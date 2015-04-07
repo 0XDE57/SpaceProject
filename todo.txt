@@ -1,0 +1,134 @@
+//revise todo after each task complete
+
+input/controls-----------------------------------------------------
+if player bounds overlap vehicle, show enter button
+if in vehicle show exit button (if can get out? must be over platform/spacestation? jetpack?)
+
+fix touchUI on different screen sizes
+
+controller/gamepad input after cleaned up/generisized player control
+
+set keys to variables, configurable, load keys from config file of sorts
+
+
+//weapons---------------------------------------------------------
+basic projectile weapon
+shoot cirles with radius relative to damage ammount / weight of projectile
+destroy bullet if bounding box overlaps collidable objects (vehicle, character, other projectiles)
+
+//debug---------------------------------------------------
+fix bounds rendering (messed up on screen resize)
+add bounds rotation
+
+
+
+move image generation our of factory into separate class
+
+move vehicle/engine into component (rocket? engine?)
+
+move gun into component
+
+add health/shield system
+
+
+make a test ship with different stats(comnponents)?
+
+
+mousewheel input processing for camera zoom
+camera zoom , rotate
+try setting camera rotate to player orientation?
+
+movement vector debug line in debug ui
+
+clean and comment, eliminate magic numbers, find reason, make clear
+
+learn how to basic git
+set up laptop lan access to local git, for working on game on laptop
+use server?
+
+research summer jobs
+
+
+clean up factory, specialize factories (projectile factory, ship factory, planet factory, etc)
+image factory? for the pixmaps.
+
+
+debug ui menu for control toggles
+
+
+
+clean your fucking browser tabs
+
+
+primitive planet and platform(space station) in space
+isPlayerOnGround - planet, platform
+switch between world and planet
+
+
+
+
+noise and generation
+solar systems, orbit, moon around planet around star
+
+world generation, tiles
+research planet attributes //size, temperature, pressure, atmosphere, elements...etc
+
+
+
+in game console
+
+study ai, add primitive ai
+
+
+simple scripting? text file of commands for creating entities and printing story text?
+
+
+
+shaders 
+basic light?
+
+
+//resources------------------------------------------
+https://docs.google.com/spreadsheets/d/1o9VvQ2CqXXktuE1diTuM1ZBE79LxW1t3GKD3tdgt6xw/edit#gid=0
+
+Touch gestures
+http://libgdx.badlogicgames.com/nightlies/docs/api/com/badlogic/gdx/input/GestureDetector.html
+http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.html
+
+convert all uses of shaperenderer to spritebatch?
+https://github.com/mattdesl/lwjgl-basics/blob/master/test/mdesl/test/RectTest.java
+https://github.com/mattdesl/lwjgl-basics/wiki/Batching-Rectangles-and-Lines
+
+
+shaders, shaders, shaders
+https://github.com/mattdesl/lwjgl-basics/wiki/Shaders
+https://github.com/mattdesl/lwjgl-basics/wiki
+
+
+//star inspiration
+
+https://www.youtube.com/watch?v=TbdH28prqac
+http://www.reddit.com/r/gamedev/comments/mtq01/how_are_universes_that_allow_zoom_inout_from/
+
+//texture overlays *research mesh
+https://stackoverflow.com/questions/20104779/libgdx-create-texture-from-overlay-using-pixmap
+
+
+Optimization/performence:
+http://t-machine.org/index.php/2014/03/08/data-structures-for-entity-systems-contiguous-memory/
+http://unseen-academy.de/snippet_component_system.html
+
+//fonts
+http://www.fontsquirrel.com/
+
+
+Publish
+http://www.reddit.com/r/gamedev/comments/20ciej/media_presence_what_platforms_are_you_active_on/
+
+
+
+
+
+
+
+
