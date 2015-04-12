@@ -19,7 +19,6 @@ import com.spaceproject.components.VehicleComponent;
 
 public class EntityFactory {
 
-	private static int scale = 4; //TODO number comes from rendering scale
 	
 	public static Entity[] createPlanetarySystem(float x, float y) {
 		//MathUtils.random.setSeed((long) (x + y) + worldSeed);
@@ -39,37 +38,7 @@ public class EntityFactory {
 		
 		
 		return entities;
-		/*
-		 MathUtils.random.setSeed(uniqueSeed);
-		int starSize = MathUtils.random(2000, 4500); //size of star
-		int numPlanets = MathUtils.random(2, 15); //how many planets in the system
-		float distance = starSize * 1.5f; //planet's initial distance away from sun
-		float radians = MathUtils.random(3.14f * 2); //direction facing
 		
-		//create star
-		SpaceScreen.universe.addStar(new Star(x, y, starSize)); //old way
-		
-		EntityFactory.createStar(x, y, starSize, radians, Color.YELLOW);
-		
-
-		//create planets
-		for (int i = 0; i < numPlanets; i++) {
-			int planetSize = MathUtils.random(400, 1200); //size of planet
-			float rotSpeed = MathUtils.random(0.005f, 0.1f); //rotation speed of planet
-			float orbitSpeed = MathUtils.random(0.0005f, 0.007f); //orbit speed of planet
-			
-			boolean dir = MathUtils.randomBoolean(); //direction planet orbit's and rotates
-			OrbitDirection direction = MathUtils.randomBoolean() ? OrbitDirection.RIGHT : OrbitDirection.LEFT;
-			
-			radians = MathUtils.random(3.14f * 2); //direction of planet and position in orbit
-			distance += MathUtils.random(5000, 20000); //distance planet is away from point of orbit(the star)
-
-			
-			SpaceScreen.universe.addPlanet(new Planet(x, y, distance, planetSize, rotSpeed, orbitSpeed, radians, dir)); //old way
-
-			EntityFactory.createPlanet(x, y, distance, planetSize, rotSpeed, orbitSpeed, radians, Color.BLUE);
-		}
-		 */
 	}
 	
 	public static Entity createStar(float x, float y) {
@@ -86,6 +55,7 @@ public class EntityFactory {
 
 		// generate pixmap texture
 		Pixmap pixmap = new Pixmap(radius * 2, radius * 2, Format.RGBA8888);
+		float scale = 4.0f;
 		
 		//draw circle for planet
 		pixmap.setColor(1, 1, 0, 1);
@@ -93,11 +63,11 @@ public class EntityFactory {
 		//draw outline
 		pixmap.setColor(1, 0, 1, 1);
 		pixmap.drawCircle(radius, radius, radius - 1);
-		
 		Texture pixmapTex = new Texture(pixmap);//create texture from pixmap
 		pixmap.dispose(); // clean up
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
-
+		texture.scale = scale;
+		
 		// set position
 		transform.pos.set(x, y, 0); 
 
@@ -128,7 +98,7 @@ public class EntityFactory {
 		
 		// generate pixmap texture
 		Pixmap pixmap = new Pixmap(radius * 2, radius * 2, Format.RGBA8888);
-		
+		float scale = 4.0f;
 		//draw circle for planet
 		pixmap.setColor(0, 0, 1, 1);
 		pixmap.fillCircle(radius, radius, radius - 1);
@@ -139,7 +109,7 @@ public class EntityFactory {
 		Texture pixmapTex = new Texture(pixmap);//create texture from pixmap
 		pixmap.dispose(); // clean up
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
-
+		texture.scale = scale;
 
 		//add bounding box
 		BoundsComponent bounds = new BoundsComponent();
@@ -171,11 +141,13 @@ public class EntityFactory {
 				
 		//create texture
 		TextureComponent texture = new TextureComponent();
+		float scale = 4.0f;
 		Pixmap pixmap = new Pixmap(size, size/2 == 0 ? 1 : size/2, Format.RGB888);
 		pixmap.setColor(1,1,1,1);
 		pixmap.fill();
 		texture.texture = new Texture(pixmap);
 		pixmap.dispose();
+		texture.scale = scale;
 		
 		//bounding box
 		BoundsComponent bounds = new BoundsComponent();
@@ -213,6 +185,7 @@ public class EntityFactory {
 		transform.pos.set(x, y, 0);
 		
 		int size = 4;
+		float scale = 4.0f;
 		Pixmap pixmap = new Pixmap(size, size, Format.RGB888);
 		pixmap.setColor(0.5f, 0.5f, 0.5f, 1);
 		pixmap.fill();
@@ -222,7 +195,7 @@ public class EntityFactory {
 
 		texture.texture = new Texture(pixmap);
 		pixmap.dispose();
-
+		texture.scale = scale;
 		
 		BoundsComponent bounds = new BoundsComponent();
 		bounds.bounds.height = size * scale;
@@ -264,8 +237,10 @@ public class EntityFactory {
 		pixmap.drawRectangle(0, 0, size-1, size-1/2);
 		
 		Texture pixmapTex = new Texture(pixmap);
+		float scale = 4.0f;
 		pixmap.dispose(); // clean up
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
+		texture.scale = scale;
 		
 		BoundsComponent bounds = new BoundsComponent();
 		bounds.bounds.height = size * scale;
@@ -365,8 +340,10 @@ public class EntityFactory {
 		
 		
 		Texture pixmapTex = new Texture(pixmap);
+		float scale = 4.0f;
 		pixmap.dispose(); // clean up
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
+		texture.scale = scale;
 		
 		BoundsComponent bounds = new BoundsComponent();
 		bounds.bounds.height = size * scale;
@@ -403,8 +380,10 @@ public class EntityFactory {
 		
 		
 		Texture pixmapTex = new Texture(pixmap);
+		float scale = 4.0f;
 		pixmap.dispose(); // clean up
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
+		texture.scale = scale;
 		
 		BoundsComponent bounds = new BoundsComponent();
 		bounds.bounds.height = size * scale;

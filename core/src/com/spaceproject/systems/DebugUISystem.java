@@ -204,8 +204,8 @@ public class DebugUISystem extends IteratingSystem {
 			TransformComponent transform = transformMap.get(entity);
 			Vector3 screenPos = RenderingSystem.getCam().project(transform.pos.cpy());
 			//draw rectangle with size relative to number of components and text size (20). 
-			//180 is magic number assuming no component name will be that long 
-			shape.rect(screenPos.x-padding, screenPos.y+padding, 180, ((-entity.getComponents().size() - 1) * 20) - padding);
+			//200 box width - magic number assuming no component name will be that long 
+			shape.rect(screenPos.x-padding, screenPos.y+padding, 200, ((-entity.getComponents().size() - 1) * 20) - padding);
 		}
 	}
 

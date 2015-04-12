@@ -38,7 +38,6 @@ public class RenderingSystem extends IteratingSystem {
 	private float zoomTarget = 1;
 	
 	//TODO: come up with some kind of standard size (pixel to meters) / something less arbitrary
-	private static final float RENDERSCALE = 4f;
 	private static final int WORLDWIDTH = 1280;
 	private static final int WORLDHEIGHT = 720;
 	
@@ -106,7 +105,7 @@ public class RenderingSystem extends IteratingSystem {
 			batch.draw(tex.texture, (t.pos.x - originX), (t.pos.y - originY),
 					   originX, originY,
 					   width, height,
-					   t.scale.x * RENDERSCALE, t.scale.y * RENDERSCALE,
+					   t.scale.x * tex.scale, t.scale.y * tex.scale,
 					   MathUtils.radiansToDegrees * t.rotation, 
 					   0, 0, (int)width, (int)height, false, false);
 		}

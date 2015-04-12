@@ -49,6 +49,7 @@ public class PlayerControlSystem extends EntitySystem {
 	public boolean move = false; 
 	//for analog control. will be value between 1 and 0
 	public float movementMultiplier = 0; 
+	//if vehicle should stop instantly-debug stop
 	public boolean stop = false;
 	
 	//set direction player faces
