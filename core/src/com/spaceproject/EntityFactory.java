@@ -20,8 +20,10 @@ import com.spaceproject.components.VehicleComponent;
 public class EntityFactory {
 
 	
+	
 	public static Entity[] createPlanetarySystem(float x, float y) {
-		//MathUtils.random.setSeed((long) (x + y) + worldSeed);
+		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
+		
 		Entity[] entities = new Entity[MathUtils.random(1,12) + 1];
 		
 		//add star to center of planetary system
@@ -42,6 +44,7 @@ public class EntityFactory {
 	}
 	
 	public static Entity createStar(float x, float y) {
+		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
 		Entity entity = new Entity();
 
 		// Create components
@@ -51,7 +54,7 @@ public class EntityFactory {
 		//generate random size 
 		int minSize = 20;
 		int maxSize = 250;
-		int radius = new Random().nextInt(maxSize - minSize) + minSize;
+		int radius = MathUtils.random(minSize, maxSize);
 
 		// generate pixmap texture
 		Pixmap pixmap = new Pixmap(radius * 2, radius * 2, Format.RGBA8888);
@@ -85,6 +88,7 @@ public class EntityFactory {
 	}
 	
 	public static Entity createPlanet(Entity parent, float distance, boolean rotationDir) {
+		MathUtils.random.setSeed((long)distance * SpaceProject.SEED);
 		Entity entity = new Entity();
 
 		// Create components
@@ -93,7 +97,7 @@ public class EntityFactory {
 		//generate random size 
 		int minSize = 12;
 		int maxSize = 200;
-		int radius = new Random().nextInt(maxSize - minSize) + minSize;
+		int radius = MathUtils.random(minSize, maxSize);
 
 		
 		// generate pixmap texture
@@ -211,6 +215,7 @@ public class EntityFactory {
 	}
 	
 	public static Entity createShip2(int x, int y) {
+		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
 		Entity entity = new Entity();
 
 		TransformComponent transform = new TransformComponent();
@@ -221,10 +226,10 @@ public class EntityFactory {
 		
 		//generate random even size 
 		int size;
-		do {
-			int minSize = 8;
-			int maxSize = 36;
-			size = new Random().nextInt(maxSize - minSize) + minSize;
+		int minSize = 8;
+		int maxSize = 36;
+		do {		
+			size = MathUtils.random(minSize, maxSize);
 		} while (size % 2 == 1);
 		
 		// generate pixmap texture
@@ -257,6 +262,7 @@ public class EntityFactory {
 	}
 	
 	public static Entity createShip3(int x, int y) {
+		
 		Entity entity = new Entity();
 
 		TransformComponent transform = new TransformComponent();
@@ -267,10 +273,11 @@ public class EntityFactory {
 		
 		//generate random even size 
 		int size;
-		do {
-			int minSize = 8;
-			int maxSize = 36;
-			size = new Random().nextInt(maxSize - minSize) + minSize;
+		int minSize = 10;
+		int maxSize = 36;
+		
+		do {		
+			size = MathUtils.random(minSize, maxSize);
 		} while (size % 2 == 1);
 		
 		//TODO: move image generation into its own class, return image
@@ -306,8 +313,8 @@ public class EntityFactory {
 		*/
 		
 		//generation------------------------------------------------------
-		Random rng = new Random();
-		int edge = rng.nextInt(size/8);
+		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
+		int edge = size/8;
 		
 		for (int yY = 0; yY <= width; yY++) {
 			
@@ -329,7 +336,7 @@ public class EntityFactory {
 			}
 			
 			//gen next edge --------------------
-			edge = rng.nextBoolean() ? (rng.nextBoolean() ? --edge: ++edge) : edge;
+			edge = MathUtils.randomBoolean() ? (MathUtils.randomBoolean() ? --edge: ++edge) : edge;
 			if (edge < 0) edge = 0;
 			if (edge > size/8) edge = size/8;
 		}

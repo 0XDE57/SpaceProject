@@ -22,6 +22,7 @@ public class RenderingSystem extends IteratingSystem {
 	private Array<Entity> renderQueue; //array of entities to render
 	private Comparator<Entity> comparator; //for sorting render order
 	
+	//map for image and position
 	private ComponentMapper<TextureComponent> textureMap;
 	private ComponentMapper<TransformComponent> transformMap;
 	
@@ -32,6 +33,8 @@ public class RenderingSystem extends IteratingSystem {
 	//window size
 	private int prevWindowWidth = 0;
 	private int prevWindowHeight = 0;
+	
+	//vertical sync
 	private boolean vsync = true;
 	
 	//camera zoom
@@ -105,7 +108,7 @@ public class RenderingSystem extends IteratingSystem {
 			batch.draw(tex.texture, (t.pos.x - originX), (t.pos.y - originY),
 					   originX, originY,
 					   width, height,
-					   t.scale.x * tex.scale, t.scale.y * tex.scale,
+					   tex.scale, tex.scale,
 					   MathUtils.radiansToDegrees * t.rotation, 
 					   0, 0, (int)width, (int)height, false, false);
 		}
@@ -115,6 +118,7 @@ public class RenderingSystem extends IteratingSystem {
 	
 		//adjust zoom
 		if (cam.zoom != zoomTarget) {
+			//3 is magic number, scaling speed
 			//zoom in
 			if (cam.zoom < zoomTarget) {
 				cam.zoom += 3 * delta;

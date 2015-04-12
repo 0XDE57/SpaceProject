@@ -7,6 +7,8 @@ import com.spaceproject.screens.TestShipGenerationScreen;
 
 public class SpaceProject extends Game {
 
+	public static final int SEED = 4;
+	
 	@Override
 	public void create() {
 		
