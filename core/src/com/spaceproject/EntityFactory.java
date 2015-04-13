@@ -24,22 +24,21 @@ public class EntityFactory {
 	public static Entity[] createPlanetarySystem(float x, float y) {
 		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
 		
-		Entity[] entities = new Entity[MathUtils.random(1,12) + 1];
+		Entity[] planetarySystemEntities = new Entity[MathUtils.random(1,12) + 1];
 		
 		//add star to center of planetary system
 		Entity star = createStar(x, y);
-		entities[0] = star;
+		planetarySystemEntities[0] = star;
 		
 		float distance = 0;
 		boolean rotationDirection = MathUtils.randomBoolean();
 		//create planets around star
-		for (int i = 1; i < entities.length; ++i) {
+		for (int i = 1; i < planetarySystemEntities.length; ++i) {
 			distance += MathUtils.random(1600, 2100);
-			entities[i] = createPlanet(star, distance, rotationDirection);
+			planetarySystemEntities[i] = createPlanet(star, distance, rotationDirection);
 		}
-		
-		
-		return entities;
+				
+		return planetarySystemEntities;
 		
 	}
 	
@@ -265,6 +264,8 @@ public class EntityFactory {
 		
 		Entity entity = new Entity();
 
+		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
+		
 		TransformComponent transform = new TransformComponent();
 		TextureComponent texture = new TextureComponent();
 
@@ -291,60 +292,71 @@ public class EntityFactory {
 		// |  
 		// |
 		// |
-		// height
+		// height		
+		
+		/////////////////////////////////image generation////////////////////////////////////
+		//smallest height a ship can be (4 because player is 4 pixels)
+		int minEdge = 4; 
+		//smallest starting point for an edge
+		float initialMinimumEdge = height * 0.8f; 
+		//edge to create shape of ship. initialize to random starting size
+		int edge = MathUtils.random((int)initialMinimumEdge, height-1);
+		
+		for (int yY = 0; yY <= width; yY++) {			
+			// draw body
+			if (yY == 0 || yY == width) {
+				//if first or last position of texture, "cap" it to complete the edging
+				pixmap.setColor(0.7f, 0.7f, 0.7f, 1);
+			} else {
+				pixmap.setColor(0, 0.5f, 0, 1);
+			}
+			pixmap.drawLine(yY, edge, yY, height - edge);
+			
+			// draw edging 
+			pixmap.setColor(0.7f, 0.7f, 0.7f, 1);
+			pixmap.drawPixel(yY, edge);// bottom edge
+			pixmap.drawPixel(yY, height - edge);// top edge
+					
+			//generate next edge---------------------------------------------------------------------
+			//beginning and end of ship have special rule to not be greater than the consecutive or previous edge
+			//so that the "caps" look right
+			if (yY == 0) { //beginning 
+				++edge;
+			} else if (yY == width-1) { //end
+				--edge;
+			} else { //body
+				//random decide to move edge. if so, move edge either up or down 1 pixel
+				edge = MathUtils.randomBoolean() ? (MathUtils.randomBoolean() ? --edge: ++edge) : edge;
+			}
+							
+			//keep edges within height and minEdge
+			if (edge > height) {
+				edge = height;
+			}
+			if (edge - (height - edge) < minEdge) {
+				edge = (height + minEdge) / 2;
+			}
+		}		
 		
 		/*
 		//fill to see image size/visual aid---------
 		pixmap.setColor(1, 1, 1, 1);
-		pixmap.fill();
-		
-		//corner pins for visual aid----------------
-		pixmap.setColor(1,0,0,1);//red: top-right
+		// pixmap.fill();
+
+		// corner pins for visual aid----------------
+		pixmap.setColor(1, 0, 0, 1);// red: top-right
 		pixmap.drawPixel(0, 0);
-		
-		pixmap.setColor(0,1,0,1);//green: top-left
+
+		pixmap.setColor(0, 1, 0, 1);// green: top-left
 		pixmap.drawPixel(width, 0);
-		
-		pixmap.setColor(0,0,1,1);//blue: bottom-left
+
+		pixmap.setColor(0, 0, 1, 1);// blue: bottom-left
 		pixmap.drawPixel(0, height);
-		
-		pixmap.setColor(1,1,0,1);//yellow: bottom-right
+
+		pixmap.setColor(1, 1, 0, 1);// yellow: bottom-right
 		pixmap.drawPixel(width, height);
 		*/
-		
-		//generation------------------------------------------------------
-		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
-		int edge = size/8;
-		
-		for (int yY = 0; yY <= width; yY++) {
-			
-			if (yY == 0 || yY == width) {
-				//draw front and back edge
-				pixmap.setColor(0.7f, 0.7f, 0.7f, 1);
-				pixmap.drawLine(yY,edge+1, yY, height-edge-1);
-			} else {
-				
-			//draw body
-			pixmap.setColor(0, 0.5f, 0, 1);
-			pixmap.drawLine(yY, edge, yY, height-edge);
-			
-			//draw edge
-			pixmap.setColor(0.7f, 0.7f, 0.7f, 1);
-			pixmap.drawPixel(yY, edge);//left edge			
-			pixmap.drawPixel(yY, height-edge);//right edge
-
-			}
-			
-			//gen next edge --------------------
-			edge = MathUtils.randomBoolean() ? (MathUtils.randomBoolean() ? --edge: ++edge) : edge;
-			if (edge < 0) edge = 0;
-			if (edge > size/8) edge = size/8;
-		}
-		
-		
-		
-		
-		
+		//////////////////end image generation//////////////////////
 		
 		Texture pixmapTex = new Texture(pixmap);
 		float scale = 4.0f;

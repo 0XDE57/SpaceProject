@@ -1,9 +1,13 @@
 package com.spaceproject.screens;
 
+import java.util.ArrayList;
+
 import com.badlogic.ashley.core.Engine;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.EntityFactory;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.systems.DebugUISystem;
@@ -21,14 +25,10 @@ public class TestShipGenerationScreen extends ScreenAdapter {
 		engine = new Engine();
 		
 		
+		
 		//generate test ships
-		for (int i = 0; i <= 20; ++i) {
-			//engine.addEntity(EntityFactory.createShip((110 * i) - Gdx.graphics.getWidth()/2, 200));
-			//engine.addEntity(EntityFactory.createShip2((110 * i) - Gdx.graphics.getWidth()/2, 100));
-
-			engine.addEntity(EntityFactory.createShip3((110 * i) - Gdx.graphics.getWidth()/2, 150));
-			engine.addEntity(EntityFactory.createShip3((110 * i) - Gdx.graphics.getWidth()/2, 0));
-			engine.addEntity(EntityFactory.createShip3((110 * i) - Gdx.graphics.getWidth()/2, -150));
+		for (Entity ent : generateShips()) {
+			engine.addEntity(ent);
 		}
 		
 		
@@ -37,6 +37,20 @@ public class TestShipGenerationScreen extends ScreenAdapter {
 		engine.addSystem(new DebugUISystem());
 		
 		
+	}
+
+	private ArrayList<Entity> generateShips() {
+		ArrayList<Entity> ents = new ArrayList<Entity>();
+		
+		for (int i = 0; i <= 20; ++i) {
+			//engine.addEntity(EntityFactory.createShip((110 * i) - Gdx.graphics.getWidth()/2, 200));
+			//engine.addEntity(EntityFactory.createShip2((110 * i) - Gdx.graphics.getWidth()/2, 100));
+			ents.add(EntityFactory.createShip3((110 * i) - Gdx.graphics.getWidth()/2, 150));
+			ents.add(EntityFactory.createShip3((110 * i) - Gdx.graphics.getWidth()/2, 0));
+			ents.add(EntityFactory.createShip3((110 * i) - Gdx.graphics.getWidth()/2, -150));
+		}
+		
+		return ents;
 	}
 	
 	public void render(float delta) {
@@ -49,7 +63,15 @@ public class TestShipGenerationScreen extends ScreenAdapter {
 		if (Gdx.input.isKeyPressed(Keys.PERIOD)) engine.getSystem(RenderingSystem.class).zoom(1);
 		if (Gdx.input.isKeyPressed(Keys.SLASH)) engine.getSystem(RenderingSystem.class).zoom(0.1f);
 		
-		
+		if (Gdx.input.isKeyJustPressed(Keys.R)) {
+			//generate new set of ships
+			SpaceProject.SEED = MathUtils.random(Long.MAX_VALUE);
+			System.out.println(SpaceProject.SEED);
+			engine.removeAllEntities();
+			for (Entity ent : generateShips()) {
+				engine.addEntity(ent);
+			}
+		}
 		
 		//terminate------------------------------------------------
 		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) Gdx.app.exit();
