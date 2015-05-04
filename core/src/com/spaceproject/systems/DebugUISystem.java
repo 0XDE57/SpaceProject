@@ -165,7 +165,7 @@ public class DebugUISystem extends IteratingSystem {
 		shape.setColor(1f, 1f, 1, 1);
 		for (Entity entity : objects) {
 			OrbitComponent orbit = orbitMap.get(entity);
-			if (orbit != null) {
+			if (orbit != null && orbit.parent != null) {
 				TransformComponent parentPos = transformMap.get(orbit.parent);
 				TransformComponent entityPos = transformMap.get(entity);
 				Vector3 screenPos1 = RenderingSystem.getCam().project(new Vector3(parentPos.pos.x, parentPos.pos.y, 0));

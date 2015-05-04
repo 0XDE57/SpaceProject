@@ -1,6 +1,5 @@
 package com.spaceproject;
 
-import java.util.Random;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -25,13 +24,14 @@ public class EntityFactory {
 		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
 		
 		Entity[] planetarySystemEntities = new Entity[MathUtils.random(1,12) + 1];
+		boolean rotationDirection = MathUtils.randomBoolean(); //rotation of system (orbits and spins)
 		
 		//add star to center of planetary system
-		Entity star = createStar(x, y);
+		Entity star = createStar(x, y, rotationDirection);
 		planetarySystemEntities[0] = star;
 		
 		float distance = 0;
-		boolean rotationDirection = MathUtils.randomBoolean();
+		
 		//create planets around star
 		for (int i = 1; i < planetarySystemEntities.length; ++i) {
 			distance += MathUtils.random(1600, 2100);
@@ -42,7 +42,7 @@ public class EntityFactory {
 		
 	}
 	
-	public static Entity createStar(float x, float y) {
+	public static Entity createStar(float x, float y, boolean rotationDir) {
 		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
 		Entity entity = new Entity();
 
@@ -78,7 +78,12 @@ public class EntityFactory {
 		bounds.bounds.height = radius*2*scale;
 		bounds.bounds.width = radius*2*scale;
 		
+		//Orbit for rotation of self (kinda hacky, not really orbiting. just rotating)
+		OrbitComponent orbit = new OrbitComponent();
+		orbit.rotateClockwise = rotationDir;
+		
 		//add components to entity
+		entity.add(orbit);
 		entity.add(bounds);
 		entity.add(transform);
 		entity.add(texture);
