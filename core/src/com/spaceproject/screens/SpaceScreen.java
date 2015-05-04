@@ -26,8 +26,7 @@ public class SpaceScreen extends ScreenAdapter {
 	
 	public Engine engine;
 	
-	
-	
+		
 	public SpaceScreen(SpaceProject game) {
 
 		this.game = game;
@@ -49,8 +48,8 @@ public class SpaceScreen extends ScreenAdapter {
 		*/
 		
 		//add test planetary system (solar system)
-		for (Entity entity : EntityFactory.createPlanetarySystem(300, 300)) {
-			//engine.addEntity(entity);
+		for (Entity entity : EntityFactory.createPlanetarySystem(0, 0)) {
+			engine.addEntity(entity);
 		}
 		
 		
@@ -90,7 +89,7 @@ public class SpaceScreen extends ScreenAdapter {
 		engine.addSystem(new CameraSystem(playerTESTSHIP));
 		engine.addSystem(new ExpireSystem(1));
 		
-		//input
+		//add input system. touch on android and keys on desktop.
 		if (Gdx.app.getType() == ApplicationType.Android) {
 			engine.addSystem(new TouchUISystem());
 		} else {
@@ -100,14 +99,12 @@ public class SpaceScreen extends ScreenAdapter {
 	}	
 	
 	
-	public void render(float delta) {
-		
+	public void render(float delta) {		
 		//update engine
 		engine.update(delta);
 			
-		//terminate------------------------------------------------
+		//terminate
 		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) Gdx.app.exit();
-
 	}
 
 	//resize game

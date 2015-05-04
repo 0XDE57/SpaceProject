@@ -12,9 +12,9 @@ public class SpaceProject extends Game {
 	@Override
 	public void create() {
 		
-		setScreen(new TestShipGenerationScreen(this));
+		//setScreen(new TestShipGenerationScreen(this));
 		
-		//setScreen(new SpaceScreen(this));
+		setScreen(new SpaceScreen(this));
 		
 		//setScreen(new MainMenuScreen(this));
 	}

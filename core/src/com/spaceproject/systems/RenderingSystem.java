@@ -1,6 +1,7 @@
 package com.spaceproject.systems;
 
 import java.util.Comparator;
+import java.util.Random;
 
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
@@ -10,10 +11,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.spaceproject.BackgroundStar;
+import com.spaceproject.EntityFactory;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 
@@ -40,9 +47,15 @@ public class RenderingSystem extends IteratingSystem {
 	//camera zoom
 	private float zoomTarget = 1;
 	
-	//TODO: come up with some kind of standard size (pixel to meters) / something less arbitrary
+	//TODO: come up with some kind of standard size (pixel to meters)? / something less arbitrary
 	private static final int WORLDWIDTH = 1280;
 	private static final int WORLDHEIGHT = 720;
+	
+	private Array<BackgroundStar> backgroundStarsLayer1 = new Array<BackgroundStar>();
+	private Array<BackgroundStar> backgroundStarsLayer2 = new Array<BackgroundStar>();
+	private Array<BackgroundStar> backgroundStarsLayer3 = new Array<BackgroundStar>();
+	
+	Texture starTexture;
 	
 	@SuppressWarnings("unchecked")
 	public RenderingSystem() {
@@ -73,6 +86,19 @@ public class RenderingSystem extends IteratingSystem {
 		//set vsync off for development, on by default
 		toggleVsync();
 		
+		//generate stars
+		for (int i = 0; i < 2000; i++) {		
+			backgroundStarsLayer1.add(new BackgroundStar((float)MathUtils.random(-5000, 5000), (float)MathUtils.random(-5000, 5000)));
+			backgroundStarsLayer2.add(new BackgroundStar((float)MathUtils.random(-5000, 5000), (float)MathUtils.random(-5000, 5000)));
+			backgroundStarsLayer3.add(new BackgroundStar((float)MathUtils.random(-5000, 5000), (float)MathUtils.random(-5000, 5000)));
+		}
+		
+		//star texture pixel
+		Pixmap pixmap = new Pixmap(1, 1, Format.RGB888);
+		pixmap.setColor(1,1,1,1);
+		pixmap.fill();
+		starTexture = new Texture(pixmap);
+		pixmap.dispose();
 	}
 
 	@Override
@@ -83,6 +109,7 @@ public class RenderingSystem extends IteratingSystem {
 		Gdx.gl20.glClearColor(0, 0, 0, 1);
 		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
+		
 		renderQueue.sort(comparator); //sort render order of entities
 		
 		//update camera and projection
@@ -91,6 +118,17 @@ public class RenderingSystem extends IteratingSystem {
 		
 		batch.begin();
 
+		//render stars
+		for (BackgroundStar star : backgroundStarsLayer1) {
+			batch.draw(starTexture, (float) star.x + (cam.position.x * 0.3f), (float) star.y + (cam.position.y * 0.3f));
+		}
+		for (BackgroundStar star : backgroundStarsLayer2) {
+			batch.draw(starTexture, (float) star.x + (cam.position.x * 0.6f), (float) star.y + (cam.position.y * 0.6f));
+		}
+		for (BackgroundStar star : backgroundStarsLayer3) {
+			batch.draw(starTexture, (float) star.x + (cam.position.x * 0.9f), (float) star.y + (cam.position.y * 0.9f));
+		}
+		
 		//render all textures
 		for (Entity entity : renderQueue) {
 			TextureComponent tex = textureMap.get(entity);
@@ -118,22 +156,15 @@ public class RenderingSystem extends IteratingSystem {
 	
 		//adjust zoom
 		if (cam.zoom != zoomTarget) {
-			//3 is magic number, scaling speed
-			//zoom in
-			if (cam.zoom < zoomTarget) {
-				cam.zoom += 3 * delta;
-			}
-			//zoom out
-			if (cam.zoom > zoomTarget) {
-				cam.zoom -= 3 * delta;
-			}
+			float scaleSpeed = 3 * delta;
+			//zoom in/out
+			cam.zoom += (cam.zoom < zoomTarget) ? scaleSpeed : -scaleSpeed;
+
 			//if zoom is close enough, just set it to target
 			if (Math.abs(cam.zoom - zoomTarget) < 0.1) {
 				cam.zoom = zoomTarget;
-				System.out.println("zoom: " + cam.zoom);
 			}
 		}
-		
 	}
 
 	//turn vsync on or off
@@ -171,6 +202,7 @@ public class RenderingSystem extends IteratingSystem {
 	//set zoom target
 	public void zoom(float zoom) {
 		zoomTarget = zoom;
+		System.out.println("zoom: " + zoom);
 	}
 
 	

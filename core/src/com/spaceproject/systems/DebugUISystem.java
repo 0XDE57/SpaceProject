@@ -40,7 +40,7 @@ public class DebugUISystem extends IteratingSystem {
 	private boolean drawBounds = false;
 	private boolean drawOrbitPath = true;
 	
-	Matrix4 projectionMatrix = new Matrix4();
+	private Matrix4 projectionMatrix = new Matrix4();
 	
 	
 	@SuppressWarnings("unchecked")

@@ -277,7 +277,8 @@ public class EntityFactory {
 		int minSize = 10;
 		int maxSize = 36;
 		
-		do {		
+		do {
+			//generate even size
 			size = MathUtils.random(minSize, maxSize);
 		} while (size % 2 == 1);
 		

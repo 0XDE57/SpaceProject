@@ -20,11 +20,9 @@ public class TestShipGenerationScreen extends ScreenAdapter {
 	public Engine engine;
 	
 	public TestShipGenerationScreen(SpaceProject game) {
-		this.game = game;
-		
+		this.game = game;		
 		engine = new Engine();
-		
-		
+				
 		
 		//generate test ships
 		for (Entity ent : generateShips()) {
@@ -35,8 +33,7 @@ public class TestShipGenerationScreen extends ScreenAdapter {
 		//engine.addSystem(new );
 		engine.addSystem(new RenderingSystem());
 		engine.addSystem(new DebugUISystem());
-		
-		
+				
 	}
 
 	private ArrayList<Entity> generateShips() {
@@ -84,13 +81,12 @@ public class TestShipGenerationScreen extends ScreenAdapter {
 		engine.getSystem(RenderingSystem.class).resize(width, height);
 	}
 
-		
-		public void dispose() { }
-		
-		public void hide() { }
+	public void dispose() { }
 
-		public void pause() { }
+	public void hide() { }
 
-		public void resume() { }
+	public void pause() { }
+
+	public void resume() { }
 	
 }
