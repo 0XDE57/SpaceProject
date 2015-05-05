@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.EntityFactory;
 import com.spaceproject.SpaceProject;
@@ -48,11 +49,36 @@ public class SpaceScreen extends ScreenAdapter {
 		*/
 		
 		//add test planetary system (solar system)
-		for (Entity entity : EntityFactory.createPlanetarySystem(0, 0)) {
-			engine.addEntity(entity);
+		for (Entity entity : EntityFactory.createPlanetarySystem(5000, 5000)) {
+			//engine.addEntity(entity);
 		}
 		
+		for (Entity entity : EntityFactory.createPlanetarySystem(5000, 15000)) {
+			engine.addEntity(entity);
+		}
+		for (Entity entity : EntityFactory.createPlanetarySystem(5000, 25000)) {
+			//engine.addEntity(entity);
+		}
+		for (Entity entity : EntityFactory.createPlanetarySystem(15000, 5000)) {
+			//engine.addEntity(entity);
+		}
+		for (Entity entity : EntityFactory.createPlanetarySystem(15000, 15000)) {
+			engine.addEntity(entity);
+		}
+		for (Entity entity : EntityFactory.createPlanetarySystem(15000, 25000)) {
+			//engine.addEntity(entity);
+		}		
+		for (Entity entity : EntityFactory.createPlanetarySystem(25000, 5000)) {
+			//engine.addEntity(entity);
+		}
+		for (Entity entity : EntityFactory.createPlanetarySystem(25000, 15000)) {
+			//engine.addEntity(entity);
+		}
+		for (Entity entity : EntityFactory.createPlanetarySystem(25000, 25000)) {
+			//engine.addEntity(entity);
+		}
 		
+	
 		
 		//test ships
 		//engine.addEntity(EntityFactory.createShip(100, 300));		
@@ -73,7 +99,7 @@ public class SpaceScreen extends ScreenAdapter {
 		//engine.addEntity(player);
 		
 		//start as ship
-		Entity playerTESTSHIP = EntityFactory.createShip3(0, 0);
+		Entity playerTESTSHIP = EntityFactory.createShip3(15000, 15000);
 		Entity player = EntityFactory.createCharacter(0, 0, true, playerTESTSHIP);
 		engine.addEntity(playerTESTSHIP);
 				
@@ -97,7 +123,7 @@ public class SpaceScreen extends ScreenAdapter {
 		}
 		
 	}	
-	
+	Entity[] testPlanetsDebug; //test removable planetary system
 	
 	public void render(float delta) {		
 		//update engine
@@ -105,6 +131,30 @@ public class SpaceScreen extends ScreenAdapter {
 			
 		//terminate
 		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) Gdx.app.exit();
+		
+		
+		
+		// [DEBUG]//////////////////////////////
+		if (Gdx.input.isKeyJustPressed(Keys.K)) {
+			if (testPlanetsDebug != null) {
+				// remove-----------------
+				for (Entity entity : testPlanetsDebug) {
+					engine.removeEntity(entity);
+				}
+				testPlanetsDebug = null;
+				System.out.println("removed test planets");
+			} else {
+				// add------------------
+				Vector3 pos = engine.getSystem(RenderingSystem.class).getCam().position;
+				testPlanetsDebug = EntityFactory.createPlanetarySystem(pos.x, pos.y);
+				for (Entity entity : testPlanetsDebug) {
+					engine.addEntity(entity);
+				}
+				System.out.println("added test planets");
+			}
+		}
+		// [DEGUB]/////////////////////////////
+
 	}
 
 	//resize game

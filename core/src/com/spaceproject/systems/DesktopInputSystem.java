@@ -15,33 +15,11 @@ public class DesktopInputSystem extends EntitySystem {
 	public void addedToEngine(Engine engine) {
 		this.engine = engine;
 
-	}
-	
-	Entity[] temp;
+	}	
 	
 	@Override
-	public void update(float delta) {
+	public void update(float delta) {	
 		
-		//[DEBUG]//////////////////////////////		
-		if (Gdx.input.isKeyJustPressed(Keys.K)) {
-			if (temp != null) {
-				//remove-----------------
-				for (Entity entity : temp) {
-					engine.removeEntity(entity);
-				}
-				temp = null;
-				System.out.println("removed");
-			} else {
-				//add------------------
-				temp = EntityFactory.createPlanetarySystem(0, 0);
-				for (Entity entity : temp) {
-					engine.addEntity(entity);
-				}
-				System.out.println("added");
-			}
-		}
-		//[DEGUB]/////////////////////////////
-
 		//SCREEN CONTROLS///////////////////////////////////////////////////////////////////////////////////////
 		//zoom test
 		if (Gdx.input.isKeyPressed(Keys.COMMA))  {

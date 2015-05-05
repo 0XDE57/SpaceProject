@@ -26,6 +26,7 @@ public class OrbitSystem extends IteratingSystem {
 
 		OrbitComponent orbit = orbitMap.get(entity);
 		TransformComponent position = transformMap.get(entity);
+		TransformComponent parentPosition = transformMap.get(orbit.parent);
 
 		if (orbit.rotateClockwise) {
 			// add clockwise rotation to entity image
@@ -42,8 +43,8 @@ public class OrbitSystem extends IteratingSystem {
 		}
 
 		// calculate orbit position
-		float orbitX = orbit.distance * MathUtils.cos(orbit.angle);
-		float orbitY = orbit.distance * MathUtils.sin(orbit.angle);
+		float orbitX = parentPosition.pos.x + (orbit.distance * MathUtils.cos(orbit.angle));
+		float orbitY = parentPosition.pos.y + (orbit.distance * MathUtils.sin(orbit.angle));
 		position.pos.set(orbitX, orbitY, position.pos.z);
 
 	}

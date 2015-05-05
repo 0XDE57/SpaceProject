@@ -18,12 +18,10 @@ import com.spaceproject.components.VehicleComponent;
 
 public class EntityFactory {
 
-	
-	
 	public static Entity[] createPlanetarySystem(float x, float y) {
 		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
 		
-		Entity[] planetarySystemEntities = new Entity[MathUtils.random(1,12) + 1];
+		Entity[] planetarySystemEntities = new Entity[MathUtils.random(1,10) + 1];
 		boolean rotationDirection = MathUtils.randomBoolean(); //rotation of system (orbits and spins)
 		
 		//add star to center of planetary system
@@ -78,9 +76,11 @@ public class EntityFactory {
 		bounds.bounds.height = radius*2*scale;
 		bounds.bounds.width = radius*2*scale;
 		
-		//Orbit for rotation of self (kinda hacky, not really orbiting. just rotating)
+		//orbit for rotation of self (kinda hacky; not really orbiting, just rotating)
 		OrbitComponent orbit = new OrbitComponent();
+		orbit.parent = entity;//set to self to negate orbit
 		orbit.rotateClockwise = rotationDir;
+		orbit.rotSpeed = MathUtils.random(0.002f, 0.01f); //rotation speed of star
 		
 		//add components to entity
 		entity.add(orbit);
