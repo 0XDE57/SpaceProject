@@ -1,24 +1,26 @@
 package com.spaceproject.systems;
 
 import java.util.Comparator;
+import java.util.Random;
 
 import com.badlogic.ashley.core.ComponentMapper;
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.spaceproject.BackgroundStar;
+import com.spaceproject.EntityFactory;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 
@@ -55,16 +57,10 @@ public class RenderingSystem extends IteratingSystem {
 	
 	Texture starTexture;
 	
-	Engine engine;
-	
-	
-	
 	@SuppressWarnings("unchecked")
-	public RenderingSystem(Engine engine) {
+	public RenderingSystem() {
 		super(Family.all(TransformComponent.class, TextureComponent.class).get());
 	
-		this.engine = engine;
-		
 		textureMap = ComponentMapper.getFor(TextureComponent.class);
 		transformMap = ComponentMapper.getFor(TransformComponent.class);
 		
@@ -91,7 +87,7 @@ public class RenderingSystem extends IteratingSystem {
 		toggleVsync();
 		
 		//generate stars
-		for (int i = 0; i < 30000; i++) {		
+		for (int i = 0; i < 2000; i++) {		
 			backgroundStarsLayer1.add(new BackgroundStar((float)MathUtils.random(-5000, 5000), (float)MathUtils.random(-5000, 5000)));
 			backgroundStarsLayer2.add(new BackgroundStar((float)MathUtils.random(-5000, 5000), (float)MathUtils.random(-5000, 5000)));
 			backgroundStarsLayer3.add(new BackgroundStar((float)MathUtils.random(-5000, 5000), (float)MathUtils.random(-5000, 5000)));
@@ -104,12 +100,6 @@ public class RenderingSystem extends IteratingSystem {
 		starTexture = new Texture(pixmap);
 		pixmap.dispose();
 	}
-	/*
-	@Override
-	public void addedToEngine(Engine engine) {
-		//this.engine = engine;
-	}	*/
-	
 
 	@Override
 	public void update(float delta) {
@@ -129,15 +119,14 @@ public class RenderingSystem extends IteratingSystem {
 		batch.begin();
 
 		//render stars
-		
-		for (BackgroundStar star : backgroundStarsLayer3) {
-			batch.draw(starTexture, (float) star.x + (cam.position.x * 0.9f), (float) star.y + (cam.position.y * 0.9f));
+		for (BackgroundStar star : backgroundStarsLayer1) {
+			batch.draw(starTexture, (float) star.x + (cam.position.x * 0.3f), (float) star.y + (cam.position.y * 0.3f));
 		}
 		for (BackgroundStar star : backgroundStarsLayer2) {
 			batch.draw(starTexture, (float) star.x + (cam.position.x * 0.6f), (float) star.y + (cam.position.y * 0.6f));
 		}
-		for (BackgroundStar star : backgroundStarsLayer1) {
-			batch.draw(starTexture, (float) star.x + (cam.position.x * 0.3f), (float) star.y + (cam.position.y * 0.3f));
+		for (BackgroundStar star : backgroundStarsLayer3) {
+			batch.draw(starTexture, (float) star.x + (cam.position.x * 0.9f), (float) star.y + (cam.position.y * 0.9f));
 		}
 		
 		//render all textures
@@ -145,17 +134,16 @@ public class RenderingSystem extends IteratingSystem {
 			TextureComponent tex = textureMap.get(entity);
 		
 			if (tex.texture == null) continue;
+			
+			TransformComponent t = transformMap.get(entity);
 		
 			float width = tex.texture.getWidth();
 			float height = tex.texture.getHeight();
 			float originX = width * 0.5f; //center 
 			float originY = height * 0.5f; //center
-			
-			TransformComponent t = transformMap.get(entity);
-			Vector3 local = CameraSystem.getLocalPosition(t);
+
 			//draw texture
-			//batch.draw(tex.texture, (t.pos.x - originX), (t.pos.y - originY),
-			batch.draw(tex.texture, (local.x - originX), (local.y - originY),
+			batch.draw(tex.texture, (t.pos.x - originX), (t.pos.y - originY),
 					   originX, originY,
 					   width, height,
 					   tex.scale, tex.scale,

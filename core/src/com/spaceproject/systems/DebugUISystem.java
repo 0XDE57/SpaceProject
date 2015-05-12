@@ -2,7 +2,6 @@ package com.spaceproject.systems;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.ComponentMapper;
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -16,7 +15,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.FontFactory;
@@ -43,7 +41,7 @@ public class DebugUISystem extends IteratingSystem {
 	private boolean drawOrbitPath = true;
 	
 	private Matrix4 projectionMatrix = new Matrix4();
-
+	
 	
 	@SuppressWarnings("unchecked")
 	public DebugUISystem() {
@@ -60,8 +58,6 @@ public class DebugUISystem extends IteratingSystem {
 		objects = new Array<Entity>();		
 		
 	}
-	
-
 	
 	@Override
 	public void update(float delta) {
@@ -205,9 +201,8 @@ public class DebugUISystem extends IteratingSystem {
 		int padding = 5;
 		//for each entity draw a clear box 
 		for (Entity entity : objects) {
-			//TransformComponent transform = transformMap.get(entity);
-			Vector3 screenPos = RenderingSystem.getCam().project(CameraSystem.getLocalPosition(transformMap.get(entity)));
-			
+			TransformComponent transform = transformMap.get(entity);
+			Vector3 screenPos = RenderingSystem.getCam().project(transform.pos.cpy());
 			//draw rectangle with size relative to number of components and text size (20). 
 			//200 box width - magic number assuming no component name will be that long 
 			shape.rect(screenPos.x-padding, screenPos.y+padding, 200, ((-entity.getComponents().size() - 1) * 20) - padding);
@@ -222,12 +217,10 @@ public class DebugUISystem extends IteratingSystem {
 			TransformComponent t = transformMap.get(entity);
 			ImmutableArray<Component> components = entity.getComponents();
 			
-			/////use Vector3.cpy() to project only the position and avoid modifying projection matrix for all coordinates
-			Vector3 screenPos = RenderingSystem.getCam().project(CameraSystem.getLocalPosition(t));
-			//Vector2 local = CameraSystem.getLocalPosition(t).;
+			//use Vector3.cpy() to project only the position and avoid modifying projection matrix for all coordinates
+			Vector3 screenPos = RenderingSystem.getCam().project(t.pos.cpy());
 			//print current ID and position in world and a list of all components
-			font.draw(batch, "ID: " + entity.getId() + " ("  + t.tileX + ":" + Math.round(t.pos.x) + "," + t.tileY + ":"  + Math.round(t.pos.y) + ") -- {"
-					+ Math.round(t.pos.x + (t.tileX * 1000)) + "," + Math.round(t.pos.y + (t.tileY * 1000)) + "}" , screenPos.x, screenPos.y);
+			font.draw(batch, "ID: " + entity.getId() + " (" + Math.round(t.pos.x) + "," + Math.round(t.pos.y) + ")", screenPos.x, screenPos.y);
 			int nextLine = 20;
 			for (int curComp = 0; curComp < components.size(); curComp++) {
 				font.draw(batch, "[" + components.get(curComp).getClass().getSimpleName() + "]", screenPos.x, screenPos.y - nextLine * (curComp + 1));

@@ -144,7 +144,7 @@ public class EntityFactory {
 	
 	//create bullet than has a damage/weight equivalent or relative to the size(); bigger projectile = more damage
 	//Enforce POT? (power of two)
-	public static Entity createProjectile(int tileX, int tileY, Vector3 position, float dx, float dy, int size) {
+	public static Entity createProjectile(Vector3 position, float dx, float dy, int size) {
 		Entity entity = new Entity();
 				
 		//create texture
@@ -163,11 +163,9 @@ public class EntityFactory {
 		bounds.bounds.height = size/2 == 0 ? 1 : size/2 * scale;
 		
 		//set position and orientation
-		TransformComponent transform = new TransformComponent();
-		transform.pos.set(position);
-		transform.tileX = tileX;
-		transform.tileY = tileY;
-		transform.rotation = (float) Math.toRadians(new Vector2(dx, dy).angle());
+		TransformComponent transfrom = new TransformComponent();
+		transfrom.pos.set(position);
+		transfrom.rotation = (float) Math.toRadians(new Vector2(dx, dy).angle());
 		
 		//set position
 		MovementComponent movement = new MovementComponent();
@@ -180,7 +178,7 @@ public class EntityFactory {
 		entity.add(expire);
 		entity.add(texture);
 		entity.add(bounds);
-		entity.add(transform);
+		entity.add(transfrom);
 		entity.add(movement);
 		
 		return entity;
@@ -387,15 +385,13 @@ public class EntityFactory {
 	}
 	
 	
-	public static Entity createShip(int tileX, int tileY, int posX, int posY) {
+	public static Entity createShip(int x, int y) {
 		Entity entity = new Entity();
 
 		TransformComponent transform = new TransformComponent();
 		TextureComponent texture = new TextureComponent();
 
-		transform.pos.set(posX, posY, -10);
-		transform.tileX = tileX;
-		transform.tileY = tileY;
+		transform.pos.set(x, y, -10);
 		transform.rotation = (float) Math.PI/2; //face upwards
 		
 		// generate pixmap texture

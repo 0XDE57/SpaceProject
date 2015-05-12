@@ -15,7 +15,6 @@ public class MovementSystem extends IteratingSystem {
 	
 	//temporary 
 	private Vector2 tmp = new Vector2(); 
-
 	
 	@SuppressWarnings("unchecked")
 	public MovementSystem() {
@@ -37,6 +36,5 @@ public class MovementSystem extends IteratingSystem {
 		//add velocity to position
 		tmp.set(movement.velocity).scl(deltaTime);
 		position.pos.add(tmp.x, tmp.y, 0.0f);
-		
 	}
 }

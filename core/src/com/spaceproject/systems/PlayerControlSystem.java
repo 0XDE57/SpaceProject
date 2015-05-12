@@ -113,12 +113,11 @@ public class PlayerControlSystem extends EntitySystem {
 			if (shoot) {
 				//TODO fix math. The ships movement needs to be added to the projectile. It looks wrong currently
 				//TODO move to weapon/projectile/gun component
-				//TODO add cooldown, etc
 				float projectileVelocity = 700;			
 				float xx = (float) Math.cos(vehicleTransform.rotation) * (projectileVelocity + vehicleMovement.velocity.x);
 				float yy = (float) Math.sin(vehicleTransform.rotation) * (projectileVelocity + vehicleMovement.velocity.y);
 											
-				engine.addEntity(EntityFactory.createProjectile(vehicleTransform.tileX, vehicleTransform.tileY, vehicleTransform.pos, xx, yy, 1));
+				engine.addEntity(EntityFactory.createProjectile(vehicleTransform.pos, xx, yy, 1));
 			}
 			
 			if (stop) {
@@ -219,9 +218,7 @@ public class PlayerControlSystem extends EntitySystem {
 		
 		//set the player at the position of vehicle
 		transformMap.get(playerEntity).pos.set(transformMap.get(vehicleEntity).pos);			
-		transformMap.get(playerEntity).tileX = transformMap.get(vehicleEntity).tileX;
-		transformMap.get(playerEntity).tileY = transformMap.get(vehicleEntity).tileY;
-		
+		 
 		//remove vehicle reference
 		vehicleEntity = null;
 
