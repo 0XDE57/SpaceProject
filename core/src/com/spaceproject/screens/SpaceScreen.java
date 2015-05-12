@@ -49,34 +49,10 @@ public class SpaceScreen extends ScreenAdapter {
 		*/
 		
 		//add test planetary system (solar system)
-		for (Entity entity : EntityFactory.createPlanetarySystem(5000, 5000)) {
-			//engine.addEntity(entity);
-		}
-		
-		for (Entity entity : EntityFactory.createPlanetarySystem(5000, 15000)) {
-			engine.addEntity(entity);
-		}
-		for (Entity entity : EntityFactory.createPlanetarySystem(5000, 25000)) {
-			//engine.addEntity(entity);
-		}
-		for (Entity entity : EntityFactory.createPlanetarySystem(15000, 5000)) {
-			//engine.addEntity(entity);
-		}
 		for (Entity entity : EntityFactory.createPlanetarySystem(15000, 15000)) {
 			engine.addEntity(entity);
 		}
-		for (Entity entity : EntityFactory.createPlanetarySystem(15000, 25000)) {
-			//engine.addEntity(entity);
-		}		
-		for (Entity entity : EntityFactory.createPlanetarySystem(25000, 5000)) {
-			//engine.addEntity(entity);
-		}
-		for (Entity entity : EntityFactory.createPlanetarySystem(25000, 15000)) {
-			//engine.addEntity(entity);
-		}
-		for (Entity entity : EntityFactory.createPlanetarySystem(25000, 25000)) {
-			//engine.addEntity(entity);
-		}
+		
 		
 	
 		

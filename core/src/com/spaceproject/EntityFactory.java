@@ -163,9 +163,9 @@ public class EntityFactory {
 		bounds.bounds.height = size/2 == 0 ? 1 : size/2 * scale;
 		
 		//set position and orientation
-		TransformComponent transfrom = new TransformComponent();
-		transfrom.pos.set(position);
-		transfrom.rotation = (float) Math.toRadians(new Vector2(dx, dy).angle());
+		TransformComponent transform = new TransformComponent();
+		transform.pos.set(position);
+		transform.rotation = (float) Math.toRadians(new Vector2(dx, dy).angle());
 		
 		//set position
 		MovementComponent movement = new MovementComponent();
@@ -178,7 +178,7 @@ public class EntityFactory {
 		entity.add(expire);
 		entity.add(texture);
 		entity.add(bounds);
-		entity.add(transfrom);
+		entity.add(transform);
 		entity.add(movement);
 		
 		return entity;

@@ -87,7 +87,7 @@ public class RenderingSystem extends IteratingSystem {
 		toggleVsync();
 		
 		//generate stars
-		for (int i = 0; i < 2000; i++) {		
+		for (int i = 0; i < 3000; i++) {		
 			backgroundStarsLayer1.add(new BackgroundStar((float)MathUtils.random(-5000, 5000), (float)MathUtils.random(-5000, 5000)));
 			backgroundStarsLayer2.add(new BackgroundStar((float)MathUtils.random(-5000, 5000), (float)MathUtils.random(-5000, 5000)));
 			backgroundStarsLayer3.add(new BackgroundStar((float)MathUtils.random(-5000, 5000), (float)MathUtils.random(-5000, 5000)));
@@ -119,14 +119,14 @@ public class RenderingSystem extends IteratingSystem {
 		batch.begin();
 
 		//render stars
-		for (BackgroundStar star : backgroundStarsLayer1) {
-			batch.draw(starTexture, (float) star.x + (cam.position.x * 0.3f), (float) star.y + (cam.position.y * 0.3f));
-		}
-		for (BackgroundStar star : backgroundStarsLayer2) {
-			batch.draw(starTexture, (float) star.x + (cam.position.x * 0.6f), (float) star.y + (cam.position.y * 0.6f));
-		}
 		for (BackgroundStar star : backgroundStarsLayer3) {
 			batch.draw(starTexture, (float) star.x + (cam.position.x * 0.9f), (float) star.y + (cam.position.y * 0.9f));
+		}
+		for (BackgroundStar star : backgroundStarsLayer2) {
+			batch.draw(starTexture, (float) star.x + (cam.position.x * 0.7f), (float) star.y + (cam.position.y * 0.7f));
+		}
+		for (BackgroundStar star : backgroundStarsLayer1) {
+			batch.draw(starTexture, (float) star.x + (cam.position.x * 0.5f), (float) star.y + (cam.position.y * 0.5f));
 		}
 		
 		//render all textures
