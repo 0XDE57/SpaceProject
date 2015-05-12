@@ -32,8 +32,8 @@ public class DesktopInputSystem extends EntitySystem {
 		}
 		if (Gdx.input.isKeyPressed(Keys.PERIOD)) engine.getSystem(RenderingSystem.class).zoom(1);
 		if (Gdx.input.isKeyPressed(Keys.SLASH)) engine.getSystem(RenderingSystem.class).zoom(0.1f);
-		
-		
+		if (Gdx.input.isKeyPressed(Keys.MINUS)) engine.getSystem(RenderingSystem.class).zoom(engine.getSystem(RenderingSystem.class).getCam().zoom += 0.001);
+		if (Gdx.input.isKeyPressed(Keys.EQUALS)) engine.getSystem(RenderingSystem.class).zoom(engine.getSystem(RenderingSystem.class).getCam().zoom -= 0.001);
 		//fullscreen toggle
 		if (Gdx.input.isKeyJustPressed(Keys.F11)) {
 			engine.getSystem(RenderingSystem.class).toggleFullscreen();

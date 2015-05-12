@@ -7,6 +7,11 @@ import com.badlogic.gdx.math.Vector3;
 public class TransformComponent extends Component {
 	/* Position in world x, y. Z used for rendering order */
 	public final Vector3 pos = new Vector3();
+	
+	/* tile that entity is in */
+	public int tileX;
+	public int tileY;
+	
 	/* Orientation in radians */
 	public float rotation = 0.0f;
 }

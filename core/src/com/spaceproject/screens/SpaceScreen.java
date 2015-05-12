@@ -49,45 +49,45 @@ public class SpaceScreen extends ScreenAdapter {
 		*/
 		
 		//add test planetary system (solar system)
-		for (Entity entity : EntityFactory.createPlanetarySystem(5000, 5000)) {
-			//engine.addEntity(entity);
-		}
-		
-		for (Entity entity : EntityFactory.createPlanetarySystem(5000, 15000)) {
+		for (Entity entity : EntityFactory.createPlanetarySystem(0, 0)) {
 			engine.addEntity(entity);
 		}
-		for (Entity entity : EntityFactory.createPlanetarySystem(5000, 25000)) {
-			//engine.addEntity(entity);
-		}
-		for (Entity entity : EntityFactory.createPlanetarySystem(15000, 5000)) {
-			//engine.addEntity(entity);
-		}
-		for (Entity entity : EntityFactory.createPlanetarySystem(15000, 15000)) {
-			engine.addEntity(entity);
-		}
-		for (Entity entity : EntityFactory.createPlanetarySystem(15000, 25000)) {
-			//engine.addEntity(entity);
-		}		
-		for (Entity entity : EntityFactory.createPlanetarySystem(25000, 5000)) {
-			//engine.addEntity(entity);
-		}
-		for (Entity entity : EntityFactory.createPlanetarySystem(25000, 15000)) {
-			//engine.addEntity(entity);
-		}
-		for (Entity entity : EntityFactory.createPlanetarySystem(25000, 25000)) {
-			//engine.addEntity(entity);
-		}
 		
-	
+		int size = 1000;
+		float x = -100.01f;
+		float y = 300;
+		int tX = 4;
+		int tY = 3;
+		
+		int newTX = tX + (int)(x / size);
+		if (x < 0) {
+			newTX--;
+		}
+		System.out.println(tX + " -> " + newTX);
+		
+		//System.out.println(x + " -> " + x % size);
+		//int newX = x - ((x / size) * size);
+		float newX = x % size;
+		if (newX < 0) {
+			newX = size + newX;
+		}
+		System.out.println(x + " -> " + newX);
 		
 		//test ships
-		//engine.addEntity(EntityFactory.createShip(100, 300));		
-		//engine.addEntity(EntityFactory.createShip(0, 300));
-		
-		engine.addEntity(EntityFactory.createShip3(-100, 400));
-		engine.addEntity(EntityFactory.createShip3(-200, 400));		
-		engine.addEntity(EntityFactory.createShip3(-300, 400));
-		engine.addEntity(EntityFactory.createShip3(-400, 400));
+		//engine.addEntity(EntityFactory.createShip(100, 300));	
+		engine.addEntity(EntityFactory.createShip(0, 0, 500, 500));
+		engine.addEntity(EntityFactory.createShip(0, 1, 500, 500));
+		engine.addEntity(EntityFactory.createShip(0, -1, 500, 500));
+		engine.addEntity(EntityFactory.createShip(1, 0, 500, 500));
+		engine.addEntity(EntityFactory.createShip(1, 1, 500, 500));
+		engine.addEntity(EntityFactory.createShip(1, -1, 500, 500));
+		engine.addEntity(EntityFactory.createShip(-1, 0, 500, 500));
+		engine.addEntity(EntityFactory.createShip(-1, 1, 500, 500));
+		engine.addEntity(EntityFactory.createShip(-1, -1, 500, 500));
+		//engine.addEntity(EntityFactory.createShip3(-100, 400));
+		//engine.addEntity(EntityFactory.createShip3(-200, 400));		
+		//engine.addEntity(EntityFactory.createShip3(-300, 400));
+		//engine.addEntity(EntityFactory.createShip3(-400, 400));
 		//engine.addEntity(EntityFactory.createShip3(200, 400));
 		//engine.addEntity(EntityFactory.createShip3(300, 400));
 		//engine.addEntity(EntityFactory.createShip3(400, 400));
@@ -99,7 +99,8 @@ public class SpaceScreen extends ScreenAdapter {
 		//engine.addEntity(player);
 		
 		//start as ship
-		Entity playerTESTSHIP = EntityFactory.createShip3(15000, 15000);
+		//Entity playerTESTSHIP = EntityFactory.createShip3(0, 0);
+		Entity playerTESTSHIP = EntityFactory.createShip(0, 0, 500, 500);
 		Entity player = EntityFactory.createCharacter(0, 0, true, playerTESTSHIP);
 		engine.addEntity(playerTESTSHIP);
 				
@@ -107,7 +108,7 @@ public class SpaceScreen extends ScreenAdapter {
 		// Add systems to engine---------------------------------------------------------
 		//engine.addSystem(new PlayerControlSystem(player));//start as player
 		engine.addSystem(new PlayerControlSystem(player, playerTESTSHIP));//start as ship
-		engine.addSystem(new RenderingSystem());
+		engine.addSystem(new RenderingSystem(engine));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new OrbitSystem());
 		engine.addSystem(new DebugUISystem());
@@ -122,7 +123,8 @@ public class SpaceScreen extends ScreenAdapter {
 			engine.addSystem(new DesktopInputSystem());
 		}
 		
-	}	
+	}
+	
 	Entity[] testPlanetsDebug; //test removable planetary system
 	
 	public void render(float delta) {		

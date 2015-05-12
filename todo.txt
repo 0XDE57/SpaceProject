@@ -1,5 +1,21 @@
 //revise todo after each task complete
 
+
+
+get gird thing fixed and working
+
+generate things per grid (start with stars?). 
+
+
+
+
+
+https://github.com/shawn42/hinas_journey/blob/master/proto/terrain.rb
+
+
+
+
+
 input/controls-----------------------------------------------------
 if player bounds overlap vehicle, show enter button
 if in vehicle show exit button (if can get out? must be over platform/spacestation? jetpack?)
