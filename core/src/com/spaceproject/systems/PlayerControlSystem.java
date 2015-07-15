@@ -103,7 +103,10 @@ public class PlayerControlSystem extends EntitySystem {
 			if (move) {
 				//add velocity in direction vehicle is facing
 				//use movementMultiplier to determine how much thrust to use (analog movement)
+				//TODO move to thrust and maxSpeed into an engine component
 				float thrust = 320;
+				//float maxSpeed;
+				//float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go
 				float dx = (float) Math.cos(vehicleTransform.rotation) * (thrust * movementMultiplier) * delta;
 				float dy = (float) Math.sin(vehicleTransform.rotation) * (thrust * movementMultiplier) * delta;
 				vehicleMovement.velocity.add(dx, dy);
@@ -113,7 +116,8 @@ public class PlayerControlSystem extends EntitySystem {
 			if (shoot) {
 				//TODO fix math. The ships movement needs to be added to the projectile. It looks wrong currently
 				//TODO move to weapon/projectile/gun component
-				float projectileVelocity = 700;			
+				float projectileVelocity = 700;
+				//float 
 				float xx = (float) (Math.cos(vehicleTransform.rotation) * projectileVelocity) + vehicleMovement.velocity.x;
 				float yy = (float) (Math.sin(vehicleTransform.rotation) * projectileVelocity) + vehicleMovement.velocity.y;
 											
@@ -210,7 +214,7 @@ public class PlayerControlSystem extends EntitySystem {
 			timeSinceVehicle = 0;
 		}
 		
-		//TODO: check if can exit on platform/spacestation 
+		//TODO: check if can exit on platform/spacestation?
 		//(dont want to get out of ship in middle of space, or do we (jetpack / personal propulsion)?
 		
 		//add player to engine
@@ -226,7 +230,6 @@ public class PlayerControlSystem extends EntitySystem {
 		engine.getSystem(RenderingSystem.class).zoom(0.4f);
 		engine.getSystem(CameraSystem.class).setTarget(playerEntity);
 		//TODO refactor zoom code into camera and make it check for player in vehicle on initialization
-		//and add animation/interpolation between zoom changes
 	}
 
 	//check if player is in vehicle

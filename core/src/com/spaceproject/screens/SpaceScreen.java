@@ -49,7 +49,7 @@ public class SpaceScreen extends ScreenAdapter {
 		*/
 		
 		//add test planetary system (solar system)
-		for (Entity entity : EntityFactory.createPlanetarySystem(15000, 15000)) {
+		for (Entity entity : EntityFactory.createPlanetarySystem(5000, 5000)) {
 			engine.addEntity(entity);
 		}
 		
@@ -75,7 +75,7 @@ public class SpaceScreen extends ScreenAdapter {
 		//engine.addEntity(player);
 		
 		//start as ship
-		Entity playerTESTSHIP = EntityFactory.createShip3(15000, 15000);
+		Entity playerTESTSHIP = EntityFactory.createShip3(0, 0);
 		Entity player = EntityFactory.createCharacter(0, 0, true, playerTESTSHIP);
 		engine.addEntity(playerTESTSHIP);
 				
@@ -83,7 +83,7 @@ public class SpaceScreen extends ScreenAdapter {
 		// Add systems to engine---------------------------------------------------------
 		//engine.addSystem(new PlayerControlSystem(player));//start as player
 		engine.addSystem(new PlayerControlSystem(player, playerTESTSHIP));//start as ship
-		engine.addSystem(new RenderingSystem());
+		engine.addSystem(new RenderingSystem(playerTESTSHIP));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new OrbitSystem());
 		engine.addSystem(new DebugUISystem());

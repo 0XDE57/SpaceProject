@@ -31,7 +31,7 @@ public class TestShipGenerationScreen extends ScreenAdapter {
 		
 		
 		//engine.addSystem(new );
-		engine.addSystem(new RenderingSystem());
+		engine.addSystem(new RenderingSystem(null));
 		engine.addSystem(new DebugUISystem());
 				
 	}

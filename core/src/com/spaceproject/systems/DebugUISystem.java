@@ -70,7 +70,7 @@ public class DebugUISystem extends IteratingSystem {
 		//don't update if we aren't drawing
 		if (!drawDebugUI) return;
 		
-		//toggle debug options------------------
+		//toggle components
 		if (Gdx.input.isKeyJustPressed(Keys.NUMPAD_1)) {
 			drawComponentList = !drawComponentList;
 			System.out.println("[debug] draw component list: " + drawComponentList);
@@ -105,7 +105,7 @@ public class DebugUISystem extends IteratingSystem {
 		
 		
 		
-		//filled shapes--------------------------------------------
+		//draw filled shapes--------------------------------------------
 		//enable blending for transparency
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -123,7 +123,7 @@ public class DebugUISystem extends IteratingSystem {
 		shape.end();
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 		
-		//non-filled shapes--------------------------------------
+		//draw non-filled shapes--------------------------------------
 		shape.begin(ShapeType.Line);
 		
 		// draw ring to visualize orbit path

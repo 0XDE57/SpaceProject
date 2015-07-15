@@ -1,5 +1,14 @@
 //revise todo after each task complete
 
+noise-----------------------------------------------------------
+https://www.reddit.com/search?q=%28perlin|simplex|opensimplex%29+noise&sort=new
+http://ronvalstar.nl/creating-tileable-noise-maps/ <--looping noise
+http://developworlds.com/blog/2015/05/28/procedural-tilemap-generation/
+https://flafla2.github.io/2014/08/09/perlinnoise.html
+http://devmag.org.za/2009/04/25/perlin-noise/
+http://blog.kaelan.org/randomly-generated-world-map/
+https://www.reddit.com/user/KdotJPG   <-OpenSimplex creator https://gist.github.com/KdotJPG/b1270127455a94ac5d19
+
 input/controls-----------------------------------------------------
 if player bounds overlap vehicle, show enter button
 if in vehicle show exit button (if can get out? must be over platform/spacestation? jetpack?)
@@ -13,7 +22,7 @@ set keys to variables, configurable, load keys from config file of sorts
 
 //weapons---------------------------------------------------------
 basic projectile weapon
-shoot cirles with radius relative to damage ammount / weight of projectile
+shoot cirles with radius relative to damage amount / weight of projectile
 destroy bullet if bounding box overlaps collidable objects (vehicle, character, other projectiles)
 
 //debug---------------------------------------------------
@@ -31,7 +40,7 @@ move gun into component
 add health/shield system
 
 
-make a test ship with different stats(comnponents)?
+make a test ship with different stats(components)?
 
 
 mousewheel input processing for camera zoom
@@ -114,13 +123,16 @@ http://www.reddit.com/r/gamedev/comments/mtq01/how_are_universes_that_allow_zoom
 https://stackoverflow.com/questions/20104779/libgdx-create-texture-from-overlay-using-pixmap
 
 
-Optimization/performence:
+Optimization/performance:
 http://t-machine.org/index.php/2014/03/08/data-structures-for-entity-systems-contiguous-memory/
 http://unseen-academy.de/snippet_component_system.html
 
 //fonts
 http://www.fontsquirrel.com/
 
+//sound
+https://www.youtube.com/watch?v=BpgPXZh1WEQ
+find real space sounds? satellite radio noise
 
 Publish
 http://www.reddit.com/r/gamedev/comments/20ciej/media_presence_what_platforms_are_you_active_on/
