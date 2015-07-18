@@ -52,21 +52,21 @@ public class RenderingSystem extends IteratingSystem {
 	private static final int WORLDWIDTH = 1280;
 	private static final int WORLDHEIGHT = 720;
 	
-
-	//private Array<SpaceBackgroundTile>[][] backgroundStarsLayer = (Array<SpaceBackgroundTile>[][])new Array[3][3];	
-	//private Array<SpaceBackgroundTile> backgroundStarsLayer1 = new Array<SpaceBackgroundTile>();
-	
-	public SpaceBackgroundTile[][] spaceBackground = new SpaceBackgroundTile[3][3];
-	
 	//TODO change all entity savings to a player/focus component
 	public Entity playerEntity = null; //the player entity target reference
 	
-	//Texture starTexture; //holds single pixel for star
-	static int tileSize = 3200; //how large a world space is
-	private float checkTileTimer = 2000;
+	
+	//tile stuff
+	//public SpaceBackgroundTile[][] spaceBackgroundB = new SpaceBackgroundTile[3][3];
+	
+	//public Array<SpaceBackgroundTile> spaceBackground = new Array<SpaceBackgroundTile>();
+	public ArrayList<SpaceBackgroundTile> spaceBackground = new ArrayList<SpaceBackgroundTile>();
+	
+	static int tileSize = 1024; //how large a world space is
+	private float checkTileTimer = 500;
 	private float checkTileCurrTime = checkTileTimer;
 	private Vector2 currentCenterTile;
-	
+	int surround = 1;//how many tiles to load around center of player
 	
 	
 	public void loadTile(int tileX, int tileY) {	
@@ -86,6 +86,8 @@ public class RenderingSystem extends IteratingSystem {
 	 * @return tile that an object is in.
 	 */
 	public static Vector2 getTilePos(float posX, float posY) {
+		//TODO: account for tile depth
+		
 		int x = (int)posX / tileSize;
 		int y = (int)posY / tileSize;
 		
@@ -95,6 +97,8 @@ public class RenderingSystem extends IteratingSystem {
 		if (posY < 0) {
 			y--;
 		}
+		
+		//System.out.println("tile: " + x + " ," + y);
 		
 		return new Vector2(x, y);
 	}
@@ -133,52 +137,15 @@ public class RenderingSystem extends IteratingSystem {
 		TransformComponent pos = transformMap.get(playerEntity);
 		currentCenterTile = getTilePos(pos.pos.x, pos.pos.y);
 		
-		//////////load tiles//////////
-		/*
-		spaceBackground[0][0] = new SpaceBackgroundTile((int)currentCenterTile.x - 1, (int)currentCenterTile.y - 1, 0.5f); // left, bottom
-		spaceBackground[0][1] = new SpaceBackgroundTile((int)currentCenterTile.x - 1, (int)currentCenterTile.y, 	   0.5f); // left, center
-		spaceBackground[0][2] = new SpaceBackgroundTile((int)currentCenterTile.x - 1, (int)currentCenterTile.y + 1, 0.5f); // left, top
-								
-		spaceBackground[1][0] = new SpaceBackgroundTile((int)currentCenterTile.x,	 (int)currentCenterTile.y - 1, 0.5f); // center, bottom
-		spaceBackground[1][1] = new SpaceBackgroundTile((int)currentCenterTile.x, 	 (int)currentCenterTile.y,     0.5f); // center, center
-		spaceBackground[1][2] = new SpaceBackgroundTile((int)currentCenterTile.x, 	 (int)currentCenterTile.y + 1, 0.5f); // center, top
-		
-		spaceBackground[2][0] = new SpaceBackgroundTile((int)currentCenterTile.x + 1, (int)currentCenterTile.y - 1, 0.5f); // right, bottom
-		spaceBackground[2][1] = new SpaceBackgroundTile((int)currentCenterTile.x + 1, (int)currentCenterTile.y, 	   0.5f); // right, center
-		spaceBackground[2][2] = new SpaceBackgroundTile((int)currentCenterTile.x + 1, (int)currentCenterTile.y + 1, 0.5f); // right, top
-		*/
-		
-		
-		Thread testThead = new ThreadLoadTest(this);
-		testThead.start();
-		
-		/*
-		bg[1][1] = loadTile((int)currentCenterTile.x, (int)currentCenterTile.y); 	   // center, center
-		bg[1][2] = loadTile((int)currentCenterTile.x, (int)currentCenterTile.y + 1); // center, top
-		bg[1][0] = loadTile((int)currentCenterTile.x,	(int)currentCenterTile.y - 1); // center, bottom
-		
-		bg[2][0] = loadTile((int)currentCenterTile.x + 1, (int)currentCenterTile.y - 1); // right, bottom
-		bg[2][1] = loadTile((int)currentCenterTile.x + 1, (int)currentCenterTile.y); 	   // right, center
-		bg[2][2] = loadTile((int)currentCenterTile.x + 1, (int)currentCenterTile.y + 1); // right, top
-							
-		bg[0][1] = loadTile((int)currentCenterTile.x - 1, (int)currentCenterTile.y); 	   // left, center
-		bg[0][2] = loadTile((int)currentCenterTile.x - 1, (int)currentCenterTile.y + 1); // left, top
-		bg[0][0] = loadTile((int)currentCenterTile.x - 1, (int)currentCenterTile.y - 1); // left, bottom
-		
-		
-		loadTile((int)currentCenterTile.x, (int)currentCenterTile.y); 	   // center, center
-		loadTile((int)currentCenterTile.x, (int)currentCenterTile.y + 1); // center, top
-		loadTile((int)currentCenterTile.x,	(int)currentCenterTile.y - 1); // center, bottom
-		
-		loadTile((int)currentCenterTile.x + 1, (int)currentCenterTile.y - 1); // right, bottom
-		loadTile((int)currentCenterTile.x + 1, (int)currentCenterTile.y); 	   // right, center
-		loadTile((int)currentCenterTile.x + 1, (int)currentCenterTile.y + 1); // right, top
-							
-		loadTile((int)currentCenterTile.x - 1, (int)currentCenterTile.y); 	   // left, center
-		loadTile((int)currentCenterTile.x - 1, (int)currentCenterTile.y + 1); // left, top
-		loadTile((int)currentCenterTile.x - 1, (int)currentCenterTile.y - 1); // left, bottom*/
-	}
+		//////////load tiles//////////		
+		for (int tX = (int)currentCenterTile.x - surround; tX <= (int)currentCenterTile.x + surround; tX++) {
+			for (int tY = (int)currentCenterTile.y - surround; tY <= (int)currentCenterTile.y + surround; tY++) {				
+				spaceBackground.add(new SpaceBackgroundTile(tX, tY, 0.5f));
+			}
+		}
 	
+	}
+
 	
 	@Override
 	public void update(float delta) {
@@ -197,17 +164,26 @@ public class RenderingSystem extends IteratingSystem {
 		
 		batch.begin();
 
-
+		
+		
 		//render background
-		for (int i = 0; i < spaceBackground.length; ++i) {
-			for (int j = 0; j < spaceBackground.length; ++j) {
-				SpaceBackgroundTile back = spaceBackground[i][j];
+		for (SpaceBackgroundTile back : spaceBackground) {
+			batch.draw(back.tex, back.x + (cam.position.x - (tileSize/2)) * back.depth, back.y + (cam.position.y - (tileSize/2)) * back.depth);
+		}
+		
+		/*
+		for (int i = 0; i < spaceBackgroundB.length; ++i) {
+			for (int j = 0; j < spaceBackgroundB.length; ++j) {
+				SpaceBackgroundTile back = spaceBackgroundB[i][j];
 				//batch.draw(back.tex, back.x, back.y);
-				batch.draw(back.tex, back.x + (cam.position.x - (tileSize/2)) * back.depth, back.y + (cam.position.y - (tileSize/2)) * back.depth);
+				//batch.draw(back.tex, back.x + (cam.position.x - (tileSize/2)) * back.depth, back.y + (cam.position.y - (tileSize/2)) * back.depth);
 				
 			}
-		}
+		}*/
+		
+	
 
+		
 		//render all textures
 		for (Entity entity : renderQueue) {
 			TextureComponent tex = textureMap.get(entity);
@@ -234,28 +210,52 @@ public class RenderingSystem extends IteratingSystem {
 		renderQueue.clear();
 		
 
-		//tile loading
+		//tile loading------------------------------------------
 		checkTileCurrTime -= 1000 * delta;
 		if (checkTileCurrTime < 0) {
-			TransformComponent pos = transformMap.get(playerEntity);
+			
+			//get tile player is in
+			TransformComponent pos = transformMap.get(playerEntity);			
 			Vector2 newTile = getTilePos(pos.pos.x, pos.pos.y);
-			if (newTile.x > currentCenterTile.x) {
-				System.out.println("--------Moved tiles RIGHT---------");
+			
+			//check if player has changed tiles
+			if (newTile.x != currentCenterTile.x || newTile.y != currentCenterTile.y) { 
+				
+				
+				//unload old tiles				
+				for (int index = 0; index < spaceBackground.size(); ++index) {
+					//remove any tiles not surrounding player
+					if (spaceBackground.get(index).tileX < newTile.x - surround || spaceBackground.get(index).tileX > newTile.x + surround 
+							|| spaceBackground.get(index).tileY < newTile.y - surround || spaceBackground.get(index).tileY > newTile.y + surround) {
+						
+						spaceBackground.remove(index);
+						
+						index = -1;
+						if (index >= spaceBackground.size()) {
+							continue;
+						}
+					}
+				}
+
+				//load new tiles
+				
+				
+				/*
 				//left tiles = center tiles
-				spaceBackground[0][0] = spaceBackground[1][0]; //left,bottom = center,bottom
-				spaceBackground[0][1] = spaceBackground[1][1]; //left,center = center,center
-				spaceBackground[0][2] = spaceBackground[1][2]; //left,top	   = center,top				
+				spaceBackgroundB[0][0] = spaceBackgroundB[1][0]; //left,bottom = center,bottom
+				spaceBackgroundB[0][1] = spaceBackgroundB[1][1]; //left,center = center,center
+				spaceBackgroundB[0][2] = spaceBackgroundB[1][2]; //left,top	   = center,top				
 				
 				//center tiles = right tiles
-				spaceBackground[1][0] = spaceBackground[2][0]; //center,bottom = right,bottom
-				spaceBackground[1][1] = spaceBackground[2][1]; //center,center = right,center
-				spaceBackground[1][2] = spaceBackground[2][2]; //center,top	 = right,top
+				spaceBackgroundB[1][0] = spaceBackgroundB[2][0]; //center,bottom = right,bottom
+				spaceBackgroundB[1][1] = spaceBackgroundB[2][1]; //center,center = right,center
+				spaceBackgroundB[1][2] = spaceBackgroundB[2][2]; //center,top	 = right,top
 				
 				//load new right tiles
-				spaceBackground[2][0] = new SpaceBackgroundTile((int)newTile.x + 1, (int)newTile.y - 1, 0.5f); // right, bottom
-				spaceBackground[2][1] = new SpaceBackgroundTile((int)newTile.x + 1, (int)newTile.y, 	   0.5f); // right, center
-				spaceBackground[2][2] = new SpaceBackgroundTile((int)newTile.x + 1, (int)newTile.y + 1, 0.5f); // right, top
-				
+				spaceBackgroundB[2][0] = new SpaceBackgroundTile((int)newTile.x + 1, (int)newTile.y - 1, 0.5f); // right, bottom
+				spaceBackgroundB[2][1] = new SpaceBackgroundTile((int)newTile.x + 1, (int)newTile.y, 	   0.5f); // right, center
+				spaceBackgroundB[2][2] = new SpaceBackgroundTile((int)newTile.x + 1, (int)newTile.y + 1, 0.5f); // right, top
+				*/
 				/*
 				//left tiles = center tiles
 				backgroundStarsLayer[0][0] = backgroundStarsLayer[1][0]; //left,bottom = center,bottom

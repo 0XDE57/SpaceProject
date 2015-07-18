@@ -13,9 +13,9 @@ public class TextureFactory {
 	public static Texture generateSpaceBackground(int tileX, int tileY, int tileSize) {
 		MathUtils.random.setSeed((long)(tileX + tileY * SpaceProject.SEED));
 		
-		pixmap = new Pixmap(tileSize, tileSize, Format.RGBA8888);		
+		pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);		
 		
-		int numStars = 3000;
+		int numStars = 800;
 		pixmap.setColor(Color.WHITE);
 		for (int i = 0; i < numStars; ++i){					
 			
