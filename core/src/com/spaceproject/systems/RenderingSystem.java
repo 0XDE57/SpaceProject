@@ -21,7 +21,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.spaceproject.SpaceBackgroundTile;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.ThreadLoadTest;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 
@@ -66,7 +65,7 @@ public class RenderingSystem extends IteratingSystem {
 	private float checkTileTimer = 500;
 	private float checkTileCurrTime = checkTileTimer;
 	private Vector2 currentCenterTile;
-	int surround = 1;//how many tiles to load around center of player
+	int surround = 2;//how many tiles to load around center of player
 	
 	
 	public void loadTile(int tileX, int tileY) {	
@@ -162,27 +161,13 @@ public class RenderingSystem extends IteratingSystem {
 		cam.update();
 		batch.setProjectionMatrix(cam.combined); 
 		
-		batch.begin();
-
+		batch.begin();	
 		
-		
-		//render background
+		//render background stars
 		for (SpaceBackgroundTile back : spaceBackground) {
 			batch.draw(back.tex, back.x + (cam.position.x - (tileSize/2)) * back.depth, back.y + (cam.position.y - (tileSize/2)) * back.depth);
 		}
-		
-		/*
-		for (int i = 0; i < spaceBackgroundB.length; ++i) {
-			for (int j = 0; j < spaceBackgroundB.length; ++j) {
-				SpaceBackgroundTile back = spaceBackgroundB[i][j];
-				//batch.draw(back.tex, back.x, back.y);
-				//batch.draw(back.tex, back.x + (cam.position.x - (tileSize/2)) * back.depth, back.y + (cam.position.y - (tileSize/2)) * back.depth);
-				
-			}
-		}*/
-		
-	
-
+			
 		
 		//render all textures
 		for (Entity entity : renderQueue) {
@@ -238,8 +223,22 @@ public class RenderingSystem extends IteratingSystem {
 				}
 
 				//load new tiles
-				
-				
+				for (int tX = (int)newTile.x - surround; tX <= (int)newTile.x + surround; tX++) {
+					for (int tY = (int)newTile.y - surround; tY <= (int)newTile.y + surround; tY++) {
+						boolean exists = false; //is the tile already loaded
+						for (int index = 0; index < spaceBackground.size() && !exists; ++index) {
+							if (spaceBackground.get(index).tileX == tX && spaceBackground.get(index).tileY == tY) {					
+								exists = true;
+								//break;
+							}
+						}
+						if (!exists) {
+							spaceBackground.add(new SpaceBackgroundTile(tX, tY, 0.5f));
+						}
+						
+					}
+				}
+				//spaceBackground.add(new SpaceBackgroundTile(tX, tY, 0.5f));
 				/*
 				//left tiles = center tiles
 				spaceBackgroundB[0][0] = spaceBackgroundB[1][0]; //left,bottom = center,bottom
