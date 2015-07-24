@@ -10,11 +10,12 @@ public class SpaceBackgroundTile {
 	public final float tileX;
 	public final float tileY;
 	public final float depth;
+	public final int size;
 	public final Texture tex;
 	
-	public SpaceBackgroundTile(int tileX, int tileY, float renderDepth) {
+	public SpaceBackgroundTile(int tileX, int tileY, float renderDepth, int tileSize) {
 		
-		int tileSize = 1024;
+		size = tileSize;
 		
 		this.tileX = tileX;
 		this.tileY = tileY;
@@ -22,8 +23,8 @@ public class SpaceBackgroundTile {
 		x = tileX * tileSize;
 		y = tileY * tileSize;
 		
-		//depth = renderDepth;
-		depth = 0;//temporary debug line. delete me later
+		depth = renderDepth;
+		//depth = 0;//temporary debug line. delete me later
 		
 		Vector2 tile = RenderingSystem.getTilePos(tileX, tileY);
 		tex = TextureFactory.generateSpaceBackground((int)tile.x, (int)tile.x, tileSize);
