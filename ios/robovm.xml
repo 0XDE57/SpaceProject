@@ -33,11 +33,7 @@
     <pattern>org.apache.harmony.security.provider.cert.DRLCertFactory</pattern>
     <pattern>org.apache.harmony.security.provider.crypto.CryptoProvider</pattern>
   </forceLinkClasses>
-  <libs>
-    <lib>build/libs/ios/libgdx-freetype.a</lib>
-    <lib>build/libs/ios/libgdx.a</lib>
-    <lib>build/libs/ios/libObjectAL.a</lib>
-  </libs>
+  <libs/>
   <frameworks>
     <framework>UIKit</framework>
     <framework>OpenGLES</framework>

@@ -58,10 +58,10 @@ public class RenderingSystem extends IteratingSystem {
 	//tile stuff
 	private ArrayList<SpaceBackgroundTile> spaceBackgroundLayer1 = new ArrayList<SpaceBackgroundTile>();
 	private ArrayList<SpaceBackgroundTile> spaceBackgroundLayer2 = new ArrayList<SpaceBackgroundTile>();
-	private static float backgroundDepth1 = 1f;
-	private static float backgroundDepth2 = 0.8f;
+	private static float backgroundDepth1 = 0.9f;
+	private static float backgroundDepth2 = 0.7f;
 	private static int tileSize = 1024; //how large a star tile is
-	private float checkTileTimer = 750; //how often to check if player moved tiles
+	private float checkTileTimer = 500; //how often to check if player moved tiles
 	private float checkTileCurrTime = checkTileTimer;
 	private Vector2 currentCenterTile; //local tile player is on to check for movement
 	private int surround = 1;//how many tiles to load around center of player
@@ -89,20 +89,24 @@ public class RenderingSystem extends IteratingSystem {
 		//TODO: account for tile depth
 		//tile.x + (cam.position.x - (tile.size/2)) * tile.depth, tile.y + (cam.position.y - (tile.size/2)) * tile.depth
 		
+		//works for depth of 0 (tiles move with world)
 		//int x = (int)posX / tileSize;
 		//int y = (int)posY / tileSize;	
 		
 		
-		int x = (int) ((posX * backgroundDepth1) / tileSize);
-		int y = (int) ((posY * backgroundDepth1) / tileSize);
+		int x = (int) (posX - (cam.position.x - (tileSize/2)) * backgroundDepth1) / tileSize;
+		int y = (int) (posY - (cam.position.y - (tileSize/2)) * backgroundDepth1) / tileSize;
 		
-		if (posX < 0) {
-			x--;
+	
+		
+		//TODO: explain why subtract 1 if less than 0, i forget why but it doesn't work without this.
+		if (x < 0) {
+			--x;
 		}
 		if (posY < 0) {
-			y--;
-		}		
-		
+			--y;
+		}	
+		System.out.println(x + ", " + y);
 		return new Vector2(x, y);
 	}
 	
@@ -144,6 +148,7 @@ public class RenderingSystem extends IteratingSystem {
 		//////////load tiles//////////	
 		TransformComponent pos = transformMap.get(playerEntity);
 		currentCenterTile = getTilePos(pos.pos.x, pos.pos.y);
+		
 		for (int tX = (int)currentCenterTile.x - surround; tX <= (int)currentCenterTile.x + surround; tX++) {
 			for (int tY = (int)currentCenterTile.y - surround; tY <= (int)currentCenterTile.y + surround; tY++) {				
 				spaceBackgroundLayer1.add(new SpaceBackgroundTile(tX, tY, backgroundDepth1, tileSize));
@@ -170,11 +175,15 @@ public class RenderingSystem extends IteratingSystem {
 		batch.setProjectionMatrix(cam.combined); 
 		
 		//draw
-		batch.begin();	
+		batch.begin();
 		
-		//render background stars
+		//render background tiles (stars)
 		for (SpaceBackgroundTile tile : spaceBackgroundLayer1) {
-			batch.draw(tile.tex, tile.x + (cam.position.x - (tile.size/2)) * tile.depth, tile.y + (cam.position.y - (tile.size/2)) * tile.depth);
+			//draw = (tile position + (cam position - center of tile)) * depth			
+			float drawX = tile.x + (cam.position.x - (tile.size/2)) * tile.depth;
+			float drawY = tile.y + (cam.position.y - (tile.size/2)) * tile.depth;			
+			
+			batch.draw(tile.tex, drawX, drawY);
 		}
 			
 		
@@ -204,8 +213,10 @@ public class RenderingSystem extends IteratingSystem {
 		renderQueue.clear();
 		
 
-		//tile loading------------------------------------------
+		//tile loading------------------------------------------------------------------------------------------
 		//TODO: move into own system
+		//TODO: consider adding timers to break up the process from happening in one frame causing a freeze/jump
+		//		because putting it in a separate thread is not possible due to glContext...
 		checkTileCurrTime -= 1000 * delta;
 		if (checkTileCurrTime < 0) {
 			
@@ -215,17 +226,21 @@ public class RenderingSystem extends IteratingSystem {
 			
 			//check if player has changed tiles
 			if (newTile.x != currentCenterTile.x || newTile.y != currentCenterTile.y) { 
-				System.out.println("---< tile change: " + newTile.x + "," + newTile.y + " ---- " + pos.pos.x + "," + pos.pos.y + " >---");
+				System.out.println("---< tile change: " + newTile.x + ", " + newTile.y + " ---- " + pos.pos.x + ", " + pos.pos.y + " >---");
 				
-				//unload old tiles-------------------------------------------------------		
+				//unload old tiles(remove any tiles not surrounding player)-------------------------------		
 				for (int index = 0; index < spaceBackgroundLayer1.size(); ++index) {
-					//remove any tiles not surrounding player
+					
 					if (spaceBackgroundLayer1.get(index).tileX < newTile.x - surround || spaceBackgroundLayer1.get(index).tileX > newTile.x + surround 
 							|| spaceBackgroundLayer1.get(index).tileY < newTile.y - surround || spaceBackgroundLayer1.get(index).tileY > newTile.y + surround) {
-					
+						
+						//dispose the texture so it doesn't eat up memory
+						spaceBackgroundLayer1.get(index).tex.dispose();
+						//remove tile
 						spaceBackgroundLayer1.remove(index);
 						
-						index = -1;//reset search because removing elements changes items in array
+						//reset index because removing elements changes elements position in array
+						index = -1;
 						if (index >= spaceBackgroundLayer1.size()) {
 							continue;
 						}
@@ -236,11 +251,13 @@ public class RenderingSystem extends IteratingSystem {
 				for (int tX = (int)newTile.x - surround; tX <= (int)newTile.x + surround; tX++) {
 					for (int tY = (int)newTile.y - surround; tY <= (int)newTile.y + surround; tY++) {
 						boolean exists = false; //is the tile already loaded
+						//check if tile exists
 						for (int index = 0; index < spaceBackgroundLayer1.size() && !exists; ++index) {
 							if (spaceBackgroundLayer1.get(index).tileX == tX && spaceBackgroundLayer1.get(index).tileY == tY) {					
 								exists = true;
 							}
 						}
+						//create and add tile if doesn't exist
 						if (!exists) {
 							spaceBackgroundLayer1.add(new SpaceBackgroundTile(tX, tY, backgroundDepth1, tileSize));
 						}
@@ -249,10 +266,11 @@ public class RenderingSystem extends IteratingSystem {
 
 			}
 			
-			currentCenterTile = newTile;			
+			currentCenterTile = newTile;
+			//reset timer
 			checkTileCurrTime = checkTileTimer;
 		}
-		
+		//------------------------------------------------------------------------------------------------------------
 		
 		//adjust zoom
 		zoomCamera(delta);
