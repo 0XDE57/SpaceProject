@@ -12,7 +12,7 @@ public class TextureFactory {
 	
 	public static Texture generateSpaceBackground(int tileX, int tileY, int tileSize) {
 		/* Note: A Global seed of 0 causes non-unique seeds. 
-		 * Consider either disallowing a seed of 0 or change fomula for getting each tiles seed
+		 * Consider either disallowing a seed of 0 or change formula for getting each tiles seed
 		 * This probably affects other parts of the program.
 		 */
 		
@@ -20,6 +20,7 @@ public class TextureFactory {
 		//System.out.println("Tile Seed: " + (long)(tileX + tileY * SpaceProject.SEED));
 		
 		pixmap = new Pixmap(tileSize, tileSize, Format.RGB565);
+		//pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
 		
 		int numStars = 400;
 		pixmap.setColor(Color.WHITE);
@@ -32,9 +33,11 @@ public class TextureFactory {
 			//pixmap.drawPixel(newX, newY, Color.rgba4444(MathUtils.random(1), MathUtils.random(1), MathUtils.random(1), 1));
 		}
 		
-		
+		/*
+		//DEBUG - fill tile to visualize boundaries
 		pixmap.setColor(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1f);
 		pixmap.fill();
+		*/
 		
 		//create texture and dispose pixmap to prevent memory leak
 		Texture t = new Texture(pixmap);

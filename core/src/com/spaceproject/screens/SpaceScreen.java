@@ -59,12 +59,12 @@ public class SpaceScreen extends ScreenAdapter {
 		//test ships
 		//engine.addEntity(EntityFactory.createShip(100, 300));		
 		//engine.addEntity(EntityFactory.createShip(0, 300));
-		/*
+		
 		engine.addEntity(EntityFactory.createShip3(-100, 400));
 		engine.addEntity(EntityFactory.createShip3(-200, 400));		
 		engine.addEntity(EntityFactory.createShip3(-300, 400));
 		engine.addEntity(EntityFactory.createShip3(-400, 400));
-		*/
+		
 		//engine.addEntity(EntityFactory.createShip3(200, 400));
 		//engine.addEntity(EntityFactory.createShip3(300, 400));
 		//engine.addEntity(EntityFactory.createShip3(400, 400));

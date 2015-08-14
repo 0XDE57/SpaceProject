@@ -85,29 +85,24 @@ public class RenderingSystem extends IteratingSystem {
 	 * @param posY
 	 * @return tile that an object is in.
 	 */
-	public static Vector2 getTilePos(float posX, float posY) {
-		//TODO: account for tile depth
-		//tile.x + (cam.position.x - (tile.size/2)) * tile.depth, tile.y + (cam.position.y - (tile.size/2)) * tile.depth
+	public static Vector2 getTilePos(float posX, float posY) {	
+		//calculate position
+		int x = (int) (posX - (cam.position.x - (tileSize/2)) * backgroundDepth1);
+		int y = (int) (posY - (cam.position.y - (tileSize/2)) * backgroundDepth1);
 		
-		//works for depth of 0 (tiles move with world)
-		//int x = (int)posX / tileSize;
-		//int y = (int)posY / tileSize;	
+		//calculate tile that position is in
+		int tX = x / tileSize;
+		int tY = y / tileSize;
 		
-		
-		int x = (int) (posX - (cam.position.x - (tileSize/2)) * backgroundDepth1) / tileSize;
-		int y = (int) (posY - (cam.position.y - (tileSize/2)) * backgroundDepth1) / tileSize;
-		
-	
-		
-		//TODO: explain why subtract 1 if less than 0, i forget why but it doesn't work without this.
+		//subtract 1 from tile position if less than zero to account for -1/x giving 0
 		if (x < 0) {
-			--x;
+			--tX;
 		}
-		if (posY < 0) {
-			--y;
+		if (y < 0) {
+			--tY;
 		}	
-		System.out.println(x + ", " + y);
-		return new Vector2(x, y);
+		
+		return new Vector2(tX, tY);
 	}
 	
 	
