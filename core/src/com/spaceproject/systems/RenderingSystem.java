@@ -1,6 +1,5 @@
 package com.spaceproject.systems;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 
 import com.badlogic.ashley.core.ComponentMapper;
@@ -11,16 +10,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Pixmap.Format;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.spaceproject.SpaceBackgroundTile;
-import com.spaceproject.SpaceProject;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 
@@ -55,59 +49,6 @@ public class RenderingSystem extends IteratingSystem {
 	public Entity playerEntity = null; //the player entity target reference
 	
 	
-	//tile stuff
-	private ArrayList<SpaceBackgroundTile> spaceBackgroundLayer1 = new ArrayList<SpaceBackgroundTile>();
-	private ArrayList<SpaceBackgroundTile> spaceBackgroundLayer2 = new ArrayList<SpaceBackgroundTile>();
-	private static float backgroundDepth1 = 0.9f;
-	private static float backgroundDepth2 = 0.7f;
-	private static int tileSize = 1024; //how large a star tile is
-	private float checkTileTimer = 500; //how often to check if player moved tiles
-	private float checkTileCurrTime = checkTileTimer;
-	private Vector2 currentCenterTile; //local tile player is on to check for movement
-	private int surround = 1;//how many tiles to load around center of player
-	
-	
-	public void loadTile(int tileX, int tileY) {	
-		System.out.println("loading tile: " + tileX + ", " + tileY);			
-
-		//world loading system?
-		
-		//load stars into tile		
-		//load spacedust/background clouds(noise/fractals)
-		//load planetary systems / planets / stars
-		//load space things (asteroids, wormhole/ black hole/ etc
-		//load ai/mobs
-		
-	}
-	
-	/** Convert world position to tile position.  
-	 * @param posX
-	 * @param posY
-	 * @return tile that an object is in.
-	 */
-	public static Vector2 getTilePos(float posX, float posY) {	
-		//calculate position
-		int x = (int) (posX - (cam.position.x - (tileSize/2)) * backgroundDepth1);
-		int y = (int) (posY - (cam.position.y - (tileSize/2)) * backgroundDepth1);
-		
-		//calculate tile that position is in
-		int tX = x / tileSize;
-		int tY = y / tileSize;
-		
-		//subtract 1 from tile position if less than zero to account for -1/x giving 0
-		if (x < 0) {
-			--tX;
-		}
-		if (y < 0) {
-			--tY;
-		}	
-		
-		return new Vector2(tX, tY);
-	}
-	
-	
-	
-	
 	@SuppressWarnings("unchecked")
 	public RenderingSystem(Entity player) {
 		super(Family.all(TransformComponent.class, TextureComponent.class).get());
@@ -139,17 +80,7 @@ public class RenderingSystem extends IteratingSystem {
 		
 		//target for tiles
 		this.playerEntity = player;
-			
-		//////////load tiles//////////	
-		TransformComponent pos = transformMap.get(playerEntity);
-		currentCenterTile = getTilePos(pos.pos.x, pos.pos.y);
-		
-		for (int tX = (int)currentCenterTile.x - surround; tX <= (int)currentCenterTile.x + surround; tX++) {
-			for (int tY = (int)currentCenterTile.y - surround; tY <= (int)currentCenterTile.y + surround; tY++) {				
-				spaceBackgroundLayer1.add(new SpaceBackgroundTile(tX, tY, backgroundDepth1, tileSize));
-				//spaceBackgroundLayer1.add(new SpaceBackgroundTile(tX, tY, backgroundDepth2, tileSize));
-			}
-		}
+	
 	
 	}
 
@@ -173,7 +104,7 @@ public class RenderingSystem extends IteratingSystem {
 		batch.begin();
 		
 		//render background tiles (stars)
-		for (SpaceBackgroundTile tile : spaceBackgroundLayer1) {
+		for (SpaceBackgroundTile tile : LoadingSystem.getFGTileLayer()) {
 			//draw = (tile position + (cam position - center of tile)) * depth			
 			float drawX = tile.x + (cam.position.x - (tile.size/2)) * tile.depth;
 			float drawY = tile.y + (cam.position.y - (tile.size/2)) * tile.depth;			
@@ -207,65 +138,6 @@ public class RenderingSystem extends IteratingSystem {
 		
 		renderQueue.clear();
 		
-
-		//tile loading------------------------------------------------------------------------------------------
-		//TODO: move into own system
-		//TODO: consider adding timers to break up the process from happening in one frame causing a freeze/jump
-		//		because putting it in a separate thread is not possible due to glContext...
-		checkTileCurrTime -= 1000 * delta;
-		if (checkTileCurrTime < 0) {
-			
-			//get tile player is in
-			TransformComponent pos = transformMap.get(playerEntity);			
-			Vector2 newTile = getTilePos(pos.pos.x, pos.pos.y);
-			
-			//check if player has changed tiles
-			if (newTile.x != currentCenterTile.x || newTile.y != currentCenterTile.y) { 
-				System.out.println("---< tile change: " + newTile.x + ", " + newTile.y + " ---- " + pos.pos.x + ", " + pos.pos.y + " >---");
-				
-				//unload old tiles(remove any tiles not surrounding player)-------------------------------		
-				for (int index = 0; index < spaceBackgroundLayer1.size(); ++index) {
-					
-					if (spaceBackgroundLayer1.get(index).tileX < newTile.x - surround || spaceBackgroundLayer1.get(index).tileX > newTile.x + surround 
-							|| spaceBackgroundLayer1.get(index).tileY < newTile.y - surround || spaceBackgroundLayer1.get(index).tileY > newTile.y + surround) {
-						
-						//dispose the texture so it doesn't eat up memory
-						spaceBackgroundLayer1.get(index).tex.dispose();
-						//remove tile
-						spaceBackgroundLayer1.remove(index);
-						
-						//reset index because removing elements changes elements position in array
-						index = -1;
-						if (index >= spaceBackgroundLayer1.size()) {
-							continue;
-						}
-					}
-				}
-
-				//load new tiles---------------------------------------------------------
-				for (int tX = (int)newTile.x - surround; tX <= (int)newTile.x + surround; tX++) {
-					for (int tY = (int)newTile.y - surround; tY <= (int)newTile.y + surround; tY++) {
-						boolean exists = false; //is the tile already loaded
-						//check if tile exists
-						for (int index = 0; index < spaceBackgroundLayer1.size() && !exists; ++index) {
-							if (spaceBackgroundLayer1.get(index).tileX == tX && spaceBackgroundLayer1.get(index).tileY == tY) {					
-								exists = true;
-							}
-						}
-						//create and add tile if doesn't exist
-						if (!exists) {
-							spaceBackgroundLayer1.add(new SpaceBackgroundTile(tX, tY, backgroundDepth1, tileSize));
-						}
-					}
-				}
-
-			}
-			
-			currentCenterTile = newTile;
-			//reset timer
-			checkTileCurrTime = checkTileTimer;
-		}
-		//------------------------------------------------------------------------------------------------------------
 		
 		//adjust zoom
 		zoomCamera(delta);

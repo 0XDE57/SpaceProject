@@ -15,6 +15,7 @@ import com.spaceproject.systems.CameraSystem;
 import com.spaceproject.systems.DebugUISystem;
 import com.spaceproject.systems.DesktopInputSystem;
 import com.spaceproject.systems.ExpireSystem;
+import com.spaceproject.systems.LoadingSystem;
 import com.spaceproject.systems.MovementSystem;
 import com.spaceproject.systems.OrbitSystem;
 import com.spaceproject.systems.PlayerControlSystem;
@@ -85,6 +86,7 @@ public class SpaceScreen extends ScreenAdapter {
 		//engine.addSystem(new PlayerControlSystem(player));//start as player
 		engine.addSystem(new PlayerControlSystem(player, playerTESTSHIP));//start as ship
 		engine.addSystem(new RenderingSystem(playerTESTSHIP));
+		engine.addSystem(new LoadingSystem(playerTESTSHIP));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new OrbitSystem());
 		engine.addSystem(new DebugUISystem());
