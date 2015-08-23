@@ -17,6 +17,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.EntityFactory;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.MovementComponent;
+import com.spaceproject.components.ProjectileComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 
@@ -30,6 +31,8 @@ public class PlayerControlSystem extends EntitySystem {
 	/* bounds map to check if player is near vehicle/ship */
 	private ComponentMapper<BoundsComponent> boundMap;
 
+	private ComponentMapper<ProjectileComponent> projectileMap;
+	
 
 	//target reference
 	private Entity playerEntity = null; //the player entity
@@ -73,6 +76,7 @@ public class PlayerControlSystem extends EntitySystem {
 		transformMap = ComponentMapper.getFor(TransformComponent.class);
 		movementMap = ComponentMapper.getFor(MovementComponent.class);
 		boundMap = ComponentMapper.getFor(BoundsComponent.class);
+		projectileMap = ComponentMapper.getFor(ProjectileComponent.class);
 		
 		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
 		
@@ -87,23 +91,30 @@ public class PlayerControlSystem extends EntitySystem {
 		if (timeSinceVehicle < timeTillCanGetInVehicle) {
 			timeSinceVehicle += 100 * delta;
 		}
+		
 	
 		//VEHICLE CONRTROLS////////////////////////////////////////////////////////////////////
 		if (isInVehicle()) {
-	
+			
 			//vehicle position
 			TransformComponent vehicleTransform = transformMap.get(vehicleEntity);
 			//vehicle movement
-			MovementComponent vehicleMovement = movementMap.get(vehicleEntity);			
-					
+			MovementComponent vehicleMovement = movementMap.get(vehicleEntity);	
+			
+			ProjectileComponent vehicleProj = projectileMap.get(vehicleEntity);
+			//deal with projectile timers
+			vehicleProj.timeSinceLastShot -= 100 * delta;
+			vehicleProj.timeSinceRechage -= 100 * delta;
+			refillAmmo(vehicleProj);
+			
 			//make vehicle face angle from mouse/joystick
 			vehicleTransform.rotation = angleFacing - 1.57f;	
 			
-			//move vehicle----------------------------
+			//move vehicle
 			if (move) {
 				//add velocity in direction vehicle is facing
 				//use movementMultiplier to determine how much thrust to use (analog movement)
-				//TODO move to thrust and maxSpeed into an engine component
+				//TODO move to engine component
 				float thrust = 320;
 				//float maxSpeed;
 				//float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go
@@ -113,15 +124,8 @@ public class PlayerControlSystem extends EntitySystem {
 			}
 			
 			//ATTACK/Projectile-----------------------
-			if (shoot) {
-				//TODO fix math. The ships movement needs to be added to the projectile. It looks wrong currently
-				//TODO move to weapon/projectile/gun component
-				float projectileVelocity = 700;
-				//float 
-				float xx = (float) (Math.cos(vehicleTransform.rotation) * projectileVelocity) + vehicleMovement.velocity.x;
-				float yy = (float) (Math.sin(vehicleTransform.rotation) * projectileVelocity) + vehicleMovement.velocity.y;
-											
-				engine.addEntity(EntityFactory.createProjectile(vehicleTransform.pos, xx, yy, 1));
+			if (shoot && canFire(vehicleProj)) {							
+				fireProjectile(vehicleTransform, vehicleMovement, vehicleProj);
 			}
 			
 			if (stop) {
@@ -148,6 +152,44 @@ public class PlayerControlSystem extends EntitySystem {
 			
 			
 		}
+	}
+
+	private void refillAmmo(ProjectileComponent vehicleProj) {
+		if (vehicleProj.timeSinceRechage < 0 && vehicleProj.curAmmo < vehicleProj.maxAmmo) {
+			//refill ammo
+			vehicleProj.curAmmo++;		
+			
+			//reset timer
+			vehicleProj.timeSinceRechage = vehicleProj.rechargeRate;
+		}
+	}
+
+	/**
+	 * Fire projectile.
+	 * @param vehicleTransform
+	 * @param vehicleMovement
+	 * @param vehicleProj
+	 */
+	private void fireProjectile(TransformComponent vehicleTransform, MovementComponent vehicleMovement, ProjectileComponent vehicleProj) {
+		//create projectile	
+		float xx = (float) (Math.cos(vehicleTransform.rotation) * vehicleProj.velocity) + vehicleMovement.velocity.x;
+		float yy = (float) (Math.sin(vehicleTransform.rotation) * vehicleProj.velocity) + vehicleMovement.velocity.y;
+		engine.addEntity(EntityFactory.createProjectile(vehicleTransform.pos, xx, yy, 1));
+		
+		//subtract ammo
+		--vehicleProj.curAmmo;
+		
+		//reset timer
+		vehicleProj.timeSinceLastShot = vehicleProj.fireRate;
+	}
+
+	/**
+	 * Check if has enough ammo and time past since last shot.
+	 * @param vehicleProj
+	 * @return true if can fire
+	 */
+	private boolean canFire(ProjectileComponent vehicleProj) {
+		return vehicleProj.curAmmo > 1 && vehicleProj.timeSinceLastShot <= 0;
 	}
 
 

@@ -12,6 +12,7 @@ import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.OrbitComponent;
+import com.spaceproject.components.ProjectileComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
@@ -375,6 +376,15 @@ public class EntityFactory {
 		bounds.bounds.width = size * scale;
 
 		
+		ProjectileComponent proj = new ProjectileComponent();
+		proj.maxAmmo = 3;
+		proj.curAmmo = proj.maxAmmo;
+		proj.fireRate = 20;
+		proj.size = 1;
+		proj.velocity = 650;
+		proj.rechargeRate = 80;
+		
+		entity.add(proj);
 		entity.add(bounds);
 		entity.add(texture);
 		entity.add(transform);
