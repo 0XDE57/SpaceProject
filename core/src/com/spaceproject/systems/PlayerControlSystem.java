@@ -17,6 +17,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.EntityFactory;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.MovementComponent;
+import com.spaceproject.components.PlayerFocusComponent;
 import com.spaceproject.components.ProjectileComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
@@ -208,7 +209,6 @@ public class PlayerControlSystem extends EntitySystem {
 	public void enterVehicle() {
 		//check if already in vehicle
 		if (isInVehicle()) {
-			System.out.println("Cannot enter vehicle: already in vehicle.");
 			return;
 		}
 		
@@ -233,7 +233,9 @@ public class PlayerControlSystem extends EntitySystem {
 
 				//zoom out camera and set target to vehicle
 				engine.getSystem(RenderingSystem.class).zoom(1);
-				engine.getSystem(CameraSystem.class).setTarget(vehicle);
+				vehicle.add(new PlayerFocusComponent());
+				playerEntity.remove(PlayerFocusComponent.class);
+				//engine.getSystem(CameraSystem.class).setTarget(vehicle);
 				
 				//remove player from engine
 				engine.removeEntity(playerEntity);
@@ -245,7 +247,6 @@ public class PlayerControlSystem extends EntitySystem {
 	public void exitVehicle() {
 		//check if not in vehicle
 		if (!isInVehicle()) {
-			System.out.println("Cannot exit vehicle: null");
 			return;
 		}
 		
@@ -266,11 +267,14 @@ public class PlayerControlSystem extends EntitySystem {
 		transformMap.get(playerEntity).pos.set(transformMap.get(vehicleEntity).pos);			
 		 
 		//remove vehicle reference
+
+		vehicleEntity.remove(PlayerFocusComponent.class);
 		vehicleEntity = null;
 
 		//zoom in camera and set camera focus to player entity
 		engine.getSystem(RenderingSystem.class).zoom(0.4f);
-		engine.getSystem(CameraSystem.class).setTarget(playerEntity);
+		playerEntity.add(new PlayerFocusComponent());
+		//engine.getSystem(CameraSystem.class).setTarget(playerEntity);
 		//TODO refactor zoom code into camera and make it check for player in vehicle on initialization
 	}
 

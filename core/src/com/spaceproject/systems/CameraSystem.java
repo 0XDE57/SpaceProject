@@ -4,36 +4,27 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.systems.IteratingSystem;
+import com.spaceproject.components.PlayerFocusComponent;
 import com.spaceproject.components.TransformComponent;
 
-public class CameraSystem extends EntitySystem {
+public class CameraSystem extends IteratingSystem {
 	
-	private Entity target;
 	private ComponentMapper<TransformComponent> transformMap;
 	
-	public CameraSystem(Entity target) {
-		transformMap = ComponentMapper.getFor(TransformComponent.class);
+	public CameraSystem() {
+		super(Family.all(PlayerFocusComponent.class).get());
 		
-		this.target = target;
+		transformMap = ComponentMapper.getFor(TransformComponent.class);
+
 	}
 	
-	public void update(float delta) {
-		TransformComponent transform = transformMap.get(target);
+	public void processEntity(Entity entity, float delta) {
+		TransformComponent transform = transformMap.get(entity);
 		
 		//set camera position to entity
 		RenderingSystem.getCam().position.x = transform.pos.x;
 		RenderingSystem.getCam().position.y = transform.pos.y;
 	}	
-
-	//get target camera is focused on
-	public Entity getTarget() {
-		return target;
-	}
-
-	//set target entity to focus camera on
-	public void setTarget(Entity target) {
-		this.target = target;
-	}
-
 
 }

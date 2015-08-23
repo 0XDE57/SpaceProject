@@ -44,13 +44,10 @@ public class RenderingSystem extends IteratingSystem {
 	//TODO: come up with some kind of standard size (pixel to meters)? / something less arbitrary
 	private static final int WORLDWIDTH = 1280;
 	private static final int WORLDHEIGHT = 720;
-	
-	//TODO change all entity savings to a player/focus component
-	public Entity playerEntity = null; //the player entity target reference
-	
+
 	
 	@SuppressWarnings("unchecked")
-	public RenderingSystem(Entity player) {
+	public RenderingSystem() {
 		super(Family.all(TransformComponent.class, TextureComponent.class).get());
 	
 		textureMap = ComponentMapper.getFor(TextureComponent.class);
@@ -76,11 +73,7 @@ public class RenderingSystem extends IteratingSystem {
 		batch = new SpriteBatch();
 		
 		//set vsync off for development, on by default
-		toggleVsync();		
-		
-		//target for tiles
-		this.playerEntity = player;
-	
+		toggleVsync();
 	
 	}
 

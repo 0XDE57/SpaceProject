@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.EntityFactory;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.PlayerFocusComponent;
 import com.spaceproject.systems.BoundsSystem;
 import com.spaceproject.systems.CameraSystem;
 import com.spaceproject.systems.DebugUISystem;
@@ -79,19 +80,20 @@ public class SpaceScreen extends ScreenAdapter {
 		//start as ship
 		Entity playerTESTSHIP = EntityFactory.createShip3(0, 0);
 		Entity player = EntityFactory.createCharacter(0, 0, true, playerTESTSHIP);
+		playerTESTSHIP.add(new PlayerFocusComponent());
 		engine.addEntity(playerTESTSHIP);
 				
 		
 		// Add systems to engine---------------------------------------------------------
 		//engine.addSystem(new PlayerControlSystem(player));//start as player
 		engine.addSystem(new PlayerControlSystem(player, playerTESTSHIP));//start as ship
-		engine.addSystem(new RenderingSystem(playerTESTSHIP));
-		engine.addSystem(new LoadingSystem(playerTESTSHIP));
+		engine.addSystem(new RenderingSystem());
+		engine.addSystem(new LoadingSystem());
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new OrbitSystem());
 		engine.addSystem(new DebugUISystem());
 		engine.addSystem(new BoundsSystem());
-		engine.addSystem(new CameraSystem(playerTESTSHIP));
+		engine.addSystem(new CameraSystem());
 		engine.addSystem(new ExpireSystem(1));
 		
 		//add input system. touch on android and keys on desktop.
@@ -108,10 +110,9 @@ public class SpaceScreen extends ScreenAdapter {
 		//update engine
 		engine.update(delta);
 			
+		
 		//terminate
-		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) Gdx.app.exit();
-		
-		
+		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) Gdx.app.exit();			
 		
 		// [DEBUG]//////////////////////////////
 		if (Gdx.input.isKeyJustPressed(Keys.K)) {

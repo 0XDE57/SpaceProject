@@ -8,6 +8,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.SpaceBackgroundTile;
+import com.spaceproject.components.PlayerFocusComponent;
 import com.spaceproject.components.TransformComponent;
 
 public class LoadingSystem extends IteratingSystem {
@@ -28,23 +29,11 @@ public class LoadingSystem extends IteratingSystem {
 	private float checkTileTimer = 500; 
 	private float checkTileCurrTime = checkTileTimer;
 	
-	public Entity playerEntity = null; //the player entity target reference
+	private ComponentMapper<TransformComponent> transformMap;	
 	
-	private ComponentMapper<TransformComponent> transformMap;
-	
-	
-	public LoadingSystem(Entity player) {
-		super(Family.all(TransformComponent.class).get());
+	public LoadingSystem() {
+		super(Family.all(PlayerFocusComponent.class).get());
 		transformMap = ComponentMapper.getFor(TransformComponent.class);
-		
-		//target for tiles
-		this.playerEntity = player;
-		
-		// load initial tiles
-		TransformComponent pos = transformMap.get(playerEntity);
-		centerTile = getTilePos(pos.pos.x, pos.pos.y);
-		loadTiles(centerTile);
-
 		
 		//load tiles
 		//load spacedust/background clouds(noise/fractals)
@@ -83,16 +72,20 @@ public class LoadingSystem extends IteratingSystem {
 		// TODO: consider adding timers to break up the process from happening
 		// in one frame causing a freeze/jump
 		// because putting it in a separate thread is not possible due to
-		// glContext...
-		
+		// glContext...	
 		
 		checkTileCurrTime -= 1000 * delta;
 		if (checkTileCurrTime < 0) {
 
 			// get tile player is in
-			TransformComponent pos = transformMap.get(playerEntity);
+			TransformComponent pos = transformMap.get(entity);
 			Vector2 newTile = getTilePos(pos.pos.x, pos.pos.y);
-						
+			
+			if (centerTile == null) {
+				centerTile = newTile;
+				loadTiles(newTile);
+			}
+			
 			// check if player has changed tiles
 			if (newTile.x != centerTile.x || newTile.y != centerTile.y) {
 				
