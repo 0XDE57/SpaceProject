@@ -114,7 +114,6 @@ public class LoadingSystem extends IteratingSystem {
 
 		for (int tX = (int) centerTile.x - surround; tX <= centerTile.x + surround; tX++) {
 			for (int tY = (int) centerTile.y - surround; tY <= centerTile.y + surround; tY++) {
-
 				// check if tile already exists
 				boolean exists = false;
 				for (int index = 0; index < bgTileLayer.size() && !exists; ++index) {

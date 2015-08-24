@@ -13,12 +13,12 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.FontFactory;
 import com.spaceproject.components.BoundsComponent;
+import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
 
@@ -30,6 +30,7 @@ public class DebugUISystem extends IteratingSystem {
 	
 	private Array<Entity> objects;
 	private ComponentMapper<TransformComponent> transformMap;
+	private ComponentMapper<MovementComponent> movementMap;
 	private ComponentMapper<BoundsComponent> boundsMap;
 	private ComponentMapper<OrbitComponent> orbitMap;
 	
@@ -48,6 +49,7 @@ public class DebugUISystem extends IteratingSystem {
 		super(Family.all(TransformComponent.class).get());
 		
 		transformMap = ComponentMapper.getFor(TransformComponent.class);
+		movementMap = ComponentMapper.getFor(MovementComponent.class);
 		boundsMap = ComponentMapper.getFor(BoundsComponent.class);
 		orbitMap = ComponentMapper.getFor(OrbitComponent.class);
 		
@@ -215,12 +217,18 @@ public class DebugUISystem extends IteratingSystem {
 		for (Entity entity : objects) {
 			//get entities position and list of components
 			TransformComponent t = transformMap.get(entity);
+			MovementComponent m = movementMap.get(entity);
 			ImmutableArray<Component> components = entity.getComponents();
 			
 			//use Vector3.cpy() to project only the position and avoid modifying projection matrix for all coordinates
 			Vector3 screenPos = RenderingSystem.getCam().project(t.pos.cpy());
 			//print current ID and position in world and a list of all components
-			font.draw(batch, "ID: " + entity.getId() + " (" + Math.round(t.pos.x) + "," + Math.round(t.pos.y) + ")", screenPos.x, screenPos.y);
+			String vel = "";
+			if (m != null) {
+				vel = " ~ " + Math.round(Math.sqrt(m.velocity.x * m.velocity.x + m.velocity.y * m.velocity.y));
+			}
+			String info = "ID: " + entity.getId() + " (" + Math.round(t.pos.x) + "," + Math.round(t.pos.y) + ")" + vel;
+			font.draw(batch, info, screenPos.x, screenPos.y);
 			int nextLine = 20;
 			for (int curComp = 0; curComp < components.size(); curComp++) {
 				font.draw(batch, "[" + components.get(curComp).getClass().getSimpleName() + "]", screenPos.x, screenPos.y - nextLine * (curComp + 1));

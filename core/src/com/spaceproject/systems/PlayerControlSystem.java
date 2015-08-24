@@ -26,12 +26,14 @@ public class PlayerControlSystem extends EntitySystem {
 
 	private static Engine engine;
 
-	/* movement and position maps */
+	// movement and position maps
 	private ComponentMapper<TransformComponent> transformMap;
 	private ComponentMapper<MovementComponent> movementMap;
-	/* bounds map to check if player is near vehicle/ship */
+	// bounds map to check if player is near vehicle/ship
 	private ComponentMapper<BoundsComponent> boundMap;
-
+	//drivable entities
+	private ComponentMapper<VehicleComponent> vehicleMap;
+	//weapons
 	private ComponentMapper<ProjectileComponent> projectileMap;
 	
 
@@ -43,6 +45,7 @@ public class PlayerControlSystem extends EntitySystem {
 	private ImmutableArray<Entity> vehicles;
 
 	//action timer, for enter/exit vehicle
+	//TODO: move to component, both player and AI need to be able to enter/exit
 	private float timeSinceVehicle = 0;
 	private int timeTillCanGetInVehicle = 60;
 		
@@ -78,7 +81,7 @@ public class PlayerControlSystem extends EntitySystem {
 		movementMap = ComponentMapper.getFor(MovementComponent.class);
 		boundMap = ComponentMapper.getFor(BoundsComponent.class);
 		projectileMap = ComponentMapper.getFor(ProjectileComponent.class);
-		
+		vehicleMap = ComponentMapper.getFor(VehicleComponent.class);
 		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
 		
 	}
@@ -102,6 +105,8 @@ public class PlayerControlSystem extends EntitySystem {
 			//vehicle movement
 			MovementComponent vehicleMovement = movementMap.get(vehicleEntity);	
 			
+			VehicleComponent vehicle = vehicleMap.get(vehicleEntity);
+			
 			ProjectileComponent vehicleProj = projectileMap.get(vehicleEntity);
 			//deal with projectile timers
 			vehicleProj.timeSinceLastShot -= 100 * delta;
@@ -116,7 +121,7 @@ public class PlayerControlSystem extends EntitySystem {
 				//add velocity in direction vehicle is facing
 				//use movementMultiplier to determine how much thrust to use (analog movement)
 				//TODO move to engine component
-				float thrust = 320;
+				float thrust = vehicle.thrust;
 				//float maxSpeed;
 				//float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go
 				float dx = (float) Math.cos(vehicleTransform.rotation) * (thrust * movementMultiplier) * delta;
@@ -182,6 +187,7 @@ public class PlayerControlSystem extends EntitySystem {
 		
 		//reset timer
 		vehicleProj.timeSinceLastShot = vehicleProj.fireRate;
+		//vehicleProj.timeSinceLastShot = 1;
 	}
 
 	/**

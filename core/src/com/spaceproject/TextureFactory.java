@@ -19,8 +19,8 @@ public class TextureFactory {
 		MathUtils.random.setSeed((long)(tileX + tileY * SpaceProject.SEED));
 		//System.out.println("Tile Seed: " + (long)(tileX + tileY * SpaceProject.SEED));
 		
-		pixmap = new Pixmap(tileSize, tileSize, Format.RGB565);
-		//pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
+		//pixmap = new Pixmap(tileSize, tileSize, Format.RGB565);
+		pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
 		
 		int numStars = 400;
 		pixmap.setColor(Color.WHITE);

@@ -371,11 +371,12 @@ public class EntityFactory {
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
 		texture.scale = scale;
 		
+		//collision detection
 		BoundsComponent bounds = new BoundsComponent();
 		bounds.bounds.height = size * scale;
 		bounds.bounds.width = size * scale;
 
-		
+		//weapon
 		ProjectileComponent proj = new ProjectileComponent();
 		proj.maxAmmo = 3;
 		proj.curAmmo = proj.maxAmmo;
@@ -384,12 +385,16 @@ public class EntityFactory {
 		proj.velocity = 650;
 		proj.rechargeRate = 80;
 		
+		//engine data and marks entity as drive-able
+		VehicleComponent vehicle = new VehicleComponent();
+		vehicle.thrust = 320;
+		
 		entity.add(proj);
 		entity.add(bounds);
 		entity.add(texture);
 		entity.add(transform);
+		entity.add(vehicle);
 		entity.add(new MovementComponent());
-		entity.add(new VehicleComponent());//vehicle makes it drive-able
 		
 		return entity;
 	}
