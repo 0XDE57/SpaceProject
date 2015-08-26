@@ -55,7 +55,10 @@ public class SpaceScreen extends ScreenAdapter {
 			engine.addEntity(entity);
 		}
 		
-		
+		for (Entity entity : EntityFactory.createPlanetarySystem(-5000, 5000)) {
+			engine.addEntity(entity);
+		}
+
 	
 		
 		//test ships
@@ -79,7 +82,7 @@ public class SpaceScreen extends ScreenAdapter {
 		
 		//start as ship
 		Entity playerTESTSHIP = EntityFactory.createShip3(0, 0);
-		Entity player = EntityFactory.createCharacter(0, 0, true, playerTESTSHIP);
+		Entity player = EntityFactory.createCharacter(0, 0);
 		playerTESTSHIP.add(new PlayerFocusComponent());
 		engine.addEntity(playerTESTSHIP);
 				

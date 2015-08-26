@@ -13,6 +13,7 @@ import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.controllers.PovDirection;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.EntityFactory;
 import com.spaceproject.components.BoundsComponent;
@@ -180,14 +181,24 @@ public class PlayerControlSystem extends EntitySystem {
 		//create projectile	
 		float xx = (float) (Math.cos(vehicleTransform.rotation) * vehicleProj.velocity) + vehicleMovement.velocity.x;
 		float yy = (float) (Math.sin(vehicleTransform.rotation) * vehicleProj.velocity) + vehicleMovement.velocity.y;
-		engine.addEntity(EntityFactory.createProjectile(vehicleTransform.pos, xx, yy, 1));
+		engine.addEntity(EntityFactory.createProjectile(vehicleTransform, xx, yy, 1));
 		
 		//subtract ammo
 		--vehicleProj.curAmmo;
 		
 		//reset timer
 		vehicleProj.timeSinceLastShot = vehicleProj.fireRate;
-		//vehicleProj.timeSinceLastShot = 1;
+
+		
+		/*
+		 * Cheat for debug:
+		 * fast firing and infinite ammo
+		 */
+		boolean cheat = false;
+		if (cheat) {
+			vehicleProj.curAmmo++;
+			vehicleProj.timeSinceLastShot = -1;
+		}
 	}
 
 	/**

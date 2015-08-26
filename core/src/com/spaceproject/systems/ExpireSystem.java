@@ -7,6 +7,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IntervalSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.spaceproject.components.ExpireComponent;
+import com.spaceproject.components.TextureComponent;
 
 public class ExpireSystem extends IntervalSystem {
 	
@@ -38,6 +39,7 @@ public class ExpireSystem extends IntervalSystem {
 			expire.time -= 1;
 			
 			if (expire.time <= 0) {
+				entity.getComponent(TextureComponent.class).texture.dispose();
 				engine.removeEntity(entity);
 			}
 		}
