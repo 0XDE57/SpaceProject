@@ -4,25 +4,27 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.spaceproject.CustomIteratingSystem;
 import com.spaceproject.FontFactory;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
 
-public class DebugUISystem extends IteratingSystem {
+public class DebugUISystem extends CustomIteratingSystem {
 
 	private SpriteBatch batch;
 	private ShapeRenderer shape;
@@ -36,13 +38,21 @@ public class DebugUISystem extends IteratingSystem {
 	
 	//config
 	private boolean drawDebugUI = true;
+	private boolean drawMenu = false;
 	private boolean drawFPS = true;
 	private boolean drawComponentList = false;
+	private boolean drawPos = false;
 	private boolean drawBounds = false;
-	private boolean drawOrbitPath = true;
+	private boolean drawOrbitPath = false;
+	private boolean drawVectors = false;
 	
 	private Matrix4 projectionMatrix = new Matrix4();
 	
+	//entity and component counting
+	private float countTimer = 50;
+	private float curCountTime = countTimer;
+	private int entityCount = 0;
+	private int componentCount = 0;
 	
 	@SuppressWarnings("unchecked")
 	public DebugUISystem() {
@@ -63,18 +73,133 @@ public class DebugUISystem extends IteratingSystem {
 	
 	@Override
 	public void update(float delta) {
+		//check key presses
+		updateKeyToggles();
+		
+		//don't update if we aren't drawing
+		if (!drawDebugUI) return;				
+		super.update(delta);
+		
+			
+		//update timer
+		curCountTime -= 100 * delta;
+		
+		
+		//set projection matrix so things render using correct coordinates
+		//TODO: only needs to be called when screen size changes
+		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); 
+		batch.setProjectionMatrix(projectionMatrix);
+		shape.setProjectionMatrix(projectionMatrix);
+		
+		
+		
+		//draw filled shapes///////////////////////////////////////////////
+		//enable blending for transparency
+		Gdx.gl.glEnable(GL20.GL_BLEND);
+		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+		
+		shape.begin(ShapeType.Filled);
+			
+		//draw light background for text visibility
+		if (drawComponentList) drawComponentListBack();
+		
+		//draw the bounding box (collision detection) for collidables
+		if (drawBounds) drawBounds();
+			
+		shape.end();
+		Gdx.gl.glDisable(GL20.GL_BLEND);
+		
+		
+		
+		//draw non-filled shapes//////////////////////////////////////////
+		shape.begin(ShapeType.Line);
+		
+		if (drawVectors) drawMovementVectors();
+		
+		// draw ring to visualize orbit path
+		if (drawOrbitPath) drawOrbitPath();
+		
+		shape.end();
+		
+		
+		
+		//draw batch////////////////////////////////////////////////////////
+		batch.begin();
+		
+		//print debug menu
+		if (drawMenu) {
+			drawDebugMenu();
+		}
+		
+		//draw frames per second and entity count
+		if (drawFPS) drawFPS();
+		
+		//draw entity position
+		if (drawPos) drawPos();
+		
+		//draw components on entity
+		if (drawComponentList) drawComponentList();
+
+		batch.end();
+	
+		
+		
+		objects.clear();		
+	}
+
+	private void drawMovementVectors() {
+		for (Entity entity : objects) {
+			//get entities position and list of components
+			TransformComponent t = transformMap.get(entity);
+			MovementComponent m = movementMap.get(entity);
+			if (m == null) continue;
+			
+			Vector3 screenPos = RenderingSystem.getCam().project(t.pos.cpy());
+			
+			//calculate vector angle and length
+			float length = (float) getLength(m.velocity.x, m.velocity.y);
+			float angle = getMoveAngle(m.velocity.x, m.velocity.y);
+			float pointX = screenPos.x + (length / 4 * MathUtils.cos(angle));
+			float pointY = screenPos.y + (length / 4 * MathUtils.sin(angle));
+			shape.line(screenPos.x, screenPos.y, pointX, pointY, Color.RED, Color.MAGENTA);
+		}
+	}
+
+	
+	//TODO move to a util/math class
+	public static double getLength(float x, float y){
+		return(Math.sqrt(x * x + y * y));
+	}
+	
+	//TODO move to a util/math class
+	public static float getMoveAngle(float dx, float dy) {
+		float angle = (float)Math.atan2(dy, dx) * MathUtils.radiansToDegrees;
+		if (angle < 0) angle += 360;
+		return angle * MathUtils.degreesToRadians;
+	}
+	
+	private void updateKeyToggles() {
 		//toggle debug
 		if (Gdx.input.isKeyJustPressed(Keys.F3)) {
 			drawDebugUI = !drawDebugUI;
 			System.out.println("DEBUG UI: " + drawDebugUI);
 		}
 		
-		//don't update if we aren't drawing
-		if (!drawDebugUI) return;
+		//toggle pos
+		if (Gdx.input.isKeyJustPressed(Keys.NUMPAD_0)) {
+			drawPos = !drawPos;
+			if(drawComponentList) {
+				drawComponentList = false;
+			}
+			System.out.println("[debug] draw pos: " + drawPos);
+		}
 		
 		//toggle components
 		if (Gdx.input.isKeyJustPressed(Keys.NUMPAD_1)) {
 			drawComponentList = !drawComponentList;
+			if (drawPos) {
+				drawPos = false;
+			}
 			System.out.println("[debug] draw component list: " + drawComponentList);
 		}
 		
@@ -97,69 +222,29 @@ public class DebugUISystem extends IteratingSystem {
 		}
 		
 		
-		super.update(delta);
-		
-		//set projection matrix so things render using correct coordinates
-		//TODO: only needs to be called when screen size changes
-		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); 
-		batch.setProjectionMatrix(projectionMatrix);
-		shape.setProjectionMatrix(projectionMatrix);
-		
-		
-		
-		//draw filled shapes--------------------------------------------
-		//enable blending for transparency
-		Gdx.gl.glEnable(GL20.GL_BLEND);
-		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-		
-		shape.begin(ShapeType.Filled);
-			
-		//draw light background for text visibility
-		if (drawComponentList) drawComponentListBack();
-		
-		//draw the bounding box (collision detection) for collidables
-		if (drawBounds) drawBounds();
-		
-		
-		
-		shape.end();
-		Gdx.gl.glDisable(GL20.GL_BLEND);
-		
-		//draw non-filled shapes--------------------------------------
-		shape.begin(ShapeType.Line);
-		
-		// draw ring to visualize orbit path
-		if (drawOrbitPath) drawOrbitPath();
-		
-		shape.end();
-		
-		
-		//batch------------------------------------------------
-		batch.begin();
-		
-		//print debug menu
-		boolean drawMenu = true;
-		if (drawMenu){
-			font.setColor(1, 1, 1, 1);
-			font.draw(batch, "---DEBUG [F3]---", 15, Gdx.graphics.getHeight() - 45);
-			font.draw(batch, "[NUM1] Draw Component List: " + drawComponentList, 15, Gdx.graphics.getHeight() - 60);
-			font.draw(batch, "[NUM2] Draw Bounds: " + drawBounds, 15, Gdx.graphics.getHeight() - 75);
-			font.draw(batch, "[NUM3] Draw FPS: " + drawFPS, 15, Gdx.graphics.getHeight() - 90);
-			font.draw(batch, "[NUM4] Draw Orbit Path: " + drawOrbitPath, 15, Gdx.graphics.getHeight() - 105);
+		//toggle vector
+		if (Gdx.input.isKeyJustPressed(Keys.NUMPAD_5)) {
+			drawVectors = !drawVectors;
+			System.out.println("[debug] draw vectors: " + drawVectors);
 		}
 		
-		//draw frames per second
-		if (drawFPS) drawFPS();
-		//TODO: entity and component count (see ashley tests)
-		
-		//draw components on entity
-		if (drawComponentList) drawComponentList();
+		//toggle menu
+		if (Gdx.input.isKeyJustPressed(Keys.NUMPAD_9)) {
+			drawMenu = !drawMenu;
+		}
+	}
 
-		batch.end();
-	
-		
-		objects.clear();
-		
+	/** draw menu showing items to draw and toggle keys */
+	private void drawDebugMenu() {
+		font.setColor(1, 1, 1, 1);
+		font.draw(batch, "***DEBUG [F3]***", 15, Gdx.graphics.getHeight() - 45);
+		font.draw(batch, "[NUM0] Draw Pos: " + drawPos, 15, Gdx.graphics.getHeight() - 60);
+		font.draw(batch, "[NUM1] Draw Component List: " + drawComponentList, 15, Gdx.graphics.getHeight() - 75);
+		font.draw(batch, "[NUM2] Draw Bounds: " + drawBounds, 15, Gdx.graphics.getHeight() - 90);
+		font.draw(batch, "[NUM3] Draw FPS: " + drawFPS, 15, Gdx.graphics.getHeight() - 105);
+		font.draw(batch, "[NUM4] Draw Orbit Path: " + drawOrbitPath, 15, Gdx.graphics.getHeight() - 120);
+		font.draw(batch, "[NUM5] Draw Vectors: " + drawOrbitPath, 15, Gdx.graphics.getHeight() - 135);
+		font.draw(batch, "[NUM9] Hide this menu.", 15, Gdx.graphics.getHeight() - 150);
 	}
 
 	/** draw orbit path, a ring to visualize objects orbit*/
@@ -191,10 +276,22 @@ public class DebugUISystem extends IteratingSystem {
 		
 	}
 
-	/** draw Frames in top left corner */
+	/** draw Frames and entity count in top left corner */
 	private void drawFPS() {
 		font.setColor(1,1,1,1);
-		font.draw(batch, Integer.toString(Gdx.graphics.getFramesPerSecond()), 15, Gdx.graphics.getHeight()- 15);
+
+		if (curCountTime < 0) {
+			entityCount = engine.getEntities().size();
+			componentCount = 0;
+			for (Entity ent : engine.getEntities()) {
+				componentCount += ent.getComponents().size();
+			}
+			//System.out.println("Entities: " + entityCount + " - Components: " + componentCount);
+			curCountTime = countTimer;
+		}
+		String count = "   E: " + entityCount + " - C: " + componentCount;
+		
+		font.draw(batch, Integer.toString(Gdx.graphics.getFramesPerSecond()) + count, 15, Gdx.graphics.getHeight()- 15);
 	}
 	
 	/**  Draw background for easier text reading */
@@ -238,6 +335,25 @@ public class DebugUISystem extends IteratingSystem {
 		
 	}
 
+	/**  Draw position and speed of entity. */
+	private void drawPos() {
+		font.setColor(1, 1, 1, 1);
+		for (Entity entity : objects) {
+			TransformComponent t = transformMap.get(entity);
+			MovementComponent m = movementMap.get(entity);
+			
+			Vector3 screenPos = RenderingSystem.getCam().project(t.pos.cpy());
+			String vel = "";
+			if (m != null) {
+				vel = " ~ " + Math.round(Math.sqrt(m.velocity.x * m.velocity.x + m.velocity.y * m.velocity.y));
+			}
+			String info = Math.round(t.pos.x) + "," + Math.round(t.pos.y) + vel;
+			font.draw(batch, info, screenPos.x, screenPos.y);			
+			
+		}
+		
+	}
+	
 	@Override 
 	public void processEntity(Entity entity, float deltaTime) {
 		objects.add(entity);

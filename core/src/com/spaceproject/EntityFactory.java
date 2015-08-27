@@ -67,7 +67,7 @@ public class EntityFactory {
 		OrbitComponent orbit = new OrbitComponent();
 		orbit.parent = entity;//set to self to negate orbit
 		orbit.rotateClockwise = rotationDir;
-		orbit.rotSpeed = MathUtils.random(0.002f, 0.01f); //rotation speed of star
+		orbit.rotSpeed = MathUtils.random(0.002f, 0.06f); //rotation speed of star
 		
 		//add components to entity
 		entity.add(orbit);
@@ -100,8 +100,8 @@ public class EntityFactory {
 		//orbit 
 		OrbitComponent orbit = new OrbitComponent();
 		orbit.parent = parent;
-		orbit.rotSpeed = MathUtils.random(0.002f, 0.05f); //rotation speed of planet
-		orbit.orbitSpeed = MathUtils.random(0.0007f, 0.005f); //orbit speed of planet	
+		orbit.rotSpeed = MathUtils.random(0.002f, 0.06f); //rotation speed of planet
+		orbit.orbitSpeed = MathUtils.random(0.0009f, 0.009f); //orbit speed of planet	
 		orbit.angle = MathUtils.random(3.14f * 2); //angle from star
 		orbit.distance = distance;
 		orbit.rotateClockwise = rotationDir;
@@ -163,7 +163,7 @@ public class EntityFactory {
 		texture.scale = scale;
 		
 		BoundsComponent bounds = new BoundsComponent();
-		bounds.bounds.height = texture.texture.getWidth() * scale;
+		bounds.bounds.height = texture.texture.getHeight() * scale;
 		bounds.bounds.width = texture.texture.getWidth() * scale;
 			
 		entity.add(bounds);
@@ -251,8 +251,8 @@ public class EntityFactory {
 		
 		//collision detection
 		BoundsComponent bounds = new BoundsComponent();
-		bounds.bounds.height = size * scale;
-		bounds.bounds.width = size * scale;
+		bounds.bounds.height = texture.texture.getHeight() * scale;
+		bounds.bounds.width = texture.texture.getWidth() * scale;
 
 		//weapon
 		ProjectileComponent proj = new ProjectileComponent();

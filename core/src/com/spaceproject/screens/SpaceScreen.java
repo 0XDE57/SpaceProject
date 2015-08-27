@@ -55,7 +55,7 @@ public class SpaceScreen extends ScreenAdapter {
 			engine.addEntity(entity);
 		}
 		
-		for (Entity entity : EntityFactory.createPlanetarySystem(-5000, 5000)) {
+		for (Entity entity : EntityFactory.createPlanetarySystem(-5000, -5000)) {
 			engine.addEntity(entity);
 		}
 
@@ -73,7 +73,6 @@ public class SpaceScreen extends ScreenAdapter {
 		//engine.addEntity(EntityFactory.createShip3(200, 400));
 		//engine.addEntity(EntityFactory.createShip3(300, 400));
 		//engine.addEntity(EntityFactory.createShip3(400, 400));
-
 		
 		//player------------------------------------------
 		//start as player
@@ -96,8 +95,8 @@ public class SpaceScreen extends ScreenAdapter {
 		engine.addSystem(new OrbitSystem());
 		engine.addSystem(new DebugUISystem());
 		engine.addSystem(new BoundsSystem());
-		engine.addSystem(new CameraSystem());
 		engine.addSystem(new ExpireSystem(1));
+		engine.addSystem(new CameraSystem());
 		
 		//add input system. touch on android and keys on desktop.
 		if (Gdx.app.getType() == ApplicationType.Android) {
@@ -105,6 +104,7 @@ public class SpaceScreen extends ScreenAdapter {
 		} else {
 			engine.addSystem(new DesktopInputSystem());
 		}
+		
 		
 	}	
 	Entity[] testPlanetsDebug; //test removable planetary system
