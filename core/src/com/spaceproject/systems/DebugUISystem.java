@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.CustomIteratingSystem;
@@ -102,22 +103,23 @@ public class DebugUISystem extends CustomIteratingSystem {
 			
 		//draw light background for text visibility
 		if (drawComponentList) drawComponentListBack();
-		
-		//draw the bounding box (collision detection) for collidables
-		if (drawBounds) drawBounds();
 			
 		shape.end();
-		Gdx.gl.glDisable(GL20.GL_BLEND);
+		Gdx.gl.glDisable(GL20.GL_BLEND); //disable blending
 		
 		
 		
 		//draw non-filled shapes//////////////////////////////////////////
 		shape.begin(ShapeType.Line);
 		
+		//draw vector to visualize speed and direction
 		if (drawVectors) drawMovementVectors();
 		
 		// draw ring to visualize orbit path
 		if (drawOrbitPath) drawOrbitPath();
+		
+		//draw the bounding box (collision detection) for collidables
+		if (drawBounds) drawBounds();
 		
 		shape.end();
 		
@@ -127,10 +129,8 @@ public class DebugUISystem extends CustomIteratingSystem {
 		batch.begin();
 		
 		//print debug menu
-		if (drawMenu) {
-			drawDebugMenu();
-		}
-		
+		if (drawMenu)  drawDebugMenu();
+			
 		//draw frames per second and entity count
 		if (drawFPS) drawFPS();
 		
@@ -147,6 +147,7 @@ public class DebugUISystem extends CustomIteratingSystem {
 		objects.clear();		
 	}
 
+	/** Draw lines to represent speed and direction of entity */
 	private void drawMovementVectors() {
 		for (Entity entity : objects) {
 			//get entities position and list of components
@@ -155,12 +156,15 @@ public class DebugUISystem extends CustomIteratingSystem {
 			if (m == null) continue;
 			
 			Vector3 screenPos = RenderingSystem.getCam().project(t.pos.cpy());
-			
+
 			//calculate vector angle and length
-			float length = (float) getLength(m.velocity.x, m.velocity.y);
+			float scale = 4; //how long to make vectors (higher number is shorter line)
+			float length = m.velocity.len();
 			float angle = getMoveAngle(m.velocity.x, m.velocity.y);
-			float pointX = screenPos.x + (length / 4 * MathUtils.cos(angle));
-			float pointY = screenPos.y + (length / 4 * MathUtils.sin(angle));
+			float pointX = screenPos.x + (length / scale * MathUtils.cos(angle));
+			float pointY = screenPos.y + (length / scale * MathUtils.sin(angle));
+			
+			//draw line to represent movement
 			shape.line(screenPos.x, screenPos.y, pointX, pointY, Color.RED, Color.MAGENTA);
 		}
 	}
@@ -266,12 +270,24 @@ public class DebugUISystem extends CustomIteratingSystem {
 	
 	/** draw bounding boxes (hitbox/collision detection) */
 	private void drawBounds() {
-		shape.setColor(1, 0.5f, 1, 0.5f);
 		for (Entity entity : objects) { 
-			BoundsComponent bounds = boundsMap.get(entity);
-			//TODO fix projection on window resize, probably the bounds width and height
-			Vector3 screenPos = RenderingSystem.getCam().project(new Vector3(bounds.bounds.x, bounds.bounds.y, 0));
-			shape.rect(screenPos.x, screenPos.y, bounds.bounds.width, bounds.bounds.height);
+			BoundsComponent bounds = boundsMap.get(entity);		
+			TransformComponent t = transformMap.get(entity);
+			
+			if (bounds != null) {
+				//draw Axis-Aligned bounding box			
+				Vector3 screenPosT = RenderingSystem.getCam().project(new Vector3(t.pos.x, t.pos.y, 0));
+				Rectangle rect = bounds.poly.getBoundingRectangle();
+				shape.setColor(1, 1, 0, 1);
+				shape.rect(screenPosT.x - rect.width/2, screenPosT.y - rect.height/2, rect.width, rect.height);
+
+				//draw Orientated bounding box
+				Vector3 screenPos = RenderingSystem.getCam().project(new Vector3(bounds.poly.getX(), bounds.poly.getY(), 0));
+				bounds.poly.setPosition(screenPos.x , screenPos.y);
+				shape.setColor(1, 0, 0, 1);
+				shape.polygon(bounds.poly.getTransformedVertices());
+			}
+			
 		}
 		
 	}

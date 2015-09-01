@@ -55,11 +55,11 @@ public class SpaceScreen extends ScreenAdapter {
 			engine.addEntity(entity);
 		}
 		
-		for (Entity entity : EntityFactory.createPlanetarySystem(-5000, -5000)) {
-			engine.addEntity(entity);
+		for (Entity entity : EntityFactory.createPlanetarySystem(-5000, -15000)) {
+			//engine.addEntity(entity);
 		}
 
-	
+
 		
 		//test ships
 		//engine.addEntity(EntityFactory.createShip(100, 300));		

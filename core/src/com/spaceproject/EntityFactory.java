@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.components.BoundsComponent;
@@ -59,9 +60,13 @@ public class EntityFactory {
 		transform.pos.set(x, y, 0); 
 
 		//add bounding box
+		/*
 		BoundsComponent bounds = new BoundsComponent();
-		bounds.bounds.height = radius*2*scale;
-		bounds.bounds.width = radius*2*scale;
+		float width = texture.texture.getWidth() * scale;
+		float height = texture.texture.getHeight() * scale;
+		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
+	    bounds.poly.setOrigin(width/2, height/2);
+		*/
 		
 		//orbit for rotation of self (kinda hacky; not really orbiting, just rotating)
 		OrbitComponent orbit = new OrbitComponent();
@@ -71,7 +76,7 @@ public class EntityFactory {
 		
 		//add components to entity
 		entity.add(orbit);
-		entity.add(bounds);
+		//entity.add(bounds);
 		entity.add(transform);
 		entity.add(texture);
 
@@ -92,10 +97,14 @@ public class EntityFactory {
 		texture.texture = TextureFactory.generatePlanet(radius);
 		texture.scale = scale;
 
+		/*
 		//add bounding box
 		BoundsComponent bounds = new BoundsComponent();
-		bounds.bounds.height = radius*2*scale;
-		bounds.bounds.width = radius*2*scale;
+		float width = texture.texture.getWidth() * scale;
+		float height = texture.texture.getHeight() * scale;
+		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
+	    bounds.poly.setOrigin(width/2, height/2);
+		*/
 		
 		//orbit 
 		OrbitComponent orbit = new OrbitComponent();
@@ -107,7 +116,7 @@ public class EntityFactory {
 		orbit.rotateClockwise = rotationDir;
 		
 		//add components to entity
-		entity.add(bounds);
+		//entity.add(bounds);
 		entity.add(new TransformComponent());
 		entity.add(texture);
 		entity.add(orbit);
@@ -126,8 +135,12 @@ public class EntityFactory {
 		
 		//bounding box
 		BoundsComponent bounds = new BoundsComponent();
-		bounds.bounds.width = size * scale;
-		bounds.bounds.height = size/2 == 0 ? 1 * scale : (size/2) * scale;
+		float width = texture.texture.getWidth() * scale;
+		float height = texture.texture.getHeight() * scale;
+		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
+	    bounds.poly.setOrigin(width/2, height/2);
+		//bounds.rect.width = size * scale;
+		//bounds.rect.height = size/2 == 0 ? 1 * scale : (size/2) * scale;
 		
 		//set position and orientation
 		TransformComponent transform = new TransformComponent();
@@ -163,9 +176,12 @@ public class EntityFactory {
 		texture.scale = scale;
 		
 		BoundsComponent bounds = new BoundsComponent();
-		bounds.bounds.height = texture.texture.getHeight() * scale;
-		bounds.bounds.width = texture.texture.getWidth() * scale;
-			
+		float width = texture.texture.getWidth() * scale;
+		float height = texture.texture.getHeight() * scale;
+		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
+	    bounds.poly.setOrigin(width/2, height/2);
+
+	    
 		entity.add(bounds);
 		entity.add(transform);
 		entity.add(texture);
@@ -209,9 +225,10 @@ public class EntityFactory {
 		texture.scale = scale;
 		
 		BoundsComponent bounds = new BoundsComponent();
-		bounds.bounds.height = size * scale;
-		bounds.bounds.width = size * scale;
-
+		float width = texture.texture.getWidth() * scale;
+		float height = texture.texture.getHeight() * scale;
+		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
+	    bounds.poly.setOrigin(width/2, height/2);
 		
 		entity.add(bounds);
 		entity.add(texture);
@@ -250,17 +267,19 @@ public class EntityFactory {
 		texture.scale = scale;
 		
 		//collision detection
-		BoundsComponent bounds = new BoundsComponent();
-		bounds.bounds.height = texture.texture.getHeight() * scale;
-		bounds.bounds.width = texture.texture.getWidth() * scale;
-
+		BoundsComponent bounds = new BoundsComponent(); 
+		float width = texture.texture.getWidth() * scale;
+		float height = texture.texture.getHeight() * scale;
+		bounds.poly = new Polygon(new float[]{0, 0,0, height,  width, height, width, 0});
+	    bounds.poly.setOrigin(width/2, height/2);
+	    
 		//weapon
 		ProjectileComponent proj = new ProjectileComponent();
 		proj.maxAmmo = 5;
 		proj.curAmmo = proj.maxAmmo;
 		proj.fireRate = 20; //lower is faster
-		proj.size = 1;
-		proj.velocity = 650;
+		proj.size = 1; //higher is bigger
+		proj.velocity = 650; //higher is faster
 		proj.rechargeRate = 60; //lower is faster
 		
 		//engine data and marks entity as drive-able
@@ -304,8 +323,10 @@ public class EntityFactory {
 		texture.scale = scale;
 		
 		BoundsComponent bounds = new BoundsComponent();
-		bounds.bounds.height = size * scale;
-		bounds.bounds.width = size * scale;
+		float width = texture.texture.getWidth() * scale;
+		float height = texture.texture.getHeight() * scale;
+		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
+	    bounds.poly.setOrigin(width/2, height/2);
 
 		
 		entity.add(bounds);

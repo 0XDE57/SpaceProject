@@ -126,6 +126,7 @@ public class LoadingSystem extends IteratingSystem {
 				// create and add tile if doesn't exist
 				if (!exists) {
 					bgTileLayer.add(new SpaceBackgroundTile(tX, tY, bgTileDepth, tileSize));
+					//bgTileLayer.add(new SpaceBackgroundTile(tX, tY, 0.8f, tileSize));
 				}
 			}
 		}

@@ -13,6 +13,7 @@ import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.controllers.PovDirection;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.EntityFactory;
@@ -150,7 +151,7 @@ public class PlayerControlSystem extends EntitySystem {
 			playerTransform.rotation = angleFacing - 1.57f;
 						
 			if (move) {				
-				float walkSpeed = 35f; //move to component?
+				float walkSpeed = 35f; //TODO: move to component
 				float dx = (float) Math.cos(playerTransform.rotation) * (walkSpeed * movementMultiplier) * delta;
 				float dy = (float) Math.sin(playerTransform.rotation) * (walkSpeed * movementMultiplier) * delta;
 				
@@ -181,7 +182,7 @@ public class PlayerControlSystem extends EntitySystem {
 		//create projectile	
 		float xx = (float) (Math.cos(vehicleTransform.rotation) * vehicleProj.velocity) + vehicleMovement.velocity.x;
 		float yy = (float) (Math.sin(vehicleTransform.rotation) * vehicleProj.velocity) + vehicleMovement.velocity.y;
-		engine.addEntity(EntityFactory.createProjectile(vehicleTransform, xx, yy, 1));
+		engine.addEntity(EntityFactory.createProjectile(vehicleTransform, xx, yy, vehicleProj.size));
 		
 		//subtract ammo
 		--vehicleProj.curAmmo;
@@ -236,26 +237,32 @@ public class PlayerControlSystem extends EntitySystem {
 			timeSinceVehicle = 0;
 		}
 		
-		
 		//get all vehicles and check if player is close to one(bounds overlap)
 		for (int v = 0; v < vehicles.size(); v++) {
 			Entity vehicle = vehicles.get(v);
 			BoundsComponent vehicleBounds = boundMap.get(vehicles.get(v));
 			BoundsComponent playerBounds = boundMap.get(playerEntity);
-
+			
 			//TODO should this be in collision detection class? use listeners?
-			// get in vehicle
-			if (playerBounds.bounds.overlaps(vehicleBounds.bounds)) {
-				vehicleEntity = vehicle; //set vehicle reference
-
-				//zoom out camera and set target to vehicle
-				engine.getSystem(RenderingSystem.class).zoom(1);
-				vehicle.add(new PlayerFocusComponent());
-				playerEntity.remove(PlayerFocusComponent.class);
-				//engine.getSystem(CameraSystem.class).setTarget(vehicle);
+			//check if character near vehicle
+			if (playerBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {
 				
-				//remove player from engine
-				engine.removeEntity(playerEntity);
+				if (Intersector.overlapConvexPolygons(vehicleBounds.poly, playerBounds.poly)){
+					// get in vehicle
+					
+					//TODO: find better way to do this, check entity for vehicle component
+					vehicleEntity = vehicle; //set vehicle reference
+
+					//zoom out camera
+					engine.getSystem(RenderingSystem.class).zoom(1);
+					//engine.getSystem(RenderingSystem.class).pan(vehicleTransform);
+					
+					//set target to vehicle
+					vehicle.add(playerEntity.remove(PlayerFocusComponent.class));//TODO make switch focus method (oldEntity, newEntity)
+				
+					//remove player from engine
+					engine.removeEntity(playerEntity);
+				}
 			}
 		}
 	}
@@ -279,20 +286,18 @@ public class PlayerControlSystem extends EntitySystem {
 		
 		//add player to engine
 		engine.addEntity(playerEntity);
-		
+
 		//set the player at the position of vehicle
-		transformMap.get(playerEntity).pos.set(transformMap.get(vehicleEntity).pos);			
-		 
-		//remove vehicle reference
+		transformMap.get(playerEntity).pos.set(transformMap.get(vehicleEntity).pos);				
 
-		vehicleEntity.remove(PlayerFocusComponent.class);
-		vehicleEntity = null;
-
-		//zoom in camera and set camera focus to player entity
+		//zoom in camera
 		engine.getSystem(RenderingSystem.class).zoom(0.4f);
-		playerEntity.add(new PlayerFocusComponent());
-		//engine.getSystem(CameraSystem.class).setTarget(playerEntity);
-		//TODO refactor zoom code into camera and make it check for player in vehicle on initialization
+		
+		//set camera focus to player entity
+		playerEntity.add(vehicleEntity.remove(PlayerFocusComponent.class));
+		
+		vehicleEntity = null;
+		
 	}
 
 	//check if player is in vehicle

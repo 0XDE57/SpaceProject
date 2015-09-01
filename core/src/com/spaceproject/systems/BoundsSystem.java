@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.TransformComponent;
 
@@ -25,9 +26,9 @@ public class BoundsSystem extends IteratingSystem {
 		TransformComponent transform = transformMap.get(entity);
 		BoundsComponent bounds = boundsMap.get(entity);
 		
-		//center bounding box on entity position
-		bounds.bounds.x = transform.pos.x - bounds.bounds.width * 0.5f;
-		bounds.bounds.y = transform.pos.y - bounds.bounds.height * 0.5f;
+		//center bounding box on entity position		
+		bounds.poly.setPosition(transform.pos.x - bounds.poly.getOriginX(), transform.pos.y - bounds.poly.getOriginY());
+		bounds.poly.setRotation(transform.rotation * MathUtils.radiansToDegrees);		
 		
 	}
 
