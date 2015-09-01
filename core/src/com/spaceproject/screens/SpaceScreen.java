@@ -13,6 +13,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.PlayerFocusComponent;
 import com.spaceproject.systems.BoundsSystem;
 import com.spaceproject.systems.CameraSystem;
+import com.spaceproject.systems.CollisionSystem;
 import com.spaceproject.systems.DebugUISystem;
 import com.spaceproject.systems.DesktopInputSystem;
 import com.spaceproject.systems.ExpireSystem;
@@ -97,6 +98,7 @@ public class SpaceScreen extends ScreenAdapter {
 		engine.addSystem(new BoundsSystem());
 		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new CameraSystem());
+		engine.addSystem(new CollisionSystem());
 		
 		//add input system. touch on android and keys on desktop.
 		if (Gdx.app.getType() == ApplicationType.Android) {

@@ -20,7 +20,7 @@ import com.spaceproject.EntityFactory;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.PlayerFocusComponent;
-import com.spaceproject.components.ProjectileComponent;
+import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 
@@ -36,7 +36,7 @@ public class PlayerControlSystem extends EntitySystem {
 	//drivable entities
 	private ComponentMapper<VehicleComponent> vehicleMap;
 	//weapons
-	private ComponentMapper<ProjectileComponent> projectileMap;
+	private ComponentMapper<CannonComponent> cannonMap;
 	
 
 	//target reference
@@ -82,7 +82,7 @@ public class PlayerControlSystem extends EntitySystem {
 		transformMap = ComponentMapper.getFor(TransformComponent.class);
 		movementMap = ComponentMapper.getFor(MovementComponent.class);
 		boundMap = ComponentMapper.getFor(BoundsComponent.class);
-		projectileMap = ComponentMapper.getFor(ProjectileComponent.class);
+		cannonMap = ComponentMapper.getFor(CannonComponent.class);
 		vehicleMap = ComponentMapper.getFor(VehicleComponent.class);
 		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
 		
@@ -109,11 +109,11 @@ public class PlayerControlSystem extends EntitySystem {
 			
 			VehicleComponent vehicle = vehicleMap.get(vehicleEntity);
 			
-			ProjectileComponent vehicleProj = projectileMap.get(vehicleEntity);
-			//deal with projectile timers
-			vehicleProj.timeSinceLastShot -= 100 * delta;
-			vehicleProj.timeSinceRechage -= 100 * delta;
-			refillAmmo(vehicleProj);
+			CannonComponent vehicleCannon = cannonMap.get(vehicleEntity);
+			//deal with cannon timers
+			vehicleCannon.timeSinceLastShot -= 100 * delta;
+			vehicleCannon.timeSinceRechage -= 100 * delta;
+			refillAmmo(vehicleCannon);
 			
 			//make vehicle face angle from mouse/joystick
 			vehicleTransform.rotation = angleFacing - 1.57f;	
@@ -131,9 +131,9 @@ public class PlayerControlSystem extends EntitySystem {
 				vehicleMovement.velocity.add(dx, dy);
 			}
 			
-			//ATTACK/Projectile-----------------------
-			if (shoot && canFire(vehicleProj)) {							
-				fireProjectile(vehicleTransform, vehicleMovement, vehicleProj);
+			//ATTACK/cannon-----------------------
+			if (shoot && canFire(vehicleCannon)) {							
+				fireCannon(vehicleTransform, vehicleMovement, vehicleCannon, vehicleEntity.getId());
 			}
 			
 			if (stop) {
@@ -162,33 +162,33 @@ public class PlayerControlSystem extends EntitySystem {
 		}
 	}
 
-	private void refillAmmo(ProjectileComponent vehicleProj) {
-		if (vehicleProj.timeSinceRechage < 0 && vehicleProj.curAmmo < vehicleProj.maxAmmo) {
+	private void refillAmmo(CannonComponent vehicleCan) {
+		if (vehicleCan.timeSinceRechage < 0 && vehicleCan.curAmmo < vehicleCan.maxAmmo) {
 			//refill ammo
-			vehicleProj.curAmmo++;		
+			vehicleCan.curAmmo++;		
 			
 			//reset timer
-			vehicleProj.timeSinceRechage = vehicleProj.rechargeRate;
+			vehicleCan.timeSinceRechage = vehicleCan.rechargeRate;
 		}
 	}
 
 	/**
-	 * Fire projectile.
+	 * Fire cannon.
 	 * @param vehicleTransform
 	 * @param vehicleMovement
-	 * @param vehicleProj
+	 * @param vehicleCan
 	 */
-	private void fireProjectile(TransformComponent vehicleTransform, MovementComponent vehicleMovement, ProjectileComponent vehicleProj) {
-		//create projectile	
-		float xx = (float) (Math.cos(vehicleTransform.rotation) * vehicleProj.velocity) + vehicleMovement.velocity.x;
-		float yy = (float) (Math.sin(vehicleTransform.rotation) * vehicleProj.velocity) + vehicleMovement.velocity.y;
-		engine.addEntity(EntityFactory.createProjectile(vehicleTransform, xx, yy, vehicleProj.size));
+	private void fireCannon(TransformComponent vehicleTransform, MovementComponent vehicleMovement, CannonComponent vehicleCan, long ID) {
+		//create missile	
+		float dx = (float) (Math.cos(vehicleTransform.rotation) * vehicleCan.velocity) + vehicleMovement.velocity.x;
+		float dy = (float) (Math.sin(vehicleTransform.rotation) * vehicleCan.velocity) + vehicleMovement.velocity.y;
+		engine.addEntity(EntityFactory.createMissile(vehicleTransform, dx, dy, vehicleCan.size, vehicleCan.damage, ID));
 		
 		//subtract ammo
-		--vehicleProj.curAmmo;
+		--vehicleCan.curAmmo;
 		
 		//reset timer
-		vehicleProj.timeSinceLastShot = vehicleProj.fireRate;
+		vehicleCan.timeSinceLastShot = vehicleCan.fireRate;
 
 		
 		/*
@@ -197,18 +197,18 @@ public class PlayerControlSystem extends EntitySystem {
 		 */
 		boolean cheat = false;
 		if (cheat) {
-			vehicleProj.curAmmo++;
-			vehicleProj.timeSinceLastShot = -1;
+			vehicleCan.curAmmo++;
+			vehicleCan.timeSinceLastShot = -1;
 		}
 	}
 
 	/**
 	 * Check if has enough ammo and time past since last shot.
-	 * @param vehicleProj
+	 * @param vehicleCan
 	 * @return true if can fire
 	 */
-	private boolean canFire(ProjectileComponent vehicleProj) {
-		return vehicleProj.curAmmo > 1 && vehicleProj.timeSinceLastShot <= 0;
+	private boolean canFire(CannonComponent vehicleCan) {
+		return vehicleCan.curAmmo > 1 && vehicleCan.timeSinceLastShot <= 0;
 	}
 
 
@@ -257,7 +257,7 @@ public class PlayerControlSystem extends EntitySystem {
 					engine.getSystem(RenderingSystem.class).zoom(1);
 					//engine.getSystem(RenderingSystem.class).pan(vehicleTransform);
 					
-					//set target to vehicle
+					//set focus to vehicle
 					vehicle.add(playerEntity.remove(PlayerFocusComponent.class));//TODO make switch focus method (oldEntity, newEntity)
 				
 					//remove player from engine
@@ -293,7 +293,7 @@ public class PlayerControlSystem extends EntitySystem {
 		//zoom in camera
 		engine.getSystem(RenderingSystem.class).zoom(0.4f);
 		
-		//set camera focus to player entity
+		//set focus to player entity
 		playerEntity.add(vehicleEntity.remove(PlayerFocusComponent.class));
 		
 		vehicleEntity = null;

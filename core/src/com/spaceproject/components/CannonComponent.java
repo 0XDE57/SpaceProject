@@ -2,7 +2,9 @@ package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
 
-public class ProjectileComponent extends Component {
+public class CannonComponent extends Component {
+	
+	public float damage;
 	
 	public int maxAmmo;
 	
@@ -19,4 +21,5 @@ public class ProjectileComponent extends Component {
 	public float rechargeRate;
 	
 	public float timeSinceRechage;
+	
 }

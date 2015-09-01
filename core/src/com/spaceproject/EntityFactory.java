@@ -11,9 +11,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.ExpireComponent;
+import com.spaceproject.components.MissileComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.OrbitComponent;
-import com.spaceproject.components.ProjectileComponent;
+import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
@@ -124,7 +125,7 @@ public class EntityFactory {
 		return entity;
 	}
 	
-	public static Entity createProjectile(TransformComponent t, float dx, float dy, int size) {
+	public static Entity createMissile(TransformComponent t, float dx, float dy, int size, float damage, long ID) {
 		Entity entity = new Entity();
 				
 		//create texture
@@ -139,8 +140,6 @@ public class EntityFactory {
 		float height = texture.texture.getHeight() * scale;
 		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
 	    bounds.poly.setOrigin(width/2, height/2);
-		//bounds.rect.width = size * scale;
-		//bounds.rect.height = size/2 == 0 ? 1 * scale : (size/2) * scale;
 		
 		//set position and orientation
 		TransformComponent transform = new TransformComponent();
@@ -155,6 +154,13 @@ public class EntityFactory {
 		ExpireComponent expire = new ExpireComponent();
 		expire.time = 5;//in seconds ~approx
 		
+		//missile damage
+		MissileComponent missile = new MissileComponent();
+		missile.damage = damage;
+		missile.ownerID = ID;
+
+		
+		entity.add(missile);
 		entity.add(expire);
 		entity.add(texture);
 		entity.add(bounds);
@@ -187,6 +193,64 @@ public class EntityFactory {
 		entity.add(texture);
 		entity.add(new MovementComponent());
 			
+		return entity;
+	}
+	
+	public static Entity createShip3(int x, int y) {
+		
+		Entity entity = new Entity();
+
+		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
+		
+		TransformComponent transform = new TransformComponent();
+		TextureComponent texture = new TextureComponent();
+
+		transform.pos.set(x, y, -10);
+		transform.rotation = (float) Math.PI/2; //face upwards
+		
+		//generate random even size 
+		int size;
+		int minSize = 10;
+		int maxSize = 36;
+		
+		do {
+			//generate even size
+			size = MathUtils.random(minSize, maxSize);
+		} while (size % 2 == 1);
+		
+		Texture pixmapTex = TextureFactory.generateShip(size);
+		float scale = 4.0f;
+		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
+		texture.scale = scale;
+		
+		//collision detection
+		BoundsComponent bounds = new BoundsComponent(); 
+		float width = texture.texture.getWidth() * scale;
+		float height = texture.texture.getHeight() * scale;
+		bounds.poly = new Polygon(new float[]{0, 0,0, height,  width, height, width, 0});
+	    bounds.poly.setOrigin(width/2, height/2);
+	    
+		//weapon
+		CannonComponent cannon = new CannonComponent();
+		cannon.damage = 10;
+		cannon.maxAmmo = 5;
+		cannon.curAmmo = cannon.maxAmmo;
+		cannon.fireRate = 20; //lower is faster
+		cannon.size = 1; //higher is bigger
+		cannon.velocity = 650; //higher is faster
+		cannon.rechargeRate = 60; //lower is faster
+		
+		//engine data and marks entity as drive-able
+		VehicleComponent vehicle = new VehicleComponent();
+		vehicle.thrust = 320;
+		
+		entity.add(cannon);
+		entity.add(bounds);
+		entity.add(texture);
+		entity.add(transform);
+		entity.add(vehicle);
+		entity.add(new MovementComponent());
+		
 		return entity;
 	}
 	
@@ -238,64 +302,7 @@ public class EntityFactory {
 		
 		return entity;
 	}
-	
-	public static Entity createShip3(int x, int y) {
-		
-		Entity entity = new Entity();
 
-		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
-		
-		TransformComponent transform = new TransformComponent();
-		TextureComponent texture = new TextureComponent();
-
-		transform.pos.set(x, y, -10);
-		transform.rotation = (float) Math.PI/2; //face upwards
-		
-		//generate random even size 
-		int size;
-		int minSize = 10;
-		int maxSize = 36;
-		
-		do {
-			//generate even size
-			size = MathUtils.random(minSize, maxSize);
-		} while (size % 2 == 1);
-		
-		Texture pixmapTex = TextureFactory.generateShip(size);
-		float scale = 4.0f;
-		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
-		texture.scale = scale;
-		
-		//collision detection
-		BoundsComponent bounds = new BoundsComponent(); 
-		float width = texture.texture.getWidth() * scale;
-		float height = texture.texture.getHeight() * scale;
-		bounds.poly = new Polygon(new float[]{0, 0,0, height,  width, height, width, 0});
-	    bounds.poly.setOrigin(width/2, height/2);
-	    
-		//weapon
-		ProjectileComponent proj = new ProjectileComponent();
-		proj.maxAmmo = 5;
-		proj.curAmmo = proj.maxAmmo;
-		proj.fireRate = 20; //lower is faster
-		proj.size = 1; //higher is bigger
-		proj.velocity = 650; //higher is faster
-		proj.rechargeRate = 60; //lower is faster
-		
-		//engine data and marks entity as drive-able
-		VehicleComponent vehicle = new VehicleComponent();
-		vehicle.thrust = 320;
-		
-		entity.add(proj);
-		entity.add(bounds);
-		entity.add(texture);
-		entity.add(transform);
-		entity.add(vehicle);
-		entity.add(new MovementComponent());
-		
-		return entity;
-	}
-	
 	@Deprecated
 	public static Entity createShip(int x, int y) {
 		Entity entity = new Entity();
