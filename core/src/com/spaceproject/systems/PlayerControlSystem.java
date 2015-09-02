@@ -245,8 +245,7 @@ public class PlayerControlSystem extends EntitySystem {
 			
 			//TODO should this be in collision detection class? use listeners?
 			//check if character near vehicle
-			if (playerBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {
-				
+			if (playerBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {			
 				if (Intersector.overlapConvexPolygons(vehicleBounds.poly, playerBounds.poly)){
 					// get in vehicle
 					

@@ -10,13 +10,17 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.EntityFactory;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.MapComponent;
+import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PlayerFocusComponent;
+import com.spaceproject.components.TransformComponent;
 import com.spaceproject.systems.BoundsSystem;
 import com.spaceproject.systems.CameraSystem;
 import com.spaceproject.systems.CollisionSystem;
 import com.spaceproject.systems.DebugUISystem;
 import com.spaceproject.systems.DesktopInputSystem;
 import com.spaceproject.systems.ExpireSystem;
+import com.spaceproject.systems.HUDSystem;
 import com.spaceproject.systems.LoadingSystem;
 import com.spaceproject.systems.MovementSystem;
 import com.spaceproject.systems.OrbitSystem;
@@ -83,9 +87,29 @@ public class SpaceScreen extends ScreenAdapter {
 		//start as ship
 		Entity playerTESTSHIP = EntityFactory.createShip3(0, 0);
 		Entity player = EntityFactory.createCharacter(0, 0);
+		
+		
 		playerTESTSHIP.add(new PlayerFocusComponent());
 		engine.addEntity(playerTESTSHIP);
-				
+
+		/*
+		Entity testOrbit = EntityFactory.createPlanet(playerTESTSHIP, 1000, true);
+		testOrbit.getComponent(OrbitComponent.class).orbitSpeed = 0.4f;
+		testOrbit.getComponent(OrbitComponent.class).angle = 3.14f*2;
+		engine.addEntity(testOrbit);
+		Entity testOrbit2 = EntityFactory.createPlanet(playerTESTSHIP, 1000, false);
+		testOrbit2.getComponent(OrbitComponent.class).orbitSpeed = 0.4f;
+		testOrbit2.getComponent(OrbitComponent.class).angle = 3.14f*2;
+		engine.addEntity(testOrbit2);
+		
+		Entity testMap = new Entity();
+		testMap.add(new MapComponent());
+		TransformComponent t = new TransformComponent();
+		t.pos.x = 1500;
+		t.pos.y = 500;
+		testMap.add(t);
+		engine.addEntity(testMap);
+		*/
 		
 		// Add systems to engine---------------------------------------------------------
 		//engine.addSystem(new PlayerControlSystem(player));//start as player
@@ -99,6 +123,7 @@ public class SpaceScreen extends ScreenAdapter {
 		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new CameraSystem());
 		engine.addSystem(new CollisionSystem());
+		engine.addSystem(new HUDSystem());
 		
 		//add input system. touch on android and keys on desktop.
 		if (Gdx.app.getType() == ApplicationType.Android) {

@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.ExpireComponent;
+import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.MissileComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.OrbitComponent;
@@ -80,6 +81,7 @@ public class EntityFactory {
 		//entity.add(bounds);
 		entity.add(transform);
 		entity.add(texture);
+		entity.add(new MapComponent());
 
 		return entity;
 	}
@@ -121,7 +123,8 @@ public class EntityFactory {
 		entity.add(new TransformComponent());
 		entity.add(texture);
 		entity.add(orbit);
-
+		entity.add(new MapComponent());
+		
 		return entity;
 	}
 	
