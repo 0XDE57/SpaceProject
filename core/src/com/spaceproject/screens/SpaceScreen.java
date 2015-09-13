@@ -93,19 +93,20 @@ public class SpaceScreen extends ScreenAdapter {
 		engine.addEntity(playerTESTSHIP);
 
 		/*
-		Entity testOrbit = EntityFactory.createPlanet(playerTESTSHIP, 1000, true);
-		testOrbit.getComponent(OrbitComponent.class).orbitSpeed = 0.4f;
+		Entity testOrbit = EntityFactory.createPlanet(playerTESTSHIP, 755, true);
+		testOrbit.getComponent(OrbitComponent.class).orbitSpeed = 0.3f;
 		testOrbit.getComponent(OrbitComponent.class).angle = 3.14f*2;
 		engine.addEntity(testOrbit);
+		
 		Entity testOrbit2 = EntityFactory.createPlanet(playerTESTSHIP, 1000, false);
-		testOrbit2.getComponent(OrbitComponent.class).orbitSpeed = 0.4f;
+		testOrbit2.getComponent(OrbitComponent.class).orbitSpeed = 0.3f;
 		testOrbit2.getComponent(OrbitComponent.class).angle = 3.14f*2;
 		engine.addEntity(testOrbit2);
 		
 		Entity testMap = new Entity();
 		testMap.add(new MapComponent());
 		TransformComponent t = new TransformComponent();
-		t.pos.x = 1500;
+		t.pos.x = 1100;
 		t.pos.y = 500;
 		testMap.add(t);
 		engine.addEntity(testMap);
