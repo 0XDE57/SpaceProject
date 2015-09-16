@@ -112,7 +112,7 @@ public class PlayerControlSystem extends EntitySystem {
 			CannonComponent vehicleCannon = cannonMap.get(vehicleEntity);
 			//deal with cannon timers
 			vehicleCannon.timeSinceLastShot -= 100 * delta;
-			vehicleCannon.timeSinceRechage -= 100 * delta;
+			vehicleCannon.timeSinceRecharge -= 100 * delta;
 			refillAmmo(vehicleCannon);
 			
 			//make vehicle face angle from mouse/joystick
@@ -163,12 +163,12 @@ public class PlayerControlSystem extends EntitySystem {
 	}
 
 	private void refillAmmo(CannonComponent vehicleCan) {
-		if (vehicleCan.timeSinceRechage < 0 && vehicleCan.curAmmo < vehicleCan.maxAmmo) {
+		if (vehicleCan.timeSinceRecharge < 0 && vehicleCan.curAmmo < vehicleCan.maxAmmo) {
 			//refill ammo
 			vehicleCan.curAmmo++;		
 			
 			//reset timer
-			vehicleCan.timeSinceRechage = vehicleCan.rechargeRate;
+			vehicleCan.timeSinceRecharge = vehicleCan.rechargeRate;
 		}
 	}
 
@@ -179,6 +179,11 @@ public class PlayerControlSystem extends EntitySystem {
 	 * @param vehicleCan
 	 */
 	private void fireCannon(TransformComponent vehicleTransform, MovementComponent vehicleMovement, CannonComponent vehicleCan, long ID) {
+		//reset timer if ammo is full, to prevent instant recharge
+		if (vehicleCan.curAmmo == vehicleCan.maxAmmo) {			
+			vehicleCan.timeSinceRecharge = vehicleCan.rechargeRate;
+		}		
+		
 		//create missile	
 		float dx = (float) (Math.cos(vehicleTransform.rotation) * vehicleCan.velocity) + vehicleMovement.velocity.x;
 		float dy = (float) (Math.sin(vehicleTransform.rotation) * vehicleCan.velocity) + vehicleMovement.velocity.y;
@@ -208,7 +213,7 @@ public class PlayerControlSystem extends EntitySystem {
 	 * @return true if can fire
 	 */
 	private boolean canFire(CannonComponent vehicleCan) {
-		return vehicleCan.curAmmo > 1 && vehicleCan.timeSinceLastShot <= 0;
+		return vehicleCan.curAmmo > 0 && vehicleCan.timeSinceLastShot <= 0;
 	}
 
 

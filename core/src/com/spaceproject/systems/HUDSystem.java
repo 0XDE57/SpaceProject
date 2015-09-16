@@ -14,7 +14,9 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.MapComponent;
+import com.spaceproject.components.PlayerFocusComponent;
 import com.spaceproject.components.TransformComponent;
 
 public class HUDSystem  extends EntitySystem {
@@ -24,13 +26,16 @@ public class HUDSystem  extends EntitySystem {
 	private ShapeRenderer shape;
 	
 	private ComponentMapper<TransformComponent> transMap;
+	private ComponentMapper<CannonComponent> canMap;
 	
 	private ImmutableArray<Entity> mapableObjects;
+	private ImmutableArray<Entity> player;
 	
 	private boolean drawMap = true;
 	
 	public HUDSystem() {
 		transMap = ComponentMapper.getFor(TransformComponent.class);
+		canMap = ComponentMapper.getFor(CannonComponent.class);
 		
 		shape = new ShapeRenderer();
 	}
@@ -38,7 +43,7 @@ public class HUDSystem  extends EntitySystem {
 	@Override
 	public void addedToEngine(Engine engine) {		
 		mapableObjects = engine.getEntitiesFor(Family.all(MapComponent.class).get());
-		
+		player = engine.getEntitiesFor(Family.one(PlayerFocusComponent.class).get());
 	}
 	
 	@Override
@@ -58,17 +63,37 @@ public class HUDSystem  extends EntitySystem {
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		shape.begin(ShapeType.Filled);
 		
+		drawAmmo();
+		
 		if (drawMap) drawEdgeMap();
 		
 		shape.end();
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 	}
 
+	private void drawAmmo() {
+		int posY = 30;
+		int posX = Gdx.graphics.getWidth() / 2;
+		int padding = 4;
+		int indicatorSize = 10;
+		
+		CannonComponent cannon = canMap.get(player.first());
+		
+		for (int i = 0; i < cannon.maxAmmo; ++i) {
+			System.out.println(cannon.curAmmo + "  -  " + (i+1));
+			shape.setColor(cannon.curAmmo < i +1 ? Color.RED : Color.WHITE);
+			shape.rect((i * (indicatorSize + (padding * 2))) + posX , posY, indicatorSize/2, indicatorSize/2, indicatorSize, indicatorSize, 1, 1, 0);
+		}
+		
+		
+	}
+
 	/**
 	 * Mark off-screen objects on edge of screen for navigation.
 	 */
 	private void drawEdgeMap() {
-		int markerSize = 5;
+		int markerSizeSmall = 5;
+		int markerSizeLarge = 7;
 		int padding = 10; //how close to draw from edge of screen (in pixels)
 		int width = Gdx.graphics.getWidth();
 		int height = Gdx.graphics.getHeight();	
@@ -123,7 +148,7 @@ public class HUDSystem  extends EntitySystem {
 			markerY += centerY;
 			
 			//draw marker
-			shape.circle(markerX, markerY, markerSize);
+			shape.circle(markerX, markerY, (screenPos.dst(screenPos.x, screenPos.y, 0, centerX, centerY, 0)) > 2000 ? markerSizeSmall : markerSizeLarge);
 			
 			//debug line
 			//shape.line(centerX, centerY, markerX, markerY);				

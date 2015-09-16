@@ -8,9 +8,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Matrix4;
 
 public class TouchUISystem extends EntitySystem {
 	
+	private Matrix4 projectionMatrix = new Matrix4();
 	private ShapeRenderer shape;
 	private Engine engine;
 
@@ -27,6 +29,10 @@ public class TouchUISystem extends EntitySystem {
 	@Override
 	public void update(float delta) {
 
+		//set projection matrix so things render using correct coordinates
+		// TODO: only needs to be called when screen size changes
+		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		shape.setProjectionMatrix(projectionMatrix);
 		
 		//joystick
 		int joystickRadius = 200;

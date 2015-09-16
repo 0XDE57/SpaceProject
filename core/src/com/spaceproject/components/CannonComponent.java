@@ -20,6 +20,6 @@ public class CannonComponent extends Component {
 	
 	public float rechargeRate;
 	
-	public float timeSinceRechage;
+	public float timeSinceRecharge;
 	
 }
