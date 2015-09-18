@@ -75,13 +75,12 @@ public class HUDSystem  extends EntitySystem {
 		int posY = 30;
 		int posX = Gdx.graphics.getWidth() / 2;
 		int padding = 4;
-		int indicatorSize = 10;
+		int indicatorSize = 15;
 		
 		CannonComponent cannon = canMap.get(player.first());
 		
 		for (int i = 0; i < cannon.maxAmmo; ++i) {
-			System.out.println(cannon.curAmmo + "  -  " + (i+1));
-			shape.setColor(cannon.curAmmo < i +1 ? Color.RED : Color.WHITE);
+			shape.setColor(cannon.curAmmo <= i ? Color.RED : Color.WHITE);
 			shape.rect((i * (indicatorSize + (padding * 2))) + posX , posY, indicatorSize/2, indicatorSize/2, indicatorSize, indicatorSize, 1, 1, 0);
 		}
 		
