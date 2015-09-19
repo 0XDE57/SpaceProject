@@ -78,11 +78,20 @@ public class HUDSystem  extends EntitySystem {
 		int indicatorSize = 15;
 		
 		CannonComponent cannon = canMap.get(player.first());
+		int barWidth = cannon.maxAmmo * (indicatorSize + (padding * 2));
 		
+		//draw bar
+		//shape.setColor(0, 0, 1, 0.7f);
+		//shape.rect(posX-barWidth/2-padding, posY, posX, barWidth/2, barWidth-padding*2+1, indicatorSize, 1, 1, 0);
+		shape.setColor(1, 1, 1, 0.4f);
+		shape.rect(posX-barWidth/2+padding, posY, posX, barWidth/2, barWidth-padding*2, indicatorSize, 1, 1, 0);
+		
+		//draw indicators
 		for (int i = 0; i < cannon.maxAmmo; ++i) {
 			shape.setColor(cannon.curAmmo <= i ? Color.RED : Color.WHITE);
-			shape.rect((i * (indicatorSize + (padding * 2))) + posX , posY, indicatorSize/2, indicatorSize/2, indicatorSize, indicatorSize, 1, 1, 0);
+			shape.rect((i * (indicatorSize + (padding * 2))) + posX - (barWidth/2)+padding, posY, indicatorSize/2, indicatorSize/2, indicatorSize, indicatorSize, 1, 1, 0);
 		}
+
 		
 		
 	}
