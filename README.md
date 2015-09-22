@@ -1,5 +1,7 @@
 # SpaceProject
-A top-down 2D, procedurally generated space shooter game.
+A top-down 2D, procedurally generated space exploration and shooter game.
 
 Currently in early (unplayable) development. 
-Work in progress.... dont look at it random person on the internet.
+Work in progress....
+
+libraries: libGDX and Ashley
