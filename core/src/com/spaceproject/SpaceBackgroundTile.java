@@ -1,8 +1,7 @@
 package com.spaceproject;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Vector2;
-import com.spaceproject.systems.RenderingSystem;
+import com.spaceproject.generation.TextureFactory;
 
 public class SpaceBackgroundTile {
 	public final float x;

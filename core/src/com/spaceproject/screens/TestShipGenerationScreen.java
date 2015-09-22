@@ -8,8 +8,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.math.MathUtils;
-import com.spaceproject.EntityFactory;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.systems.DebugUISystem;
 import com.spaceproject.systems.RenderingSystem;
 

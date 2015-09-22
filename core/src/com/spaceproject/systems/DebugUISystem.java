@@ -18,11 +18,11 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.CustomIteratingSystem;
-import com.spaceproject.FontFactory;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.generation.FontFactory;
 import com.spaceproject.utility.Mappers;
 
 public class DebugUISystem extends CustomIteratingSystem {
@@ -57,6 +57,7 @@ public class DebugUISystem extends CustomIteratingSystem {
 		super(Family.all(TransformComponent.class).get());
 		
 		font = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 15);
+		
 		batch = new SpriteBatch();
 		shape = new ShapeRenderer();
 		

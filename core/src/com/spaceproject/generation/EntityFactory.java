@@ -1,4 +1,4 @@
-package com.spaceproject;
+package com.spaceproject.generation;
 
 
 import com.badlogic.ashley.core.Entity;
@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.MapComponent;

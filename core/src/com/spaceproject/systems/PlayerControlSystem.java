@@ -6,13 +6,13 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Intersector;
-import com.spaceproject.EntityFactory;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.PlayerFocusComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.utility.Mappers;
 
 public class PlayerControlSystem extends EntitySystem {
