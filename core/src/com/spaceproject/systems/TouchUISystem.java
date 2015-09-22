@@ -3,8 +3,6 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -12,14 +10,11 @@ import com.badlogic.gdx.math.Matrix4;
 
 public class TouchUISystem extends EntitySystem {
 	
-	private Matrix4 projectionMatrix = new Matrix4();
-	private ShapeRenderer shape;
 	private Engine engine;
-
-	public TouchUISystem() {
-		shape = new ShapeRenderer();
-		
-	}
+	
+	//rendering
+	private Matrix4 projectionMatrix = new Matrix4();
+	private ShapeRenderer shape = new ShapeRenderer();
 	
 	@Override
 	public void addedToEngine(Engine engine) {

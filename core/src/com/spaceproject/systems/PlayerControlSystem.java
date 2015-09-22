@@ -1,43 +1,23 @@
 package com.spaceproject.systems;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Application.ApplicationType;
-import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.controllers.Controller;
-import com.badlogic.gdx.controllers.ControllerListener;
-import com.badlogic.gdx.controllers.Controllers;
-import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.EntityFactory;
 import com.spaceproject.components.BoundsComponent;
+import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.PlayerFocusComponent;
-import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.utility.Mappers;
 
 public class PlayerControlSystem extends EntitySystem {
 
 	private static Engine engine;
-
-	// movement and position maps
-	private ComponentMapper<TransformComponent> transformMap;
-	private ComponentMapper<MovementComponent> movementMap;
-	// bounds map to check if player is near vehicle/ship
-	private ComponentMapper<BoundsComponent> boundMap;
-	//drivable entities
-	private ComponentMapper<VehicleComponent> vehicleMap;
-	//weapons
-	private ComponentMapper<CannonComponent> cannonMap;
-	
 
 	//target reference
 	private Entity playerEntity = null; //the player entity
@@ -67,9 +47,6 @@ public class PlayerControlSystem extends EntitySystem {
 	
 	//set direction player faces
 	public float angleFacing = 0;
-
-
-	
 	
 	public PlayerControlSystem(Entity player) {
 		this.playerEntity = player;	
@@ -85,13 +62,7 @@ public class PlayerControlSystem extends EntitySystem {
 	public void addedToEngine(Engine engine) {
 		this.engine = engine;	
 		
-		transformMap = ComponentMapper.getFor(TransformComponent.class);
-		movementMap = ComponentMapper.getFor(MovementComponent.class);
-		boundMap = ComponentMapper.getFor(BoundsComponent.class);
-		cannonMap = ComponentMapper.getFor(CannonComponent.class);
-		vehicleMap = ComponentMapper.getFor(VehicleComponent.class);
-		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
-		
+		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());	
 	}
 
 
@@ -109,13 +80,14 @@ public class PlayerControlSystem extends EntitySystem {
 		if (isInVehicle()) {
 			
 			//vehicle position
-			TransformComponent vehicleTransform = transformMap.get(vehicleEntity);
+			TransformComponent vehicleTransform = Mappers.transform.get(vehicleEntity);
 			//vehicle movement
-			MovementComponent vehicleMovement = movementMap.get(vehicleEntity);	
+			MovementComponent vehicleMovement = Mappers.movement.get(vehicleEntity);	
 			
-			VehicleComponent vehicle = vehicleMap.get(vehicleEntity);
+			VehicleComponent vehicle = Mappers.vehicle.get(vehicleEntity);
 			
-			CannonComponent vehicleCannon = cannonMap.get(vehicleEntity);
+			CannonComponent vehicleCannon = Mappers.cannon.get(vehicleEntity);
+			//TODO: cannon refill logic needs to be moved to system, all ships need to recharge
 			//deal with cannon timers
 			vehicleCannon.timeSinceLastShot -= 100 * delta;
 			vehicleCannon.timeSinceRecharge -= 100 * delta;
@@ -154,6 +126,7 @@ public class PlayerControlSystem extends EntitySystem {
 				vehicleMovement.velocity.add(dx, dy);
 			}
 			
+			//apply breaks
 			if (applyBreaks) {			
 				float thrust = vehicle.thrust * 0.9f;
 				float angle = vehicleMovement.velocity.angle();
@@ -176,7 +149,7 @@ public class PlayerControlSystem extends EntitySystem {
 			//CHARACTER CONTROLS///////////////////////////////////////////////////////////////////////////
 			
 			//players position
-			TransformComponent playerTransform = transformMap.get(playerEntity);
+			TransformComponent playerTransform = Mappers.transform.get(playerEntity);
 			
 			//make character face mouse/joystick
 			playerTransform.rotation = angleFacing - 1.57f;
@@ -276,8 +249,8 @@ public class PlayerControlSystem extends EntitySystem {
 		//get all vehicles and check if player is close to one(bounds overlap)
 		for (int v = 0; v < vehicles.size(); v++) {
 			Entity vehicle = vehicles.get(v);
-			BoundsComponent vehicleBounds = boundMap.get(vehicles.get(v));
-			BoundsComponent playerBounds = boundMap.get(playerEntity);
+			BoundsComponent vehicleBounds = Mappers.bounds.get(vehicles.get(v));
+			BoundsComponent playerBounds = Mappers.bounds.get(playerEntity);
 			
 			//TODO should this be in collision detection class? use listeners?
 			//check if character near vehicle
@@ -323,7 +296,7 @@ public class PlayerControlSystem extends EntitySystem {
 		engine.addEntity(playerEntity);
 
 		//set the player at the position of vehicle
-		transformMap.get(playerEntity).pos.set(transformMap.get(vehicleEntity).pos);				
+		Mappers.transform.get(playerEntity).pos.set(Mappers.transform.get(vehicleEntity).pos);				
 
 		//zoom in camera
 		engine.getSystem(RenderingSystem.class).zoom(0.4f);

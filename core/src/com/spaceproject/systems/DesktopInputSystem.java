@@ -1,11 +1,9 @@
 package com.spaceproject.systems;
 
 import com.badlogic.ashley.core.Engine;
-import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.spaceproject.EntityFactory;
 
 public class DesktopInputSystem extends EntitySystem {
 	

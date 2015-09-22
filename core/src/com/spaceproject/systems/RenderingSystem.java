@@ -2,7 +2,6 @@ package com.spaceproject.systems;
 
 import java.util.Comparator;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -17,16 +16,14 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.spaceproject.SpaceBackgroundTile;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.utility.Mappers;
 
 public class RenderingSystem extends IteratingSystem {
 		
 	private Array<Entity> renderQueue; //array of entities to render
 	private Comparator<Entity> comparator; //for sorting render order
 	
-	//map for image and position
-	private ComponentMapper<TextureComponent> textureMap;
-	private ComponentMapper<TransformComponent> transformMap;
-	
+	//rendering
 	private static OrthographicCamera cam;
 	private ExtendViewport viewport;
 	private static SpriteBatch batch;
@@ -49,9 +46,6 @@ public class RenderingSystem extends IteratingSystem {
 	@SuppressWarnings("unchecked")
 	public RenderingSystem() {
 		super(Family.all(TransformComponent.class, TextureComponent.class).get());
-	
-		textureMap = ComponentMapper.getFor(TextureComponent.class);
-		transformMap = ComponentMapper.getFor(TransformComponent.class);
 		
 		renderQueue = new Array<Entity>();
 		
@@ -59,8 +53,8 @@ public class RenderingSystem extends IteratingSystem {
 		comparator = new Comparator<Entity>() {
 			@Override
 			public int compare(Entity entityA, Entity entityB) {
-				return (int)Math.signum(transformMap.get(entityB).pos.z -
-										transformMap.get(entityA).pos.z);
+				return (int)Math.signum(Mappers.transform.get(entityB).pos.z -
+										Mappers.transform.get(entityA).pos.z);
 			}
 		};
 		
@@ -108,11 +102,11 @@ public class RenderingSystem extends IteratingSystem {
 		
 		//render all textures
 		for (Entity entity : renderQueue) {
-			TextureComponent tex = textureMap.get(entity);
+			TextureComponent tex = Mappers.texture.get(entity);
 		
 			if (tex.texture == null) continue;
 			
-			TransformComponent t = transformMap.get(entity);
+			TransformComponent t = Mappers.transform.get(entity);
 		
 			float width = tex.texture.getWidth();
 			float height = tex.texture.getHeight();

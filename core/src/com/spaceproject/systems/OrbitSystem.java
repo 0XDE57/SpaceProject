@@ -1,32 +1,26 @@
 package com.spaceproject.systems;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.utility.Mappers;
 
 public class OrbitSystem extends IteratingSystem {
-
-	private ComponentMapper<OrbitComponent> orbitMap;
-	private ComponentMapper<TransformComponent> transformMap;
 
 	@SuppressWarnings("unchecked")
 	public OrbitSystem() {
 		super(Family.all(OrbitComponent.class, TransformComponent.class).get());
-
-		orbitMap = ComponentMapper.getFor(OrbitComponent.class);
-		transformMap = ComponentMapper.getFor(TransformComponent.class);
 	}
 
 	@Override
 	protected void processEntity(Entity entity, float delta) {
 
-		OrbitComponent orbit = orbitMap.get(entity);
-		TransformComponent position = transformMap.get(entity);
-		TransformComponent parentPosition = transformMap.get(orbit.parent);
+		OrbitComponent orbit = Mappers.orbit.get(entity);
+		TransformComponent position = Mappers.transform.get(entity);
+		TransformComponent parentPosition = Mappers.transform.get(orbit.parent);
 
 		if (orbit.rotateClockwise) {
 			// add clockwise rotation to entity image

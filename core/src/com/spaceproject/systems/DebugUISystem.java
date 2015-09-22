@@ -1,7 +1,6 @@
 package com.spaceproject.systems;
 
 import com.badlogic.ashley.core.Component;
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
@@ -24,18 +23,18 @@ import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.utility.Mappers;
 
 public class DebugUISystem extends CustomIteratingSystem {
 
+	//rendering
 	private SpriteBatch batch;
 	private ShapeRenderer shape;
 	private BitmapFont font;
+	private Matrix4 projectionMatrix = new Matrix4();
 	
+	//entity storage
 	private Array<Entity> objects;
-	private ComponentMapper<TransformComponent> transformMap;
-	private ComponentMapper<MovementComponent> movementMap;
-	private ComponentMapper<BoundsComponent> boundsMap;
-	private ComponentMapper<OrbitComponent> orbitMap;
 	
 	//config
 	private boolean drawDebugUI = true;
@@ -47,8 +46,6 @@ public class DebugUISystem extends CustomIteratingSystem {
 	private boolean drawOrbitPath = false;
 	private boolean drawVectors = false;
 	
-	private Matrix4 projectionMatrix = new Matrix4();
-	
 	//entity and component counting
 	private float countTimer = 50;
 	private float curCountTime = countTimer;
@@ -58,11 +55,6 @@ public class DebugUISystem extends CustomIteratingSystem {
 	@SuppressWarnings("unchecked")
 	public DebugUISystem() {
 		super(Family.all(TransformComponent.class).get());
-		
-		transformMap = ComponentMapper.getFor(TransformComponent.class);
-		movementMap = ComponentMapper.getFor(MovementComponent.class);
-		boundsMap = ComponentMapper.getFor(BoundsComponent.class);
-		orbitMap = ComponentMapper.getFor(OrbitComponent.class);
 		
 		font = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 15);
 		batch = new SpriteBatch();
@@ -151,8 +143,8 @@ public class DebugUISystem extends CustomIteratingSystem {
 	private void drawMovementVectors() {
 		for (Entity entity : objects) {
 			//get entities position and list of components
-			TransformComponent t = transformMap.get(entity);
-			MovementComponent m = movementMap.get(entity);
+			TransformComponent t = Mappers.transform.get(entity);
+			MovementComponent m = Mappers.movement.get(entity);
 			if (m == null) continue;
 			
 			Vector3 screenPos = RenderingSystem.getCam().project(t.pos.cpy());
@@ -255,10 +247,10 @@ public class DebugUISystem extends CustomIteratingSystem {
 	private void drawOrbitPath() {
 		shape.setColor(1f, 1f, 1, 1);
 		for (Entity entity : objects) {
-			OrbitComponent orbit = orbitMap.get(entity);
+			OrbitComponent orbit = Mappers.orbit.get(entity);
 			if (orbit != null && orbit.parent != null) {
-				TransformComponent parentPos = transformMap.get(orbit.parent);
-				TransformComponent entityPos = transformMap.get(entity);
+				TransformComponent parentPos = Mappers.transform.get(orbit.parent);
+				TransformComponent entityPos = Mappers.transform.get(entity);
 				Vector3 screenPos1 = RenderingSystem.getCam().project(new Vector3(parentPos.pos.x, parentPos.pos.y, 0));
 				Vector3 screenPos2 = RenderingSystem.getCam().project(new Vector3(entityPos.pos.x, entityPos.pos.y, 0));
 				float distance = (float) Math.sqrt(Math.pow(screenPos1.x - screenPos2.x, 2) + Math.pow(screenPos1.y - screenPos2.y, 2));
@@ -271,8 +263,8 @@ public class DebugUISystem extends CustomIteratingSystem {
 	/** draw bounding boxes (hitbox/collision detection) */
 	private void drawBounds() {
 		for (Entity entity : objects) { 
-			BoundsComponent bounds = boundsMap.get(entity);		
-			TransformComponent t = transformMap.get(entity);
+			BoundsComponent bounds = Mappers.bounds.get(entity);		
+			TransformComponent t = Mappers.transform.get(entity);
 			
 			if (bounds != null) {
 				//draw Axis-Aligned bounding box			
@@ -316,7 +308,7 @@ public class DebugUISystem extends CustomIteratingSystem {
 		int padding = 5;
 		//for each entity draw a clear box 
 		for (Entity entity : objects) {
-			TransformComponent transform = transformMap.get(entity);
+			TransformComponent transform = Mappers.transform.get(entity);
 			Vector3 screenPos = RenderingSystem.getCam().project(transform.pos.cpy());
 			//draw rectangle with size relative to number of components and text size (20). 
 			//200 box width - magic number assuming no component name will be that long 
@@ -329,8 +321,8 @@ public class DebugUISystem extends CustomIteratingSystem {
 		font.setColor(1, 1, 1, 1);
 		for (Entity entity : objects) {
 			//get entities position and list of components
-			TransformComponent t = transformMap.get(entity);
-			MovementComponent m = movementMap.get(entity);
+			TransformComponent t = Mappers.transform.get(entity);
+			MovementComponent m = Mappers.movement.get(entity);
 			ImmutableArray<Component> components = entity.getComponents();
 			
 			//use Vector3.cpy() to project only the position and avoid modifying projection matrix for all coordinates
@@ -355,8 +347,8 @@ public class DebugUISystem extends CustomIteratingSystem {
 	private void drawPos() {
 		font.setColor(1, 1, 1, 1);
 		for (Entity entity : objects) {
-			TransformComponent t = transformMap.get(entity);
-			MovementComponent m = movementMap.get(entity);
+			TransformComponent t = Mappers.transform.get(entity);
+			MovementComponent m = Mappers.movement.get(entity);
 			
 			Vector3 screenPos = RenderingSystem.getCam().project(t.pos.cpy());
 			String vel = "";

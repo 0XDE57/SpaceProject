@@ -1,6 +1,5 @@
 package com.spaceproject.systems;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
@@ -11,21 +10,14 @@ import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.MissileComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.utility.Mappers;
 
 public class CollisionSystem extends EntitySystem {
 
 	private Engine engine;
 	
-	private ComponentMapper<BoundsComponent> boundMap;
-	private ComponentMapper<MissileComponent> missileMap;
-	
 	private ImmutableArray<Entity> missiles;
 	private ImmutableArray<Entity> vehicles;
-	
-	public CollisionSystem() {
-		boundMap = ComponentMapper.getFor(BoundsComponent.class);
-		missileMap = ComponentMapper.getFor(MissileComponent.class);
-	}
 	
 	@Override
 	public void addedToEngine(Engine engine) {
@@ -41,13 +33,13 @@ public class CollisionSystem extends EntitySystem {
 		//check for bullet collision against ships
 		for (Entity vehicle : vehicles) {
 			for (Entity missle : missiles) {
-				//if missle not from self (don't shoot self)
-				if (vehicle.getId() != missileMap.get(missle).ownerID) {
-					BoundsComponent mis = boundMap.get(missle);
-					BoundsComponent veh = boundMap.get(vehicle);
+				//if missile not from self (don't shoot self)
+				if (vehicle.getId() != Mappers.missile.get(missle).ownerID) {
+					BoundsComponent mis = Mappers.bounds.get(missle);
+					BoundsComponent veh = Mappers.bounds.get(vehicle);
 					if (mis.poly.getBoundingRectangle().overlaps(veh.poly.getBoundingRectangle())) {
 						if (Intersector.overlapConvexPolygons(mis.poly, veh.poly)){
-							//remove missle
+							//remove missile
 							missle.getComponent(TextureComponent.class).texture.dispose();
 							engine.removeEntity(missle);
 							

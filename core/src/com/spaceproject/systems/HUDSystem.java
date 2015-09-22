@@ -1,6 +1,5 @@
 package com.spaceproject.systems;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
@@ -17,28 +16,20 @@ import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.PlayerFocusComponent;
-import com.spaceproject.components.TransformComponent;
+import com.spaceproject.utility.Mappers;
 
 public class HUDSystem  extends EntitySystem {
 	
-	private Matrix4 projectionMatrix = new Matrix4();
+	//rendering
+	private Matrix4 projectionMatrix = new Matrix4();	
+	private ShapeRenderer shape = new ShapeRenderer();
 	
-	private ShapeRenderer shape;
-	
-	private ComponentMapper<TransformComponent> transMap;
-	private ComponentMapper<CannonComponent> canMap;
-	
+	//entity storage
 	private ImmutableArray<Entity> mapableObjects;
 	private ImmutableArray<Entity> player;
 	
+	//draw edge map or not
 	private boolean drawMap = true;
-	
-	public HUDSystem() {
-		transMap = ComponentMapper.getFor(TransformComponent.class);
-		canMap = ComponentMapper.getFor(CannonComponent.class);
-		
-		shape = new ShapeRenderer();
-	}
 	
 	@Override
 	public void addedToEngine(Engine engine) {		
@@ -77,7 +68,7 @@ public class HUDSystem  extends EntitySystem {
 		int padding = 4;
 		int indicatorSize = 15;
 		
-		CannonComponent cannon = canMap.get(player.first());
+		CannonComponent cannon = Mappers.cannon.get(player.first());
 		if (cannon == null) {
 			return;
 		}
@@ -117,7 +108,7 @@ public class HUDSystem  extends EntitySystem {
 		shape.setColor(0.15f, 0.5f, 0.9f, 0.9f);
 		
 		for (Entity mapable : mapableObjects) {
-			Vector3 screenPos = transMap.get(mapable).pos.cpy();
+			Vector3 screenPos = Mappers.transform.get(mapable).pos.cpy();
 			
 			//set entity co'ords relative to center of screen
 			screenPos.x -= RenderingSystem.getCam().position.x;
