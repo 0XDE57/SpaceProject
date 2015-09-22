@@ -17,6 +17,7 @@ import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.PlayerFocusComponent;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.MyMath;
 
 public class HUDSystem  extends EntitySystem {
 	
@@ -151,7 +152,7 @@ public class HUDSystem  extends EntitySystem {
 			markerY += centerY;
 			
 			//draw marker
-			shape.circle(markerX, markerY, (screenPos.dst(screenPos.x, screenPos.y, 0, centerX, centerY, 0)) > 2000 ? markerSizeSmall : markerSizeLarge);
+			shape.circle(markerX, markerY, (MyMath.distance(screenPos.x, screenPos.y, centerX, centerY)) > 2000 ? markerSizeSmall : markerSizeLarge);
 			
 			//debug line
 			//shape.line(centerX, centerY, markerX, markerY);				

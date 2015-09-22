@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.spaceproject.utility.MyMath;
 
 public class DesktopInputSystem extends EntitySystem {
 	
@@ -45,8 +46,8 @@ public class DesktopInputSystem extends EntitySystem {
 	
 		//PLAYER CONTROLS//////////////////////////////////////////////////////////////////////////////////////
 		//make ship face mouse		
-		engine.getSystem(PlayerControlSystem.class).pointTo(Gdx.input.getX(), Gdx.graphics.getHeight() -Gdx.input.getY(),
-				Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+		float angle = MyMath.angleTo(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY(), Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+		engine.getSystem(PlayerControlSystem.class).angleFacing = angle;
 	
 
 		

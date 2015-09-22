@@ -94,7 +94,7 @@ public class PlayerControlSystem extends EntitySystem {
 			refillAmmo(vehicleCannon);
 			
 			//make vehicle face angle from mouse/joystick
-			vehicleTransform.rotation = angleFacing - 1.57f;	
+			vehicleTransform.rotation = angleFacing;	
 			
 			//apply thrust forward
 			if (moveForward) {
@@ -152,7 +152,7 @@ public class PlayerControlSystem extends EntitySystem {
 			TransformComponent playerTransform = Mappers.transform.get(playerEntity);
 			
 			//make character face mouse/joystick
-			playerTransform.rotation = angleFacing - 1.57f;
+			playerTransform.rotation = angleFacing;
 						
 			if (moveForward) {				
 				float walkSpeed = 35f; //TODO: move to component
@@ -219,20 +219,11 @@ public class PlayerControlSystem extends EntitySystem {
 	private boolean canFire(CannonComponent vehicleCan) {
 		return vehicleCan.curAmmo > 0 && vehicleCan.timeSinceLastShot <= 0;
 	}
-
-
-	/**
-	 * Make player face point.
-	 * @param x1 point 1
-	 * @param y1 point 1
-	 * @param x2 point 2
-	 * @param y2 point 2
-	 */
-	public void pointTo(int x1, int y1, int x2, int y2) {
-		angleFacing = (float) -(Math.atan2(x2 - x1, y2 - y1));
-	}
 	
-	// get in vehicle
+	
+	/**
+	 * Enter nearest vehicle if available.
+	 */
 	public void enterVehicle() {
 		//check if already in vehicle
 		if (isInVehicle()) {
@@ -275,7 +266,9 @@ public class PlayerControlSystem extends EntitySystem {
 		}
 	}
 			
-	// get out of vehicle
+	/**
+	 * Exit current vehicle.
+	 */
 	public void exitVehicle() {
 		//check if not in vehicle
 		if (!isInVehicle()) {

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
+import com.spaceproject.utility.MyMath;
 
 public class TouchUISystem extends EntitySystem {
 	
@@ -69,6 +70,7 @@ public class TouchUISystem extends EntitySystem {
 		}
 
 		//JOYSTICK-------------------------------------------------------------------------------
+		
 		boolean move = false;
 		
 		//check finger 1
@@ -77,7 +79,8 @@ public class TouchUISystem extends EntitySystem {
 		if (Gdx.input.isTouched(0) && distanceToJoystick <= joystickRadius + 100) {
 			stickX = Gdx.input.getX(0);
 			stickY = Gdx.graphics.getHeight() - Gdx.input.getY(0);
-			engine.getSystem(PlayerControlSystem.class).pointTo(stickX, stickY, joystickPosX + joystickRadius, joystickPosY + joystickRadius);
+			float angle = MyMath.angleTo(stickX, stickY, joystickPosX + joystickRadius, joystickPosY + joystickRadius);
+			engine.getSystem(PlayerControlSystem.class).angleFacing = angle;
 			move = true;
 		}
 		
@@ -87,7 +90,8 @@ public class TouchUISystem extends EntitySystem {
 		if (Gdx.input.isTouched(1) && distanceToJoystick1 <= joystickRadius + 100) {
 			stickX = Gdx.input.getX(1);
 			stickY = Gdx.graphics.getHeight() - Gdx.input.getY(1);
-			engine.getSystem(PlayerControlSystem.class).pointTo(stickX, stickY, joystickPosX + joystickRadius, joystickPosY + joystickRadius);
+			float angle = MyMath.angleTo(stickX, stickY, joystickPosX + joystickRadius, joystickPosY + joystickRadius);
+			engine.getSystem(PlayerControlSystem.class).angleFacing = angle;
 			move = true;		
 		}
 
