@@ -101,9 +101,9 @@ public class TouchUISystem extends EntitySystem {
 			float powerRatio = distanceToJoystick / joystickRadius;
 			if (powerRatio > 1) powerRatio = 1;
 			engine.getSystem(PlayerControlSystem.class).movementMultiplier = powerRatio;
-			engine.getSystem(PlayerControlSystem.class).move = true;
+			engine.getSystem(PlayerControlSystem.class).moveForward = true;
 		} else {
-			engine.getSystem(PlayerControlSystem.class).move = false;
+			engine.getSystem(PlayerControlSystem.class).moveForward = false;
 		}
 
 		

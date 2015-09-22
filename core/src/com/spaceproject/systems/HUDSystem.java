@@ -78,6 +78,10 @@ public class HUDSystem  extends EntitySystem {
 		int indicatorSize = 15;
 		
 		CannonComponent cannon = canMap.get(player.first());
+		if (cannon == null) {
+			return;
+		}
+		
 		int barWidth = cannon.maxAmmo * (indicatorSize + (padding * 2));
 		
 		//draw bar

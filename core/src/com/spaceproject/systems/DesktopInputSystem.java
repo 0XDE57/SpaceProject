@@ -50,19 +50,22 @@ public class DesktopInputSystem extends EntitySystem {
 		engine.getSystem(PlayerControlSystem.class).pointTo(Gdx.input.getX(), Gdx.graphics.getHeight() -Gdx.input.getY(),
 				Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
 	
-		//move forward
-		if (Gdx.input.isKeyPressed(Keys.W)) {
-			engine.getSystem(PlayerControlSystem.class).move = true;
-			// set multiplier to full power because a key switch is on or off
-			engine.getSystem(PlayerControlSystem.class).movementMultiplier = 1; 
-		} else {
-			engine.getSystem(PlayerControlSystem.class).move = false;
-		}
+
 		
-		//stop ship
-		if (Gdx.input.isKeyJustPressed(Keys.S)) {
-			engine.getSystem(PlayerControlSystem.class).stop = true;
-		}
+		// set multiplier to full power because a key switch is on or off
+		engine.getSystem(PlayerControlSystem.class).movementMultiplier = 1;
+		
+		//forward
+		engine.getSystem(PlayerControlSystem.class).moveForward = Gdx.input.isKeyPressed(Keys.W);
+		//right
+		engine.getSystem(PlayerControlSystem.class).moveRight	= Gdx.input.isKeyPressed(Keys.D);
+		//left
+		engine.getSystem(PlayerControlSystem.class).moveLeft    = Gdx.input.isKeyPressed(Keys.A);
+		//breaks
+		engine.getSystem(PlayerControlSystem.class).applyBreaks = Gdx.input.isKeyPressed(Keys.S);
+		
+		//DEBUG instant stop
+		engine.getSystem(PlayerControlSystem.class).stop = Gdx.input.isKeyJustPressed(Keys.X);
 		
 		//shoot
 		engine.getSystem(PlayerControlSystem.class).shoot = (Gdx.input.isKeyPressed(Keys.SPACE) || Gdx.input.isTouched());

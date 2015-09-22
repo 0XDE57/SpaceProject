@@ -240,8 +240,8 @@ public class EntityFactory {
 		cannon.curAmmo = cannon.maxAmmo;
 		cannon.fireRate = 20; //lower is faster
 		cannon.size = 1; //higher is bigger
-		cannon.velocity = 650; //higher is faster
-		cannon.rechargeRate = 60; //lower is faster
+		cannon.velocity = 680; //higher is faster
+		cannon.rechargeRate = 100; //lower is faster
 		
 		//engine data and marks entity as drive-able
 		VehicleComponent vehicle = new VehicleComponent();

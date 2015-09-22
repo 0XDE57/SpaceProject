@@ -55,7 +55,11 @@ public class PlayerControlSystem extends EntitySystem {
 	public boolean shoot = false;
 
 	//vehicle should move
-	public boolean move = false; 
+	public boolean moveForward = false; 
+	public boolean moveLeft = false;
+	public boolean moveRight = false;
+	public boolean applyBreaks = false;
+	
 	//for analog control. will be value between 1 and 0
 	public float movementMultiplier = 0; 
 	//if vehicle should stop instantly-debug stop
@@ -63,6 +67,8 @@ public class PlayerControlSystem extends EntitySystem {
 	
 	//set direction player faces
 	public float angleFacing = 0;
+
+
 	
 	
 	public PlayerControlSystem(Entity player) {
@@ -118,16 +124,41 @@ public class PlayerControlSystem extends EntitySystem {
 			//make vehicle face angle from mouse/joystick
 			vehicleTransform.rotation = angleFacing - 1.57f;	
 			
-			//move vehicle
-			if (move) {
-				//add velocity in direction vehicle is facing
-				//use movementMultiplier to determine how much thrust to use (analog movement)
-				//TODO move to engine component
-				float thrust = vehicle.thrust;
+			//apply thrust forward
+			if (moveForward) {
+				//TODO: implement rest of engine behavior
 				//float maxSpeed;
 				//float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go
-				float dx = (float) Math.cos(vehicleTransform.rotation) * (thrust * movementMultiplier) * delta;
-				float dy = (float) Math.sin(vehicleTransform.rotation) * (thrust * movementMultiplier) * delta;
+				float thrust = vehicle.thrust;
+				float angle = vehicleTransform.rotation;
+				float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
+				float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
+				vehicleMovement.velocity.add(dx, dy);
+			}
+			
+			//apply thrust left
+			if (moveLeft) {
+				float thrust = vehicle.thrust * 0.6f;
+				float angle = vehicleTransform.rotation + 1.57f;
+				float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
+				float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
+				vehicleMovement.velocity.add(dx, dy);
+			}
+			
+			//apply thrust right
+			if (moveRight) {
+				float thrust = vehicle.thrust * 0.6f;
+				float angle = vehicleTransform.rotation - 1.57f;
+				float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
+				float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
+				vehicleMovement.velocity.add(dx, dy);
+			}
+			
+			if (applyBreaks) {			
+				float thrust = vehicle.thrust * 0.9f;
+				float angle = vehicleMovement.velocity.angle();
+				float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
+				float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
 				vehicleMovement.velocity.add(dx, dy);
 			}
 			
@@ -136,7 +167,7 @@ public class PlayerControlSystem extends EntitySystem {
 				fireCannon(vehicleTransform, vehicleMovement, vehicleCannon, vehicleEntity.getId());
 			}
 			
-			if (stop) {
+			if (stop) {//debug stop
 				vehicleMovement.velocity.set(0,0);
 				stop = false;
 			}
@@ -150,7 +181,7 @@ public class PlayerControlSystem extends EntitySystem {
 			//make character face mouse/joystick
 			playerTransform.rotation = angleFacing - 1.57f;
 						
-			if (move) {				
+			if (moveForward) {				
 				float walkSpeed = 35f; //TODO: move to component
 				float dx = (float) Math.cos(playerTransform.rotation) * (walkSpeed * movementMultiplier) * delta;
 				float dy = (float) Math.sin(playerTransform.rotation) * (walkSpeed * movementMultiplier) * delta;
