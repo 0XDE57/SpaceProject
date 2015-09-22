@@ -50,16 +50,18 @@ public class TouchUISystem extends EntitySystem {
 
 		//FIRE BUTTON---------------------------------------------------
 		//finger 1
-		float distanceToShootButton = (float) Math.sqrt(Math.pow(
-				Gdx.input.getX(0) - (shootButtonPosX - shootButtonRadius), 2)
-				+ Math.pow(Gdx.graphics.getHeight() - Gdx.input.getY(0)
-						- (shootButtonPosY + shootButtonRadius), 2));
+		float distanceToShootButton = MyMath.distance(
+				Gdx.input.getX(0),
+				Gdx.graphics.getHeight() - Gdx.input.getY(0), 
+				shootButtonPosX - shootButtonRadius, 
+				shootButtonPosY + shootButtonRadius);
 
-		//finger 2
-		float distanceToShootButton1 = (float) Math.sqrt(Math.pow(
-				Gdx.input.getX(1) - (shootButtonPosX - shootButtonRadius), 2)
-				+ Math.pow(Gdx.graphics.getHeight() - Gdx.input.getY(1)
-						- (shootButtonPosY + shootButtonRadius), 2));
+		//finger 2		
+		float distanceToShootButton1 = MyMath.distance(
+				Gdx.input.getX(1),
+				Gdx.graphics.getHeight() - Gdx.input.getY(1), 
+				shootButtonPosX - shootButtonRadius, 
+				shootButtonPosY + shootButtonRadius);
 
 		//if a finger is touching the touch is on fire button
 		if ((Gdx.input.isTouched(0) && distanceToShootButton <= shootButtonRadius) 
@@ -73,10 +75,14 @@ public class TouchUISystem extends EntitySystem {
 		
 		boolean move = false;
 		
+		//padding to register touch if finger is a little bit off the joystick
+		int joystickPadding = 100;
+		
+		
 		//check finger 1
-		float distanceToJoystick = (float) Math.sqrt(Math.pow(Gdx.input.getX(0) - stickX, 2)
-				+ Math.pow(Gdx.graphics.getHeight() - Gdx.input.getY(0) - stickY, 2));		
-		if (Gdx.input.isTouched(0) && distanceToJoystick <= joystickRadius + 100) {
+		float distanceToJoystick = MyMath.distance(Gdx.input.getX(0), Gdx.graphics.getHeight() - Gdx.input.getY(0), stickX, stickY);		
+		
+		if (Gdx.input.isTouched(0) && distanceToJoystick <= joystickRadius + joystickPadding) {
 			stickX = Gdx.input.getX(0);
 			stickY = Gdx.graphics.getHeight() - Gdx.input.getY(0);
 			float angle = MyMath.angleTo(stickX, stickY, joystickPosX + joystickRadius, joystickPosY + joystickRadius);
@@ -85,9 +91,9 @@ public class TouchUISystem extends EntitySystem {
 		}
 		
 		//check finger 2
-		float distanceToJoystick1 = (float) Math.sqrt(Math.pow(Gdx.input.getX(1) - stickX, 2)
-						+ Math.pow(Gdx.graphics.getHeight() - Gdx.input.getY(1) - stickY, 2));
-		if (Gdx.input.isTouched(1) && distanceToJoystick1 <= joystickRadius + 100) {
+		float distanceToJoystick1 = MyMath.distance(Gdx.input.getX(1), Gdx.graphics.getHeight() - Gdx.input.getY(1), stickX, stickY);
+
+		if (Gdx.input.isTouched(1) && distanceToJoystick1 <= joystickRadius + joystickPadding) {
 			stickX = Gdx.input.getX(1);
 			stickY = Gdx.graphics.getHeight() - Gdx.input.getY(1);
 			float angle = MyMath.angleTo(stickX, stickY, joystickPosX + joystickRadius, joystickPosY + joystickRadius);
@@ -108,8 +114,12 @@ public class TouchUISystem extends EntitySystem {
 		
 		//ENTER/EXIT vehicle-----------------------------------------------------
 		//TODO: fix vehicle button for multitouch
-		float distanceToVehicleButton = (float) Math.sqrt(Math.pow(Gdx.input.getX() - (vehicleButtonPosX - vehicleButtonRaduis), 2)
-				+ Math.pow(Gdx.graphics.getHeight() - Gdx.input.getY() - (vehicleButtonPosY + vehicleButtonRaduis), 2));
+		float distanceToVehicleButton = MyMath.distance(
+				Gdx.input.getX(), 
+				Gdx.graphics.getHeight() - Gdx.input.getY(), 
+				vehicleButtonPosX - vehicleButtonRaduis,
+				vehicleButtonPosY + vehicleButtonRaduis);
+		
 		if (Gdx.input.isTouched() && distanceToVehicleButton <= vehicleButtonRaduis) {
 			if (engine.getSystem(PlayerControlSystem.class).isInVehicle()) {
 				engine.getSystem(PlayerControlSystem.class).exitVehicle();
