@@ -1,9 +1,10 @@
 package com.spaceproject.utility;
 
+
 public class MyMath {
 
 	/**
-	 * Get distance from position 1 to position 2
+	 * Get distance from position 1 to position 2.
 	 * @param x1
 	 * @param y1
 	 * @param x2
@@ -11,13 +12,11 @@ public class MyMath {
 	 * @return distance
 	 */
 	public static float distance(float x1, float y1, float x2, float y2) {
-		float a = x2 - x1;
-		float b = y2 - y1;
-		return (float) Math.sqrt(a * a + b * b);
+		return (float) Math.hypot(x2 - x1, y2 - y1);
 	}
 	
 	/**
-	 * Get angle from position 1 to position 2
+	 * Get angle from position 1 to position 2.
 	 * @param x1
 	 * @param y1
 	 * @param x2
@@ -28,4 +27,14 @@ public class MyMath {
 		return (float) -(Math.atan2(x2 - x1, y2 - y1)) - 1.57f;
 	}
 	
+	/**
+	 * Round value with specified precision.
+	 * @param value
+	 * @param precision number of decimal points
+	 * @return rounded value
+	 */
+	public static double round(double value, int precision) {
+	    int scale = (int) Math.pow(10, precision);
+	    return (double) Math.round(value * scale) / scale;
+	}
 }

@@ -24,6 +24,7 @@ import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.MyMath;
 
 public class DebugUISystem extends CustomIteratingSystem {
 
@@ -153,7 +154,7 @@ public class DebugUISystem extends CustomIteratingSystem {
 			//calculate vector angle and length
 			float scale = 4; //how long to make vectors (higher number is shorter line)
 			float length = m.velocity.len();
-			float angle = getMoveAngle(m.velocity.x, m.velocity.y);
+			float angle = m.velocity.angle() * MathUtils.degreesToRadians;
 			float pointX = screenPos.x + (length / scale * MathUtils.cos(angle));
 			float pointY = screenPos.y + (length / scale * MathUtils.sin(angle));
 			
@@ -162,19 +163,6 @@ public class DebugUISystem extends CustomIteratingSystem {
 		}
 	}
 
-	
-	//TODO move to a util/math class
-	public static double getLength(float x, float y){
-		return(Math.sqrt(x * x + y * y));
-	}
-	
-	//TODO move to a util/math class
-	public static float getMoveAngle(float dx, float dy) {
-		float angle = (float)Math.atan2(dy, dx) * MathUtils.radiansToDegrees;
-		if (angle < 0) angle += 360;
-		return angle * MathUtils.degreesToRadians;
-	}
-	
 	private void updateKeyToggles() {
 		//toggle debug
 		if (Gdx.input.isKeyJustPressed(Keys.F3)) {
@@ -254,7 +242,7 @@ public class DebugUISystem extends CustomIteratingSystem {
 				TransformComponent entityPos = Mappers.transform.get(entity);
 				Vector3 screenPos1 = RenderingSystem.getCam().project(new Vector3(parentPos.pos.x, parentPos.pos.y, 0));
 				Vector3 screenPos2 = RenderingSystem.getCam().project(new Vector3(entityPos.pos.x, entityPos.pos.y, 0));
-				float distance = (float) Math.sqrt(Math.pow(screenPos1.x - screenPos2.x, 2) + Math.pow(screenPos1.y - screenPos2.y, 2));
+				float distance = MyMath.distance(screenPos1.x, screenPos1.y, screenPos2.x, screenPos2.y);
 				shape.circle(screenPos1.x, screenPos1.y, distance);
 				shape.line(screenPos1.x, screenPos1.y, screenPos2.x, screenPos2.y);
 			}
@@ -331,7 +319,7 @@ public class DebugUISystem extends CustomIteratingSystem {
 			//print current ID and position in world and a list of all components
 			String vel = "";
 			if (m != null) {
-				vel = " ~ " + Math.round(Math.sqrt(m.velocity.x * m.velocity.x + m.velocity.y * m.velocity.y));
+				vel = " ~ " + MyMath.round(m.velocity.len(), 1);
 			}
 			String info = "ID: " + entity.getId() + " (" + Math.round(t.pos.x) + "," + Math.round(t.pos.y) + ")" + vel;
 			font.draw(batch, info, screenPos.x, screenPos.y);
@@ -354,7 +342,7 @@ public class DebugUISystem extends CustomIteratingSystem {
 			Vector3 screenPos = RenderingSystem.getCam().project(t.pos.cpy());
 			String vel = "";
 			if (m != null) {
-				vel = " ~ " + Math.round(Math.sqrt(m.velocity.x * m.velocity.x + m.velocity.y * m.velocity.y));
+				vel = " ~ " + MyMath.round(m.velocity.len(), 1);
 			}
 			String info = Math.round(t.pos.x) + "," + Math.round(t.pos.y) + vel;
 			font.draw(batch, info, screenPos.x, screenPos.y);			

@@ -134,7 +134,6 @@ public class SpaceScreen extends ScreenAdapter {
 			engine.addSystem(new DesktopInputSystem());
 		}
 		
-		
 	}	
 	Entity[] testPlanetsDebug; //test removable planetary system
 	

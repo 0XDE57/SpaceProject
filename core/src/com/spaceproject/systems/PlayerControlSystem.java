@@ -127,12 +127,16 @@ public class PlayerControlSystem extends EntitySystem {
 			}
 			
 			//apply breaks
-			if (applyBreaks) {			
-				float thrust = vehicle.thrust * 0.9f;
-				float angle = vehicleMovement.velocity.angle();
-				float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
-				float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
-				vehicleMovement.velocity.add(dx, dy);
+			if (applyBreaks) {					
+				if (vehicleMovement.velocity.len() < 1) {
+					vehicleMovement.velocity.set(0,0);
+				} else {
+					float thrust = vehicle.thrust * 0.9f;
+					float angle = vehicleMovement.velocity.angle();
+					float dx = (float) Math.cos(angle) * thrust * delta;
+					float dy = (float) Math.sin(angle) * thrust * delta;
+					vehicleMovement.velocity.add(dx, dy);
+				}
 			}
 			
 			//ATTACK/cannon-----------------------

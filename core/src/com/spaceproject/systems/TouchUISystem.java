@@ -30,12 +30,8 @@ public class TouchUISystem extends EntitySystem {
 		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		shape.setProjectionMatrix(projectionMatrix);
 		
-		//joystick
-		int joystickRadius = 200;
-		int joystickPosX = 20;
-		int joystickPosY = 20;
-		int stickX = joystickPosX + joystickRadius;
-		int stickY = joystickPosY + joystickRadius;
+			
+		//FIRE BUTTON---------------------------------------------------
 		
 		//shoot button
 		int shootButtonRadius = 70;
@@ -46,17 +42,15 @@ public class TouchUISystem extends EntitySystem {
 		int vehicleButtonRaduis = 50;
 		int vehicleButtonPosX = Gdx.graphics.getWidth() - 80;
 		int vehicleButtonPosY = 300;
-
-
-		//FIRE BUTTON---------------------------------------------------
-		//finger 1
+		
+		//finger 0
 		float distanceToShootButton = MyMath.distance(
 				Gdx.input.getX(0),
 				Gdx.graphics.getHeight() - Gdx.input.getY(0), 
 				shootButtonPosX - shootButtonRadius, 
 				shootButtonPosY + shootButtonRadius);
 
-		//finger 2		
+		//finger 1		
 		float distanceToShootButton1 = MyMath.distance(
 				Gdx.input.getX(1),
 				Gdx.graphics.getHeight() - Gdx.input.getY(1), 
@@ -72,43 +66,71 @@ public class TouchUISystem extends EntitySystem {
 		}
 
 		//JOYSTICK-------------------------------------------------------------------------------
-		
-		boolean move = false;
-		
+
+		//joystick size
+		int joystickRadius = 200;
+		//joystick position
+		int joystickPosX = 20;
+		int joystickPosY = 20;	
 		//padding to register touch if finger is a little bit off the joystick
-		int joystickPadding = 100;
+		int joystickPadding = 100;	
+		//center of joystick
+		int stickCenterX = joystickPosX + joystickRadius;
+		int stickCenterY = joystickPosY + joystickRadius;		
+		//current position of stick
+		int stickX = stickCenterX;
+		int stickY = stickCenterY;
 		
+		
+		//check finger 0
+		float distanceToJoystick0 = MyMath.distance(Gdx.input.getX(0), Gdx.graphics.getHeight() - Gdx.input.getY(0), 
+				stickCenterX, stickCenterY);
 		
 		//check finger 1
-		float distanceToJoystick = MyMath.distance(Gdx.input.getX(0), Gdx.graphics.getHeight() - Gdx.input.getY(0), stickX, stickY);		
+		float distanceToJoystick1 = MyMath.distance(Gdx.input.getX(1), Gdx.graphics.getHeight() - Gdx.input.getY(1), 
+				stickCenterX, stickCenterY);
 		
-		if (Gdx.input.isTouched(0) && distanceToJoystick <= joystickRadius + joystickPadding) {
+		//finger 0 is touched
+		boolean finger0 = Gdx.input.isTouched(0) && distanceToJoystick0 <= joystickRadius + joystickPadding;
+		boolean finger1 = Gdx.input.isTouched(1) && distanceToJoystick1 <= joystickRadius + joystickPadding;
+		
+		//analog movement: how much energy to put into movement
+		float powerRatio = 0;
+		
+		if (finger0) {
 			stickX = Gdx.input.getX(0);
 			stickY = Gdx.graphics.getHeight() - Gdx.input.getY(0);
-			float angle = MyMath.angleTo(stickX, stickY, joystickPosX + joystickRadius, joystickPosY + joystickRadius);
-			engine.getSystem(PlayerControlSystem.class).angleFacing = angle;
-			move = true;
-		}
-		
-		//check finger 2
-		float distanceToJoystick1 = MyMath.distance(Gdx.input.getX(1), Gdx.graphics.getHeight() - Gdx.input.getY(1), stickX, stickY);
-
-		if (Gdx.input.isTouched(1) && distanceToJoystick1 <= joystickRadius + joystickPadding) {
+			powerRatio = distanceToJoystick0 / joystickRadius;
+		} 
+		if (finger1) {
 			stickX = Gdx.input.getX(1);
 			stickY = Gdx.graphics.getHeight() - Gdx.input.getY(1);
-			float angle = MyMath.angleTo(stickX, stickY, joystickPosX + joystickRadius, joystickPosY + joystickRadius);
-			engine.getSystem(PlayerControlSystem.class).angleFacing = angle;
-			move = true;		
+			powerRatio = distanceToJoystick1 / joystickRadius;
 		}
 
-		if (move) {
-			//analog movement: how much energy to put into movement
-			float powerRatio = distanceToJoystick / joystickRadius;
+		if (finger0 || finger1) {
+			//face finger
+			float angle = MyMath.angleTo(stickX, stickY, stickCenterX, stickCenterY);
+			engine.getSystem(PlayerControlSystem.class).angleFacing = angle;
+						
 			if (powerRatio > 1) powerRatio = 1;
+			if (powerRatio < 0) powerRatio = 0;
+
 			engine.getSystem(PlayerControlSystem.class).movementMultiplier = powerRatio;
 			engine.getSystem(PlayerControlSystem.class).moveForward = true;
+			/*
+			System.out.println(powerRatio);
+			if (powerRatio < 0.5f) {
+				engine.getSystem(PlayerControlSystem.class).applyBreaks = true;
+				engine.getSystem(PlayerControlSystem.class).moveForward = false;
+			} else {
+				engine.getSystem(PlayerControlSystem.class).moveForward = true;
+				engine.getSystem(PlayerControlSystem.class).applyBreaks = false;
+			}*/
+			
 		} else {
 			engine.getSystem(PlayerControlSystem.class).moveForward = false;
+			engine.getSystem(PlayerControlSystem.class).applyBreaks = false;
 		}
 
 		
@@ -138,7 +160,7 @@ public class TouchUISystem extends EntitySystem {
 		shape.setColor(1f, 1f, 1f, 0.5f);
 		
 		//draw joystick base
-		shape.circle(joystickPosX + joystickRadius, joystickPosY + joystickRadius, joystickRadius, 12);
+		shape.circle(stickCenterX, stickCenterY, joystickRadius, 12);
 
 		shape.end();
 		
@@ -146,7 +168,7 @@ public class TouchUISystem extends EntitySystem {
 		
 		//draw stick on joystick
 		shape.circle(stickX, stickY, joystickRadius / 5, 6);
-		shape.line(stickX, stickY, joystickPosX + joystickRadius, joystickPosY + joystickRadius);
+		shape.line(stickX, stickY, stickCenterX, stickCenterY);
 		
 		//draw shoot button
 		shape.circle(shootButtonPosX - shootButtonRadius, shootButtonPosY + shootButtonRadius, shootButtonRadius, 6);
