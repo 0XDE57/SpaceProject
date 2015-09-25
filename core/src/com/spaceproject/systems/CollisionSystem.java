@@ -7,6 +7,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Intersector;
 import com.spaceproject.components.BoundsComponent;
+import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MissileComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.VehicleComponent;
@@ -38,13 +39,23 @@ public class CollisionSystem extends EntitySystem {
 					BoundsComponent mis = Mappers.bounds.get(missle);
 					BoundsComponent veh = Mappers.bounds.get(vehicle);
 					if (mis.poly.getBoundingRectangle().overlaps(veh.poly.getBoundingRectangle())) {
-						if (Intersector.overlapConvexPolygons(mis.poly, veh.poly)){
+						if (Intersector.overlapConvexPolygons(mis.poly, veh.poly)) {						
+							
+							//do damage
+							HealthComponent health = Mappers.health.get(vehicle);
+							MissileComponent misl = Mappers.missile.get(missle);
+							health.health -= misl.damage;
+							
+							//remove ship (kill)
+							if (health.health <= 0) {
+								vehicle.getComponent(TextureComponent.class).texture.dispose();
+								engine.removeEntity(vehicle);
+								System.out.println("[" + vehicle.getId() + "] killed by: [" + misl.ownerID + "]");
+							}
+							
 							//remove missile
 							missle.getComponent(TextureComponent.class).texture.dispose();
 							engine.removeEntity(missle);
-							
-							//do damage
-							//health -= damage
 						}
 						
 					}

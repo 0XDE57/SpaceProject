@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.ExpireComponent;
+import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.MissileComponent;
 import com.spaceproject.components.MovementComponent;
@@ -248,6 +249,13 @@ public class EntityFactory {
 		VehicleComponent vehicle = new VehicleComponent();
 		vehicle.thrust = 320;
 		
+		//health
+		HealthComponent health = new HealthComponent();
+		health.health = 100;
+		health.maxHealth = health.health;
+		
+		//add components to entity
+		entity.add(health);
 		entity.add(cannon);
 		entity.add(bounds);
 		entity.add(texture);

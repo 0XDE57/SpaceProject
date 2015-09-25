@@ -71,138 +71,149 @@ public class PlayerControlSystem extends EntitySystem {
 		
 		//getting in and out of vehicle timer
 		//TODO: variables could use better names
+		//TODO: move to component
 		if (timeSinceVehicle < timeTillCanGetInVehicle) {
 			timeSinceVehicle += 100 * delta;
 		}
 		
 	
-		//VEHICLE CONRTROLS////////////////////////////////////////////////////////////////////
-		if (isInVehicle()) {
-			
-			//vehicle position
-			TransformComponent vehicleTransform = Mappers.transform.get(vehicleEntity);
-			//vehicle movement
-			MovementComponent vehicleMovement = Mappers.movement.get(vehicleEntity);	
-			
-			VehicleComponent vehicle = Mappers.vehicle.get(vehicleEntity);
-			
-			CannonComponent vehicleCannon = Mappers.cannon.get(vehicleEntity);
-			//TODO: cannon refill logic needs to be moved to system, all ships need to recharge
-			//deal with cannon timers
-			vehicleCannon.timeSinceLastShot -= 100 * delta;
-			vehicleCannon.timeSinceRecharge -= 100 * delta;
-			refillAmmo(vehicleCannon);
-			
-			//make vehicle face angle from mouse/joystick
-			vehicleTransform.rotation = angleFacing;	
-			
-			//apply thrust forward
-			if (moveForward) {
-				//TODO: implement rest of engine behavior
-				//float maxSpeed;
-				//float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go
-				float thrust = vehicle.thrust;
-				float angle = vehicleTransform.rotation;
-				float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
-				float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
-				vehicleMovement.velocity.add(dx, dy);
-			}
-			
-			//apply thrust left
-			if (moveLeft) {
-				float thrust = vehicle.thrust * 0.6f;
-				float angle = vehicleTransform.rotation + 1.57f;
-				float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
-				float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
-				vehicleMovement.velocity.add(dx, dy);
-			}
-			
-			//apply thrust right
-			if (moveRight) {
-				float thrust = vehicle.thrust * 0.6f;
-				float angle = vehicleTransform.rotation - 1.57f;
-				float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
-				float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
-				vehicleMovement.velocity.add(dx, dy);
-			}
-			
-			//apply breaks
-			if (applyBreaks) {					
-				if (vehicleMovement.velocity.len() < 1) {
-					vehicleMovement.velocity.set(0,0);
-				} else {
-					float thrust = vehicle.thrust * 0.9f;
-					float angle = vehicleMovement.velocity.angle();
-					float dx = (float) Math.cos(angle) * thrust * delta;
-					float dy = (float) Math.sin(angle) * thrust * delta;
-					vehicleMovement.velocity.add(dx, dy);
-				}
-			}
-			
-			//ATTACK/cannon-----------------------
-			if (shoot && canFire(vehicleCannon)) {							
-				fireCannon(vehicleTransform, vehicleMovement, vehicleCannon, vehicleEntity.getId());
-			}
-			
-			if (stop) {//debug stop
-				vehicleMovement.velocity.set(0,0);
-				stop = false;
-			}
-					
-		} else { 
-			//CHARACTER CONTROLS///////////////////////////////////////////////////////////////////////////
-			
-			//players position
-			TransformComponent playerTransform = Mappers.transform.get(playerEntity);
-			
-			//make character face mouse/joystick
-			playerTransform.rotation = angleFacing;
-						
-			if (moveForward) {				
-				float walkSpeed = 35f; //TODO: move to component
-				float dx = (float) Math.cos(playerTransform.rotation) * (walkSpeed * movementMultiplier) * delta;
-				float dy = (float) Math.sin(playerTransform.rotation) * (walkSpeed * movementMultiplier) * delta;
-				
-				playerTransform.pos.add(dx, dy, 0);
-			}
-			
-			
+		if (isInVehicle()) {			
+			controlShip(delta);					
+		} else { 			
+			controlCharacter(delta);			
 		}
 	}
 
-	private void refillAmmo(CannonComponent vehicleCan) {
-		if (vehicleCan.timeSinceRecharge < 0 && vehicleCan.curAmmo < vehicleCan.maxAmmo) {
+	/**
+	 * Control the character.
+	 * @param delta
+	 */
+	private void controlCharacter(float delta) {
+		//players position
+		TransformComponent transform = Mappers.transform.get(playerEntity);
+		
+		//make character face mouse/joystick
+		transform.rotation = angleFacing;
+					
+		if (moveForward) {				
+			float walkSpeed = 35f; //TODO: move to component
+			float dx = (float) Math.cos(transform.rotation) * (walkSpeed * movementMultiplier) * delta;
+			float dy = (float) Math.sin(transform.rotation) * (walkSpeed * movementMultiplier) * delta;
+			
+			transform.pos.add(dx, dy, 0);
+		}
+	}
+
+	/**
+	 * Control the ship.
+	 * @param delta
+	 */
+	private void controlShip(float delta) {
+		TransformComponent transform = Mappers.transform.get(vehicleEntity);
+		MovementComponent movement = Mappers.movement.get(vehicleEntity);	
+		VehicleComponent vehicle = Mappers.vehicle.get(vehicleEntity);
+		
+		CannonComponent cannon = Mappers.cannon.get(vehicleEntity);
+		//TODO: cannon refill logic needs to be moved to system, all ships need to recharge
+		//deal with cannon timers
+		cannon.timeSinceLastShot -= 100 * delta;
+		cannon.timeSinceRecharge -= 100 * delta;
+		refillAmmo(cannon);
+		
+		//make vehicle face angle from mouse/joystick
+		transform.rotation = angleFacing;	
+		
+		//apply thrust forward
+		if (moveForward) {
+			//TODO: implement rest of engine behavior
+			//float maxSpeed;
+			//float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go
+			float thrust = vehicle.thrust;
+			float angle = transform.rotation;
+			float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
+			float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
+			movement.velocity.add(dx, dy);
+		}
+		
+		//apply thrust left
+		if (moveLeft) {
+			float thrust = vehicle.thrust * 0.6f;
+			float angle = transform.rotation + 1.57f;
+			float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
+			float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
+			movement.velocity.add(dx, dy);
+		}
+		
+		//apply thrust right
+		if (moveRight) {
+			float thrust = vehicle.thrust * 0.6f;
+			float angle = transform.rotation - 1.57f;
+			float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
+			float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
+			movement.velocity.add(dx, dy);
+		}
+		
+		//apply breaks
+		if (applyBreaks) {					
+			if (movement.velocity.len() < 1) {
+				movement.velocity.set(0,0);
+			} else {
+				float thrust = vehicle.thrust * 0.9f;
+				float angle = movement.velocity.angle();
+				float dx = (float) Math.cos(angle) * thrust * delta;
+				float dy = (float) Math.sin(angle) * thrust * delta;
+				movement.velocity.add(dx, dy);
+			}
+		}
+		
+		//fire cannon / attack
+		if (shoot && canFire(cannon)) {							
+			fireCannon(transform, movement, cannon, vehicleEntity.getId());
+		}
+		
+		//debug stop
+		if (stop) {
+			movement.velocity.set(0,0);
+			stop = false;
+		}
+	}
+
+	/**
+	 * Refill ammo for the cannon
+	 * @param cannon
+	 */
+	private void refillAmmo(CannonComponent cannon) {
+		if (cannon.timeSinceRecharge < 0 && cannon.curAmmo < cannon.maxAmmo) {
 			//refill ammo
-			vehicleCan.curAmmo++;		
+			cannon.curAmmo++;		
 			
 			//reset timer
-			vehicleCan.timeSinceRecharge = vehicleCan.rechargeRate;
+			cannon.timeSinceRecharge = cannon.rechargeRate;
 		}
 	}
 
 	/**
 	 * Fire cannon.
-	 * @param vehicleTransform
-	 * @param vehicleMovement
-	 * @param vehicleCan
+	 * @param transform of ship
+	 * @param movement of ship
+	 * @param cannon
 	 */
-	private void fireCannon(TransformComponent vehicleTransform, MovementComponent vehicleMovement, CannonComponent vehicleCan, long ID) {
+	private void fireCannon(TransformComponent transform, MovementComponent movement, CannonComponent cannon, long ID) {
 		//reset timer if ammo is full, to prevent instant recharge
-		if (vehicleCan.curAmmo == vehicleCan.maxAmmo) {			
-			vehicleCan.timeSinceRecharge = vehicleCan.rechargeRate;
+		if (cannon.curAmmo == cannon.maxAmmo) {			
+			cannon.timeSinceRecharge = cannon.rechargeRate;
 		}		
 		
 		//create missile	
-		float dx = (float) (Math.cos(vehicleTransform.rotation) * vehicleCan.velocity) + vehicleMovement.velocity.x;
-		float dy = (float) (Math.sin(vehicleTransform.rotation) * vehicleCan.velocity) + vehicleMovement.velocity.y;
-		engine.addEntity(EntityFactory.createMissile(vehicleTransform, dx, dy, vehicleCan.size, vehicleCan.damage, ID));
+		float dx = (float) (Math.cos(transform.rotation) * cannon.velocity) + movement.velocity.x;
+		float dy = (float) (Math.sin(transform.rotation) * cannon.velocity) + movement.velocity.y;
+		engine.addEntity(EntityFactory.createMissile(transform, dx, dy, cannon.size, cannon.damage, ID));
 		
 		//subtract ammo
-		--vehicleCan.curAmmo;
+		--cannon.curAmmo;
 		
 		//reset timer
-		vehicleCan.timeSinceLastShot = vehicleCan.fireRate;
-
+		cannon.timeSinceLastShot = cannon.fireRate;
 		
 		/*
 		 * Cheat for debug:
@@ -210,18 +221,18 @@ public class PlayerControlSystem extends EntitySystem {
 		 */
 		boolean cheat = false;
 		if (cheat) {
-			vehicleCan.curAmmo++;
-			vehicleCan.timeSinceLastShot = -1;
+			cannon.curAmmo++;
+			cannon.timeSinceLastShot = -1;
 		}
 	}
 
 	/**
 	 * Check if has enough ammo and time past since last shot.
-	 * @param vehicleCan
+	 * @param cannon
 	 * @return true if can fire
 	 */
-	private boolean canFire(CannonComponent vehicleCan) {
-		return vehicleCan.curAmmo > 0 && vehicleCan.timeSinceLastShot <= 0;
+	private boolean canFire(CannonComponent cannon) {
+		return cannon.curAmmo > 0 && cannon.timeSinceLastShot <= 0;
 	}
 	
 	
@@ -261,7 +272,8 @@ public class PlayerControlSystem extends EntitySystem {
 					//engine.getSystem(RenderingSystem.class).pan(vehicleTransform);
 					
 					//set focus to vehicle
-					vehicle.add(playerEntity.remove(PlayerFocusComponent.class));//TODO make switch focus method (oldEntity, newEntity)
+					//TODO make switch focus method (oldEntity, newEntity)
+					vehicle.add(playerEntity.remove(PlayerFocusComponent.class));
 				
 					//remove player from engine
 					engine.removeEntity(playerEntity);
@@ -305,7 +317,10 @@ public class PlayerControlSystem extends EntitySystem {
 		
 	}
 
-	//check if player is in vehicle
+	/**
+	 * Check if player is in vehicle.
+	 * @return true if in vehicle
+	 */
 	public boolean isInVehicle() {
 		return vehicleEntity != null ? true : false;
 	}
