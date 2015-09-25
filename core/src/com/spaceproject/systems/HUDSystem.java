@@ -53,6 +53,7 @@ public class HUDSystem  extends EntitySystem {
 		//enable transparency
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
 		shape.begin(ShapeType.Filled);
 		
 		drawAmmo();
@@ -63,32 +64,37 @@ public class HUDSystem  extends EntitySystem {
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 	}
 
-	private void drawAmmo() {
-		int posY = 30;
-		int posX = Gdx.graphics.getWidth() / 2;
-		int padding = 4;
-		int indicatorSize = 15;
-		
+	/**
+	 * Draw the Ammo bar.
+	 */
+	private void drawAmmo() {		
 		CannonComponent cannon = Mappers.cannon.get(player.first());
 		if (cannon == null) {
 			return;
 		}
 		
+		Color bar = new Color(1, 1, 1, 0.3f);
+		Color on = new Color(0.6f, 0.8f, 1, 0.5f);
+		Color off = new Color(0f, 0f, 0f, 0.6f);
+		
+		int posY = 30; //pixels from bottom off screen
+		int posX = Gdx.graphics.getWidth() / 2;
+		int border = 5; //width of border on background bar
+		int padding = 4; //space between indicators
+		int indicatorSize = 15;
 		int barWidth = cannon.maxAmmo * (indicatorSize + (padding * 2));
 		
 		//draw bar
-		//shape.setColor(0, 0, 1, 0.7f);
-		//shape.rect(posX-barWidth/2-padding, posY, posX, barWidth/2, barWidth-padding*2+1, indicatorSize, 1, 1, 0);
-		shape.setColor(1, 1, 1, 0.4f);
-		shape.rect(posX-barWidth/2+padding, posY, posX, barWidth/2, barWidth-padding*2, indicatorSize, 1, 1, 0);
+		shape.setColor(bar);		
+		shape.rect(posX-barWidth/2+padding-border, posY-border, posX, (barWidth/2) + (border*2), (barWidth-padding*2) + (border*2), indicatorSize + (border*2), 1, 1, 0);
 		
 		//draw indicators
-		for (int i = 0; i < cannon.maxAmmo; ++i) {
-			shape.setColor(cannon.curAmmo <= i ? Color.RED : Color.WHITE);
-			shape.rect((i * (indicatorSize + (padding * 2))) + posX - (barWidth/2)+padding, posY, indicatorSize/2, indicatorSize/2, indicatorSize, indicatorSize, 1, 1, 0);
+		for (int i = 0; i < cannon.maxAmmo; ++i) {			
+			//Z = A * (B + (C * 2)) + X - ((D * (B + C * 2))/2) + C
+			//TODO: It works, but can this be simplified?
+			shape.setColor(cannon.curAmmo <= i ? off : on);
+			shape.rect((i * (indicatorSize + (padding * 2))) + posX - (barWidth/2) + padding, posY, indicatorSize/2, indicatorSize/2, indicatorSize, indicatorSize, 1, 1, 0);
 		}
-
-		
 		
 	}
 
@@ -96,8 +102,10 @@ public class HUDSystem  extends EntitySystem {
 	 * Mark off-screen objects on edge of screen for navigation.
 	 */
 	private void drawEdgeMap() {
+		//TODO: change this to a scaling marker between min and max with size based on distance (Transfer Function?)
 		int markerSizeSmall = 5;
 		int markerSizeLarge = 7;
+		int distChangeMarker = 2000; //when to switch from small to large marker (closer object gets bigger marker)
 		int padding = 10; //how close to draw from edge of screen (in pixels)
 		int width = Gdx.graphics.getWidth();
 		int height = Gdx.graphics.getHeight();	
@@ -126,7 +134,7 @@ public class HUDSystem  extends EntitySystem {
 			//calculate slope of line (y = mx+b)
 			float slope = screenPos.y / screenPos.x;
 			
-			
+			//calculate where to position the marker
 			if (screenPos.y < 0) {
 				//top
 				markerX = -verticleEdge/slope;
@@ -152,24 +160,28 @@ public class HUDSystem  extends EntitySystem {
 			markerY += centerY;
 			
 			//draw marker
-			shape.circle(markerX, markerY, (MyMath.distance(screenPos.x, screenPos.y, centerX, centerY)) > 2000 ? markerSizeSmall : markerSizeLarge);
+			shape.circle(markerX, markerY, (MyMath.distance(screenPos.x, screenPos.y, centerX, centerY)) > distChangeMarker ? markerSizeSmall : markerSizeLarge);
 			
-			//debug line
+			//debug line to check marker accuracy
 			//shape.line(centerX, centerY, markerX, markerY);				
 		}
 		
 		/*
-		//draw boarders
-		Color outer = new Color(1, 1, 1, 0.22f);
-		Color inner = new Color(1, 1, 1, 0.05f);
+		//I'm not sure how to make this look pretty or if borders should be added...
+		//Maybe research some UI design.
+		
+		//draw borders
+		Color outer = new Color(0.6f, 1, 0.7f, 0.3f);
+		Color inner = new Color(1, 1, 1, 0.2f);
 		//left
-		shape.rect(0, 0, padding, height, outer, inner, inner, outer);
+		shape.rect(0, 0, padding*2, height, outer, inner, inner, outer);
+		shape.line(padding*2, 0, padding*2, height);
 		//right
-		shape.rect(width - padding, 0, padding, height, inner, outer, outer, inner);
+		shape.rect(width - padding*2, 0, padding*2, height, inner, outer, outer, inner);
 		//bottom
-		shape.rect(0, 0, width, padding, outer, outer, inner, inner);
+		shape.rect(0, 0, width, padding*2, outer, outer, inner, inner);
 		//top
-		shape.rect(0, height - padding, width, padding, inner, inner, outer, outer);
+		shape.rect(0, height - padding*2, width, padding*2, inner, inner, outer, outer);
 		*/
 	}
 	
