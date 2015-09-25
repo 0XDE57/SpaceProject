@@ -14,12 +14,14 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.components.CannonComponent;
+import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.PlayerFocusComponent;
+import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 
-public class HUDSystem  extends EntitySystem {
+public class HUDSystem extends EntitySystem {
 	
 	//rendering
 	private Matrix4 projectionMatrix = new Matrix4();	
@@ -28,22 +30,30 @@ public class HUDSystem  extends EntitySystem {
 	//entity storage
 	private ImmutableArray<Entity> mapableObjects;
 	private ImmutableArray<Entity> player;
+	private ImmutableArray<Entity> killables;
 	
-	//draw edge map or not
-	private boolean drawMap = true;
+	private boolean drawHud = true;
+	private boolean drawMap = true; //draw edge map
 	
 	@Override
 	public void addedToEngine(Engine engine) {		
-		mapableObjects = engine.getEntitiesFor(Family.all(MapComponent.class).get());
+		mapableObjects = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
 		player = engine.getEntitiesFor(Family.one(PlayerFocusComponent.class).get());
+		killables = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).get());
 	}
 	
 	@Override
 	public void update(float delta) {
+		if (Gdx.input.isKeyJustPressed(Keys.H)) {
+			drawHud = !drawHud;
+			System.out.println("HUD: " + drawHud);
+		}
 		if (Gdx.input.isKeyJustPressed(Keys.M)) {
 			drawMap = !drawMap;
 			System.out.println("Edge map: " + drawMap);
 		}
+		
+		if (!drawHud) return;
 		
 		//set projection matrix so things render using correct coordinates
 		//TODO: only needs to be called when screen size changes
@@ -60,8 +70,41 @@ public class HUDSystem  extends EntitySystem {
 		
 		if (drawMap) drawEdgeMap();
 		
+		drawHealthBars();
+		
 		shape.end();
 		Gdx.gl.glDisable(GL20.GL_BLEND);
+	}
+
+	/**
+	 * Draw health bars on entities.
+	 */
+	private void drawHealthBars() {
+		//bar dimensions
+		int barLength = 40;
+		int barWidth = 8;
+		int yOffset = -20; //position from entity
+		Color barBackground = new Color(1,1,1,0.4f);
+		
+		for (Entity entity : killables) {
+			Vector3 pos = RenderingSystem.getCam().project(Mappers.transform.get(entity).pos.cpy());
+			HealthComponent health = Mappers.health.get(entity);
+			
+			//ignore full health
+			if (health.health == health.maxHealth) {
+				continue;
+			}
+			
+			//background
+			shape.setColor(barBackground);
+			shape.rect(pos.x-barLength/2, pos.y+yOffset, barLength, barWidth);
+			
+			//health
+			float ratio = health.health/health.maxHealth;
+			shape.setColor(new Color(1 - ratio, ratio, 0,0.5f));
+			shape.rect(pos.x-barLength/2, pos.y+yOffset, barLength * ratio, barWidth);
+		}
+			
 	}
 
 	/**
