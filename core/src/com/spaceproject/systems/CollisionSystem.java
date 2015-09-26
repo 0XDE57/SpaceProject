@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MissileComponent;
@@ -44,7 +45,9 @@ public class CollisionSystem extends EntitySystem {
 							//do damage
 							HealthComponent health = Mappers.health.get(vehicle);
 							MissileComponent misl = Mappers.missile.get(missle);
-							health.health -= misl.damage;
+							
+							double chance = MathUtils.random(-misl.damage/10, misl.damage/10); // damage +/- 10%
+							health.health -= misl.damage + chance;
 							
 							//remove ship (kill)
 							if (health.health <= 0) {
@@ -57,12 +60,10 @@ public class CollisionSystem extends EntitySystem {
 							missle.getComponent(TextureComponent.class).texture.dispose();
 							engine.removeEntity(missle);
 						}
-						
 					}
 				}
 			}
 		}
-		
 	}
 	
 }

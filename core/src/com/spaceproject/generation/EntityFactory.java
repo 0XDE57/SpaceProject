@@ -237,7 +237,7 @@ public class EntityFactory {
 	    
 		//weapon
 		CannonComponent cannon = new CannonComponent();
-		cannon.damage = 10;
+		cannon.damage = 15;
 		cannon.maxAmmo = 5;
 		cannon.curAmmo = cannon.maxAmmo;
 		cannon.fireRate = 20; //lower is faster

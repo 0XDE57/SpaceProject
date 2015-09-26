@@ -101,7 +101,7 @@ public class HUDSystem extends EntitySystem {
 			
 			//health
 			float ratio = health.health/health.maxHealth;
-			shape.setColor(new Color(1 - ratio, ratio, 0,0.5f));
+			shape.setColor(new Color(1 - ratio, ratio, 0,0.6f));
 			shape.rect(pos.x-barLength/2, pos.y+yOffset, barLength * ratio, barWidth);
 		}
 			
