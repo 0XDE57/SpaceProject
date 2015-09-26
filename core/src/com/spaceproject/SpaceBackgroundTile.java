@@ -12,6 +12,11 @@ public class SpaceBackgroundTile {
 	public final int size;
 	public final Texture tex;
 	
+	//TODO: turn this into an entity?
+	//Transform  Vector3(x, y, depth)
+	//Texture Texture(tex)
+	//Tile (tileX, tileY, size) or (tileX, tileY, size, depth)
+	
 	public SpaceBackgroundTile(int tileX, int tileY, float renderDepth, int tileSize) {
 			
 		this.tileX = tileX;
@@ -22,7 +27,7 @@ public class SpaceBackgroundTile {
 		depth = renderDepth;
 		
 		//generate texture
-		tex = TextureFactory.generateSpaceBackground(tileX, tileY, tileSize, depth);
+		tex = TextureFactory.generateSpaceBackground(tileX, tileY, tileSize, renderDepth);
 	}
 	
 }

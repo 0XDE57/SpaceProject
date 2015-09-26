@@ -49,8 +49,7 @@ public class DesktopInputSystem extends EntitySystem {
 		float angle = MyMath.angleTo(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY(), Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
 		engine.getSystem(PlayerControlSystem.class).angleFacing = angle;
 	
-
-		
+	
 		// set multiplier to full power because a key switch is on or off
 		engine.getSystem(PlayerControlSystem.class).movementMultiplier = 1;
 		
@@ -70,13 +69,7 @@ public class DesktopInputSystem extends EntitySystem {
 		engine.getSystem(PlayerControlSystem.class).shoot = (Gdx.input.isKeyPressed(Keys.SPACE) || Gdx.input.isTouched());
 		
 		//enter/exit vehicle
-		if (Gdx.input.isKeyPressed(Keys.G)) {
-			if (engine.getSystem(PlayerControlSystem.class).isInVehicle()) {
-				engine.getSystem(PlayerControlSystem.class).exitVehicle();
-			} else {
-				engine.getSystem(PlayerControlSystem.class).enterVehicle();
-			}
-		}
+		engine.getSystem(PlayerControlSystem.class).changeVehicle = Gdx.input.isKeyPressed(Keys.G);
 
 	}
 

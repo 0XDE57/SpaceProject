@@ -3,6 +3,7 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -17,6 +18,33 @@ public class TouchUISystem extends EntitySystem {
 	private Matrix4 projectionMatrix = new Matrix4();
 	private ShapeRenderer shape = new ShapeRenderer();
 	
+	Color white = new Color(1f, 1f, 1f, 0.5f);
+	Color blue = new Color(0.5f, 0.5f, 1f, 0.7f);
+	
+	/////CONTROL POSITIONS/////
+	//-----shoot button-----
+	int shootButtonRadius = 70;
+	int shootButtonPosX = Gdx.graphics.getWidth() - 80;
+	int shootButtonPosY = 100;
+	
+	//-----vehicle button-----
+	int vehicleButtonRaduis = 50;
+	int vehicleButtonPosX = Gdx.graphics.getWidth() - 80;
+	int vehicleButtonPosY = 300;
+	
+	//-----joystick-----
+	int joystickRadius = 200;
+	int joystickPosX = 20;
+	int joystickPosY = 20;
+	// padding to register touch if finger is a little bit off the joystick
+	int joystickPadding = 100;
+	// center of joystick
+	int stickCenterX = joystickPosX + joystickRadius;
+	int stickCenterY = joystickPosY + joystickRadius;
+	// current position of stick
+	int stickX = stickCenterX;
+	int stickY = stickCenterY;
+	
 	@Override
 	public void addedToEngine(Engine engine) {
 		this.engine = engine;	
@@ -25,63 +53,66 @@ public class TouchUISystem extends EntitySystem {
 	@Override
 	public void update(float delta) {
 
+		//reset stick to center
+		stickX = stickCenterX;
+		stickY = stickCenterY;
+		
+		//check controls
+		checkFireButton();		
+		checkVehicleButton();		
+		checkJoystick();
+	
 		//set projection matrix so things render using correct coordinates
 		// TODO: only needs to be called when screen size changes
 		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		shape.setProjectionMatrix(projectionMatrix);
-		
 			
-		//FIRE BUTTON---------------------------------------------------
-		
-		//shoot button
-		int shootButtonRadius = 70;
-		int shootButtonPosX = Gdx.graphics.getWidth() - 80;
-		int shootButtonPosY = 100;
-		
-		//vehicle button
-		int vehicleButtonRaduis = 50;
-		int vehicleButtonPosX = Gdx.graphics.getWidth() - 80;
-		int vehicleButtonPosY = 300;
-		
-		//finger 0
-		float distanceToShootButton = MyMath.distance(
-				Gdx.input.getX(0),
-				Gdx.graphics.getHeight() - Gdx.input.getY(0), 
-				shootButtonPosX - shootButtonRadius, 
-				shootButtonPosY + shootButtonRadius);
+		//draw buttons on screen
+		drawControls();
 
-		//finger 1		
-		float distanceToShootButton1 = MyMath.distance(
-				Gdx.input.getX(1),
-				Gdx.graphics.getHeight() - Gdx.input.getY(1), 
-				shootButtonPosX - shootButtonRadius, 
-				shootButtonPosY + shootButtonRadius);
+	}
 
-		//if a finger is touching the touch is on fire button
-		if ((Gdx.input.isTouched(0) && distanceToShootButton <= shootButtonRadius) 
-				|| (Gdx.input.isTouched(1) && distanceToShootButton1 <= shootButtonRadius)) {
-			engine.getSystem(PlayerControlSystem.class).shoot = true;
-		} else {
-			engine.getSystem(PlayerControlSystem.class).shoot = false;
-		}
-
-		//JOYSTICK-------------------------------------------------------------------------------
-
-		//joystick size
-		int joystickRadius = 200;
-		//joystick position
-		int joystickPosX = 20;
-		int joystickPosY = 20;	
-		//padding to register touch if finger is a little bit off the joystick
-		int joystickPadding = 100;	
-		//center of joystick
-		int stickCenterX = joystickPosX + joystickRadius;
-		int stickCenterY = joystickPosY + joystickRadius;		
-		//current position of stick
-		int stickX = stickCenterX;
-		int stickY = stickCenterY;
+	/**
+	 * Draw on-screen buttons.
+	 */
+	private void drawControls() { 
+		//enable transparency
+		Gdx.gl.glEnable(GL20.GL_BLEND);
+		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+		shape.begin(ShapeType.Line);
 		
+		//draw joystick base
+		shape.setColor(white);
+		shape.circle(stickCenterX, stickCenterY, joystickRadius, 12);
+
+		shape.end();
+
 		
+		shape.begin(ShapeType.Filled);		
+		
+		//draw stick on joystick
+		shape.setColor(engine.getSystem(PlayerControlSystem.class).moveForward ? blue : white);
+		shape.circle(stickX, stickY, joystickRadius / 5, 6);
+		shape.line(stickX, stickY, stickCenterX, stickCenterY);
+		
+		//draw shoot button
+		shape.setColor(engine.getSystem(PlayerControlSystem.class).shoot ? blue : white);
+		shape.circle(shootButtonPosX - shootButtonRadius, shootButtonPosY + shootButtonRadius, shootButtonRadius, 6);
+			
+		//draw vehicle button
+		//TODO: test if player is in vehicle or can get in a vehicle;
+		//if (engine.getSystem(PlayerControlSystem.class).isInVehicle() || engine.getSystem(PlayerControlSystem.class).canGetInVehicle()) {
+		shape.setColor(engine.getSystem(PlayerControlSystem.class).changeVehicle ? blue : white);
+		shape.circle(vehicleButtonPosX - vehicleButtonRaduis, vehicleButtonPosY + vehicleButtonRaduis, vehicleButtonRaduis, 6);
+		shape.end();
+		
+		Gdx.gl.glDisable(GL20.GL_BLEND);
+	}
+
+	/**
+	 * Check if joystick being used.
+	 */
+	private void checkJoystick() { 
 		//check finger 0
 		float distanceToJoystick0 = MyMath.distance(Gdx.input.getX(0), Gdx.graphics.getHeight() - Gdx.input.getY(0), 
 				stickCenterX, stickCenterY);
@@ -132,9 +163,12 @@ public class TouchUISystem extends EntitySystem {
 			engine.getSystem(PlayerControlSystem.class).moveForward = false;
 			engine.getSystem(PlayerControlSystem.class).applyBreaks = false;
 		}
+	}
 
-		
-		//ENTER/EXIT vehicle-----------------------------------------------------
+	/**
+	 * Check if enter/exit vehicle button is pressed.
+	 */
+	private void checkVehicleButton() {
 		//TODO: fix vehicle button for multitouch
 		float distanceToVehicleButton = MyMath.distance(
 				Gdx.input.getX(), 
@@ -142,45 +176,34 @@ public class TouchUISystem extends EntitySystem {
 				vehicleButtonPosX - vehicleButtonRaduis,
 				vehicleButtonPosY + vehicleButtonRaduis);
 		
-		if (Gdx.input.isTouched() && distanceToVehicleButton <= vehicleButtonRaduis) {
-			if (engine.getSystem(PlayerControlSystem.class).isInVehicle()) {
-				engine.getSystem(PlayerControlSystem.class).exitVehicle();
-			} else {
-				engine.getSystem(PlayerControlSystem.class).enterVehicle();
-			}
+		engine.getSystem(PlayerControlSystem.class).changeVehicle = (Gdx.input.isTouched() && distanceToVehicleButton <= vehicleButtonRaduis);
+		
+	}
 
-		}		
-		
-		
-		//enable transparency
-		Gdx.gl.glEnable(GL20.GL_BLEND);
-		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+	/**
+	 * Check if fire button is pressed.
+	 */
+	private void checkFireButton() {
+		//finger 0
+		float distanceToShootButton = MyMath.distance(
+				Gdx.input.getX(0),
+				Gdx.graphics.getHeight() - Gdx.input.getY(0), 
+				shootButtonPosX - shootButtonRadius, 
+				shootButtonPosY + shootButtonRadius);
 
-		shape.begin(ShapeType.Line);
-		shape.setColor(1f, 1f, 1f, 0.5f);
-		
-		//draw joystick base
-		shape.circle(stickCenterX, stickCenterY, joystickRadius, 12);
+		//finger 1		
+		float distanceToShootButton1 = MyMath.distance(
+				Gdx.input.getX(1),
+				Gdx.graphics.getHeight() - Gdx.input.getY(1), 
+				shootButtonPosX - shootButtonRadius, 
+				shootButtonPosY + shootButtonRadius);
 
-		shape.end();
-		
-		shape.begin(ShapeType.Filled);		
-		
-		//draw stick on joystick
-		shape.circle(stickX, stickY, joystickRadius / 5, 6);
-		shape.line(stickX, stickY, stickCenterX, stickCenterY);
-		
-		//draw shoot button
-		shape.circle(shootButtonPosX - shootButtonRadius, shootButtonPosY + shootButtonRadius, shootButtonRadius, 6);
-		
-		//draw vehicle button
-		//TODO: test if player is in vehicle or can get in a vehicle;
-		//if (engine.getSystem(PlayerControlSystem.class).isInVehicle() || engine.getSystem(PlayerControlSystem.class).canGetInVehicle()) {
-		shape.circle(vehicleButtonPosX - vehicleButtonRaduis, vehicleButtonPosY + vehicleButtonRaduis, vehicleButtonRaduis, 6);
-		
-		
-		shape.end();
-		Gdx.gl.glDisable(GL20.GL_BLEND);
-
+		//if a finger is touching the touch is on fire button
+		if ((Gdx.input.isTouched(0) && distanceToShootButton <= shootButtonRadius) 
+				|| (Gdx.input.isTouched(1) && distanceToShootButton1 <= shootButtonRadius)) {
+			engine.getSystem(PlayerControlSystem.class).shoot = true;
+		} else {
+			engine.getSystem(PlayerControlSystem.class).shoot = false;
+		}
 	}
 }

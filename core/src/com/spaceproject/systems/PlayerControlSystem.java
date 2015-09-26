@@ -39,14 +39,19 @@ public class PlayerControlSystem extends EntitySystem {
 	public boolean moveLeft = false;
 	public boolean moveRight = false;
 	public boolean applyBreaks = false;
-	
-	//for analog control. will be value between 1 and 0
-	public float movementMultiplier = 0; 
+	 
 	//if vehicle should stop instantly-debug stop
 	public boolean stop = false;
 	
+	//player should enter/exit vehicle
+	public boolean changeVehicle = false;
+	
+	//for analog control. will be value between 1 and 0
+	public float movementMultiplier = 0;
+	
 	//set direction player faces
 	public float angleFacing = 0;
+	
 	
 	public PlayerControlSystem(Entity player) {
 		this.playerEntity = player;	
@@ -81,6 +86,14 @@ public class PlayerControlSystem extends EntitySystem {
 			controlShip(delta);					
 		} else { 			
 			controlCharacter(delta);			
+		}
+		
+		if (changeVehicle) {
+			if (isInVehicle()) {
+				exitVehicle();
+			} else {
+				enterVehicle();
+			}
 		}
 	}
 
@@ -322,7 +335,7 @@ public class PlayerControlSystem extends EntitySystem {
 	 * @return true if in vehicle
 	 */
 	public boolean isInVehicle() {
-		return vehicleEntity != null ? true : false;
+		return vehicleEntity != null;
 	}
 
 }
