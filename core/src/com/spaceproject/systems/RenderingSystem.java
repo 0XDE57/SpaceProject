@@ -91,7 +91,7 @@ public class RenderingSystem extends IteratingSystem {
 		batch.begin();
 		
 		//render background tiles (stars)
-		for (SpaceBackgroundTile tile : LoadingSystem.getFGTileLayer()) {
+		for (SpaceBackgroundTile tile : LoadingSystem.getTiles()) {
 			//draw = (tile position + (cam position - center of tile)) * depth			
 			float drawX = tile.x + (cam.position.x - (tile.size/2)) * tile.depth;
 			float drawY = tile.y + (cam.position.y - (tile.size/2)) * tile.depth;			

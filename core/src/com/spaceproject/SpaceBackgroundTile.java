@@ -22,7 +22,7 @@ public class SpaceBackgroundTile {
 		depth = renderDepth;
 		
 		//generate texture
-		tex = TextureFactory.generateSpaceBackground(tileX, tileY, tileSize);
+		tex = TextureFactory.generateSpaceBackground(tileX, tileY, tileSize, depth);
 	}
 	
 }

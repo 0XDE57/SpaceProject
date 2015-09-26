@@ -10,30 +10,30 @@ import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.SpaceBackgroundTile;
 import com.spaceproject.components.PlayerFocusComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.utility.Mappers;
 
 public class LoadingSystem extends IteratingSystem {
 	
 	//background layer of tiles
-	private static ArrayList<SpaceBackgroundTile> bgTileLayer = new ArrayList<SpaceBackgroundTile>();
-	private static float bgTileDepth = 0.9f; //multiplier for position of tile
+	private static ArrayList<SpaceBackgroundTile> tiles = new ArrayList<SpaceBackgroundTile>();
 	
-	//foreground layer of tiles (not implemented yet)
-	//private ArrayList<SpaceBackgroundTile> fgTileLayer = new ArrayList<SpaceBackgroundTile>();	
-	//private static float fgTileDepth = 0.7f;
+	//multiplier for position of tile
+	private static float bgTileDepth = 0.9f; //background
+	private static float fgTileDepth = 0.7f; //foreground
 	
+	//center tile to check for tile change
+	private Vector2 bgCenterTile; //background
+	private Vector2 fgCenterTile; //foreground	
+		
 	private static int tileSize = 1024; //how large a tile texture is
 	private int surround = 1;//how many tiles to load around center tile
-	private Vector2 centerTile; //center tile to check for tile change
-	
+		
 	//timer for how often to check if player moved tiles
 	private float checkTileTimer = 500; 
 	private float checkTileCurrTime = checkTileTimer;
 	
-	private ComponentMapper<TransformComponent> transformMap;	
-	
 	public LoadingSystem() {
 		super(Family.all(PlayerFocusComponent.class).get());
-		transformMap = ComponentMapper.getFor(TransformComponent.class);
 		
 		//load tiles
 		//load spacedust/background clouds(noise/fractals)
@@ -47,10 +47,10 @@ public class LoadingSystem extends IteratingSystem {
 	 * @param posY
 	 * @return tile that an object is in.
 	 */
-	public static Vector2 getTilePos(float posX, float posY) {	
+	public static Vector2 getTilePos(float posX, float posY, float depth) {	
 		//calculate position
-		int x = (int) (posX - (RenderingSystem.getCam().position.x - (tileSize/2)) * bgTileDepth);
-		int y = (int) (posY - (RenderingSystem.getCam().position.y - (tileSize/2)) * bgTileDepth);
+		int x = (int) (posX - (RenderingSystem.getCam().position.x - (tileSize/2)) * depth);
+		int y = (int) (posY - (RenderingSystem.getCam().position.y - (tileSize/2)) * depth);
 		
 		//calculate tile that position is in
 		int tX = x / tileSize;
@@ -74,84 +74,108 @@ public class LoadingSystem extends IteratingSystem {
 		// because putting it in a separate thread is not possible due to
 		// glContext...	
 		
+		// Also: consider refactoring to allow for arbitrary number layers(depths)
+		
 		checkTileCurrTime -= 1000 * delta;
 		if (checkTileCurrTime < 0) {
 
-			// get tile player is in
-			TransformComponent pos = transformMap.get(entity);
-			Vector2 newTile = getTilePos(pos.pos.x, pos.pos.y);
+			// get tiles player is in
+			TransformComponent pos = Mappers.transform.get(entity);
+			Vector2 bgTile = getTilePos(pos.pos.x, pos.pos.y, bgTileDepth);
+			Vector2 fgTile = getTilePos(pos.pos.x, pos.pos.y, fgTileDepth);
 			
-			if (centerTile == null) {
-				centerTile = newTile;
-				loadTiles(newTile);
+			if (bgCenterTile == null) {
+				bgCenterTile = bgTile;
+				loadTiles(bgTile, bgTileDepth);
 			}
 			
-			// check if player has changed tiles
-			if (newTile.x != centerTile.x || newTile.y != centerTile.y) {
+			if (fgCenterTile == null) {
+				fgCenterTile = fgTile;
+				loadTiles(fgTile, fgTileDepth);
+			}
+			
+			// check if player has changed background tiles
+			if (bgTile.x != bgCenterTile.x || bgTile.y != bgCenterTile.y) {
+
+				// unload old tiles
+				unloadTiles(bgTile, bgTileDepth);
+
+				// load new tiles
+				loadTiles(bgTile, bgTileDepth);
+				
+				//store tile
+				bgCenterTile = bgTile;
+			}
+			
+			// check if player has changed foreground tiles
+			if (fgTile.x != fgCenterTile.x || fgTile.y != fgCenterTile.y) {
 				
 				//unload old tiles
-				unloadTiles(newTile);
+				unloadTiles(fgTile, fgTileDepth);
 
 				//load new tiles
-				loadTiles(newTile);
+				loadTiles(fgTile, fgTileDepth);
 
+				//store tile
+				fgCenterTile = fgTile;
 			}
-		
-			//set new centerTile
-			centerTile = newTile;
-			
+					
 			// reset timer
 			checkTileCurrTime = checkTileTimer;
 		}
 
 	}
 
-	/** 
-	 * Load tiles surrounding centerTile.
-	 * @param centerTile 
+	/**
+	 * Load tiles surrounding centerTile of specified depth.
+	 * @param centerTile
+	 * @param depth
 	 */
-	private void loadTiles(Vector2 centerTile) {
+	private void loadTiles(Vector2 centerTile, float depth) {
 
 		for (int tX = (int) centerTile.x - surround; tX <= centerTile.x + surround; tX++) {
 			for (int tY = (int) centerTile.y - surround; tY <= centerTile.y + surround; tY++) {
 				// check if tile already exists
 				boolean exists = false;
-				for (int index = 0; index < bgTileLayer.size() && !exists; ++index) {
-					if (bgTileLayer.get(index).tileX == tX
-							&& bgTileLayer.get(index).tileY == tY) {
+				for (int index = 0; index < tiles.size() && !exists; ++index) {
+					SpaceBackgroundTile t = tiles.get(index);
+					if (t.tileX == tX && t.tileY == tY && t.depth == depth) {
 						exists = true;
 					}
 				}
 				
 				// create and add tile if doesn't exist
 				if (!exists) {
-					bgTileLayer.add(new SpaceBackgroundTile(tX, tY, bgTileDepth, tileSize));
-					//bgTileLayer.add(new SpaceBackgroundTile(tX, tY, 0.8f, tileSize));
+					tiles.add(new SpaceBackgroundTile(tX, tY, depth, tileSize));
+					//bgTileLayer.add(new SpaceBackgroundTile(tX, tY, fgTileDepth, tileSize));
 				}
 			}
 		}
 	}
 
 	/** 
-	 * Remove any tiles not surrounding centerTile.
+	 * Remove any tiles not surrounding centerTile of same depth.
 	 * @param centerTile
+	 * @param depth
 	 */
-	private void unloadTiles(Vector2 centerTile) {
+	private void unloadTiles(Vector2 centerTile, float depth) {
 		
-		for (int index = 0; index < bgTileLayer.size(); ++index) {
+		for (int index = 0; index < tiles.size(); ++index) {
+			SpaceBackgroundTile tile = tiles.get(index);
+			if (tile.depth == depth) {
+				if (tileIsNear(centerTile, tile)) {
 
-			if (tileIsNear(centerTile, bgTileLayer.get(index))) {
+					// dispose the texture so it doesn't eat up memory
+					tile.tex.dispose();
+					// remove tile
+					tiles.remove(index);
 
-				// dispose the texture so it doesn't eat up memory
-				bgTileLayer.get(index).tex.dispose();
-				// remove tile
-				bgTileLayer.remove(index);
-
-				// reset index because removing elements changes
-				// elements position in array
-				index = -1;
-				if (index >= bgTileLayer.size()) {
-					continue;
+					// reset search index because removing elements changes
+					// position of elements
+					index = -1;
+					if (index >= tiles.size()) {
+						continue;
+					}
 				}
 			}
 		}
@@ -167,7 +191,7 @@ public class LoadingSystem extends IteratingSystem {
 		 || tileToCheck.tileY > centerTile.y + surround;
 	}
 	
-	public static ArrayList<SpaceBackgroundTile> getFGTileLayer() {
-		return bgTileLayer;
+	public static ArrayList<SpaceBackgroundTile> getTiles() {
+		return tiles;
 	}
 }

@@ -11,20 +11,20 @@ public class TextureFactory {
 
 	static Pixmap pixmap;
 	
-	public static Texture generateSpaceBackground(int tileX, int tileY, int tileSize) {
+	public static Texture generateSpaceBackground(int tileX, int tileY, int tileSize, float depth) {
 
 		/* Note: A Global seed of 0 causes non-unique seeds. 
 		 * Consider either disallowing a seed of 0 or change formula for getting each tiles seed
 		 * This probably affects other parts of the program.
 		 */
 		
-		MathUtils.random.setSeed((long)(tileX + tileY * SpaceProject.SEED));
+		MathUtils.random.setSeed((long)(tileX * depth + tileY * SpaceProject.SEED));
 		//System.out.println("Tile Seed: " + (long)(tileX + tileY * SpaceProject.SEED));
 		
 		//pixmap = new Pixmap(tileSize, tileSize, Format.RGB565);
 		pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
 		
-		int numStars = 400;
+		int numStars = 200;
 		pixmap.setColor(Color.WHITE);
 		for (int i = 0; i < numStars; ++i){					
 			
@@ -32,12 +32,12 @@ public class TextureFactory {
 			int newY = MathUtils.random(tileSize);
 			
 			pixmap.drawPixel(newX, newY);
-			//pixmap.drawPixel(newX, newY, Color.rgba4444(MathUtils.random(1), MathUtils.random(1), MathUtils.random(1), 1));
+			//pixmap.drawPixel(newX, newY, Color.rgba8888(MathUtils.random(1), MathUtils.random(1), MathUtils.random(1), 1));
 		}
 		
 		/*
 		//DEBUG - fill tile to visualize boundaries
-		pixmap.setColor(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1f);
+		pixmap.setColor(MathUtils.random(), MathUtils.random(), MathUtils.random(), 0.5f);
 		pixmap.fill();
 		*/
 		
@@ -48,6 +48,7 @@ public class TextureFactory {
 	}
 
 	public static Texture generateShip(int size) {
+		//TODO: seed
 		boolean debugImage = false;
 		
 		// generate pixmap texture
@@ -62,8 +63,6 @@ public class TextureFactory {
 		// |
 		// height
 
-		// ///////////////////////////////image
-		// generation////////////////////////////////////
 		// smallest height a ship can be (4 because player is 4 pixels)
 		int minEdge = 4;
 		// smallest starting point for an edge
@@ -90,8 +89,7 @@ public class TextureFactory {
 			pixmap.drawPixel(yY, edge);// bottom edge
 			pixmap.drawPixel(yY, height - edge);// top edge
 
-			// generate next
-			// edge---------------------------------------------------------------------
+			// generate next edge
 			// beginning and end of ship have special rule to not be greater
 			// than the consecutive or previous edge
 			// so that the "caps" look right
@@ -134,8 +132,6 @@ public class TextureFactory {
 			pixmap.setColor(1, 1, 0, 1);// yellow: bottom-right
 			pixmap.drawPixel(width, height);
 		}
-
-		//////////////////end image generation//////////////////////
 				
 		// create texture and dispose pixmap to prevent memory leak
 		Texture t = new Texture(pixmap);
