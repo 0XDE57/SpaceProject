@@ -2,6 +2,7 @@ package com.spaceproject.generation;
 
 
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
@@ -63,14 +64,6 @@ public class EntityFactory {
 		TransformComponent transform = new TransformComponent();
 		transform.pos.set(x, y, 0); 
 
-		//add bounding box
-		/*
-		BoundsComponent bounds = new BoundsComponent();
-		float width = texture.texture.getWidth() * scale;
-		float height = texture.texture.getHeight() * scale;
-		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
-	    bounds.poly.setOrigin(width/2, height/2);
-		*/
 		
 		//orbit for rotation of self (kinda hacky; not really orbiting, just rotating)
 		OrbitComponent orbit = new OrbitComponent();
@@ -78,12 +71,15 @@ public class EntityFactory {
 		orbit.rotateClockwise = rotationDir;
 		orbit.rotSpeed = MathUtils.random(0.002f, 0.06f); //rotation speed of star
 		
+		MapComponent map = new MapComponent();
+		map.color = new Color(0.9f, 0.9f, 0.15f, 0.9f);
+		map.distance = 80000;
+		
 		//add components to entity
 		entity.add(orbit);
-		//entity.add(bounds);
 		entity.add(transform);
 		entity.add(texture);
-		entity.add(new MapComponent());
+		entity.add(map);
 
 		return entity;
 	}
@@ -120,12 +116,16 @@ public class EntityFactory {
 		orbit.distance = distance;
 		orbit.rotateClockwise = rotationDir;
 		
+		MapComponent map = new MapComponent();
+		map.color = new Color(0.15f, 0.5f, 0.9f, 0.9f);
+		map.distance = 10000;
+		
 		//add components to entity
 		//entity.add(bounds);
 		entity.add(new TransformComponent());
 		entity.add(texture);
 		entity.add(orbit);
-		entity.add(new MapComponent());
+		entity.add(map);
 		
 		return entity;
 	}
@@ -254,6 +254,13 @@ public class EntityFactory {
 		health.health = 100;
 		health.maxHealth = health.health;
 		
+		
+		//map
+		MapComponent map = new MapComponent();
+		map.color = new Color(1, 1, 1, 0.9f);
+		map.distance = 3000;
+		
+		
 		//add components to entity
 		entity.add(health);
 		entity.add(cannon);
@@ -261,6 +268,7 @@ public class EntityFactory {
 		entity.add(texture);
 		entity.add(transform);
 		entity.add(vehicle);
+		entity.add(map);
 		entity.add(new MovementComponent());
 		
 		return entity;
