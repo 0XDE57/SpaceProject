@@ -168,10 +168,11 @@ public class PlayerControlSystem extends EntitySystem {
 		
 		//apply breaks
 		if (applyBreaks) {					
-			if (movement.velocity.len() < 1) {
+			if (movement.velocity.len() < 10) {
 				movement.velocity.set(0,0);
 			} else {
-				float thrust = vehicle.thrust * 0.9f;
+				float thrust = movement.velocity.len();
+				if (thrust > 1000) thrust = 1000; //cap the breaking power
 				float angle = movement.velocity.angle();
 				float dx = (float) Math.cos(angle) * thrust * delta;
 				float dy = (float) Math.sin(angle) * thrust * delta;

@@ -121,7 +121,7 @@ public class TouchUISystem extends EntitySystem {
 		float distanceToJoystick1 = MyMath.distance(Gdx.input.getX(1), Gdx.graphics.getHeight() - Gdx.input.getY(1), 
 				stickCenterX, stickCenterY);
 		
-		//finger 0 is touched
+		//finger is touching joystick
 		boolean finger0 = Gdx.input.isTouched(0) && distanceToJoystick0 <= joystickRadius + joystickPadding;
 		boolean finger1 = Gdx.input.isTouched(1) && distanceToJoystick1 <= joystickRadius + joystickPadding;
 		
@@ -132,8 +132,7 @@ public class TouchUISystem extends EntitySystem {
 			stickX = Gdx.input.getX(0);
 			stickY = Gdx.graphics.getHeight() - Gdx.input.getY(0);
 			powerRatio = distanceToJoystick0 / joystickRadius;
-		} 
-		if (finger1) {
+		} else if (finger1) {
 			stickX = Gdx.input.getX(1);
 			stickY = Gdx.graphics.getHeight() - Gdx.input.getY(1);
 			powerRatio = distanceToJoystick1 / joystickRadius;
@@ -143,22 +142,22 @@ public class TouchUISystem extends EntitySystem {
 			//face finger
 			float angle = MyMath.angleTo(stickX, stickY, stickCenterX, stickCenterY);
 			engine.getSystem(PlayerControlSystem.class).angleFacing = angle;
-						
+			
+			//cap ratio and set multiplier
 			if (powerRatio > 1) powerRatio = 1;
 			if (powerRatio < 0) powerRatio = 0;
-
 			engine.getSystem(PlayerControlSystem.class).movementMultiplier = powerRatio;
-			engine.getSystem(PlayerControlSystem.class).moveForward = true;
-			/*
-			System.out.println(powerRatio);
-			if (powerRatio < 0.5f) {
-				engine.getSystem(PlayerControlSystem.class).applyBreaks = true;
+			
+			//if finger is close to center of joystick, apply breaks
+			if (powerRatio < 0.15f) {
+				//breaks
 				engine.getSystem(PlayerControlSystem.class).moveForward = false;
+				engine.getSystem(PlayerControlSystem.class).applyBreaks = true;
 			} else {
+				//move
 				engine.getSystem(PlayerControlSystem.class).moveForward = true;
 				engine.getSystem(PlayerControlSystem.class).applyBreaks = false;
-			}*/
-			
+			}
 		} else {
 			engine.getSystem(PlayerControlSystem.class).moveForward = false;
 			engine.getSystem(PlayerControlSystem.class).applyBreaks = false;
@@ -169,7 +168,6 @@ public class TouchUISystem extends EntitySystem {
 	 * Check if enter/exit vehicle button is pressed.
 	 */
 	private void checkVehicleButton() {
-		//TODO: fix vehicle button for multitouch
 		float distanceToVehicleButton = MyMath.distance(
 				Gdx.input.getX(), 
 				Gdx.graphics.getHeight() - Gdx.input.getY(), 

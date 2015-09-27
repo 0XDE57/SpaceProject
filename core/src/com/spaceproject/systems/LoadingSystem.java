@@ -19,7 +19,7 @@ public class LoadingSystem extends IteratingSystem {
 	
 	//multiplier for position of tile
 	private static float bgTileDepth = 0.9f; //background
-	private static float fgTileDepth = 0.7f; //foreground
+	private static float fgTileDepth = 0.8f; //foreground
 	
 	//center tile to check for tile change
 	private Vector2 bgCenterTile; //background
