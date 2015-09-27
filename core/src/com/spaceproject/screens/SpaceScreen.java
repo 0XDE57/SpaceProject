@@ -91,6 +91,8 @@ public class SpaceScreen extends ScreenAdapter {
 		
 		playerTESTSHIP.add(new PlayerFocusComponent());
 		engine.addEntity(playerTESTSHIP);
+		
+		//engine.addEntity(EntityFactory.createNoiseTile(0, 0, 256));
 
 		/*
 		Entity testOrbit = EntityFactory.createPlanet(playerTESTSHIP, 755, true);

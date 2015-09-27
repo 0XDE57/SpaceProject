@@ -6,10 +6,45 @@ import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.utility.OpenSimplexNoise;
 
 public class TextureFactory {
 
 	static Pixmap pixmap;
+	
+	public static Texture generateNoiseTile(long seed, int tileSize) {
+		pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
+		
+		OpenSimplexNoise noise = new OpenSimplexNoise();
+		OpenSimplexNoise rGen = new OpenSimplexNoise(1);
+		OpenSimplexNoise gGen = new OpenSimplexNoise(2);
+		OpenSimplexNoise bGen = new OpenSimplexNoise(3);
+		double featureSize = 24;
+
+		for (int y = 0; y < pixmap.getHeight(); y++) {
+			for (int x = 0; x < pixmap.getWidth(); x++) {
+			
+				double nx = x/featureSize, ny = y/featureSize;
+				double i = noise.eval(nx, ny, 0);
+				i = (i * 0.5) + 0.5; //convert from range [-1:1] to [0:1]
+			
+				double r = rGen.eval(nx, ny, 0);
+				r = (r * 0.5) + 0.5; //convert from range [-1:1] to [0:1]
+				double g = gGen.eval(nx, ny, 0);
+				g = (g * 0.5) + 0.5; //convert from range [-1:1] to [0:1]
+				double b = bGen.eval(nx, ny, 0);
+				b = (b * 0.5) + 0.5; //convert from range [-1:1] to [0:1]
+				
+				pixmap.setColor(new Color((float)r, (float)g, (float)b, (float) i));
+				pixmap.drawPixel(x, y);
+			}
+		}
+		
+		
+		Texture tex = new Texture(pixmap);
+		pixmap.dispose();
+		return tex;
+	}
 	
 	public static Texture generateSpaceBackground(int tileX, int tileY, int tileSize, float depth) {
 
@@ -147,14 +182,30 @@ public class TextureFactory {
 	}
 
 	public static Texture generatePlanet(int radius) {
+		OpenSimplexNoise noise = new OpenSimplexNoise();
+		
 		Pixmap pixmap = new Pixmap(radius * 2, radius * 2, Format.RGBA4444);
-
+		
+		double featureSize = 24;
+		
 		// draw circle for planet
-		pixmap.setColor(0, 0, 1, 1);
-		pixmap.fillCircle(radius, radius, radius - 1);
-		// draw outline
 		pixmap.setColor(1, 1, 1, 1);
-		pixmap.drawCircle(radius, radius, radius - 1);
+		pixmap.fillCircle(radius, radius, radius - 1);
+		
+		//add layer of noise
+		for (int y = 0; y < pixmap.getHeight(); ++y) {
+			for (int x = 0; x < pixmap.getWidth(); ++x) {
+				//only draw on circle
+				if (pixmap.getPixel(x, y) != 0) {
+					double nx = x/featureSize, ny = y/featureSize;
+					double i = noise.eval(nx, ny, 0);
+					i = (i * 0.5) + 0.5; //convert from range [-1:1] to [0:1]
+					pixmap.setColor(new Color(0,(float)i,(float)(1-i), 1));
+					pixmap.drawPixel(x, y);
+				}				
+			}
+		}
+		
 
 		Texture t = new Texture(pixmap);
 		pixmap.dispose();
@@ -162,14 +213,34 @@ public class TextureFactory {
 	}
 
 	public static Texture generateStar(int radius) {
+		OpenSimplexNoise noise = new OpenSimplexNoise();
+		
 		Pixmap pixmap = new Pixmap(radius * 2, radius * 2, Format.RGBA4444);
-
-		// draw circle
-		pixmap.setColor(1, 1, 0, 1);
+		
+		double featureSize = 20;
+		
+		// draw circle for planet
+		pixmap.setColor(0.5f, 0.5f, 0.5f, 1);
 		pixmap.fillCircle(radius, radius, radius - 1);
-		// draw outline
-		pixmap.setColor(1, 0, 0, 1);
-		pixmap.drawCircle(radius, radius, radius - 1);
+		
+		//add layer of noise
+		for (int y = 0; y < pixmap.getHeight(); ++y) {
+			for (int x = 0; x < pixmap.getWidth(); ++x) {
+				//only draw on circle
+				if (pixmap.getPixel(x, y) != 0) {
+					double nx = x/featureSize, ny = y/featureSize;
+					double i = noise.eval(nx, ny, 0);
+					i = (i * 0.5) + 0.5; //convert from range [-1:1] to [0:1]
+					if (i > 0.5f){
+						pixmap.setColor(new Color(1, 1, 0, (float)i));
+					} else {
+						pixmap.setColor(new Color(1, 0, 0, (float)(1-i)));
+					}
+					pixmap.drawPixel(x, y);
+				}				
+			}
+		}
+		
 
 		Texture t = new Texture(pixmap);
 		pixmap.dispose();

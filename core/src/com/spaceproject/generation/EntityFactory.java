@@ -356,4 +356,22 @@ public class EntityFactory {
 		
 		return entity;
 	}
+
+	public static Entity createNoiseTile(int x, int y, int tileSize) {
+		Entity entity = new Entity();
+		
+		TextureComponent texture = new TextureComponent();
+		texture.texture = TextureFactory.generateNoiseTile((long)(x + y * SpaceProject.SEED), tileSize);
+		
+		TransformComponent transform = new TransformComponent();
+		transform.pos.x = x;
+		transform.pos.y = y;
+		texture.scale = 8;
+		
+		entity.add(transform);
+		entity.add(texture);
+		
+		return entity;
+	}
+
 }
