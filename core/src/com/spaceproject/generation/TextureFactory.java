@@ -46,8 +46,16 @@ public class TextureFactory {
 		return t;
 	}
 
-	public static Texture generateShip(int size) {
-		//TODO: seed
+	/**
+	 * Generate a unique ship.
+	 * @param x position for seed
+	 * @param y position for seed
+	 * @param size of ship
+	 * @return Texture of ship
+	 */
+	public static Texture generateShip(int x, int y, int size) {
+		MathUtils.random.setSeed(x * size + y * SpaceProject.SEED);
+		
 		boolean debugImage = false;
 		
 		// generate pixmap texture

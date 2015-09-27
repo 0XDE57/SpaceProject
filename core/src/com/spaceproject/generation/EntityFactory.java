@@ -223,7 +223,7 @@ public class EntityFactory {
 			size = MathUtils.random(minSize, maxSize);
 		} while (size % 2 == 1);
 		
-		Texture pixmapTex = TextureFactory.generateShip(size);
+		Texture pixmapTex = TextureFactory.generateShip(x, y, size);
 		float scale = 4.0f;
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
 		texture.scale = scale;
