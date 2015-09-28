@@ -145,10 +145,14 @@ public class HUDSystem extends EntitySystem {
 	 * Mark off-screen objects on edge of screen for navigation.
 	 */
 	private void drawEdgeMap() {
-		//TODO: change this to a scaling marker between min and max with size based on distance (Transfer Function?)
-		int markerSizeSmall = 4;
-		int markerSizeLarge = 7;
-		int distChangeMarker = 3000; //when to switch from small to large marker (closer object gets bigger marker)
+		float markerSmall = 3.5f; //min marker size
+		float markerLarge = 8; //max marker size
+		float distSmall = 8000; //distance when marker is small
+		float distLarge = 2000; //distance when marker is large
+		//gain and offset for transfer function: map [3.5 - 8] to [8000 - 2000]
+		double gain = (markerSmall-markerLarge)/(distSmall-distLarge);
+		double offset = markerSmall - gain * distSmall;
+		
 		int padding = 12; //how close to draw from edge of screen (in pixels)
 		int width = Gdx.graphics.getWidth();
 		int height = Gdx.graphics.getHeight();	
@@ -164,12 +168,14 @@ public class HUDSystem extends EntitySystem {
 					screenPos.x, screenPos.y) > map.distance) {
 				continue;
 			}
+			
 			//set entity co'ords relative to center of screen
 			screenPos.x -= RenderingSystem.getCam().position.x;
 			screenPos.y -= RenderingSystem.getCam().position.y;
 			
 			//skip on screen entities
-			if (screenPos.x > -centerX && screenPos.x < centerX && screenPos.y > -centerY && screenPos.y < centerY) {
+			int z = 100; //how close to edge of screen to ignore
+			if (screenPos.x + z > -centerX && screenPos.x - z < centerX && screenPos.y + z > -centerY && screenPos.y - z < centerY) {			
 				continue;
 			}
 			
@@ -204,13 +210,15 @@ public class HUDSystem extends EntitySystem {
 			markerX += centerX;
 			markerY += centerY;
 			
+			//calculate size of marker based on distance
+			float dist = MyMath.distance(screenPos.x, screenPos.y, centerX, centerY);
+			double size = gain * dist + offset;
+			if (size < markerSmall) size = markerSmall;
+			if (size > markerLarge) size = markerLarge;
+			
 			//draw marker
 			shape.setColor(map.color);
-			//float size = MyMath.distance(screenPos.x, screenPos.y, centerX, centerY)/distChangeMarker;
-			//if (size < markerSizeSmall) size = markerSizeSmall;
-			//if (size > markerSizeLarge) size = markerSizeLarge;
-			//shape.circle(markerX, markerY, size);
-			shape.circle(markerX, markerY, (MyMath.distance(screenPos.x, screenPos.y, centerX, centerY)) > distChangeMarker ? markerSizeSmall : markerSizeLarge);			
+			shape.circle(markerX, markerY, (float)size);			
 		}
 		
 		/*
