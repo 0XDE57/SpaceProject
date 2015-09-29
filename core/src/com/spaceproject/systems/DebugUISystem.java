@@ -283,7 +283,7 @@ public class DebugUISystem extends CustomIteratingSystem {
 			for (Entity ent : engine.getEntities()) {
 				componentCount += ent.getComponents().size();
 			}
-			//System.out.println("Entities: " + entityCount + " - Components: " + componentCount);
+
 			curCountTime = countTimer;
 		}
 		String count = "   E: " + entityCount + " - C: " + componentCount;
@@ -321,7 +321,7 @@ public class DebugUISystem extends CustomIteratingSystem {
 			if (m != null) {
 				vel = " ~ " + MyMath.round(m.velocity.len(), 1);
 			}
-			String info = "ID: " + entity.getId() + " (" + Math.round(t.pos.x) + "," + Math.round(t.pos.y) + ")" + vel;
+			String info = "ID: " + entity.getId() + " (" + MyMath.round(t.pos.x, 1) + "," + MyMath.round(t.pos.y, 1) + ")" + vel;
 			font.draw(batch, info, screenPos.x, screenPos.y);
 			int nextLine = 20;
 			for (int curComp = 0; curComp < components.size(); curComp++) {

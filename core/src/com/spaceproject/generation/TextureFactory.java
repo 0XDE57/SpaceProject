@@ -58,7 +58,7 @@ public class TextureFactory {
 		//pixmap = new Pixmap(tileSize, tileSize, Format.RGB565);
 		pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
 		
-		int numStars = 200;
+		int numStars = 300;
 		pixmap.setColor(Color.WHITE);
 		for (int i = 0; i < numStars; ++i){					
 			

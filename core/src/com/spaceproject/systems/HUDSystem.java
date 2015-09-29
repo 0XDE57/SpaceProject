@@ -116,8 +116,8 @@ public class HUDSystem extends EntitySystem {
 			return;
 		}
 		
-		Color bar = new Color(1, 1, 1, 0.3f);
-		Color on = new Color(0.6f, 0.8f, 1, 0.5f);
+		Color bar = new Color(1, 1, 1, 0.4f);
+		Color on = new Color(0.15f, 0.5f, 0.9f, 0.9f);
 		Color off = new Color(0f, 0f, 0f, 0.6f);
 		
 		int posY = 30; //pixels from bottom off screen

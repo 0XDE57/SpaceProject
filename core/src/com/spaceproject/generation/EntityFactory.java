@@ -54,7 +54,7 @@ public class EntityFactory {
 		// create star texture
 		TextureComponent texture = new TextureComponent();
 		float scale = 4.0f;
-		int minSize = 20;
+		int minSize = 30;
 		int maxSize = 250;
 		int radius = MathUtils.random(minSize, maxSize);	
 		texture.texture = TextureFactory.generateStar(radius);
@@ -63,7 +63,6 @@ public class EntityFactory {
 		// set position
 		TransformComponent transform = new TransformComponent();
 		transform.pos.set(x, y, 0); 
-
 		
 		//orbit for rotation of self (kinda hacky; not really orbiting, just rotating)
 		OrbitComponent orbit = new OrbitComponent();
@@ -71,6 +70,7 @@ public class EntityFactory {
 		orbit.rotateClockwise = rotationDir;
 		orbit.rotSpeed = MathUtils.random(0.002f, 0.06f); //rotation speed of star
 		
+		//map
 		MapComponent map = new MapComponent();
 		map.color = new Color(0.9f, 0.9f, 0.15f, 0.9f);
 		map.distance = 80000;
@@ -92,30 +92,22 @@ public class EntityFactory {
 		//create texture
 		TextureComponent texture = new TextureComponent();
 		float scale = 4.0f;
-		int minRad = 12;
+		int minRad = 20;
 		int maxRad = 200;	
 		int radius = MathUtils.random(minRad, maxRad);	
 		texture.texture = TextureFactory.generatePlanet(radius);
 		texture.scale = scale;
-
-		/*
-		//add bounding box
-		BoundsComponent bounds = new BoundsComponent();
-		float width = texture.texture.getWidth() * scale;
-		float height = texture.texture.getHeight() * scale;
-		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
-	    bounds.poly.setOrigin(width/2, height/2);
-		*/
 		
 		//orbit 
 		OrbitComponent orbit = new OrbitComponent();
 		orbit.parent = parent;
-		orbit.rotSpeed = MathUtils.random(0.002f, 0.06f); //rotation speed of planet
-		orbit.orbitSpeed = MathUtils.random(0.0009f, 0.009f); //orbit speed of planet	
+		orbit.rotSpeed = MathUtils.random(0.015f, 0.09f); //rotation speed of planet
+		orbit.orbitSpeed = MathUtils.random(0.001f, 0.009f); //orbit speed of planet	
 		orbit.angle = MathUtils.random(3.14f * 2); //angle from star
 		orbit.distance = distance;
 		orbit.rotateClockwise = rotationDir;
 		
+		//map
 		MapComponent map = new MapComponent();
 		map.color = new Color(0.15f, 0.5f, 0.9f, 0.9f);
 		map.distance = 10000;
