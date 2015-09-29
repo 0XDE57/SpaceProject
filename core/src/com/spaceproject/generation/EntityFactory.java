@@ -40,7 +40,10 @@ public class EntityFactory {
 		//create planets around star
 		for (int i = 1; i < planetarySystemEntities.length; ++i) {
 			distance += MathUtils.random(1600, 2100);
-			planetarySystemEntities[i] = createPlanet(star, distance, rotationDirection);
+			float angle = MathUtils.random(3.14f * 2); //angle from star
+			float orbitX = x + (distance * MathUtils.cos(angle));
+			float orbitY = y + (distance * MathUtils.sin(angle));
+			planetarySystemEntities[i] = createPlanet(star, orbitX, orbitY, angle, distance, rotationDirection);
 		}
 				
 		return planetarySystemEntities;
@@ -84,7 +87,7 @@ public class EntityFactory {
 		return entity;
 	}
 	
-	public static Entity createPlanet(Entity parent, float distance, boolean rotationDir) {
+	public static Entity createPlanet(Entity parent, float orbitX, float orbitY, float angle, float distance, boolean rotationDir) {
 		Vector3 parentPos = parent.getComponent(TransformComponent.class).pos;
 		MathUtils.random.setSeed((long)(parentPos.x + parentPos.y * distance) * SpaceProject.SEED);
 		Entity entity = new Entity();	
@@ -103,9 +106,14 @@ public class EntityFactory {
 		orbit.parent = parent;
 		orbit.rotSpeed = MathUtils.random(0.015f, 0.09f); //rotation speed of planet
 		orbit.orbitSpeed = MathUtils.random(0.001f, 0.009f); //orbit speed of planet	
-		orbit.angle = MathUtils.random(3.14f * 2); //angle from star
+		orbit.angle = angle; //angle from star
 		orbit.distance = distance;
 		orbit.rotateClockwise = rotationDir;
+		
+		//transform
+		TransformComponent transform = new TransformComponent();
+		transform.pos.x = orbitX;
+		transform.pos.y = orbitY;
 		
 		//map
 		MapComponent map = new MapComponent();
@@ -113,8 +121,7 @@ public class EntityFactory {
 		map.distance = 10000;
 		
 		//add components to entity
-		//entity.add(bounds);
-		entity.add(new TransformComponent());
+		entity.add(transform);
 		entity.add(texture);
 		entity.add(orbit);
 		entity.add(map);

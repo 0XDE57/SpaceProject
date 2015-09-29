@@ -1,5 +1,7 @@
 package com.spaceproject.systems;
 
+import javafx.collections.SetChangeListener;
+
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
@@ -80,15 +82,31 @@ public class HUDSystem extends EntitySystem {
 	 * Draw health bars on entities.
 	 */
 	private void drawHealthBars() {
+		int playerBarLength = 120;
+		int playerBarX = Gdx.graphics.getWidth()/2 - playerBarLength/2;
+		int playerBarY = 55;
+		
 		//bar dimensions
 		int barLength = 40;
 		int barWidth = 8;
 		int yOffset = -20; //position from entity
-		Color barBackground = new Color(1,1,1,0.4f);
+		Color barBackground = new Color(1,1,1,0.5f);
 		
 		for (Entity entity : killables) {
 			Vector3 pos = RenderingSystem.getCam().project(Mappers.transform.get(entity).pos.cpy());
 			HealthComponent health = Mappers.health.get(entity);
+			
+			//player bar
+			if (entity.equals(player.first())) {
+				shape.setColor(barBackground);
+				shape.rect(playerBarX, playerBarY, playerBarLength, barWidth);
+				
+				float ratio = health.health/health.maxHealth;
+				shape.setColor(new Color(1 - ratio, ratio, 0, 0.7f));
+				shape.rect(playerBarX, playerBarY, playerBarLength * ratio, barWidth);
+				
+				continue;
+			}
 			
 			//ignore full health
 			if (health.health == health.maxHealth) {
@@ -101,7 +119,7 @@ public class HUDSystem extends EntitySystem {
 			
 			//health
 			float ratio = health.health/health.maxHealth;
-			shape.setColor(new Color(1 - ratio, ratio, 0,0.6f));
+			shape.setColor(new Color(1 - ratio, ratio, 0, 0.7f));
 			shape.rect(pos.x-barLength/2, pos.y+yOffset, barLength * ratio, barWidth);
 		}
 			
