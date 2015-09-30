@@ -1,7 +1,5 @@
 package com.spaceproject.systems;
 
-import javafx.collections.SetChangeListener;
-
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
