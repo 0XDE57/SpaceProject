@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.spaceproject.SpaceBackgroundTile;
@@ -75,9 +76,10 @@ public class RenderingSystem extends IteratingSystem {
 	@Override
 	public void update(float delta) {
 		super.update(delta); //adds entities to render queue
-		
-		//clear screen with black
-		Gdx.gl20.glClearColor(0, 0, 0, 1);
+			
+		//clear screen with color based on camera position
+		Vector3 color = backgroundColor();
+		Gdx.gl20.glClearColor(color.x, color.y, color.z, 1);
 		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		//sort render order of entities
@@ -138,6 +140,31 @@ public class RenderingSystem extends IteratingSystem {
 		}
 	}
 
+
+	/**
+	 * Return color based on camera position
+	 * @return red in x, green in y, blue in z
+	 */
+	private Vector3 backgroundColor() {
+		float maxColor = 0.12f;
+		float ratio = 0.00001f;
+		float green = Math.abs(cam.position.x * ratio);
+		float blue = Math.abs(cam.position.y * ratio);
+		if ((int)(green / maxColor) % 2 == 0) {
+			green %= maxColor;
+		} else {
+			green = maxColor - green % maxColor;
+		}
+		if ((int)(blue / maxColor) % 2 == 1) {
+			blue %= maxColor;
+		} else {
+			blue = maxColor - blue % maxColor;
+		}
+		float red = blue+green;
+		Vector3 color = new Vector3(red, green, blue);
+		return color;
+	}
+
 	private void zoomCamera(float delta) {
 		if (cam.zoom != zoomTarget) {
 			float scaleSpeed = 3 * delta;
@@ -147,6 +174,7 @@ public class RenderingSystem extends IteratingSystem {
 			//if zoom is close enough, just set it to target
 			if (Math.abs(cam.zoom - zoomTarget) < 0.1) {
 				cam.zoom = zoomTarget;
+				System.out.println("zoom: " + cam.zoom);
 			}
 		}
 	}
@@ -186,7 +214,6 @@ public class RenderingSystem extends IteratingSystem {
 	//set zoom target
 	public void zoom(float zoom) {
 		zoomTarget = zoom;
-		System.out.println("zoom: " + zoom);
 	}
 
 	
