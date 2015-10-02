@@ -81,18 +81,16 @@ public class DebugUISystem extends CustomIteratingSystem {
 		
 		
 		//set projection matrix so things render using correct coordinates
-		//TODO: only needs to be called when screen size changes
 		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); 
 		batch.setProjectionMatrix(projectionMatrix);
-		shape.setProjectionMatrix(projectionMatrix);
+		shape.setProjectionMatrix(RenderingSystem.getCam().combined);
 		
 		
-		
-		//draw filled shapes///////////////////////////////////////////////
 		//enable blending for transparency
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		
+		//draw filled shapes
 		shape.begin(ShapeType.Filled);
 			
 		//draw light background for text visibility
@@ -100,10 +98,9 @@ public class DebugUISystem extends CustomIteratingSystem {
 			
 		shape.end();
 		Gdx.gl.glDisable(GL20.GL_BLEND); //disable blending
+				
 		
-		
-		
-		//draw non-filled shapes//////////////////////////////////////////
+		//draw non-filled shapes
 		shape.begin(ShapeType.Line);
 		
 		//draw vector to visualize speed and direction
@@ -119,7 +116,7 @@ public class DebugUISystem extends CustomIteratingSystem {
 		
 		
 		
-		//draw batch////////////////////////////////////////////////////////
+		//draw batch
 		batch.begin();
 		
 		//print debug menu
@@ -134,9 +131,7 @@ public class DebugUISystem extends CustomIteratingSystem {
 		//draw components on entity
 		if (drawComponentList) drawComponentList();
 
-		batch.end();
-	
-		
+		batch.end();	
 		
 		objects.clear();		
 	}
@@ -148,18 +143,16 @@ public class DebugUISystem extends CustomIteratingSystem {
 			TransformComponent t = Mappers.transform.get(entity);
 			MovementComponent m = Mappers.movement.get(entity);
 			if (m == null) continue;
-			
-			Vector3 screenPos = RenderingSystem.getCam().project(t.pos.cpy());
 
 			//calculate vector angle and length
 			float scale = 4; //how long to make vectors (higher number is shorter line)
 			float length = m.velocity.len();
 			float angle = m.velocity.angle() * MathUtils.degreesToRadians;
-			float pointX = screenPos.x + (length / scale * MathUtils.cos(angle));
-			float pointY = screenPos.y + (length / scale * MathUtils.sin(angle));
+			float pointX = t.pos.x + (length / scale * MathUtils.cos(angle));
+			float pointY = t.pos.y + (length / scale * MathUtils.sin(angle));
 			
 			//draw line to represent movement
-			shape.line(screenPos.x, screenPos.y, pointX, pointY, Color.RED, Color.MAGENTA);
+			shape.line(t.pos.x, t.pos.y, pointX, pointY, Color.RED, Color.MAGENTA);
 		}
 	}
 
@@ -240,11 +233,9 @@ public class DebugUISystem extends CustomIteratingSystem {
 			if (orbit != null && orbit.parent != null) {
 				TransformComponent parentPos = Mappers.transform.get(orbit.parent);
 				TransformComponent entityPos = Mappers.transform.get(entity);
-				Vector3 screenPos1 = RenderingSystem.getCam().project(new Vector3(parentPos.pos.x, parentPos.pos.y, 0));
-				Vector3 screenPos2 = RenderingSystem.getCam().project(new Vector3(entityPos.pos.x, entityPos.pos.y, 0));
-				float distance = MyMath.distance(screenPos1.x, screenPos1.y, screenPos2.x, screenPos2.y);
-				shape.circle(screenPos1.x, screenPos1.y, distance);
-				shape.line(screenPos1.x, screenPos1.y, screenPos2.x, screenPos2.y);
+				float distance = MyMath.distance(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
+				shape.circle(parentPos.pos.x, parentPos.pos.y, distance);
+				shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
 			}
 		}
 	}
@@ -257,14 +248,12 @@ public class DebugUISystem extends CustomIteratingSystem {
 			
 			if (bounds != null) {
 				//draw Axis-Aligned bounding box			
-				Vector3 screenPosT = RenderingSystem.getCam().project(new Vector3(t.pos.x, t.pos.y, 0));
 				Rectangle rect = bounds.poly.getBoundingRectangle();
 				shape.setColor(1, 1, 0, 1);
-				shape.rect(screenPosT.x - rect.width/2, screenPosT.y - rect.height/2, rect.width, rect.height);
+				shape.rect(t.pos.x - rect.width/2, t.pos.y - rect.height/2, rect.width, rect.height);
 
 				//draw Orientated bounding box
-				Vector3 screenPos = RenderingSystem.getCam().project(new Vector3(bounds.poly.getX(), bounds.poly.getY(), 0));
-				bounds.poly.setPosition(screenPos.x , screenPos.y);
+				bounds.poly.setPosition(bounds.poly.getX(), bounds.poly.getY());
 				shape.setColor(1, 0, 0, 1);
 				shape.polygon(bounds.poly.getTransformedVertices());
 			}
@@ -298,10 +287,9 @@ public class DebugUISystem extends CustomIteratingSystem {
 		//for each entity draw a clear box 
 		for (Entity entity : objects) {
 			TransformComponent transform = Mappers.transform.get(entity);
-			Vector3 screenPos = RenderingSystem.getCam().project(transform.pos.cpy());
 			//draw rectangle with size relative to number of components and text size (20). 
-			//200 box width - magic number assuming no component name will be that long 
-			shape.rect(screenPos.x-padding, screenPos.y+padding, 200, ((-entity.getComponents().size() - 1) * 20) - padding);
+			//210 box width - magic number assuming no component name will be that long 
+			shape.rect(transform.pos.x-padding, transform.pos.y+padding, 210, ((-entity.getComponents().size() - 1) * 20) - padding);
 		}
 	}
 

@@ -161,7 +161,7 @@ public class RenderingSystem extends IteratingSystem {
 			blue = maxColor - blue % maxColor;
 		}
 		float red = blue+green;
-		Vector3 color = new Vector3(red, green, blue);
+		Vector3 color = new Vector3(red, green + (0.15f-red)+0.05f, blue + (0.15f-red));
 		return color;
 	}
 
