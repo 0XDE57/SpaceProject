@@ -1,6 +1,5 @@
 package com.spaceproject.generation;
 
-
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -8,45 +7,62 @@ import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BoundsComponent;
+import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.MissileComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.OrbitComponent;
-import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.utility.MyMath;
 
 public class EntityFactory {
 
 	public static Entity[] createPlanetarySystem(float x, float y) {
 		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
+
+		//number of planets in a system
+		int minPlanets = 0;
+		int maxPlanets = 10;
+		int numPlanets = MathUtils.random(minPlanets,maxPlanets);
+		//distance between planets
+		float minDist = 1700;
+		float maxDist = 2200;
+		float distance = 0;
+		//rotation of system (orbits and spins)
+		boolean rotDir = MathUtils.randomBoolean();
+		//collection of planets/stars
+		Entity[] entities = new Entity[numPlanets + 1];
 		
-		Entity[] planetarySystemEntities = new Entity[MathUtils.random(1,10) + 1];
-		boolean rotationDirection = MathUtils.randomBoolean(); //rotation of system (orbits and spins)
 		
 		//add star to center of planetary system
-		Entity star = createStar(x, y, rotationDirection);
-		planetarySystemEntities[0] = star;
+		Entity star = createStar(x, y, rotDir);
+		entities[0] = star;
 		
-		float distance = 0;
 		
+		System.out.println("\nNew Planetary System: " + x + ", " + y);
+		System.out.println("Planets: " + (numPlanets));
+		System.out.print("[");
 		//create planets around star
-		for (int i = 1; i < planetarySystemEntities.length; ++i) {
-			distance += MathUtils.random(1600, 2100);
+		for (int i = 1; i < entities.length; ++i) {
+			distance += MathUtils.random(minDist, maxDist); //distance from previous entity
 			float angle = MathUtils.random(3.14f * 2); //angle from star
 			float orbitX = x + (distance * MathUtils.cos(angle));
 			float orbitY = y + (distance * MathUtils.sin(angle));
-			planetarySystemEntities[i] = createPlanet(star, orbitX, orbitY, angle, distance, rotationDirection);
+			entities[i] = createPlanet(star, orbitX, orbitY, angle, distance, rotDir);
+			//System.out.print("("+ MyMath.round(orbitX,1) + ", " + MyMath.round(orbitY,1) + "),");
+			System.out.print(MyMath.round(distance, 1) + ", ");
 		}
-				
-		return planetarySystemEntities;
+		System.out.println("]");
+		System.out.println("Size of system: " + distance*2);
+		
+		return entities;
 		
 	}
 	

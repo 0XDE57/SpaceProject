@@ -2,17 +2,18 @@ package com.spaceproject.systems;
 
 import java.util.ArrayList;
 
-import com.badlogic.ashley.core.ComponentMapper;
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.SpaceBackgroundTile;
 import com.spaceproject.components.PlayerFocusComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
 
-public class LoadingSystem extends IteratingSystem {
+public class LoadingSystem extends EntitySystem {
 	
 	//background layer of tiles
 	private static ArrayList<SpaceBackgroundTile> tiles = new ArrayList<SpaceBackgroundTile>();
@@ -32,8 +33,15 @@ public class LoadingSystem extends IteratingSystem {
 	private float checkTileTimer = 500; 
 	private float checkTileCurrTime = checkTileTimer;
 	
+	private ImmutableArray<Entity> player;
+	/*
+	private ImmutableArray<Entity> celestials;
+	private ImmutableArray<Entity> ships;
+	*/
+	
+	
 	public LoadingSystem() {
-		super(Family.all(PlayerFocusComponent.class).get());
+		//super(Family.all(PlayerFocusComponent.class).get());
 		
 		//load tiles
 		//load spacedust/background clouds(noise/fractals)
@@ -42,33 +50,13 @@ public class LoadingSystem extends IteratingSystem {
 		//load ai/mobs
 	}
 	
-	/** Convert world position to tile position.  
-	 * @param posX
-	 * @param posY
-	 * @return tile that an object is in.
-	 */
-	public static Vector2 getTilePos(float posX, float posY, float depth) {	
-		//calculate position
-		int x = (int) (posX - (RenderingSystem.getCam().position.x - (tileSize/2)) * depth);
-		int y = (int) (posY - (RenderingSystem.getCam().position.y - (tileSize/2)) * depth);
-		
-		//calculate tile that position is in
-		int tX = x / tileSize;
-		int tY = y / tileSize;
-		
-		//subtract 1 from tile position if less than zero to account for -1/x giving 0
-		if (x < 0) {
-			--tX;
-		}
-		if (y < 0) {
-			--tY;
-		}	
-		
-		return new Vector2(tX, tY);
+	@Override
+	public void addedToEngine(Engine engine) {
+		player = engine.getEntitiesFor(Family.one(PlayerFocusComponent.class).get());
 	}
 
 	@Override
-	protected void processEntity(Entity entity, float delta) {
+	public void update(float delta) {
 		// TODO: consider adding timers to break up the process from happening
 		// in one frame causing a freeze/jump
 		// because putting it in a separate thread is not possible due to
@@ -80,7 +68,7 @@ public class LoadingSystem extends IteratingSystem {
 		if (checkTileCurrTime < 0) {
 
 			// get tiles player is in
-			TransformComponent pos = Mappers.transform.get(entity);
+			TransformComponent pos = Mappers.transform.get(player.first());
 			Vector2 bgTile = getTilePos(pos.pos.x, pos.pos.y, bgTileDepth);
 			Vector2 fgTile = getTilePos(pos.pos.x, pos.pos.y, fgTileDepth);
 			
@@ -125,6 +113,31 @@ public class LoadingSystem extends IteratingSystem {
 		}
 
 	}
+	
+	/** Convert world position to tile position.  
+	 * @param posX
+	 * @param posY
+	 * @return tile that an object is in.
+	 */
+	public static Vector2 getTilePos(float posX, float posY, float depth) {	
+		//calculate position
+		int x = (int) (posX - (RenderingSystem.getCam().position.x - (tileSize/2)) * depth);
+		int y = (int) (posY - (RenderingSystem.getCam().position.y - (tileSize/2)) * depth);
+		
+		//calculate tile that position is in
+		int tX = x / tileSize;
+		int tY = y / tileSize;
+		
+		//subtract 1 from tile position if less than zero to account for -1/x giving 0
+		if (x < 0) {
+			--tX;
+		}
+		if (y < 0) {
+			--tY;
+		}	
+		
+		return new Vector2(tX, tY);
+	}
 
 	/**
 	 * Load tiles surrounding centerTile of specified depth.
@@ -151,6 +164,7 @@ public class LoadingSystem extends IteratingSystem {
 				}
 			}
 		}
+		System.out.println("Load tile: [" + depth + "]: " + centerTile.x + ", " + centerTile.y);
 	}
 
 	/** 

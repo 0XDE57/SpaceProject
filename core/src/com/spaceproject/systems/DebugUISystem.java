@@ -221,7 +221,7 @@ public class DebugUISystem extends CustomIteratingSystem {
 		font.draw(batch, "[NUM2] Draw Bounds: " + drawBounds, 15, Gdx.graphics.getHeight() - 90);
 		font.draw(batch, "[NUM3] Draw FPS: " + drawFPS, 15, Gdx.graphics.getHeight() - 105);
 		font.draw(batch, "[NUM4] Draw Orbit Path: " + drawOrbitPath, 15, Gdx.graphics.getHeight() - 120);
-		font.draw(batch, "[NUM5] Draw Vectors: " + drawOrbitPath, 15, Gdx.graphics.getHeight() - 135);
+		font.draw(batch, "[NUM5] Draw Vectors: " + drawVectors, 15, Gdx.graphics.getHeight() - 135);
 		font.draw(batch, "[NUM9] Hide this menu.", 15, Gdx.graphics.getHeight() - 150);
 	}
 
