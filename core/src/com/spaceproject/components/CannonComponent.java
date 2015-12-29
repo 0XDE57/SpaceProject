@@ -2,7 +2,7 @@ package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
 
-public class CannonComponent extends Component {
+public class CannonComponent implements Component {
 	
 	public float damage;
 	

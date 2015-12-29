@@ -40,11 +40,10 @@ public class RenderingSystem extends IteratingSystem {
 	private float zoomTarget = 1;
 	
 	//TODO: come up with some kind of standard size (pixel to meters)? / something less arbitrary
-	private static final int WORLDWIDTH = 1280;
+	//private static final int WORLDWIDTH = 1280;
 	private static final int WORLDHEIGHT = 720;
 
 	
-	@SuppressWarnings("unchecked")
 	public RenderingSystem() {
 		super(Family.all(TransformComponent.class, TextureComponent.class).get());
 		
@@ -215,7 +214,15 @@ public class RenderingSystem extends IteratingSystem {
 	public void zoom(float zoom) {
 		zoomTarget = zoom;
 	}
+	
+	public float getZoom() {
+		return cam.zoom;
+	}
 
+	public Vector3 getPos() {
+		return cam.position;
+	}
+	
 	
 	public static OrthographicCamera getCam() {
 		return cam;
@@ -225,6 +232,7 @@ public class RenderingSystem extends IteratingSystem {
 	public void resize(int width, int height) {
 		viewport.update(width, height);
 	}
+
 
 	
 

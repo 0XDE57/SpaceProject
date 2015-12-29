@@ -13,7 +13,6 @@ public class MovementSystem extends IteratingSystem {
 	//temporary 
 	private Vector2 tmp = new Vector2(); 
 	
-	@SuppressWarnings("unchecked")
 	public MovementSystem() {
 		super(Family.all(TransformComponent.class, MovementComponent.class).get());
 	}

@@ -6,7 +6,6 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MissileComponent;
@@ -35,8 +34,9 @@ public class CollisionSystem extends EntitySystem {
 		//check for bullet collision against ships
 		for (Entity vehicle : vehicles) {
 			for (Entity missle : missiles) {
+				
 				//if missile not from self (don't shoot self)
-				if (vehicle.getId() != Mappers.missile.get(missle).ownerID) {
+				if (Mappers.vehicle.get(vehicle).id != Mappers.missile.get(missle).ownerID) {
 					BoundsComponent mis = Mappers.bounds.get(missle);
 					BoundsComponent veh = Mappers.bounds.get(vehicle);
 					if (mis.poly.getBoundingRectangle().overlaps(veh.poly.getBoundingRectangle())) {
@@ -46,14 +46,14 @@ public class CollisionSystem extends EntitySystem {
 							HealthComponent health = Mappers.health.get(vehicle);
 							MissileComponent misl = Mappers.missile.get(missle);
 							
-							double chance = MathUtils.random(-misl.damage/10, misl.damage/10); // damage +/- 10%
-							health.health -= misl.damage + chance;
+							//double chance = MathUtils.random(-misl.damage/10, misl.damage/10); // damage +/- 10%
+							health.health -= misl.damage;// + chance;
 							
 							//remove ship (kill)
 							if (health.health <= 0) {
 								vehicle.getComponent(TextureComponent.class).texture.dispose();
 								engine.removeEntity(vehicle);
-								System.out.println("[" + vehicle.getId() + "] killed by: [" + misl.ownerID + "]");
+								System.out.println("[" + Mappers.vehicle.get(vehicle).id + "] killed by: [" + misl.ownerID + "]");
 							}
 							
 							//remove missile

@@ -22,6 +22,7 @@ import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
@@ -53,7 +54,6 @@ public class DebugUISystem extends CustomIteratingSystem {
 	private int entityCount = 0;
 	private int componentCount = 0;
 	
-	@SuppressWarnings("unchecked")
 	public DebugUISystem() {
 		super(Family.all(TransformComponent.class).get());
 		
@@ -298,18 +298,28 @@ public class DebugUISystem extends CustomIteratingSystem {
 		font.setColor(1, 1, 1, 1);
 		for (Entity entity : objects) {
 			//get entities position and list of components
-			TransformComponent t = Mappers.transform.get(entity);
-			MovementComponent m = Mappers.movement.get(entity);
+			TransformComponent t = Mappers.transform.get(entity);			
 			ImmutableArray<Component> components = entity.getComponents();
 			
 			//use Vector3.cpy() to project only the position and avoid modifying projection matrix for all coordinates
 			Vector3 screenPos = RenderingSystem.getCam().project(t.pos.cpy());
-			//print current ID and position in world and a list of all components
+					
+			//if has movement
+			MovementComponent m = Mappers.movement.get(entity);
 			String vel = "";
 			if (m != null) {
 				vel = " ~ " + MyMath.round(m.velocity.len(), 1);
 			}
-			String info = "ID: " + entity.getId() + " (" + MyMath.round(t.pos.x, 1) + "," + MyMath.round(t.pos.y, 1) + ")" + vel;
+			
+			//if has id
+			VehicleComponent v = Mappers.vehicle.get(entity);
+			String id = "";
+			if (v != null) {
+				id = "ID: " + v.id + " ";
+			}
+			
+			//print current ID and position in world and a list of all components
+			String info = id + "(" + MyMath.round(t.pos.x, 1) + "," + MyMath.round(t.pos.y, 1) + ")" + vel;
 			font.draw(batch, info, screenPos.x, screenPos.y);
 			int nextLine = 20;
 			for (int curComp = 0; curComp < components.size(); curComp++) {

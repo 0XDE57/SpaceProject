@@ -62,7 +62,7 @@ public class PlayerControlSystem extends EntitySystem {
 		this.vehicleEntity = vehicle;
 	}
 
-	@SuppressWarnings("unchecked")
+
 	@Override
 	public void addedToEngine(Engine engine) {
 		this.engine = engine;	
@@ -166,13 +166,16 @@ public class PlayerControlSystem extends EntitySystem {
 			movement.velocity.add(dx, dy);
 		}
 		
-		//apply breaks
+		//stop vehicle
 		if (applyBreaks) {					
 			if (movement.velocity.len() < 10) {
+				//completely stop if moving really slowly
 				movement.velocity.set(0,0);
 			} else {
 				float thrust = movement.velocity.len();
-				if (thrust > 1000) thrust = 1000; //cap the breaking power
+				if (thrust > 1000) {
+					thrust = 1000; //cap the braking power
+				}
 				float angle = movement.velocity.angle();
 				float dx = (float) Math.cos(angle) * thrust * delta;
 				float dy = (float) Math.sin(angle) * thrust * delta;
@@ -182,7 +185,7 @@ public class PlayerControlSystem extends EntitySystem {
 		
 		//fire cannon / attack
 		if (shoot && canFire(cannon)) {							
-			fireCannon(transform, movement, cannon, vehicleEntity.getId());
+			fireCannon(transform, movement, cannon, Mappers.vehicle.get(vehicleEntity).id);
 		}
 		
 		//debug stop

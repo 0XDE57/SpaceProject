@@ -3,7 +3,7 @@ package com.spaceproject.components;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.graphics.Color;
 
-public class MapComponent extends Component {
+public class MapComponent implements Component {
 	/* color of marker */
 	public Color color;
 	

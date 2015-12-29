@@ -20,6 +20,7 @@ import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.utility.IDGen;
 import com.spaceproject.utility.MyMath;
 
 public class EntityFactory {
@@ -263,6 +264,7 @@ public class EntityFactory {
 		//engine data and marks entity as drive-able
 		VehicleComponent vehicle = new VehicleComponent();
 		vehicle.thrust = 320;
+		vehicle.id = IDGen.get();
 		
 		//health
 		HealthComponent health = new HealthComponent();

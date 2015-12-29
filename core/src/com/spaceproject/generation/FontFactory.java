@@ -8,11 +8,11 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 public class FontFactory {
 
 	//fonts
-	public static String fontPressStart = "fonts/pressstart/PressStart2P.ttf";
+	public static final String fontPressStart = "fonts/pressstart/PressStart2P.ttf";
 	
-	public static String fontComfortaaLight = "fonts/comfortaa/ComfortaaLight.ttf";
-	public static String fontComfortaaRegular = "fonts/comfortaa/ComfortaaRegular.ttf";
-	public static String fontComfortaaBold = "fonts/comfortaa/ComfortaaBold.ttf";
+	public static final String fontComfortaaLight = "fonts/comfortaa/ComfortaaLight.ttf";
+	public static final String fontComfortaaRegular = "fonts/comfortaa/ComfortaaRegular.ttf";
+	public static final String fontComfortaaBold = "fonts/comfortaa/ComfortaaBold.ttf";
 	
 	public static final String fontBitstreamVM = "fonts/bitstream/VeraMono.ttf";
 	public static final String fontBitstreamVMBoldItalic = "fonts/bitstream/VeraMono-Bold-Italic.ttf";

@@ -10,7 +10,6 @@ import com.spaceproject.utility.Mappers;
 
 public class BoundsSystem extends IteratingSystem {
 	
-	@SuppressWarnings("unchecked")
 	public BoundsSystem() {
 		super(Family.all(BoundsComponent.class, TransformComponent.class).get());
 		

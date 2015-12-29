@@ -16,9 +16,9 @@ allprojects {
     version = '1.0'
     ext {
         appName = 'spaceproject'
-        gdxVersion = '1.7.0'
+        gdxVersion = '1.7.2'
         roboVMVersion = '1.8'
-        ashleyVersion = '1.6.0'
+        ashleyVersion = '1.7.0'
     }
 
     repositories {

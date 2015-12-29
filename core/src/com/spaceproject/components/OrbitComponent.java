@@ -3,7 +3,7 @@ package com.spaceproject.components;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
 
-public class OrbitComponent extends Component {
+public class OrbitComponent implements Component {
 	//the entity to orbit
 	public Entity parent; 
 	

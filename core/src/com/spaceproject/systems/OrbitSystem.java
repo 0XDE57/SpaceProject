@@ -11,7 +11,6 @@ import com.spaceproject.utility.Mappers;
 
 public class OrbitSystem extends IteratingSystem {
 
-	@SuppressWarnings("unchecked")
 	public OrbitSystem() {
 		super(Family.all(OrbitComponent.class, TransformComponent.class).get());
 	}

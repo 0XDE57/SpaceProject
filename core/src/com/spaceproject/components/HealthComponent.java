@@ -2,7 +2,7 @@ package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
 
-public class HealthComponent extends Component {
+public class HealthComponent implements Component {
 	//health for living things / combat, entity dies upon value reaching 0
 	public float health;
 	

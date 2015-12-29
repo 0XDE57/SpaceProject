@@ -2,17 +2,13 @@ package com.spaceproject.screens;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Application.ApplicationType;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.MapComponent;
-import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PlayerFocusComponent;
-import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.systems.BoundsSystem;
 import com.spaceproject.systems.CameraSystem;

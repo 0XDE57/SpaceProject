@@ -19,7 +19,6 @@ public class ExpireSystem extends IntervalSystem {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
     public void addedToEngine(Engine engine) {
         entities = engine.getEntitiesFor(Family.all(ExpireComponent.class).get());
