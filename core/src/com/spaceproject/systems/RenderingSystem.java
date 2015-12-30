@@ -223,7 +223,6 @@ public class RenderingSystem extends IteratingSystem {
 		return cam.position;
 	}
 	
-	
 	public static OrthographicCamera getCam() {
 		return cam;
 	}

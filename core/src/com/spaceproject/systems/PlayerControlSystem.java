@@ -17,7 +17,7 @@ import com.spaceproject.utility.Mappers;
 
 public class PlayerControlSystem extends EntitySystem {
 
-	private static Engine engine;
+	private Engine engine;
 
 	//target reference
 	private Entity playerEntity = null; //the player entity
@@ -106,13 +106,12 @@ public class PlayerControlSystem extends EntitySystem {
 		TransformComponent transform = Mappers.transform.get(playerEntity);
 		
 		//make character face mouse/joystick
-		transform.rotation = angleFacing;
+		transform.rotation = angleFacing;		
 					
 		if (moveForward) {				
 			float walkSpeed = 35f; //TODO: move to component
 			float dx = (float) Math.cos(transform.rotation) * (walkSpeed * movementMultiplier) * delta;
-			float dy = (float) Math.sin(transform.rotation) * (walkSpeed * movementMultiplier) * delta;
-			
+			float dy = (float) Math.sin(transform.rotation) * (walkSpeed * movementMultiplier) * delta;		
 			transform.pos.add(dx, dy, 0);
 		}
 	}
@@ -126,69 +125,39 @@ public class PlayerControlSystem extends EntitySystem {
 		MovementComponent movement = Mappers.movement.get(vehicleEntity);	
 		VehicleComponent vehicle = Mappers.vehicle.get(vehicleEntity);
 		
-		CannonComponent cannon = Mappers.cannon.get(vehicleEntity);
-		//TODO: cannon refill logic needs to be moved to system, all ships need to recharge
-		//deal with cannon timers
-		cannon.timeSinceLastShot -= 100 * delta;
-		cannon.timeSinceRecharge -= 100 * delta;
-		refillAmmo(cannon);
+		CannonComponent cannon = Mappers.cannon.get(vehicleEntity);	
+		refillAmmo(cannon, delta);
 		
 		//make vehicle face angle from mouse/joystick
-		transform.rotation = angleFacing;	
+		transform.rotation = angleFacing;
 		
-		//apply thrust forward
+		
+		//apply thrust forward accelerate 
 		if (moveForward) {
-			//TODO: implement rest of engine behavior
-			//float maxSpeed;
-			//float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go
-			float thrust = vehicle.thrust;
-			float angle = transform.rotation;
-			float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
-			float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
-			movement.velocity.add(dx, dy);
+			accelerate(delta, transform, movement, vehicle);
 		}
 		
 		//apply thrust left
 		if (moveLeft) {
-			float thrust = vehicle.thrust * 0.6f;
-			float angle = transform.rotation + 1.57f;
-			float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
-			float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
-			movement.velocity.add(dx, dy);
+			accelLeft(delta, transform, movement, vehicle);
 		}
 		
 		//apply thrust right
 		if (moveRight) {
-			float thrust = vehicle.thrust * 0.6f;
-			float angle = transform.rotation - 1.57f;
-			float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
-			float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
-			movement.velocity.add(dx, dy);
+			accelRight(delta, transform, movement, vehicle);
 		}
 		
 		//stop vehicle
 		if (applyBreaks) {					
-			if (movement.velocity.len() < 10) {
-				//completely stop if moving really slowly
-				movement.velocity.set(0,0);
-			} else {
-				float thrust = movement.velocity.len();
-				if (thrust > 1000) {
-					thrust = 1000; //cap the braking power
-				}
-				float angle = movement.velocity.angle();
-				float dx = (float) Math.cos(angle) * thrust * delta;
-				float dy = (float) Math.sin(angle) * thrust * delta;
-				movement.velocity.add(dx, dy);
-			}
+			decelerate(delta, movement);
 		}
 		
 		//fire cannon / attack
-		if (shoot && canFire(cannon)) {							
+		if (shoot) {							
 			fireCannon(transform, movement, cannon, Mappers.vehicle.get(vehicleEntity).id);
 		}
 		
-		//debug stop
+		//debug force insta-stop
 		if (stop) {
 			movement.velocity.set(0,0);
 			stop = false;
@@ -196,10 +165,88 @@ public class PlayerControlSystem extends EntitySystem {
 	}
 
 	/**
+	 * Slow down ship. When ship is slow enough, ship will stop completely
+	 * @param delta
+	 * @param movement
+	 */
+	private void decelerate(float delta, MovementComponent movement) {
+		if (movement.velocity.len() < 10f) {
+			//completely stop if moving really slowly
+			movement.velocity.set(0,0);
+		} else {
+			float thrust = movement.velocity.len();
+			if (thrust > 1000) {
+				thrust = 1000; //cap the braking power
+			}
+			float angle = movement.velocity.angle();
+			float dx = (float) Math.cos(angle) * thrust * delta;
+			float dy = (float) Math.sin(angle) * thrust * delta;
+			movement.velocity.add(dx, dy);
+		}
+	}
+
+	/**
+	 * Move ship to the right. TODO: change this to dodge mechanic.
+	 * @param delta
+	 * @param transform
+	 * @param movement
+	 * @param vehicle
+	 */
+	private void accelRight(float delta, TransformComponent transform, MovementComponent movement, VehicleComponent vehicle) {
+		float thrust = vehicle.thrust * 0.6f;
+		float angle = transform.rotation - 1.57f;
+		float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
+		float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
+		movement.velocity.add(dx, dy);
+		movement.velocity.clamp(0, vehicle.maxSpeed);
+	}
+
+	/**
+	 * Move ship to the left. TODO: change this to dodge mechanic.
+	 * @param delta
+	 * @param transform
+	 * @param movement
+	 * @param vehicle
+	 */
+	private void accelLeft(float delta, TransformComponent transform, MovementComponent movement, VehicleComponent vehicle) {
+		float thrust = vehicle.thrust * 0.6f;
+		float angle = transform.rotation + 1.57f;
+		float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
+		float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
+		movement.velocity.add(dx, dy);
+		movement.velocity.clamp(0, vehicle.maxSpeed);
+	}
+
+	/**
+	 * Move ship forward.
+	 * @param delta
+	 * @param transform
+	 * @param movement
+	 * @param vehicle
+	 */
+	private void accelerate(float delta, TransformComponent transform, MovementComponent movement, VehicleComponent vehicle) {
+		//TODO: implement rest of engine behavior
+		//float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go			
+	
+		float thrust = vehicle.thrust;
+		float angle = transform.rotation;
+		float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
+		float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
+		movement.velocity.add(dx, dy);
+		if (vehicle.maxSpeed != -1)
+			movement.velocity.clamp(0, vehicle.maxSpeed);
+	}
+
+	/**
 	 * Refill ammo for the cannon
 	 * @param cannon
+	 * @param delta 
 	 */
-	private void refillAmmo(CannonComponent cannon) {
+	private void refillAmmo(CannonComponent cannon, float delta) {
+		//TODO: cannon refill logic needs to be moved to system, all ships need to recharge
+		// deal with cannon timers
+		cannon.timeSinceLastShot -= 100 * delta;
+		cannon.timeSinceRecharge -= 100 * delta;
 		if (cannon.timeSinceRecharge < 0 && cannon.curAmmo < cannon.maxAmmo) {
 			//refill ammo
 			cannon.curAmmo++;		
@@ -216,6 +263,10 @@ public class PlayerControlSystem extends EntitySystem {
 	 * @param cannon
 	 */
 	private void fireCannon(TransformComponent transform, MovementComponent movement, CannonComponent cannon, long ID) {
+		//check if can fire before shooting
+		if (!canFire(cannon))
+			return;
+		
 		//reset timer if ammo is full, to prevent instant recharge
 		if (cannon.curAmmo == cannon.maxAmmo) {			
 			cannon.timeSinceRecharge = cannon.rechargeRate;

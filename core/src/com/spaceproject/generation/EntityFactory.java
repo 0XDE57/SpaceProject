@@ -263,7 +263,8 @@ public class EntityFactory {
 		
 		//engine data and marks entity as drive-able
 		VehicleComponent vehicle = new VehicleComponent();
-		vehicle.thrust = 320;
+		vehicle.thrust = 320;//higher is faster
+		vehicle.maxSpeed = -1;//-1 = no max speed/infinite
 		vehicle.id = IDGen.get();
 		
 		//health
