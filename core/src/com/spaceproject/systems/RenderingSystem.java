@@ -145,25 +145,33 @@ public class RenderingSystem extends IteratingSystem {
 	 * @return red in x, green in y, blue in z
 	 */
 	private Vector3 backgroundColor() {
+		//still playing with these values to get the right feel/intensity of color...
 		float maxColor = 0.12f;
 		float ratio = 0.00001f;
 		float green = Math.abs(cam.position.x * ratio);
 		float blue = Math.abs(cam.position.y * ratio);
+		//green based on x position. range amount of green between 0 and maxColor
 		if ((int)(green / maxColor) % 2 == 0) {
 			green %= maxColor;
 		} else {
 			green = maxColor - green % maxColor;
 		}
+		//blue based on y position. range amount of blue between 0 and maxColor
 		if ((int)(blue / maxColor) % 2 == 1) {
 			blue %= maxColor;
 		} else {
 			blue = maxColor - blue % maxColor;
 		}
+		//red is combination of blue and green
 		float red = blue+green;
 		Vector3 color = new Vector3(red, green + (0.15f-red)+0.05f, blue + (0.15f-red));
 		return color;
 	}
 
+	/**
+	 * Animate camera zoom. Will zoom camera in or out until it reaches zoomTarget.
+	 * @param delta
+	 */
 	private void zoomCamera(float delta) {
 		if (cam.zoom != zoomTarget) {
 			float scaleSpeed = 3 * delta;
@@ -173,25 +181,28 @@ public class RenderingSystem extends IteratingSystem {
 			//if zoom is close enough, just set it to target
 			if (Math.abs(cam.zoom - zoomTarget) < 0.1) {
 				cam.zoom = zoomTarget;
-				System.out.println("zoom: " + cam.zoom);
 			}
 		}
 	}
 
-	//turn vsync on or off
+	/**
+	 * Turn vsync on or off
+	 */
 	void toggleVsync() {
 		vsync = !vsync;
 		Gdx.graphics.setVSync(vsync);
 		System.out.println("vsync: " + vsync);
 	}
 
-	//switch between fullscreen and windowed
+	/**
+	 * Switch between fullscreen and windowed mode.
+	 */
 	void toggleFullscreen() {
 		if (Gdx.graphics.isFullscreen()) {
 			//set window to previous window size
 			Gdx.graphics.setDisplayMode(prevWindowWidth, prevWindowHeight, false);
 		} else {
-			//save windows size
+			//save window size
 			prevWindowWidth = Gdx.graphics.getWidth();
 			prevWindowHeight = Gdx.graphics.getHeight();
 			
@@ -205,21 +216,24 @@ public class RenderingSystem extends IteratingSystem {
 	}
 	
 	@Override
-	//Add entities to render queue
 	public void processEntity(Entity entity, float deltaTime) {
+		//Add entities to render queue
 		renderQueue.add(entity);
 	}
 	
-	//set zoom target
-	public void zoom(float zoom) {
+	/**
+	 * Set zoom for camera to animate to.
+	 * @param zoom
+	 */
+	public void setZoomTarget(float zoom) {
 		zoomTarget = zoom;
 	}
 	
-	public float getZoom() {
+	public float getCamZoom() {
 		return cam.zoom;
 	}
 
-	public Vector3 getPos() {
+	public static Vector3 getCamPos() {
 		return cam.position;
 	}
 	
@@ -227,7 +241,11 @@ public class RenderingSystem extends IteratingSystem {
 		return cam;
 	}
 
-	//resize viewport. called from screen resize
+	/**
+	 * Resize viewport. Called from screen resize.
+	 * @param width
+	 * @param height
+	 */
 	public void resize(int width, int height) {
 		viewport.update(width, height);
 	}

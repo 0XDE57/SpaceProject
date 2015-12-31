@@ -170,14 +170,19 @@ public class PlayerControlSystem extends EntitySystem {
 	 * @param movement
 	 */
 	private void decelerate(float delta, MovementComponent movement) {
-		if (movement.velocity.len() < 10f) {
+		int stopThreshold = 20; 
+		int minBreakingOffset = 100;
+		int maxBreakingThrust = 1000;
+		if (movement.velocity.len() <= stopThreshold) {
 			//completely stop if moving really slowly
 			movement.velocity.set(0,0);
 		} else {
-			float thrust = movement.velocity.len();
-			if (thrust > 1000) {
-				thrust = 1000; //cap the braking power
+			//thrust amount to slow down by
+			float thrust = minBreakingOffset + movement.velocity.len();		
+			if (thrust > maxBreakingThrust) {
+				thrust = maxBreakingThrust; //cap the braking power
 			}
+			//add thrust opposite direction of velocity to slow down ship
 			float angle = movement.velocity.angle();
 			float dx = (float) Math.cos(angle) * thrust * delta;
 			float dy = (float) Math.sin(angle) * thrust * delta;
@@ -198,7 +203,8 @@ public class PlayerControlSystem extends EntitySystem {
 		float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
 		float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
 		movement.velocity.add(dx, dy);
-		movement.velocity.clamp(0, vehicle.maxSpeed);
+		if (vehicle.maxSpeed != -1)
+			movement.velocity.clamp(0, vehicle.maxSpeed);
 	}
 
 	/**
@@ -214,7 +220,8 @@ public class PlayerControlSystem extends EntitySystem {
 		float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
 		float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
 		movement.velocity.add(dx, dy);
-		movement.velocity.clamp(0, vehicle.maxSpeed);
+		if (vehicle.maxSpeed != -1)
+			movement.velocity.clamp(0, vehicle.maxSpeed);
 	}
 
 	/**
@@ -225,6 +232,7 @@ public class PlayerControlSystem extends EntitySystem {
 	 * @param vehicle
 	 */
 	private void accelerate(float delta, TransformComponent transform, MovementComponent movement, VehicleComponent vehicle) {
+		//TODO: create a vector method for the dx = cos... dy = sin... It's used multiple times in the program(movement, missiles..)
 		//TODO: implement rest of engine behavior
 		//float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go			
 	
@@ -233,6 +241,8 @@ public class PlayerControlSystem extends EntitySystem {
 		float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
 		float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
 		movement.velocity.add(dx, dy);
+		
+		//cap speed at max. if maxSpeed set to -1 it's infinite(no cap)
 		if (vehicle.maxSpeed != -1)
 			movement.velocity.clamp(0, vehicle.maxSpeed);
 	}
@@ -321,26 +331,28 @@ public class PlayerControlSystem extends EntitySystem {
 		}
 		
 		//get all vehicles and check if player is close to one(bounds overlap)
-		for (int v = 0; v < vehicles.size(); v++) {
-			Entity vehicle = vehicles.get(v);
-			BoundsComponent vehicleBounds = Mappers.bounds.get(vehicles.get(v));
-			BoundsComponent playerBounds = Mappers.bounds.get(playerEntity);
+		BoundsComponent playerBounds = Mappers.bounds.get(playerEntity);
+		for (Entity vehicle : vehicles) {
+			BoundsComponent vehicleBounds = Mappers.bounds.get(vehicle);			
 			
-			//TODO should this be in collision detection class? use listeners?
-			//check if character near vehicle
+			//check if character is near a vehicle TODO: check if vehicle empty/available
 			if (playerBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {			
-				if (Intersector.overlapConvexPolygons(vehicleBounds.poly, playerBounds.poly)){
-					// get in vehicle
+				if (Intersector.overlapConvexPolygons(vehicleBounds.poly, playerBounds.poly)) {
 					
-					//TODO: find better way to do this, check entity for vehicle component
+					//TODO: find better way to do this, check entity for vehicle component?
+					//Change vehicle component to save the controlling entity(the driver). reference null if vehicle empty.
+					//generic to work with AI and player (and in theory arbitrary entities if necessary)
 					vehicleEntity = vehicle; //set vehicle reference
 
 					//zoom out camera
-					engine.getSystem(RenderingSystem.class).zoom(1);
+					engine.getSystem(RenderingSystem.class).setZoomTarget(1);
+					//TODO add animation to slowly move focus to the vehicle instead of instantly jumping to the vehicle position
 					//engine.getSystem(RenderingSystem.class).pan(vehicleTransform);
 					
+					
+					//TODO make switch focus method? (oldEntity, newEntity)
+					//TODO there is a crash here when entering vehicle sometimes...find it, fix it.
 					//set focus to vehicle
-					//TODO make switch focus method (oldEntity, newEntity)
 					vehicle.add(playerEntity.remove(PlayerFocusComponent.class));
 				
 					//remove player from engine
@@ -376,7 +388,7 @@ public class PlayerControlSystem extends EntitySystem {
 		Mappers.transform.get(playerEntity).pos.set(Mappers.transform.get(vehicleEntity).pos);				
 
 		//zoom in camera
-		engine.getSystem(RenderingSystem.class).zoom(0.4f);
+		engine.getSystem(RenderingSystem.class).setZoomTarget(0.4f);
 		
 		//set focus to player entity
 		playerEntity.add(vehicleEntity.remove(PlayerFocusComponent.class));

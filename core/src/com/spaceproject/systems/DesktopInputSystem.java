@@ -22,16 +22,16 @@ public class DesktopInputSystem extends EntitySystem {
 		//SCREEN CONTROLS///////////////////////////////////////////////////////////////////////////////////////
 		//zoom test
 		if (Gdx.input.isKeyPressed(Keys.COMMA))  {
-			if (engine.getSystem(RenderingSystem.class).getZoom() >= 10f) {
-				engine.getSystem(RenderingSystem.class).zoom(60);
+			if (engine.getSystem(RenderingSystem.class).getCamZoom() >= 10f) {
+				engine.getSystem(RenderingSystem.class).setZoomTarget(60);
 			} else {
-				engine.getSystem(RenderingSystem.class).zoom(10);
+				engine.getSystem(RenderingSystem.class).setZoomTarget(10);
 			}
 		}
-		if (Gdx.input.isKeyPressed(Keys.PERIOD)) engine.getSystem(RenderingSystem.class).zoom(1);
-		if (Gdx.input.isKeyPressed(Keys.SLASH)) engine.getSystem(RenderingSystem.class).zoom(0.1f);
-		if (Gdx.input.isKeyPressed(Keys.MINUS)) engine.getSystem(RenderingSystem.class).zoom(engine.getSystem(RenderingSystem.class).getZoom() + 0.001f);
-		if (Gdx.input.isKeyPressed(Keys.EQUALS)) engine.getSystem(RenderingSystem.class).zoom(engine.getSystem(RenderingSystem.class).getZoom() - 0.001f);
+		if (Gdx.input.isKeyPressed(Keys.PERIOD)) engine.getSystem(RenderingSystem.class).setZoomTarget(1);
+		if (Gdx.input.isKeyPressed(Keys.SLASH)) engine.getSystem(RenderingSystem.class).setZoomTarget(0.1f);
+		if (Gdx.input.isKeyPressed(Keys.MINUS)) engine.getSystem(RenderingSystem.class).setZoomTarget(engine.getSystem(RenderingSystem.class).getCamZoom() + 0.001f);
+		if (Gdx.input.isKeyPressed(Keys.EQUALS)) engine.getSystem(RenderingSystem.class).setZoomTarget(engine.getSystem(RenderingSystem.class).getCamZoom() - 0.001f);
 		
 		//fullscreen toggle
 		if (Gdx.input.isKeyJustPressed(Keys.F11)) {

@@ -154,7 +154,7 @@ public class SpaceScreen extends ScreenAdapter {
 				System.out.println("removed test planets");
 			} else {
 				// add------------------
-				Vector3 pos = engine.getSystem(RenderingSystem.class).getPos();
+				Vector3 pos = engine.getSystem(RenderingSystem.class).getCamPos();
 				testPlanetsDebug = EntityFactory.createPlanetarySystem(pos.x, pos.y);
 				for (Entity entity : testPlanetsDebug) {
 					engine.addEntity(entity);
