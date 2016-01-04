@@ -21,7 +21,6 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.utility.IDGen;
-import com.spaceproject.utility.MyMath;
 
 public class EntityFactory {
 
@@ -46,10 +45,6 @@ public class EntityFactory {
 		Entity star = createStar(x, y, rotDir);
 		entities[0] = star;
 		
-		
-		System.out.println("\nNew Planetary System: " + x + ", " + y);
-		System.out.println("Planets: " + (numPlanets));
-		System.out.print("[");
 		//create planets around star
 		for (int i = 1; i < entities.length; ++i) {
 			distance += MathUtils.random(minDist, maxDist); //distance from previous entity
@@ -57,11 +52,9 @@ public class EntityFactory {
 			float orbitX = x + (distance * MathUtils.cos(angle));
 			float orbitY = y + (distance * MathUtils.sin(angle));
 			entities[i] = createPlanet(star, orbitX, orbitY, angle, distance, rotDir);
-			//System.out.print("("+ MyMath.round(orbitX,1) + ", " + MyMath.round(orbitY,1) + "),");
-			System.out.print(MyMath.round(distance, 1) + ", ");
 		}
-		System.out.println("]");
-		System.out.println("Size of system: " + distance*2);
+		
+		System.out.println("Planetary System: (" + x + ", " + y + ") Planets: " + (numPlanets));
 		
 		return entities;
 		

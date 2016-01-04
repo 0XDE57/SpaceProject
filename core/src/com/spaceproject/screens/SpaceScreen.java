@@ -34,7 +34,7 @@ public class SpaceScreen extends ScreenAdapter {
 	public SpaceScreen(SpaceProject game) {
 
 		this.game = game;
-		// engine to handle all entities and component
+		// engine to handle all entities and components
 		engine = new Engine();
 		
 		
@@ -51,6 +51,7 @@ public class SpaceScreen extends ScreenAdapter {
 		engine.addEntity(EntityFactory.createPlanet(1900, 0));
 		*/
 		
+		/*
 		//add test planetary system (solar system)
 		for (Entity entity : EntityFactory.createPlanetarySystem(5000, 5000)) {
 			engine.addEntity(entity);
@@ -59,7 +60,7 @@ public class SpaceScreen extends ScreenAdapter {
 		for (Entity entity : EntityFactory.createPlanetarySystem(-5000, -15000)) {
 			//engine.addEntity(entity);
 		}
-
+		*/
 
 		
 		//test ships
