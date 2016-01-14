@@ -19,8 +19,7 @@ public class OrbitSystem extends IteratingSystem {
 	protected void processEntity(Entity entity, float delta) {
 
 		OrbitComponent orbit = Mappers.orbit.get(entity);
-		TransformComponent position = Mappers.transform.get(entity);
-		TransformComponent parentPosition = Mappers.transform.get(orbit.parent);
+		TransformComponent position = Mappers.transform.get(entity);		
 
 		//keep angles within 0 to 2PI radians.
 		if (orbit.angle > MathUtils.PI2){
@@ -43,12 +42,18 @@ public class OrbitSystem extends IteratingSystem {
 			orbit.angle -= orbit.orbitSpeed * delta;
 		}
 
-		// calculate orbit position
-		float orbitX = parentPosition.pos.x + (orbit.distance * MathUtils.cos(orbit.angle));
-		float orbitY = parentPosition.pos.y + (orbit.distance * MathUtils.sin(orbit.angle));
-		Vector3 nextPos = new Vector3(orbitX, orbitY, position.pos.z);
-		//linear interpolate to smooth out movement and eliminate "jumping" visible on long orbit distances.
-		position.pos.lerp(nextPos, 0.001f);
+
+		if (orbit.parent != null) {
+			TransformComponent parentPosition = Mappers.transform.get(orbit.parent);
+
+			// calculate orbit position
+			float orbitX = parentPosition.pos.x + (orbit.distance * MathUtils.cos(orbit.angle));
+			float orbitY = parentPosition.pos.y + (orbit.distance * MathUtils.sin(orbit.angle));
+			Vector3 nextPos = new Vector3(orbitX, orbitY, position.pos.z);
+			// linear interpolate to smooth out movement and eliminate "jumping"
+			// visible on long orbit distances.
+			position.pos.lerp(nextPos, 0.001f);
+		}
 	}
 
 }

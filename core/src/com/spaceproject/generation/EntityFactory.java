@@ -17,6 +17,7 @@ import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.MissileComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.OrbitComponent;
+import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
@@ -34,7 +35,7 @@ public class EntityFactory {
 		//distance between planets
 		float minDist = 1700;
 		float maxDist = 2200;
-		float distance = 0;
+		float distance = minDist/3; //add some initial distance between star and first planet
 		//rotation of system (orbits and spins)
 		boolean rotDir = MathUtils.randomBoolean();
 		//collection of planets/stars
@@ -67,7 +68,7 @@ public class EntityFactory {
 		// create star texture
 		TextureComponent texture = new TextureComponent();
 		float scale = 4.0f;
-		int minSize = 30;
+		int minSize = 60;
 		int maxSize = 250;
 		int radius = MathUtils.random(minSize, maxSize);	
 		texture.texture = TextureFactory.generateStar(radius);
@@ -79,7 +80,7 @@ public class EntityFactory {
 		
 		//orbit for rotation of self (kinda hacky; not really orbiting, just rotating)
 		OrbitComponent orbit = new OrbitComponent();
-		orbit.parent = entity;//set to self to negate orbit
+		orbit.parent = null;//set to null to negate orbit, but keep rotation
 		orbit.rotateClockwise = rotationDir;
 		orbit.rotSpeed = MathUtils.random(0.002f, 0.06f); //rotation speed of star
 		
@@ -93,6 +94,7 @@ public class EntityFactory {
 		entity.add(transform);
 		entity.add(texture);
 		entity.add(map);
+		entity.add(new StarComponent());
 
 		return entity;
 	}
