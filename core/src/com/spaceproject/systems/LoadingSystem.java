@@ -43,7 +43,7 @@ public class LoadingSystem extends EntitySystem {
 	private float checkTileTimer = 500;
 	private float checkTileCurrTime = checkTileTimer;
 
-	private ArrayList<Vector2> points = new ArrayList<>();
+	private ArrayList<Vector2> points = new ArrayList<Vector2>();
 	private ImmutableArray<Entity> loadedStars;
 	private float checkStarsTimer = 4000;
 	private float checkStarsCurrTime = checkStarsTimer;
