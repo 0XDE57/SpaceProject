@@ -4,16 +4,16 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.MyMath;
 
 public class DesktopInputSystem extends EntitySystem {
 	
-	private Engine engine;
+	private Engine engine;	
 	
 	@Override
 	public void addedToEngine(Engine engine) {
-		this.engine = engine;
-
+		this.engine = engine;		
 	}	
 	
 	@Override
@@ -53,13 +53,13 @@ public class DesktopInputSystem extends EntitySystem {
 		engine.getSystem(PlayerControlSystem.class).movementMultiplier = 1;
 		
 		//forward
-		engine.getSystem(PlayerControlSystem.class).moveForward = Gdx.input.isKeyPressed(Keys.W);
+		engine.getSystem(PlayerControlSystem.class).moveForward = Gdx.input.isKeyPressed(SpaceScreen.keycfg.forward);
 		//right
-		engine.getSystem(PlayerControlSystem.class).moveRight	= Gdx.input.isKeyPressed(Keys.D);
+		engine.getSystem(PlayerControlSystem.class).moveRight	= Gdx.input.isKeyPressed(SpaceScreen.keycfg.right);
 		//left
-		engine.getSystem(PlayerControlSystem.class).moveLeft    = Gdx.input.isKeyPressed(Keys.A);
+		engine.getSystem(PlayerControlSystem.class).moveLeft    = Gdx.input.isKeyPressed(SpaceScreen.keycfg.left);
 		//breaks
-		engine.getSystem(PlayerControlSystem.class).applyBreaks = Gdx.input.isKeyPressed(Keys.S);
+		engine.getSystem(PlayerControlSystem.class).applyBreaks = Gdx.input.isKeyPressed(SpaceScreen.keycfg.breaks);
 		
 		//DEBUG instant stop
 		engine.getSystem(PlayerControlSystem.class).stop = Gdx.input.isKeyJustPressed(Keys.X);

@@ -19,6 +19,7 @@ import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.Mappers;
 
 public class LoadingSystem extends EntitySystem {
@@ -59,13 +60,13 @@ public class LoadingSystem extends EntitySystem {
 		loadStars();
 
 		
-		////////////////////TEST/////////////////////
+		/*///////////////////TEST/////////////////////
 		for (Vector2 point : points) {
 			System.out.println(point);
-			/*
+			
 			for (Entity e : EntityFactory.createPlanetarySystem(point.x, point.y)) {
-				engine.addEntity(e);
-			}*/
+				//engine.addEntity(e);
+			}
 		}
 		//////////////////////////////////////////*/
 
@@ -162,14 +163,11 @@ public class LoadingSystem extends EntitySystem {
 		if (checkStarsCurrTime < 0) {
 			System.out.println("Checking stars...");
 			
-			// same as planetarySystem values from entityfactory
-			// TODO: load these values from a file to make sure they are consistent
-			int maxPlanets = 10;
-			float maxDist = 2200;
-			int loadDistance = (int) (maxPlanets*maxDist*3f);
+			//distance to check when to load planets
+			int loadDistance = (int) (SpaceScreen.celestcfg.maxPlanets * SpaceScreen.celestcfg.maxDist * 6f);
 			loadDistance *= loadDistance; // squared for quick distance checking
 
-			// remove stars from engine that are too far		
+			// remove stars from engine that are too far
 			for (Entity star : loadedStars) {
 				TransformComponent t = Mappers.transform.get(star);
 				if (Vector2.dst2(t.pos.x, t.pos.y, camPos.x, camPos.y) > loadDistance) {
@@ -272,20 +270,16 @@ public class LoadingSystem extends EntitySystem {
 		int numStars = 150; // how many stars TRY to create(does not guarantee this many points will actually be generated)
 		int genRange = 400000; // range from origin(0,0) to create points
 
-		// same as planetarySystem values from entityfactory
-		// TODO: load these values from a file to make sure they are consistent
-		int maxPlanets = 10;
-		float maxDist = 2200;
-		// maxplanets*maxdistance*3
-		float dist = maxPlanets * maxDist * 6; // minimum distance between points
+
+		// minimum distance between points
+		float dist = SpaceScreen.celestcfg.maxPlanets * SpaceScreen.celestcfg.maxDist * 6; 
 		dist *= dist;// squared for quick distance checking
 
 		// generate points
 		for (int i = 0; i < numStars; i++) {
 			Vector2 newPoint;
 
-			boolean reGen = false; // flag for if the point is needs to be
-									// regenerated or not
+			boolean reGen = false; // flag for if the point is needs to be regenerated
 			boolean fail = false; // flag for when to give up generating a point
 			int fails = 0; // how many times a point has been regenerated
 			do {

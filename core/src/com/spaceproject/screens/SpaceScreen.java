@@ -5,10 +5,14 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Json;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.PlayerFocusComponent;
+import com.spaceproject.config.CelestialConfig;
+import com.spaceproject.config.KeyConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.systems.BoundsSystem;
 import com.spaceproject.systems.CameraSystem;
@@ -28,15 +32,22 @@ public class SpaceScreen extends ScreenAdapter {
 
 	SpaceProject game;
 	
-	public Engine engine;
+	public static Engine engine;
 	
-		
+	public static CelestialConfig celestcfg;
+	public static KeyConfig keycfg;
+	
+	Entity[] testPlanetsDebug; //test removable planetary system
+	
 	public SpaceScreen(SpaceProject game) {
 
 		this.game = game;
 		// engine to handle all entities and components
 		engine = new Engine();
 		
+		
+		//load values for things like key mapping, settings, default values for generation
+		loadConfigs();
 		
 		//temporary test entities--------------------------------------------
 		//add entities to engine, should put in spawn system or initializer of sorts...
@@ -133,8 +144,30 @@ public class SpaceScreen extends ScreenAdapter {
 			engine.addSystem(new DesktopInputSystem());
 		}
 		
-	}	
-	Entity[] testPlanetsDebug; //test removable planetary system
+	}
+
+	private void loadConfigs() {
+		//KEYS
+		FileHandle keyFile = Gdx.files.local("controls.txt");
+		if (keyFile.exists()) {
+			Json json = new Json();
+			json.setUsePrototypes(false);
+			
+			keycfg = json.fromJson(KeyConfig.class, keyFile.readString());
+			System.out.println("Loaded keys from json: " + json.toJson(keycfg));
+		} else {
+			keycfg = new KeyConfig();
+			keycfg.loadDefault();
+			//keycfg.saveToJson();
+			System.out.println("No key file found. Loaded defaults.");
+		}
+		
+		
+		//CELESTIAL OBJECTS
+		celestcfg = new CelestialConfig();
+		celestcfg.loadDefault();
+		celestcfg.saveToJson();
+	}		
 	
 	public void render(float delta) {		
 		//update engine

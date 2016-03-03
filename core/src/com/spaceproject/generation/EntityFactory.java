@@ -21,41 +21,41 @@ import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.IDGen;
 
-public class EntityFactory {
+public class EntityFactory {	
 
 	public static Entity[] createPlanetarySystem(float x, float y) {
 		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
 
 		//number of planets in a system
-		int minPlanets = 0;
-		int maxPlanets = 10;
-		int numPlanets = MathUtils.random(minPlanets,maxPlanets);
+		int numPlanets = MathUtils.random(SpaceScreen.celestcfg.minPlanets, SpaceScreen.celestcfg.maxPlanets);
+		
 		//distance between planets
-		float minDist = 1700;
-		float maxDist = 2200;
-		float distance = minDist/3; //add some initial distance between star and first planet
+		float distance = SpaceScreen.celestcfg.minDist/3; //add some initial distance between star and first planet
+		
 		//rotation of system (orbits and spins)
 		boolean rotDir = MathUtils.randomBoolean();
+		
 		//collection of planets/stars
 		Entity[] entities = new Entity[numPlanets + 1];
-		
-		
+	
 		//add star to center of planetary system
 		Entity star = createStar(x, y, rotDir);
 		entities[0] = star;
 		
 		//create planets around star
 		for (int i = 1; i < entities.length; ++i) {
-			distance += MathUtils.random(minDist, maxDist); //distance from previous entity
+			//add some distance from previous entity
+			distance += MathUtils.random(SpaceScreen.celestcfg.minDist, SpaceScreen.celestcfg.maxDist); 
 			float angle = MathUtils.random(3.14f * 2); //angle from star
 			float orbitX = x + (distance * MathUtils.cos(angle));
 			float orbitY = y + (distance * MathUtils.sin(angle));
 			entities[i] = createPlanet(star, orbitX, orbitY, angle, distance, rotDir);
 		}
 		
-		System.out.println("Planetary System: (" + x + ", " + y + ") Planets: " + (numPlanets));
+		System.out.println("Planetary System: (" + x + ", " + y + ") Objects: " + (numPlanets));
 		
 		return entities;
 		
@@ -68,9 +68,7 @@ public class EntityFactory {
 		// create star texture
 		TextureComponent texture = new TextureComponent();
 		float scale = 4.0f;
-		int minSize = 60;
-		int maxSize = 250;
-		int radius = MathUtils.random(minSize, maxSize);	
+		int radius = MathUtils.random(SpaceScreen.celestcfg.minStarSize, SpaceScreen.celestcfg.maxStarSize);	
 		texture.texture = TextureFactory.generateStar(radius);
 		texture.scale = scale;
 		
@@ -82,7 +80,8 @@ public class EntityFactory {
 		OrbitComponent orbit = new OrbitComponent();
 		orbit.parent = null;//set to null to negate orbit, but keep rotation
 		orbit.rotateClockwise = rotationDir;
-		orbit.rotSpeed = MathUtils.random(0.002f, 0.06f); //rotation speed of star
+		orbit.rotSpeed = MathUtils.random(SpaceScreen.celestcfg.minStarRot, 
+				SpaceScreen.celestcfg.maxStarRot); //rotation speed of star
 		
 		//map
 		MapComponent map = new MapComponent();
@@ -107,17 +106,16 @@ public class EntityFactory {
 		//create texture
 		TextureComponent texture = new TextureComponent();
 		float scale = 4.0f;
-		int minRad = 20;
-		int maxRad = 200;	
-		int radius = MathUtils.random(minRad, maxRad);	
+		
+		int radius = MathUtils.random(SpaceScreen.celestcfg.minPlanetSize, SpaceScreen.celestcfg.maxPlanetSize);	
 		texture.texture = TextureFactory.generatePlanet(radius);
 		texture.scale = scale;
 		
 		//orbit 
 		OrbitComponent orbit = new OrbitComponent();
-		orbit.parent = parent;
-		orbit.rotSpeed = MathUtils.random(0.015f, 0.09f); //rotation speed of planet
-		orbit.orbitSpeed = MathUtils.random(0.001f, 0.009f); //orbit speed of planet	
+		orbit.parent = parent; //object to orbit around
+		orbit.rotSpeed = MathUtils.random(SpaceScreen.celestcfg.minPlanetRot, SpaceScreen.celestcfg.maxPlanetRot); //rotation speed of planet
+		orbit.orbitSpeed = MathUtils.random(SpaceScreen.celestcfg.minPlanetOrbit, SpaceScreen.celestcfg.minPlanetOrbit); //orbit speed of planet	
 		orbit.angle = angle; //angle from star
 		orbit.distance = distance;
 		orbit.rotateClockwise = rotationDir;
@@ -146,7 +144,7 @@ public class EntityFactory {
 				
 		//create texture
 		TextureComponent texture = new TextureComponent();
-		float scale = 4.0f;	
+		float scale = 4.0f;
 		texture.texture = TextureFactory.generateProjectile(size);
 		texture.scale = scale;
 		
