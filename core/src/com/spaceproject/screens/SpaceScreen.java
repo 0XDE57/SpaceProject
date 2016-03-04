@@ -148,6 +148,11 @@ public class SpaceScreen extends ScreenAdapter {
 
 	private void loadConfigs() {
 		//KEYS
+		keycfg = new KeyConfig();
+		keycfg.loadDefault();
+		keycfg.saveToJson();
+		
+		/*
 		FileHandle keyFile = Gdx.files.local("controls.txt");
 		if (keyFile.exists()) {
 			Json json = new Json();
@@ -160,7 +165,7 @@ public class SpaceScreen extends ScreenAdapter {
 			keycfg.loadDefault();
 			//keycfg.saveToJson();
 			System.out.println("No key file found. Loaded defaults.");
-		}
+		}*/
 		
 		
 		//CELESTIAL OBJECTS
@@ -178,7 +183,7 @@ public class SpaceScreen extends ScreenAdapter {
 		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) Gdx.app.exit();			
 		
 		// [DEBUG]//////////////////////////////
-		if (Gdx.input.isKeyJustPressed(Keys.K)) {
+		if (Gdx.input.isKeyJustPressed(keycfg.createSystemAtPlayer)) {
 			if (testPlanetsDebug != null) {
 				// remove-----------------
 				for (Entity entity : testPlanetsDebug) {

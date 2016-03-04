@@ -10,8 +10,7 @@ public class CelestialConfig {
 	//---Planetary system generation---	
 	//number of planets
 	public int minPlanets;
-	public int maxPlanets;
-	
+	public int maxPlanets;	
 	//distance between planets
 	public float minDist;
 	public float maxDist;
@@ -21,7 +20,6 @@ public class CelestialConfig {
 	//size of stars
 	public int minStarSize;
 	public int maxStarSize;
-	
 	//star rotation speed
 	public float minStarRot;
 	public float maxStarRot;
@@ -37,6 +35,7 @@ public class CelestialConfig {
 	//planet orbit speed
 	public float minPlanetOrbit;
 	public float maxPlanetOrbit;
+	
 	
 	public void saveToJson() {
 		

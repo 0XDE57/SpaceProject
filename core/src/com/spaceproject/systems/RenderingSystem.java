@@ -17,6 +17,8 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.spaceproject.SpaceBackgroundTile;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.config.KeyConfig;
+import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.Mappers;
 
 public class RenderingSystem extends IteratingSystem {
@@ -131,10 +133,10 @@ public class RenderingSystem extends IteratingSystem {
 		zoomCamera(delta);
 		
 		//TODO: move into input
-		if (Gdx.input.isKeyPressed(Keys.LEFT_BRACKET)) {
+		if (Gdx.input.isKeyPressed(SpaceScreen.keycfg.rotateRight)) {
 			cam.rotate(5f * delta);
 		}
-		if (Gdx.input.isKeyPressed(Keys.RIGHT_BRACKET)) {
+		if (Gdx.input.isKeyPressed(SpaceScreen.keycfg.rotateLeft)) {
 			cam.rotate(-5f * delta);
 		}
 	}

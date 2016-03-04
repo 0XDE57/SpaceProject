@@ -5,7 +5,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -24,6 +23,7 @@ import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.generation.FontFactory;
+import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 
@@ -158,13 +158,13 @@ public class DebugUISystem extends CustomIteratingSystem {
 
 	private void updateKeyToggles() {
 		//toggle debug
-		if (Gdx.input.isKeyJustPressed(Keys.F3)) {
+		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.toggleDebug)) {
 			drawDebugUI = !drawDebugUI;
 			System.out.println("DEBUG UI: " + drawDebugUI);
 		}
 		
 		//toggle pos
-		if (Gdx.input.isKeyJustPressed(Keys.NUMPAD_0)) {
+		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.togglePos)) {
 			drawPos = !drawPos;
 			if(drawComponentList) {
 				drawComponentList = false;
@@ -173,7 +173,7 @@ public class DebugUISystem extends CustomIteratingSystem {
 		}
 		
 		//toggle components
-		if (Gdx.input.isKeyJustPressed(Keys.NUMPAD_1)) {
+		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.toggleComponents)) {
 			drawComponentList = !drawComponentList;
 			if (drawPos) {
 				drawPos = false;
@@ -182,32 +182,32 @@ public class DebugUISystem extends CustomIteratingSystem {
 		}
 		
 		//toggle bounds		
-		if (Gdx.input.isKeyJustPressed(Keys.NUMPAD_2)) {
+		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.toggleBounds)) {
 			drawBounds = !drawBounds;
 			System.out.println("[debug] draw bounds: " + drawBounds);
 		}
 		
 		//toggle fps
-		if (Gdx.input.isKeyJustPressed(Keys.NUMPAD_3)) {
+		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.toggleFPS)) {
 			drawFPS = !drawFPS;
 			System.out.println("[debug] draw FPS: " + drawFPS);
 		}
 			
 		//toggle orbit circle
-		if (Gdx.input.isKeyJustPressed(Keys.NUMPAD_4)) {
+		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.toggleOrbit)) {
 			drawOrbitPath = !drawOrbitPath;
 			System.out.println("[debug] draw orbit path: " + drawOrbitPath);
 		}
 		
 		
 		//toggle vector
-		if (Gdx.input.isKeyJustPressed(Keys.NUMPAD_5)) {
+		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.toggleVector)) {
 			drawVectors = !drawVectors;
 			System.out.println("[debug] draw vectors: " + drawVectors);
 		}
 		
 		//toggle menu
-		if (Gdx.input.isKeyJustPressed(Keys.NUMPAD_9)) {
+		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.toggleMenu)) {
 			drawMenu = !drawMenu;
 		}
 	}

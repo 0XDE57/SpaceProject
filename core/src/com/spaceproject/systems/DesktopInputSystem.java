@@ -21,25 +21,25 @@ public class DesktopInputSystem extends EntitySystem {
 		
 		//SCREEN CONTROLS///////////////////////////////////////////////////////////////////////////////////////
 		//zoom test
-		if (Gdx.input.isKeyPressed(Keys.COMMA))  {
+		if (Gdx.input.isKeyPressed(SpaceScreen.keycfg.zoomSpace))  {
 			if (engine.getSystem(RenderingSystem.class).getCamZoom() >= 10f) {
 				engine.getSystem(RenderingSystem.class).setZoomTarget(60);
 			} else {
 				engine.getSystem(RenderingSystem.class).setZoomTarget(10);
 			}
 		}
-		if (Gdx.input.isKeyPressed(Keys.PERIOD)) engine.getSystem(RenderingSystem.class).setZoomTarget(1);
-		if (Gdx.input.isKeyPressed(Keys.SLASH)) engine.getSystem(RenderingSystem.class).setZoomTarget(0.1f);
-		if (Gdx.input.isKeyPressed(Keys.MINUS)) engine.getSystem(RenderingSystem.class).setZoomTarget(engine.getSystem(RenderingSystem.class).getCamZoom() + 0.001f);
-		if (Gdx.input.isKeyPressed(Keys.EQUALS)) engine.getSystem(RenderingSystem.class).setZoomTarget(engine.getSystem(RenderingSystem.class).getCamZoom() - 0.001f);
+		if (Gdx.input.isKeyPressed(SpaceScreen.keycfg.resetZoom)) engine.getSystem(RenderingSystem.class).setZoomTarget(1);
+		if (Gdx.input.isKeyPressed(SpaceScreen.keycfg.zoomCharacter)) engine.getSystem(RenderingSystem.class).setZoomTarget(0.1f);
+		if (Gdx.input.isKeyPressed(SpaceScreen.keycfg.zoomOut)) engine.getSystem(RenderingSystem.class).setZoomTarget(engine.getSystem(RenderingSystem.class).getCamZoom() + 0.001f);
+		if (Gdx.input.isKeyPressed(SpaceScreen.keycfg.zoomIn)) engine.getSystem(RenderingSystem.class).setZoomTarget(engine.getSystem(RenderingSystem.class).getCamZoom() - 0.001f);
 		
 		//fullscreen toggle
-		if (Gdx.input.isKeyJustPressed(Keys.F11)) {
+		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.fullscreen)) {
 			engine.getSystem(RenderingSystem.class).toggleFullscreen();
 		}
 		
 		//vsync toggle
-		if (Gdx.input.isKeyJustPressed(Keys.F8)) {
+		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.vsync)) {
 			engine.getSystem(RenderingSystem.class).toggleVsync();
 		}
 	
@@ -62,13 +62,13 @@ public class DesktopInputSystem extends EntitySystem {
 		engine.getSystem(PlayerControlSystem.class).applyBreaks = Gdx.input.isKeyPressed(SpaceScreen.keycfg.breaks);
 		
 		//DEBUG instant stop
-		engine.getSystem(PlayerControlSystem.class).stop = Gdx.input.isKeyJustPressed(Keys.X);
+		engine.getSystem(PlayerControlSystem.class).stop = Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.instantStop);
 		
 		//shoot
-		engine.getSystem(PlayerControlSystem.class).shoot = (Gdx.input.isKeyPressed(Keys.SPACE) || Gdx.input.isTouched());
+		engine.getSystem(PlayerControlSystem.class).shoot = (Gdx.input.isKeyPressed(SpaceScreen.keycfg.shoot) || Gdx.input.isTouched());
 		
 		//enter/exit vehicle
-		engine.getSystem(PlayerControlSystem.class).changeVehicle = Gdx.input.isKeyPressed(Keys.G);
+		engine.getSystem(PlayerControlSystem.class).changeVehicle = Gdx.input.isKeyPressed(SpaceScreen.keycfg.changeVehicle);
 
 	}
 
