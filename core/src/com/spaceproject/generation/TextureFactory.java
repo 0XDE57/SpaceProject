@@ -247,6 +247,37 @@ public class TextureFactory {
 		return t;
 	}
 	
+	public static Texture generateNoise(long seed, int size, double featureSize) {
+		OpenSimplexNoise noise = new OpenSimplexNoise(seed);
+		
+		Pixmap pixmap = new Pixmap(size, size, Format.RGBA4444);
+		
+		//add layer of noise
+		for (int y = 0; y < pixmap.getHeight(); ++y) {
+			for (int x = 0; x < pixmap.getWidth(); ++x) {
+				// only draw on circle
+
+				double nx = x / featureSize, ny = y / featureSize;
+				double i = noise.eval(nx, ny, 0);
+				i = (i * 0.5) + 0.5; // convert from range [-1:1] to [0:1]
+
+				/*
+				 * if (i > 0.5f){ pixmap.setColor(new Color(1, 1, 0, (float)i));
+				 * } else { pixmap.setColor(new Color(1, 0, 0, (float)(1-i))); }
+				 */
+
+				pixmap.setColor(new Color((float) i, (float) i, (float) i, 1));
+				pixmap.drawPixel(x, y);
+
+			}
+		}
+		
+
+		Texture t = new Texture(pixmap);
+		pixmap.dispose();
+		return t;
+	}
+	
 	public static Texture generateCharacter() {
 		pixmap = new Pixmap(4, 4, Format.RGB565);
 		

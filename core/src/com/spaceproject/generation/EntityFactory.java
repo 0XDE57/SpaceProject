@@ -24,7 +24,9 @@ import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.IDGen;
 
-public class EntityFactory {	
+public class EntityFactory {
+	
+	public static float scale = 4.0f;
 
 	public static Entity[] createPlanetarySystem(float x, float y) {
 		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
@@ -67,7 +69,6 @@ public class EntityFactory {
 
 		// create star texture
 		TextureComponent texture = new TextureComponent();
-		float scale = 4.0f;
 		int radius = MathUtils.random(SpaceScreen.celestcfg.minStarSize, SpaceScreen.celestcfg.maxStarSize);	
 		texture.texture = TextureFactory.generateStar(radius);
 		texture.scale = scale;
@@ -105,7 +106,6 @@ public class EntityFactory {
 		
 		//create texture
 		TextureComponent texture = new TextureComponent();
-		float scale = 4.0f;
 		
 		int radius = MathUtils.random(SpaceScreen.celestcfg.minPlanetSize, SpaceScreen.celestcfg.maxPlanetSize);	
 		texture.texture = TextureFactory.generatePlanet(radius);
@@ -144,7 +144,6 @@ public class EntityFactory {
 				
 		//create texture
 		TextureComponent texture = new TextureComponent();
-		float scale = 4.0f;
 		texture.texture = TextureFactory.generateProjectile(size);
 		texture.scale = scale;
 		
@@ -191,7 +190,6 @@ public class EntityFactory {
 		transform.pos.set(x, y, 0);
 		
 		TextureComponent texture = new TextureComponent();
-		float scale = 4.0f;		
 		texture.texture = TextureFactory.generateCharacter();
 		texture.scale = scale;
 		
@@ -233,7 +231,6 @@ public class EntityFactory {
 		} while (size % 2 == 1);
 		
 		Texture pixmapTex = TextureFactory.generateShip(x, y, size);
-		float scale = 4.0f;
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
 		texture.scale = scale;
 		
@@ -314,7 +311,6 @@ public class EntityFactory {
 		pixmap.drawRectangle(0, 0, size-1, size-1/2);
 		
 		Texture pixmapTex = new Texture(pixmap);
-		float scale = 4.0f;
 		pixmap.dispose(); // clean up
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
 		texture.scale = scale;
@@ -355,7 +351,6 @@ public class EntityFactory {
 		
 		
 		Texture pixmapTex = new Texture(pixmap);
-		float scale = 4.0f;
 		pixmap.dispose(); // clean up
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
 		texture.scale = scale;

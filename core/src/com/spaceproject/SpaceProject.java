@@ -3,6 +3,7 @@ package com.spaceproject;
 import com.badlogic.gdx.Game;
 import com.spaceproject.screens.MainMenuScreen;
 import com.spaceproject.screens.SpaceScreen;
+import com.spaceproject.screens.TestNoiseScreen;
 import com.spaceproject.screens.TestShipGenerationScreen;
 
 public class SpaceProject extends Game {
@@ -13,6 +14,7 @@ public class SpaceProject extends Game {
 	public void create() {
 		
 		//setScreen(new TestShipGenerationScreen(this));
+		//setScreen(new TestNoiseScreen(this));
 		
 		setScreen(new SpaceScreen(this));
 		
