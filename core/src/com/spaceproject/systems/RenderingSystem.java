@@ -6,7 +6,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -17,7 +16,6 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.spaceproject.SpaceBackgroundTile;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.config.KeyConfig;
 import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.Mappers;
 
@@ -202,7 +200,7 @@ public class RenderingSystem extends IteratingSystem {
 	void toggleFullscreen() {
 		if (Gdx.graphics.isFullscreen()) {
 			//set window to previous window size
-			Gdx.graphics.setDisplayMode(prevWindowWidth, prevWindowHeight, false);
+			Gdx.graphics.setWindowedMode(prevWindowWidth, prevWindowHeight);
 		} else {
 			//save window size
 			prevWindowWidth = Gdx.graphics.getWidth();
@@ -210,7 +208,7 @@ public class RenderingSystem extends IteratingSystem {
 			
 			//set to fullscreen
 			if (Gdx.graphics.supportsDisplayModeChange()) {
-				Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, true); 
+				Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 			} else {
 				Gdx.app.log("graphics", "DisplayModeChange not supported.");
 			}

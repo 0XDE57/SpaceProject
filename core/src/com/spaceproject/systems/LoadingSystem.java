@@ -219,9 +219,6 @@ public class LoadingSystem extends EntitySystem {
 	 * exist, create points and save to disk.
 	 */
 	private void loadStars() {
-		// TODO: only load the closest few systems surrounding player,
-		// don't load all of them in the engine
-
 		// create handle for file storing points
 		FileHandle starsFile = Gdx.files.local("stars.txt");
 
