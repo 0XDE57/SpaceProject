@@ -217,7 +217,7 @@ public class TextureFactory {
 		
 		Pixmap pixmap = new Pixmap(radius * 2, radius * 2, Format.RGBA4444);
 		
-		double featureSize = 20;
+		double scale = 20;//zoom
 		
 		// draw circle for planet
 		pixmap.setColor(0.5f, 0.5f, 0.5f, 1);
@@ -228,7 +228,7 @@ public class TextureFactory {
 			for (int x = 0; x < pixmap.getWidth(); ++x) {
 				//only draw on circle
 				if (pixmap.getPixel(x, y) != 0) {
-					double nx = x/featureSize, ny = y/featureSize;
+					double nx = x/scale, ny = y/scale;
 					double i = noise.eval(nx, ny, 0);
 					i = (i * 0.5) + 0.5; //convert from range [-1:1] to [0:1]
 					if (i > 0.5f){
@@ -255,16 +255,10 @@ public class TextureFactory {
 		//add layer of noise
 		for (int y = 0; y < pixmap.getHeight(); ++y) {
 			for (int x = 0; x < pixmap.getWidth(); ++x) {
-				// only draw on circle
-
+				
 				double nx = x / featureSize, ny = y / featureSize;
 				double i = noise.eval(nx, ny, 0);
 				i = (i * 0.5) + 0.5; // convert from range [-1:1] to [0:1]
-
-				/*
-				 * if (i > 0.5f){ pixmap.setColor(new Color(1, 1, 0, (float)i));
-				 * } else { pixmap.setColor(new Color(1, 0, 0, (float)(1-i))); }
-				 */
 
 				pixmap.setColor(new Color((float) i, (float) i, (float) i, 1));
 				pixmap.drawPixel(x, y);
