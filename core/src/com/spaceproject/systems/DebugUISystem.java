@@ -16,18 +16,19 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.CustomIteratingSystem;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.generation.FontFactory;
-import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 
-public class DebugUISystem extends CustomIteratingSystem {
+public class DebugUISystem extends CustomIteratingSystem implements Disposable {
 
 	//rendering
 	private SpriteBatch batch;
@@ -158,13 +159,13 @@ public class DebugUISystem extends CustomIteratingSystem {
 
 	private void updateKeyToggles() {
 		//toggle debug
-		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.toggleDebug)) {
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleDebug)) {
 			drawDebugUI = !drawDebugUI;
 			System.out.println("DEBUG UI: " + drawDebugUI);
 		}
 		
 		//toggle pos
-		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.togglePos)) {
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.togglePos)) {
 			drawPos = !drawPos;
 			if(drawComponentList) {
 				drawComponentList = false;
@@ -173,7 +174,7 @@ public class DebugUISystem extends CustomIteratingSystem {
 		}
 		
 		//toggle components
-		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.toggleComponents)) {
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleComponents)) {
 			drawComponentList = !drawComponentList;
 			if (drawPos) {
 				drawPos = false;
@@ -182,32 +183,32 @@ public class DebugUISystem extends CustomIteratingSystem {
 		}
 		
 		//toggle bounds		
-		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.toggleBounds)) {
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleBounds)) {
 			drawBounds = !drawBounds;
 			System.out.println("[debug] draw bounds: " + drawBounds);
 		}
 		
 		//toggle fps
-		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.toggleFPS)) {
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleFPS)) {
 			drawFPS = !drawFPS;
 			System.out.println("[debug] draw FPS: " + drawFPS);
 		}
 			
 		//toggle orbit circle
-		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.toggleOrbit)) {
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleOrbit)) {
 			drawOrbitPath = !drawOrbitPath;
 			System.out.println("[debug] draw orbit path: " + drawOrbitPath);
 		}
 		
 		
 		//toggle vector
-		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.toggleVector)) {
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleVector)) {
 			drawVectors = !drawVectors;
 			System.out.println("[debug] draw vectors: " + drawVectors);
 		}
 		
 		//toggle menu
-		if (Gdx.input.isKeyJustPressed(SpaceScreen.keycfg.toggleMenu)) {
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleMenu)) {
 			drawMenu = !drawMenu;
 		}
 	}
@@ -352,6 +353,13 @@ public class DebugUISystem extends CustomIteratingSystem {
 	@Override 
 	public void processEntity(Entity entity, float deltaTime) {
 		objects.add(entity);
+	}
+
+	@Override
+	public void dispose() {
+		font.dispose();
+		batch.dispose();
+		shape.dispose();
 	}
 	
 }

@@ -20,7 +20,7 @@ public class MovementSystem extends IteratingSystem {
 	@Override
 	public void processEntity(Entity entity, float deltaTime) {
 		TransformComponent position = Mappers.transform.get(entity);
-		MovementComponent movement = Mappers.movement.get(entity);;
+		MovementComponent movement = Mappers.movement.get(entity);
 		
 		//set velocity
 		tmp.set(movement.accel).scl(deltaTime);

@@ -212,7 +212,7 @@ public class EntityFactory {
 		
 		Entity entity = new Entity();
 
-		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
+		MathUtils.random.setSeed((x + y) * SpaceProject.SEED);
 		
 		TransformComponent transform = new TransformComponent();
 		TextureComponent texture = new TextureComponent();
@@ -284,7 +284,7 @@ public class EntityFactory {
 	
 	@Deprecated
 	public static Entity createShip2(int x, int y) {
-		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
+		MathUtils.random.setSeed((x + y) * SpaceProject.SEED);
 		Entity entity = new Entity();
 
 		TransformComponent transform = new TransformComponent();
@@ -375,7 +375,7 @@ public class EntityFactory {
 		Entity entity = new Entity();
 		
 		TextureComponent texture = new TextureComponent();
-		texture.texture = TextureFactory.generateNoiseTile((long)(x + y * SpaceProject.SEED), tileSize);
+		texture.texture = TextureFactory.generateNoiseTile(x + y * SpaceProject.SEED, tileSize);
 		
 		TransformComponent transform = new TransformComponent();
 		transform.pos.x = x;

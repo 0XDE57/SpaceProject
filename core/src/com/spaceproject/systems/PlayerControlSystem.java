@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.math.Intersector;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CannonComponent;
@@ -13,12 +14,14 @@ import com.spaceproject.components.PlayerFocusComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.Mappers;
 
 public class PlayerControlSystem extends EntitySystem {
 
 	private Engine engine;
-
+	private ScreenAdapter screen;
+	
 	//target reference
 	private Entity playerEntity = null; //the player entity
 	private Entity vehicleEntity = null;//the vehicle player currently controls (also inVehicle flag if !null)
@@ -46,6 +49,8 @@ public class PlayerControlSystem extends EntitySystem {
 	//player should enter/exit vehicle
 	public boolean changeVehicle = false;
 	
+	public boolean land = false;
+	
 	//for analog control. will be value between 1 and 0
 	public float movementMultiplier = 0;
 	
@@ -53,12 +58,13 @@ public class PlayerControlSystem extends EntitySystem {
 	public float angleFacing = 0;
 	
 	
-	public PlayerControlSystem(Entity player) {
+	public PlayerControlSystem(ScreenAdapter screen, Entity player) {
+		this.screen = screen;
 		this.playerEntity = player;	
 	}
 	
-	public PlayerControlSystem(Entity player, Entity vehicle) {
-		this(player);
+	public PlayerControlSystem(ScreenAdapter screen, Entity player, Entity vehicle) {
+		this(screen, player);
 		this.vehicleEntity = vehicle;
 	}
 
@@ -83,9 +89,9 @@ public class PlayerControlSystem extends EntitySystem {
 		
 	
 		if (isInVehicle()) {			
-			controlShip(delta);					
+			controlShip(delta);
 		} else { 			
-			controlCharacter(delta);			
+			controlCharacter(delta);
 		}
 		
 		if (changeVehicle) {
@@ -162,6 +168,10 @@ public class PlayerControlSystem extends EntitySystem {
 			movement.velocity.set(0,0);
 			stop = false;
 		}
+		
+		if (land) {
+			((SpaceScreen) screen).changeScreen();
+		}
 	}
 
 	/**
@@ -169,7 +179,7 @@ public class PlayerControlSystem extends EntitySystem {
 	 * @param delta
 	 * @param movement
 	 */
-	private void decelerate(float delta, MovementComponent movement) {
+	private static void decelerate(float delta, MovementComponent movement) {
 		int stopThreshold = 20; 
 		int minBreakingOffset = 100;
 		int maxBreakingThrust = 1000;
@@ -252,7 +262,7 @@ public class PlayerControlSystem extends EntitySystem {
 	 * @param cannon
 	 * @param delta 
 	 */
-	private void refillAmmo(CannonComponent cannon, float delta) {
+	private static void refillAmmo(CannonComponent cannon, float delta) {
 		//TODO: cannon refill logic needs to be moved to system, all ships need to recharge
 		// deal with cannon timers
 		cannon.timeSinceLastShot -= 100 * delta;
@@ -309,7 +319,7 @@ public class PlayerControlSystem extends EntitySystem {
 	 * @param cannon
 	 * @return true if can fire
 	 */
-	private boolean canFire(CannonComponent cannon) {
+	private static boolean canFire(CannonComponent cannon) {
 		return cannon.curAmmo > 0 && cannon.timeSinceLastShot <= 0;
 	}
 	

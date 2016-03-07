@@ -12,14 +12,15 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.spaceproject.SpaceBackgroundTile;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.Mappers;
 
-public class RenderingSystem extends IteratingSystem {
+public class RenderingSystem extends IteratingSystem implements Disposable {
 		
 	private Array<Entity> renderQueue; //array of entities to render
 	private Comparator<Entity> comparator; //for sorting render order
@@ -131,10 +132,10 @@ public class RenderingSystem extends IteratingSystem {
 		zoomCamera(delta);
 		
 		//TODO: move into input
-		if (Gdx.input.isKeyPressed(SpaceScreen.keycfg.rotateRight)) {
+		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.rotateRight)) {
 			cam.rotate(5f * delta);
 		}
-		if (Gdx.input.isKeyPressed(SpaceScreen.keycfg.rotateLeft)) {
+		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.rotateLeft)) {
 			cam.rotate(-5f * delta);
 		}
 	}
@@ -229,7 +230,7 @@ public class RenderingSystem extends IteratingSystem {
 		zoomTarget = zoom;
 	}
 	
-	public float getCamZoom() {
+	public static float getCamZoom() {
 		return cam.zoom;
 	}
 
@@ -248,6 +249,23 @@ public class RenderingSystem extends IteratingSystem {
 	 */
 	public void resize(int width, int height) {
 		viewport.update(width, height);
+	}
+
+
+	@Override
+	public void dispose() {		
+		//dispose of all textures
+		for (Entity entity : renderQueue) {
+			TextureComponent tex = Mappers.texture.get(entity);	
+			if (tex.texture != null)
+				tex.texture.dispose();
+		}
+		
+		for (SpaceBackgroundTile tile : LoadingSystem.getTiles()) {
+			tile.tex.dispose();
+		}
+		
+		batch.dispose();
 	}
 
 

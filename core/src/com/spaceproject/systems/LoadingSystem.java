@@ -164,9 +164,9 @@ public class LoadingSystem extends EntitySystem {
 			System.out.println("Checking stars...");
 			
 			//distance to check when to load planets
-			int loadDistance = (int) (SpaceScreen.celestcfg.maxPlanets * SpaceScreen.celestcfg.maxDist * 6f);
+			int loadDistance = (int) (SpaceScreen.celestcfg.maxPlanets * SpaceScreen.celestcfg.maxDist);
 			loadDistance *= loadDistance; // squared for quick distance checking
-
+			
 			// remove stars from engine that are too far
 			for (Entity star : loadedStars) {
 				TransformComponent t = Mappers.transform.get(star);
@@ -181,6 +181,7 @@ public class LoadingSystem extends EntitySystem {
 						}
 					}
 					engine.removeEntity(star);
+					System.out.println("Removed: " + star.getComponent(TransformComponent.class).pos.toString());
 				}
 			}
 			
@@ -194,7 +195,7 @@ public class LoadingSystem extends EntitySystem {
 					// check if star is already in world
 					for (Entity star : loadedStars) {
 						TransformComponent t = Mappers.transform.get(star);
-						if (point.dst(t.pos.x, t.pos.y) < 1f) {
+						if (point.dst(t.pos.x, t.pos.y) < 2f) {
 							loaded = true;
 						}
 					}
@@ -261,7 +262,7 @@ public class LoadingSystem extends EntitySystem {
 	 * 
 	 * @return list of Vector2 representing points
 	 */
-	private ArrayList<Vector2> generatePoints() {
+	private static ArrayList<Vector2> generatePoints() {
 		MathUtils.random.setSeed(SpaceProject.SEED);
 		ArrayList<Vector2> points = new ArrayList<Vector2>();
 		int numStars = 150; // how many stars TRY to create(does not guarantee this many points will actually be generated)
