@@ -253,7 +253,8 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 
 
 	@Override
-	public void dispose() {		
+	public void dispose() {
+		
 		//dispose of all textures
 		for (Entity entity : renderQueue) {
 			TextureComponent tex = Mappers.texture.get(entity);	
@@ -265,7 +266,12 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 			tile.tex.dispose();
 		}
 		
-		batch.dispose();
+		//batch.dispose();//crashes: 
+		/*
+		EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x0000000054554370, pid=5604, tid=2364
+		Problematic frame:
+	 	C  [atio6axx.dll+0x3c4370]
+		 */
 	}
 
 

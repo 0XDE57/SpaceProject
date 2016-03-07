@@ -357,9 +357,15 @@ public class DebugUISystem extends CustomIteratingSystem implements Disposable {
 
 	@Override
 	public void dispose() {
+		
 		font.dispose();
 		batch.dispose();
-		shape.dispose();
+		//shape.dispose(); //crashes: 
+		/*
+		EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x0000000054554370, pid=5604, tid=2364
+		Problematic frame:
+	 	C  [atio6axx.dll+0x3c4370]
+		 */
 	}
 	
 }

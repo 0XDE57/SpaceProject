@@ -218,10 +218,11 @@ public class SpaceScreen extends ScreenAdapter {
 	public void dispose() {
 		//clean up after self
 		//dispose of spritebatches and textures
+		
 		for (EntitySystem sys : engine.getSystems()) {
 			if (sys instanceof Disposable)
 				((Disposable) sys).dispose();
-		}	
+		}
 		
 		for (Entity ents : engine.getEntities()) {
 			TextureComponent tex = ents.getComponent(TextureComponent.class);
@@ -229,7 +230,7 @@ public class SpaceScreen extends ScreenAdapter {
 				tex.texture.dispose();
 		}
 		
-		engine.removeAllEntities();
+		//engine.removeAllEntities();
 	}
 	
 	//resize game
