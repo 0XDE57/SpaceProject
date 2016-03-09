@@ -21,15 +21,18 @@ public class TestNoiseScreen extends ScreenAdapter {
 	private BitmapFont font;
 	
 	Texture noise;
-	double scale = 20;
+	double scale = 40;
 	long seed;
 	int size = 256;
 	//float off = 0;
 	float zed = 0;
 	static double animationSpeed = 48.0;
-	float zoomScale = 4.0f;
+	float zoomScale = 40.0f;
 	
-	public TestNoiseScreen(SpaceProject spaceProject) {
+	float xX = 0;
+	float yY = 0;
+	
+	public TestNoiseScreen(SpaceProject space) {
 		seed = MathUtils.random(Long.MAX_VALUE);
 		noise = generateWrappingNoise4D(seed, size, scale); //generateNoise3(seed, size, scale, zed);
 		
@@ -51,7 +54,7 @@ public class TestNoiseScreen extends ScreenAdapter {
 		//batch.draw(noise, 0, size);
 		//batch.draw(noise, size, size);
 
-		batch.draw(noise, 0, 0,
+		batch.draw(noise, xX, yY,
 				   0, 0,
 				   size, size,
 				   zoomScale, zoomScale,
@@ -60,10 +63,19 @@ public class TestNoiseScreen extends ScreenAdapter {
 		
 		font.draw(batch, "Seed: " + seed, 15, Gdx.graphics.getHeight() - 15);
 		font.draw(batch, "Scale: " + scale, 15, Gdx.graphics.getHeight() - 30);
-		//font.draw(batch, "Z: " + zed + " (" + MyMath.round(zed/animationSpeed, 2) + ")", 15, Gdx.graphics.getHeight() - 45);
+		font.draw(batch, "Zoom: " + zoomScale, 15, Gdx.graphics.getHeight() - 45);
 		
 		batch.end();
 		
+		
+		if (Gdx.input.isKeyPressed(Keys.LEFT))
+			xX++;
+		if (Gdx.input.isKeyPressed(Keys.RIGHT))
+			xX--;
+		if (Gdx.input.isKeyPressed(Keys.UP))
+			yY--;
+		if (Gdx.input.isKeyPressed(Keys.DOWN))
+			yY++;
 		
 		boolean change = false;
 		if (Gdx.input.isKeyJustPressed(Keys.SPACE)){
@@ -121,7 +133,7 @@ public class TestNoiseScreen extends ScreenAdapter {
 	public static Texture generateWrappingNoise4D(long seed, int size, double scale) {
 		OpenSimplexNoise noise = new OpenSimplexNoise(seed);
 		
-		Pixmap pixmap = new Pixmap(size, size, Format.RGBA8888);
+		Pixmap pixmap = new Pixmap(size, size, Format.RGB888);
 	
 		
 		//add layer of noise

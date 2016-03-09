@@ -12,13 +12,23 @@ public class TextureFactory {
 
 	static Pixmap pixmap;
 	
+	public static Texture createTile(Color c) {
+		pixmap = new Pixmap(1, 1, Format.RGB888);
+		pixmap.setColor(c);
+		pixmap.fill();
+	
+		Texture tex = new Texture(pixmap);
+		pixmap.dispose();
+		return tex;
+	}
+	
 	public static Texture generateNoiseTile(long seed, int tileSize) {
 		pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
 		
-		OpenSimplexNoise noise = new OpenSimplexNoise();
-		OpenSimplexNoise rGen = new OpenSimplexNoise(1);
-		OpenSimplexNoise gGen = new OpenSimplexNoise(2);
-		OpenSimplexNoise bGen = new OpenSimplexNoise(3);
+		OpenSimplexNoise noise = new OpenSimplexNoise(seed);
+		OpenSimplexNoise rGen = new OpenSimplexNoise(seed + 1);
+		OpenSimplexNoise gGen = new OpenSimplexNoise(seed + 2);
+		OpenSimplexNoise bGen = new OpenSimplexNoise(seed + 3);
 		double featureSize = 24;
 
 		for (int y = 0; y < pixmap.getHeight(); y++) {

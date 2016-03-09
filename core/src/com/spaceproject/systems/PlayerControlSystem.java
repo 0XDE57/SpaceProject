@@ -355,7 +355,7 @@ public class PlayerControlSystem extends EntitySystem {
 					vehicleEntity = vehicle; //set vehicle reference
 
 					//zoom out camera
-					engine.getSystem(RenderingSystem.class).setZoomTarget(1);
+					engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(1);
 					//TODO add animation to slowly move focus to the vehicle instead of instantly jumping to the vehicle position
 					//engine.getSystem(RenderingSystem.class).pan(vehicleTransform);
 					
@@ -398,7 +398,7 @@ public class PlayerControlSystem extends EntitySystem {
 		Mappers.transform.get(playerEntity).pos.set(Mappers.transform.get(vehicleEntity).pos);				
 
 		//zoom in camera
-		engine.getSystem(RenderingSystem.class).setZoomTarget(0.4f);
+		engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(0.4f);
 		
 		//set focus to player entity
 		playerEntity.add(vehicleEntity.remove(PlayerFocusComponent.class));

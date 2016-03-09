@@ -20,7 +20,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
 
-public class RenderingSystem extends IteratingSystem implements Disposable {
+public class SpaceRenderingSystem extends IteratingSystem implements Disposable {
 		
 	private Array<Entity> renderQueue; //array of entities to render
 	private Comparator<Entity> comparator; //for sorting render order
@@ -28,7 +28,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	//rendering
 	private static OrthographicCamera cam;
 	private ExtendViewport viewport;
-	private static SpriteBatch batch;
+	private SpriteBatch batch;
 	
 	//window size
 	private int prevWindowWidth = 0;
@@ -45,8 +45,10 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	private static final int WORLDHEIGHT = 720;
 
 	
-	public RenderingSystem() {
+	public SpaceRenderingSystem(OrthographicCamera camera) {
 		super(Family.all(TransformComponent.class, TextureComponent.class).get());
+		
+		cam = camera;
 		
 		renderQueue = new Array<Entity>();
 		
@@ -60,9 +62,8 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		};
 		
 		//initialize camera, viewport and aspect ratio
-		cam = new OrthographicCamera();
 		float aspectRatio = Gdx.graphics.getHeight() / Gdx.graphics.getWidth();	
-		viewport = new ExtendViewport(WORLDHEIGHT * aspectRatio, WORLDHEIGHT, cam);
+		viewport = new ExtendViewport(WORLDHEIGHT * aspectRatio, WORLDHEIGHT, camera);
 		viewport.apply();
 		
 		batch = new SpriteBatch();
@@ -93,7 +94,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		batch.begin();
 		
 		//render background tiles (stars)
-		for (SpaceBackgroundTile tile : LoadingSystem.getTiles()) {
+		for (SpaceBackgroundTile tile : SpaceLoadingSystem.getTiles()) {
 			//draw = (tile position + (cam position - center of tile)) * depth			
 			float drawX = tile.x + (cam.position.x - (tile.size/2)) * tile.depth;
 			float drawY = tile.y + (cam.position.y - (tile.size/2)) * tile.depth;			
@@ -145,7 +146,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	 * Return color based on camera position
 	 * @return red in x, green in y, blue in z
 	 */
-	private Vector3 backgroundColor() {
+	private static Vector3 backgroundColor() {
 		//still playing with these values to get the right feel/intensity of color...
 		float maxColor = 0.12f;
 		float ratio = 0.00001f;
@@ -262,7 +263,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 				tex.texture.dispose();
 		}
 		
-		for (SpaceBackgroundTile tile : LoadingSystem.getTiles()) {
+		for (SpaceBackgroundTile tile : SpaceLoadingSystem.getTiles()) {
 			tile.tex.dispose();
 		}
 		

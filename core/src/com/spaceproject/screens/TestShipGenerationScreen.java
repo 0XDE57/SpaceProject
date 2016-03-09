@@ -13,7 +13,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureFactory;
-import com.spaceproject.systems.RenderingSystem;
+import com.spaceproject.systems.SpaceRenderingSystem;
 
 public class TestShipGenerationScreen extends ScreenAdapter {
 

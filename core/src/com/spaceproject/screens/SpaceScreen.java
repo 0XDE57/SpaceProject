@@ -7,7 +7,7 @@ import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
@@ -23,11 +23,11 @@ import com.spaceproject.systems.DebugUISystem;
 import com.spaceproject.systems.DesktopInputSystem;
 import com.spaceproject.systems.ExpireSystem;
 import com.spaceproject.systems.HUDSystem;
-import com.spaceproject.systems.LoadingSystem;
 import com.spaceproject.systems.MovementSystem;
 import com.spaceproject.systems.OrbitSystem;
 import com.spaceproject.systems.PlayerControlSystem;
-import com.spaceproject.systems.RenderingSystem;
+import com.spaceproject.systems.SpaceLoadingSystem;
+import com.spaceproject.systems.SpaceRenderingSystem;
 import com.spaceproject.systems.TouchUISystem;
 
 public class SpaceScreen extends ScreenAdapter {
@@ -35,6 +35,8 @@ public class SpaceScreen extends ScreenAdapter {
 	SpaceProject game;
 	
 	public static Engine engine;
+	
+	private static OrthographicCamera cam;
 	
 	public static CelestialConfig celestcfg;
 	public static KeyConfig keycfg;
@@ -44,6 +46,9 @@ public class SpaceScreen extends ScreenAdapter {
 	public SpaceScreen(SpaceProject game) {
 
 		this.game = game;
+		
+		cam = new OrthographicCamera();
+		
 		// engine to handle all entities and components
 		engine = new Engine();
 		
@@ -128,16 +133,16 @@ public class SpaceScreen extends ScreenAdapter {
 		//engine.addSystem(new PlayerControlSystem(player));//start as player
 		
 		engine.addSystem(new PlayerControlSystem(this, player, playerTESTSHIP));//start as ship
-		engine.addSystem(new RenderingSystem());
-		engine.addSystem(new LoadingSystem());
+		engine.addSystem(new SpaceRenderingSystem(cam));
+		engine.addSystem(new SpaceLoadingSystem());
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new OrbitSystem());
-		engine.addSystem(new DebugUISystem());
+		engine.addSystem(new DebugUISystem(cam));
 		engine.addSystem(new BoundsSystem());
 		engine.addSystem(new ExpireSystem(1));
-		engine.addSystem(new CameraSystem());
+		engine.addSystem(new CameraSystem(cam));
 		engine.addSystem(new CollisionSystem());
-		engine.addSystem(new HUDSystem());
+		engine.addSystem(new HUDSystem(cam));
 		
 		//add input system. touch on android and keys on desktop.
 		if (Gdx.app.getType() == ApplicationType.Android) {
@@ -148,7 +153,7 @@ public class SpaceScreen extends ScreenAdapter {
 		
 	}
 
-	private void loadConfigs() {
+	private static void loadConfigs() {
 		//KEYS
 		keycfg = new KeyConfig();
 		keycfg.loadDefault();
@@ -195,7 +200,7 @@ public class SpaceScreen extends ScreenAdapter {
 				System.out.println("removed test planets");
 			} else {
 				// add------------------
-				Vector3 pos = engine.getSystem(RenderingSystem.class).getCamPos();
+				Vector3 pos = cam.position;
 				testPlanetsDebug = EntityFactory.createPlanetarySystem(pos.x, pos.y);
 				for (Entity entity : testPlanetsDebug) {
 					engine.addEntity(entity);
@@ -236,7 +241,7 @@ public class SpaceScreen extends ScreenAdapter {
 	//resize game
 	public void resize(int width, int height) {
 		Gdx.app.log("screen", width + ", " + height);
-		engine.getSystem(RenderingSystem.class).resize(width, height);
+		engine.getSystem(SpaceRenderingSystem.class).resize(width, height);
 	}
 	
 	public void hide() { }

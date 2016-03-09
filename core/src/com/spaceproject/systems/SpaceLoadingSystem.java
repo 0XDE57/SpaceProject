@@ -22,7 +22,7 @@ import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.Mappers;
 
-public class LoadingSystem extends EntitySystem {
+public class SpaceLoadingSystem extends EntitySystem {
 
 	private Engine engine;
 
@@ -81,7 +81,7 @@ public class LoadingSystem extends EntitySystem {
 	public void update(float delta) {
 
 		// position of camera to know where to load
-		Vector3 camPos = RenderingSystem.getCamPos();
+		Vector3 camPos = SpaceRenderingSystem.getCamPos();
 
 		// check, load and unload tiles
 		updateTiles(delta, camPos);
@@ -320,8 +320,8 @@ public class LoadingSystem extends EntitySystem {
 	 */
 	public static Vector2 getTilePos(float posX, float posY, float depth) {
 		// calculate position
-		int x = (int) (posX - (RenderingSystem.getCamPos().x - (tileSize / 2)) * depth);
-		int y = (int) (posY - (RenderingSystem.getCamPos().y - (tileSize / 2)) * depth);
+		int x = (int) (posX - (SpaceRenderingSystem.getCamPos().x - (tileSize / 2)) * depth);
+		int y = (int) (posY - (SpaceRenderingSystem.getCamPos().y - (tileSize / 2)) * depth);
 
 		// calculate tile that position is in
 		int tX = x / tileSize;

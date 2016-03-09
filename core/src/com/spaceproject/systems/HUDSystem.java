@@ -9,6 +9,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
@@ -24,6 +25,7 @@ import com.spaceproject.utility.MyMath;
 public class HUDSystem extends EntitySystem {
 	
 	//rendering
+	private static OrthographicCamera cam;
 	private Matrix4 projectionMatrix = new Matrix4();	
 	private ShapeRenderer shape = new ShapeRenderer();
 	
@@ -38,8 +40,10 @@ public class HUDSystem extends EntitySystem {
 	float opacity = 0.7f;
 	Color barBackground = new Color(1,1,1,0.5f);
 	
-	
-	
+	public HUDSystem(OrthographicCamera camera) {
+		cam = camera;
+	}
+
 	@Override
 	public void addedToEngine(Engine engine) {		
 		mapableObjects = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
@@ -91,7 +95,7 @@ public class HUDSystem extends EntitySystem {
 		int yOffset = -20; //position from entity		
 		
 		for (Entity entity : killables) {
-			Vector3 pos = RenderingSystem.getCam().project(Mappers.transform.get(entity).pos.cpy());
+			Vector3 pos = cam.project(Mappers.transform.get(entity).pos.cpy());
 			HealthComponent health = Mappers.health.get(entity);
 			
 			
@@ -207,13 +211,13 @@ public class HUDSystem extends EntitySystem {
 			MapComponent map = Mappers.map.get(mapable);
 			Vector3 screenPos = Mappers.transform.get(mapable).pos.cpy();
 			
-			if (screenPos.dst(RenderingSystem.getCamPos()) > map.distance) {
+			if (screenPos.dst(SpaceRenderingSystem.getCamPos()) > map.distance) {
 				continue;
 			}
 			
 			//set entity co'ords relative to center of screen
-			screenPos.x -= RenderingSystem.getCamPos().x;
-			screenPos.y -= RenderingSystem.getCamPos().y;
+			screenPos.x -= SpaceRenderingSystem.getCamPos().x;
+			screenPos.y -= SpaceRenderingSystem.getCamPos().y;
 			
 			//skip on screen entities
 			int z = 100; //how close to edge of screen to ignore

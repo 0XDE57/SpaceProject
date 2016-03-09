@@ -9,7 +9,7 @@ import com.spaceproject.utility.MyMath;
 
 public class DesktopInputSystem extends EntitySystem {
 	
-	private Engine engine;	
+	private Engine engine;
 	
 	@Override
 	public void addedToEngine(Engine engine) {
@@ -22,25 +22,25 @@ public class DesktopInputSystem extends EntitySystem {
 		//SCREEN CONTROLS///////////////////////////////////////////////////////////////////////////////////////
 		//zoom test
 		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomSpace))  {
-			if (engine.getSystem(RenderingSystem.class).getCamZoom() >= 10f) {
-				engine.getSystem(RenderingSystem.class).setZoomTarget(60);
+			if (engine.getSystem(SpaceRenderingSystem.class).getCamZoom() >= 10f) {
+				engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(60);
 			} else {
-				engine.getSystem(RenderingSystem.class).setZoomTarget(10);
+				engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(10);
 			}
 		}
-		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.resetZoom)) engine.getSystem(RenderingSystem.class).setZoomTarget(1);
-		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomCharacter)) engine.getSystem(RenderingSystem.class).setZoomTarget(0.1f);
-		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomOut)) engine.getSystem(RenderingSystem.class).setZoomTarget(engine.getSystem(RenderingSystem.class).getCamZoom() + 0.001f);
-		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomIn)) engine.getSystem(RenderingSystem.class).setZoomTarget(engine.getSystem(RenderingSystem.class).getCamZoom() - 0.001f);
+		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.resetZoom)) engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(1);
+		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomCharacter)) engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(0.1f);
+		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomOut)) engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(engine.getSystem(SpaceRenderingSystem.class).getCamZoom() + 0.001f);
+		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomIn)) engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(engine.getSystem(SpaceRenderingSystem.class).getCamZoom() - 0.001f);
 		
 		//fullscreen toggle
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.fullscreen)) {
-			engine.getSystem(RenderingSystem.class).toggleFullscreen();
+			engine.getSystem(SpaceRenderingSystem.class).toggleFullscreen();
 		}
 		
 		//vsync toggle
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.vsync)) {
-			engine.getSystem(RenderingSystem.class).toggleVsync();
+			engine.getSystem(SpaceRenderingSystem.class).toggleVsync();
 		}
 	
 		//PLAYER CONTROLS//////////////////////////////////////////////////////////////////////////////////////

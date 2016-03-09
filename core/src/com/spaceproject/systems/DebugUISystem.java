@@ -7,6 +7,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -31,6 +32,7 @@ import com.spaceproject.utility.MyMath;
 public class DebugUISystem extends CustomIteratingSystem implements Disposable {
 
 	//rendering
+	private static OrthographicCamera cam;
 	private SpriteBatch batch;
 	private ShapeRenderer shape;
 	private BitmapFont font;
@@ -55,8 +57,10 @@ public class DebugUISystem extends CustomIteratingSystem implements Disposable {
 	private int entityCount = 0;
 	private int componentCount = 0;
 	
-	public DebugUISystem() {
+	public DebugUISystem(OrthographicCamera camera) {
 		super(Family.all(TransformComponent.class).get());
+		
+		cam = camera;
 		
 		font = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 15);
 		
@@ -84,7 +88,7 @@ public class DebugUISystem extends CustomIteratingSystem implements Disposable {
 		//set projection matrix so things render using correct coordinates
 		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); 
 		batch.setProjectionMatrix(projectionMatrix);
-		shape.setProjectionMatrix(RenderingSystem.getCam().combined);
+		shape.setProjectionMatrix(cam.combined);
 		
 		
 		//enable blending for transparency
@@ -303,7 +307,7 @@ public class DebugUISystem extends CustomIteratingSystem implements Disposable {
 			ImmutableArray<Component> components = entity.getComponents();
 			
 			//use Vector3.cpy() to project only the position and avoid modifying projection matrix for all coordinates
-			Vector3 screenPos = RenderingSystem.getCam().project(t.pos.cpy());
+			Vector3 screenPos = cam.project(t.pos.cpy());
 					
 			//if has movement
 			MovementComponent m = Mappers.movement.get(entity);
@@ -338,7 +342,7 @@ public class DebugUISystem extends CustomIteratingSystem implements Disposable {
 			TransformComponent t = Mappers.transform.get(entity);
 			MovementComponent m = Mappers.movement.get(entity);
 			
-			Vector3 screenPos = RenderingSystem.getCam().project(t.pos.cpy());
+			Vector3 screenPos = cam.project(t.pos.cpy());
 			String vel = "";
 			if (m != null) {
 				vel = " ~ " + MyMath.round(m.velocity.len(), 1);
