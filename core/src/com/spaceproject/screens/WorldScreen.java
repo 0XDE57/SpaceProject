@@ -39,7 +39,7 @@ public class WorldScreen extends ScreenAdapter {
 		engine.addEntity(player);
 		
 		engine.addSystem(new PlayerControlSystem(this, player));
-		engine.addSystem(new WorldRenderingSystem(cam));
+		engine.addSystem(new WorldRenderingSystem(30, cam));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new CameraSystem(cam));
 		engine.addSystem(new DebugUISystem(cam));

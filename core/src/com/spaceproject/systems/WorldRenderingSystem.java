@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.spaceproject.SpaceBackgroundTile;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -43,21 +44,21 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	//camera zoom
 	private float zoomTarget = 1;
 	
-	//TODO: come up with some kind of standard size (pixel to meters)? / something less arbitrary
-	//private static final int WORLDWIDTH = 1280;
 	private static final int WORLDHEIGHT = 720;
 	
+	//test tiles
 	private Texture water;
 	private Texture grass;
 	
 	private double map[][];	
 	
-	private float scale;
-	int mapSize = 128;
-	int tileSize = 40;
+	private float noiseScale; //scale of noise
+	private int mapSize; //size of world
+	private int tileSize; //render size of tiles
+	private int surround; //how many tiles to draw around the camera
 
 	
-	public WorldRenderingSystem(OrthographicCamera camera) {
+	public WorldRenderingSystem(long seed, OrthographicCamera camera) {
 		super(Family.all(TransformComponent.class, TextureComponent.class).get());
 		
 		cam = camera;
@@ -84,40 +85,23 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		water = TextureFactory.createTile(Color.BLUE);
 		grass = TextureFactory.createTile(Color.GREEN);
 		
-		scale = 40;
+		noiseScale = 40;
+		mapSize = 128;
+		tileSize = 25;
+		surround = 30;	
 		
-		map = new double[mapSize][mapSize];
-		
-		//generate map
-		OpenSimplexNoise noise = new OpenSimplexNoise();	
-		for (int y = 0; y < mapSize; ++y) {
-			for (int x = 0; x < mapSize; ++x) {
-				
-				//sinX, cosX. wrap X axis
-				double sx = MathUtils.sin(x * MathUtils.PI2 / mapSize) / MathUtils.PI2 * mapSize / scale;
-				double cx = MathUtils.cos(x * MathUtils.PI2 / mapSize) / MathUtils.PI2 * mapSize / scale;
-				//sinY, cosY. wrap Y axis
-				double sy = MathUtils.sin(y * MathUtils.PI2 / mapSize) / MathUtils.PI2 * mapSize / scale;
-				double cy = MathUtils.cos(y * MathUtils.PI2 / mapSize) / MathUtils.PI2 * mapSize / scale;
-				
-				
-				double i = noise.eval(sx, cx, sy, cy); //get 4D noise using wrapped x and y axis
-				//i = (i * 0.5) + 0.5; // convert from range [-1:1] to [0:1]
-				map[x][y] = i;
-			}
-		}
+		initilizeMap(seed);
 		
 		//set vsync off for development, on by default
 		toggleVsync();
 	
 	}
 
-	
 	@Override
 	public void update(float delta) {
 		super.update(delta); //adds entities to render queue
 			
-		//clear screen with color based on camera position
+		//clear screen
 		Gdx.gl20.glClearColor(0, 0, 0, 1);
 		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
@@ -132,15 +116,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		batch.begin();
 		
 		//render background tiles
-		for (int x = 0; x < mapSize; ++x) {
-			for (int y = 0; y < mapSize; ++y) {
-				if (map[x][y] > 0) {
-					batch.draw(water, x * tileSize, y * tileSize, tileSize, tileSize);
-				} else {
-					batch.draw(grass, x * tileSize, y * tileSize, tileSize, tileSize);
-				}
-			}
-		}
+		drawTiles();
 			
 		
 		//render all textures
@@ -178,6 +154,71 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		}
 		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.rotateLeft)) {
 			cam.rotate(-5f * delta);
+		}
+	}
+
+	private void initilizeMap(long seed) {
+		map = new double[mapSize][mapSize];
+		
+		//generate map
+		OpenSimplexNoise noise = new OpenSimplexNoise(seed);	
+		for (int y = 0; y < mapSize; ++y) {
+			for (int x = 0; x < mapSize; ++x) {
+				
+				//sinX, cosX. wrap X axis
+				double sx = MathUtils.sin(x * MathUtils.PI2 / mapSize) / MathUtils.PI2 * mapSize / noiseScale;
+				double cx = MathUtils.cos(x * MathUtils.PI2 / mapSize) / MathUtils.PI2 * mapSize / noiseScale;
+				//sinY, cosY. wrap Y axis
+				double sy = MathUtils.sin(y * MathUtils.PI2 / mapSize) / MathUtils.PI2 * mapSize / noiseScale;
+				double cy = MathUtils.cos(y * MathUtils.PI2 / mapSize) / MathUtils.PI2 * mapSize / noiseScale;
+				
+				
+				double i = noise.eval(sx, cx, sy, cy); //get 4D noise using wrapped x and y axis
+				//i = (i * 0.5) + 0.5; // convert from range [-1:1] to [0:1]
+				map[x][y] = i;
+			}
+		}
+	}
+
+	private void drawTiles() {
+			
+		// calculate tile that the camera is in
+		int centerX = (int) (cam.position.x / tileSize);
+		int centerY = (int) (cam.position.y / tileSize);
+
+		// subtract 1 from tile position if less than zero to account for -1/n = 0
+		if (cam.position.x < 0) --centerX;		
+		if (cam.position.y < 0) --centerY;
+		
+		/* Draw all for debug
+		System.out.println(centerX + ":" + centerY);
+		for (int x = 0; x < mapSize; ++x) {
+			for (int y = 0; y < mapSize; ++y) {
+				if (map[x][y] < 0) {
+					batch.draw(water, x * tileSize, y * tileSize, tileSize, tileSize);
+				} else {
+					batch.draw(grass, x * tileSize, y * tileSize, tileSize, tileSize);
+				}
+			}
+		}*/
+		
+		
+		for (int tileX = centerX - surround; tileX <= centerX + surround; tileX++) {
+			for (int tileY = centerY - surround; tileY <= centerY + surround; tileY++) {
+				//wrap tiles when position is outside of map
+				int tX = tileX % map.length;
+				int tY = tileY % map.length;
+				if (tX < 0) tX += map.length;
+				if (tY < 0) tY += map.length;
+				
+				//draw tiles
+				if (map[tX][tY] < 0) {
+					batch.draw(water, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
+				} else {
+					batch.draw(grass, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
+				}
+				
+			}
 		}
 	}
 

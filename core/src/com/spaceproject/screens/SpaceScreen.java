@@ -134,7 +134,7 @@ public class SpaceScreen extends ScreenAdapter {
 		
 		engine.addSystem(new PlayerControlSystem(this, player, playerTESTSHIP));//start as ship
 		engine.addSystem(new SpaceRenderingSystem(cam));
-		engine.addSystem(new SpaceLoadingSystem());
+		engine.addSystem(new SpaceLoadingSystem(cam));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new OrbitSystem());
 		engine.addSystem(new DebugUISystem(cam));

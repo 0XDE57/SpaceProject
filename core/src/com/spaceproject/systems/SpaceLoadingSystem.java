@@ -9,6 +9,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -25,6 +26,7 @@ import com.spaceproject.utility.Mappers;
 public class SpaceLoadingSystem extends EntitySystem {
 
 	private Engine engine;
+	private static OrthographicCamera cam;
 
 	// background layer of tiles
 	private static ArrayList<SpaceBackgroundTile> tiles = new ArrayList<SpaceBackgroundTile>();
@@ -48,6 +50,10 @@ public class SpaceLoadingSystem extends EntitySystem {
 	private ImmutableArray<Entity> loadedStars;
 	private float checkStarsTimer = 4000;
 	private float checkStarsCurrTime = checkStarsTimer;
+
+	public SpaceLoadingSystem(OrthographicCamera camera) {
+		cam = camera;
+	}
 
 	@Override
 	public void addedToEngine(Engine engine) {
@@ -320,8 +326,8 @@ public class SpaceLoadingSystem extends EntitySystem {
 	 */
 	public static Vector2 getTilePos(float posX, float posY, float depth) {
 		// calculate position
-		int x = (int) (posX - (SpaceRenderingSystem.getCamPos().x - (tileSize / 2)) * depth);
-		int y = (int) (posY - (SpaceRenderingSystem.getCamPos().y - (tileSize / 2)) * depth);
+		int x = (int) (posX - (cam.position.x - (tileSize / 2)) * depth);
+		int y = (int) (posY - (cam.position.y - (tileSize / 2)) * depth);
 
 		// calculate tile that position is in
 		int tX = x / tileSize;
