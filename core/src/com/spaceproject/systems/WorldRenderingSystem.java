@@ -16,7 +16,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.spaceproject.SpaceBackgroundTile;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -218,6 +217,10 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 					batch.draw(grass, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
 				}
 				
+				/* really slow grayscale test
+				float i = (float) (map[tX][tY] * 0.5f) + 0.5f;
+				batch.draw(TextureFactory.createTile(new Color(i, i ,i , 1)), tileX * tileSize, tileY * tileSize, tileSize, tileSize);
+				*/
 			}
 		}
 	}

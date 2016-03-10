@@ -17,6 +17,7 @@ import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.MissileComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.OrbitComponent;
+import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -29,7 +30,8 @@ public class EntityFactory {
 	public static float scale = 4.0f;
 
 	public static Entity[] createPlanetarySystem(float x, float y) {
-		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
+		long seed = (long)(x + y) * SpaceProject.SEED;
+		MathUtils.random.setSeed(seed);
 
 		//number of planets in a system
 		int numPlanets = MathUtils.random(SpaceScreen.celestcfg.minPlanets, SpaceScreen.celestcfg.maxPlanets);
@@ -44,7 +46,7 @@ public class EntityFactory {
 		Entity[] entities = new Entity[numPlanets + 1];
 	
 		//add star to center of planetary system
-		Entity star = createStar(x, y, rotDir);
+		Entity star = createStar(seed, x, y, rotDir);
 		entities[0] = star;
 		
 		//create planets around star
@@ -54,7 +56,7 @@ public class EntityFactory {
 			float angle = MathUtils.random(3.14f * 2); //angle from star
 			float orbitX = x + (distance * MathUtils.cos(angle));
 			float orbitY = y + (distance * MathUtils.sin(angle));
-			entities[i] = createPlanet(star, orbitX, orbitY, angle, distance, rotDir);
+			entities[i] = createPlanet(seed + i, star, orbitX, orbitY, angle, distance, rotDir);
 		}
 		
 		System.out.println("Planetary System: (" + x + ", " + y + ") Objects: " + (numPlanets));
@@ -63,8 +65,8 @@ public class EntityFactory {
 		
 	}
 	
-	public static Entity createStar(float x, float y, boolean rotationDir) {
-		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
+	public static Entity createStar(long seed, float x, float y, boolean rotationDir) {
+		MathUtils.random.setSeed(seed);
 		Entity entity = new Entity();
 
 		// create star texture
@@ -99,9 +101,9 @@ public class EntityFactory {
 		return entity;
 	}
 	
-	public static Entity createPlanet(Entity parent, float orbitX, float orbitY, float angle, float distance, boolean rotationDir) {
-		Vector3 parentPos = parent.getComponent(TransformComponent.class).pos;
-		MathUtils.random.setSeed((long)(parentPos.x + parentPos.y * distance) * SpaceProject.SEED);
+	public static Entity createPlanet(long seed, Entity parent, float orbitX, float orbitY, float angle, float distance, boolean rotationDir) {
+		MathUtils.random.setSeed(seed);
+		
 		Entity entity = new Entity();	
 		
 		//create texture
@@ -130,11 +132,16 @@ public class EntityFactory {
 		map.color = new Color(0.15f, 0.5f, 0.9f, 0.9f);
 		map.distance = 10000;
 		
+		//planet
+		PlanetComponent planet = new PlanetComponent();
+		planet.seed = seed;
+		
 		//add components to entity
 		entity.add(transform);
 		entity.add(texture);
 		entity.add(orbit);
 		entity.add(map);
+		entity.add(planet);
 		
 		return entity;
 	}

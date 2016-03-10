@@ -9,6 +9,7 @@ import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.MissileComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.OrbitComponent;
+import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
@@ -36,4 +37,6 @@ public class Mappers {
 	public static final ComponentMapper<HealthComponent> health = ComponentMapper.getFor(HealthComponent.class);
 	
 	public static final ComponentMapper<MapComponent> map = ComponentMapper.getFor(MapComponent.class);
+
+	public static final ComponentMapper<PlanetComponent> planet = ComponentMapper.getFor(PlanetComponent.class);
 }

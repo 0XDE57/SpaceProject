@@ -206,18 +206,19 @@ public class SpaceScreen extends ScreenAdapter {
 					engine.addEntity(entity);
 				}
 				System.out.println("added test planets");
+				//engine.addEntity(EntityFactory.createPlanet(EntityFactory.createStar(0, 0, true), pos.x, pos.y, 0, 0, true));
 			}
 		}
 		// [DEGUB]/////////////////////////////
 
 	}
 	
-	public void changeScreen() {
+	public void changeScreen(long seed) {
 		System.out.println("Change screen to World.");
 		
-		dispose();
+		//dispose();
 		
-		game.setScreen(new WorldScreen(game));
+		game.setScreen(new WorldScreen(game, seed));
 	}
 
 	public void dispose() {

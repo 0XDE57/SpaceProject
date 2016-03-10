@@ -2,12 +2,15 @@ package com.spaceproject.screens;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.PlayerFocusComponent;
+import com.spaceproject.components.TextureComponent;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.systems.BoundsSystem;
 import com.spaceproject.systems.CameraSystem;
@@ -26,7 +29,7 @@ public class WorldScreen extends ScreenAdapter {
 	
 	private static OrthographicCamera cam;	
 
-	public WorldScreen(SpaceProject game) {
+	public WorldScreen(SpaceProject game, long seed) {
 		this.game = game;
 		
 		cam = new OrthographicCamera();		
@@ -39,7 +42,7 @@ public class WorldScreen extends ScreenAdapter {
 		engine.addEntity(player);
 		
 		engine.addSystem(new PlayerControlSystem(this, player));
-		engine.addSystem(new WorldRenderingSystem(30, cam));
+		engine.addSystem(new WorldRenderingSystem(seed, cam));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new CameraSystem(cam));
 		engine.addSystem(new DebugUISystem(cam));
@@ -66,11 +69,31 @@ public class WorldScreen extends ScreenAdapter {
 		engine.getSystem(WorldRenderingSystem.class).resize(width, height);
 	}
 
-	public void dispose() {
-		// TODO: clean up after self
-		// dispose of all spritebatches and whatnot
-		// create dispose method in all systems and call?
+	public void changeScreen() {
+		System.out.println("Change screen to Space.");
+		
+		//dispose();
+		
+		game.setScreen(new SpaceScreen(game));
+	}
 
+	public void dispose() {
+		//clean up after self
+		//dispose of spritebatches and textures
+		//engine.
+		for (EntitySystem sys : engine.getSystems()) {			
+			if (sys instanceof Disposable)
+				((Disposable) sys).dispose();
+		}
+		
+		for (Entity ents : engine.getEntities()) {
+			TextureComponent tex = ents.getComponent(TextureComponent.class);
+			if (tex != null)
+				tex.texture.dispose();
+		}
+		
+		//engine.removeAllEntities();
+		
 	}
 
 	public void hide() { }

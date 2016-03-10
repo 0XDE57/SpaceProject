@@ -10,12 +10,16 @@ import com.badlogic.gdx.math.Intersector;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.MovementComponent;
+import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.PlayerFocusComponent;
+import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.SpaceScreen;
+import com.spaceproject.screens.WorldScreen;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.MyMath;
 
 public class PlayerControlSystem extends EntitySystem {
 
@@ -28,6 +32,7 @@ public class PlayerControlSystem extends EntitySystem {
 
 	//vehicles array to check if player can get in 
 	private ImmutableArray<Entity> vehicles;
+	private ImmutableArray<Entity> planets;
 
 	//action timer, for enter/exit vehicle
 	//TODO: move to component, both player and AI need to be able to enter/exit
@@ -73,7 +78,8 @@ public class PlayerControlSystem extends EntitySystem {
 	public void addedToEngine(Engine engine) {
 		this.engine = engine;	
 		
-		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());	
+		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
+		planets = engine.getEntitiesFor(Family.all(PlanetComponent.class).get());
 	}
 
 
@@ -99,6 +105,25 @@ public class PlayerControlSystem extends EntitySystem {
 				exitVehicle();
 			} else {
 				enterVehicle();
+			}
+		}
+		
+		//land = true;
+		if (land) {
+			if (screen instanceof SpaceScreen) {
+				TransformComponent playerPos = Mappers.transform.get(vehicleEntity);
+				for (Entity planet : planets) {
+					TransformComponent planetPos = Mappers.transform.get(planet);
+					TextureComponent planetTex = Mappers.texture.get(planet);
+					
+					if (MyMath.distance(playerPos.pos.x, playerPos.pos.y, planetPos.pos.x, planetPos.pos.y) <= planetTex.texture.getWidth()/2 * planetTex.scale) {
+						long seed = Mappers.planet.get(planet).seed;
+						((SpaceScreen) screen).changeScreen(seed);
+					}
+				}
+			} else if (screen instanceof WorldScreen) {
+				System.out.println("Go to Space");
+				((WorldScreen) screen).changeScreen();
 			}
 		}
 	}
@@ -168,10 +193,7 @@ public class PlayerControlSystem extends EntitySystem {
 			movement.velocity.set(0,0);
 			stop = false;
 		}
-		
-		if (land) {
-			((SpaceScreen) screen).changeScreen();
-		}
+			
 	}
 
 	/**

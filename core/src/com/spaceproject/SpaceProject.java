@@ -21,8 +21,8 @@ public class SpaceProject extends Game {
 		//setScreen(new TestShipGenerationScreen(this));
 		//setScreen(new TestNoiseScreen(this));
 		
-		//setScreen(new SpaceScreen(this));
-		setScreen(new WorldScreen(this));
+		setScreen(new SpaceScreen(this));
+		//setScreen(new WorldScreen(this));
 		
 		//setScreen(new MainMenuScreen(this));
 	}
