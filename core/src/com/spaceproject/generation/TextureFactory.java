@@ -98,8 +98,8 @@ public class TextureFactory {
 	 * @param size of ship
 	 * @return Texture of ship
 	 */
-	public static Texture generateShip(int x, int y, int size) {
-		MathUtils.random.setSeed(x * size + y * SpaceProject.SEED);
+	public static Texture generateShip(long seed, int size) {
+		MathUtils.random.setSeed(seed);
 		
 		boolean debugImage = false;
 		

@@ -190,7 +190,7 @@ public class EntityFactory {
 		return entity;
 	}
 	
-	public static Entity createCharacter(int x, int y) {
+	public static Entity createCharacter(float x, float y) {
 		Entity entity = new Entity();
 		
 		TransformComponent transform = new TransformComponent();
@@ -215,11 +215,11 @@ public class EntityFactory {
 		return entity;
 	}
 	
-	public static Entity createShip3(int x, int y) {
+	public static Entity createShip3(float x, float y) {
 		
 		Entity entity = new Entity();
 
-		MathUtils.random.setSeed((x + y) * SpaceProject.SEED);
+		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
 		
 		TransformComponent transform = new TransformComponent();
 		TextureComponent texture = new TextureComponent();
@@ -237,7 +237,8 @@ public class EntityFactory {
 			size = MathUtils.random(minSize, maxSize);
 		} while (size % 2 == 1);
 		
-		Texture pixmapTex = TextureFactory.generateShip(x, y, size);
+		long seed = (long) (x * size + y * SpaceProject.SEED);
+		Texture pixmapTex = TextureFactory.generateShip(seed, size);
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
 		texture.scale = scale;
 		

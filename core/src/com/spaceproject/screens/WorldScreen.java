@@ -7,6 +7,7 @@ import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.PlayerFocusComponent;
@@ -69,12 +70,12 @@ public class WorldScreen extends ScreenAdapter {
 		engine.getSystem(WorldRenderingSystem.class).resize(width, height);
 	}
 
-	public void changeScreen() {
+	public void changeScreen(Vector3 landedPlanet) {
 		System.out.println("Change screen to Space.");
 		
 		//dispose();
 		
-		game.setScreen(new SpaceScreen(game));
+		game.setScreen(new SpaceScreen(game, landedPlanet));
 	}
 
 	public void dispose() {

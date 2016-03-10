@@ -7,6 +7,8 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.MovementComponent;
@@ -108,22 +110,26 @@ public class PlayerControlSystem extends EntitySystem {
 			}
 		}
 		
-		//land = true;
 		if (land) {
 			if (screen instanceof SpaceScreen) {
-				TransformComponent playerPos = Mappers.transform.get(vehicleEntity);
+				Vector3 playerPos = Mappers.transform.get(vehicleEntity).pos;
 				for (Entity planet : planets) {
-					TransformComponent planetPos = Mappers.transform.get(planet);
+					Vector3 planetPos = Mappers.transform.get(planet).pos;
 					TextureComponent planetTex = Mappers.texture.get(planet);
-					
-					if (MyMath.distance(playerPos.pos.x, playerPos.pos.y, planetPos.pos.x, planetPos.pos.y) <= planetTex.texture.getWidth()/2 * planetTex.scale) {
+					//if player is over planet 
+					if (MyMath.distance(playerPos.x, playerPos.y, planetPos.x, planetPos.y) <= planetTex.texture.getWidth()/2 * planetTex.scale) {
+						//save position for taking off from planet
+						SpaceProject.landedPlanet = planetPos;
+						
+						//land on planet
 						long seed = Mappers.planet.get(planet).seed;
 						((SpaceScreen) screen).changeScreen(seed);
 					}
 				}
 			} else if (screen instanceof WorldScreen) {
-				System.out.println("Go to Space");
-				((WorldScreen) screen).changeScreen();
+				//TODO: Create some kind of time system so planets go to their orbital position based on time passed.
+				//take off from planet. pass position of planet that was landed on.
+				((WorldScreen) screen).changeScreen(SpaceProject.landedPlanet);
 			}
 		}
 	}

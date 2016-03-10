@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 
 public class MainMenuScreen extends ScreenAdapter {
@@ -110,7 +111,7 @@ public class MainMenuScreen extends ScreenAdapter {
 			System.out.println(time);
 			if (time < 0) {
 				dispose();
-				game.setScreen(new SpaceScreen(game));
+				game.setScreen(new SpaceScreen(game, new Vector3()));
 			}
 		}
 

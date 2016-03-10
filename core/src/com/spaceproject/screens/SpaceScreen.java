@@ -43,7 +43,7 @@ public class SpaceScreen extends ScreenAdapter {
 	
 	Entity[] testPlanetsDebug; //test removable planetary system
 	
-	public SpaceScreen(SpaceProject game) {
+	public SpaceScreen(SpaceProject game, Vector3 startPosition) {
 
 		this.game = game;
 		
@@ -100,8 +100,8 @@ public class SpaceScreen extends ScreenAdapter {
 		//engine.addEntity(player);
 		
 		//start as ship
-		Entity playerTESTSHIP = EntityFactory.createShip3(0, 0);
-		Entity player = EntityFactory.createCharacter(0, 0);
+		Entity playerTESTSHIP = EntityFactory.createShip3(startPosition.x, startPosition.y);
+		Entity player = EntityFactory.createCharacter(startPosition.x, startPosition.y);
 		
 		
 		playerTESTSHIP.add(new PlayerFocusComponent());

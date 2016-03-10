@@ -44,12 +44,12 @@ public class SpaceLoadingSystem extends EntitySystem {
 
 	// timer for how often to check if player moved tiles
 	private float checkTileTimer = 500;
-	private float checkTileCurrTime = checkTileTimer;
+	private float checkTileCurrTime;
 
 	private ArrayList<Vector2> points = new ArrayList<Vector2>();
 	private ImmutableArray<Entity> loadedStars;
 	private float checkStarsTimer = 4000;
-	private float checkStarsCurrTime = checkStarsTimer;
+	private float checkStarsCurrTime;
 
 	public SpaceLoadingSystem(OrthographicCamera camera) {
 		cam = camera;
@@ -86,14 +86,11 @@ public class SpaceLoadingSystem extends EntitySystem {
 	@Override
 	public void update(float delta) {
 
-		// position of camera to know where to load
-		Vector3 camPos = SpaceRenderingSystem.getCamPos();
-
 		// check, load and unload tiles
-		updateTiles(delta, camPos);
+		updateTiles(delta);
 
 		// check, load and unload stars
-		updateStars(delta, camPos);
+		updateStars(delta);
 
 	}
 
@@ -102,9 +99,8 @@ public class SpaceLoadingSystem extends EntitySystem {
 	 * load near tiles.
 	 * 
 	 * @param delta
-	 * @param camPos
 	 */
-	private void updateTiles(float delta, Vector3 camPos) {
+	private void updateTiles(float delta) {
 		// TODO: consider adding timers to break up the process from happening
 		// in one frame causing a freeze/jump
 		// because putting it in a separate thread is not working (possible?)
@@ -119,8 +115,8 @@ public class SpaceLoadingSystem extends EntitySystem {
 		if (checkTileCurrTime < 0) {
 
 			// get tiles camera is in
-			Vector2 bgTile = getTilePos(camPos.x, camPos.y, bgTileDepth);
-			Vector2 fgTile = getTilePos(camPos.x, camPos.y, fgTileDepth);
+			Vector2 bgTile = getTilePos(cam.position.x, cam.position.y, bgTileDepth);
+			Vector2 fgTile = getTilePos(cam.position.x, cam.position.y, fgTileDepth);
 
 			if (bgCenterTile == null) {
 				bgCenterTile = bgTile;
@@ -164,7 +160,7 @@ public class SpaceLoadingSystem extends EntitySystem {
 	}
 
 
-	private void updateStars(float delta, Vector3 camPos) {
+	private void updateStars(float delta) {
 		checkStarsCurrTime -= 1000 * delta;
 		if (checkStarsCurrTime < 0) {
 			System.out.println("Checking stars...");
@@ -176,7 +172,7 @@ public class SpaceLoadingSystem extends EntitySystem {
 			// remove stars from engine that are too far
 			for (Entity star : loadedStars) {
 				TransformComponent t = Mappers.transform.get(star);
-				if (Vector2.dst2(t.pos.x, t.pos.y, camPos.x, camPos.y) > loadDistance) {
+				if (Vector2.dst2(t.pos.x, t.pos.y, cam.position.x, cam.position.y) > loadDistance) {
 					for (Entity e : engine.getEntitiesFor(Family.all(OrbitComponent.class).get())){
 						OrbitComponent orbit = Mappers.orbit.get(e);
 						if (orbit.parent != null) {
@@ -194,7 +190,7 @@ public class SpaceLoadingSystem extends EntitySystem {
 			// add planetary systems to engine
 			for (Vector2 point : points) {
 				//check if point is close enough to be loaded
-				if (point.dst2(camPos.x, camPos.y) < loadDistance) {
+				if (point.dst2(cam.position.x, cam.position.y) < loadDistance) {
 
 					boolean loaded = false;
 					

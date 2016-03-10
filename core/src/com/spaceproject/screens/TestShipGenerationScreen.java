@@ -40,7 +40,7 @@ public class TestShipGenerationScreen extends ScreenAdapter {
 		for (int i = 0; i < numShips; i++) {
 			int x = i % rows;
 			int y = i / rows;
-			tex.add(TextureFactory.generateShip(x, y, MathUtils.random(10, 36)));
+			tex.add(TextureFactory.generateShip(MathUtils.random(Long.MAX_VALUE), MathUtils.random(10, 36)));
 		}
 		
 		
