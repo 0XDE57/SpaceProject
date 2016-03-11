@@ -20,21 +20,23 @@ public class TestNoiseScreen extends ScreenAdapter {
 	SpriteBatch batch = new SpriteBatch();
 	private BitmapFont font;
 	
+	int mapSize = 256;	
+	float pixelSize = 3.0f;
+	
+	long seed;
 	Texture noise;
 	double scale = 40;
-	long seed;
-	int size = 256;
-	//float off = 0;
-	float zed = 0;
-	static double animationSpeed = 48.0;
-	float zoomScale = 40.0f;
+	int octaves = 4;
+	float persistence = 0.5f;
+	float lacunarity = 2;
+	
 	
 	float xX = 0;
 	float yY = 0;
 	
 	public TestNoiseScreen(SpaceProject space) {
 		seed = MathUtils.random(Long.MAX_VALUE);
-		noise = generateWrappingNoise4D(seed, size, scale); //generateNoise3(seed, size, scale, zed);
+		noise = generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity);
 		
 		font = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 15);
 		
@@ -56,14 +58,14 @@ public class TestNoiseScreen extends ScreenAdapter {
 
 		batch.draw(noise, xX, yY,
 				   0, 0,
-				   size, size,
-				   zoomScale, zoomScale,
+				   mapSize, mapSize,
+				   pixelSize, pixelSize,
 				   0, 
-				   0, 0, size, size, false, false);
+				   0, 0, mapSize, mapSize, false, false);
 		
 		font.draw(batch, "Seed: " + seed, 15, Gdx.graphics.getHeight() - 15);
 		font.draw(batch, "Scale: " + scale, 15, Gdx.graphics.getHeight() - 30);
-		font.draw(batch, "Zoom: " + zoomScale, 15, Gdx.graphics.getHeight() - 45);
+		font.draw(batch, "Zoom: " + pixelSize, 15, Gdx.graphics.getHeight() - 45);
 		
 		batch.end();
 		
@@ -83,24 +85,25 @@ public class TestNoiseScreen extends ScreenAdapter {
 			change = true;
 		}			
 		if (Gdx.input.isKeyPressed(Keys.EQUALS)) {
-			++scale;
+			pixelSize += 0.5;
 			change = true;		
 		}
 		if (Gdx.input.isKeyPressed(Keys.MINUS)) {
-			--scale;
+			pixelSize -= 0.5;
 			change = true;
 		}
+		
 		if (Gdx.input.isKeyPressed(Keys.LEFT_BRACKET)) {
-			zoomScale -= 0.5;
+			++scale;
 			change = true;
 		}
 		if (Gdx.input.isKeyPressed(Keys.RIGHT_BRACKET)) {
-			zoomScale += 0.5;
+			--scale;
 			change = true;
 		}
 		
 		if (change)
-			noise = generateWrappingNoise4D(seed, size, scale); //noise = generateNoise3(seed, size, scale, zed);
+			noise = generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity); //noise = generateNoise3(seed, size, scale, zed);
 	}
 	
 	public static Texture generateNoise(long seed, int size, double scale) {
@@ -130,27 +133,66 @@ public class TestNoiseScreen extends ScreenAdapter {
 		return t;
 	}
 	
-	public static Texture generateWrappingNoise4D(long seed, int size, double scale) {
+	public static Texture generateWrappingNoise4D(long seed, int size, double scale, int octaves, float persistence, float lacunarity) {
+		float[][] map = new float[size][size];
+		
 		OpenSimplexNoise noise = new OpenSimplexNoise(seed);
-		
-		Pixmap pixmap = new Pixmap(size, size, Format.RGB888);
 	
+		float minNoise = Float.MAX_VALUE;
+		float maxNoise = Float.MIN_VALUE;
+
+		for (int x = 0; x < size; ++x) {
+			for (int y = 0; y < size; ++y) {
+				float amplitude = 1;
+				float frequency = 1;
+				float noiseHeight = 0;
+				
+				for (int oct = 0; oct < octaves; ++oct) {
+					// sinX, cosX. wrap X axis
+					double sx = (MathUtils.sin(x * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale) * frequency;
+					double cx = (MathUtils.cos(x * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale) * frequency;
+					// sinY, cosY. wrap Y axis
+					double sy = (MathUtils.sin(y * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale) * frequency;
+					double cy = (MathUtils.cos(y * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale) * frequency;
+
+					double i = noise.eval(sx, cx, sy, cy); // eval 4D noise using wrapped x and y axis
+					
+					//i = (i * 0.5) + 0.5; // convert from range [-1:1] to [0:1]
+					
+					//map[x][y] = (float) (i * 0.5f) + 0.5f; // convert from range [-1:1] to [0:1]
+					noiseHeight += (float) (i * amplitude);
+					
+					amplitude += persistence;
+					frequency += lacunarity;
+					
+				}
+				
+				if (noiseHeight > maxNoise) maxNoise = noiseHeight;
+				if (noiseHeight < minNoise) minNoise = noiseHeight;
+				
+				map[x][y] = noiseHeight;
+			}			
+		}
+		System.out.println("Origin MIN/MAX: " + minNoise + "/" + maxNoise);
 		
-		//add layer of noise
-		for (int y = 0; y < pixmap.getHeight(); ++y) {
-			for (int x = 0; x < pixmap.getWidth(); ++x) {
-				
-				//sinX, cosX. wrap X axis
-				double sx = MathUtils.sin(x * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale;
-				double cx = MathUtils.cos(x * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale;
-				//sinY, cosY. wrap Y axis
-				double sy = MathUtils.sin(y * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale;
-				double cy = MathUtils.cos(y * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale;
-				
-				
-				double i = noise.eval(sx, cx, sy, cy); //eval 4D noise using wrapped x and y axis
-				i = (i * 0.5) + 0.5; // convert from range [-1:1] to [0:1]
-				
+		//normalize
+		float minNoiseNormal = Float.MAX_VALUE;
+		float maxNoiseNormal = Float.MIN_VALUE;
+
+		for (int x = 0; x < size; ++x) {
+			for (int y = 0; y < size; ++y) {
+				map[x][y] = inverseLerp(minNoise, maxNoise, map[x][y]);
+				float normal = map[x][y];
+				if (normal > maxNoiseNormal) maxNoiseNormal = normal;
+				if (normal < minNoiseNormal) minNoiseNormal = normal;
+			}
+		}
+		System.out.println("Normal MIN/MAX: " + minNoiseNormal + "/" + maxNoiseNormal);
+		
+		//create image
+		Pixmap pixmap = new Pixmap(size, size, Format.RGB888);
+		for (int x = 0; x < size; ++x) {
+			for (int y = 0; y < size; ++y) {
 				/*
 				if (i > 0.85f)
 					pixmap.setColor(new Color((float) 1, (float) 1, (float) 1, 1));			
@@ -162,21 +204,17 @@ public class TestNoiseScreen extends ScreenAdapter {
 					pixmap.setColor(new Color((float) 0.9, (float) 0.7, (float) 0, 1));
 				else if (i > 0.3f)
 					pixmap.setColor(new Color((float) 0, (float) 0, (float) (1-i), 1));
-				*/
-				/*
 				if (i > 0.5f){
 					pixmap.setColor(new Color(1, 1, 0, (float)i));
 				} else {
 					pixmap.setColor(new Color(1, 0, 0, (float)(1-i)));
 				}*/
+				//float i = (map[xX][yY] * 0.5f) + 0.5f; // convert from range [-1:1] to [0:1];
 				
-				pixmap.setColor(new Color((float) i, (float) i , (float) i, 1));
-				//if (i > 0.45f && i < 0.5f)
-					//pixmap.setColor(new Color((float) 1, (float) 1 , (float) 0, 1));
-				
+				float i = map[x][y];
+				pixmap.setColor(new Color(i, i , i, 1));
 				
 				pixmap.drawPixel(x, y);
-
 			}
 		}
 		
@@ -186,11 +224,15 @@ public class TestNoiseScreen extends ScreenAdapter {
 		return t;
 	}
 	
+	private static float inverseLerp(float minNoise, float maxNoise, float f) {
+		return (f - minNoise) / (maxNoise - minNoise);
+	}
+
 	public static Texture generateNoise3(long seed, int size, double scale, float z) {
 		OpenSimplexNoise noise = new OpenSimplexNoise(seed);
 		
 		Pixmap pixmap = new Pixmap(size, size, Format.RGBA4444);
-		
+		double animationSpeed = 48.0;
 		
 		//add layer of noise
 		for (int y = 0; y < pixmap.getHeight(); ++y) {
