@@ -21,6 +21,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.NoiseGen;
 import com.spaceproject.utility.OpenSimplexNoise;
 
 public class WorldRenderingSystem extends IteratingSystem implements Disposable {
@@ -56,10 +57,8 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	private Texture waterDeeper;
 	
 	
-	private double map[][];	
-	
-	private float noiseScale; //scale of noise
-	private int mapSize; //size of world
+	private float[][] map;	
+		
 	private int tileSize; //render size of tiles
 	private int surround; //how many tiles to draw around the camera
 
@@ -97,13 +96,18 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		waterDeep 	 = TextureFactory.createTile(new Color((float)15/255, (float)85/255, (float)160/255, 1));
 		waterDeeper	 = TextureFactory.createTile(new Color((float)15/255, (float)10/255, (float)170/255, 1));
 		
-		//test map values
-		noiseScale = 40;
-		mapSize = 256;
-		tileSize = 2;//25;
+		tileSize = 25;
 		surround = 30;	
 		
-		initilizeMap(seed);
+		//test map values
+		float scale = 40; //scale of noise = 40;
+		int octaves = 4;
+		float persistence = 0.5f;//0 - 1
+		float lacunarity = 1;//1 - x
+		int mapSize = 256; //size of world
+		
+		
+		map = NoiseGen.generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity);
 		
 		//set vsync off for development, on by default
 		toggleVsync();
@@ -130,8 +134,6 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		
 		//render background tiles
 		drawTiles();
-		//batch.draw(grassDark, 0 * tileSize, 0 * tileSize, tileSize, tileSize);
-		//batch.draw(waterShallow, 1 * tileSize, 1 * tileSize, tileSize, tileSize);
 		
 		
 		//render all textures
@@ -170,30 +172,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.rotateLeft)) {
 			cam.rotate(-5f * delta);
 		}
-	}
-
-	private void initilizeMap(long seed) {
-		map = new double[mapSize][mapSize];
-		
-		//generate map
-		OpenSimplexNoise noise = new OpenSimplexNoise(seed);	
-		for (int y = 0; y < mapSize; ++y) {
-			for (int x = 0; x < mapSize; ++x) {
-				
-				//sinX, cosX. wrap X axis
-				double sx = MathUtils.sin(x * MathUtils.PI2 / mapSize) / MathUtils.PI2 * mapSize / noiseScale;
-				double cx = MathUtils.cos(x * MathUtils.PI2 / mapSize) / MathUtils.PI2 * mapSize / noiseScale;
-				//sinY, cosY. wrap Y axis
-				double sy = MathUtils.sin(y * MathUtils.PI2 / mapSize) / MathUtils.PI2 * mapSize / noiseScale;
-				double cy = MathUtils.cos(y * MathUtils.PI2 / mapSize) / MathUtils.PI2 * mapSize / noiseScale;
-				
-				
-				double i = noise.eval(sx, cx, sy, cy); //get 4D noise using wrapped x and y axis
-				i = (i * 0.5) + 0.5; // convert from range [-1:1] to [0:1]
-				map[x][y] = i;
-			}
-		}
-	}
+	}	
 
 	private void drawTiles() {
 			
@@ -205,7 +184,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		if (cam.position.x < 0) --centerX;		
 		if (cam.position.y < 0) --centerY;
 		
-		
+		/*//debug draw full map
 		for (int x = 0; x < mapSize; ++x) {
 			for (int y = 0; y < mapSize; ++y) {
 				if (map[x][y] > 0.90) {
@@ -226,7 +205,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 					batch.draw(waterDeeper, x * tileSize, y * tileSize, tileSize, tileSize);
 				}			
 			}
-		}
+		}*/
 		
 		
 		for (int tileX = centerX - surround; tileX <= centerX + surround; tileX++) {
@@ -238,6 +217,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 				if (tY < 0) tY += map.length;
 				
 				//draw tiles
+				//TODO: refactor threshold values to config object
 				if (map[tX][tY] > 0.90) {
 					batch.draw(rockDark, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
 				} else if (map[tX][tY] > 0.80) {

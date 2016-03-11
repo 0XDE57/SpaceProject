@@ -25,7 +25,7 @@ public class SpaceProject extends Game {
 		//setScreen(new TestNoiseScreen(this));
 		
 		setScreen(new SpaceScreen(this, new Vector3()));
-		//setScreen(new WorldScreen(this));
+		//setScreen(new WorldScreen(this, 0));
 		
 		//setScreen(new MainMenuScreen(this));
 	}

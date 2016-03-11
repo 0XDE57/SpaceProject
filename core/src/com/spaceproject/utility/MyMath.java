@@ -1,5 +1,6 @@
 package com.spaceproject.utility;
 
+import com.badlogic.gdx.math.MathUtils;
 
 public class MyMath {
 
@@ -36,5 +37,16 @@ public class MyMath {
 	public static double round(double value, int precision) {
 	    int scale = (int) Math.pow(10, precision);
 	    return (double) Math.round(value * scale) / scale;
+	}
+	
+	/**
+	 * Returns the percentage of the range max-min that corresponds to value.
+	 * @param min
+	 * @param max
+	 * @param value
+	 * @return interpolant value within the range [min, max].
+	 */
+	public static float inverseLerp(float min, float max, float value) {
+		return (value - min) / (max - min);
 	}
 }

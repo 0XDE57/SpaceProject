@@ -29,6 +29,7 @@ import com.spaceproject.systems.PlayerControlSystem;
 import com.spaceproject.systems.SpaceLoadingSystem;
 import com.spaceproject.systems.SpaceRenderingSystem;
 import com.spaceproject.systems.TouchUISystem;
+import com.sun.java_cup.internal.runtime.virtual_parse_stack;
 
 public class SpaceScreen extends ScreenAdapter {
 
@@ -49,6 +50,9 @@ public class SpaceScreen extends ScreenAdapter {
 		
 		cam = new OrthographicCamera();
 		
+		if (startPosition == null)
+			startPosition = new Vector3();
+		
 		// engine to handle all entities and components
 		engine = new Engine();
 		
@@ -56,83 +60,38 @@ public class SpaceScreen extends ScreenAdapter {
 		//load values for things like key mapping, settings, default values for generation
 		loadConfigs();
 		
-		//temporary test entities--------------------------------------------
-		//add entities to engine, should put in spawn system or initializer of sorts...
-		//TODO: need refactor and a home			
 		
-		/*
-		//test planets
-		engine.addEntity(EntityFactory.createPlanet(300, 300));
-		engine.addEntity(EntityFactory.createPlanet(-300, -300));
-		engine.addEntity(EntityFactory.createPlanet(600, 0));
-		engine.addEntity(EntityFactory.createPlanet(-600, 0));
-		engine.addEntity(EntityFactory.createPlanet(1900, 0));
-		*/
+		//add temporary test entities--------------------------------------------
+		//TODO: need refactor, put in spawn system or initializer of sorts...			
 		
-		/*
-		//add test planetary system (solar system)
-		for (Entity entity : EntityFactory.createPlanetarySystem(5000, 5000)) {
-			engine.addEntity(entity);
-		}
-		
-		for (Entity entity : EntityFactory.createPlanetarySystem(-5000, -15000)) {
-			//engine.addEntity(entity);
-		}
-		*/
-
-		
-		//test ships
-		//engine.addEntity(EntityFactory.createShip(100, 300));		
-		//engine.addEntity(EntityFactory.createShip(0, 300));
-		
+		//add test ships
 		engine.addEntity(EntityFactory.createShip3(-100, 400));
 		engine.addEntity(EntityFactory.createShip3(-200, 400));		
 		engine.addEntity(EntityFactory.createShip3(-300, 400));
 		engine.addEntity(EntityFactory.createShip3(-400, 400));
-		
-		//engine.addEntity(EntityFactory.createShip3(200, 400));
-		//engine.addEntity(EntityFactory.createShip3(300, 400));
-		//engine.addEntity(EntityFactory.createShip3(400, 400));
-		
-		//player------------------------------------------
-		//start as player
-		//Entity player = EntityFactory.createCharacter(0, 0, false, null);
-		//engine.addEntity(player);
-		
-		//start as ship
+			
+		//add player
+		boolean startAsShip = true;//debug: start as ship or player
 		Entity playerTESTSHIP = EntityFactory.createShip3(startPosition.x, startPosition.y);
 		Entity player = EntityFactory.createCharacter(startPosition.x, startPosition.y);
 		
-		
-		playerTESTSHIP.add(new PlayerFocusComponent());
-		engine.addEntity(playerTESTSHIP);
-		
-		//engine.addEntity(EntityFactory.createNoiseTile(0, 0, 256));
-
-		/*
-		Entity testOrbit = EntityFactory.createPlanet(playerTESTSHIP, 755, true);
-		testOrbit.getComponent(OrbitComponent.class).orbitSpeed = 0.3f;
-		testOrbit.getComponent(OrbitComponent.class).angle = 3.14f*2;
-		engine.addEntity(testOrbit);
-		
-		Entity testOrbit2 = EntityFactory.createPlanet(playerTESTSHIP, 1000, false);
-		testOrbit2.getComponent(OrbitComponent.class).orbitSpeed = 0.3f;
-		testOrbit2.getComponent(OrbitComponent.class).angle = 3.14f*2;
-		engine.addEntity(testOrbit2);
-		
-		Entity testMap = new Entity();
-		testMap.add(new MapComponent());
-		TransformComponent t = new TransformComponent();
-		t.pos.x = 1100;
-		t.pos.y = 500;
-		testMap.add(t);
-		engine.addEntity(testMap);
-		*/
+		if (startAsShip) {
+			//start as ship	
+			playerTESTSHIP.add(new PlayerFocusComponent());
+			engine.addEntity(playerTESTSHIP);
+		} else {
+			//start as player
+			player.add(new PlayerFocusComponent());
+			engine.addEntity(player);
+		}
 		
 		// Add systems to engine---------------------------------------------------------
-		//engine.addSystem(new PlayerControlSystem(player));//start as player
+		if (startAsShip) {
+			engine.addSystem(new PlayerControlSystem(this, player, playerTESTSHIP));//start as ship
+		} else {
+			engine.addSystem(new PlayerControlSystem(this, player));//start as player
+		}		
 		
-		engine.addSystem(new PlayerControlSystem(this, player, playerTESTSHIP));//start as ship
 		engine.addSystem(new SpaceRenderingSystem(cam));
 		engine.addSystem(new SpaceLoadingSystem(cam));
 		engine.addSystem(new MovementSystem());
