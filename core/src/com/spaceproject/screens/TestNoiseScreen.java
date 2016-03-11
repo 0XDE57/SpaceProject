@@ -20,15 +20,15 @@ public class TestNoiseScreen extends ScreenAdapter {
 	SpriteBatch batch = new SpriteBatch();
 	private BitmapFont font;
 	
-	int mapSize = 256;	
+	int mapSize = 128;	
 	float pixelSize = 3.0f;
 	
 	long seed;
 	Texture noise;
-	double scale = 40;
+	double scale = 40;//30 - 100
 	int octaves = 4;
-	float persistence = 0.5f;
-	float lacunarity = 2;
+	float persistence = 0.5f;//0 - 1
+	float lacunarity = 2;//1 - x
 	
 	
 	float xX = 0;
@@ -80,6 +80,7 @@ public class TestNoiseScreen extends ScreenAdapter {
 			yY++;
 		
 		boolean change = false;
+		//TODO: make UI sliders for these values
 		if (Gdx.input.isKeyJustPressed(Keys.SPACE)){
 			seed = MathUtils.random(Long.MAX_VALUE);
 			change = true;
@@ -155,7 +156,8 @@ public class TestNoiseScreen extends ScreenAdapter {
 					double sy = (MathUtils.sin(y * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale) * frequency;
 					double cy = (MathUtils.cos(y * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale) * frequency;
 
-					double i = noise.eval(sx, cx, sy, cy); // eval 4D noise using wrapped x and y axis
+					//double i = noise.eval(sx, cx, sy, cy); // eval 4D noise using wrapped x and y axis
+					double i = noise.eval(sx, cy, sy, cx);
 					
 					//i = (i * 0.5) + 0.5; // convert from range [-1:1] to [0:1]
 					
@@ -173,12 +175,13 @@ public class TestNoiseScreen extends ScreenAdapter {
 				map[x][y] = noiseHeight;
 			}			
 		}
-		System.out.println("Origin MIN/MAX: " + minNoise + "/" + maxNoise);
+		//System.out.println("Origin MIN/MAX: " + minNoise + "/" + maxNoise);
 		
-		//normalize
+		
 		float minNoiseNormal = Float.MAX_VALUE;
 		float maxNoiseNormal = Float.MIN_VALUE;
-
+		
+		//normalize
 		for (int x = 0; x < size; ++x) {
 			for (int y = 0; y < size; ++y) {
 				map[x][y] = inverseLerp(minNoise, maxNoise, map[x][y]);
@@ -187,7 +190,7 @@ public class TestNoiseScreen extends ScreenAdapter {
 				if (normal < minNoiseNormal) minNoiseNormal = normal;
 			}
 		}
-		System.out.println("Normal MIN/MAX: " + minNoiseNormal + "/" + maxNoiseNormal);
+		//System.out.println("Normal MIN/MAX: " + minNoiseNormal + "/" + maxNoiseNormal);
 		
 		//create image
 		Pixmap pixmap = new Pixmap(size, size, Format.RGB888);

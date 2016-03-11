@@ -46,8 +46,15 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	private static final int WORLDHEIGHT = 720;
 	
 	//test tiles
-	private Texture water;
-	private Texture grass;
+	private Texture rockDark;
+	private Texture rockLight;
+	private Texture grassDark;
+	private Texture grassLight;
+	private Texture sand;
+	private Texture waterShallow;
+	private Texture waterDeep;
+	private Texture waterDeeper;
+	
 	
 	private double map[][];	
 	
@@ -80,13 +87,20 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		
 		batch = new SpriteBatch();
 		
+		//test color values
+		rockDark 	 = TextureFactory.createTile(new Color((float)75/255, (float)30/255, 0, 1));
+		rockLight 	 = TextureFactory.createTile(new Color((float)115/255, (float)40/255, 0, 1));
+		grassDark 	 = TextureFactory.createTile(new Color((float)30/255, (float)107/255, 0, 1));
+		grassLight 	 = TextureFactory.createTile(new Color((float)10/255, (float)130/255, (float)15/255, 1));
+		sand		 = TextureFactory.createTile(new Color((float)155/255, (float)130/255, 0, 1));
+		waterShallow = TextureFactory.createTile(new Color((float)10/255, (float)140/255, (float)180/255, 1));
+		waterDeep 	 = TextureFactory.createTile(new Color((float)15/255, (float)85/255, (float)160/255, 1));
+		waterDeeper	 = TextureFactory.createTile(new Color((float)15/255, (float)10/255, (float)170/255, 1));
 		
-		water = TextureFactory.createTile(Color.BLUE);
-		grass = TextureFactory.createTile(Color.GREEN);
-		
+		//test map values
 		noiseScale = 40;
-		mapSize = 128;
-		tileSize = 25;
+		mapSize = 256;
+		tileSize = 2;//25;
 		surround = 30;	
 		
 		initilizeMap(seed);
@@ -116,7 +130,9 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		
 		//render background tiles
 		drawTiles();
-			
+		//batch.draw(grassDark, 0 * tileSize, 0 * tileSize, tileSize, tileSize);
+		//batch.draw(waterShallow, 1 * tileSize, 1 * tileSize, tileSize, tileSize);
+		
 		
 		//render all textures
 		for (Entity entity : renderQueue) {
@@ -173,7 +189,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 				
 				
 				double i = noise.eval(sx, cx, sy, cy); //get 4D noise using wrapped x and y axis
-				//i = (i * 0.5) + 0.5; // convert from range [-1:1] to [0:1]
+				i = (i * 0.5) + 0.5; // convert from range [-1:1] to [0:1]
 				map[x][y] = i;
 			}
 		}
@@ -189,17 +205,28 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		if (cam.position.x < 0) --centerX;		
 		if (cam.position.y < 0) --centerY;
 		
-		/* Draw all for debug
-		System.out.println(centerX + ":" + centerY);
+		
 		for (int x = 0; x < mapSize; ++x) {
 			for (int y = 0; y < mapSize; ++y) {
-				if (map[x][y] < 0) {
-					batch.draw(water, x * tileSize, y * tileSize, tileSize, tileSize);
+				if (map[x][y] > 0.90) {
+					batch.draw(rockDark, x * tileSize, y * tileSize, tileSize, tileSize);
+				} else if (map[x][y] > 0.80) {
+					batch.draw(rockLight, x * tileSize, y * tileSize, tileSize, tileSize);
+				} else if (map[x][y] > 0.70) {
+					batch.draw(grassDark, x * tileSize, y * tileSize, tileSize, tileSize);
+				} else if (map[x][y] > 0.53) {
+					batch.draw(grassLight, x * tileSize, y * tileSize, tileSize, tileSize);
+				} else if (map[x][y] > 0.50) {
+					batch.draw(sand, x * tileSize, y * tileSize, tileSize, tileSize);
+				} else if (map[x][y] > 0.40) {
+					batch.draw(waterShallow, x * tileSize, y * tileSize, tileSize, tileSize);
+				} else if (map[x][y] > 0.25) {
+					batch.draw(waterDeep, x * tileSize, y * tileSize, tileSize, tileSize);
 				} else {
-					batch.draw(grass, x * tileSize, y * tileSize, tileSize, tileSize);
-				}
+					batch.draw(waterDeeper, x * tileSize, y * tileSize, tileSize, tileSize);
+				}			
 			}
-		}*/
+		}
 		
 		
 		for (int tileX = centerX - surround; tileX <= centerX + surround; tileX++) {
@@ -211,16 +238,23 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 				if (tY < 0) tY += map.length;
 				
 				//draw tiles
-				if (map[tX][tY] < 0) {
-					batch.draw(water, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
+				if (map[tX][tY] > 0.90) {
+					batch.draw(rockDark, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
+				} else if (map[tX][tY] > 0.80) {
+					batch.draw(rockLight, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
+				} else if (map[tX][tY] > 0.70) {
+					batch.draw(grassDark, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
+				} else if (map[tX][tY] > 0.53) {
+					batch.draw(grassLight, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
+				} else if (map[tX][tY] > 0.50) {
+					batch.draw(sand, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
+				} else if (map[tX][tY] > 0.40) {
+					batch.draw(waterShallow, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
+				} else if (map[tX][tY] > 0.25) {
+					batch.draw(waterDeep, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
 				} else {
-					batch.draw(grass, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
+					batch.draw(waterDeeper, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
 				}
-				
-				/* really slow grayscale test
-				float i = (float) (map[tX][tY] * 0.5f) + 0.5f;
-				batch.draw(TextureFactory.createTile(new Color(i, i ,i , 1)), tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-				*/
 			}
 		}
 	}
