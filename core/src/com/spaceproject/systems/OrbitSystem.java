@@ -52,7 +52,7 @@ public class OrbitSystem extends IteratingSystem {
 			Vector3 nextPos = new Vector3(orbitX, orbitY, position.pos.z);
 			// linear interpolate to smooth out movement and eliminate "jumping"
 			// visible on long orbit distances.
-			position.pos.lerp(nextPos, 0.001f);
+			position.pos.lerp(nextPos, 1f*delta);
 		}
 	}
 

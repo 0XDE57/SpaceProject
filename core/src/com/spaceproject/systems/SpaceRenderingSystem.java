@@ -21,7 +21,7 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
 
 public class SpaceRenderingSystem extends IteratingSystem implements Disposable {
-		
+	
 	private Array<Entity> renderQueue; //array of entities to render
 	private Comparator<Entity> comparator; //for sorting render order
 	
@@ -44,6 +44,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 	//private static final int WORLDWIDTH = 1280;
 	private static final int WORLDHEIGHT = 720;
 
+	boolean animateLanding;
 	
 	public SpaceRenderingSystem(OrthographicCamera camera) {
 		super(Family.all(TransformComponent.class, TextureComponent.class).get());
@@ -72,7 +73,6 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 		toggleVsync();
 	
 	}
-
 	
 	@Override
 	public void update(float delta) {
@@ -139,6 +139,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.rotateLeft)) {
 			cam.rotate(-5f * delta);
 		}
+	
 	}
 
 
