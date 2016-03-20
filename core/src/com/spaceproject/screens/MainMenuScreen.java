@@ -111,7 +111,7 @@ public class MainMenuScreen extends ScreenAdapter {
 			System.out.println(time);
 			if (time < 0) {
 				dispose();
-				game.setScreen(new SpaceScreen(game, new Vector3()));
+				//game.setScreen(new SpaceScreen(game, new Vector3()));
 			}
 		}
 

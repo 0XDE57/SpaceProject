@@ -7,11 +7,13 @@ import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.PlayerFocusComponent;
 import com.spaceproject.components.TextureComponent;
+import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.systems.BoundsSystem;
 import com.spaceproject.systems.CameraSystem;
@@ -28,12 +30,20 @@ public class WorldScreen extends ScreenAdapter {
 
 	public static Engine engine;
 	
-	private static OrthographicCamera cam;	
+	private static OrthographicCamera cam;
+	private static SpriteBatch batch;
+	private static ShapeRenderer shape;
+	
+	//LandConfig landCFG;
 
-	public WorldScreen(SpaceProject game, long seed) {
+	public WorldScreen(SpaceProject game, LandConfig landCFG) {
 		this.game = game;
 		
-		cam = new OrthographicCamera();		
+		cam = new OrthographicCamera();
+		batch = new SpriteBatch();
+		shape = new ShapeRenderer();
+		
+		//this.landCFG = landCFG;
 		
 		// engine to handle all entities and components
 		engine = new Engine();
@@ -42,11 +52,11 @@ public class WorldScreen extends ScreenAdapter {
 		player.add(new PlayerFocusComponent());
 		engine.addEntity(player);
 		
-		engine.addSystem(new PlayerControlSystem(this, player));
-		engine.addSystem(new WorldRenderingSystem(seed, cam));
+		engine.addSystem(new PlayerControlSystem(this, player, landCFG));
+		engine.addSystem(new WorldRenderingSystem(landCFG.planetSeed, cam));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new CameraSystem(cam));
-		engine.addSystem(new DebugUISystem(cam));
+		engine.addSystem(new DebugUISystem(cam, batch, shape));
 		engine.addSystem(new BoundsSystem());
 		
 		//add input system. touch on android and keys on desktop.
@@ -70,12 +80,12 @@ public class WorldScreen extends ScreenAdapter {
 		engine.getSystem(WorldRenderingSystem.class).resize(width, height);
 	}
 
-	public void changeScreen(Vector3 landedPlanet) {
+	public void changeScreen(LandConfig landCFG) {
 		System.out.println("Change screen to Space.");
 		
 		//dispose();
 		
-		game.setScreen(new SpaceScreen(game, landedPlanet));
+		game.setScreen(new SpaceScreen(game, landCFG));
 	}
 
 	public void dispose() {

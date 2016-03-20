@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
-import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CannonComponent;
@@ -216,10 +215,15 @@ public class EntityFactory {
 	}
 	
 	public static Entity createShip3(float x, float y) {
+		long seed = (long)(x + y) * SpaceProject.SEED;
+		return createShip3(x, y, seed);
+	}
+	
+	public static Entity createShip3(float x, float y, long seed) {
 		
 		Entity entity = new Entity();
 
-		MathUtils.random.setSeed((long)(x + y) * SpaceProject.SEED);
+		MathUtils.random.setSeed(seed);
 		
 		TransformComponent transform = new TransformComponent();
 		TextureComponent texture = new TextureComponent();
@@ -236,8 +240,7 @@ public class EntityFactory {
 			//generate even size
 			size = MathUtils.random(minSize, maxSize);
 		} while (size % 2 == 1);
-		
-		long seed = (long) (x * size + y * SpaceProject.SEED);
+
 		Texture pixmapTex = TextureFactory.generateShip(seed, size);
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
 		texture.scale = scale;
@@ -395,5 +398,7 @@ public class EntityFactory {
 		
 		return entity;
 	}
+
+
 
 }

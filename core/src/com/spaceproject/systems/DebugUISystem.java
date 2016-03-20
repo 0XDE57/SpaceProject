@@ -33,8 +33,8 @@ public class DebugUISystem extends CustomIteratingSystem implements Disposable {
 
 	//rendering
 	private static OrthographicCamera cam;
-	private SpriteBatch batch;
-	private ShapeRenderer shape;
+	private static SpriteBatch batch;
+	private static ShapeRenderer shape;
 	private BitmapFont font;
 	private Matrix4 projectionMatrix = new Matrix4();
 	
@@ -57,15 +57,15 @@ public class DebugUISystem extends CustomIteratingSystem implements Disposable {
 	private int entityCount = 0;
 	private int componentCount = 0;
 	
-	public DebugUISystem(OrthographicCamera camera) {
+	public DebugUISystem(OrthographicCamera camera, SpriteBatch spriteBatch, ShapeRenderer shapeRenderer) {
 		super(Family.all(TransformComponent.class).get());
 		
 		cam = camera;
 		
 		font = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 15);
 		
-		batch = new SpriteBatch();
-		shape = new ShapeRenderer();
+		batch = spriteBatch;
+		shape = shapeRenderer;
 		
 		objects = new Array<Entity>();		
 		

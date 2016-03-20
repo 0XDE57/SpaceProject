@@ -8,6 +8,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
@@ -15,6 +17,7 @@ import com.spaceproject.components.PlayerFocusComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.KeyConfig;
+import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.systems.BoundsSystem;
 import com.spaceproject.systems.CameraSystem;
@@ -29,7 +32,6 @@ import com.spaceproject.systems.PlayerControlSystem;
 import com.spaceproject.systems.SpaceLoadingSystem;
 import com.spaceproject.systems.SpaceRenderingSystem;
 import com.spaceproject.systems.TouchUISystem;
-import com.sun.java_cup.internal.runtime.virtual_parse_stack;
 
 public class SpaceScreen extends ScreenAdapter {
 
@@ -38,20 +40,23 @@ public class SpaceScreen extends ScreenAdapter {
 	public static Engine engine;
 	
 	private static OrthographicCamera cam;
+	private static SpriteBatch batch;
+	private static ShapeRenderer shape;
 	
 	public static CelestialConfig celestcfg;
 	public static KeyConfig keycfg;
 	
+	LandConfig landCFG;	
+	
 	Entity[] testPlanetsDebug; //test removable planetary system
 	
-	public SpaceScreen(SpaceProject game, Vector3 startPosition) {
+	public SpaceScreen(SpaceProject game, LandConfig landCFG) {
 
 		this.game = game;
 		
 		cam = new OrthographicCamera();
-		
-		if (startPosition == null)
-			startPosition = new Vector3();
+		batch = new SpriteBatch();
+		shape = new ShapeRenderer();
 		
 		// engine to handle all entities and components
 		engine = new Engine();
@@ -72,8 +77,8 @@ public class SpaceScreen extends ScreenAdapter {
 			
 		//add player
 		boolean startAsShip = true;//debug: start as ship or player
-		Entity playerTESTSHIP = EntityFactory.createShip3(startPosition.x, startPosition.y);
-		Entity player = EntityFactory.createCharacter(startPosition.x, startPosition.y);
+		Entity playerTESTSHIP = EntityFactory.createShip3(landCFG.position.x, landCFG.position.y, landCFG.shipSeed);
+		Entity player = EntityFactory.createCharacter(landCFG.position.x, landCFG.position.y);
 		
 		if (startAsShip) {
 			//start as ship	
@@ -87,16 +92,16 @@ public class SpaceScreen extends ScreenAdapter {
 		
 		// Add systems to engine---------------------------------------------------------
 		if (startAsShip) {
-			engine.addSystem(new PlayerControlSystem(this, player, playerTESTSHIP));//start as ship
+			engine.addSystem(new PlayerControlSystem(this, player, playerTESTSHIP, landCFG));//start as ship
 		} else {
-			engine.addSystem(new PlayerControlSystem(this, player));//start as player
+			engine.addSystem(new PlayerControlSystem(this, player, landCFG));//start as player
 		}		
 		
 		engine.addSystem(new SpaceRenderingSystem(cam));
 		engine.addSystem(new SpaceLoadingSystem(cam));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new OrbitSystem());
-		engine.addSystem(new DebugUISystem(cam));
+		engine.addSystem(new DebugUISystem(cam, batch, shape));
 		engine.addSystem(new BoundsSystem());
 		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new CameraSystem(cam));
@@ -172,12 +177,12 @@ public class SpaceScreen extends ScreenAdapter {
 
 	}
 	
-	public void changeScreen(long seed) {
+	public void changeScreen(LandConfig landCFG) {
 		System.out.println("Change screen to World.");
 		
 		//dispose();
 		
-		game.setScreen(new WorldScreen(game, seed));
+		game.setScreen(new WorldScreen(game, landCFG));
 	}
 
 	public void dispose() {

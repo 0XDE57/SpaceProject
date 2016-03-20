@@ -5,13 +5,10 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
-import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.MovementComponent;
@@ -20,6 +17,7 @@ import com.spaceproject.components.PlayerFocusComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.screens.WorldScreen;
@@ -30,6 +28,8 @@ public class PlayerControlSystem extends EntitySystem {
 
 	private Engine engine;
 	private ScreenAdapter screen;
+	
+	LandConfig landCFG;
 	
 	//target reference
 	private Entity playerEntity = null; //the player entity
@@ -69,13 +69,15 @@ public class PlayerControlSystem extends EntitySystem {
 	public float angleFacing = 0;
 	
 	
-	public PlayerControlSystem(ScreenAdapter screen, Entity player) {
+	public PlayerControlSystem(ScreenAdapter screen, Entity player, LandConfig landConfig) {
 		this.screen = screen;
-		this.playerEntity = player;	
+		this.playerEntity = player;
+		
+		this.landCFG = landConfig;
 	}
 	
-	public PlayerControlSystem(ScreenAdapter screen, Entity player, Entity vehicle) {
-		this(screen, player);
+	public PlayerControlSystem(ScreenAdapter screen, Entity player, Entity vehicle, LandConfig landConfig) {
+		this(screen, player, landConfig);
 		this.vehicleEntity = vehicle;
 	}
 
@@ -100,7 +102,7 @@ public class PlayerControlSystem extends EntitySystem {
 			timeSinceVehicle += 100 * delta;
 		}
 		
-	
+
 		if (isInVehicle()) {			
 			controlShip(delta);
 		} else { 			
@@ -115,36 +117,59 @@ public class PlayerControlSystem extends EntitySystem {
 			}
 		}
 		
-		//TODO: refactor. this is crap, but it works.
-		if (land || animateLanding) {					
+		
+		if (land && !animateLanding) {
 			if (screen instanceof SpaceScreen) {
-				
-				Vector3 playerPos = Mappers.transform.get(vehicleEntity).pos;
-				for (Entity planet : planets) {
-					Vector3 planetPos = Mappers.transform.get(planet).pos;
-					TextureComponent planetTex = Mappers.texture.get(planet);
-					//if player is over planet 
-					if (MyMath.distance(playerPos.x, playerPos.y, planetPos.x, planetPos.y) <= planetTex.texture.getWidth()/2 * planetTex.scale) {
-						animateLanding = true;
-						if (animateLanding) {
-							Entity player = engine.getEntitiesFor(Family.one(PlayerFocusComponent.class).get()).first();
-							player.getComponent(TextureComponent.class).scale -= 3f * delta;
-	
-							if (player.getComponent(TextureComponent.class).scale <= 0) {
-								//save position for taking off from planet
-								SpaceProject.landedPlanet = planetPos;
-								
-								//land on planet
-								long seed = Mappers.planet.get(planet).seed;
-								((SpaceScreen) screen).changeScreen(seed);
-							}
-						}				
-					}
-				}
+				tryLandOnPlanet();
 			} else if (screen instanceof WorldScreen) {
 				//TODO: Create some kind of time system so planets go to their orbital position based on time passed.
-				//take off from planet. pass position of planet that was landed on.
-				((WorldScreen) screen).changeScreen(SpaceProject.landedPlanet);
+				//take off from planet
+				((WorldScreen) screen).changeScreen(landCFG);
+			}
+			
+		}
+		if (animateLanding) {
+			animatePlanetLanding(delta);
+		}
+	
+	}
+
+	private void animatePlanetLanding(float delta) {
+		Entity player = engine.getEntitiesFor(Family.one(PlayerFocusComponent.class).get()).first();
+		
+		//freeze position
+		player.getComponent(MovementComponent.class).velocity.set(0, 0); 
+		
+		TextureComponent tex = player.getComponent(TextureComponent.class);			
+		if (tex.scale <= 0.1f) {
+			tex.scale = 0;
+			
+			//zoom in
+			engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(0);
+			if (engine.getSystem(SpaceRenderingSystem.class).getCamZoom() <= 0.1f) {
+				//land on planet
+				((SpaceScreen) screen).changeScreen(landCFG);
+			}
+			
+		} else {
+			//shrink texture
+			tex.scale -= 3f * delta; 
+		}
+	}
+
+	private void tryLandOnPlanet() {
+		Vector3 playerPos = Mappers.transform.get(vehicleEntity).pos;
+		for (Entity planet : planets) {
+			Vector3 planetPos = Mappers.transform.get(planet).pos;
+			TextureComponent planetTex = Mappers.texture.get(planet);
+			// if player is over planet
+			if (MyMath.distance(playerPos.x, playerPos.y, planetPos.x, planetPos.y) <= planetTex.texture.getWidth() / 2 * planetTex.scale) {
+				animateLanding = true;
+
+				landCFG = new LandConfig();
+				landCFG.position = planetPos;// save position for taking off from planet
+				landCFG.planetSeed = Mappers.planet.get(planet).seed; // save seed for planet
+
 			}
 		}
 	}
@@ -182,8 +207,7 @@ public class PlayerControlSystem extends EntitySystem {
 		refillAmmo(cannon, delta);
 		
 		//make vehicle face angle from mouse/joystick
-		transform.rotation = MathUtils.lerpAngle(transform.rotation, angleFacing, 6f*delta);
-		//transform.rotation = angleFacing;
+		transform.rotation = MathUtils.lerpAngle(transform.rotation, angleFacing, 8f*delta);
 		
 		
 		//apply thrust forward accelerate 

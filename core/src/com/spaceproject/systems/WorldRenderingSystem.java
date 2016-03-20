@@ -22,7 +22,6 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.NoiseGen;
-import com.spaceproject.utility.OpenSimplexNoise;
 
 public class WorldRenderingSystem extends IteratingSystem implements Disposable {
 		
