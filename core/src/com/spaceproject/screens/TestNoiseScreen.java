@@ -1,5 +1,7 @@
 package com.spaceproject.screens;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ScreenAdapter;
@@ -11,36 +13,84 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.FontFactory;
+import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.NoiseGen;
-import com.spaceproject.utility.OpenSimplexNoise;
+
+class Slider {
+	int btnWidth = 20;
+	int sldWidth = 200;
+	int sldHeight = 30;
+	
+	Vector2 pos;
+	
+	float btnX;
+	private float min;
+	private float max;	
+	
+	public String name;
+	
+	public Slider(String name, float min, float max, Vector2 position){
+		this.name = name;
+		this.min = min;
+		this.max = max;
+		this.pos = position;
+		btnX = pos.x + sldWidth/2; //half bar
+	}
+	
+	public String toString() {
+		return name + " (" + btnX + "):" + getValue();
+	}
+	
+	public float getValue() {
+		return (float) MyMath.round((btnX - pos.x) / sldWidth * (max - min) + 1, 2);
+	}
+
+	public void setPos(int x) {
+		btnX = MathUtils.clamp(x, pos.x, pos.x + sldWidth);
+		
+	}
+
+	
+}
 
 public class TestNoiseScreen extends ScreenAdapter {
 	
 	SpriteBatch batch = new SpriteBatch();
 	private BitmapFont font;
 	
-	int mapSize = 128;	
+	Texture buttonTex = TextureFactory.createTile(new Color(0.7f, 0.7f, 0.7f, 1f));
+	Texture slideTex = TextureFactory.createTile(new Color(0.3f, 0.3f, 0.3f, 1f));
+	
+	int mapSize = 120;
 	float pixelSize = 3.0f;
 	
 	long seed;
 	Texture noise;
-	double scale = 40;//30 - 100
-	int octaves = 4;
-	float persistence = 0.5f;//0 - 1
-	float lacunarity = 2;//1 - x
 	
-	float xX = 0;
-	float yY = 0;
+	
+	ArrayList<Slider> sliders = new ArrayList<Slider>();
 	
 	public TestNoiseScreen(SpaceProject space) {
 		seed = MathUtils.random(Long.MAX_VALUE);
-		noise = createNoiseMapTex(NoiseGen.generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity));
+		noise = createNoiseMapTex(NoiseGen.generateWrappingNoise4D(seed, mapSize, 40, 4, 1, 2));
 		
 		font = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 15);
 		
 		font.setColor(1, 1, 1, 1);
+		
+	
+		//double scale = 40;//30 - 100
+		//int octaves = 4;
+		//float persistence = 0.5f;//0 - 1
+		//float lacunarity = 2;//1 - x
+		sliders.add(new Slider("scale", 1, 80, new Vector2(40,  180)));
+		sliders.add(new Slider("octave", 1, 4, new Vector2(40, 140)));
+		sliders.add(new Slider("persistence", 0, 1, new Vector2(40, 100)));
+		sliders.add(new Slider("lacunarity", 0, 10, new Vector2(40, 60)));
 	}
 
 	public void render(float delta) {
@@ -55,33 +105,37 @@ public class TestNoiseScreen extends ScreenAdapter {
 		//batch.draw(noise, 0, mapSize);
 		//batch.draw(noise, mapSize, mapSize);
 
-		batch.draw(noise, xX, yY,
+		batch.draw(noise, (Gdx.graphics.getWidth()/2) - (noise.getWidth()/2), (Gdx.graphics.getHeight()/2) - (noise.getHeight()/2),
 				   0, 0,
 				   mapSize, mapSize,
 				   pixelSize, pixelSize,
-				   0, 
+				   0,
 				   0, 0, mapSize, mapSize, false, false);
+		
+		
+		for (Slider slide : sliders) {
+			batch.draw(slideTex, slide.pos.x - slide.btnWidth/2, slide.pos.y, slide.sldWidth + slide.btnWidth, slide.sldHeight);
+			batch.draw(buttonTex, slide.btnX - slide.btnWidth/2, slide.pos.y, slide.btnWidth, slide.sldHeight);
+			font.draw(batch, slide.toString(), slide.pos.x, slide.pos.y + slide.sldHeight/2);
+		}
 		
 		font.draw(batch, "Seed: " + seed, 15, Gdx.graphics.getHeight() - 15);
 		font.draw(batch, "Zoom: " + pixelSize, 15, Gdx.graphics.getHeight() - 30);
-		font.draw(batch, "Scale: " + scale, 15, Gdx.graphics.getHeight() - 45);
-		font.draw(batch, "Octaves: " + octaves, 15, Gdx.graphics.getHeight() - 60);
-		font.draw(batch, "Persistence: " + persistence, 15, Gdx.graphics.getHeight() - 75);
-		font.draw(batch, "Lacunarity: " + lacunarity, 15, Gdx.graphics.getHeight() - 90);
 		
 		batch.end();
 		
-		
-		if (Gdx.input.isKeyPressed(Keys.LEFT))
-			xX++;
-		if (Gdx.input.isKeyPressed(Keys.RIGHT))
-			xX--;
-		if (Gdx.input.isKeyPressed(Keys.UP))
-			yY--;
-		if (Gdx.input.isKeyPressed(Keys.DOWN))
-			yY++;
-		
 		boolean change = false;
+		if (Gdx.input.isTouched()) {
+			for (Slider s : sliders) {
+				if (isMouseInSlider(s)) {
+					s.setPos(Gdx.input.getX());
+					change = true;
+				}
+			}
+		}
+		
+
+		
 		//TODO: make UI sliders for these values
 		if (Gdx.input.isKeyJustPressed(Keys.SPACE)){
 			seed = MathUtils.random(Long.MAX_VALUE);
@@ -97,44 +151,35 @@ public class TestNoiseScreen extends ScreenAdapter {
 			change = true;
 		}
 		
-		if (Gdx.input.isKeyPressed(Keys.LEFT_BRACKET)) {
-			--scale;
-			change = true;
-		}
-		if (Gdx.input.isKeyPressed(Keys.RIGHT_BRACKET)) {
-			++scale;
-			change = true;
-		}
-		
-		if (Gdx.input.isKeyPressed(Keys.Q)) {
-			octaves--;
-			change = true;
-		}
-		if (Gdx.input.isKeyPressed(Keys.W)) {
-			octaves++;
-			change = true;
-		}
-		
-		if (Gdx.input.isKeyPressed(Keys.A)) {
-			persistence -= 0.5f;
-			change = true;
-		}
-		if (Gdx.input.isKeyPressed(Keys.S)) {
-			persistence += 0.5f;
-			change = true;
-		}
-		
-		if (Gdx.input.isKeyPressed(Keys.Z)) {
-			lacunarity -= 0.2f;
-			change = true;
-		}
-		if (Gdx.input.isKeyPressed(Keys.X)) {
-			lacunarity += 0.2f;
-			change = true;
-		}
-		
-		if (change)
+		if (change) {
+			//double scale = sliders.indexOf(o -> o.getValue());  // indexOf((e) -> (e.))
+			double scale = 0;			
+			int octaves = 0;
+			float persistence = 0;
+			float lacunarity = 0;
+			for (Slider s : sliders) {
+				switch (s.name) {
+					case "scale": 
+						scale = s.getValue(); break;
+					case "octave": 
+						octaves = (int)s.getValue(); break;
+					case "persistence":
+						persistence = s.getValue(); break;
+					case "lacunarity":
+						lacunarity = s.getValue(); break;
+				}
+			}
+			System.out.println(scale + ",  " + octaves + ", " + persistence + ", " + lacunarity);
+			
 			noise = createNoiseMapTex(NoiseGen.generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity)); //noise = generateNoise3(seed, size, scale, zed);
+		}
+			
+	}
+
+	private static boolean isMouseInSlider(Slider s) {
+		float yTop = Gdx.graphics.getHeight() - Gdx.input.getY();
+		float yBot = Gdx.graphics.getHeight() - Gdx.input.getY();
+		return yTop >= s.pos.y && yBot <= s.pos.y + s.sldHeight &&  Gdx.input.getX() >= s.pos.x- s.btnWidth/2 && Gdx.input.getX() <= s.pos.x + s.sldWidth + s.btnWidth;
 	}
 	
 	
