@@ -140,7 +140,10 @@ public class PlayerControlSystem extends EntitySystem {
 		//freeze position
 		player.getComponent(MovementComponent.class).velocity.set(0, 0); 
 		
-		TextureComponent tex = player.getComponent(TextureComponent.class);			
+		TextureComponent tex = player.getComponent(TextureComponent.class);
+		
+		//shrink texture
+		tex.scale -= 3f * delta; 
 		if (tex.scale <= 0.1f) {
 			tex.scale = 0;
 			
@@ -151,9 +154,6 @@ public class PlayerControlSystem extends EntitySystem {
 				((SpaceScreen) screen).changeScreen(landCFG);
 			}
 			
-		} else {
-			//shrink texture
-			tex.scale -= 3f * delta; 
 		}
 	}
 
@@ -169,6 +169,7 @@ public class PlayerControlSystem extends EntitySystem {
 				landCFG = new LandConfig();
 				landCFG.position = planetPos;// save position for taking off from planet
 				landCFG.planetSeed = Mappers.planet.get(planet).seed; // save seed for planet
+				landCFG.shipSeed = Mappers.vehicle.get(vehicleEntity).seed; //save seed for ship
 			}
 		}
 	}

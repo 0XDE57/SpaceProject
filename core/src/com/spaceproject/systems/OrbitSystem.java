@@ -21,7 +21,7 @@ public class OrbitSystem extends IteratingSystem {
 		OrbitComponent orbit = Mappers.orbit.get(entity);
 		TransformComponent position = Mappers.transform.get(entity);		
 
-		//keep angles within 0 to 2PI radians.
+		//keep angles within 0 to 2PI radians
 		if (orbit.angle > MathUtils.PI2){
 			orbit.angle -= MathUtils.PI2;
 		} else if (orbit.angle < 0) {
@@ -29,16 +29,12 @@ public class OrbitSystem extends IteratingSystem {
 		}
 		
 		if (orbit.rotateClockwise) {
-			// add clockwise rotation to entity image
+			// add clockwise rotation to entity image and orbit
 			position.rotation += orbit.rotSpeed * delta;
-
-			// add clockwise rotation to entity orbit
 			orbit.angle += orbit.orbitSpeed * delta;
 		} else {
-			// add counter-clockwise rotation to entity image
+			// add counter-clockwise rotation to entity image and orbit
 			position.rotation -= orbit.rotSpeed * delta;
-
-			// add counter-clockwise rotation to entity orbit
 			orbit.angle -= orbit.orbitSpeed * delta;
 		}
 
@@ -50,8 +46,7 @@ public class OrbitSystem extends IteratingSystem {
 			float orbitX = parentPosition.pos.x + (orbit.distance * MathUtils.cos(orbit.angle));
 			float orbitY = parentPosition.pos.y + (orbit.distance * MathUtils.sin(orbit.angle));
 			Vector3 nextPos = new Vector3(orbitX, orbitY, position.pos.z);
-			// linear interpolate to smooth out movement and eliminate "jumping"
-			// visible on long orbit distances.
+			// linear interpolate to smooth out movement and eliminate "jumping" visible on long orbit distances.
 			position.pos.lerp(nextPos, 1f*delta);
 		}
 	}
