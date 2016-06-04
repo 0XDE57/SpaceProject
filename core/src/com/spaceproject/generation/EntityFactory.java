@@ -267,6 +267,7 @@ public class EntityFactory {
 		vehicle.thrust = 320;//higher is faster
 		vehicle.maxSpeed = -1;//-1 = no max speed/infinite
 		vehicle.id = IDGen.get();
+		vehicle.seed = seed;
 		
 		//health
 		HealthComponent health = new HealthComponent();

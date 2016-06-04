@@ -169,7 +169,6 @@ public class PlayerControlSystem extends EntitySystem {
 				landCFG = new LandConfig();
 				landCFG.position = planetPos;// save position for taking off from planet
 				landCFG.planetSeed = Mappers.planet.get(planet).seed; // save seed for planet
-
 			}
 		}
 	}
