@@ -29,6 +29,18 @@ public class NoiseGen {
 		return map;
 	}
 	
+	/**
+	 * Creates a noise map in a torus so the edges wrap around.
+	 * Based off of https://www.youtube.com/watch?v=MRNFcywkUSA
+	 * TODO: scale is incorrect in 4D implementation
+	 * @param seed of noise
+	 * @param size of map to generate
+	 * @param scale or zoom
+	 * @param octaves or layers of noise
+	 * @param persistence or weight of layers
+	 * @param lacunarity ?
+	 * @return array holding noise
+	 */
 	public static float[][] generateWrappingNoise4D(long seed, int size, double scale, int octaves, float persistence, float lacunarity) {
 		float[][] map = new float[size][size];
 		
@@ -59,8 +71,8 @@ public class NoiseGen {
 					noiseHeight += n * amplitude;
 					
 					//increase amplitude and frequencies for layers
-					amplitude += persistence;
-					frequency += lacunarity;				
+					amplitude *= persistence;
+					frequency *= lacunarity;				
 				}
 							
 				//set map position to final noise value
@@ -71,7 +83,6 @@ public class NoiseGen {
 				if (noiseHeight < minNoise) minNoise = noiseHeight;
 			}			
 		}
-
 		
 		//normalize values to range of 0 - 1
 		for (int x = 0; x < size; ++x) {
