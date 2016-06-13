@@ -22,16 +22,71 @@ import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.NoiseGen;
 
-class Slider {
-	static Texture buttonTex = TextureFactory.createTile(new Color(0.7f, 0.7f, 0.7f, 1f));
-	static Texture slideTex = TextureFactory.createTile(new Color(0.3f, 0.3f, 0.3f, 1f));
+class Button {
+	static Texture buttonTex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));
 	
-	int btnWidth;
-	int sldWidth;
-	int sldHeight;
-	
-	float btnX;
+	private String text;
 	private float x, y;
+	private int width, height;
+	private boolean click = false;//flag for triggering click on mouse release
+	
+	public Button(String text, float x, float y, int width, int height) {
+		this.text = text;
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+	}
+		
+	public boolean isClicked() {
+		//return Gdx.input.isTouched() && isMouseOver();
+		if (Gdx.input.isTouched() && isMouseOver()) {
+			click = true;
+		}
+		
+		if (!Gdx.input.isTouched() && click) {
+			click = false;
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isMouseOver() {
+		int mouseX = Gdx.input.getX();
+		int mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
+		return mouseX > x && mouseX < x + width && mouseY > y && mouseY < y + height;
+	}
+	
+	public void draw(SpriteBatch batch, BitmapFont font) {
+		batch.setColor(Color.BLACK);
+		batch.draw(buttonTex, x, y, width, height);
+		
+		if (isMouseOver()) {
+			batch.setColor(0.2f, 0.5f, 0.9f, 1f);
+		} else {
+			batch.setColor(0.7f, 0.7f, 0.7f, 1f);
+		}	
+		batch.draw(buttonTex, x+1, y+1, width-2, height-2);
+		font.draw(batch, text, x, y+height);
+	}
+	
+	@Override
+	public String toString() {
+		return text;
+	}
+	
+}
+
+class Slider {
+	static Texture tex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));
+	
+	private int btnWidth;
+	private int sldWidth;
+	private int sldHeight;
+	
+	private int btnX;
+	private int x, y;
 	private float value;
 	private float min,max;
 	
@@ -49,7 +104,7 @@ class Slider {
 		this.sldWidth = sldWidth;
 		this.sldHeight = sldHeight;
 		
-		setValue((max-min)/2);
+		setValue((max-min)/2+min);
 	}
 	
 	public String toString() {
@@ -57,21 +112,20 @@ class Slider {
 	}
 	
 	public void setValue(float val) {
-		value = MathUtils.clamp(val, min, max);		
+		value = MathUtils.clamp(val, min, max);
 		updateButtonPos();
 	}
 	
 	public float getValue() {
 		return value;
 	}
-
 	
 	private void updateButtonPos() {
-		float pos = value / (max-min) * sldWidth + x;
-		btnX = MathUtils.clamp(pos, x, x + sldWidth);		
+		float pos = (sldWidth*(min-value))/(min-max) + x;
+		btnX = (int)MathUtils.clamp(pos, x, x + sldWidth);
 	}
 	
-	public boolean isMouseInSlider() {
+	public boolean isMouseOver() {
 		int mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
 		int mouseX = Gdx.input.getX();
 		return mouseY >= y && mouseY <= y + sldHeight 
@@ -79,19 +133,38 @@ class Slider {
 	}
 
 	public void draw(SpriteBatch batch, BitmapFont font) {
-		batch.draw(slideTex, x - btnWidth/2, y, sldWidth + btnWidth, sldHeight);
-		batch.draw(buttonTex, btnX - btnWidth/2, y, btnWidth, sldHeight);
+		//draw bar
+		batch.setColor(Color.BLACK);
+		batch.draw(tex, x - btnWidth/2, y, sldWidth + btnWidth, sldHeight);
+		if (isMouseOver()) {
+			batch.setColor(0.6f, 0.6f, 0.6f, 1f);
+		} else {
+			batch.setColor(0.3f, 0.3f, 0.3f, 1f);
+		}
+		batch.draw(tex, x - btnWidth/2 + 1, y + 1, sldWidth + btnWidth - 2, sldHeight - 2);
+		
+		//draw button
+		batch.setColor(Color.BLACK);
+		batch.draw(tex, btnX - btnWidth/2, y, btnWidth, sldHeight);
+		if (isMouseOver()) {
+			batch.setColor(0.2f, 0.5f, 0.9f, 1f);
+		} else {
+			batch.setColor(0.7f, 0.7f, 0.7f, 1f);
+		}
+		batch.draw(tex, btnX - btnWidth/2+1, y+1, btnWidth-2, sldHeight-2);
+		
+		//draw text
 		font.draw(batch, toString(), x, y + sldHeight/1.5f);
 	}
 
-	public boolean update() {
-		float temp = getValue();
-		if (Gdx.input.isTouched() && isMouseInSlider()) {		
-			float value = (Gdx.input.getX() - x) / sldWidth * (max-min);		
-			setValue(value);
+	public boolean update() {	
+		if (Gdx.input.isTouched() && isMouseOver()) {
+			float temp = value;
+			float v = (Gdx.input.getX() - x) / (float)sldWidth * (max-min) + min;
+			setValue(v);
+			return temp != v;
 		}
-		
-		return temp != getValue();		
+		return false;			
 	}
 
 }
@@ -109,13 +182,15 @@ class ColorProfile {
 	
 	//tile ID's (-1 = none selected)
 	int selectedColorID = -1;
-	int lastSelectedID = -1;
-	
-	//color of tile
-	Slider red, green, blue;
+	int lastSelectedID = -1;	
 	
 	//colors in column
 	ArrayList<Tile> tiles = new ArrayList<Tile>();
+	
+	//color of tile
+	Slider red, green, blue;
+	//add or remove colors
+	Button add, remove;
 	
 	public ColorProfile(int x, int y, int width, int height) {
 		columnX = x;
@@ -129,9 +204,16 @@ class ColorProfile {
 		int sldPadding = 5;
 		int offsetX = sldWidth + 30;
 		int offsetY = 40;
-		red   = new Slider("red",   0, 1, columnX - offsetX, columnY + offsetY + (sldHeight + sldPadding)*2, btnWidth, sldWidth, sldHeight);
-		green = new Slider("green", 0, 1, columnX - offsetX, columnY + offsetY + sldHeight + sldPadding, btnWidth, sldWidth, sldHeight);
-		blue  = new Slider("blue",  0, 1, columnX - offsetX, columnY + offsetY , btnWidth, sldWidth, sldHeight);
+		red   = new Slider("r",   0, 1, columnX - offsetX, columnY + offsetY + (sldHeight + sldPadding)*2, btnWidth, sldWidth, sldHeight);
+		green = new Slider("g", 0, 1, columnX - offsetX, columnY + offsetY + sldHeight + sldPadding, btnWidth, sldWidth, sldHeight);
+		blue  = new Slider("b",  0, 1, columnX - offsetX, columnY + offsetY , btnWidth, sldWidth, sldHeight);
+		
+		int buttonWidth = 60;
+		int buttonHeight = 22;
+		int buttonOffsetX = buttonWidth*2-40;
+		int buttonOffsetY = columnY;
+		add = new Button("add", columnX - buttonOffsetX - buttonWidth - 6, buttonOffsetY, buttonWidth, buttonHeight);
+		remove = new Button("remove", columnX- buttonOffsetX, buttonOffsetY, buttonWidth, buttonHeight);
 	}
 	
 	public void add(Tile t) {
@@ -149,7 +231,7 @@ class ColorProfile {
 
 			// draw color column
 			if (i == 0) {
-				shape.rect(columnX, columnY + colHeight, colWidth, -t.getHeight() * colHeight);
+				shape.rect(columnX, columnY + colHeight, colWidth, -colHeight);
 			} else {
 				shape.rect(columnX, columnY + t.getHeight() * colHeight, colWidth, -t.getHeight() * colHeight);
 			}
@@ -167,11 +249,9 @@ class ColorProfile {
 		shape.setColor(Color.BLACK);
 		shape.rect(columnX - size - offsetX - 1, columnY + offsetY -1, size+2, size+2);
 		if (lastSelectedID != -1) {
-			for (int j = 0; j < tiles.size(); j++) {
-				if (tiles.get(j).getID() == lastSelectedID) {
-					shape.setColor(tiles.get(j).getColor());					
-					break;
-				}
+			Tile t = getTileById(lastSelectedID);
+			if (t != null) {
+				shape.setColor(t.getColor());
 			}
 			shape.rect(columnX - size - offsetX, columnY + offsetY, size, size);
 		}
@@ -189,22 +269,50 @@ class ColorProfile {
 		red.draw(batch, font);
 		green.draw(batch, font);
 		blue.draw(batch, font);
+		
+		//draw buttons
+		add.draw(batch, font);
+		remove.draw(batch, font);
+	}
+	
+	public Tile getTileById(int ID) {
+		for (int t = 0; t < tiles.size(); t++) {
+			if (tiles.get(t).getID() == lastSelectedID) {
+				return tiles.get(t);
+			}
+		}
+		return null;
 	}
 	
 	public void update() {
+		//check buttons
+		if (add.isClicked()) {
+			Tile newTile = new Tile(null, 0, new Color(1,1,1,1));
+			add(newTile);
+			lastSelectedID = newTile.getID();
+			selectedColorID = newTile.getID();
+		}
+		if (remove.isClicked()) {
+			Tile t = getTileById(lastSelectedID);
+			if (t != null) {
+				tiles.remove(t);
+				lastSelectedID = -1;
+				selectedColorID = -1;
+			}
+		}
+		
+		
 		//update color sliders
 		if (red.update() || green.update() || blue.update()) {
 			//set selected color to slider values
-			for (int j = 0; j < tiles.size(); j++) {
-				if (tiles.get(j).getID() == lastSelectedID) {
-					Tile t = tiles.get(j);
-					t.getColor().r = red.getValue();
-					t.getColor().g = green.getValue();
-					t.getColor().b = blue.getValue();
-					break;
-				}
+			Tile t = getTileById(lastSelectedID);
+			if (t != null) {
+				t.getColor().r = red.getValue();
+				t.getColor().g = green.getValue();
+				t.getColor().b = blue.getValue();
 			}
 		}
+		
 		
 		boolean selectionChanged = false;
 		int mouseX = Gdx.input.getX();
@@ -233,7 +341,7 @@ class ColorProfile {
 					//select first tile from top if height is not at the top of the column
 					lastSelectedID = tiles.get(0).getID();
 					selectionChanged = true;
-					
+					break;
 				} else if (mouseX > columnX && mouseX < columnX + colWidth && mouseY < colorTop) {
 					lastSelectedID = t.getID();
 					selectionChanged = true;
@@ -246,28 +354,21 @@ class ColorProfile {
 
 		// move selected color
 		if (selectedColorID != -1) {
-			for (int j = 0; j < tiles.size(); j++) {
-				if (tiles.get(j).getID() == selectedColorID) {
-					Tile t = tiles.get(j);
-					t.setHeight((float)(mouseY - columnY + buttonSize/2) / colHeight);
-					
-					Collections.sort(tiles);
-					break;
-				}
+			Tile t = getTileById(selectedColorID);
+			if (t!= null) {
+				t.setHeight((float)(mouseY - columnY + buttonSize/2) / colHeight);		
+				Collections.sort(tiles);
 			}
 		}
 		
 		//set RGB sliders to selected color
 		if (selectionChanged) {
-			for (int j = 0; j < tiles.size(); j++) {
-				if (tiles.get(j).getID() == lastSelectedID) {
-					Tile t = tiles.get(j);
-					red.setValue(t.getColor().r);
-					green.setValue(t.getColor().g);
-					blue.setValue(t.getColor().b);					
-					break;
-				}
-			}		
+			Tile t = getTileById(lastSelectedID);
+			if (t!= null) {
+				red.setValue(t.getColor().r);
+				green.setValue(t.getColor().g);
+				blue.setValue(t.getColor().b);
+			}
 		}
 	}
 	
@@ -275,17 +376,22 @@ class ColorProfile {
 
 class Tile implements Comparable<Tile> {
 	private static int nextID;
+	
 	private final int id;
 	private String name;
 	private float height;
 	private Color color;
 	
 	public Tile(String name, float height, Color color) {
+		id = nextID++;
+				
+		if (name == null) {
+			name = "color" + id;
+		}
+		
 		this.name = name;
 		this.height = height;
-		this.color = color;
-		
-		id = nextID++;
+		this.color = color;		
 	}
 	
 	public int getID() {
@@ -370,16 +476,12 @@ public class TestNoiseScreen extends ScreenAdapter {
 		colorProfile.add(new Tile("lava",  1f,    Color.RED));
 		colorProfile.add(new Tile("rock",  0.95f, Color.BROWN));
 		
-		
-		//scale.setValue(10);
 	}
-	
 	
 	public void render(float delta) {
 		Gdx.gl20.glClearColor(0.5f, 0.5f, 0.5f, 1);
 		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
-				
 		shape.begin(ShapeType.Filled);		
 		
 		//draw noise map
@@ -440,7 +542,6 @@ public class TestNoiseScreen extends ScreenAdapter {
 			
 	}
 
-
 	private void updateMap() {
 		double s = scale.getValue();			
 		int o = (int)octave.getValue();
@@ -475,7 +576,6 @@ public class TestNoiseScreen extends ScreenAdapter {
 		}
 	}
 
-	
 	private static Texture createNoiseMapTex(float[][] map) {
 		//create image
 		Pixmap pixmap = new Pixmap(map.length, map.length, Format.RGB888);
@@ -494,7 +594,6 @@ public class TestNoiseScreen extends ScreenAdapter {
 		return t;
 	}
 
-	
 	public void resize(int width, int height) {
 		Gdx.app.log("screen", width + ", " + height);
 	}
