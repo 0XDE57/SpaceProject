@@ -226,7 +226,7 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 						break;
 					}
 				}
-				
+				//draw grid to visualize wrap
 				if (tX == heightMap.length-1 || tY == heightMap.length-1) {
 					shape.setColor(Color.BLACK);
 				}
@@ -242,16 +242,16 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 	}
 
 	private void drawMapLerped() {
-		for (int y = 0; y < heightMap.length; y++) {
-			for (int x = 0; x < heightMap.length; x++) {
+		for (int y = 0; y * pixelSize <= mapRenderWindowSize; y++) {
+			for (int x = 0; x * pixelSize <= mapRenderWindowSize; x++) {
 				
+				//wrap tiles
 				int tX = (x + offsetX) % heightMap.length;
 				int tY = (y + offsetY) % heightMap.length;
 				if (tX < 0) tX += heightMap.length;
 				if (tY < 0) tY += heightMap.length;
 				
 				//pick color
-				//float i = heightMap[x][y];
 				float i = heightMap[tX][tY];
 				for (int k = colorProfile.getTiles().size()-1; k >= 0; k--) {
 					Tile tile = colorProfile.getTiles().get(k);
@@ -269,12 +269,17 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 					}
 				}
 				
+				//draw grid to visualize wrap
+				if (tX == heightMap.length-1 || tY == heightMap.length-1) {
+					shape.setColor(Color.BLACK);
+				}
+				
 				//draw
-				shape.rect(mapX + x * pixelSize, mapY + y * pixelSize, pixelSize, pixelSize);
+				shape.rect(mapX + x * pixelSize, mapY - y * pixelSize, pixelSize, pixelSize);
 				
 				//grayscale debug
 				shape.setColor(i, i, i, i);
-				shape.rect(mapX + x * pixelSize + (heightMap.length*pixelSize), mapY + y * pixelSize, pixelSize, pixelSize);
+				shape.rect(mapX + x * pixelSize + mapRenderWindowSize, mapY - y * pixelSize, pixelSize, pixelSize);
 			}
 		}
 	}
@@ -285,7 +290,7 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 		}
 		
 		int mapX = Gdx.graphics.getWidth() - heightMap.length - 20;
-		int mapY = Gdx.graphics.getHeight() - heightMap.length - 20;
+		int mapY = Gdx.graphics.getHeight() - 20;
 		
 		int chunkSize = 6;
 		//chunkSize must evenly divide into mapsize
@@ -307,14 +312,14 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 				//for each tile in chunk, count occurrence of tiles within a chunk
 				for (int y = chunkY; y < chunkY+chunkSize; y++) {
 					for (int x = chunkX; x < chunkX+chunkSize; x++) {
-										
+						
+						//wrap tiles
 						int tX = (x + offsetX) % heightMap.length;
 						int tY = (y + offsetY) % heightMap.length;
 						if (tX < 0) tX += heightMap.length;
 						if (tY < 0) tY += heightMap.length;
 						
-						//count color
-						//float i = heightMap[x][y];
+						//count colors
 						float i = heightMap[tX][tY];
 						for (int k = colorProfile.getTiles().size() - 1; k >= 0; k--) {
 							Tile tile = colorProfile.getTiles().get(k);
@@ -336,7 +341,6 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 					}
 				}
 				shape.setColor(colorProfile.getTiles().get(index).getColor());
-				shape.rect(mapX + chunkX, mapY+ chunkY, chunkSize, chunkSize);
 				
 			}
 		}
@@ -373,7 +377,6 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 	public void pause() { }
 
 	public void resume() { }
-
 	
 	@Override
 	public boolean keyDown(int keycode) { return false; }
