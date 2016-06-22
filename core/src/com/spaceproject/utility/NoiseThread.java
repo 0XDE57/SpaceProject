@@ -100,6 +100,9 @@ public class NoiseThread implements Runnable {
 	}
 	
 	public boolean isProcessed(){
+		if (!isDone()) {
+			return false;
+		}
 		return isProcessed;
 	}
 }

@@ -2,7 +2,6 @@ package com.spaceproject.systems;
 
 import java.util.ArrayList;
 
-import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
@@ -63,7 +62,6 @@ public class SpaceLoadingSystem extends EntitySystem {
 
 	public SpaceLoadingSystem(OrthographicCamera camera) {
 		cam = camera;
-		//cam.zoom = 50;
 	}
 
 	@Override
@@ -110,9 +108,13 @@ public class SpaceLoadingSystem extends EntitySystem {
 	}
 
 	private void updatePlanetTextures() {
+		if (noiseThreads.isEmpty()) {
+			return;
+		}
+		
 		//if a thread has finished generating the noise, create a texture and replace the blank one
 		for (NoiseThread thread : noiseThreads) {
-			if (thread.isDone()) {			
+			if (thread.isDone() && !thread.isProcessed()) {			
 				for (Entity p : engine.getEntitiesFor(Family.all(PlanetComponent.class).get())) {
 					if (p.getComponent(PlanetComponent.class).id == thread.getID()) {					
 						int[][] tileMap = thread.getPixelatedMap();
@@ -130,7 +132,16 @@ public class SpaceLoadingSystem extends EntitySystem {
 		}
 		
 		//remove completed threads
-		noiseThreads.removeIf(o -> o.isProcessed());
+		//noiseThreads.removeIf(o -> o.isProcessed());//java8 lamba only supported in androidN+
+		boolean finished = true;
+		for (NoiseThread thread : noiseThreads) {
+			if (!thread.isProcessed())
+				finished = false;
+		}
+		if (finished) {
+			noiseThreads.clear();
+		}
+		
 	}
 
 	/**
@@ -291,6 +302,7 @@ public class SpaceLoadingSystem extends EntitySystem {
 		FileHandle starsFile = Gdx.files.local("stars.txt");
 
 		// starsFile.delete();
+		points.add(new Vector2(700, 700));//close system for debug
 
 		if (starsFile.exists()) {
 			// load points

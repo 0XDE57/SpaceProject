@@ -70,7 +70,7 @@ public class Tile implements Comparable<Tile> {
 	//-also loading and unloading to json.
 	//-also support for different profiles.
 	private static ArrayList<Tile> getDefault() {
-		ArrayList<Tile> tiles = new ArrayList<>();
+		ArrayList<Tile> tiles = new ArrayList<Tile>();
 		tiles.add(new Tile("water", 0.41f, Color.BLUE));
 		tiles.add(new Tile("water1", 0.345f, new Color(0, 0, 0.42f, 1)));
 		tiles.add(new Tile("water2", 0.240f, new Color(0, 0, 0.23f, 1)));
