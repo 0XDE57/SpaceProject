@@ -41,6 +41,8 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 	int pixelSize = 3;//zoom
 	
 	float[][] heightMap;
+	int[][] tileMap;
+	int[][] pixelatedTileMap;
 	
 	//feature sliders
 	Slider scale, octave, persistence, lacunarity;
@@ -62,9 +64,8 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 		
 		font = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 15);
 				
-		seed = MathUtils.random(Long.MAX_VALUE);		
-		
-	
+		seed = MathUtils.random(Long.MAX_VALUE);
+			
 		int width = 200;
 		int height = 30;
 		int buttonWidth = 20;
@@ -73,24 +74,18 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 		persistence = new Slider("persistence", 0, 1,   40,  100, buttonWidth, width, height);//0 - 1
 		lacunarity  = new Slider("lacunarity",  0, 5,   40,   60, buttonWidth, width, height);//0 - x
 		
+		colorProfile = new ColorProfile(500, 50, 50, 200);
+		loadTestProfile();
 		updateMap();
 		
 		mapX = 20; 
 		mapY = Gdx.graphics.getHeight() -pixelSize - 20;
 		//mapY = Gdx.graphics.getHeight() - heightMap.length*pixelSize - 20;
-		
-		colorProfile = new ColorProfile(500, 50, 50, 200);
-		
-		loadTestProfile();
-		
-		/*
-		colorProfile.add(new Tile("r",  1f, Color.RED));
-		colorProfile.add(new Tile("g",  0.666f, Color.GREEN));
-		colorProfile.add(new Tile("b",  0.333f, Color.BLUE));
-		*/
+
 	}
 
 	private void loadTestProfile() {
+		/*
 		colorProfile.add(new Tile("water",  0.41f,  Color.BLUE));
 		colorProfile.add(new Tile("water1", 0.345f, new Color(0,0,0.42f,1)));
 		colorProfile.add(new Tile("water2", 0.240f, new Color(0,0,0.23f,1)));
@@ -100,7 +95,8 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 		colorProfile.add(new Tile("grass1", 0.725f, new Color(0,0.63f,0,1)));
 		colorProfile.add(new Tile("grass2", 0.815f, new Color(0,0.48f,0,1)));
 		colorProfile.add(new Tile("lava",   1f,     Color.RED));
-		colorProfile.add(new Tile("rock",   0.95f,  Color.BROWN));
+		colorProfile.add(new Tile("rock",   0.95f,  Color.BROWN));*/
+		colorProfile.getTiles().addAll(Tile.defaultTiles);
 		
 		scale.setValue(100);
 		octave.setValue(4);
@@ -202,8 +198,9 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 		int o = (int)octave.getValue();
 		float p = persistence.getValue();
 		float l = lacunarity.getValue();
-
 		heightMap = NoiseGen.generateWrappingNoise4D(seed, mapSize, s, o, p, l);
+		tileMap = NoiseGen.createTileMap(heightMap, colorProfile.getTiles());	
+		pixelatedTileMap = NoiseGen.createPixelatedTileMap(tileMap, colorProfile.getTiles());
 	}
 	
 	private void drawMap() {					
@@ -218,14 +215,16 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 				
 				//pick color
 				float i = heightMap[tX][tY];
-				//TODO: color doesn't need to be calculated every loop. Save tile index to array.
+				shape.setColor(colorProfile.getTiles().get(tileMap[tX][tY]).getColor());
+				/*
 				for (int k = colorProfile.getTiles().size()-1; k >= 0; k--) {
 					Tile tile = colorProfile.getTiles().get(k);
 					if (i <= tile.getHeight() || k == 0) {
 						shape.setColor(tile.getColor());
 						break;
 					}
-				}
+				}*/
+				
 				//draw grid to visualize wrap
 				if (tX == heightMap.length-1 || tY == heightMap.length-1) {
 					shape.setColor(Color.BLACK);
@@ -288,16 +287,24 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 		if (colorProfile.getTiles().isEmpty()) {
 			return;
 		}
-		
-		int mapX = Gdx.graphics.getWidth() - heightMap.length - 20;
+		int renderSize = 8;
+		int mapX = Gdx.graphics.getWidth() - pixelatedTileMap.length*renderSize - 20;
 		int mapY = Gdx.graphics.getHeight() - 20;
 		
-		int chunkSize = 6;
-		//chunkSize must evenly divide into mapsize
-		while (heightMap.length % chunkSize != 0) {
-			chunkSize--;
+		for (int y = 0; y < pixelatedTileMap.length; y++) {
+			for (int x = 0; x < pixelatedTileMap.length; x++) {
+				
+				int tX = (x + offsetX) % pixelatedTileMap.length;
+				int tY = (y + offsetY) % pixelatedTileMap.length;
+				if (tX < 0) tX += pixelatedTileMap.length;
+				if (tY < 0) tY += pixelatedTileMap.length;
+				
+				shape.setColor(colorProfile.getTiles().get(pixelatedTileMap[tX][tY]).getColor());
+				shape.rect(mapX + x*renderSize, mapY - y*renderSize, renderSize, renderSize);
+			}
 		}
-		chunkSize = Math.abs(chunkSize);
+		/*
+		int chunkSize = 10; //chunkSize must evenly divide into mapsize
 		int chunks = heightMap.length/chunkSize;
 
 		//for each chunk
@@ -332,18 +339,17 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 				}
 				
 				//set color to highest tile count
-				int max = count[0];
 				int index = 0;
 				for (int i = 0; i < count.length; i++) {
-					if (count[i] > max) {
-						max = count[i];
+					if (count[i] > count[index]) {
 						index = i;
 					}
 				}
 				shape.setColor(colorProfile.getTiles().get(index).getColor());
+				shape.rect(mapX + chunkX, mapY - chunkY, chunkSize, chunkSize);
 				
 			}
-		}
+		}*/
 		
 		
 	}

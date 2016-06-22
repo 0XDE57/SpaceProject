@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -20,7 +21,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
 
-public class SpaceRenderingSystem extends IteratingSystem implements Disposable {
+public class SpaceRenderingSystem extends IteratingSystem implements Disposable, InputProcessor {
 	
 	private Array<Entity> renderQueue; //array of entities to render
 	private Comparator<Entity> comparator; //for sorting render order
@@ -43,13 +44,23 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 	//TODO: come up with some kind of standard size (pixel to meters)? / something less arbitrary
 	//private static final int WORLDWIDTH = 1280;
 	private static final int WORLDHEIGHT = 720;
+	
+	public final static float SCALE = 1f;//32f;
+    public final static float INV_SCALE = 1.f/SCALE;
+    // this is our "target" resolution, window can be any size, it is not bound to this one
+    public final static float VP_WIDTH = 1280 * INV_SCALE;
+    public final static float VP_HEIGHT = 720 * INV_SCALE;
 
 	boolean animateLanding;
 	
 	public SpaceRenderingSystem(OrthographicCamera camera) {
 		super(Family.all(TransformComponent.class, TextureComponent.class).get());
 		
+		//set this as input processor for mouse wheel scroll events
+		Gdx.input.setInputProcessor(this);
+			
 		cam = camera;
+		//cam.zoom = 50; zoomTarget = cam.zoom;//debug test
 		
 		renderQueue = new Array<Entity>();
 		
@@ -63,8 +74,9 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 		};
 		
 		//initialize camera, viewport and aspect ratio
-		float aspectRatio = Gdx.graphics.getHeight() / Gdx.graphics.getWidth();	
-		viewport = new ExtendViewport(WORLDHEIGHT * aspectRatio, WORLDHEIGHT, camera);
+		//float aspectRatio = Gdx.graphics.getHeight() / Gdx.graphics.getWidth();	
+		//viewport = new ExtendViewport(WORLDHEIGHT * aspectRatio, WORLDHEIGHT, camera);
+		viewport = new ExtendViewport(VP_WIDTH, VP_HEIGHT, camera);
 		viewport.apply();
 		
 		batch = new SpriteBatch();
@@ -72,6 +84,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 		//set vsync off for development, on by default
 		toggleVsync();
 	
+		
 	}
 	
 	@Override
@@ -149,7 +162,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 	 */
 	private static Vector3 backgroundColor() {
 		//still playing with these values to get the right feel/intensity of color...
-		float maxColor = 0.12f;
+		float maxColor = 0.25f;
 		float ratio = 0.00001f;
 		float green = Math.abs(cam.position.x * ratio);
 		float blue = Math.abs(cam.position.y * ratio);
@@ -160,14 +173,14 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 			green = maxColor - green % maxColor;
 		}
 		//blue based on y position. range amount of blue between 0 and maxColor
-		if ((int)(blue / maxColor) % 2 == 1) {
+		if ((int)(blue / maxColor) % 2 == 0) {
 			blue %= maxColor;
 		} else {
 			blue = maxColor - blue % maxColor;
 		}
 		//red is combination of blue and green
 		float red = blue+green;
-		Vector3 color = new Vector3(red, green + (0.15f-red)+0.05f, blue + (0.15f-red));
+		Vector3 color = new Vector3(red, green + (maxColor-red)+0.15f, blue + (maxColor-red)+0.1f);
 		return color;
 	}
 
@@ -276,7 +289,31 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 		 */
 	}
 
+	@Override
+	public boolean keyDown(int keycode) { return false; }
 
-	
+	@Override
+	public boolean keyUp(int keycode) { return false; }
+
+	@Override
+	public boolean keyTyped(char character) { return false; }
+
+	@Override
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) { return false; }
+
+	@Override
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) { return false; }
+
+	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer) { return false; }
+
+	@Override
+	public boolean mouseMoved(int screenX, int screenY) { return false; }
+
+	@Override
+	public boolean scrolled(int amount) {
+		setZoomTarget(cam.zoom += amount/2f);
+		return false;
+	}
 
 }

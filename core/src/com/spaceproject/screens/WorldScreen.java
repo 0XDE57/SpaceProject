@@ -47,13 +47,14 @@ public class WorldScreen extends ScreenAdapter {
 		
 		// engine to handle all entities and components
 		engine = new Engine();
-			
-		Entity player = EntityFactory.createCharacter(0, 0);
+		
+		int position = landCFG.planet.mapSize*32/2;//32 = tileSize, set position to middle of planet
+		Entity player = EntityFactory.createCharacter(position, position);
 		player.add(new PlayerFocusComponent());
 		engine.addEntity(player);
 		
 		engine.addSystem(new PlayerControlSystem(this, player, landCFG));
-		engine.addSystem(new WorldRenderingSystem(landCFG.planetSeed, cam));
+		engine.addSystem(new WorldRenderingSystem(landCFG.planet, cam));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new CameraSystem(cam));
 		engine.addSystem(new DebugUISystem(cam, batch, shape));

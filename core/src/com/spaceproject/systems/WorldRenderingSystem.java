@@ -1,5 +1,6 @@
 package com.spaceproject.systems;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 
 import com.badlogic.ashley.core.Entity;
@@ -17,6 +18,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.Tile;
+import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.TextureFactory;
@@ -45,24 +48,17 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	
 	private static final int WORLDHEIGHT = 720;
 	
-	//test tiles
-	private Texture rockDark;
-	private Texture rockLight;
-	private Texture grassDark;
-	private Texture grassLight;
-	private Texture sand;
-	private Texture waterShallow;
-	private Texture waterDeep;
-	private Texture waterDeeper;
+	private ArrayList<Tile> tiles = Tile.defaultTiles;
 	
-	
-	private float[][] map;	
+	private float[][] heightMap;//height of tile
+	private int[][] tileMap;//index of tile
 		
 	private int tileSize; //render size of tiles
 	private int surround; //how many tiles to draw around the camera
 
+	static Texture tileTex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));
 	
-	public WorldRenderingSystem(long seed, OrthographicCamera camera) {
+	public WorldRenderingSystem(PlanetComponent planet, OrthographicCamera camera) {
 		super(Family.all(TransformComponent.class, TextureComponent.class).get());
 		
 		cam = camera;
@@ -84,34 +80,52 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		viewport.apply();
 		
 		batch = new SpriteBatch();
+	
 		
-		//test color values
-		rockDark 	 = TextureFactory.createTile(new Color((float)75/255, (float)30/255, 0, 1));
-		rockLight 	 = TextureFactory.createTile(new Color((float)115/255, (float)40/255, 0, 1));
-		grassDark 	 = TextureFactory.createTile(new Color((float)30/255, (float)107/255, 0, 1));
-		grassLight 	 = TextureFactory.createTile(new Color((float)10/255, (float)130/255, (float)15/255, 1));
-		sand		 = TextureFactory.createTile(new Color((float)155/255, (float)130/255, 0, 1));
-		waterShallow = TextureFactory.createTile(new Color((float)10/255, (float)140/255, (float)180/255, 1));
-		waterDeep 	 = TextureFactory.createTile(new Color((float)15/255, (float)85/255, (float)160/255, 1));
-		waterDeeper	 = TextureFactory.createTile(new Color((float)15/255, (float)10/255, (float)170/255, 1));
-		
-		tileSize = 25;
+		tileSize = 32;
 		surround = 30;	
-		
-		//test map values
-		float scale = 40; //scale of noise = 40;
-		int octaves = 4;
-		float persistence = 0.5f;//0 - 1
-		float lacunarity = 1;//1 - x
-		int mapSize = 256; //size of world
-		
-		
-		map = NoiseGen.generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity);
+				
+		loadMap(planet);
 		
 		//set vsync off for development, on by default
 		toggleVsync();
 	
 	}
+
+	private void loadMap(PlanetComponent planet) {
+		//TODO: use NoiseThread
+		
+		//create tile features
+		//createTiles();
+
+		//create world features
+		/*
+		float scale = 100; //scale of noise = 40;
+		int octaves = 4;
+		float persistence = 0.68f;//0 - 1
+		float lacunarity = 2.6f;//1 - x
+		int mapSize = 256; //size of world	*/	
+		heightMap = NoiseGen.generateWrappingNoise4D(planet.seed, planet.mapSize, planet.scale, planet.octaves, planet.persistence, planet.lacunarity);
+		
+		//create map of tiles based on height
+		tileMap = NoiseGen.createTileMap(heightMap, tiles);		
+	}
+	
+	
+	/*
+	private void createTiles() {
+		tiles.add(new Tile("water",  0.41f,  Color.BLUE));
+		tiles.add(new Tile("water1", 0.345f, new Color(0,0,0.42f,1)));
+		tiles.add(new Tile("water2", 0.240f, new Color(0,0,0.23f,1)));
+		tiles.add(new Tile("water3", 0.085f, new Color(0,0,0.1f,1)));
+		tiles.add(new Tile("sand",   0.465f, Color.YELLOW));
+		tiles.add(new Tile("grass",  0.625f, Color.GREEN));
+		tiles.add(new Tile("grass1", 0.725f, new Color(0,0.63f,0,1)));
+		tiles.add(new Tile("grass2", 0.815f, new Color(0,0.48f,0,1)));
+		tiles.add(new Tile("lava",   1f,     Color.RED));
+		tiles.add(new Tile("rock",   0.95f,  Color.BROWN));
+		Collections.sort(tiles);
+	}*/
 
 	@Override
 	public void update(float delta) {
@@ -134,6 +148,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		//render background tiles
 		drawTiles();
 		
+		batch.setColor(Color.WHITE);
 		
 		//render all textures
 		for (Entity entity : renderQueue) {
@@ -183,6 +198,23 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		if (cam.position.x < 0) --centerX;		
 		if (cam.position.y < 0) --centerY;
 		
+		for (int tileY = centerY - surround; tileY <= centerY + surround; tileY++) {
+			for (int tileX = centerX - surround; tileX <= centerX + surround; tileX++) {
+				
+				//wrap tiles when position is outside of map
+				int tX = tileX % heightMap.length;
+				int tY = tileY % heightMap.length;
+				if (tX < 0) tX += heightMap.length;
+				if (tY < 0) tY += heightMap.length;
+							
+				//render tile
+				batch.setColor(tiles.get(tileMap[tX][tY]).getColor());
+				//if (tX == heightMap.length-1 || tY == heightMap.length-1) batch.setColor(Color.BLACK);
+				batch.draw(tileTex, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
+			}
+		}
+		
+		
 		/*//debug draw full map
 		for (int x = 0; x < mapSize; ++x) {
 			for (int y = 0; y < mapSize; ++y) {
@@ -205,38 +237,38 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 				}			
 			}
 		}*/
-		
-		
-		for (int tileX = centerX - surround; tileX <= centerX + surround; tileX++) {
-			for (int tileY = centerY - surround; tileY <= centerY + surround; tileY++) {
+		/*
+		for (int tileY = centerY - surround; tileY <= centerY + surround; tileY++) {
+			for (int tileX = centerX - surround; tileX <= centerX + surround; tileX++) {			
 				//wrap tiles when position is outside of map
-				int tX = tileX % map.length;
-				int tY = tileY % map.length;
-				if (tX < 0) tX += map.length;
-				if (tY < 0) tY += map.length;
+				int tX = tileX % heightMap.length;
+				int tY = tileY % heightMap.length;
+				if (tX < 0) tX += heightMap.length;
+				if (tY < 0) tY += heightMap.length;
 				
 				//draw tiles
 				//TODO: refactor threshold values to config object
-				if (map[tX][tY] > 0.90) {
+				if (heightMap[tX][tY] > 0.90) {
 					batch.draw(rockDark, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-				} else if (map[tX][tY] > 0.80) {
+				} else if (heightMap[tX][tY] > 0.80) {
 					batch.draw(rockLight, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-				} else if (map[tX][tY] > 0.70) {
+				} else if (heightMap[tX][tY] > 0.70) {
 					batch.draw(grassDark, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-				} else if (map[tX][tY] > 0.53) {
+				} else if (heightMap[tX][tY] > 0.53) {
 					batch.draw(grassLight, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-				} else if (map[tX][tY] > 0.50) {
+				} else if (heightMap[tX][tY] > 0.50) {
 					batch.draw(sand, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-				} else if (map[tX][tY] > 0.40) {
+				} else if (heightMap[tX][tY] > 0.40) {
 					batch.draw(waterShallow, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-				} else if (map[tX][tY] > 0.25) {
+				} else if (heightMap[tX][tY] > 0.25) {
 					batch.draw(waterDeep, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
 				} else {
 					batch.draw(waterDeeper, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
 				}
 			}
-		}
+		}*/
 	}
+
 
 	
 	/**

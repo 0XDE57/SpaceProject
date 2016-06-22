@@ -2,6 +2,7 @@ package com.spaceproject.systems;
 
 import java.util.ArrayList;
 
+import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
@@ -10,17 +11,23 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.spaceproject.SpaceBackgroundTile;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.Tile;
 import com.spaceproject.components.OrbitComponent;
+import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.StarComponent;
+import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.NoiseThread;
 
 public class SpaceLoadingSystem extends EntitySystem {
 
@@ -45,13 +52,18 @@ public class SpaceLoadingSystem extends EntitySystem {
 	private float checkTileTimer = 500;
 	private float checkTileCurrTime;
 
+	
 	private ArrayList<Vector2> points = new ArrayList<Vector2>();
 	private ImmutableArray<Entity> loadedStars;
 	private float checkStarsTimer = 4000;
 	private float checkStarsCurrTime;
+	
+	//threads for generating planet texture noise
+	ArrayList<NoiseThread> noiseThreads = new ArrayList<NoiseThread>();
 
 	public SpaceLoadingSystem(OrthographicCamera camera) {
 		cam = camera;
+		//cam.zoom = 50;
 	}
 
 	@Override
@@ -90,7 +102,35 @@ public class SpaceLoadingSystem extends EntitySystem {
 
 		// check, load and unload stars
 		updateStars(delta);
+		
+		// check noise generation threads, update/replace textures
+		updatePlanetTextures();
 
+
+	}
+
+	private void updatePlanetTextures() {
+		//if a thread has finished generating the noise, create a texture and replace the blank one
+		for (NoiseThread thread : noiseThreads) {
+			if (thread.isDone()) {			
+				for (Entity p : engine.getEntitiesFor(Family.all(PlanetComponent.class).get())) {
+					if (p.getComponent(PlanetComponent.class).id == thread.getID()) {					
+						int[][] tileMap = thread.getPixelatedMap();
+						if (tileMap != null) {
+							// create planet texture from tileMap, replace texture
+							Texture newTex = TextureFactory.generatePlanet(tileMap, Tile.defaultTiles);
+							p.getComponent(TextureComponent.class).texture = newTex;
+							
+							thread.setProcessed();//set flag to signify we are done with the thread
+							System.out.println("Texture loaded: [" + thread.getID() + "]");
+						}
+					}
+				}
+			}
+		}
+		
+		//remove completed threads
+		noiseThreads.removeIf(o -> o.isProcessed());
 	}
 
 	/**
@@ -162,7 +202,7 @@ public class SpaceLoadingSystem extends EntitySystem {
 	private void updateStars(float delta) {
 		checkStarsCurrTime -= 1000 * delta;
 		if (checkStarsCurrTime < 0) {
-			System.out.println("Checking stars...");
+			//System.out.println("Checking stars...");
 			
 			//distance to check when to load planets
 			int loadDistance = (int) (SpaceScreen.celestcfg.maxPlanets * SpaceScreen.celestcfg.maxDist);
@@ -176,6 +216,7 @@ public class SpaceLoadingSystem extends EntitySystem {
 						OrbitComponent orbit = Mappers.orbit.get(e);
 						if (orbit.parent != null) {
 							//TODO: check if parents have parents (eg: moon > planet > star)
+							//TODO: dispose texture. research auto texture dispose -> entity.componentRemoved()?
 							if (orbit.parent == star) {
 								engine.removeEntity(e);
 							}
@@ -194,6 +235,7 @@ public class SpaceLoadingSystem extends EntitySystem {
 					boolean loaded = false;
 					
 					// check if star is already in world
+					//TODO: check based on an ID rather than distance. more reliable and makes more sense than a distance check
 					for (Entity star : loadedStars) {
 						TransformComponent t = Mappers.transform.get(star);
 						if (point.dst(t.pos.x, t.pos.y) < 2f) {
@@ -204,7 +246,30 @@ public class SpaceLoadingSystem extends EntitySystem {
 					if (!loaded) {
 						//create new system
 						for (Entity e : EntityFactory.createPlanetarySystem(point.x, point.y)) {
+							//add entity to world
 							engine.addEntity(e);
+							
+							
+							PlanetComponent planet = Mappers.planet.get(e);
+							if (planet == null) {
+								continue;
+							}
+							
+							/*
+							long id = planet.id;
+							long seed = planet.seed;
+							int mapSize = planet.mapSize;
+							float scale = 100; //scale of noise = 40;
+							int octaves = 4;
+							float persistence = 0.68f;//0 - 1
+							float lacunarity = 2.6f;//1 - x
+							*/
+							//NoiseThread noise = new NoiseThread(id, scale, octaves, persistence, lacunarity, seed, mapSize, Tile.defaultTiles);
+							NoiseThread noise = new NoiseThread(planet, Tile.defaultTiles);
+							Thread createNoise = new Thread(noise);
+							createNoise.start();
+							
+							noiseThreads.add(noise);
 						}
 					}
 
@@ -215,9 +280,10 @@ public class SpaceLoadingSystem extends EntitySystem {
 			checkStarsCurrTime = checkStarsTimer;
 		}
 	}
-
+	
+	
 	/**
-	 * Fill world with stars and planets. Load points from disk or if no points
+	 * Fill universe with stars and planets. Load points from disk or if no points
 	 * exist, create points and save to disk.
 	 */
 	private void loadStars() {

@@ -39,6 +39,21 @@ public class ColorProfile {
 		colWidth = width;
 		colHeight = height;
 		
+		addSliders();
+		
+		addButtons();
+	}
+
+	private void addButtons() {
+		int buttonWidth = 60;
+		int buttonHeight = 22;
+		int buttonOffsetX = buttonWidth*2-35;
+		int buttonOffsetY = columnY;
+		add = new Button("add", columnX - buttonOffsetX - buttonWidth - 6, buttonOffsetY, buttonWidth, buttonHeight);
+		remove = new Button("remove", columnX- buttonOffsetX, buttonOffsetY, buttonWidth, buttonHeight);
+	}
+
+	private void addSliders() {
 		int sldWidth = 100;
 		int sldHeight = 16;
 		int btnWidth = 10;
@@ -48,13 +63,6 @@ public class ColorProfile {
 		red   = new Slider("r",   0, 1, columnX - offsetX, columnY + offsetY + (sldHeight + sldPadding)*2, btnWidth, sldWidth, sldHeight);
 		green = new Slider("g", 0, 1, columnX - offsetX, columnY + offsetY + sldHeight + sldPadding, btnWidth, sldWidth, sldHeight);
 		blue  = new Slider("b",  0, 1, columnX - offsetX, columnY + offsetY , btnWidth, sldWidth, sldHeight);
-		
-		int buttonWidth = 60;
-		int buttonHeight = 22;
-		int buttonOffsetX = buttonWidth*2-35;
-		int buttonOffsetY = columnY;
-		add = new Button("add", columnX - buttonOffsetX - buttonWidth - 6, buttonOffsetY, buttonWidth, buttonHeight);
-		remove = new Button("remove", columnX- buttonOffsetX, buttonOffsetY, buttonWidth, buttonHeight);
 	}
 	
 	public ArrayList<Tile> getTiles() {

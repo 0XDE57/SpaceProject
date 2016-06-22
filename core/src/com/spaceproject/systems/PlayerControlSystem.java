@@ -37,7 +37,7 @@ public class PlayerControlSystem extends EntitySystem {
 
 	//vehicles array to check if player can get in 
 	private ImmutableArray<Entity> vehicles;
-	private ImmutableArray<Entity> planets;
+	//private ImmutableArray<Entity> planets;
 
 	//action timer, for enter/exit vehicle
 	//TODO: move to component, both player and AI need to be able to enter/exit
@@ -88,7 +88,7 @@ public class PlayerControlSystem extends EntitySystem {
 		
 		//playerEntity = engine.getEntitiesFor(Family.one(PlayerFocusComponent.class).get()).first();
 		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
-		planets = engine.getEntitiesFor(Family.all(PlanetComponent.class).get());
+		//planets = engine.getEntitiesFor(Family.all(PlanetComponent.class).get());
 	}
 
 
@@ -159,7 +159,7 @@ public class PlayerControlSystem extends EntitySystem {
 
 	private void tryLandOnPlanet() {
 		Vector3 playerPos = Mappers.transform.get(vehicleEntity).pos;
-		for (Entity planet : planets) {
+		for (Entity planet : engine.getEntitiesFor(Family.all(PlanetComponent.class).get())) {
 			Vector3 planetPos = Mappers.transform.get(planet).pos;
 			TextureComponent planetTex = Mappers.texture.get(planet);
 			// if player is over planet
@@ -168,7 +168,7 @@ public class PlayerControlSystem extends EntitySystem {
 
 				landCFG = new LandConfig();
 				landCFG.position = planetPos;// save position for taking off from planet
-				landCFG.planetSeed = Mappers.planet.get(planet).seed; // save seed for planet
+				landCFG.planet = Mappers.planet.get(planet); // save seed for planet
 				landCFG.shipSeed = Mappers.vehicle.get(vehicleEntity).seed; //save seed for ship
 			}
 		}
@@ -187,7 +187,7 @@ public class PlayerControlSystem extends EntitySystem {
 		transform.rotation = MathUtils.lerpAngle(transform.rotation, angleFacing, 6f*delta);
 					
 		if (moveForward) {				
-			float walkSpeed = 50f; //TODO: move to component
+			float walkSpeed = 300f;//50f; //TODO: move to component
 			float dx = (float) Math.cos(transform.rotation) * (walkSpeed * movementMultiplier) * delta;
 			float dy = (float) Math.sin(transform.rotation) * (walkSpeed * movementMultiplier) * delta;		
 			transform.pos.add(dx, dy, 0);

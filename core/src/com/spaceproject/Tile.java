@@ -1,10 +1,14 @@
 package com.spaceproject;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.utility.MyMath;
 
 public class Tile implements Comparable<Tile> {
+	public static ArrayList<Tile> defaultTiles = getDefault();
 	private static int nextID;
 	
 	private final int id;
@@ -60,6 +64,25 @@ public class Tile implements Comparable<Tile> {
 	@Override
 	public String toString() {
 		return String.format("%-5s", MyMath.round(getHeight(),3)).replace(' ', '0')  + " " + getName();
+	}
+	
+	//TODO: find better place for this. 
+	//-also loading and unloading to json.
+	//-also support for different profiles.
+	private static ArrayList<Tile> getDefault() {
+		ArrayList<Tile> tiles = new ArrayList<>();
+		tiles.add(new Tile("water", 0.41f, Color.BLUE));
+		tiles.add(new Tile("water1", 0.345f, new Color(0, 0, 0.42f, 1)));
+		tiles.add(new Tile("water2", 0.240f, new Color(0, 0, 0.23f, 1)));
+		tiles.add(new Tile("water3", 0.085f, new Color(0, 0, 0.1f, 1)));
+		tiles.add(new Tile("sand", 0.465f, Color.YELLOW));
+		tiles.add(new Tile("grass", 0.625f, Color.GREEN));
+		tiles.add(new Tile("grass1", 0.725f, new Color(0, 0.63f, 0, 1)));
+		tiles.add(new Tile("grass2", 0.815f, new Color(0, 0.48f, 0, 1)));
+		tiles.add(new Tile("lava", 1f, Color.RED));
+		tiles.add(new Tile("rock", 0.95f, Color.BROWN));
+		Collections.sort(tiles);
+		return tiles;
 	}
 
 }

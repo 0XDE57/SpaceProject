@@ -2,6 +2,7 @@ package com.spaceproject;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.config.LandConfig;
@@ -13,8 +14,6 @@ public class SpaceProject extends Game {
 	
 	public static CelestialConfig celestcfg;
 	public static KeyConfig keycfg;
-
-	//public static Vector3 landedPlanet;//hacky temporary way to save planet player landed on
 	
 	@Override
 	public void create() {
@@ -24,12 +23,22 @@ public class SpaceProject extends Game {
 		
 		//setScreen(new TestShipGenerationScreen(this));
 		//setScreen(new TestNoiseScreen(this));
+		
+		
 		LandConfig landCFG = new LandConfig();
 		landCFG.position = new Vector3();
 		
+		//test values for world
+		PlanetComponent planet = new PlanetComponent();
+		planet.mapSize = 512;
+		planet.scale = 100;
+		planet.octaves = 4;
+		planet.persistence = 0.68f;
+		planet.lacunarity = 2.6f;
+		landCFG.planet = planet;
 		
 		setScreen(new SpaceScreen(this, landCFG));
-		//setScreen(new WorldScreen(this, 0));
+		//setScreen(new WorldScreen(this, landCFG));
 		
 		//setScreen(new MainMenuScreen(this));
 	}

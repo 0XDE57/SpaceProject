@@ -1,8 +1,13 @@
 package com.spaceproject.utility;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.math.MathUtils;
+import com.spaceproject.Tile;
 
 public class NoiseGen {
+	
+	public static final int chunkSize = 8;
 	
 	public static float[][] generateWrappingNoise4D(long seed, int mapSize, float scale) {
 		float[][] map = new float[mapSize][mapSize];	
@@ -93,5 +98,67 @@ public class NoiseGen {
 		
 		return map;
 		
+	}
+	
+	public static int[][] createPixelatedTileMap(int[][] tileMap, ArrayList<Tile> tiles) {
+		
+		//int chunkSize = 8;
+		int chunks = tileMap.length/chunkSize;
+		int[][] pixelatedMap = new int[chunks][chunks];
+		
+		//for each chunk
+		for (int cY = 0; cY < chunks; cY++) {
+			for (int cX = 0; cX < chunks; cX++) {
+				
+				//calculate chunk position
+				int chunkX = cX * chunkSize;
+				int chunkY = cY * chunkSize;
+				
+				//reset chunk count
+				int[] count = new int[tiles.size()];
+				
+				//for each tile in chunk, count occurrence of tiles within a chunk
+				for (int y = chunkY; y < chunkY+chunkSize; y++) {
+					for (int x = chunkX; x < chunkX+chunkSize; x++) {
+						count[tileMap[x][y]]++;
+					}
+				}
+				
+				//set tile to highest tile count
+				pixelatedMap[cX][cY] = getMaxValueIndex(count);
+
+			}
+		}
+		
+		return pixelatedMap;
+	}
+
+	public static int[][] createTileMap(float[][] heightMap, ArrayList<Tile> tiles) {
+		int [][] tileMap = new int[heightMap.length][heightMap.length];
+		for (int y = 0; y < heightMap.length; y++) {
+			for (int x = 0; x < heightMap.length; x++) {
+				
+				//save tile index
+				float i = heightMap[x][y];			
+				for (int k = tiles.size()-1; k >= 0; k--) {
+					Tile tile = tiles.get(k);
+					if (i <= tile.getHeight() || k == 0) {
+						tileMap[x][y] = k;
+						break;
+					}
+				}
+			}
+		}
+		return tileMap;
+	}
+	
+	public static int getMaxValueIndex(int[] array) {
+		int index = 0;
+		for (int i = 0; i < array.length; i++) {
+			if (array[i] > array[index]) {
+				index = i;
+			}
+		}
+		return index;
 	}
 }
