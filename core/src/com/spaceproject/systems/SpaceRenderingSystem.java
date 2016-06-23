@@ -20,6 +20,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.MyScreenAdapter;
 
 public class SpaceRenderingSystem extends IteratingSystem implements Disposable, InputProcessor {
 	
@@ -28,39 +29,22 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable,
 	
 	//rendering
 	private static OrthographicCamera cam;
-	private ExtendViewport viewport;
-	private SpriteBatch batch;
+	private static SpriteBatch batch;
 	
-	//window size
-	private int prevWindowWidth = 0;
-	private int prevWindowHeight = 0;
-	
-	//vertical sync
-	private boolean vsync = true;
-	
-	//camera zoom
-	private float zoomTarget = 1;
-	
-	//TODO: come up with some kind of standard size (pixel to meters)? / something less arbitrary
-	//private static final int WORLDWIDTH = 1280;
-	private static final int WORLDHEIGHT = 720;
-	
-	public final static float SCALE = 1f;//32f;
-    public final static float INV_SCALE = 1.f/SCALE;
-    // this is our "target" resolution, window can be any size, it is not bound to this one
-    public final static float VP_WIDTH = 1280 * INV_SCALE;
-    public final static float VP_HEIGHT = 720 * INV_SCALE;
-
 	boolean animateLanding;
 	
-	public SpaceRenderingSystem(OrthographicCamera camera) {
+	public SpaceRenderingSystem() {
+		this(MyScreenAdapter.cam, MyScreenAdapter.batch);
+	}
+	
+	public SpaceRenderingSystem(OrthographicCamera camera, SpriteBatch spriteBatch) {
 		super(Family.all(TransformComponent.class, TextureComponent.class).get());
 		
 		//set this as input processor for mouse wheel scroll events
 		Gdx.input.setInputProcessor(this);
 			
 		cam = camera;
-		//cam.zoom = 50; zoomTarget = cam.zoom;//debug test
+		batch = spriteBatch;
 		
 		renderQueue = new Array<Entity>();
 		
@@ -72,18 +56,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable,
 										Mappers.transform.get(entityA).pos.z);
 			}
 		};
-		
-		//initialize camera, viewport and aspect ratio
-		//float aspectRatio = Gdx.graphics.getHeight() / Gdx.graphics.getWidth();	
-		//viewport = new ExtendViewport(WORLDHEIGHT * aspectRatio, WORLDHEIGHT, camera);
-		viewport = new ExtendViewport(VP_WIDTH, VP_HEIGHT, camera);
-		viewport.apply();
-		
-		batch = new SpriteBatch();
-		
-		//set vsync off for development, on by default
-		toggleVsync();
-	
+
 		
 	}
 	
@@ -98,11 +71,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable,
 		
 		//sort render order of entities
 		renderQueue.sort(comparator); 
-		
-		//update camera and projection
-		cam.update();
-		batch.setProjectionMatrix(cam.combined); 
-		
+
 		//draw
 		batch.begin();
 		
@@ -140,18 +109,6 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable,
 		batch.end();
 		
 		renderQueue.clear();
-		
-		
-		//adjust zoom
-		zoomCamera(delta);
-		
-		//TODO: move into input
-		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.rotateRight)) {
-			cam.rotate(5f * delta);
-		}
-		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.rotateLeft)) {
-			cam.rotate(-5f * delta);
-		}
 	
 	}
 
@@ -184,52 +141,6 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable,
 		return color;
 	}
 
-	/**
-	 * Animate camera zoom. Will zoom camera in or out until it reaches zoomTarget.
-	 * @param delta
-	 */
-	private void zoomCamera(float delta) {
-		if (cam.zoom != zoomTarget) {
-			float scaleSpeed = 3 * delta;
-			//zoom in/out
-			cam.zoom += (cam.zoom < zoomTarget) ? scaleSpeed : -scaleSpeed;
-
-			//if zoom is close enough, just set it to target
-			if (Math.abs(cam.zoom - zoomTarget) < 0.1) {
-				cam.zoom = zoomTarget;
-			}
-		}
-	}
-
-	/**
-	 * Turn vsync on or off
-	 */
-	void toggleVsync() {
-		vsync = !vsync;
-		Gdx.graphics.setVSync(vsync);
-		System.out.println("vsync: " + vsync);
-	}
-
-	/**
-	 * Switch between fullscreen and windowed mode.
-	 */
-	void toggleFullscreen() {
-		if (Gdx.graphics.isFullscreen()) {
-			//set window to previous window size
-			Gdx.graphics.setWindowedMode(prevWindowWidth, prevWindowHeight);
-		} else {
-			//save window size
-			prevWindowWidth = Gdx.graphics.getWidth();
-			prevWindowHeight = Gdx.graphics.getHeight();
-			
-			//set to fullscreen
-			if (Gdx.graphics.supportsDisplayModeChange()) {
-				Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-			} else {
-				Gdx.app.log("graphics", "DisplayModeChange not supported.");
-			}
-		}
-	}
 	
 	@Override
 	public void processEntity(Entity entity, float deltaTime) {
@@ -237,35 +148,6 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable,
 		renderQueue.add(entity);
 	}
 	
-	/**
-	 * Set zoom for camera to animate to.
-	 * @param zoom
-	 */
-	public void setZoomTarget(float zoom) {
-		zoomTarget = zoom;
-	}
-	
-	public static float getCamZoom() {
-		return cam.zoom;
-	}
-
-	public static Vector3 getCamPos() {
-		return cam.position;
-	}
-	
-	public static OrthographicCamera getCam() {
-		return cam;
-	}
-
-	/**
-	 * Resize viewport. Called from screen resize.
-	 * @param width
-	 * @param height
-	 */
-	public void resize(int width, int height) {
-		viewport.update(width, height);
-	}
-
 
 	@Override
 	public void dispose() {
@@ -312,7 +194,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable,
 
 	@Override
 	public boolean scrolled(int amount) {
-		setZoomTarget(cam.zoom += amount/2f);
+		MyScreenAdapter.setZoomTarget(cam.zoom += amount/2f);
 		return false;
 	}
 

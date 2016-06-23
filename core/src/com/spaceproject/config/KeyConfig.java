@@ -86,7 +86,7 @@ public class KeyConfig {
 		toggleVector = Keys.NUMPAD_5;
 		toggleMenu = Keys.NUMPAD_9;
 		
-		//temporary
+		//temporary/debug
 		vsync = Keys.F8;
 		instantStop = Keys.X;
 		createSystemAtPlayer = Keys.K;

@@ -302,6 +302,7 @@ public class SpaceLoadingSystem extends EntitySystem {
 		FileHandle starsFile = Gdx.files.local("stars.txt");
 
 		// starsFile.delete();
+		
 		points.add(new Vector2(700, 700));//close system for debug
 
 		if (starsFile.exists()) {

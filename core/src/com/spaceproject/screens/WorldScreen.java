@@ -5,13 +5,12 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.PlayerFocusComponent;
+import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
@@ -23,38 +22,30 @@ import com.spaceproject.systems.MovementSystem;
 import com.spaceproject.systems.PlayerControlSystem;
 import com.spaceproject.systems.TouchUISystem;
 import com.spaceproject.systems.WorldRenderingSystem;
+import com.spaceproject.utility.MyScreenAdapter;
 
-public class WorldScreen extends ScreenAdapter {
+public class WorldScreen extends MyScreenAdapter {
 
 	SpaceProject game;
 
 	public static Engine engine;
-	
-	private static OrthographicCamera cam;
-	private static SpriteBatch batch;
-	private static ShapeRenderer shape;
-	
-	//LandConfig landCFG;
 
 	public WorldScreen(SpaceProject game, LandConfig landCFG) {
 		this.game = game;
 		
-		cam = new OrthographicCamera();
-		batch = new SpriteBatch();
-		shape = new ShapeRenderer();
-		
-		//this.landCFG = landCFG;
+		cam.zoom = 1;
+		setZoomTarget(1);
 		
 		// engine to handle all entities and components
 		engine = new Engine();
 		
 		int position = landCFG.planet.mapSize*32/2;//32 = tileSize, set position to middle of planet
 		Entity player = EntityFactory.createCharacter(position, position);
-		player.add(new PlayerFocusComponent());
+		player.add(new CameraFocusComponent());
 		engine.addEntity(player);
 		
 		engine.addSystem(new PlayerControlSystem(this, player, landCFG));
-		engine.addSystem(new WorldRenderingSystem(landCFG.planet, cam));
+		engine.addSystem(new WorldRenderingSystem(landCFG.planet));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new CameraSystem(cam));
 		engine.addSystem(new DebugUISystem(cam, batch, shape));
@@ -68,18 +59,14 @@ public class WorldScreen extends ScreenAdapter {
 		}
 	}
 	
-	
-	public void render(float delta) {		
+	@Override
+	public void render(float delta) {
+		super.render(delta);
+		
 		//update engine
 		engine.update(delta);
 	}
 	
-	
-	// resize game
-	public void resize(int width, int height) {
-		Gdx.app.log("screen", width + ", " + height);
-		engine.getSystem(WorldRenderingSystem.class).resize(width, height);
-	}
 
 	public void changeScreen(LandConfig landCFG) {
 		System.out.println("Change screen to Space.");
@@ -92,7 +79,6 @@ public class WorldScreen extends ScreenAdapter {
 	public void dispose() {
 		//clean up after self
 		//dispose of spritebatches and textures
-		//engine.
 		for (EntitySystem sys : engine.getSystems()) {			
 			if (sys instanceof Disposable)
 				((Disposable) sys).dispose();

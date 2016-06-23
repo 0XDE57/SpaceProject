@@ -17,10 +17,11 @@ import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
-import com.spaceproject.components.PlayerFocusComponent;
+import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
+import com.spaceproject.utility.MyScreenAdapter;
 
 public class HUDSystem extends EntitySystem {
 	
@@ -47,8 +48,8 @@ public class HUDSystem extends EntitySystem {
 	@Override
 	public void addedToEngine(Engine engine) {		
 		mapableObjects = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
-		player = engine.getEntitiesFor(Family.one(PlayerFocusComponent.class).get());
-		killables = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(PlayerFocusComponent.class).get());
+		player = engine.getEntitiesFor(Family.one(CameraFocusComponent.class).get());
+		killables = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(CameraFocusComponent.class).get());
 	}
 	
 	@Override
@@ -211,13 +212,13 @@ public class HUDSystem extends EntitySystem {
 			MapComponent map = Mappers.map.get(mapable);
 			Vector3 screenPos = Mappers.transform.get(mapable).pos.cpy();
 			
-			if (screenPos.dst(SpaceRenderingSystem.getCamPos()) > map.distance) {
+			if (screenPos.dst(MyScreenAdapter.cam.position) > map.distance) {
 				continue;
 			}
 			
 			//set entity co'ords relative to center of screen
-			screenPos.x -= SpaceRenderingSystem.getCamPos().x;
-			screenPos.y -= SpaceRenderingSystem.getCamPos().y;
+			screenPos.x -= MyScreenAdapter.cam.position.x;
+			screenPos.y -= MyScreenAdapter.cam.position.y;
 			
 			//skip on screen entities
 			int z = 100; //how close to edge of screen to ignore

@@ -1,4 +1,4 @@
-package com.spaceproject;
+package com.spaceproject.utility;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -9,7 +9,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 /**
  * A copy of @IteratingSystem with support for engine access.
  */
-public abstract class CustomIteratingSystem extends EntitySystem {
+public abstract class MyIteratingSystem extends EntitySystem {
 	protected Engine engine;
 	
 	private Family family;
@@ -19,7 +19,7 @@ public abstract class CustomIteratingSystem extends EntitySystem {
 	 * Instantiates a system that will iterate over the entities described by the Family.
 	 * @param family The family of entities iterated over in this System
 	 */
-	public CustomIteratingSystem (Family family) {
+	public MyIteratingSystem (Family family) {
 		this(family, 0);
 	}
 
@@ -28,7 +28,7 @@ public abstract class CustomIteratingSystem extends EntitySystem {
 	 * @param family The family of entities iterated over in this System
 	 * @param priority The priority to execute this system with (lower means higher priority)
 	 */
-	public CustomIteratingSystem (Family family, int priority) {
+	public MyIteratingSystem (Family family, int priority) {
 		super(priority);
 
 		this.family = family;

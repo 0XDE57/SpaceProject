@@ -13,7 +13,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.PlayerFocusComponent;
+import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.KeyConfig;
@@ -32,16 +32,13 @@ import com.spaceproject.systems.PlayerControlSystem;
 import com.spaceproject.systems.SpaceLoadingSystem;
 import com.spaceproject.systems.SpaceRenderingSystem;
 import com.spaceproject.systems.TouchUISystem;
+import com.spaceproject.utility.MyScreenAdapter;
 
-public class SpaceScreen extends ScreenAdapter {
+public class SpaceScreen extends MyScreenAdapter {
 
 	SpaceProject game;
 	
 	public static Engine engine;
-	
-	private static OrthographicCamera cam;
-	private static SpriteBatch batch;
-	private static ShapeRenderer shape;
 	
 	public static CelestialConfig celestcfg;
 	public static KeyConfig keycfg;
@@ -54,9 +51,6 @@ public class SpaceScreen extends ScreenAdapter {
 
 		this.game = game;
 		
-		cam = new OrthographicCamera();
-		batch = new SpriteBatch();
-		shape = new ShapeRenderer();
 		
 		// engine to handle all entities and components
 		engine = new Engine();
@@ -68,6 +62,8 @@ public class SpaceScreen extends ScreenAdapter {
 		
 		//add temporary test entities--------------------------------------------
 		//TODO: need refactor, put in spawn system or initializer of sorts...			
+		//add test planetary system near spawn
+		//for (Entity entity : EntityFactory.createPlanetarySystem(700, 700)) { engine.addEntity(entity);}
 		
 		//add test ships
 		engine.addEntity(EntityFactory.createShip3(-100, 400));
@@ -82,11 +78,11 @@ public class SpaceScreen extends ScreenAdapter {
 		
 		if (startAsShip) {
 			//start as ship	
-			playerTESTSHIP.add(new PlayerFocusComponent());
+			playerTESTSHIP.add(new CameraFocusComponent());
 			engine.addEntity(playerTESTSHIP);
 		} else {
 			//start as player
-			player.add(new PlayerFocusComponent());
+			player.add(new CameraFocusComponent());
 			engine.addEntity(player);
 		}
 		
@@ -97,14 +93,14 @@ public class SpaceScreen extends ScreenAdapter {
 			engine.addSystem(new PlayerControlSystem(this, player, landCFG));//start as player
 		}		
 		
-		engine.addSystem(new SpaceRenderingSystem(cam));
+		engine.addSystem(new SpaceRenderingSystem());
 		engine.addSystem(new SpaceLoadingSystem(cam));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new OrbitSystem());
-		engine.addSystem(new DebugUISystem(cam, batch, shape));
+		engine.addSystem(new DebugUISystem());
 		engine.addSystem(new BoundsSystem());
 		engine.addSystem(new ExpireSystem(1));
-		engine.addSystem(new CameraSystem(cam));
+		engine.addSystem(new CameraSystem());
 		engine.addSystem(new CollisionSystem());
 		engine.addSystem(new HUDSystem(cam));
 		
@@ -118,6 +114,9 @@ public class SpaceScreen extends ScreenAdapter {
 	}
 
 	private static void loadConfigs() {
+		//set vsync off for development, on by default
+		toggleVsync();
+		
 		//KEYS
 		keycfg = new KeyConfig();
 		keycfg.loadDefault();
@@ -145,7 +144,10 @@ public class SpaceScreen extends ScreenAdapter {
 		celestcfg.saveToJson();
 	}		
 	
-	public void render(float delta) {		
+	@Override
+	public void render(float delta) {
+		super.render(delta);
+		
 		//update engine
 		engine.update(delta);
 			
@@ -202,13 +204,7 @@ public class SpaceScreen extends ScreenAdapter {
 		
 		//engine.removeAllEntities();
 	}
-	
-	//resize game
-	public void resize(int width, int height) {
-		Gdx.app.log("screen", width + ", " + height);
-		engine.getSystem(SpaceRenderingSystem.class).resize(width, height);
-	}
-	
+
 	public void hide() { }
 
 	public void pause() { }

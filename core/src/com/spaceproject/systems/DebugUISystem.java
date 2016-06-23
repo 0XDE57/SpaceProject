@@ -18,7 +18,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.spaceproject.CustomIteratingSystem;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.MovementComponent;
@@ -27,9 +26,11 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.MyIteratingSystem;
 import com.spaceproject.utility.MyMath;
+import com.spaceproject.utility.MyScreenAdapter;
 
-public class DebugUISystem extends CustomIteratingSystem implements Disposable {
+public class DebugUISystem extends MyIteratingSystem implements Disposable {
 
 	//rendering
 	private static OrthographicCamera cam;
@@ -57,20 +58,22 @@ public class DebugUISystem extends CustomIteratingSystem implements Disposable {
 	private int entityCount = 0;
 	private int componentCount = 0;
 	
+	public DebugUISystem() {
+		this(MyScreenAdapter.cam, MyScreenAdapter.batch, MyScreenAdapter.shape);
+	}
+	
 	public DebugUISystem(OrthographicCamera camera, SpriteBatch spriteBatch, ShapeRenderer shapeRenderer) {
 		super(Family.all(TransformComponent.class).get());
 		
 		cam = camera;
-		
-		font = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 15);
-		
 		batch = spriteBatch;
 		shape = shapeRenderer;
+		font = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 15);
 		
 		objects = new Array<Entity>();		
 		
 	}
-	
+
 	@Override
 	public void update(float delta) {
 		//check key presses
@@ -86,9 +89,10 @@ public class DebugUISystem extends CustomIteratingSystem implements Disposable {
 		
 		
 		//set projection matrix so things render using correct coordinates
-		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); 
+		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());		
 		batch.setProjectionMatrix(projectionMatrix);
-		shape.setProjectionMatrix(cam.combined);
+		//shape.setProjectionMatrix(projectionMatrix);
+		//shape.setProjectionMatrix(cam.combined);
 		
 		
 		//enable blending for transparency

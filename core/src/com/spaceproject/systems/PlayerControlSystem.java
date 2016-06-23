@@ -13,7 +13,7 @@ import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.PlanetComponent;
-import com.spaceproject.components.PlayerFocusComponent;
+import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
@@ -23,6 +23,7 @@ import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.screens.WorldScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
+import com.spaceproject.utility.MyScreenAdapter;
 
 public class PlayerControlSystem extends EntitySystem {
 
@@ -135,7 +136,7 @@ public class PlayerControlSystem extends EntitySystem {
 	}
 
 	private void animatePlanetLanding(float delta) {
-		Entity player = engine.getEntitiesFor(Family.one(PlayerFocusComponent.class).get()).first();
+		Entity player = engine.getEntitiesFor(Family.one(CameraFocusComponent.class).get()).first();
 		
 		//freeze position
 		player.getComponent(MovementComponent.class).velocity.set(0, 0); 
@@ -148,8 +149,8 @@ public class PlayerControlSystem extends EntitySystem {
 			tex.scale = 0;
 			
 			//zoom in
-			engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(0);
-			if (engine.getSystem(SpaceRenderingSystem.class).getCamZoom() <= 0.1f) {
+			MyScreenAdapter.setZoomTarget(0);
+			if (MyScreenAdapter.cam.zoom <= 0.1f) {
 				//land on planet
 				((SpaceScreen) screen).changeScreen(landCFG);
 			}
@@ -424,7 +425,8 @@ public class PlayerControlSystem extends EntitySystem {
 					vehicleEntity = vehicle; //set vehicle reference
 
 					//zoom out camera
-					engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(1);
+					//engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(1);
+					MyScreenAdapter.setZoomTarget(1);
 					//TODO add animation to slowly move focus to the vehicle instead of instantly jumping to the vehicle position
 					//engine.getSystem(RenderingSystem.class).pan(vehicleTransform);
 					
@@ -432,7 +434,7 @@ public class PlayerControlSystem extends EntitySystem {
 					//TODO make switch focus method? (oldEntity, newEntity)
 					//TODO there is a crash here when entering vehicle sometimes...find it, fix it.
 					//set focus to vehicle
-					vehicle.add(playerEntity.remove(PlayerFocusComponent.class));
+					vehicle.add(playerEntity.remove(CameraFocusComponent.class));
 				
 					//remove player from engine
 					engine.removeEntity(playerEntity);
@@ -467,10 +469,11 @@ public class PlayerControlSystem extends EntitySystem {
 		Mappers.transform.get(playerEntity).pos.set(Mappers.transform.get(vehicleEntity).pos);				
 
 		//zoom in camera
-		engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(0.4f);
+		//engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(0.4f);
+		MyScreenAdapter.setZoomTarget(0.4f);
 		
 		//set focus to player entity
-		playerEntity.add(vehicleEntity.remove(PlayerFocusComponent.class));
+		playerEntity.add(vehicleEntity.remove(CameraFocusComponent.class));
 		
 		vehicleEntity = null;
 		

@@ -24,6 +24,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.MyScreenAdapter;
 import com.spaceproject.utility.NoiseGen;
 
 public class WorldRenderingSystem extends IteratingSystem implements Disposable {
@@ -33,20 +34,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	
 	//rendering
 	private static OrthographicCamera cam;
-	private ExtendViewport viewport;
-	private SpriteBatch batch;
-	
-	//window size
-	private int prevWindowWidth = 0;
-	private int prevWindowHeight = 0;
-	
-	//vertical sync
-	private boolean vsync = true;
-	
-	//camera zoom
-	private float zoomTarget = 1;
-	
-	private static final int WORLDHEIGHT = 720;
+	private static SpriteBatch batch;
 	
 	private ArrayList<Tile> tiles = Tile.defaultTiles;
 	
@@ -58,10 +46,15 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 
 	static Texture tileTex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));
 	
-	public WorldRenderingSystem(PlanetComponent planet, OrthographicCamera camera) {
+	public WorldRenderingSystem(PlanetComponent planet) {
+		this(planet, MyScreenAdapter.cam, MyScreenAdapter.batch);
+	}
+	
+	public WorldRenderingSystem(PlanetComponent planet, OrthographicCamera camera, SpriteBatch spriteBatch) {
 		super(Family.all(TransformComponent.class, TextureComponent.class).get());
 		
 		cam = camera;
+		batch = spriteBatch;
 		
 		renderQueue = new Array<Entity>();
 		
@@ -74,21 +67,11 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 			}
 		};
 		
-		//initialize camera, viewport and aspect ratio
-		float aspectRatio = Gdx.graphics.getHeight() / Gdx.graphics.getWidth();	
-		viewport = new ExtendViewport(WORLDHEIGHT * aspectRatio, WORLDHEIGHT, camera);
-		viewport.apply();
-		
-		batch = new SpriteBatch();
-	
-		
 		tileSize = 32;
 		surround = 30;	
 				
 		loadMap(planet);
-		
-		//set vsync off for development, on by default
-		toggleVsync();
+
 	
 	}
 
@@ -137,10 +120,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		
 		//sort render order of entities
 		renderQueue.sort(comparator); 
-		
-		//update camera and projection
-		cam.update();
-		batch.setProjectionMatrix(cam.combined); 
+
 		
 		//draw
 		batch.begin();
@@ -175,17 +155,6 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		
 		renderQueue.clear();
 		
-		
-		//adjust zoom
-		zoomCamera(delta);
-		
-		//TODO: move into input
-		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.rotateRight)) {
-			cam.rotate(5f * delta);
-		}
-		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.rotateLeft)) {
-			cam.rotate(-5f * delta);
-		}
 	}	
 
 	private void drawTiles() {
@@ -213,109 +182,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 				batch.draw(tileTex, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
 			}
 		}
-		
-		
-		/*//debug draw full map
-		for (int x = 0; x < mapSize; ++x) {
-			for (int y = 0; y < mapSize; ++y) {
-				if (map[x][y] > 0.90) {
-					batch.draw(rockDark, x * tileSize, y * tileSize, tileSize, tileSize);
-				} else if (map[x][y] > 0.80) {
-					batch.draw(rockLight, x * tileSize, y * tileSize, tileSize, tileSize);
-				} else if (map[x][y] > 0.70) {
-					batch.draw(grassDark, x * tileSize, y * tileSize, tileSize, tileSize);
-				} else if (map[x][y] > 0.53) {
-					batch.draw(grassLight, x * tileSize, y * tileSize, tileSize, tileSize);
-				} else if (map[x][y] > 0.50) {
-					batch.draw(sand, x * tileSize, y * tileSize, tileSize, tileSize);
-				} else if (map[x][y] > 0.40) {
-					batch.draw(waterShallow, x * tileSize, y * tileSize, tileSize, tileSize);
-				} else if (map[x][y] > 0.25) {
-					batch.draw(waterDeep, x * tileSize, y * tileSize, tileSize, tileSize);
-				} else {
-					batch.draw(waterDeeper, x * tileSize, y * tileSize, tileSize, tileSize);
-				}			
-			}
-		}*/
-		/*
-		for (int tileY = centerY - surround; tileY <= centerY + surround; tileY++) {
-			for (int tileX = centerX - surround; tileX <= centerX + surround; tileX++) {			
-				//wrap tiles when position is outside of map
-				int tX = tileX % heightMap.length;
-				int tY = tileY % heightMap.length;
-				if (tX < 0) tX += heightMap.length;
-				if (tY < 0) tY += heightMap.length;
-				
-				//draw tiles
-				//TODO: refactor threshold values to config object
-				if (heightMap[tX][tY] > 0.90) {
-					batch.draw(rockDark, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-				} else if (heightMap[tX][tY] > 0.80) {
-					batch.draw(rockLight, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-				} else if (heightMap[tX][tY] > 0.70) {
-					batch.draw(grassDark, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-				} else if (heightMap[tX][tY] > 0.53) {
-					batch.draw(grassLight, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-				} else if (heightMap[tX][tY] > 0.50) {
-					batch.draw(sand, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-				} else if (heightMap[tX][tY] > 0.40) {
-					batch.draw(waterShallow, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-				} else if (heightMap[tX][tY] > 0.25) {
-					batch.draw(waterDeep, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-				} else {
-					batch.draw(waterDeeper, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-				}
-			}
-		}*/
-	}
 
-
-	
-	/**
-	 * Animate camera zoom. Will zoom camera in or out until it reaches zoomTarget.
-	 * @param delta
-	 */
-	private void zoomCamera(float delta) {
-		if (cam.zoom != zoomTarget) {
-			float scaleSpeed = 3 * delta;
-			//zoom in/out
-			cam.zoom += (cam.zoom < zoomTarget) ? scaleSpeed : -scaleSpeed;
-
-			//if zoom is close enough, just set it to target
-			if (Math.abs(cam.zoom - zoomTarget) < 0.1) {
-				cam.zoom = zoomTarget;
-			}
-		}
-	}
-
-	/**
-	 * Turn vsync on or off
-	 */
-	void toggleVsync() {
-		vsync = !vsync;
-		Gdx.graphics.setVSync(vsync);
-		System.out.println("vsync: " + vsync);
-	}
-
-	/**
-	 * Switch between fullscreen and windowed mode.
-	 */
-	void toggleFullscreen() {
-		if (Gdx.graphics.isFullscreen()) {
-			//set window to previous window size
-			Gdx.graphics.setWindowedMode(prevWindowWidth, prevWindowHeight);
-		} else {
-			//save window size
-			prevWindowWidth = Gdx.graphics.getWidth();
-			prevWindowHeight = Gdx.graphics.getHeight();
-			
-			//set to fullscreen
-			if (Gdx.graphics.supportsDisplayModeChange()) {
-				Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-			} else {
-				Gdx.app.log("graphics", "DisplayModeChange not supported.");
-			}
-		}
 	}
 	
 	@Override
@@ -323,36 +190,6 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		//Add entities to render queue
 		renderQueue.add(entity);
 	}
-	
-	/**
-	 * Set zoom for camera to animate to.
-	 * @param zoom
-	 */
-	public void setZoomTarget(float zoom) {
-		zoomTarget = zoom;
-	}
-	
-	public static float getCamZoom() {
-		return cam.zoom;
-	}
-
-	public static Vector3 getCamPos() {
-		return cam.position;
-	}
-	
-	public static OrthographicCamera getCam() {
-		return cam;
-	}
-
-	/**
-	 * Resize viewport. Called from screen resize.
-	 * @param width
-	 * @param height
-	 */
-	public void resize(int width, int height) {
-		viewport.update(width, height);
-	}
-
 
 	@Override
 	public void dispose() {
@@ -371,8 +208,5 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	 	C  [atio6axx.dll+0x3c4370]
 		 */
 	}
-
-
-	
 
 }

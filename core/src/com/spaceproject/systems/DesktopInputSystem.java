@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.utility.MyMath;
+import com.spaceproject.utility.MyScreenAdapter;
 
 public class DesktopInputSystem extends EntitySystem {
 	
@@ -22,33 +23,46 @@ public class DesktopInputSystem extends EntitySystem {
 		//SCREEN CONTROLS///////////////////////////////////////////////////////////////////////////////////////
 		//zoom test
 		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomSpace))  {
-			if (engine.getSystem(SpaceRenderingSystem.class).getCamZoom() >= 10f) {
-				engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(60);
+			if (MyScreenAdapter.cam.zoom >= 10f) {
+				MyScreenAdapter.setZoomTarget(60);
 			} else {
-				engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(10);
+				MyScreenAdapter.setZoomTarget(10);
 			}
 		}
-		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.resetZoom)) engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(1);
-		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomCharacter)) engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(0.1f);
-		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomOut)) engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(engine.getSystem(SpaceRenderingSystem.class).getCamZoom() + 0.001f);
-		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomIn)) engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(engine.getSystem(SpaceRenderingSystem.class).getCamZoom() - 0.001f);
+		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.resetZoom)) {
+			MyScreenAdapter.setZoomTarget(1);
+		}
+		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomCharacter)) {
+			MyScreenAdapter.setZoomTarget(0.1f);
+		}
+		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomOut)) {
+			MyScreenAdapter.setZoomTarget(MyScreenAdapter.cam.zoom + 0.001f);
+		}
+		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomIn)) {
+			MyScreenAdapter.setZoomTarget(MyScreenAdapter.cam.zoom - 0.001f);
+		}
+		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.rotateRight)) {
+			MyScreenAdapter.cam.rotate(5f * delta);
+		}
+		if (Gdx.input.isKeyPressed(SpaceProject.keycfg.rotateLeft)) {
+			MyScreenAdapter.cam.rotate(-5f * delta);
+		}
 		
 		//fullscreen toggle
-		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.fullscreen)) {
-			engine.getSystem(SpaceRenderingSystem.class).toggleFullscreen();
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.fullscreen)) { 
+			MyScreenAdapter.toggleFullscreen();
 		}
 		
 		//vsync toggle
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.vsync)) {
-			engine.getSystem(SpaceRenderingSystem.class).toggleVsync();
+			MyScreenAdapter.toggleVsync();
 		}
 	
 		//PLAYER CONTROLS//////////////////////////////////////////////////////////////////////////////////////
 		//make ship face mouse		
 		float angle = MyMath.angleTo(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY(), Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
 		engine.getSystem(PlayerControlSystem.class).angleFacing = angle;
-	
-	
+		
 		// set multiplier to full power because a key switch is on or off
 		engine.getSystem(PlayerControlSystem.class).movementMultiplier = 1;
 		
@@ -71,9 +85,7 @@ public class DesktopInputSystem extends EntitySystem {
 		engine.getSystem(PlayerControlSystem.class).changeVehicle = Gdx.input.isKeyPressed(SpaceProject.keycfg.changeVehicle);
 		
 		//land on planet
-		engine.getSystem(PlayerControlSystem.class).land = Gdx.input.isKeyJustPressed(Keys.T);
-		
-		
+		engine.getSystem(PlayerControlSystem.class).land = Gdx.input.isKeyJustPressed(Keys.T);	
 
 	}
 
