@@ -6,9 +6,6 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Pixmap.Format;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -139,14 +136,15 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 		font.draw(batch, "Zoom: " + pixelSize, 15, Gdx.graphics.getHeight() - 30);
 		batch.end();
 		
+		
+		updateClickDragMapOffset();
+		
+		
+		boolean change = false;
 		//update
 		colorProfile.update();
 		
-		
-		updateClickDragMapOffset();
 
-		
-		boolean change = false;
 		if (scale.update() || octave.update() 
 				|| persistence.update() || lacunarity.update()){
 			change = true;
@@ -194,16 +192,21 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 	}
 
 	private void updateMap() {
+		if (colorProfile.getTiles().isEmpty()) {
+			//return;
+		}
+		
 		double s = scale.getValue();			
 		int o = (int)octave.getValue();
 		float p = persistence.getValue();
 		float l = lacunarity.getValue();
 		heightMap = NoiseGen.generateWrappingNoise4D(seed, mapSize, s, o, p, l);
-		tileMap = NoiseGen.createTileMap(heightMap, colorProfile.getTiles());	
-		pixelatedTileMap = NoiseGen.createPixelatedTileMap(tileMap, colorProfile.getTiles());
+		//tileMap = NoiseGen.createTileMap(heightMap, colorProfile.getTiles());	
+		//pixelatedTileMap = NoiseGen.createPixelatedTileMap(tileMap, colorProfile.getTiles());
 	}
 	
-	private void drawMap() {					
+	private void drawMap() {
+		
 		for (int y = 0; y * pixelSize <= mapRenderWindowSize; y++) {
 			for (int x = 0; x * pixelSize <= mapRenderWindowSize; x++) {
 				
@@ -215,20 +218,24 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 				
 				//pick color
 				float i = heightMap[tX][tY];
-				shape.setColor(colorProfile.getTiles().get(tileMap[tX][tY]).getColor());
-				/*
+				//shape.setColor(colorProfile.getTiles().get(tileMap[tX][tY]).getColor());
+				
 				for (int k = colorProfile.getTiles().size()-1; k >= 0; k--) {
 					Tile tile = colorProfile.getTiles().get(k);
 					if (i <= tile.getHeight() || k == 0) {
 						shape.setColor(tile.getColor());
 						break;
 					}
-				}*/
+				}
 				
+				if (colorProfile.getTiles().isEmpty()) {
+					shape.setColor(i, i, i, i);
+				}
 				//draw grid to visualize wrap
 				if (tX == heightMap.length-1 || tY == heightMap.length-1) {
 					shape.setColor(Color.BLACK);
 				}
+				
 				
 				//draw
 				shape.rect(mapX + x * pixelSize, mapY - y * pixelSize, pixelSize, pixelSize);
@@ -287,6 +294,7 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 		if (colorProfile.getTiles().isEmpty()) {
 			return;
 		}
+		/*
 		int renderSize = 8;
 		int mapX = Gdx.graphics.getWidth() - pixelatedTileMap.length*renderSize - 20;
 		int mapY = Gdx.graphics.getHeight() - 20;
@@ -302,11 +310,14 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 				shape.setColor(colorProfile.getTiles().get(pixelatedTileMap[tX][tY]).getColor());
 				shape.rect(mapX + x*renderSize, mapY - y*renderSize, renderSize, renderSize);
 			}
-		}
-		/*
-		int chunkSize = 10; //chunkSize must evenly divide into mapsize
+		}*/
+		
+		//int renderSize = 8;
+		int chunkSize = 8; //chunkSize must evenly divide into mapsize
 		int chunks = heightMap.length/chunkSize;
-
+		
+		int mapX = Gdx.graphics.getWidth() - chunks*chunkSize - 20;
+		int mapY = Gdx.graphics.getHeight() - 20;
 		//for each chunk
 		for (int cY = 0; cY < chunks; cY++) {
 			for (int cX = 0; cX < chunks; cX++) {
@@ -349,27 +360,9 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 				shape.rect(mapX + chunkX, mapY - chunkY, chunkSize, chunkSize);
 				
 			}
-		}*/
+		}
 		
 		
-	}
-	
-	private static Texture createNoiseMapTex(float[][] map) {
-		//create image
-		Pixmap pixmap = new Pixmap(map.length, map.length, Format.RGB888);
-		for (int x = 0; x < map.length; ++x) {
-			for (int y = 0; y < map.length; ++y) {
-				
-				float i = map[x][y];
-				pixmap.setColor(new Color(i, i , i, 1));
-				
-				pixmap.drawPixel(x, y);
-			}
-		}	
-
-		Texture t = new Texture(pixmap);
-		pixmap.dispose();
-		return t;
 	}
 
 	public void resize(int width, int height) {
