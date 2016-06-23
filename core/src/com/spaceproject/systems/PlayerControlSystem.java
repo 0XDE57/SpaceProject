@@ -38,7 +38,6 @@ public class PlayerControlSystem extends EntitySystem {
 
 	//vehicles array to check if player can get in 
 	private ImmutableArray<Entity> vehicles;
-	//private ImmutableArray<Entity> planets;
 
 	//action timer, for enter/exit vehicle
 	//TODO: move to component, both player and AI need to be able to enter/exit
@@ -72,8 +71,7 @@ public class PlayerControlSystem extends EntitySystem {
 	
 	public PlayerControlSystem(ScreenAdapter screen, Entity player, LandConfig landConfig) {
 		this.screen = screen;
-		this.playerEntity = player;
-		
+		this.playerEntity = player;	
 		this.landCFG = landConfig;
 	}
 	
@@ -125,7 +123,7 @@ public class PlayerControlSystem extends EntitySystem {
 			} else if (screen instanceof WorldScreen) {
 				//TODO: Create some kind of time system so planets go to their orbital position based on time passed.
 				//take off from planet
-				((WorldScreen) screen).changeScreen(landCFG);
+				MyScreenAdapter.changeScreen(new SpaceScreen(landCFG));
 			}
 			
 		}
@@ -147,12 +145,13 @@ public class PlayerControlSystem extends EntitySystem {
 		tex.scale -= 3f * delta; 
 		if (tex.scale <= 0.1f) {
 			tex.scale = 0;
+			//TODO: Finish animation. fade screen white/blurry/some effect
 			
 			//zoom in
 			MyScreenAdapter.setZoomTarget(0);
 			if (MyScreenAdapter.cam.zoom <= 0.1f) {
 				//land on planet
-				((SpaceScreen) screen).changeScreen(landCFG);
+				MyScreenAdapter.changeScreen(new WorldScreen(landCFG));
 			}
 			
 		}

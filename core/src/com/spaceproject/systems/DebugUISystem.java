@@ -90,10 +90,7 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		
 		//set projection matrix so things render using correct coordinates
 		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());		
-		batch.setProjectionMatrix(projectionMatrix);
-		//shape.setProjectionMatrix(projectionMatrix);
-		//shape.setProjectionMatrix(cam.combined);
-		
+		batch.setProjectionMatrix(projectionMatrix);		
 		
 		//enable blending for transparency
 		Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -363,11 +360,12 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		objects.add(entity);
 	}
 
+	
 	@Override
 	public void dispose() {
 		
-		font.dispose();
-		batch.dispose();
+		//font.dispose();
+		//batch.dispose();
 		//shape.dispose(); //crashes: 
 		/*
 		EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x0000000054554370, pid=5604, tid=2364

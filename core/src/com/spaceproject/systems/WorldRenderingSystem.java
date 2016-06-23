@@ -13,11 +13,8 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.TextureComponent;
@@ -29,12 +26,20 @@ import com.spaceproject.utility.NoiseGen;
 
 public class WorldRenderingSystem extends IteratingSystem implements Disposable {
 		
-	private Array<Entity> renderQueue; //array of entities to render
-	private Comparator<Entity> comparator; //for sorting render order
-	
-	//rendering
+	// rendering
 	private static OrthographicCamera cam;
 	private static SpriteBatch batch;
+
+	// array of entities to render
+	private Array<Entity> renderQueue = new Array<Entity>();
+	// render order. sort by depth, z axis determines what order to draw
+	private Comparator<Entity> comparator = new Comparator<Entity>() {
+		@Override
+		public int compare(Entity entityA, Entity entityB) {
+			return (int) Math.signum(Mappers.transform.get(entityB).pos.z 
+					- Mappers.transform.get(entityA).pos.z);
+		}
+	};
 	
 	private ArrayList<Tile> tiles = Tile.defaultTiles;
 	
@@ -55,23 +60,11 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		
 		cam = camera;
 		batch = spriteBatch;
-		
-		renderQueue = new Array<Entity>();
-		
-		//sort by depth, z axis determines what order to draw 
-		comparator = new Comparator<Entity>() {
-			@Override
-			public int compare(Entity entityA, Entity entityB) {
-				return (int)Math.signum(Mappers.transform.get(entityB).pos.z -
-										Mappers.transform.get(entityA).pos.z);
-			}
-		};
-		
+
 		tileSize = 32;
 		surround = 30;	
 				
 		loadMap(planet);
-
 	
 	}
 
@@ -118,18 +111,21 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		Gdx.gl20.glClearColor(0, 0, 0, 1);
 		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
-		//sort render order of entities
-		renderQueue.sort(comparator); 
-
-		
-		//draw
 		batch.begin();
 		
 		//render background tiles
 		drawTiles();
 		
-		batch.setColor(Color.WHITE);
+		//draw game objects
+		drawEntities();
 		
+		batch.end();
+	}
+
+	private void drawEntities() {
+		batch.setColor(Color.WHITE);	
+		//sort render order of entities
+		renderQueue.sort(comparator); 
 		//render all textures
 		for (Entity entity : renderQueue) {
 			TextureComponent tex = Mappers.texture.get(entity);
@@ -151,10 +147,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 					   MathUtils.radiansToDegrees * t.rotation, 
 					   0, 0, (int)width, (int)height, false, false);
 		}
-		batch.end();
-		
 		renderQueue.clear();
-		
 	}	
 
 	private void drawTiles() {

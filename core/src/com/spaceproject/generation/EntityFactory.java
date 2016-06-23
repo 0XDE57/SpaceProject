@@ -35,10 +35,10 @@ public class EntityFactory {
 		MathUtils.random.setSeed(seed);
 
 		//number of planets in a system
-		int numPlanets = MathUtils.random(SpaceScreen.celestcfg.minPlanets, SpaceScreen.celestcfg.maxPlanets);
+		int numPlanets = MathUtils.random(SpaceProject.celestcfg.minPlanets, SpaceProject.celestcfg.maxPlanets);
 		
 		//distance between planets
-		float distance = SpaceScreen.celestcfg.minDist/3; //add some initial distance between star and first planet
+		float distance = SpaceProject.celestcfg.minDist/3; //add some initial distance between star and first planet
 		
 		//rotation of system (orbits and spins)
 		boolean rotDir = MathUtils.randomBoolean();
@@ -53,7 +53,7 @@ public class EntityFactory {
 		//create planets around star
 		for (int i = 1; i < entities.length; ++i) {
 			//add some distance from previous entity
-			distance += MathUtils.random(SpaceScreen.celestcfg.minDist, SpaceScreen.celestcfg.maxDist); 
+			distance += MathUtils.random(SpaceProject.celestcfg.minDist, SpaceProject.celestcfg.maxDist); 
 			float angle = MathUtils.random(3.14f * 2); //angle from star
 			float orbitX = x + (distance * MathUtils.cos(angle));
 			float orbitY = y + (distance * MathUtils.sin(angle));
@@ -72,7 +72,7 @@ public class EntityFactory {
 
 		// create star texture
 		TextureComponent texture = new TextureComponent();
-		int radius = MathUtils.random(SpaceScreen.celestcfg.minStarSize, SpaceScreen.celestcfg.maxStarSize);	
+		int radius = MathUtils.random(SpaceProject.celestcfg.minStarSize, SpaceProject.celestcfg.maxStarSize);	
 		texture.texture = TextureFactory.generateStar(radius);
 		texture.scale = scale;
 		
@@ -84,8 +84,8 @@ public class EntityFactory {
 		OrbitComponent orbit = new OrbitComponent();
 		orbit.parent = null;//set to null to negate orbit, but keep rotation
 		orbit.rotateClockwise = rotationDir;
-		orbit.rotSpeed = MathUtils.random(SpaceScreen.celestcfg.minStarRot, 
-				SpaceScreen.celestcfg.maxStarRot); //rotation speed of star
+		orbit.rotSpeed = MathUtils.random(SpaceProject.celestcfg.minStarRot, 
+				SpaceProject.celestcfg.maxStarRot); //rotation speed of star
 		
 		//map
 		MapComponent map = new MapComponent();
@@ -116,8 +116,8 @@ public class EntityFactory {
 		//orbit 
 		OrbitComponent orbit = new OrbitComponent();
 		orbit.parent = parent; //object to orbit around
-		orbit.rotSpeed = MathUtils.random(SpaceScreen.celestcfg.minPlanetRot, SpaceScreen.celestcfg.maxPlanetRot); //rotation speed of planet
-		orbit.orbitSpeed = MathUtils.random(SpaceScreen.celestcfg.minPlanetOrbit, SpaceScreen.celestcfg.minPlanetOrbit); //orbit speed of planet	
+		orbit.rotSpeed = MathUtils.random(SpaceProject.celestcfg.minPlanetRot, SpaceProject.celestcfg.maxPlanetRot);
+		orbit.orbitSpeed = MathUtils.random(SpaceProject.celestcfg.minPlanetOrbit, SpaceProject.celestcfg.minPlanetOrbit);
 		orbit.angle = angle; //angle from star
 		orbit.distance = distance;
 		orbit.rotateClockwise = rotationDir;

@@ -6,26 +6,32 @@ import com.spaceproject.Tile;
 import com.spaceproject.components.PlanetComponent;
 
 public class NoiseThread implements Runnable {
-
+	
+	//threading
+	public Thread thread;
 	private volatile boolean isDone = false;	
 	private volatile boolean isProcessed = false;
+	private volatile boolean stop = false;
 	
-	private ArrayList<Tile> tiles;
-	
+	//the texture the noise belongs to
 	private long ID;
 	
+	//color/height
+	private ArrayList<Tile> tiles;
+	
+	//features
+	private long seed;
 	private float scale;
 	private int octaves;
 	private float persistence;
-	private float lacunarity;
+	private float lacunarity;	
 	
-	private long seed;
-	
+	//map
 	private int mapSize;
 	private float[][] heightMap;
 	private int[][] tileMap;
 	private int[][] pixelatedTileMap;
-	
+
 	public NoiseThread(PlanetComponent planet, ArrayList<Tile> tiles) {
 		this(planet.id, planet.scale, planet.octaves, planet.persistence, planet.lacunarity, planet.seed, planet.mapSize, tiles);
 	}
@@ -39,14 +45,10 @@ public class NoiseThread implements Runnable {
 		this.seed = seed;
 		this.mapSize = mapSize;
 		this.tiles = tiles;
+		
+		thread = new Thread(this);
+		thread.start();
 	}
-
-	/*
-	public NoiseThread(long seed, int mapSize, ArrayList<Tile> tiles) {
-		this.seed = seed;
-		this.mapSize = mapSize;
-		this.tiles = tiles;
-	}*/
 
 	@Override
 	public void run() {
@@ -56,14 +58,24 @@ public class NoiseThread implements Runnable {
 		long startTime = System.currentTimeMillis();
 		
 		//do work
-		heightMap = NoiseGen.generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity);
-		tileMap = NoiseGen.createTileMap(heightMap, tiles);	
-		pixelatedTileMap = NoiseGen.createPixelatedTileMap(tileMap, tiles);
+		if (!stop) {
+		 heightMap = NoiseGen.generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity);
+		}
+		if (!stop) { 
+			tileMap = NoiseGen.createTileMap(heightMap, tiles);	
+		}
+		if (!stop) { 
+			pixelatedTileMap = NoiseGen.createPixelatedTileMap(tileMap, tiles);
+		}
 		
 		//finish
 		long endTime = System.currentTimeMillis() - startTime;
 		isDone = true;
-		System.out.println("Thread [" + ID + "] complete in : " + endTime + "ms. MapSize=" + mapSize);
+		if (stop) {
+			System.out.println("Thread [" + ID + "] killed. " + endTime + "ms");
+		} else {
+			System.out.println("Thread [" + ID + "] complete in : " + endTime + "ms. MapSize=" + mapSize);
+		}
 	}
 	
 	public long getID() {
@@ -92,7 +104,7 @@ public class NoiseThread implements Runnable {
 	}
 	
 	public boolean isDone() {
-		return isDone;
+		return isDone && !stop;
 	}
 	
 	public void setProcessed() {
@@ -104,5 +116,9 @@ public class NoiseThread implements Runnable {
 			return false;
 		}
 		return isProcessed;
+	}
+
+	public void stop() {
+		stop = true;		
 	}
 }

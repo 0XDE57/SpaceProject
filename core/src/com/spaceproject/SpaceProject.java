@@ -7,6 +7,7 @@ import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.screens.*;
+import com.spaceproject.utility.MyScreenAdapter;
 
 public class SpaceProject extends Game {
 
@@ -16,17 +17,16 @@ public class SpaceProject extends Game {
 	public static KeyConfig keycfg;
 	
 	@Override
-	public void create() {
+	public void create() {	
+		MyScreenAdapter.game = this;
 		
 		//load values for things like key mapping, settings, default values for generation
 		loadConfigs();
-		
-		//setScreen(new TestShipGenerationScreen(this));
-		//setScreen(new TestNoiseScreen(this));
-		
-		
+				
+	
+		//load test default values
 		LandConfig landCFG = new LandConfig();
-		landCFG.position = new Vector3();
+		landCFG.position = new Vector3();//start player at 0,0
 		
 		//test values for world
 		PlanetComponent planet = new PlanetComponent();
@@ -37,9 +37,10 @@ public class SpaceProject extends Game {
 		planet.lacunarity = 2.6f;
 		landCFG.planet = planet;
 		
-		setScreen(new SpaceScreen(this, landCFG));
-		//setScreen(new WorldScreen(this, landCFG));
-		
+		setScreen(new SpaceScreen(landCFG));
+		//setScreen(new WorldScreen(landCFG));
+		//setScreen(new TestShipGenerationScreen(this));
+		//setScreen(new TestNoiseScreen(this));
 		//setScreen(new MainMenuScreen(this));
 	}
 	

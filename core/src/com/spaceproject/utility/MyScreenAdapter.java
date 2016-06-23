@@ -1,19 +1,30 @@
 package com.spaceproject.utility;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.spaceproject.SpaceProject;
 
-public abstract class MyScreenAdapter extends ScreenAdapter {
+public abstract class MyScreenAdapter extends ScreenAdapter implements InputProcessor {
 	
+	public static SpaceProject game;
+	
+	//rendering resolution
+	private final static float SCALE = 1f;
+	private final static float INV_SCALE = 1.f / SCALE;
+	private final static float VIEWPORT_WIDTH = 1280 * INV_SCALE;
+	private final static float VIEWPORT_HEIGHT = 720 * INV_SCALE;
+
 	// rendering objects
 	public static OrthographicCamera cam;
-	public static ExtendViewport viewport;
 	public static SpriteBatch batch;
 	public static ShapeRenderer shape;
+	public static ExtendViewport viewport;
 	
 	private static boolean vsync = true;
 	
@@ -21,16 +32,9 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
 	private static float zoomSpeed = 3;
 	//private static float panSpeed/panTarget(lerp to entity)
 	
-	//rendering resolution
-	private final static float SCALE = 1f;
-	private final static float INV_SCALE = 1.f/SCALE;
-	private final static float VIEWPORT_WIDTH = 1280 * INV_SCALE;
-	private final static float VIEWPORT_HEIGHT = 720 * INV_SCALE;
-        
     //save window size for switching between fullscreen and windowed
   	private static int prevWindowWidth = (int) VIEWPORT_WIDTH;
   	private static int prevWindowHeight = (int) VIEWPORT_HEIGHT;
-  	
   	
     public MyScreenAdapter() {
     	cam = new OrthographicCamera();
@@ -38,6 +42,15 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
 		shape = new ShapeRenderer();
 		viewport = new ExtendViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, cam);
 		viewport.apply();
+    	
+    	//reset camera
+    	cam.zoom = 1;
+		setZoomTarget(1);
+		
+		//set this as input processor for mouse wheel scroll events
+		Gdx.input.setInputProcessor(this);
+		
+		System.out.println("ScreenAdapter Reset.");
     }
     
     @Override
@@ -51,10 +64,15 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
     	
     };
     
+    public static void changeScreen(Screen screen) {
+    	Gdx.app.log("Game", "Screen changed: " + screen.getClass().getSimpleName());
+    	game.setScreen(screen);
+    }
+   
     @Override
     public void resize(int width, int height) {
     	viewport.update(width, height);
-    	Gdx.app.log("graphics", width + ", " + height);
+    	Gdx.app.log("Graphics", width + ", " + height);
     }
     
     /**
@@ -64,7 +82,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
 		if (Gdx.graphics.isFullscreen()) {
 			//set window to previous window size
 			Gdx.graphics.setWindowedMode(prevWindowWidth, prevWindowHeight);
-			Gdx.app.log("graphics", "Set to windowed.");
+			Gdx.app.log("Graphics", "Set to windowed.");
 		} else {
 			//save window size
 			prevWindowWidth = Gdx.graphics.getWidth();
@@ -73,9 +91,9 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
 			//set to fullscreen
 			if (Gdx.graphics.supportsDisplayModeChange()) {
 				Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-				Gdx.app.log("graphics", "Set to fullscreen.");
+				Gdx.app.log("Graphics", "Set to fullscreen.");
 			} else {
-				Gdx.app.log("graphics", "DisplayModeChange not supported.");
+				Gdx.app.log("Graphics", "DisplayModeChange not supported.");
 			}
 		}
 	}
@@ -86,7 +104,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
 	public static void toggleVsync() {
 		vsync = !vsync;
 		Gdx.graphics.setVSync(vsync);
-		Gdx.app.log("graphics", "vsync = " + vsync);
+		Gdx.app.log("Graphics", "vsync = " + vsync);
 	}
 	
 	
@@ -114,5 +132,37 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
 	public static void setZoomTarget(float zoom) {
 		zoomTarget = zoom;
 	}
-    
+	
+	@Override
+	public void dispose() {
+		shape.dispose();
+		batch.dispose();
+	}
+
+	@Override
+	public boolean scrolled(int amount) {
+		setZoomTarget(cam.zoom += amount / 2f);
+		return false;
+	}
+	
+	@Override
+	public boolean keyDown(int keycode) { return false; }
+
+	@Override
+	public boolean keyUp(int keycode) { return false; }
+
+	@Override
+	public boolean keyTyped(char character) { return false; }
+
+	@Override
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) { return false; }
+
+	@Override
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) { return false; }
+
+	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer) { return false; }
+
+	@Override
+	public boolean mouseMoved(int screenX, int screenY) { return false; }
 }

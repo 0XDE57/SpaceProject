@@ -41,6 +41,10 @@ public class HUDSystem extends EntitySystem {
 	float opacity = 0.7f;
 	Color barBackground = new Color(1,1,1,0.5f);
 	
+	public HUDSystem() {
+		this(MyScreenAdapter.cam);
+	}
+	
 	public HUDSystem(OrthographicCamera camera) {
 		cam = camera;
 	}

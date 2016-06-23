@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.spaceproject.SpaceBackgroundTile;
 import com.spaceproject.SpaceProject;
@@ -24,11 +25,11 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureFactory;
-import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.MyScreenAdapter;
 import com.spaceproject.utility.NoiseThread;
 
-public class SpaceLoadingSystem extends EntitySystem {
+public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 
 	private Engine engine;
 	private static OrthographicCamera cam;
@@ -51,7 +52,7 @@ public class SpaceLoadingSystem extends EntitySystem {
 	private float checkTileTimer = 500;
 	private float checkTileCurrTime;
 
-	
+	// star entities
 	private ArrayList<Vector2> points = new ArrayList<Vector2>();
 	private ImmutableArray<Entity> loadedStars;
 	private float checkStarsTimer = 4000;
@@ -60,6 +61,10 @@ public class SpaceLoadingSystem extends EntitySystem {
 	//threads for generating planet texture noise
 	ArrayList<NoiseThread> noiseThreads = new ArrayList<NoiseThread>();
 
+	public SpaceLoadingSystem() {
+		this(MyScreenAdapter.cam);
+	}
+	
 	public SpaceLoadingSystem(OrthographicCamera camera) {
 		cam = camera;
 	}
@@ -72,7 +77,7 @@ public class SpaceLoadingSystem extends EntitySystem {
 		loadedStars = engine.getEntitiesFor(Family.all(StarComponent.class, TransformComponent.class).get());
 
 		// generate or load points from disk
-		loadStars();
+		loadPoints();
 
 		
 		/*///////////////////TEST/////////////////////
@@ -95,15 +100,14 @@ public class SpaceLoadingSystem extends EntitySystem {
 	@Override
 	public void update(float delta) {
 
-		// check, load and unload tiles
+		// load and unload tiles
 		updateTiles(delta);
 
-		// check, load and unload stars
+		// load and unload stars
 		updateStars(delta);
 		
-		// check noise generation threads, update/replace textures
+		// noise generation threads, update/replace textures
 		updatePlanetTextures();
-
 
 	}
 
@@ -140,6 +144,7 @@ public class SpaceLoadingSystem extends EntitySystem {
 		}
 		if (finished) {
 			noiseThreads.clear();
+			System.out.println("All Planet Textures Loaded.");
 		}
 		
 	}
@@ -216,7 +221,7 @@ public class SpaceLoadingSystem extends EntitySystem {
 			//System.out.println("Checking stars...");
 			
 			//distance to check when to load planets
-			int loadDistance = (int) (SpaceScreen.celestcfg.maxPlanets * SpaceScreen.celestcfg.maxDist);
+			int loadDistance = (int) (SpaceProject.celestcfg.maxPlanets * SpaceProject.celestcfg.maxDist);
 			loadDistance *= loadDistance; // squared for quick distance checking
 			
 			// remove stars from engine that are too far
@@ -259,28 +264,11 @@ public class SpaceLoadingSystem extends EntitySystem {
 						for (Entity e : EntityFactory.createPlanetarySystem(point.x, point.y)) {
 							//add entity to world
 							engine.addEntity(e);
-							
-							
+														
 							PlanetComponent planet = Mappers.planet.get(e);
-							if (planet == null) {
-								continue;
+							if (planet != null) {
+								noiseThreads.add(new NoiseThread(planet, Tile.defaultTiles));
 							}
-							
-							/*
-							long id = planet.id;
-							long seed = planet.seed;
-							int mapSize = planet.mapSize;
-							float scale = 100; //scale of noise = 40;
-							int octaves = 4;
-							float persistence = 0.68f;//0 - 1
-							float lacunarity = 2.6f;//1 - x
-							*/
-							//NoiseThread noise = new NoiseThread(id, scale, octaves, persistence, lacunarity, seed, mapSize, Tile.defaultTiles);
-							NoiseThread noise = new NoiseThread(planet, Tile.defaultTiles);
-							Thread createNoise = new Thread(noise);
-							createNoise.start();
-							
-							noiseThreads.add(noise);
 						}
 					}
 
@@ -297,7 +285,7 @@ public class SpaceLoadingSystem extends EntitySystem {
 	 * Fill universe with stars and planets. Load points from disk or if no points
 	 * exist, create points and save to disk.
 	 */
-	private void loadStars() {
+	private void loadPoints() {
 		// create handle for file storing points
 		FileHandle starsFile = Gdx.files.local("stars.txt");
 
@@ -350,7 +338,7 @@ public class SpaceLoadingSystem extends EntitySystem {
 
 
 		// minimum distance between points
-		float dist = SpaceScreen.celestcfg.maxPlanets * SpaceScreen.celestcfg.maxDist * 6; 
+		float dist = SpaceProject.celestcfg.maxPlanets * SpaceProject.celestcfg.maxDist * 6; 
 		dist *= dist;// squared for quick distance checking
 
 		// generate points
@@ -488,5 +476,15 @@ public class SpaceLoadingSystem extends EntitySystem {
 
 	public static ArrayList<SpaceBackgroundTile> getTiles() {
 		return tiles;
+	}
+
+	@Override
+	public void dispose() {
+		
+		for (NoiseThread thread : noiseThreads) {
+			thread.stop();
+		}
+		noiseThreads.clear();
+		
 	}
 }

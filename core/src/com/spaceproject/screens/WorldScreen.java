@@ -3,13 +3,10 @@ package com.spaceproject.screens;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
+import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Disposable;
-import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.config.LandConfig;
@@ -26,16 +23,10 @@ import com.spaceproject.utility.MyScreenAdapter;
 
 public class WorldScreen extends MyScreenAdapter {
 
-	SpaceProject game;
-
 	public static Engine engine;
 
-	public WorldScreen(SpaceProject game, LandConfig landCFG) {
-		this.game = game;
-		
-		cam.zoom = 1;
-		setZoomTarget(1);
-		
+	public WorldScreen(LandConfig landCFG) {
+
 		// engine to handle all entities and components
 		engine = new Engine();
 		
@@ -47,8 +38,8 @@ public class WorldScreen extends MyScreenAdapter {
 		engine.addSystem(new PlayerControlSystem(this, player, landCFG));
 		engine.addSystem(new WorldRenderingSystem(landCFG.planet));
 		engine.addSystem(new MovementSystem());
-		engine.addSystem(new CameraSystem(cam));
-		engine.addSystem(new DebugUISystem(cam, batch, shape));
+		engine.addSystem(new CameraSystem());
+		engine.addSystem(new DebugUISystem());
 		engine.addSystem(new BoundsSystem());
 		
 		//add input system. touch on android and keys on desktop.
@@ -67,16 +58,10 @@ public class WorldScreen extends MyScreenAdapter {
 		engine.update(delta);
 	}
 	
-
-	public void changeScreen(LandConfig landCFG) {
-		System.out.println("Change screen to Space.");
-		
-		//dispose();
-		
-		game.setScreen(new SpaceScreen(game, landCFG));
-	}
-
+	@Override
 	public void dispose() {
+		System.out.println("Disposing: " + this.getClass().getSimpleName());
+		
 		//clean up after self
 		//dispose of spritebatches and textures
 		for (EntitySystem sys : engine.getSystems()) {			
@@ -84,7 +69,7 @@ public class WorldScreen extends MyScreenAdapter {
 				((Disposable) sys).dispose();
 		}
 		
-		for (Entity ents : engine.getEntities()) {
+		for (Entity ents : engine.getEntitiesFor(Family.all(TextureComponent.class).get())) {
 			TextureComponent tex = ents.getComponent(TextureComponent.class);
 			if (tex != null)
 				tex.texture.dispose();
@@ -93,10 +78,14 @@ public class WorldScreen extends MyScreenAdapter {
 		//engine.removeAllEntities();
 		
 	}
-
-	public void hide() { }
-
+	
+	@Override
+	public void hide() {
+		//dispose();
+	}
+	
+	@Override
 	public void pause() { }
-
+	@Override
 	public void resume() { }
 }
