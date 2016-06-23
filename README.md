@@ -18,7 +18,7 @@ Make sure Android SDK is installed.
 Import projects in IDE of choice using gradle.
 
 ###Trouble Shooting
-If a "File not found" runtime crash occurs check the working directory.
+If a "File not found" error occurs, check the working directory.
 
 Append "android\assets" to the working directory in run configurations.
 
