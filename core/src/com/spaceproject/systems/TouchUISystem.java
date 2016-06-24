@@ -35,6 +35,7 @@ public class TouchUISystem extends EntitySystem {
 		PlayerControlSystem.shoot = btnShoot.isTouched();
 		PlayerControlSystem.changeVehicle = btnVehicle.isTouched();
 		PlayerControlSystem.land = btnLand.isTouched();
+		btnLand.hidden = !PlayerControlSystem.canLand;
 		
 		if (joyMovement.isTouched()) {
 

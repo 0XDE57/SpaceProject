@@ -9,8 +9,8 @@ public class TouchButtonRectangle {
 		Color colorTouched;
 		int x,y;
 		int width, height;
-		boolean hidden = false;
-		boolean enabled = true;
+		public boolean hidden = false;
+		public boolean enabled = true;
 		
 		public TouchButtonRectangle(int x, int y, int width, int height, Color color, Color pressed) {
 			this.x = x;

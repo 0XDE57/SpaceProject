@@ -28,8 +28,8 @@ import com.spaceproject.utility.MyScreenAdapter;
 public class PlayerControlSystem extends EntitySystem {
 
 	private Engine engine;
-	private ScreenAdapter screen;
 	
+	public boolean inSpace;	
 	LandConfig landCFG;
 	
 	//target reference
@@ -38,6 +38,7 @@ public class PlayerControlSystem extends EntitySystem {
 
 	//vehicles array to check if player can get in 
 	private ImmutableArray<Entity> vehicles;
+	private ImmutableArray<Entity> planets;
 
 	//action timer, for enter/exit vehicle
 	//TODO: move to component, both player and AI need to be able to enter/exit
@@ -62,12 +63,16 @@ public class PlayerControlSystem extends EntitySystem {
 	public static boolean changeVehicle;
 	//landing on planets
 	public static boolean land;
+	public static boolean canLand;
 	private static boolean animateLanding;
+	private static boolean animationFinished;
 	//END Contols//////////////////////////////////////	
 	
 	
 	public PlayerControlSystem(ScreenAdapter screen, Entity player, LandConfig landConfig) {
-		this.screen = screen;
+		//this.screen = screen;
+		inSpace = (screen instanceof SpaceScreen);
+		
 		this.playerEntity = player;	
 		this.landCFG = landConfig;
 		
@@ -88,7 +93,9 @@ public class PlayerControlSystem extends EntitySystem {
 		shoot = false;
 		changeVehicle = false;
 		land = false;
+		canLand = false;
 		animateLanding = false;
+		animationFinished = false;
 	}
 	
 	public PlayerControlSystem(ScreenAdapter screen, Entity player, Entity vehicle, LandConfig landConfig) {
@@ -103,13 +110,13 @@ public class PlayerControlSystem extends EntitySystem {
 		
 		//playerEntity = engine.getEntitiesFor(Family.one(PlayerFocusComponent.class).get()).first();
 		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
-		//planets = engine.getEntitiesFor(Family.all(PlanetComponent.class).get());
+		planets = engine.getEntitiesFor(Family.all(PlanetComponent.class).get());
 	}
 
 
 	@Override
-	public void update(float delta) {		
-		
+	public void update(float delta) {
+	
 		//getting in and out of vehicle timer
 		//TODO: variables could use better names
 		//TODO: move to component
@@ -124,32 +131,47 @@ public class PlayerControlSystem extends EntitySystem {
 			controlCharacter(delta);
 		}
 		
-		if (changeVehicle) {
-			if (isInVehicle()) {
-				exitVehicle();
-			} else {
-				enterVehicle();
-			}
-		}
-		
-		
-		if (land && !animateLanding) {
-			if (screen instanceof SpaceScreen) {
-				tryLandOnPlanet();
-			} else if (screen instanceof WorldScreen) {
-				//TODO: Create some kind of time system so planets go to their orbital position based on time passed.
-				//take off from planet
-				MyScreenAdapter.changeScreen(new SpaceScreen(landCFG));
-			}
-			
-		}
-		if (animateLanding) {
-			animatePlanetLanding(delta);
-		}
-	
+		landAndTakeoff(delta);
 	}
 
+	private void landAndTakeoff(float delta) {
+		if (inSpace) {
+			canLand = canLandOnPlanet();		
+			if (animateLanding) {
+				animatePlanetLanding(delta);
+			}
+			if (animationFinished) {
+				MyScreenAdapter.changeScreen(new WorldScreen(landCFG));
+			}
+		} else {
+			//TODO: Create some kind of system so planets orbital position based is on time
+			// because when the player leaves a planet the orbit is reset.
+			//TODO: only true if player is in ship on planet
+			//canTakeOff = inVehicle
+			canLand = true;//true for debug
+			if (land) { MyScreenAdapter.changeScreen(new SpaceScreen(landCFG)); }
+			
+			if (animateLanding) {
+				//animateSpaceTakeOff(delta);
+			}
+			if (animationFinished) {
+				//MyScreenAdapter.changeScreen(new SpaceScreen(landCFG));
+			}
+		}
+		if (land && canLand) {
+			animateLanding = true;
+		}
+	}
+
+	/**
+	 * Animate landing on planet. First shrink texture, then zoom camera.
+	 * @param delta
+	 */
 	private void animatePlanetLanding(float delta) {
+		if (!animateLanding || animationFinished) {
+			return;
+		}
+		
 		Entity player = engine.getEntitiesFor(Family.one(CameraFocusComponent.class).get()).first();
 		
 		//freeze position
@@ -166,28 +188,29 @@ public class PlayerControlSystem extends EntitySystem {
 			//zoom in
 			MyScreenAdapter.setZoomTarget(0);
 			if (MyScreenAdapter.cam.zoom <= 0.1f) {
-				//land on planet
-				MyScreenAdapter.changeScreen(new WorldScreen(landCFG));
-			}
-			
+				animationFinished = true;
+			}			
 		}
 	}
-
-	private void tryLandOnPlanet() {
+	
+	private boolean canLandOnPlanet() {
+		if (!isInVehicle()) {
+			return false;
+		}
 		Vector3 playerPos = Mappers.transform.get(vehicleEntity).pos;
-		for (Entity planet : engine.getEntitiesFor(Family.all(PlanetComponent.class).get())) {
+		for (Entity planet : planets) {
 			Vector3 planetPos = Mappers.transform.get(planet).pos;
 			TextureComponent planetTex = Mappers.texture.get(planet);
 			// if player is over planet
-			if (MyMath.distance(playerPos.x, playerPos.y, planetPos.x, planetPos.y) <= planetTex.texture.getWidth() / 2 * planetTex.scale) {
-				animateLanding = true;
-
+			if (MyMath.distance(playerPos.x, playerPos.y, planetPos.x, planetPos.y) <= planetTex.texture.getWidth() * 0.5 * planetTex.scale) {
 				landCFG = new LandConfig();
 				landCFG.position = planetPos;// save position for taking off from planet
 				landCFG.planet = Mappers.planet.get(planet); // save seed for planet
 				landCFG.shipSeed = Mappers.vehicle.get(vehicleEntity).seed; //save seed for ship
+				return true;
 			}
 		}
+		return false;
 	}
 
 	/**
@@ -207,6 +230,10 @@ public class PlayerControlSystem extends EntitySystem {
 			float dx = (float) Math.cos(transform.rotation) * (walkSpeed * movementMultiplier) * delta;
 			float dy = (float) Math.sin(transform.rotation) * (walkSpeed * movementMultiplier) * delta;		
 			transform.pos.add(dx, dy, 0);
+		}
+		
+		if (changeVehicle) {
+			enterVehicle();
 		}
 	}
 
@@ -255,6 +282,11 @@ public class PlayerControlSystem extends EntitySystem {
 		if (stop) {
 			movement.velocity.set(0,0);
 			stop = false;
+		}
+		
+		//exit vehicle
+		if (changeVehicle) {
+			exitVehicle();
 		}
 			
 	}
@@ -440,16 +472,13 @@ public class PlayerControlSystem extends EntitySystem {
 					vehicleEntity = vehicle; //set vehicle reference
 
 					//zoom out camera
-					//engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(1);
 					MyScreenAdapter.setZoomTarget(1);
 					//TODO add animation to slowly move focus to the vehicle instead of instantly jumping to the vehicle position
-					//engine.getSystem(RenderingSystem.class).pan(vehicleTransform);
+					//engine.getSystem(RenderingSystem.class).pan(vehicleTransform);					
 					
-					
-					//TODO make switch focus method? (oldEntity, newEntity)
-					//TODO there is a crash here when entering vehicle sometimes...find it, fix it.
 					//set focus to vehicle
-					vehicle.add(playerEntity.remove(CameraFocusComponent.class));
+					playerEntity.remove(CameraFocusComponent.class);
+					vehicle.add(new CameraFocusComponent());
 				
 					//remove player from engine
 					engine.removeEntity(playerEntity);
@@ -473,10 +502,7 @@ public class PlayerControlSystem extends EntitySystem {
 		} else {
 			timeSinceVehicle = 0;
 		}
-		
-		//TODO: check if can exit on platform/spacestation?
-		//(dont want to get out of ship in middle of space, or do we (jetpack / personal propulsion)?
-		
+
 		//add player to engine
 		engine.addEntity(playerEntity);
 
@@ -484,11 +510,11 @@ public class PlayerControlSystem extends EntitySystem {
 		Mappers.transform.get(playerEntity).pos.set(Mappers.transform.get(vehicleEntity).pos);				
 
 		//zoom in camera
-		//engine.getSystem(SpaceRenderingSystem.class).setZoomTarget(0.4f);
 		MyScreenAdapter.setZoomTarget(0.4f);
 		
 		//set focus to player entity
-		playerEntity.add(vehicleEntity.remove(CameraFocusComponent.class));
+		vehicleEntity.remove(CameraFocusComponent.class);
+		playerEntity.add(new CameraFocusComponent());
 		
 		vehicleEntity = null;
 		
