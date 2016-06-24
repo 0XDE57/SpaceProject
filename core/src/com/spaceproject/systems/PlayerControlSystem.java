@@ -43,30 +43,27 @@ public class PlayerControlSystem extends EntitySystem {
 	//TODO: move to component, both player and AI need to be able to enter/exit
 	private float timeSinceVehicle = 0;
 	private int timeTillCanGetInVehicle = 60;
-		
-	//player should shoot
-	public boolean shoot = false;
-
-	//vehicle should move
-	public boolean moveForward = false; 
-	public boolean moveLeft = false;
-	public boolean moveRight = false;
-	public boolean applyBreaks = false;
-	 
-	//if vehicle should stop instantly-debug stop
-	public boolean stop = false;
 	
-	//player should enter/exit vehicle
-	public boolean changeVehicle = false;
+	//CONTROLS///////////////////////////////////////////////
+	//movement
+	public static boolean moveForward = false; 
+	public static boolean moveLeft = false;
+	public static boolean moveRight = false;
+	public static boolean applyBreaks = false;
+	public static boolean stop = false;//if vehicle should stop instantly-debug stop
 	
-	public boolean land = false;
-	private boolean animateLanding = false;
+	public static float movementMultiplier = 0;	//for analog control. will be value between 1 and 0
+	public static float angleFacing = 0;//set direction player faces
 	
-	//for analog control. will be value between 1 and 0
-	public float movementMultiplier = 0;
-	
-	//set direction player faces
-	public float angleFacing = 0;
+	//actions
+	//player should shoot	
+	public static boolean shoot = false;
+	//player should enter/exit vehicle	
+	public static boolean changeVehicle = false;
+	//landing on planets
+	public static boolean land = false;
+	private static boolean animateLanding = false;
+	//END Contols//////////////////////////////////////	
 	
 	
 	public PlayerControlSystem(ScreenAdapter screen, Entity player, LandConfig landConfig) {

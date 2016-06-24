@@ -17,6 +17,7 @@ import com.spaceproject.generation.FontFactory;
 import com.spaceproject.ui.ColorProfile;
 import com.spaceproject.ui.Slider;
 import com.spaceproject.utility.MyMath;
+import com.spaceproject.utility.MyScreenAdapter;
 import com.spaceproject.utility.NoiseGen;
 
 /* TODO:
@@ -25,7 +26,7 @@ import com.spaceproject.utility.NoiseGen;
  * -saving and loading color/feature profiles to json
  * -fix screen skew on resize
  */
-public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
+public class TestNoiseScreen extends MyScreenAdapter {
 	
 	SpriteBatch batch = new SpriteBatch();
 	ShapeRenderer shape = new ShapeRenderer();
@@ -38,8 +39,8 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 	int pixelSize = 3;//zoom
 	
 	float[][] heightMap;
-	int[][] tileMap;
-	int[][] pixelatedTileMap;
+	//int[][] tileMap;
+	//int[][] pixelatedTileMap;
 	
 	//feature sliders
 	Slider scale, octave, persistence, lacunarity;
@@ -102,6 +103,8 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 	}
 	
 	public void render(float delta) {
+		super.render(delta);
+
 		Gdx.gl20.glClearColor(0.5f, 0.5f, 0.5f, 1);
 		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 			
@@ -191,11 +194,7 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 		}
 	}
 
-	private void updateMap() {
-		if (colorProfile.getTiles().isEmpty()) {
-			//return;
-		}
-		
+	private void updateMap() {		
 		double s = scale.getValue();			
 		int o = (int)octave.getValue();
 		float p = persistence.getValue();
@@ -205,8 +204,7 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 		//pixelatedTileMap = NoiseGen.createPixelatedTileMap(tileMap, colorProfile.getTiles());
 	}
 	
-	private void drawMap() {
-		
+	private void drawMap() {		
 		for (int y = 0; y * pixelSize <= mapRenderWindowSize; y++) {
 			for (int x = 0; x * pixelSize <= mapRenderWindowSize; x++) {
 				
@@ -365,38 +363,6 @@ public class TestNoiseScreen extends ScreenAdapter implements InputProcessor {
 		
 	}
 
-	public void resize(int width, int height) {
-		Gdx.app.log("screen", width + ", " + height);
-	}
-
-	public void dispose() { }
-
-	public void hide() { }
-
-	public void pause() { }
-
-	public void resume() { }
-	
-	@Override
-	public boolean keyDown(int keycode) { return false; }
-
-	@Override
-	public boolean keyUp(int keycode) { return false; }
-
-	@Override
-	public boolean keyTyped(char character) { return false; }
-
-	@Override
-	public boolean touchDown(int screenX, int screenY, int pointer, int button) { return false; }
-
-	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button) { return false; }
-
-	@Override
-	public boolean touchDragged(int screenX, int screenY, int pointer) { return false; }
-
-	@Override
-	public boolean mouseMoved(int screenX, int screenY) { return false; }
 
 	@Override
 	public boolean scrolled(int amount) {
