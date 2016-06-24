@@ -33,36 +33,36 @@ public class PlayerControlSystem extends EntitySystem {
 	LandConfig landCFG;
 	
 	//target reference
-	private Entity playerEntity = null; //the player entity
-	private Entity vehicleEntity = null;//the vehicle player currently controls (also inVehicle flag if !null)
+	private Entity playerEntity; //the player entity
+	private Entity vehicleEntity;//the vehicle player currently controls (also inVehicle flag if !null)
 
 	//vehicles array to check if player can get in 
 	private ImmutableArray<Entity> vehicles;
 
 	//action timer, for enter/exit vehicle
 	//TODO: move to component, both player and AI need to be able to enter/exit
-	private float timeSinceVehicle = 0;
-	private int timeTillCanGetInVehicle = 60;
+	private float timeSinceVehicle;
+	private int timeTillCanGetInVehicle;
 	
 	//CONTROLS///////////////////////////////////////////////
 	//movement
-	public static boolean moveForward = false; 
-	public static boolean moveLeft = false;
-	public static boolean moveRight = false;
-	public static boolean applyBreaks = false;
-	public static boolean stop = false;//if vehicle should stop instantly-debug stop
+	public static boolean moveForward; 
+	public static boolean moveLeft;
+	public static boolean moveRight;
+	public static boolean applyBreaks;
+	public static boolean stop;//if vehicle should stop instantly-debug stop
 	
-	public static float movementMultiplier = 0;	//for analog control. will be value between 1 and 0
-	public static float angleFacing = 0;//set direction player faces
+	public static float movementMultiplier;	//for analog control. will be value between 1 and 0
+	public static float angleFacing;//set direction player faces
 	
 	//actions
 	//player should shoot	
-	public static boolean shoot = false;
+	public static boolean shoot;
 	//player should enter/exit vehicle	
-	public static boolean changeVehicle = false;
+	public static boolean changeVehicle;
 	//landing on planets
-	public static boolean land = false;
-	private static boolean animateLanding = false;
+	public static boolean land;
+	private static boolean animateLanding;
 	//END Contols//////////////////////////////////////	
 	
 	
@@ -70,6 +70,25 @@ public class PlayerControlSystem extends EntitySystem {
 		this.screen = screen;
 		this.playerEntity = player;	
 		this.landCFG = landConfig;
+		
+		timeSinceVehicle = 0;
+		timeTillCanGetInVehicle = 60;
+
+		//movement
+		moveForward = false; 
+		moveLeft = false;
+		moveRight = false;
+		applyBreaks = false;
+		stop = false;
+		
+		movementMultiplier = 0;
+		angleFacing = 0;
+		
+		//actions
+		shoot = false;
+		changeVehicle = false;
+		land = false;
+		animateLanding = false;
 	}
 	
 	public PlayerControlSystem(ScreenAdapter screen, Entity player, Entity vehicle, LandConfig landConfig) {

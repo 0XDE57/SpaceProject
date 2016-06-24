@@ -7,7 +7,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
-import com.spaceproject.ui.TouchButton;
+import com.spaceproject.ui.TouchButtonRectangle;
+import com.spaceproject.ui.TouchButtonRound;
 import com.spaceproject.ui.TouchJoyStick;
 
 /*TODO: test multiple screen sizes
@@ -22,8 +23,9 @@ public class TouchUISystem extends EntitySystem {
 	Color white = new Color(1f, 1f, 1f, 0.5f);
 	Color blue = new Color(0.5f, 0.5f, 1f, 0.7f);
 	
-	TouchButton btnShoot = new TouchButton(Gdx.graphics.getWidth() - 80, 100, 70, white, blue);
-	TouchButton btnVehicle = new TouchButton(Gdx.graphics.getWidth() - 80, 300, 50, white, blue);
+	TouchButtonRound btnShoot = new TouchButtonRound(Gdx.graphics.getWidth() - 80, 100, 70, white, blue);
+	TouchButtonRound btnVehicle = new TouchButtonRound(Gdx.graphics.getWidth() - 80, 300, 50, white, blue);
+	TouchButtonRectangle btnLand = new TouchButtonRectangle(Gdx.graphics.getWidth()/2-60, Gdx.graphics.getHeight() - 80, 120, 60, white, blue);
 	
 	TouchJoyStick joyMovement = new TouchJoyStick(230, 230, 200, white, blue);
 	
@@ -32,6 +34,7 @@ public class TouchUISystem extends EntitySystem {
 		
 		PlayerControlSystem.shoot = btnShoot.isTouched();
 		PlayerControlSystem.changeVehicle = btnVehicle.isTouched();
+		PlayerControlSystem.land = btnLand.isTouched();
 		
 		if (joyMovement.isTouched()) {
 
@@ -84,6 +87,8 @@ public class TouchUISystem extends EntitySystem {
 		//draw vehicle button
 		//TODO: test if player is in vehicle or can get in a vehicle;
 		btnVehicle.render(shape);
+		
+		btnLand.render(shape);
 		shape.end();
 		
 		Gdx.gl.glDisable(GL20.GL_BLEND);

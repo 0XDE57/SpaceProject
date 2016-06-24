@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.spaceproject.utility.MyMath;
 
-public class TouchButton {
+public class TouchButtonRound {
 	Color color;
 	Color colorTouched;
 	int x,y;
@@ -13,7 +13,7 @@ public class TouchButton {
 	boolean hidden = false;
 	boolean enabled = true;
 	
-	public TouchButton(int x, int y, int radius, Color color, Color pressed) {
+	public TouchButtonRound(int x, int y, int radius, Color color, Color pressed) {
 		this.x = x;
 		this.y = y;
 		this.radius = radius;
