@@ -6,7 +6,6 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -14,10 +13,11 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.SpaceProject;
+import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
-import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
@@ -58,11 +58,11 @@ public class HUDSystem extends EntitySystem {
 	
 	@Override
 	public void update(float delta) {
-		if (Gdx.input.isKeyJustPressed(Keys.H)) {
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleHUD)) {
 			drawHud = !drawHud;
 			System.out.println("HUD: " + drawHud);
 		}
-		if (Gdx.input.isKeyJustPressed(Keys.M)) {
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleMap)) {
 			drawMap = !drawMap;
 			System.out.println("Edge map: " + drawMap);
 		}
@@ -70,7 +70,6 @@ public class HUDSystem extends EntitySystem {
 		if (!drawHud) return;
 		
 		//set projection matrix so things render using correct coordinates
-		//TODO: only needs to be called when screen size changes
 		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); 
 		shape.setProjectionMatrix(projectionMatrix);
 		
@@ -194,8 +193,10 @@ public class HUDSystem extends EntitySystem {
 
 	/**
 	 * Mark off-screen objects on edge of screen for navigation.
+	 * TODO: load star map markers based on point list instead of star entity for greater distance
 	 */
 	private void drawEdgeMap() {
+		//TODO: move these values into MapComponent
 		float markerSmall = 3.5f; //min marker size
 		float markerLarge = 8; //max marker size
 		float distSmall = 8000; //distance when marker is small
@@ -204,7 +205,7 @@ public class HUDSystem extends EntitySystem {
 		double gain = (markerSmall-markerLarge)/(distSmall-distLarge);
 		double offset = markerSmall - gain * distSmall;
 		
-		int padding = 12; //how close to draw from edge of screen (in pixels)
+		int padding = (int) (markerLarge + 4); //how close to draw from edge of screen (in pixels)
 		int width = Gdx.graphics.getWidth();
 		int height = Gdx.graphics.getHeight();	
 		int centerX = width/2;
@@ -270,7 +271,15 @@ public class HUDSystem extends EntitySystem {
 			
 			//draw marker
 			shape.setColor(map.color);
-			shape.circle(markerX, markerY, (float)size);			
+			shape.circle(markerX, markerY, (float)size);
+			
+			/*
+			switch(map.shape) {
+				case circle: shape.circle(markerX, markerY, (float)size);
+				case square: shape.rect
+				case triangle: shape.poly
+			}
+			 */
 		}
 		
 		/*

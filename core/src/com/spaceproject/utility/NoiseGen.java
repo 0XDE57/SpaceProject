@@ -90,8 +90,8 @@ public class NoiseGen {
 		}
 		
 		//normalize values to range of 0 - 1
-		for (int x = 0; x < size; ++x) {
-			for (int y = 0; y < size; ++y) {
+		for (int y = 0; y < size; ++y) {
+			for (int x = 0; x < size; ++x) {			
 				map[x][y] = MyMath.inverseLerp(minNoise, maxNoise, map[x][y]);
 			}
 		}

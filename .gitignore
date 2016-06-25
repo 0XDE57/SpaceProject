@@ -62,7 +62,8 @@ build/
 
 ## OS Specific
 .DS_Store
+
+##SpaceProject
 todo.txt
-todo.txt
-todo.txt
-android/assets/stars.txt
+android/assets/config/
+android/assets/save/

@@ -1,13 +1,9 @@
 package com.spaceproject.config;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.badlogic.gdx.utils.Json;
 
-public class KeyConfig {
-
+public class KeyConfig extends Config {
+	
 	//---player controls---
 	public int forward;
 	public int right;
@@ -15,9 +11,15 @@ public class KeyConfig {
 	public int breaks;
 	public int shoot;
 	public int changeVehicle;
+	public int land;
+	
+	//---UI controls---
+	public int toggleHUD;
+	public int toggleMap;
 	
 	//---screen controls---
 	public int fullscreen;
+	public int vsync;
 	public int zoomOut;
 	public int zoomIn;
 	public int resetZoom;
@@ -36,38 +38,26 @@ public class KeyConfig {
 	public int toggleVector;
 	public int toggleMenu;
 	
-	
 	//---temporary/test/debug controls---
-	public int vsync;
 	public int instantStop;
-	public int createSystemAtPlayer;
-
-	public void saveToJson() {
-		
-		Json json = new Json();
-		json.setUsePrototypes(false);
-		
-		//System.out.println(json.toJson(this));			
-		//check if null keys or not set, then load defaults before saving
-		
-		FileHandle keyFile = Gdx.files.local("controls.txt");		
-		try {
-			keyFile.writeString(json.toJson(this), false);			
-		} catch (GdxRuntimeException ex) {
-			System.out.println("Could not save file: " + ex.getMessage());
-		}
-	}
-
+	
 	public void loadDefault() {
 		//player
 		forward = Keys.W;
 		right = Keys.D;
 		left = Keys.A;
 		breaks = Keys.S;
+		shoot = Keys.SPACE;
 		changeVehicle = Keys.G;
+		land = Keys.T;
+		
+		//ui
+		toggleHUD = Keys.H;
+		toggleMap = Keys.M;
 		
 		//screen
 		fullscreen = Keys.F11;
+		vsync = Keys.F8;
 		zoomOut = Keys.MINUS;
 		zoomIn = Keys.EQUALS;
 		resetZoom = Keys.PERIOD;
@@ -87,10 +77,7 @@ public class KeyConfig {
 		toggleMenu = Keys.NUMPAD_9;
 		
 		//temporary/debug
-		vsync = Keys.F8;
 		instantStop = Keys.X;
-		createSystemAtPlayer = Keys.K;
 	}
-	
 	
 }

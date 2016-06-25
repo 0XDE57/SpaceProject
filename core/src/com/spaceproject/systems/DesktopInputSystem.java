@@ -2,7 +2,6 @@ package com.spaceproject.systems;
 
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.MyScreenAdapter;
@@ -45,7 +44,7 @@ public class DesktopInputSystem extends EntitySystem {
 		PlayerControlSystem.changeVehicle = Gdx.input.isKeyPressed(SpaceProject.keycfg.changeVehicle);
 		
 		//land on planet
-		PlayerControlSystem.land = Gdx.input.isKeyJustPressed(Keys.T);
+		PlayerControlSystem.land = Gdx.input.isKeyJustPressed(SpaceProject.keycfg.land);
 	}
 
 	private void cameraControls(float delta) {

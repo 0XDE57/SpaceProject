@@ -38,7 +38,7 @@ public class EntityFactory {
 		int numPlanets = MathUtils.random(SpaceProject.celestcfg.minPlanets, SpaceProject.celestcfg.maxPlanets);
 		
 		//distance between planets
-		float distance = SpaceProject.celestcfg.minDist/3; //add some initial distance between star and first planet
+		float distance = SpaceProject.celestcfg.minPlanetDist/3; //add some initial distance between star and first planet
 		
 		//rotation of system (orbits and spins)
 		boolean rotDir = MathUtils.randomBoolean();
@@ -53,7 +53,7 @@ public class EntityFactory {
 		//create planets around star
 		for (int i = 1; i < entities.length; ++i) {
 			//add some distance from previous entity
-			distance += MathUtils.random(SpaceProject.celestcfg.minDist, SpaceProject.celestcfg.maxDist); 
+			distance += MathUtils.random(SpaceProject.celestcfg.minPlanetDist, SpaceProject.celestcfg.maxPlanetDist); 
 			float angle = MathUtils.random(3.14f * 2); //angle from star
 			float orbitX = x + (distance * MathUtils.cos(angle));
 			float orbitY = y + (distance * MathUtils.sin(angle));

@@ -156,6 +156,7 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 	 * @param delta
 	 */
 	private void updateTiles(float delta) {
+		// TODO: space dust layer
 		// TODO: consider adding timers to break up the process from happening
 		// in one frame causing a freeze/jump
 		// because putting it in a separate thread is not working (possible?)
@@ -218,11 +219,11 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 	private void updateStars(float delta) {
 		checkStarsCurrTime -= 1000 * delta;
 		if (checkStarsCurrTime < 0) {
-			//System.out.println("Checking stars...");
+			checkStarsCurrTime = checkStarsTimer; // reset timer
 			
 			//distance to check when to load planets
-			int loadDistance = (int) (SpaceProject.celestcfg.maxPlanets * SpaceProject.celestcfg.maxDist);
-			loadDistance *= loadDistance; // squared for quick distance checking
+			int loadDistance = (int) SpaceProject.celestcfg.loadSystemDistance;
+			loadDistance *= loadDistance;//square for dist2
 			
 			// remove stars from engine that are too far
 			for (Entity star : loadedStars) {
@@ -247,11 +248,10 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 			for (Vector2 point : points) {
 				//check if point is close enough to be loaded
 				if (point.dst2(cam.position.x, cam.position.y) < loadDistance) {
-
-					boolean loaded = false;
-					
+			
 					// check if star is already in world
 					//TODO: check based on an ID rather than distance. more reliable and makes more sense than a distance check
+					boolean loaded = false;
 					for (Entity star : loadedStars) {
 						TransformComponent t = Mappers.transform.get(star);
 						if (point.dst(t.pos.x, t.pos.y) < 2f) {
@@ -273,30 +273,25 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 					}
 
 				}
-			}
-
-			// reset timer
-			checkStarsCurrTime = checkStarsTimer;
+			}	
 		}
 	}
-	
 	
 	/**
 	 * Fill universe with stars and planets. Load points from disk or if no points
 	 * exist, create points and save to disk.
 	 */
 	private void loadPoints() {
-		// create handle for file storing points
-		FileHandle starsFile = Gdx.files.local("stars.txt");
-
-		// starsFile.delete();
+		points.clear();
 		
-		points.add(new Vector2(700, 700));//close system for debug
-
+		// create handle for file storing points
+		FileHandle starsFile = Gdx.files.local("save/stars.txt");
+		
+		//starsFile.delete();//debug, don't save for now
+		
 		if (starsFile.exists()) {
 			// load points
 			try {
-				System.out.println("[LOAD DATA] : Loading points from disk...");
 				for (String line : starsFile.readString().replaceAll("\\r", "").split("\\n")) {
 					String[] coords = line.split(",");
 					int x = Integer.parseInt(coords[0]);
@@ -308,11 +303,9 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 				System.out.println("Could not load file: " + ex.getMessage());
 			}
 		} else {
-			System.out.println("[GENERATE DATA] : Generating points...");
 			points = generatePoints();// create points
 			System.out.println("[GENERATE DATA] : Created " + points.size() + " points...");
 			try {
-				System.out.println("[SAVE DATA] : Saving points to disk...");
 				// save points to disk
 				for (Vector2 p : points) {
 					starsFile.writeString((int) p.x + "," + (int) p.y + "\n", true);
@@ -322,6 +315,9 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 				System.out.println("Could not save file: " + ex.getMessage());
 			}
 		}
+		
+		//debug
+		points.add(new Vector2(700, 700));//system near origin for debug
 
 	}
 
@@ -333,13 +329,14 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 	private static ArrayList<Vector2> generatePoints() {
 		MathUtils.random.setSeed(SpaceProject.SEED);
 		ArrayList<Vector2> points = new ArrayList<Vector2>();
-		int numStars = 150; // how many stars TRY to create(does not guarantee this many points will actually be generated)
-		int genRange = 400000; // range from origin(0,0) to create points
-
-
+		
+		// how many stars TRY to create(does not guarantee this many points will actually be generated)
+		int numStars = SpaceProject.celestcfg.numPoints;
+		// range from origin(0,0) to create points
+		int genRange = SpaceProject.celestcfg.pointGenRange;
 		// minimum distance between points
-		float dist = SpaceProject.celestcfg.maxPlanets * SpaceProject.celestcfg.maxDist * 6; 
-		dist *= dist;// squared for quick distance checking
+		float dist = SpaceProject.celestcfg.minPointDistance; 
+		dist *= dist;//squared for dst2
 
 		// generate points
 		for (int i = 0; i < numStars; i++) {

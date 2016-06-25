@@ -1,1 +1,0 @@
-{forward:51,right:32,left:29,breaks:47,shoot:0,changeVehicle:35,fullscreen:254,zoomOut:69,zoomIn:70,resetZoom:56,zoomCharacter:76,zoomSpace:55,rotateLeft:71,rotateRight:72,toggleDebug:246,togglePos:144,toggleComponents:145,toggleBounds:146,toggleFPS:147,toggleOrbit:148,toggleVector:149,toggleMenu:153,vsync:251,instantStop:52,createSystemAtPlayer:39}

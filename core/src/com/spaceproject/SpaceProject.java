@@ -6,6 +6,7 @@ import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.config.LandConfig;
+import com.spaceproject.config.WorldConfig;
 import com.spaceproject.screens.*;
 import com.spaceproject.utility.MyScreenAdapter;
 
@@ -45,31 +46,19 @@ public class SpaceProject extends Game {
 	}
 	
 	private static void loadConfigs() {
-		//KEYS
+		//keycfg = (KeyConfig) new KeyConfig().loadFromJson();
 		keycfg = new KeyConfig();
 		keycfg.loadDefault();
-		keycfg.saveToJson();
 		
-		/*
-		FileHandle keyFile = Gdx.files.local("controls.txt");
-		if (keyFile.exists()) {
-			Json json = new Json();
-			json.setUsePrototypes(false);
-			
-			keycfg = json.fromJson(KeyConfig.class, keyFile.readString());
-			System.out.println("Loaded keys from json: " + json.toJson(keycfg));
-		} else {
-			keycfg = new KeyConfig();
-			keycfg.loadDefault();
-			//keycfg.saveToJson();
-			System.out.println("No key file found. Loaded defaults.");
-		}*/
-		
-		
-		//CELESTIAL OBJECTS
+
+		//celestcfg = (CelestialConfig) new CelestialConfig().loadFromJson();
 		celestcfg = new CelestialConfig();
 		celestcfg.loadDefault();
-		celestcfg.saveToJson();
+		
+		
+		//WorldConfig worldcfg = (WorldConfig) new WorldConfig().loadFromJson();
+		//worldcfg.loadDefault();
+		//worldcfg.saveToJson();
 	}		
 	
 }

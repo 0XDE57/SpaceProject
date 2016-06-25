@@ -1,20 +1,14 @@
 package com.spaceproject.config;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.badlogic.gdx.utils.Json;
+public class CelestialConfig extends Config {
 
-public class CelestialConfig {
-	
 	//---Planetary system generation---	
 	//number of planets
 	public int minPlanets;
 	public int maxPlanets;	
 	//distance between planets
-	public float minDist;
-	public float maxDist;
-	
+	public float minPlanetDist;
+	public float maxPlanetDist;
 	
 	//---Star generation---
 	//size of stars
@@ -23,7 +17,6 @@ public class CelestialConfig {
 	//star rotation speed
 	public float minStarRot;
 	public float maxStarRot;
-	
 	
 	//---Planet generation---
 	//size of planets
@@ -36,31 +29,30 @@ public class CelestialConfig {
 	public float minPlanetOrbit;
 	public float maxPlanetOrbit;
 	
+	//---Point generation---
+	// how many stars TRY to create(does not guarantee this many points will actually be generated)
+	public int numPoints;
+	// range from origin(0,0) to create points
+	public int pointGenRange; 
+	// minimum distance between points
+	public float minPointDistance;
+	//distance to check when to load or unload planets
+	public float loadSystemDistance;
 	
-	public void saveToJson() {
-		
-		Json json = new Json();
-		json.setUsePrototypes(false);
-		
-		FileHandle keyFile = Gdx.files.local("celestials.txt");		
-		try {
-			keyFile.writeString(json.toJson(this), false);			
-		} catch (GdxRuntimeException ex) {
-			System.out.println("Could not save file: " + ex.getMessage());
-		}
-	}
-
-	public void loadDefault() {		
+	public void loadDefault() {
+		//system gen
 		minPlanets = 0;
 		maxPlanets = 10;	
-		minDist = 1700;
-		maxDist = 2200;
+		minPlanetDist = 1700;
+		maxPlanetDist = 2200;
 		
+		//star gen
 		minStarSize = 60;
 		maxStarSize = 250;
 		minStarRot = 0.002f;
 		maxStarRot = 0.06f;
-	
+		
+		//planet gen
 		minPlanetSize = 20;
 		maxPlanetSize = 200;
 		minPlanetRot = 0.015f;
@@ -68,5 +60,11 @@ public class CelestialConfig {
 		minPlanetOrbit = 0.001f;
 		maxPlanetOrbit = 0.009f;
 		
+		// point gen
+		numPoints = 150;
+		pointGenRange = 400000;
+		minPointDistance = maxPlanets*maxPlanetDist*6f;	
+		loadSystemDistance = maxPlanets*maxPlanetDist*1.5f;
 	}
+	
 }
