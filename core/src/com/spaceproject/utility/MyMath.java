@@ -1,8 +1,17 @@
 package com.spaceproject.utility;
 
-import com.badlogic.gdx.math.MathUtils;
+import com.spaceproject.SpaceProject;
 
 public class MyMath {
+	
+	public static long getSeed(float x, float y) {
+		return getSeed((int)x, (int)y);
+	}
+	
+	public static long getSeed(int x, int y) {
+		//long is 64 bits. store x in upper bits, y in lower bits
+		return (x << 32) + y + SpaceProject.SEED;
+	}
 
 	/**
 	 * Get distance from position 1 to position 2.

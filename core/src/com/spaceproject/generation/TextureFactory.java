@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
+import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.NoiseGen;
 import com.spaceproject.utility.NoiseThread;
 import com.spaceproject.utility.OpenSimplexNoise;
@@ -68,7 +69,7 @@ public class TextureFactory {
 		 * This probably affects other parts of the program.
 		 */
 		
-		MathUtils.random.setSeed((long)(tileX * depth + tileY * SpaceProject.SEED));
+		MathUtils.random.setSeed((long) (MyMath.getSeed(tileX, tileY) * depth));
 		
 		//pixmap = new Pixmap(tileSize, tileSize, Format.RGB565);
 		pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);

@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.Tile;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
@@ -23,17 +22,16 @@ import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
-import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.IDGen;
-import com.spaceproject.utility.NoiseThread;
+import com.spaceproject.utility.MyMath;
 
 public class EntityFactory {
 	
 	public static float scale = 4.0f;
 
 	public static Entity[] createPlanetarySystem(float x, float y) {
-		long seed = (long)(x + y) * SpaceProject.SEED;
-		MathUtils.random.setSeed(seed);
+		long seed = MyMath.getSeed(x, y);
+		MathUtils.random.setSeed(MyMath.getSeed(x, y));
 
 		//number of planets in a system
 		int numPlanets = MathUtils.random(SpaceProject.celestcfg.minPlanets, SpaceProject.celestcfg.maxPlanets);
@@ -58,7 +56,7 @@ public class EntityFactory {
 			float angle = MathUtils.random(3.14f * 2); //angle from star
 			float orbitX = x + (distance * MathUtils.cos(angle));
 			float orbitY = y + (distance * MathUtils.sin(angle));
-			entities[i] = createPlanet(seed + i, star, orbitX, orbitY, angle, distance, rotDir);
+			entities[i] = createPlanet(MyMath.getSeed(x, y + distance), star, orbitX, orbitY, angle, distance, rotDir);
 		}
 		
 		System.out.println("Planetary System: (" + x + ", " + y + ") Objects: " + (numPlanets));
@@ -230,19 +228,16 @@ public class EntityFactory {
 	}
 	
 	public static Entity createShip3(float x, float y, Entity driver) {
-		long seed = (long)(x + y) * SpaceProject.SEED;
-		return createShip3(x, y, seed, driver);
+		return createShip3(x, y, MyMath.getSeed(x, y), driver);
 	}
 	
 	public static Entity createShip3(float x, float y, long seed, Entity driver) {
-		
 		Entity entity = new Entity();
 
 		MathUtils.random.setSeed(seed);
 		
+		//transform
 		TransformComponent transform = new TransformComponent();
-		TextureComponent texture = new TextureComponent();
-
 		transform.pos.set(x, y, -10);
 		transform.rotation = (float) Math.PI/2; //face upwards
 		
@@ -255,7 +250,7 @@ public class EntityFactory {
 			//generate even size
 			size = MathUtils.random(minSize, maxSize);
 		} while (size % 2 == 1);
-
+		TextureComponent texture = new TextureComponent();
 		Texture pixmapTex = TextureFactory.generateShip(seed, size);
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
 		texture.scale = scale;
@@ -290,12 +285,10 @@ public class EntityFactory {
 		health.health = 100;
 		health.maxHealth = health.health;
 		
-		
 		//map
 		MapComponent map = new MapComponent();
 		map.color = new Color(1, 1, 1, 0.9f);
 		map.distance = 3000;
-		
 		
 		//add components to entity
 		entity.add(health);
@@ -403,7 +396,7 @@ public class EntityFactory {
 		Entity entity = new Entity();
 		
 		TextureComponent texture = new TextureComponent();
-		texture.texture = TextureFactory.generateNoiseTile(x + y * SpaceProject.SEED, tileSize);
+		texture.texture = TextureFactory.generateNoiseTile(MyMath.getSeed(x, y), tileSize);
 		
 		TransformComponent transform = new TransformComponent();
 		transform.pos.x = x;
