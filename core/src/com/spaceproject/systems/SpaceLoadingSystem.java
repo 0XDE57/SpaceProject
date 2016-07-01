@@ -287,7 +287,7 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 		// create handle for file storing points
 		FileHandle starsFile = Gdx.files.local("save/stars.txt");
 		
-		//starsFile.delete();//debug, don't save for now
+		starsFile.delete();//debug, don't save for now
 		
 		if (starsFile.exists()) {
 			// load points
@@ -426,12 +426,10 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 				// create and add tile if doesn't exist
 				if (!exists) {
 					tiles.add(new SpaceBackgroundTile(tX, tY, depth, tileSize));
-					// bgTileLayer.add(new SpaceBackgroundTile(tX, tY,
-					// fgTileDepth, tileSize));
 				}
 			}
 		}
-		System.out.println("Load tile: [" + depth + "]: " + centerTile.x + ", " + centerTile.y);
+		System.out.println("Load tile: [" + depth + "]: " + (int)centerTile.x + ", " + (int)centerTile.y);
 	}
 
 	/**

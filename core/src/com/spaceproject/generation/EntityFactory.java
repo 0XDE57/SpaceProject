@@ -11,6 +11,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CannonComponent;
+import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
@@ -212,21 +213,28 @@ public class EntityFactory {
 		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
 	    bounds.poly.setOrigin(width/2, height/2);
 
+	    CharacterComponent character = new CharacterComponent();
+	    character.walkSpeed = 300f;//70f;
 	    
 		entity.add(bounds);
 		entity.add(transform);
 		entity.add(texture);
 		entity.add(new MovementComponent());
+		entity.add(character);
 			
 		return entity;
 	}
 	
 	public static Entity createShip3(float x, float y) {
-		long seed = (long)(x + y) * SpaceProject.SEED;
-		return createShip3(x, y, seed);
+		return createShip3(x, y, null);
 	}
 	
-	public static Entity createShip3(float x, float y, long seed) {
+	public static Entity createShip3(float x, float y, Entity driver) {
+		long seed = (long)(x + y) * SpaceProject.SEED;
+		return createShip3(x, y, seed, driver);
+	}
+	
+	public static Entity createShip3(float x, float y, long seed, Entity driver) {
 		
 		Entity entity = new Entity();
 
@@ -271,6 +279,7 @@ public class EntityFactory {
 		
 		//engine data and marks entity as drive-able
 		VehicleComponent vehicle = new VehicleComponent();
+		vehicle.driver = driver;
 		vehicle.thrust = 320;//higher is faster
 		vehicle.maxSpeed = -1;//-1 = no max speed/infinite
 		vehicle.id = IDGen.get();

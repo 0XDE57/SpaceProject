@@ -34,7 +34,6 @@ public class PlayerControlSystem extends EntitySystem {
 	
 	//target reference
 	private Entity playerEntity; //the player entity
-	private Entity vehicleEntity;//the vehicle player currently controls (also inVehicle flag if !null)
 
 	//vehicles array to check if player can get in 
 	private ImmutableArray<Entity> vehicles;
@@ -98,10 +97,11 @@ public class PlayerControlSystem extends EntitySystem {
 		animationFinished = false;
 	}
 	
+	/*
 	public PlayerControlSystem(ScreenAdapter screen, Entity player, Entity vehicle, LandConfig landConfig) {
 		this(screen, player, landConfig);
 		this.vehicleEntity = vehicle;
-	}
+	}*/
 
 
 	@Override
@@ -117,18 +117,17 @@ public class PlayerControlSystem extends EntitySystem {
 	@Override
 	public void update(float delta) {
 	
-		//getting in and out of vehicle timer
-		//TODO: variables could use better names
-		//TODO: move to component
+		//update getting in/out of vehicle action timer
 		if (timeSinceVehicle < timeTillCanGetInVehicle) {
 			timeSinceVehicle += 100 * delta;
 		}
 		
-
-		if (isInVehicle()) {			
-			controlShip(delta);
-		} else { 			
-			controlCharacter(delta);
+		Entity vehicleEntity = Mappers.character.get(playerEntity).vehicle;
+		 
+		if (isInVehicle(playerEntity)) {			
+			controlShip(vehicleEntity, delta);
+		} else {	
+			controlCharacter(playerEntity, delta);
 		}
 		
 		landAndTakeoff(delta);
@@ -194,9 +193,10 @@ public class PlayerControlSystem extends EntitySystem {
 	}
 	
 	private boolean canLandOnPlanet() {
-		if (!isInVehicle()) {
+		if (!isInVehicle(playerEntity)) {
 			return false;
 		}
+		Entity vehicleEntity = Mappers.character.get(playerEntity).vehicle;
 		Vector3 playerPos = Mappers.transform.get(vehicleEntity).pos;
 		for (Entity planet : planets) {
 			Vector3 planetPos = Mappers.transform.get(planet).pos;
@@ -215,20 +215,20 @@ public class PlayerControlSystem extends EntitySystem {
 
 	/**
 	 * Control the character.
+	 * @param playerEntity 
 	 * @param delta
 	 */
-	private void controlCharacter(float delta) {
+	private void controlCharacter(Entity playerEntity, float delta) {
 		//players position
 		TransformComponent transform = Mappers.transform.get(playerEntity);
 		
 		//make character face mouse/joystick
-		//transform.rotation = angleFacing;
-		transform.rotation = MathUtils.lerpAngle(transform.rotation, angleFacing, 6f*delta);
-					
-		if (moveForward) {				
-			float walkSpeed = 300f;//50f; //TODO: move to component
+		transform.rotation = MathUtils.lerpAngle(transform.rotation, angleFacing, 8f*delta);
+		
+		if (moveForward) {
+			float walkSpeed = Mappers.character.get(playerEntity).walkSpeed;
 			float dx = (float) Math.cos(transform.rotation) * (walkSpeed * movementMultiplier) * delta;
-			float dy = (float) Math.sin(transform.rotation) * (walkSpeed * movementMultiplier) * delta;		
+			float dy = (float) Math.sin(transform.rotation) * (walkSpeed * movementMultiplier) * delta;
 			transform.pos.add(dx, dy, 0);
 		}
 		
@@ -241,7 +241,9 @@ public class PlayerControlSystem extends EntitySystem {
 	 * Control the ship.
 	 * @param delta
 	 */
-	private void controlShip(float delta) {
+	private void controlShip(Entity vehicleEntity, float delta) {
+		//Entity vehicleEntity = Mappers.character.get(playerEntity).vehicle;
+		
 		TransformComponent transform = Mappers.transform.get(vehicleEntity);
 		MovementComponent movement = Mappers.movement.get(vehicleEntity);	
 		VehicleComponent vehicle = Mappers.vehicle.get(vehicleEntity);
@@ -269,12 +271,12 @@ public class PlayerControlSystem extends EntitySystem {
 		}
 		
 		//stop vehicle
-		if (applyBreaks) {					
+		if (applyBreaks) {
 			decelerate(delta, movement);
 		}
 		
 		//fire cannon / attack
-		if (shoot) {							
+		if (shoot) {
 			fireCannon(transform, movement, cannon, Mappers.vehicle.get(vehicleEntity).id);
 		}
 		
@@ -286,7 +288,7 @@ public class PlayerControlSystem extends EntitySystem {
 		
 		//exit vehicle
 		if (changeVehicle) {
-			exitVehicle();
+			exitVehicle(vehicleEntity);
 		}
 			
 	}
@@ -446,86 +448,93 @@ public class PlayerControlSystem extends EntitySystem {
 	 */
 	public void enterVehicle() {
 		//check if already in vehicle
-		if (isInVehicle()) {
+		if (isInVehicle(playerEntity)) {
 			return;
 		}
 		
 		//action timer
 		if (timeSinceVehicle < timeTillCanGetInVehicle) {
 			return;
-		} else {
-			timeSinceVehicle = 0;
 		}
+		timeSinceVehicle = 0;
+		
 		
 		//get all vehicles and check if player is close to one(bounds overlap)
 		BoundsComponent playerBounds = Mappers.bounds.get(playerEntity);
 		for (Entity vehicle : vehicles) {
-			BoundsComponent vehicleBounds = Mappers.bounds.get(vehicle);			
 			
-			//check if character is near a vehicle TODO: check if vehicle empty/available
+			//skip vehicle is occupied
+			if (Mappers.vehicle.get(vehicle).driver != null) continue;
+			
+			//check if character is near a vehicle
+			BoundsComponent vehicleBounds = Mappers.bounds.get(vehicle);
 			if (playerBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {			
-				if (Intersector.overlapConvexPolygons(vehicleBounds.poly, playerBounds.poly)) {
-					
-					//TODO: find better way to do this, check entity for vehicle component?
-					//Change vehicle component to save the controlling entity(the driver). reference null if vehicle empty.
-					//generic to work with AI and player (and in theory arbitrary entities if necessary)
-					vehicleEntity = vehicle; //set vehicle reference
-
-					//zoom out camera
-					MyScreenAdapter.setZoomTarget(1);
-					//TODO add animation to slowly move focus to the vehicle instead of instantly jumping to the vehicle position
-					//engine.getSystem(RenderingSystem.class).pan(vehicleTransform);					
-					
-					//set focus to vehicle
-					playerEntity.remove(CameraFocusComponent.class);
-					vehicle.add(new CameraFocusComponent());
+				//if (Intersector.overlapConvexPolygons(vehicleBounds.poly, playerBounds.poly)) {
 				
-					//remove player from engine
-					engine.removeEntity(playerEntity);
-				}
+				//set references
+				Mappers.character.get(playerEntity).vehicle = vehicle;
+				Mappers.vehicle.get(vehicle).driver = playerEntity;
+				
+				// set focus to vehicle
+				playerEntity.remove(CameraFocusComponent.class);
+				vehicle.add(new CameraFocusComponent());
+				
+				// remove player from engine
+				engine.removeEntity(playerEntity);
+				
+				// zoom out camera, TODO: add pan animation
+				MyScreenAdapter.setZoomTarget(1);
+				
+				return;
 			}
 		}
 	}
 			
 	/**
 	 * Exit current vehicle.
+	 * @param vehicleEntity 
 	 */
-	public void exitVehicle() {
+	public void exitVehicle(Entity vehicleEntity) {
 		//check if not in vehicle
-		if (!isInVehicle()) {
+		if (!isInVehicle(playerEntity)) {
 			return;
 		}
 		
 		//action timer
 		if (timeSinceVehicle < timeTillCanGetInVehicle) {
 			return;
-		} else {
-			timeSinceVehicle = 0;
 		}
+		timeSinceVehicle = 0;
 
-		//add player to engine
-		engine.addEntity(playerEntity);
-
-		//set the player at the position of vehicle
-		Mappers.transform.get(playerEntity).pos.set(Mappers.transform.get(vehicleEntity).pos);				
-
-		//zoom in camera
-		MyScreenAdapter.setZoomTarget(0.4f);
 		
-		//set focus to player entity
+		// set the player at the position of vehicle
+		Vector3 vehiclePosition = Mappers.transform.get(vehicleEntity).pos;
+		Mappers.transform.get(playerEntity).pos.set(vehiclePosition);
+		
+		// set focus to player entity
 		vehicleEntity.remove(CameraFocusComponent.class);
 		playerEntity.add(new CameraFocusComponent());
+	
+		// remove references
+		Mappers.character.get(playerEntity).vehicle = null;
+		Mappers.vehicle.get(vehicleEntity).driver = null;
 		
-		vehicleEntity = null;
+		// add player back into world
+		engine.addEntity(playerEntity);
+		
+		// zoom in camera
+		MyScreenAdapter.setZoomTarget(0.5f);
 		
 	}
 
 	/**
 	 * Check if player is in vehicle.
+	 * @param vehicleEntity 
 	 * @return true if in vehicle
 	 */
-	public boolean isInVehicle() {
-		return vehicleEntity != null;
+	public boolean isInVehicle(Entity character) {
+		//return vehicleEntity != null;
+		return Mappers.character.get(character).vehicle != null;
 	}
 
 }

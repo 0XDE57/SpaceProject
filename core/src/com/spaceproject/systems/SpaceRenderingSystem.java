@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -52,8 +53,8 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 		super.update(delta); //adds entities to render queue
 			
 		//clear screen with color based on camera position
-		Vector3 color = backgroundColor();
-		Gdx.gl20.glClearColor(color.x, color.y, color.z, 1);
+		Color color = backgroundColor();
+		Gdx.gl20.glClearColor(color.r, color.g, color.b, 1);
 		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		batch.begin();
@@ -84,7 +85,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 			float height = tex.texture.getHeight();
 			float originX = width * 0.5f; //center 
 			float originY = height * 0.5f; //center
-
+			
 			//draw texture
 			batch.draw(tex.texture, (t.pos.x - originX), (t.pos.y - originY),
 					   originX, originY,
@@ -110,9 +111,9 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 
 	/**
 	 * Return color based on camera position
-	 * @return red in x, green in y, blue in z
+	 * @return color
 	 */
-	private static Vector3 backgroundColor() {
+	private static Color backgroundColor() {
 		//still playing with these values to get the right feel/intensity of color...
 		float maxColor = 0.25f;
 		float ratio = 0.00001f;
@@ -132,7 +133,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 		}
 		//red is combination of blue and green
 		float red = blue+green;
-		Vector3 color = new Vector3(red, green + (maxColor-red)+0.15f, blue + (maxColor-red)+0.1f);
+		Color color = new Color(red, green + (maxColor-red)+0.2f, blue + (maxColor-red)+0.1f,1);
 		return color;
 	}
 

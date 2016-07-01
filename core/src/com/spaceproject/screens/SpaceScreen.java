@@ -9,6 +9,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.CameraFocusComponent;
+import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
@@ -47,8 +48,9 @@ public class SpaceScreen extends MyScreenAdapter {
 			
 		//add player
 		boolean startAsShip = true;//debug: start as ship or player
-		Entity playerTESTSHIP = EntityFactory.createShip3(landCFG.position.x, landCFG.position.y, landCFG.shipSeed);
 		Entity player = EntityFactory.createCharacter(landCFG.position.x, landCFG.position.y);
+		Entity playerTESTSHIP = EntityFactory.createShip3(landCFG.position.x, landCFG.position.y, landCFG.shipSeed, player);
+		player.getComponent(CharacterComponent.class).vehicle = playerTESTSHIP;
 		
 		if (startAsShip) {
 			//start as ship	
@@ -61,11 +63,13 @@ public class SpaceScreen extends MyScreenAdapter {
 		}
 		
 		// Add systems to engine---------------------------------------------------------
+		engine.addSystem(new PlayerControlSystem(this, player, landCFG));
+		/*
 		if (startAsShip) {
 			engine.addSystem(new PlayerControlSystem(this, player, playerTESTSHIP, landCFG));//start as ship
 		} else {
 			engine.addSystem(new PlayerControlSystem(this, player, landCFG));//start as player
-		}		
+		}*/
 		
 		engine.addSystem(new SpaceRenderingSystem());
 		engine.addSystem(new SpaceLoadingSystem());
