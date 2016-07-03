@@ -1,5 +1,7 @@
 package com.spaceproject.systems;
 
+import java.lang.reflect.Field;
+
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -20,11 +22,12 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BoundsComponent;
-import com.spaceproject.components.MovementComponent;
+import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.generation.FontFactory;
+import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyIteratingSystem;
 import com.spaceproject.utility.MyMath;
@@ -36,7 +39,7 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 	private static OrthographicCamera cam;
 	private static SpriteBatch batch;
 	private static ShapeRenderer shape;
-	private BitmapFont font;
+	private BitmapFont fontSmall, fontLarge;
 	private Matrix4 projectionMatrix = new Matrix4();
 	
 	//entity storage
@@ -68,8 +71,8 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		cam = camera;
 		batch = spriteBatch;
 		shape = shapeRenderer;
-		font = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 15);
-		
+		fontSmall = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 10);
+		fontLarge = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 20);
 		objects = new Array<Entity>();		
 		
 	}
@@ -90,8 +93,9 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		
 		//set projection matrix so things render using correct coordinates
 		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());		
-		batch.setProjectionMatrix(projectionMatrix);		
+		batch.setProjectionMatrix(projectionMatrix);
 		
+		/*
 		//enable blending for transparency
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -104,7 +108,7 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 			
 		shape.end();
 		Gdx.gl.glDisable(GL20.GL_BLEND); //disable blending
-				
+		*/	
 		
 		//draw non-filled shapes
 		shape.begin(ShapeType.Line);
@@ -140,26 +144,6 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		batch.end();	
 		
 		objects.clear();		
-	}
-
-	/** Draw lines to represent speed and direction of entity */
-	private void drawMovementVectors() {
-		for (Entity entity : objects) {
-			//get entities position and list of components
-			TransformComponent t = Mappers.transform.get(entity);
-			MovementComponent m = Mappers.movement.get(entity);
-			if (m == null) continue;
-
-			//calculate vector angle and length
-			float scale = 4; //how long to make vectors (higher number is shorter line)
-			float length = m.velocity.len();
-			float angle = m.velocity.angle() * MathUtils.degreesToRadians;
-			float pointX = t.pos.x + (length / scale * MathUtils.cos(angle));
-			float pointY = t.pos.y + (length / scale * MathUtils.sin(angle));
-			
-			//draw line to represent movement
-			shape.line(t.pos.x, t.pos.y, pointX, pointY, Color.RED, Color.MAGENTA);
-		}
 	}
 
 	private void updateKeyToggles() {
@@ -220,17 +204,35 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 
 	/** draw menu showing items to draw and toggle keys */
 	private void drawDebugMenu() {
-		font.setColor(1, 1, 1, 1);
-		font.draw(batch, "***DEBUG [F3]***", 15, Gdx.graphics.getHeight() - 45);
-		font.draw(batch, "[NUM0] Draw Pos: " + drawPos, 15, Gdx.graphics.getHeight() - 60);
-		font.draw(batch, "[NUM1] Draw Component List: " + drawComponentList, 15, Gdx.graphics.getHeight() - 75);
-		font.draw(batch, "[NUM2] Draw Bounds: " + drawBounds, 15, Gdx.graphics.getHeight() - 90);
-		font.draw(batch, "[NUM3] Draw FPS: " + drawFPS, 15, Gdx.graphics.getHeight() - 105);
-		font.draw(batch, "[NUM4] Draw Orbit Path: " + drawOrbitPath, 15, Gdx.graphics.getHeight() - 120);
-		font.draw(batch, "[NUM5] Draw Vectors: " + drawVectors, 15, Gdx.graphics.getHeight() - 135);
-		font.draw(batch, "[NUM9] Hide this menu.", 15, Gdx.graphics.getHeight() - 150);
+		fontSmall.setColor(1, 1, 1, 1);
+		fontSmall.draw(batch, "***DEBUG [F3]***", 15, Gdx.graphics.getHeight() - 45);
+		fontSmall.draw(batch, "[NUM0] Draw Pos: " + drawPos, 15, Gdx.graphics.getHeight() - 60);
+		fontSmall.draw(batch, "[NUM1] Draw Component List: " + drawComponentList, 15, Gdx.graphics.getHeight() - 75);
+		fontSmall.draw(batch, "[NUM2] Draw Bounds: " + drawBounds, 15, Gdx.graphics.getHeight() - 90);
+		fontSmall.draw(batch, "[NUM3] Draw FPS: " + drawFPS, 15, Gdx.graphics.getHeight() - 105);
+		fontSmall.draw(batch, "[NUM4] Draw Orbit Path: " + drawOrbitPath, 15, Gdx.graphics.getHeight() - 120);
+		fontSmall.draw(batch, "[NUM5] Draw Vectors: " + drawVectors, 15, Gdx.graphics.getHeight() - 135);
+		fontSmall.draw(batch, "[NUM9] Hide this menu.", 15, Gdx.graphics.getHeight() - 150);
 	}
 
+	/** Draw lines to represent speed and direction of entity */
+	private void drawMovementVectors() {
+		for (Entity entity : objects) {
+			//get entities position and list of components
+			TransformComponent t = Mappers.transform.get(entity);
+
+			//calculate vector angle and length
+			float scale = 4; //how long to make vectors (higher number is shorter line)
+			float length = t.velocity.len();
+			float angle = t.velocity.angle() * MathUtils.degreesToRadians;
+			float pointX = t.pos.x + (length / scale * MathUtils.cos(angle));
+			float pointY = t.pos.y + (length / scale * MathUtils.sin(angle));
+			
+			//draw line to represent movement
+			shape.line(t.pos.x, t.pos.y, pointX, pointY, Color.RED, Color.MAGENTA);
+		}
+	}
+	
 	/** draw orbit path, a ring to visualize objects orbit*/
 	private void drawOrbitPath() {
 		shape.setColor(1f, 1f, 1, 1);
@@ -270,7 +272,7 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 
 	/** draw Frames and entity count in top left corner */
 	private void drawFPS() {
-		font.setColor(1,1,1,1);
+		fontLarge.setColor(1,1,1,1);
 
 		if (curCountTime < 0) {
 			entityCount = engine.getEntities().size();
@@ -283,7 +285,7 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		}
 		String count = "   E: " + entityCount + " - C: " + componentCount;
 		
-		font.draw(batch, Integer.toString(Gdx.graphics.getFramesPerSecond()) + count, 15, Gdx.graphics.getHeight()- 15);
+		fontLarge.draw(batch, Integer.toString(Gdx.graphics.getFramesPerSecond()) + count, 15, Gdx.graphics.getHeight()- 15);
 	}
 	
 	/**  Draw background for easier text reading */
@@ -300,59 +302,77 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 	}
 
 	/**  Draw Entity ID, position and list of components attached. */
-	private void drawComponentList() {
-		font.setColor(1, 1, 1, 1);
+	private void drawComponentList() {		
+		fontSmall.setColor(1, 1, 1, 1);
 		for (Entity entity : objects) {
 			//get entities position and list of components
 			TransformComponent t = Mappers.transform.get(entity);			
 			ImmutableArray<Component> components = entity.getComponents();
+		
+			//if has id TODO: character ID
+			//VehicleComponent v = Mappers.vehicle.get(entity);
+			//CharacterComponent c = Mappers.character.get(entity);
+			//String id = "";
+			//if (v != null) {
+			//	id = "VID: " + v.id + " ";
+			//}
+			//if (c != null) {
+			//	id = "CID: " + c.id + " ";
+			//}
+			
+			//print current ID and position in world and a list of all components
+			//String  vel = " ~ " + MyMath.round(t.velocity.len(), 1);
+			//String info = id + "(" + MyMath.round(t.pos.x, 1) + "," + MyMath.round(t.pos.y, 1) + ")" + vel;
 			
 			//use Vector3.cpy() to project only the position and avoid modifying projection matrix for all coordinates
 			Vector3 screenPos = cam.project(t.pos.cpy());
-					
-			//if has movement
-			MovementComponent m = Mappers.movement.get(entity);
-			String vel = "";
-			if (m != null) {
-				vel = " ~ " + MyMath.round(m.velocity.len(), 1);
-			}
+			//font.draw(batch, info, screenPos.x, screenPos.y);
+			float yOffset = fontSmall.getLineHeight() * components.size() * 2;
+			float nextLine = fontSmall.getLineHeight();
+			int curLine = 0;
 			
-			//if has id
-			VehicleComponent v = Mappers.vehicle.get(entity);
-			String id = "";
-			if (v != null) {
-				id = "ID: " + v.id + " ";
+			/*
+			int l = 0;
+			for (Component c : components) {
+				for (Field f : c.getClass().getFields()) {
+					l++;
+				}
+				l++;
 			}
-			
-			//print current ID and position in world and a list of all components
-			String info = id + "(" + MyMath.round(t.pos.x, 1) + "," + MyMath.round(t.pos.y, 1) + ")" + vel;
-			font.draw(batch, info, screenPos.x, screenPos.y);
-			int nextLine = 20;
-			for (int curComp = 0; curComp < components.size(); curComp++) {
-				font.draw(batch, "[" + components.get(curComp).getClass().getSimpleName() + "]", screenPos.x, screenPos.y - nextLine * (curComp + 1));
+			batch.draw(TextureFactory.createTile(new Color(0.5f,0.5f,0.5f,0.5f)), screenPos.x, screenPos.y - yOffset - fontSmall.getLineHeight() , 400, l * nextLine);
+			*/
+			for (Component c : components) {
+				batch.draw(TextureFactory.createTile(new Color(0,0.5f,0.5f,1f)), screenPos.x, screenPos.y - (nextLine * curLine) + yOffset, 400, 4);
+				fontSmall.draw(batch, "[" + c.getClass().getSimpleName() + "]", screenPos.x, screenPos.y - (nextLine * curLine) + yOffset);
+				
+				for (Field f : c.getClass().getFields()) {
+					try {
+						fontSmall.draw(batch, f.getName() +  " " + f.get(c), screenPos.x + 130, screenPos.y - (nextLine * curLine) + yOffset);
+					} catch (IllegalArgumentException e) {
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						e.printStackTrace();
+					}
+					curLine++;
+				}
+				curLine++;
 			}
-			
 		}
 		
 	}
 
 	/**  Draw position and speed of entity. */
 	private void drawPos() {
-		font.setColor(1, 1, 1, 1);
+		fontSmall.setColor(1, 1, 1, 1);
 		for (Entity entity : objects) {
 			TransformComponent t = Mappers.transform.get(entity);
-			MovementComponent m = Mappers.movement.get(entity);
+			
+			String vel = " ~ " + MyMath.round(t.velocity.len(), 1);
+			String info = Math.round(t.pos.x) + "," + Math.round(t.pos.y) + vel;
 			
 			Vector3 screenPos = cam.project(t.pos.cpy());
-			String vel = "";
-			if (m != null) {
-				vel = " ~ " + MyMath.round(m.velocity.len(), 1);
-			}
-			String info = Math.round(t.pos.x) + "," + Math.round(t.pos.y) + vel;
-			font.draw(batch, info, screenPos.x, screenPos.y);			
-			
+			fontSmall.draw(batch, info, screenPos.x, screenPos.y);			
 		}
-		
 	}
 	
 	@Override 

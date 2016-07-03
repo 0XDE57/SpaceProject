@@ -8,7 +8,6 @@ import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.MissileComponent;
-import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.TextureComponent;
@@ -20,8 +19,6 @@ public class Mappers {
 	public static final ComponentMapper<TextureComponent> texture = ComponentMapper.getFor(TextureComponent.class);
 
 	public static final ComponentMapper<TransformComponent> transform = ComponentMapper.getFor(TransformComponent.class);	
-
-	public static final ComponentMapper<MovementComponent> movement = ComponentMapper.getFor(MovementComponent.class);	
 
 	public static final ComponentMapper<BoundsComponent> bounds = ComponentMapper.getFor(BoundsComponent.class);
 	

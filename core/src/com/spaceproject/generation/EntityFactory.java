@@ -15,7 +15,6 @@ import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.MissileComponent;
-import com.spaceproject.components.MovementComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.StarComponent;
@@ -172,8 +171,8 @@ public class EntityFactory {
 		transform.rotation = t.rotation;
 		
 		//set position
-		MovementComponent movement = new MovementComponent();
-		movement.velocity.add(dx, dy);
+		//MovementComponent movement = new MovementComponent();
+		transform.velocity.add(dx, dy);
 		
 		//set expire time
 		ExpireComponent expire = new ExpireComponent();
@@ -190,7 +189,7 @@ public class EntityFactory {
 		entity.add(texture);
 		entity.add(bounds);
 		entity.add(transform);
-		entity.add(movement);
+		//entity.add(movement);
 		
 		return entity;
 	}
@@ -217,7 +216,6 @@ public class EntityFactory {
 		entity.add(bounds);
 		entity.add(transform);
 		entity.add(texture);
-		entity.add(new MovementComponent());
 		entity.add(character);
 			
 		return entity;
@@ -298,7 +296,6 @@ public class EntityFactory {
 		entity.add(transform);
 		entity.add(vehicle);
 		entity.add(map);
-		entity.add(new MovementComponent());
 		
 		return entity;
 	}
@@ -345,7 +342,6 @@ public class EntityFactory {
 		entity.add(bounds);
 		entity.add(texture);
 		entity.add(transform);
-		entity.add(new MovementComponent());
 		entity.add(new VehicleComponent());
 		
 		return entity;
@@ -386,7 +382,6 @@ public class EntityFactory {
 		entity.add(bounds);
 		entity.add(texture);
 		entity.add(transform);
-		entity.add(new MovementComponent());
 		entity.add(new VehicleComponent());
 		
 		return entity;

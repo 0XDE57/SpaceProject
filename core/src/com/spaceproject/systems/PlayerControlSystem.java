@@ -6,14 +6,12 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.components.BoundsComponent;
-import com.spaceproject.components.CannonComponent;
-import com.spaceproject.components.MovementComponent;
-import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.CameraFocusComponent;
+import com.spaceproject.components.CannonComponent;
+import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
@@ -174,7 +172,7 @@ public class PlayerControlSystem extends EntitySystem {
 		Entity player = engine.getEntitiesFor(Family.one(CameraFocusComponent.class).get()).first();
 		
 		//freeze position
-		player.getComponent(MovementComponent.class).velocity.set(0, 0); 
+		player.getComponent(TransformComponent.class).velocity.set(0, 0); 
 		
 		TextureComponent tex = player.getComponent(TextureComponent.class);
 		
@@ -242,10 +240,8 @@ public class PlayerControlSystem extends EntitySystem {
 	 * @param delta
 	 */
 	private void controlShip(Entity vehicleEntity, float delta) {
-		//Entity vehicleEntity = Mappers.character.get(playerEntity).vehicle;
 		
 		TransformComponent transform = Mappers.transform.get(vehicleEntity);
-		MovementComponent movement = Mappers.movement.get(vehicleEntity);	
 		VehicleComponent vehicle = Mappers.vehicle.get(vehicleEntity);
 		
 		CannonComponent cannon = Mappers.cannon.get(vehicleEntity);	
@@ -257,32 +253,32 @@ public class PlayerControlSystem extends EntitySystem {
 		
 		//apply thrust forward accelerate 
 		if (moveForward) {
-			accelerate(delta, transform, movement, vehicle);
+			accelerate(delta, transform, vehicle);
 		}
 		
 		//apply thrust left
 		if (moveLeft) {
-			accelLeft(delta, transform, movement, vehicle);
+			accelLeft(delta, transform, vehicle);
 		}
 		
 		//apply thrust right
 		if (moveRight) {
-			accelRight(delta, transform, movement, vehicle);
+			accelRight(delta, transform, vehicle);
 		}
 		
 		//stop vehicle
 		if (applyBreaks) {
-			decelerate(delta, movement);
+			decelerate(delta, transform);
 		}
 		
 		//fire cannon / attack
 		if (shoot) {
-			fireCannon(transform, movement, cannon, Mappers.vehicle.get(vehicleEntity).id);
+			fireCannon(transform, cannon, Mappers.vehicle.get(vehicleEntity).id);
 		}
 		
 		//debug force insta-stop
 		if (stop) {
-			movement.velocity.set(0,0);
+			transform.velocity.set(0,0);
 			stop = false;
 		}
 		
@@ -296,26 +292,26 @@ public class PlayerControlSystem extends EntitySystem {
 	/**
 	 * Slow down ship. When ship is slow enough, ship will stop completely
 	 * @param delta
-	 * @param movement
+	 * @param transform
 	 */
-	private static void decelerate(float delta, MovementComponent movement) {
+	private static void decelerate(float delta, TransformComponent transform) {
 		int stopThreshold = 20; 
 		int minBreakingOffset = 100;
 		int maxBreakingThrust = 1000;
-		if (movement.velocity.len() <= stopThreshold) {
+		if (transform.velocity.len() <= stopThreshold) {
 			//completely stop if moving really slowly
-			movement.velocity.set(0,0);
+			transform.velocity.set(0,0);
 		} else {
 			//thrust amount to slow down by
-			float thrust = minBreakingOffset + movement.velocity.len();		
+			float thrust = minBreakingOffset + transform.velocity.len();		
 			if (thrust > maxBreakingThrust) {
 				thrust = maxBreakingThrust; //cap the braking power
 			}
 			//add thrust opposite direction of velocity to slow down ship
-			float angle = movement.velocity.angle();
+			float angle = transform.velocity.angle();
 			float dx = (float) Math.cos(angle) * thrust * delta;
 			float dy = (float) Math.sin(angle) * thrust * delta;
-			movement.velocity.add(dx, dy);
+			transform.velocity.add(dx, dy);
 		}
 	}
 
@@ -326,14 +322,14 @@ public class PlayerControlSystem extends EntitySystem {
 	 * @param movement
 	 * @param vehicle
 	 */
-	private void accelRight(float delta, TransformComponent transform, MovementComponent movement, VehicleComponent vehicle) {
+	private void accelRight(float delta, TransformComponent transform, VehicleComponent vehicle) {
 		float thrust = vehicle.thrust * 0.6f;
 		float angle = transform.rotation - 1.57f;
 		float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
 		float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
-		movement.velocity.add(dx, dy);
+		transform.velocity.add(dx, dy);
 		if (vehicle.maxSpeed != -1)
-			movement.velocity.clamp(0, vehicle.maxSpeed);
+			transform.velocity.clamp(0, vehicle.maxSpeed);
 	}
 
 	/**
@@ -343,14 +339,14 @@ public class PlayerControlSystem extends EntitySystem {
 	 * @param movement
 	 * @param vehicle
 	 */
-	private void accelLeft(float delta, TransformComponent transform, MovementComponent movement, VehicleComponent vehicle) {
+	private void accelLeft(float delta, TransformComponent transform, VehicleComponent vehicle) {
 		float thrust = vehicle.thrust * 0.6f;
 		float angle = transform.rotation + 1.57f;
 		float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
 		float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
-		movement.velocity.add(dx, dy);
+		transform.velocity.add(dx, dy);
 		if (vehicle.maxSpeed != -1)
-			movement.velocity.clamp(0, vehicle.maxSpeed);
+			transform.velocity.clamp(0, vehicle.maxSpeed);
 	}
 
 	/**
@@ -360,7 +356,7 @@ public class PlayerControlSystem extends EntitySystem {
 	 * @param movement
 	 * @param vehicle
 	 */
-	private void accelerate(float delta, TransformComponent transform, MovementComponent movement, VehicleComponent vehicle) {
+	private void accelerate(float delta, TransformComponent transform, VehicleComponent vehicle) {
 		//TODO: create a vector method for the dx = cos... dy = sin... It's used multiple times in the program(movement, missiles..)
 		//TODO: implement rest of engine behavior
 		//float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go			
@@ -369,11 +365,11 @@ public class PlayerControlSystem extends EntitySystem {
 		float angle = transform.rotation;
 		float dx = (float) Math.cos(angle) * (thrust * movementMultiplier) * delta;
 		float dy = (float) Math.sin(angle) * (thrust * movementMultiplier) * delta;
-		movement.velocity.add(dx, dy);
+		transform.velocity.add(dx, dy);
 		
 		//cap speed at max. if maxSpeed set to -1 it's infinite(no cap)
 		if (vehicle.maxSpeed != -1)
-			movement.velocity.clamp(0, vehicle.maxSpeed);
+			transform.velocity.clamp(0, vehicle.maxSpeed);
 	}
 
 	/**
@@ -401,7 +397,7 @@ public class PlayerControlSystem extends EntitySystem {
 	 * @param movement of ship
 	 * @param cannon
 	 */
-	private void fireCannon(TransformComponent transform, MovementComponent movement, CannonComponent cannon, long ID) {
+	private void fireCannon(TransformComponent transform, CannonComponent cannon, long ID) {
 		//check if can fire before shooting
 		if (!canFire(cannon))
 			return;
@@ -412,8 +408,8 @@ public class PlayerControlSystem extends EntitySystem {
 		}		
 		
 		//create missile	
-		float dx = (float) (Math.cos(transform.rotation) * cannon.velocity) + movement.velocity.x;
-		float dy = (float) (Math.sin(transform.rotation) * cannon.velocity) + movement.velocity.y;
+		float dx = (float) (Math.cos(transform.rotation) * cannon.velocity) + transform.velocity.x;
+		float dy = (float) (Math.sin(transform.rotation) * cannon.velocity) + transform.velocity.y;
 		engine.addEntity(EntityFactory.createMissile(transform, dx, dy, cannon.size, cannon.damage, ID));
 		
 		//subtract ammo
