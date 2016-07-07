@@ -15,7 +15,7 @@ Set up your [Development Environment](https://github.com/libgdx/libgdx/wiki/Sett
 
 Make sure Android SDK is installed.
 
-Import projects in IDE of choice using gradle.
+Import project in IDE of choice using gradle.
 
 ###Trouble Shooting
 If a "File not found" error occurs, check the working directory.
