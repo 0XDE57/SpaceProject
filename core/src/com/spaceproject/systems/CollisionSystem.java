@@ -24,8 +24,8 @@ public class CollisionSystem extends EntitySystem {
 	public void addedToEngine(Engine engine) {
 		this.engine = engine;
 		
-		missiles = engine.getEntitiesFor(Family.all(MissileComponent.class).get());
-		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
+		missiles = engine.getEntitiesFor(Family.all(MissileComponent.class, BoundsComponent.class).get());
+		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class, BoundsComponent.class).get());
 	
 	}
 	

@@ -50,7 +50,10 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
 		//set this as input processor for mouse wheel scroll events
 		Gdx.input.setInputProcessor(this);
 		
-		System.out.println("ScreenAdapter Reset.");
+		//debug
+		System.out.println("ScreenAdapter Reset.");		
+		toggleVsync();
+		//
     }
     
     @Override

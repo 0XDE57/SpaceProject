@@ -296,18 +296,14 @@ public class PlayerControlSystem extends EntitySystem {
 	 */
 	private static void decelerate(float delta, TransformComponent transform) {
 		int stopThreshold = 20; 
-		int minBreakingOffset = 100;
-		int maxBreakingThrust = 1000;
+		int minBreakingThrust = 10;
+		int maxBreakingThrust = 1500;
 		if (transform.velocity.len() <= stopThreshold) {
 			//completely stop if moving really slowly
 			transform.velocity.set(0,0);
 		} else {
-			//thrust amount to slow down by
-			float thrust = minBreakingOffset + transform.velocity.len();		
-			if (thrust > maxBreakingThrust) {
-				thrust = maxBreakingThrust; //cap the braking power
-			}
 			//add thrust opposite direction of velocity to slow down ship
+			float thrust = MathUtils.clamp(transform.velocity.len(), minBreakingThrust, maxBreakingThrust);
 			float angle = transform.velocity.angle();
 			float dx = (float) Math.cos(angle) * thrust * delta;
 			float dy = (float) Math.sin(angle) * thrust * delta;

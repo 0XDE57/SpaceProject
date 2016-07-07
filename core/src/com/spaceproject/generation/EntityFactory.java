@@ -168,11 +168,8 @@ public class EntityFactory {
 		//set position and orientation
 		TransformComponent transform = new TransformComponent();
 		transform.pos.set(t.pos);
-		transform.rotation = t.rotation;
-		
-		//set position
-		//MovementComponent movement = new MovementComponent();
-		transform.velocity.add(dx, dy);
+		transform.rotation = t.rotation;		
+		transform.velocity.add(dx, dy);//add velocity
 		
 		//set expire time
 		ExpireComponent expire = new ExpireComponent();
@@ -182,14 +179,13 @@ public class EntityFactory {
 		MissileComponent missile = new MissileComponent();
 		missile.damage = damage;
 		missile.ownerID = ID;
-
+		
 		
 		entity.add(missile);
 		entity.add(expire);
 		entity.add(texture);
 		entity.add(bounds);
 		entity.add(transform);
-		//entity.add(movement);
 		
 		return entity;
 	}

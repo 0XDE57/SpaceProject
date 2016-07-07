@@ -58,4 +58,17 @@ public class MyMath {
 	public static float inverseLerp(float min, float max, float value) {
 		return (value - min) / (max - min);
 	}
+	
+	/**
+	 * Convert bytes to a human readable format.
+	 * Eg: 26673720 -> 25.44MB
+	 * Credit: icza, stackoverflow.com/questions/3758606/#24805871
+	 * @param bytes
+	 * @return bytes with SI postfix
+	 */
+	public static String formatBytes(long bytes) {
+	    if (bytes < 1024) return bytes + " B";
+	    int z = (63 - Long.numberOfLeadingZeros(bytes)) / 10;
+	    return String.format("%.2f%sB", (double)bytes / (1L << (z*10)), " KMGTPE".charAt(z));
+	}
 }

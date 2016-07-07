@@ -1,6 +1,7 @@
 package com.spaceproject.systems;
 
 import java.lang.reflect.Field;
+import java.util.Set;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
@@ -8,8 +9,8 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -22,10 +23,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BoundsComponent;
-import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.Mappers;
@@ -41,6 +40,7 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 	private static ShapeRenderer shape;
 	private BitmapFont fontSmall, fontLarge;
 	private Matrix4 projectionMatrix = new Matrix4();
+	private Texture back = TextureFactory.createTile(new Color(0.5f, 0.5f, 0.5f, 1));
 	
 	//entity storage
 	private Array<Entity> objects;
@@ -55,12 +55,6 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 	private boolean drawOrbitPath = false;
 	private boolean drawVectors = false;
 	
-	//entity and component counting
-	private float countTimer = 50;
-	private float curCountTime = countTimer;
-	private int entityCount = 0;
-	private int componentCount = 0;
-	
 	public DebugUISystem() {
 		this(MyScreenAdapter.cam, MyScreenAdapter.batch, MyScreenAdapter.shape);
 	}
@@ -73,8 +67,23 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		shape = shapeRenderer;
 		fontSmall = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 10);
 		fontLarge = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 20);
-		objects = new Array<Entity>();		
+		objects = new Array<Entity>();
 		
+		
+		boolean showInfo = false;
+		if (showInfo) {
+			System.out.println("\n------- sys info -------");
+			System.getProperties().list(System.out);
+			System.out.println("-------------------------\n");
+			
+			/*
+			System.out.println(String.format("%s %s", Gdx.graphics.getPpiX(), Gdx.graphics.getPpiY()));
+			for (DisplayMode mode : Gdx.graphics.getDisplayModes()) {
+				System.out.println(String.format("%s %s %s %s", mode.width, mode.height, mode.bitsPerPixel, mode.refreshRate));
+			}
+			System.out.println("-------------------------\n");
+			*/
+		}
 	}
 
 	@Override
@@ -85,11 +94,6 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		//don't update if we aren't drawing
 		if (!drawDebugUI) return;				
 		super.update(delta);
-		
-			
-		//update timer
-		curCountTime -= 100 * delta;
-		
 		
 		//set projection matrix so things render using correct coordinates
 		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());		
@@ -125,8 +129,6 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		shape.end();
 		
 		
-		
-		//draw batch
 		batch.begin();
 		
 		//print debug menu
@@ -142,6 +144,7 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		if (drawComponentList) drawComponentList();
 
 		batch.end();	
+		
 		
 		objects.clear();		
 	}
@@ -261,93 +264,73 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 				shape.rect(t.pos.x - rect.width/2, t.pos.y - rect.height/2, rect.width, rect.height);
 
 				//draw Orientated bounding box
-				bounds.poly.setPosition(bounds.poly.getX(), bounds.poly.getY());
 				shape.setColor(1, 0, 0, 1);
 				shape.polygon(bounds.poly.getTransformedVertices());
 			}
-			
 		}
-		
 	}
 
 	/** draw Frames and entity count in top left corner */
 	private void drawFPS() {
-		fontLarge.setColor(1,1,1,1);
-
-		if (curCountTime < 0) {
-			entityCount = engine.getEntities().size();
-			componentCount = 0;
-			for (Entity ent : engine.getEntities()) {
-				componentCount += ent.getComponents().size();
-			}
-
-			curCountTime = countTimer;
+		//fps
+		String frames = Integer.toString(Gdx.graphics.getFramesPerSecond());
+		
+		//threads
+		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+		String threads = "  Thread: " + threadSet.size();
+		
+		//memory
+		Runtime runtime = Runtime.getRuntime();
+		long used = runtime.totalMemory() - runtime.freeMemory();
+		String memory = "Mem: " + MyMath.formatBytes(used);
+		
+		//entity/component count
+		int entityCount = engine.getEntities().size();
+		int componentCount = 0;
+		for (Entity ent : engine.getEntities()) {
+			componentCount += ent.getComponents().size();
 		}
 		String count = "   E: " + entityCount + " - C: " + componentCount;
 		
-		fontLarge.draw(batch, Integer.toString(Gdx.graphics.getFramesPerSecond()) + count, 15, Gdx.graphics.getHeight()- 15);
+		//camera position
+		String camera = String.format("Pos: %s %s  Z:%3$.2f", (int)cam.position.x, (int)cam.position.y, cam.zoom);
+		
+		//display info
+		int x = 15;
+		int y = Gdx.graphics.getHeight() - 15;
+		fontLarge.setColor(1,1,1,1);
+		fontLarge.draw(batch, frames + count, x, y);
+		fontLarge.draw(batch, memory + threads, x, y - fontLarge.getLineHeight());
+		
+		fontLarge.draw(batch, camera, x, y - fontLarge.getLineHeight()*2);
 	}
 	
-	/**  Draw background for easier text reading */
-	private void drawComponentListBack() {
-		shape.setColor(0.5f, 0.5f, 0.5f, 0.6f);
-		int padding = 5;
-		//for each entity draw a clear box 
-		for (Entity entity : objects) {
-			TransformComponent transform = Mappers.transform.get(entity);
-			//draw rectangle with size relative to number of components and text size (20). 
-			//210 box width - magic number assuming no component name will be that long 
-			shape.rect(transform.pos.x-padding, transform.pos.y+padding, 210, ((-entity.getComponents().size() - 1) * 20) - padding);
-		}
-	}
+	
 
-	/**  Draw Entity ID, position and list of components attached. */
+	/**  Draw all Entity components and fields. */
 	private void drawComponentList() {		
 		fontSmall.setColor(1, 1, 1, 1);
 		for (Entity entity : objects) {
 			//get entities position and list of components
 			TransformComponent t = Mappers.transform.get(entity);			
 			ImmutableArray<Component> components = entity.getComponents();
-		
-			//if has id TODO: character ID
-			//VehicleComponent v = Mappers.vehicle.get(entity);
-			//CharacterComponent c = Mappers.character.get(entity);
-			//String id = "";
-			//if (v != null) {
-			//	id = "VID: " + v.id + " ";
-			//}
-			//if (c != null) {
-			//	id = "CID: " + c.id + " ";
-			//}
-			
-			//print current ID and position in world and a list of all components
-			//String  vel = " ~ " + MyMath.round(t.velocity.len(), 1);
-			//String info = id + "(" + MyMath.round(t.pos.x, 1) + "," + MyMath.round(t.pos.y, 1) + ")" + vel;
 			
 			//use Vector3.cpy() to project only the position and avoid modifying projection matrix for all coordinates
 			Vector3 screenPos = cam.project(t.pos.cpy());
-			//font.draw(batch, info, screenPos.x, screenPos.y);
 			float yOffset = fontSmall.getLineHeight() * components.size() * 2;
 			float nextLine = fontSmall.getLineHeight();
 			int curLine = 0;
 			
-			/*
-			int l = 0;
+			//draw all components
 			for (Component c : components) {
-				for (Field f : c.getClass().getFields()) {
-					l++;
-				}
-				l++;
-			}
-			batch.draw(TextureFactory.createTile(new Color(0.5f,0.5f,0.5f,0.5f)), screenPos.x, screenPos.y - yOffset - fontSmall.getLineHeight() , 400, l * nextLine);
-			*/
-			for (Component c : components) {
-				batch.draw(TextureFactory.createTile(new Color(0,0.5f,0.5f,1f)), screenPos.x, screenPos.y - (nextLine * curLine) + yOffset, 400, 4);
-				fontSmall.draw(batch, "[" + c.getClass().getSimpleName() + "]", screenPos.x, screenPos.y - (nextLine * curLine) + yOffset);
+				float comp = curLine;//save component line to draw name
 				
+				//draw all fields
 				for (Field f : c.getClass().getFields()) {
+					float yOffField = screenPos.y - (nextLine * curLine) + yOffset;
+					batch.draw(back, screenPos.x, yOffField, 400, -nextLine);
 					try {
-						fontSmall.draw(batch, f.getName() +  " " + f.get(c), screenPos.x + 130, screenPos.y - (nextLine * curLine) + yOffset);
+						fontSmall.draw(batch, String.format("%-14s %s", f.getName(), f.get(c)), screenPos.x + 130, yOffField);
 					} catch (IllegalArgumentException e) {
 						e.printStackTrace();
 					} catch (IllegalAccessException e) {
@@ -355,7 +338,16 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 					}
 					curLine++;
 				}
+				
+				//draw backing on empty components
+				if (c.getClass().getFields().length == 0) {
+					batch.draw(back, screenPos.x, screenPos.y - (nextLine * curLine) + yOffset, 400, -nextLine);
+				}
 				curLine++;
+				
+				//draw component name
+				float yOffComp = screenPos.y - (nextLine * comp) + yOffset;
+				fontSmall.draw(batch, "[" + c.getClass().getSimpleName() + "]", screenPos.x, yOffComp);
 			}
 		}
 		
