@@ -7,6 +7,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CameraFocusComponent;
@@ -406,7 +407,7 @@ public class PlayerControlSystem extends EntitySystem {
 		//create missile	
 		float dx = (float) (Math.cos(transform.rotation) * cannon.velocity) + transform.velocity.x;
 		float dy = (float) (Math.sin(transform.rotation) * cannon.velocity) + transform.velocity.y;
-		engine.addEntity(EntityFactory.createMissile(transform, dx, dy, cannon.size, cannon.damage, ID));
+		engine.addEntity(EntityFactory.createMissile(transform, new Vector2(dx, dy), cannon, ID));
 		
 		//subtract ammo
 		--cannon.curAmmo;

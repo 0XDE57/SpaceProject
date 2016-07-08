@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
+import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CannonComponent;
@@ -150,12 +151,12 @@ public class EntityFactory {
 		return entity;
 	}
 	
-	public static Entity createMissile(TransformComponent t, float dx, float dy, int size, float damage, long ID) {
+	public static Entity createMissile(TransformComponent source, Vector2 velocity, CannonComponent cannon, long ID) {
 		Entity entity = new Entity();
 				
 		//create texture
 		TextureComponent texture = new TextureComponent();
-		texture.texture = TextureFactory.generateProjectile(size);
+		texture.texture = TextureFactory.generateProjectile(cannon.size);
 		texture.scale = scale;
 		
 		//bounding box
@@ -165,11 +166,12 @@ public class EntityFactory {
 		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
 	    bounds.poly.setOrigin(width/2, height/2);
 		
-		//set position and orientation
+		//set position, orientation, velocity and acceleration
 		TransformComponent transform = new TransformComponent();
-		transform.pos.set(t.pos);
-		transform.rotation = t.rotation;		
-		transform.velocity.add(dx, dy);//add velocity
+		transform.pos.set(source.pos);
+		transform.rotation = source.rotation;		
+		transform.velocity.add(velocity);
+		transform.accel.add(velocity.cpy().setLength(cannon.acceleration));//speed up over time
 		
 		//set expire time
 		ExpireComponent expire = new ExpireComponent();
@@ -177,7 +179,7 @@ public class EntityFactory {
 		
 		//missile damage
 		MissileComponent missile = new MissileComponent();
-		missile.damage = damage;
+		missile.damage = cannon.damage;
 		missile.ownerID = ID;
 		
 		
@@ -264,6 +266,7 @@ public class EntityFactory {
 		cannon.fireRate = 20; //lower is faster
 		cannon.size = 1; //higher is bigger
 		cannon.velocity = 680; //higher is faster
+		cannon.acceleration = 200;
 		cannon.rechargeRate = 100; //lower is faster
 		
 		//engine data and marks entity as drive-able
