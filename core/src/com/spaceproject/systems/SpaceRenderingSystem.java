@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceBackgroundTile;
@@ -103,8 +102,16 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 			//draw = (tile position + (cam position - center of tile)) * depth			
 			float drawX = tile.x + (cam.position.x - (tile.size/2)) * tile.depth;
 			float drawY = tile.y + (cam.position.y - (tile.size/2)) * tile.depth;			
+			//batch.draw(tile.tex, drawX, drawY);
 			
-			batch.draw(tile.tex, drawX, drawY);
+			//draw texture
+			float width = tile.tex.getWidth();
+			float height = tile.tex.getHeight();
+			batch.draw(tile.tex, drawX, drawY,
+					   0,0,
+					   width, height,
+					   tile.scale, tile.scale,
+					   0, 0, 0, (int)width, (int)height, false, false);
 		}
 	}
 

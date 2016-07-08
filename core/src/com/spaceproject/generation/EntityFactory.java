@@ -386,11 +386,12 @@ public class EntityFactory {
 		return entity;
 	}
 
+	/*
 	public static Entity createNoiseTile(int x, int y, int tileSize) {
 		Entity entity = new Entity();
 		
 		TextureComponent texture = new TextureComponent();
-		texture.texture = TextureFactory.generateNoiseTile(MyMath.getSeed(x, y), tileSize);
+		texture.texture = TextureFactory.generateNoiseTile(x, y, tileSize);
 		
 		TransformComponent transform = new TransformComponent();
 		transform.pos.x = x;
@@ -401,7 +402,7 @@ public class EntityFactory {
 		entity.add(texture);
 		
 		return entity;
-	}
+	}*/
 
 
 

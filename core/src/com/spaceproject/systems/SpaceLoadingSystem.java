@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.spaceproject.SpaceBackgroundTile;
+import com.spaceproject.SpaceBackgroundTile.TileType;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
 import com.spaceproject.components.OrbitComponent;
@@ -35,13 +36,15 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 	private static OrthographicCamera cam;
 
 	// background layer of tiles
-	private static ArrayList<SpaceBackgroundTile> tiles = new ArrayList<SpaceBackgroundTile>();
+	private static ArrayList<SpaceBackgroundTile> tiles;
 
-	// multiplier for position of tile
+	// multiplier for parallax position of tile
+	private static float dustTileDepth = 0.99f;
 	private static float bgTileDepth = 0.9f; // background
 	private static float fgTileDepth = 0.8f; // foreground
 
 	// center tile to check for tile change
+	private Vector2 dustCenterTile;
 	private Vector2 bgCenterTile; // background
 	private Vector2 fgCenterTile; // foreground
 
@@ -53,13 +56,13 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 	private float checkTileCurrTime;
 
 	// star entities
-	private ArrayList<Vector2> points = new ArrayList<Vector2>();
+	private ArrayList<Vector2> points;
 	private ImmutableArray<Entity> loadedStars;
 	private float checkStarsTimer = 4000;
 	private float checkStarsCurrTime;
 	
 	//threads for generating planet texture noise
-	ArrayList<NoiseThread> noiseThreads = new ArrayList<NoiseThread>();
+	ArrayList<NoiseThread> noiseThreads;
 
 	public SpaceLoadingSystem() {
 		this(MyScreenAdapter.cam);
@@ -67,6 +70,10 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 	
 	public SpaceLoadingSystem(OrthographicCamera camera) {
 		cam = camera;
+		
+		tiles = new ArrayList<SpaceBackgroundTile>();
+		points = new ArrayList<Vector2>();
+		noiseThreads = new ArrayList<NoiseThread>();
 	}
 
 	@Override
@@ -156,32 +163,50 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 	 * @param delta
 	 */
 	private void updateTiles(float delta) {
-		// TODO: space dust layer
 		// TODO: consider adding timers to break up the process from happening
 		// in one frame causing a freeze/jump
 		// because putting it in a separate thread is not working (possible?)
-		// due to
-		// glContext...
+		// due to glContext...
 
-		// Also: consider refactoring to allow for arbitrary number
-		// layers(depths)
+		// TODO: refactor to simplify layers(depths)
 
 		// timer to check when player has changed tiles
 		checkTileCurrTime -= 1000 * delta;
 		if (checkTileCurrTime < 0) {
+			// reset timer
+			checkTileCurrTime = checkTileTimer;
 
 			// get tiles camera is in
+			Vector2 dustTile = getTilePos(cam.position.x, cam.position.y, dustTileDepth);
 			Vector2 bgTile = getTilePos(cam.position.x, cam.position.y, bgTileDepth);
 			Vector2 fgTile = getTilePos(cam.position.x, cam.position.y, fgTileDepth);
 
+			if (dustCenterTile == null) {
+				dustCenterTile = dustTile;
+				loadTiles(dustTile, dustTileDepth, SpaceBackgroundTile.TileType.Dust);
+			}
+			
 			if (bgCenterTile == null) {
 				bgCenterTile = bgTile;
-				loadTiles(bgTile, bgTileDepth);
+				loadTiles(bgTile, bgTileDepth, SpaceBackgroundTile.TileType.Stars);
 			}
 
 			if (fgCenterTile == null) {
 				fgCenterTile = fgTile;
-				loadTiles(fgTile, fgTileDepth);
+				loadTiles(fgTile, fgTileDepth, SpaceBackgroundTile.TileType.Stars);
+			}
+			
+			
+			if (dustTile.x != dustCenterTile.x || dustTile.y != dustCenterTile.y) {
+
+				// unload old tiles
+				unloadTiles(dustTile, dustTileDepth);
+
+				// load new tiles
+				loadTiles(dustTile, dustTileDepth, SpaceBackgroundTile.TileType.Dust);
+
+				// store tile
+				dustCenterTile = dustTile;
 			}
 
 			// check if player has changed background tiles
@@ -191,7 +216,7 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 				unloadTiles(bgTile, bgTileDepth);
 
 				// load new tiles
-				loadTiles(bgTile, bgTileDepth);
+				loadTiles(bgTile, bgTileDepth, SpaceBackgroundTile.TileType.Stars);
 
 				// store tile
 				bgCenterTile = bgTile;
@@ -204,17 +229,14 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 				unloadTiles(fgTile, fgTileDepth);
 
 				// load new tiles
-				loadTiles(fgTile, fgTileDepth);
+				loadTiles(fgTile, fgTileDepth, SpaceBackgroundTile.TileType.Stars);
 
 				// store tile
 				fgCenterTile = fgTile;
 			}
 
-			// reset timer
-			checkTileCurrTime = checkTileTimer;
 		}
 	}
-
 
 	private void updateStars(float delta) {
 		checkStarsCurrTime -= 1000 * delta;
@@ -409,8 +431,9 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 	 * 
 	 * @param centerTile
 	 * @param depth
+	 * @param type 
 	 */
-	private void loadTiles(Vector2 centerTile, float depth) {
+	private void loadTiles(Vector2 centerTile, float depth, TileType type) {
 
 		for (int tX = (int) centerTile.x - surround; tX <= centerTile.x + surround; tX++) {
 			for (int tY = (int) centerTile.y - surround; tY <= centerTile.y + surround; tY++) {
@@ -418,18 +441,19 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 				boolean exists = false;
 				for (int index = 0; index < tiles.size() && !exists; ++index) {
 					SpaceBackgroundTile t = tiles.get(index);
-					if (t.tileX == tX && t.tileY == tY && t.depth == depth) {
+					//TODO: explore an ID method of checking existence
+					if (t.tileX == tX && t.tileY == tY && t.depth == depth && t.type == type) {
 						exists = true;
 					}
 				}
 
 				// create and add tile if doesn't exist
 				if (!exists) {
-					tiles.add(new SpaceBackgroundTile(tX, tY, depth, tileSize));
+					tiles.add(new SpaceBackgroundTile(tX, tY, depth, tileSize, type));
 				}
 			}
 		}
-		System.out.println("Load tile: [" + depth + "]: " + (int)centerTile.x + ", " + (int)centerTile.y);
+		System.out.println("Load " + type + " tile: [" + depth + "]: " + (int)centerTile.x + ", " + (int)centerTile.y);
 	}
 
 	/**
@@ -475,7 +499,13 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 
 	@Override
 	public void dispose() {
+		//dispose of textures
+		for (SpaceBackgroundTile t : tiles) {
+			t.tex.dispose();
+		}
+		tiles.clear();
 		
+		//stop and clear threads
 		for (NoiseThread thread : noiseThreads) {
 			thread.stop();
 		}

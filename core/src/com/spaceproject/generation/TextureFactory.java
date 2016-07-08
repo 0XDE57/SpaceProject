@@ -11,7 +11,6 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.NoiseGen;
-import com.spaceproject.utility.NoiseThread;
 import com.spaceproject.utility.OpenSimplexNoise;
 
 public class TextureFactory {
@@ -28,48 +27,44 @@ public class TextureFactory {
 		return tex;
 	}
 	
-	public static Texture generateNoiseTile(long seed, int tileSize) {
-		pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
+	static OpenSimplexNoise opacityGen = new OpenSimplexNoise(SpaceProject.SEED);
+	static OpenSimplexNoise redGen = new OpenSimplexNoise(SpaceProject.SEED + 1);
+	static OpenSimplexNoise blueGen = new OpenSimplexNoise(SpaceProject.SEED + 2);
+	public static Texture generateSpaceBackgroundDust(int tX, int tY, int tileSize) {
+		pixmap = new Pixmap(tileSize, tileSize, Format.RGBA8888);
 		
-		OpenSimplexNoise noise = new OpenSimplexNoise(seed);
-		OpenSimplexNoise rGen = new OpenSimplexNoise(seed + 1);
-		OpenSimplexNoise gGen = new OpenSimplexNoise(seed + 2);
-		OpenSimplexNoise bGen = new OpenSimplexNoise(seed + 3);
-		double featureSize = 24;
-
+		double featureSize = 100;
 		for (int y = 0; y < pixmap.getHeight(); y++) {
 			for (int x = 0; x < pixmap.getWidth(); x++) {
-			
-				double nx = x/featureSize, ny = y/featureSize;
-				double i = noise.eval(nx, ny, 0);
-				i = (i * 0.5) + 0.5; //convert from range [-1:1] to [0:1]
-			
-				double r = rGen.eval(nx, ny, 0);
-				r = (r * 0.5) + 0.5; //convert from range [-1:1] to [0:1]
-				double g = gGen.eval(nx, ny, 0);
-				g = (g * 0.5) + 0.5; //convert from range [-1:1] to [0:1]
-				double b = bGen.eval(nx, ny, 0);
-				b = (b * 0.5) + 0.5; //convert from range [-1:1] to [0:1]
+				//position
+				double nX = (x + (tX * tileSize))/featureSize;
+				double nY = (y + (tY * tileSize))/featureSize;
 				
-				pixmap.setColor(new Color((float)r, (float)g, (float)b, (float) i));
-				pixmap.drawPixel(x, y);
+				//opacity
+				double opacity = opacityGen.eval(nX, nY, 0);
+				opacity = (opacity * 0.5) + 0.5; //convert from range [-1:1] to [0:1]
+				
+				//red
+				double red = redGen.eval(nX, nY, 0);
+				red = (red * 0.5) + 0.5;
+				
+				//blue
+				double blue = blueGen.eval(nX, nY, 0);
+				blue = (blue * 0.5) + 0.5;
+				
+				//draw
+				pixmap.setColor(new Color((float)red, (float)0, (float)blue, (float) opacity));
+				pixmap.drawPixel(x, pixmap.getHeight()-1-y);
 			}
 		}
-		
 		
 		Texture tex = new Texture(pixmap);
 		pixmap.dispose();
 		return tex;
 	}
 	
-	public static Texture generateSpaceBackground(int tileX, int tileY, int tileSize, float depth) {
-
-		/* Note: A Global seed of 0 causes non-unique seeds. 
-		 * Consider either disallowing a seed of 0 or change formula for getting each tiles seed
-		 * This probably affects other parts of the program.
-		 */
-		
-		MathUtils.random.setSeed((long) (MyMath.getSeed(tileX, tileY) * depth));
+	public static Texture generateSpaceBackgroundStars(int tileX, int tileY, int tileSize, float depth) {
+		MathUtils.random.setSeed((long) ((float)MyMath.getSeed(tileX, tileY) * depth));
 		
 		//pixmap = new Pixmap(tileSize, tileSize, Format.RGB565);
 		pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
