@@ -40,7 +40,10 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 	private static ShapeRenderer shape;
 	private BitmapFont fontSmall, fontLarge;
 	private Matrix4 projectionMatrix = new Matrix4();
-	private Texture back = TextureFactory.createTile(new Color(0.5f, 0.5f, 0.5f, 1));
+	
+	//textures
+	private Texture texCompBack = TextureFactory.createTile(Color.GRAY);
+	private Texture texCompSeperator = TextureFactory.createTile(Color.RED);
 	
 	//entity storage
 	private Array<Entity> objects;
@@ -65,7 +68,7 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		cam = camera;
 		batch = spriteBatch;
 		shape = shapeRenderer;
-		fontSmall = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 10);
+		fontSmall = FontFactory.createFont(FontFactory.fontBitstreamVM, 10);
 		fontLarge = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 20);
 		objects = new Array<Entity>();
 		
@@ -98,23 +101,8 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		//set projection matrix so things render using correct coordinates
 		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());		
 		batch.setProjectionMatrix(projectionMatrix);
+
 		
-		/*
-		//enable blending for transparency
-		Gdx.gl.glEnable(GL20.GL_BLEND);
-		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-		
-		//draw filled shapes
-		shape.begin(ShapeType.Filled);
-			
-		//draw light background for text visibility
-		if (drawComponentList) drawComponentListBack();
-			
-		shape.end();
-		Gdx.gl.glDisable(GL20.GL_BLEND); //disable blending
-		*/	
-		
-		//draw non-filled shapes
 		shape.begin(ShapeType.Line);
 		
 		//draw vector to visualize speed and direction
@@ -205,7 +193,7 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		}
 	}
 
-	/** draw menu showing items to draw and toggle keys */
+	/** Draw menu showing items to draw and toggle keys */
 	private void drawDebugMenu() {
 		fontSmall.setColor(1, 1, 1, 1);
 		fontSmall.draw(batch, "***DEBUG [F3]***", 15, Gdx.graphics.getHeight() - 45);
@@ -236,7 +224,7 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		}
 	}
 	
-	/** draw orbit path, a ring to visualize objects orbit*/
+	/** Draw orbit path, a ring to visualize objects orbit*/
 	private void drawOrbitPath() {
 		shape.setColor(1f, 1f, 1, 1);
 		for (Entity entity : objects) {
@@ -251,7 +239,7 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		}
 	}
 	
-	/** draw bounding boxes (hitbox/collision detection) */
+	/** Draw bounding boxes (hitbox/collision detection) */
 	private void drawBounds() {
 		for (Entity entity : objects) { 
 			BoundsComponent bounds = Mappers.bounds.get(entity);		
@@ -270,7 +258,7 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		}
 	}
 
-	/** draw Frames and entity count in top left corner */
+	/** Draw frames, entity count, position and memory info. */
 	private void drawFPS() {
 		//fps
 		String frames = Integer.toString(Gdx.graphics.getFramesPerSecond());
@@ -301,15 +289,16 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		fontLarge.setColor(1,1,1,1);
 		fontLarge.draw(batch, frames + count, x, y);
 		fontLarge.draw(batch, memory + threads, x, y - fontLarge.getLineHeight());
-		
 		fontLarge.draw(batch, camera, x, y - fontLarge.getLineHeight()*2);
 	}
 	
-	
-
 	/**  Draw all Entity components and fields. */
-	private void drawComponentList() {		
+	private void drawComponentList() {
+		float fontHeight = fontSmall.getLineHeight();
+		int backWidth = 400;//width of background
+		
 		fontSmall.setColor(1, 1, 1, 1);
+		
 		for (Entity entity : objects) {
 			//get entities position and list of components
 			TransformComponent t = Mappers.transform.get(entity);			
@@ -317,18 +306,24 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 			
 			//use Vector3.cpy() to project only the position and avoid modifying projection matrix for all coordinates
 			Vector3 screenPos = cam.project(t.pos.cpy());
-			float yOffset = fontSmall.getLineHeight() * components.size() * 2;
-			float nextLine = fontSmall.getLineHeight();
+			
+			//calculate spacing and offset for rendering
+			int fields = 0;
+			for (Component c : components) {
+				fields += c.getClass().getFields().length;
+			}
+			float yOffset = fontHeight * fields/2;
 			int curLine = 0;
 			
-			//draw all components
+			//draw all components/fields
 			for (Component c : components) {
-				float comp = curLine;//save component line to draw name
+				//save component line to draw name
+				float compLine = curLine;
 				
 				//draw all fields
 				for (Field f : c.getClass().getFields()) {
-					float yOffField = screenPos.y - (nextLine * curLine) + yOffset;
-					batch.draw(back, screenPos.x, yOffField, 400, -nextLine);
+					float yOffField = screenPos.y - (fontHeight * curLine) + yOffset;
+					batch.draw(texCompBack, screenPos.x, yOffField, backWidth, -fontHeight);
 					try {
 						fontSmall.draw(batch, String.format("%-14s %s", f.getName(), f.get(c)), screenPos.x + 130, yOffField);
 					} catch (IllegalArgumentException e) {
@@ -341,12 +336,14 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 				
 				//draw backing on empty components
 				if (c.getClass().getFields().length == 0) {
-					batch.draw(back, screenPos.x, screenPos.y - (nextLine * curLine) + yOffset, 400, -nextLine);
+					batch.draw(texCompBack, screenPos.x, screenPos.y - (fontHeight * curLine) + yOffset, backWidth, -fontHeight);
 				}
-				curLine++;
+				
+				//draw separating line
+				batch.draw(texCompSeperator, screenPos.x, screenPos.y - (fontHeight * curLine) + yOffset, backWidth, 1);
 				
 				//draw component name
-				float yOffComp = screenPos.y - (nextLine * comp) + yOffset;
+				float yOffComp = screenPos.y - (fontHeight * compLine) + yOffset;
 				fontSmall.draw(batch, "[" + c.getClass().getSimpleName() + "]", screenPos.x, yOffComp);
 			}
 		}
@@ -375,7 +372,10 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 	
 	@Override
 	public void dispose() {
-		
+		texCompBack.dispose();
+		texCompSeperator.dispose();
+		fontSmall.dispose();
+		fontLarge.dispose();
 		//font.dispose();
 		//batch.dispose();
 		//shape.dispose(); //crashes: 
