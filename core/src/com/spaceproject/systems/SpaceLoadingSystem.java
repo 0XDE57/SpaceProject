@@ -168,74 +168,43 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 		// because putting it in a separate thread is not working (possible?)
 		// due to glContext...
 
-		// TODO: refactor to simplify layers(depths)
-
 		// timer to check when player has changed tiles
 		checkTileCurrTime -= 1000 * delta;
 		if (checkTileCurrTime < 0) {
 			// reset timer
 			checkTileCurrTime = checkTileTimer;
-
-			// get tiles camera is in
-			Vector2 dustTile = getTilePos(cam.position.x, cam.position.y, dustTileDepth);
-			Vector2 bgTile = getTilePos(cam.position.x, cam.position.y, bgTileDepth);
-			Vector2 fgTile = getTilePos(cam.position.x, cam.position.y, fgTileDepth);
-
-			if (dustCenterTile == null) {
-				dustCenterTile = dustTile;
-				loadTiles(dustTile, dustTileDepth, SpaceBackgroundTile.TileType.Dust);
-			}
 			
-			if (bgCenterTile == null) {
-				bgCenterTile = bgTile;
-				loadTiles(bgTile, bgTileDepth, SpaceBackgroundTile.TileType.Stars);
-			}
-
-			if (fgCenterTile == null) {
-				fgCenterTile = fgTile;
-				loadTiles(fgTile, fgTileDepth, SpaceBackgroundTile.TileType.Stars);
-			}
-			
-			
-			if (dustTile.x != dustCenterTile.x || dustTile.y != dustCenterTile.y) {
-
-				// unload old tiles
-				unloadTiles(dustTile, dustTileDepth);
-
-				// load new tiles
-				loadTiles(dustTile, dustTileDepth, SpaceBackgroundTile.TileType.Dust);
-
-				// store tile
-				dustCenterTile = dustTile;
-			}
-
-			// check if player has changed background tiles
-			if (bgTile.x != bgCenterTile.x || bgTile.y != bgCenterTile.y) {
-
-				// unload old tiles
-				unloadTiles(bgTile, bgTileDepth);
-
-				// load new tiles
-				loadTiles(bgTile, bgTileDepth, SpaceBackgroundTile.TileType.Stars);
-
-				// store tile
-				bgCenterTile = bgTile;
-			}
-
-			// check if player has changed foreground tiles
-			if (fgTile.x != fgCenterTile.x || fgTile.y != fgCenterTile.y) {
-
-				// unload old tiles
-				unloadTiles(fgTile, fgTileDepth);
-
-				// load new tiles
-				loadTiles(fgTile, fgTileDepth, SpaceBackgroundTile.TileType.Stars);
-
-				// store tile
-				fgCenterTile = fgTile;
-			}
-
+			//update each layer in order of depth
+			dustCenterTile = updateLayer(dustCenterTile, dustTileDepth, SpaceBackgroundTile.TileType.Dust);
+			bgCenterTile = updateLayer(bgCenterTile, bgTileDepth, SpaceBackgroundTile.TileType.Stars);
+			fgCenterTile = updateLayer(fgCenterTile, fgTileDepth, SpaceBackgroundTile.TileType.Stars);
 		}
+	}
+	
+	private Vector2 updateLayer(Vector2 lastTile, float depth, SpaceBackgroundTile.TileType type) {
+		//calculate tile camera is within
+		Vector2 currentTile = getTilePos(cam.position.x, cam.position.y, depth);
+		
+		//load initial tiles
+		if (lastTile == null) {
+			lastTile = currentTile;
+			loadTiles(currentTile, depth, type);
+		}
+		
+		//check if moved tile
+		if (currentTile.x != lastTile.x || currentTile.y != lastTile.y) {
+
+			// unload old tiles
+			unloadTiles(currentTile, depth);
+
+			// load new tiles
+			loadTiles(currentTile, depth, type);
+
+			// store tile position
+			lastTile = currentTile;
+		}
+		
+		return lastTile;
 	}
 
 	private void updateStars(float delta) {
