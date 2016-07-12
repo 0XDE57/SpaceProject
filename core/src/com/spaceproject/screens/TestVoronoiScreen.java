@@ -8,9 +8,11 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.ConvexHull;
 import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.FloatArray;
@@ -19,6 +21,7 @@ import com.spaceproject.utility.MyScreenAdapter;
 
 //https://en.wikipedia.org/wiki/Circumscribed_circle
 //http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect/565282#565282
+//http://stackoverflow.com/questions/31021968/correct-use-of-polygon-triangulators-in-libgdx
 class DelaunayCell {
 	Vector2 a, b, c;
 	Vector2 midAB, midBC, midCA;
@@ -103,12 +106,30 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 	FloatArray points;
 	DelaunayTriangulator tri;
 	ShortArray triangles;
+	//ConvexHull convex;	
+	ArrayList<DelaunayCell> dCells = new ArrayList<DelaunayCell>();
+	float[] hull;// = convex.computePolygon(points, false).items;
+	
+	boolean drawCircumcircle = false,
+		drawCircumcenter = true,
+		drawPoints = true,
+		drawDelaunay = true,
+		drawVoronoi = true,
+		drawMidpoints = true,
+		drawHull = true;
+	
+	
+	int pX = 0;
+	int pY = Gdx.graphics.getHeight();
+	
+	
+	
 	public TestVoronoiScreen() {
 		cam.position.x = Gdx.graphics.getWidth()/2;
 		cam.position.y = Gdx.graphics.getHeight()/2;
 		
 		tri = new DelaunayTriangulator();
-		
+		//convex = new ConvexHull();
 		
 		generateNewPoints(10);
 
@@ -127,6 +148,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 		
 		
 		calculateDelaunay();
+		
 	}
 
 
@@ -147,14 +169,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 			DelaunayCell d = new DelaunayCell(a, b, c);
 			dCells.add(d);
 		}
+		
+		ConvexHull convex = new ConvexHull();
+		hull = convex.computePolygon(points, false).toArray();
+		hullPoly = new Polygon(hull);
 	}
-	ArrayList<DelaunayCell> dCells = new ArrayList<DelaunayCell>();
-	boolean drawCircumcircle = false,
-		drawCircumcenter = true,
-		drawPoints = true,
-		drawDelaunay = true,
-		drawVoronoi = true,
-		drawMidpoints = true;
+	Polygon hullPoly;
 	
 	@Override
 	public void render(float delta) {
@@ -165,26 +185,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 		
 		shape.begin(ShapeType.Line);
 		
-		/*
-		shape.setColor(Color.BLACK);
-		for (int i = 0; i < points.size; i += 2) {
-			float x = points.get(i);
-			float y = points.get(i+1);
-			shape.circle(x, y, 6);
-		}*/
-		
-	/*
-		shape.setColor(Color.RED);	
-		for (int i = 0; i < triangles.size; i += 3) {
-			int p1 = triangles.get(i) * 2;
-			int p2 = triangles.get(i + 1) * 2;
-			int p3 = triangles.get(i + 2) * 2;
-			shape.triangle( points.get(p1), points.get(p1 + 1), points.get(p2), points.get(p2 + 1), points.get(p3), points.get(p3 + 1));
-		}*/
-		
-		
-		//ArrayList<Vector2> midPoints = new ArrayList<Vector2>();
-	
 		
 		int dist = 6;
 		for (DelaunayCell d : dCells) {
@@ -213,69 +213,113 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 			}
 			
 			
+			
 			//draw voronoi cells
 			if (drawVoronoi) {
-				shape.setColor(Color.ORANGE);
-				shape.line(d.circumcenter, d.midAB);
-				shape.line(d.circumcenter, d.midBC);
-				shape.line(d.circumcenter, d.midCA);
-			}
+				//shape.setColor(Color.ORANGE);		
+				//shape.line(d.circumcenter, d.midAB);
+				//shape.line(d.circumcenter, d.midBC);
+				//shape.line(d.circumcenter, d.midCA);
+				
+				float[] verticies = hullPoly.getTransformedVertices();
+				for (int v = 0; v < verticies.length - 2; v += 2) {
+					float x1 = verticies[v];
+					float y1 = verticies[v + 1];
+					float x2 = verticies[v + 2];
+					float y2 = verticies[v + 3];
+					// convex hull line
+					Vector2 pA1 = new Vector2(x1, y1);
+					Vector2 pA2 = new Vector2(x2, y2);
+					shape.setColor(Color.RED);
+					shape.line(pA1, pA2);
 
-			/*
-			shape.setColor(Color.ORANGE);
-			for (DelaunayCell other : dCells) {
-				//if line from center to midpoint hits another voronoi point, draw to that voronoi point
-				float ab = Intersector.distanceLinePoint(d.circumcenter.x, d.circumcenter.y, d.midAB.x, d.midAB.y, other.circumcenter.x, other.circumcenter.y);
-				float bc = Intersector.distanceLinePoint(d.circumcenter.x, d.circumcenter.y, d.midBC.x, d.midBC.y, other.circumcenter.x, other.circumcenter.y);
-				float ca = Intersector.distanceLinePoint(d.circumcenter.x, d.circumcenter.y, d.midCA.x, d.midCA.y, other.circumcenter.x, other.circumcenter.y);
-				
-				float e = 0.01f;
-				if (ab < e || bc < e || ca < e) {				
-					shape.line(d.circumcenter, other.circumcenter);
-				}
-				
-				if (ab < e) {
-					d.ab = true;
-				}
-				if (bc < e) {
-					d.bc = true;
-				}
-				if (ca < e) {
-					d.ca = true;
-				}
-				
-			}
+					Vector2 intersect = new Vector2();
 
-			shape.setColor(Color.BLACK);
-			if (!d.ab) {
-				shape.line(d.circumcenter, d.midAB);
+					// AB
+					if (Intersector.intersectSegments(pA1, pA2, d.circumcenter, d.midAB, intersect)) {
+						shape.setColor(Color.LIME);
+						shape.line(d.midAB, intersect);
+						shape.circle(intersect.x, intersect.y, 3);
+					} else {
+						shape.setColor(Color.ORANGE);
+						shape.line(d.circumcenter, d.midAB);
+					}
+					
+					// BC
+					if (Intersector.intersectSegments(pA1, pA2, d.circumcenter, d.midBC, intersect)) {
+						shape.setColor(Color.LIME);
+						shape.line(d.midBC, intersect);
+						shape.circle(intersect.x, intersect.y, 3);
+					} else {
+						shape.setColor(Color.ORANGE);
+						shape.line(d.circumcenter, d.midBC);
+					}
+
+					// CA
+					if (Intersector.intersectSegments(pA1, pA2, d.circumcenter, d.midCA, intersect)) {
+						shape.setColor(Color.LIME);
+						shape.line(d.midCA, intersect);
+						shape.circle(intersect.x, intersect.y, 3);
+					} else {
+						shape.setColor(Color.ORANGE);
+						shape.line(d.circumcenter, d.midCA);
+					}
+					
+				}
+		
+				
+				/*
+				shape.setColor(Color.PINK);
+				for (DelaunayCell other : dCells) {
+					//if line from center to midpoint hits another voronoi point, draw to that voronoi point
+					float ab = Intersector.distanceLinePoint(d.circumcenter.x, d.circumcenter.y, d.midAB.x, d.midAB.y, other.circumcenter.x, other.circumcenter.y);
+					float bc = Intersector.distanceLinePoint(d.circumcenter.x, d.circumcenter.y, d.midBC.x, d.midBC.y, other.circumcenter.x, other.circumcenter.y);
+					float ca = Intersector.distanceLinePoint(d.circumcenter.x, d.circumcenter.y, d.midCA.x, d.midCA.y, other.circumcenter.x, other.circumcenter.y);
+
+					float e = 0.01f;
+					if (ab < e || bc < e || ca < e) {				
+						//shape.line(d.circumcenter, other.circumcenter);
+					}
+					
+					
+					/*
+					if (ab < e) {
+						d.ab = true;
+					}
+					if (bc < e) {
+						d.bc = true;
+					}
+					if (ca < e) {
+						d.ca = true;
+					}*
+
+				}
+/*
+				shape.setColor(Color.BLACK);
+				if (!d.ab) {
+					shape.line(d.circumcenter, d.midAB);
+				}
+
+				if (!d.bc) {
+					shape.line(d.circumcenter, d.midBC);
+				}
+
+				if (!d.ca) {
+					shape.line(d.circumcenter, d.midCA);
+				}*/
 			}
 			
-			if (!d.bc) {
-				shape.line(d.circumcenter, d.midBC);
-			}
-			
-			if (!d.ca) {
-				shape.line(d.circumcenter, d.midCA);
-			}*/
-				
 			
 			//draw circumcircle
-			
-			shape.setColor(Color.GREEN);
+			if (!hullPoly.contains(d.circumcenter)) {
+				shape.setColor(Color.MAROON);
+			} else {
+				shape.setColor(Color.GREEN);
+			}	
 			if (drawCircumcircle) shape.circle(d.circumcenter.x, d.circumcenter.y, d.circumradius);
 			if (drawCircumcenter) shape.circle(d.circumcenter.x, d.circumcenter.y, dist);
 		}
-		/*
-		for (Vector2 p : voronoiPoints) {
-			shape.setColor(Color.GREEN);		
-			shape.circle(p.x, p.y, 6);
-		}*/
-		/*
-		shape.setColor(Color.BLUE);
-		for (Vector2 m : midPoints) {		
-			shape.circle(m.x, m.y, 3);
-		}*/
+
 		
 		/*
 		//////////////////////////////////////////////////////////
@@ -297,11 +341,16 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 		////////////////////////////////////////////////////////////
 		*/
 		
+		if (drawHull) {
+			shape.setColor(Color.RED);
+			//shape.polyline(hullPoly.getVertices());
+			//shape.polyline(hull);
+		}
+		
 		shape.end();
 		
 		if (Gdx.input.isKeyJustPressed(Keys.SPACE)) {
 			generateNewPoints(3);
-			
 		}
 		
 		
@@ -322,7 +371,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 				float px = points.get(i);
 				float py = points.get(i+1);
 				
-				if (Vector2.dst(x, y, px, py) < dist*2) {
+				if (Vector2.dst(x, y, px, py) < dist*3) {
 					points.set(i, x);
 					points.set(i+1, y);
 					mod = true;
@@ -360,8 +409,5 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 		}
 	}
 	
-	int pX = 0;
-	int pY = Gdx.graphics.getHeight();
-	
-	
+
 }
