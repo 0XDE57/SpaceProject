@@ -167,6 +167,8 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 		// in one frame causing a freeze/jump
 		// because putting it in a separate thread is not working (possible?)
 		// due to glContext...
+		//https://github.com/libgdx/libgdx/wiki/Threading
+		//https://www.opengl.org/wiki/OpenGL_and_multithreading
 
 		// timer to check when player has changed tiles
 		checkTileCurrTime -= 1000 * delta;

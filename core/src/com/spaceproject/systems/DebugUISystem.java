@@ -15,12 +15,15 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.FloatArray;
+import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.OrbitComponent;
@@ -254,9 +257,25 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 				//draw Orientated bounding box
 				shape.setColor(1, 0, 0, 1);
 				shape.polygon(bounds.poly.getTransformedVertices());
+				
+				/*
+				//draw triangles
+				shape.setColor(Color.BLUE);
+				FloatArray points = new FloatArray(bounds.poly.getTransformedVertices());
+				ShortArray triangles = tri.computeTriangles(points, false);
+				for (int i = 0; i < triangles.size; i += 3) {
+					int p1 = triangles.get(i) * 2;
+					int p2 = triangles.get(i + 1) * 2;
+					int p3 = triangles.get(i + 2) * 2;
+					shape.triangle(
+						points.get(p1), points.get(p1 + 1),
+						points.get(p2), points.get(p2 + 1),
+						points.get(p3), points.get(p3 + 1));
+				}*/
 			}
 		}
 	}
+	DelaunayTriangulator tri = new DelaunayTriangulator();
 
 	/** Draw frames, entity count, position and memory info. */
 	private void drawFPS() {
