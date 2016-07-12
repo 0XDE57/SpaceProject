@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.ConvexHull;
 import com.badlogic.gdx.math.DelaunayTriangulator;
+import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
@@ -220,53 +221,76 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 				//shape.line(d.circumcenter, d.midAB);
 				//shape.line(d.circumcenter, d.midBC);
 				//shape.line(d.circumcenter, d.midCA);
-				
-				float[] verticies = hullPoly.getTransformedVertices();
-				for (int v = 0; v < verticies.length - 2; v += 2) {
-					float x1 = verticies[v];
-					float y1 = verticies[v + 1];
-					float x2 = verticies[v + 2];
-					float y2 = verticies[v + 3];
-					// convex hull line
-					Vector2 pA1 = new Vector2(x1, y1);
-					Vector2 pA2 = new Vector2(x2, y2);
-					shape.setColor(Color.RED);
-					shape.line(pA1, pA2);
-
-					Vector2 intersect = new Vector2();
-
-					// AB
-					if (Intersector.intersectSegments(pA1, pA2, d.circumcenter, d.midAB, intersect)) {
-						shape.setColor(Color.LIME);
-						shape.line(d.midAB, intersect);
-						shape.circle(intersect.x, intersect.y, 3);
-					} else {
-						shape.setColor(Color.ORANGE);
-						shape.line(d.circumcenter, d.midAB);
-					}
+				if (hullPoly.contains(d.circumcenter)) {
+					shape.setColor(Color.ORANGE);		
+					shape.line(d.circumcenter, d.midAB);
+					shape.line(d.circumcenter, d.midBC);
+					shape.line(d.circumcenter, d.midCA);
 					
-					// BC
-					if (Intersector.intersectSegments(pA1, pA2, d.circumcenter, d.midBC, intersect)) {
-						shape.setColor(Color.LIME);
-						shape.line(d.midBC, intersect);
-						shape.circle(intersect.x, intersect.y, 3);
-					} else {
-						shape.setColor(Color.ORANGE);
-						shape.line(d.circumcenter, d.midBC);
-					}
+					/*
+					shape.setColor(Color.PINK);
+					for (DelaunayCell other : dCells) {
+						if (hullPoly.contains(other.circumcenter)) {
+							//if line from center to midpoint hits another voronoi point, draw to that voronoi point
+							float ab = Intersector.distanceLinePoint(d.circumcenter.x, d.circumcenter.y, d.midAB.x, d.midAB.y, other.circumcenter.x, other.circumcenter.y);
+							float bc = Intersector.distanceLinePoint(d.circumcenter.x, d.circumcenter.y, d.midBC.x, d.midBC.y, other.circumcenter.x, other.circumcenter.y);
+							float ca = Intersector.distanceLinePoint(d.circumcenter.x, d.circumcenter.y, d.midCA.x, d.midCA.y, other.circumcenter.x, other.circumcenter.y);
 
-					// CA
-					if (Intersector.intersectSegments(pA1, pA2, d.circumcenter, d.midCA, intersect)) {
-						shape.setColor(Color.LIME);
-						shape.line(d.midCA, intersect);
-						shape.circle(intersect.x, intersect.y, 3);
-					} else {
-						shape.setColor(Color.ORANGE);
-						shape.line(d.circumcenter, d.midCA);
+							float e = 0.01f;
+							if (ab < e || bc < e || ca < e) {				
+								shape.line(d.circumcenter, other.circumcenter);
+							}
+						}
 					}
-					
+					*/
+				} else {
+					//check collision with convex hull, only draw within hull
+					float[] verticies = hullPoly.getTransformedVertices();
+					for (int v = 0; v < verticies.length - 2; v += 2) {
+						float x1 = verticies[v];
+						float y1 = verticies[v + 1];
+						float x2 = verticies[v + 2];
+						float y2 = verticies[v + 3];
+						// convex hull line
+						Vector2 pA = new Vector2(x1, y1);
+						Vector2 pB = new Vector2(x2, y2);
+						shape.setColor(Color.RED);
+						shape.line(pA, pB);
+
+						Vector2 intersect = new Vector2();
+
+						// AB
+						if (Intersector.intersectSegments(pA, pB, d.circumcenter, d.midAB, intersect)) {
+							shape.setColor(Color.RED);
+							shape.line(d.midAB, intersect);
+							shape.circle(intersect.x, intersect.y, 3);
+						} else {
+							//shape.setColor(Color.ORANGE);
+							//shape.line(d.circumcenter, d.midAB);
+						}
+						
+						// BC
+						if (Intersector.intersectSegments(pA, pB, d.circumcenter, d.midBC, intersect)) {
+							shape.setColor(Color.BLUE);
+							shape.line(d.midBC, intersect);
+							shape.circle(intersect.x, intersect.y, 3);
+						} else {
+							//shape.setColor(Color.CYAN);
+							//shape.line(d.circumcenter, d.midBC);
+						}
+
+						// CA
+						if (Intersector.intersectSegments(pA, pB, d.circumcenter, d.midCA, intersect)) {
+							shape.setColor(Color.FOREST);
+							shape.line(d.midCA, intersect);
+							shape.circle(intersect.x, intersect.y, 3);
+						} else {
+							//shape.setColor(Color.BROWN);
+							//shape.line(d.circumcenter, d.midCA);
+						}
+
+					}
 				}
-		
 				
 				/*
 				shape.setColor(Color.PINK);
@@ -278,7 +302,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
 					float e = 0.01f;
 					if (ab < e || bc < e || ca < e) {				
-						//shape.line(d.circumcenter, other.circumcenter);
+						shape.line(d.circumcenter, other.circumcenter);
 					}
 					
 					
@@ -312,7 +336,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 			
 			//draw circumcircle
 			if (!hullPoly.contains(d.circumcenter)) {
-				shape.setColor(Color.MAROON);
+				shape.setColor(Color.MAGENTA);
 			} else {
 				shape.setColor(Color.GREEN);
 			}	
@@ -320,6 +344,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 			if (drawCircumcenter) shape.circle(d.circumcenter.x, d.circumcenter.y, dist);
 		}
 
+		//tri.computeTriangles(new Polygon(points).getVertices().toArray());
+		//EarClippingTriangulator t = new EarClippingTriangulator();
+		//ConvexHull tHull = new ConvexHull();
 		
 		/*
 		//////////////////////////////////////////////////////////
@@ -340,6 +367,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 		shape.circle(intersect.x, intersect.y, 8);
 		////////////////////////////////////////////////////////////
 		*/
+		
 		
 		if (drawHull) {
 			shape.setColor(Color.RED);
