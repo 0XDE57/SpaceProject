@@ -16,15 +16,46 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.utility.MyScreenAdapter;
 
 //voronoi/polygon stuff
+//END GOAL: https://www.youtube.com/watch?v=pe4_Dimk7v0
+//https://github.com/libgdx/libgdx/wiki/Circles%2C-planes%2C-rays%2C-etc.
 //https://en.wikipedia.org/wiki/Circumscribed_circle
 //http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect/565282#565282
 //http://stackoverflow.com/questions/31021968/correct-use-of-polygon-triangulators-in-libgdx
+//https://github.com/mjholtzem/Unity-2D-Destruction
 
+class VoronoiCell {
+	
+	Polygon poly;
+	FloatArray verticies = new FloatArray();
+	
+	public void addVertex(Vector2 point) {
+		verticies.add(point.x);
+		verticies.add(point.y);
+			
+	}
+
+	public void setVerticies() {		
+		/*
+		FloatArray verts = verticies;
+		float[] floatArray = new float[verts.length];
+		
+		int i = 0;
+		for (Float f : verticies) {
+		    floatArray[i++] = (f != null ? f : Float.NaN);
+		}*/
+		
+		ConvexHull convex = new ConvexHull();
+		FloatArray hull = convex.computePolygon(verticies, false);
+		poly.setVertices(hull.toArray());
+	}
+	
+}
 
 class DelaunayCell {
 	Vector2 a, b, c;
@@ -147,15 +178,19 @@ class DelaunayCell {
 }
 
 public class TestVoronoiScreen extends MyScreenAdapter {
-
+	//points
 	FloatArray points;
-	DelaunayTriangulator tri;
+	
+	//triangulation
+	DelaunayTriangulator delaunay = new DelaunayTriangulator();
 	ShortArray triangles;
 	ArrayList<DelaunayCell> dCells = new ArrayList<DelaunayCell>();
 	
+	//convex hull
 	float[] hull;
 	Polygon hullPoly;
 	
+	//toggles
 	boolean drawCircumcircle = false,
 		drawCircumcenter = true,
 		drawPoints = true,
@@ -165,14 +200,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 		drawHull = true;
 		
 	public TestVoronoiScreen() {
+		//center cam
 		cam.position.x = Gdx.graphics.getWidth()/2;
 		cam.position.y = Gdx.graphics.getHeight()/2;
-		
-		tri = new DelaunayTriangulator();
-		//convex = new ConvexHull();
-		
+	
 		generateNewPoints(10);
-
 	}
 
 
@@ -183,18 +215,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 			float y = MathUtils.random(0, Gdx.graphics.getHeight());
 			points.add(x);
 			points.add(y);
-			//System.out.println(x + "," + y);
 		}
 		
-		
 		calculateDelaunay();
-		
 	}
 
 
 	private void calculateDelaunay() {
 		//apply delaunay triangulation to points
-		triangles = tri.computeTriangles(points, false);
+		triangles = delaunay.computeTriangles(points, false);
 		//triangles = new EarClippingTriangulator().computeTriangles(points);
 		
 		//create cells for each triangle
@@ -221,9 +250,16 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 		DelaunayCell.findNeighbors(dCells);
 	}
 	
+	/**
+	 * Check if a line from a to b intersects with the convext hull. 
+	 * If so, the point of intersection is stored in the intersect vector.
+	 * @param a point one
+	 * @param b point two
+	 * @param intersect point of intersection
+	 * @return true if intersect. Point of intersection stored in intersect
+	 */
 	public boolean collideWithHull(Vector2 a, Vector2 b, Vector2 intersect) {
 		float[] verticies = hullPoly.getTransformedVertices();
-		//Vector2 intersect = null;// = new Vector2();
 		for (int v = 0; v < verticies.length - 2; v += 2) {
 			float x1 = verticies[v];
 			float y1 = verticies[v + 1];
@@ -235,10 +271,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 			
 			if (Intersector.intersectSegments(pA, pB, a, b, intersect)) {
 				return true;
-				/*
-				shape.setColor(Color.RED);
-				shape.line(d.midAB, intersect);
-				shape.circle(intersect.x, intersect.y, 3);*/
 			}
 
 		}
@@ -247,20 +279,23 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 	
 	private void drawCellEdge(DelaunayCell cellA, DelaunayCell cellB) {
 		if (hullPoly.contains(cellA.circumcenter)) {
-
 			if (cellB != null) {
 				shape.setColor(Color.ORANGE);
 				if (hullPoly.contains(cellB.circumcenter)) {
+					//if both circumcenters are within the convex hull, draw from circumcenter to circumcenter
 					shape.line(cellA.circumcenter, cellB.circumcenter);
 				} else {
+					//if circumcenter is outside of convex hull, draw from circumcenter to intersection
 					Vector2 intersect = new Vector2();
-					if (collideWithHull(cellA.circumcenter, cellB.circumcenter, intersect)) {
+					if (collideWithHull(cellA.circumcenter, cellB.circumcenter, intersect)) {						
 						shape.line(cellA.circumcenter, intersect);
-						shape.circle(intersect.x, intersect.y, 8);
+						shape.circle(intersect.x, intersect.y, 8);//show point of intersection
 					}
 				}
 
 			} else {
+				//if no neighbor, draw from midpoint to circumcenter
+				//TODO: don't connect to mid points if already connected to voronoi point
 				shape.setColor(Color.CYAN);
 				shape.line(cellA.circumcenter, cellA.midAB);
 				shape.line(cellA.circumcenter, cellA.midBC);
@@ -281,7 +316,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 				// convex hull line
 				Vector2 edgeA = new Vector2(x1, y1);
 				Vector2 edgeB = new Vector2(x2, y2);
-
+				
+				//TODO: only draw where voronoi points are not connected and ignore certain midpoints.
+				//ignore where the circumcenter is outside of hull? and some other edge cases...
+				//if (Intersector.isPointInTriangle(cellA.circumcenter, cellA.a, cellA.b, cellA.c)?
+				//if (Intersector.pointLineSide(edgeA, edgeB, cellA.midXX) == 1)?
+				//if circumcenter is same side as midpoint, opposite of obtuse angle, dont draw?
 				drawIntersectingLines(cellA, cellA.midAB, edgeA, edgeB);
 				drawIntersectingLines(cellA, cellA.midBC, edgeA, edgeB);
 				drawIntersectingLines(cellA, cellA.midCA, edgeA, edgeB);
@@ -299,29 +339,22 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 		}
 	}
 
-	
-	
-	@Override
-	public void render(float delta) {
-		super.render(delta);
-		
-		Gdx.gl20.glClearColor(1,1,1,1);
-		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		
+
+	private void drawStuff() {
 		shape.begin(ShapeType.Line);
 		
 		
-		int dist = 6;
+		int pSize = 6;
 		for (DelaunayCell d : dCells) {
 			//draw points
 			if (drawPoints) {
 				shape.setColor(Color.BLACK);
-				shape.circle(d.a.x, d.a.y, dist);
-				shape.circle(d.b.x, d.b.y, dist);
-				shape.circle(d.c.x, d.c.y, dist);
+				shape.circle(d.a.x, d.a.y, pSize);
+				shape.circle(d.b.x, d.b.y, pSize);
+				shape.circle(d.c.x, d.c.y, pSize);
 			}
 			
-			//draw delaunay triangulation
+			//draw delaunay triangles
 			if (drawDelaunay) {
 				shape.setColor(Color.GRAY);
 				shape.triangle(d.a.x, d.a.y, // A
@@ -332,7 +365,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 			//draw midpoints
 			if (drawMidpoints) {
 				shape.setColor(Color.BLUE);
-				shape.circle(d.midAB.x, d.midAB.y, 1);
+				shape.circle(d.midAB.x, d.midAB.y, 1);//Different radius to help determine edge
 				shape.circle(d.midCA.x, d.midCA.y, 2);
 				shape.circle(d.midBC.x, d.midBC.y, 3);
 			}
@@ -404,7 +437,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 				shape.setColor(Color.GREEN);
 			}	
 			if (drawCircumcircle) shape.circle(d.circumcenter.x, d.circumcenter.y, d.circumradius);
-			if (drawCircumcenter) shape.circle(d.circumcenter.x, d.circumcenter.y, dist);
+			if (drawCircumcenter) shape.circle(d.circumcenter.x, d.circumcenter.y, pSize);
 		}
 
 	
@@ -414,8 +447,25 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 		}
 		
 		shape.end();
+	}
+	
+	@Override
+	public void render(float delta) {
+		super.render(delta);
 		
+		//clear screen
+		Gdx.gl20.glClearColor(1,1,1,1);
+		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
+		//render voronoi stuff
+		drawStuff();
+		
+		//toggles, add/move points, reset
+		updateControls();
+	}
+
+
+	private void updateControls() {
 		//reset. new test points
 		if (Gdx.input.isKeyJustPressed(Keys.SPACE)) {
 			generateNewPoints(3);
@@ -429,7 +479,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 			calculateDelaunay();
 		}
 		
-		//draw points around
+		//drag points around
 		if (Gdx.input.isButtonPressed(Buttons.RIGHT)) {
 			int x = Gdx.input.getX();
 			int y = Gdx.graphics.getHeight() - Gdx.input.getY();
@@ -439,7 +489,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 				float px = points.get(i);
 				float py = points.get(i+1);
 				
-				if (Vector2.dst(x, y, px, py) < dist*3) {
+				if (Vector2.dst(x, y, px, py) < 20) {
 					points.set(i, x);
 					points.set(i+1, y);
 					mod = true;
@@ -475,10 +525,5 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 			drawHull =! drawHull;
 		}
 	}
-
-
-
-
-	
 
 }
