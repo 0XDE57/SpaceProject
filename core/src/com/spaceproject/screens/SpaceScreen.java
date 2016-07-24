@@ -24,6 +24,7 @@ import com.spaceproject.systems.MovementSystem;
 import com.spaceproject.systems.OrbitSystem;
 import com.spaceproject.systems.PlayerControlSystem;
 import com.spaceproject.systems.SpaceLoadingSystem;
+import com.spaceproject.systems.SpaceParallaxSystem;
 import com.spaceproject.systems.SpaceRenderingSystem;
 import com.spaceproject.systems.TouchUISystem;
 import com.spaceproject.utility.MyScreenAdapter;
@@ -73,6 +74,7 @@ public class SpaceScreen extends MyScreenAdapter {
 		
 		engine.addSystem(new SpaceRenderingSystem());
 		engine.addSystem(new SpaceLoadingSystem());
+		engine.addSystem(new SpaceParallaxSystem());
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new OrbitSystem());
 		engine.addSystem(new DebugUISystem());

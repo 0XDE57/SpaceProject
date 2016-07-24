@@ -38,11 +38,11 @@ public class SpaceProject extends Game {
 		planet.lacunarity = 2.6f;
 		landCFG.planet = planet;
 		
-		//setScreen(new SpaceScreen(landCFG));
+		setScreen(new SpaceScreen(landCFG));
 		//setScreen(new WorldScreen(landCFG));
 		//setScreen(new TestShipGenerationScreen(this));
 		//setScreen(new TestNoiseScreen(this));
-		setScreen(new TestVoronoiScreen());
+		//setScreen(new TestVoronoiScreen());
 		//setScreen(new MainMenuScreen(this));
 	}
 	

@@ -98,7 +98,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 	}
 	
 	private void drawParallaxTiles() {
-		for (SpaceBackgroundTile tile : SpaceLoadingSystem.getTiles()) {
+		for (SpaceBackgroundTile tile : SpaceParallaxSystem.getTiles()) {
 			//draw = (tile position + (cam position - center of tile)) * depth			
 			float drawX = tile.x + (cam.position.x - (tile.size/2)) * tile.depth;
 			float drawY = tile.y + (cam.position.y - (tile.size/2)) * tile.depth;			
@@ -160,7 +160,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 				tex.texture.dispose();
 		}
 		
-		for (SpaceBackgroundTile tile : SpaceLoadingSystem.getTiles()) {
+		for (SpaceBackgroundTile tile : SpaceParallaxSystem.getTiles()) {
 			tile.tex.dispose();
 		}
 		

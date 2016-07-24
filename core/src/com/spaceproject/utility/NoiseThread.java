@@ -119,6 +119,12 @@ public class NoiseThread implements Runnable {
 	}
 
 	public void stop() {
-		stop = true;		
+		stop = true;
+		thread.interrupt();
+	}
+	
+	public void forceStop() {
+		stop();
+		thread.stop();//find a safer way?
 	}
 }
