@@ -8,17 +8,14 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.ConvexHull;
 import com.badlogic.gdx.math.DelaunayTriangulator;
-import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.generation.FontFactory;
@@ -109,7 +106,7 @@ class DelaunayCell {
 			return true;
 		}
 		
-		if (sharesMidpoint(cellA.midBC, cellB)) {;
+		if (sharesMidpoint(cellA.midBC, cellB)) {
 			cellA.nBC = cellB;
 			return true;
 		}
@@ -149,7 +146,7 @@ class DelaunayCell {
 	 * @param c
 	 * @return circumcirle of triangle in a Vector3 with position in x,y and radius in z.
 	 */
-	private Vector3 circumcircle2(Vector2 a, Vector2 b, Vector2 c) {
+	private static Vector3 circumcircle2(Vector2 a, Vector2 b, Vector2 c) {
 	    float EPSILON = 1.0f / 1048576.0f;
 	  
 	    float fabsy1y2 = Math.abs(a.y - b.y),
@@ -181,9 +178,7 @@ class DelaunayCell {
 	        my1 = (a.y + b.y) / 2.0f;
 	        my2 = (b.y + c.y) / 2.0f;
 	        xc  = (m1 * mx1 - m2 * mx2 + my2 - my1) / (m1 - m2);
-	        yc  = (fabsy1y2 > fabsy2y3) ?
-	        m1 * (xc - mx1) + my1 :
-	        m2 * (xc - mx2) + my2;
+	        yc  = (fabsy1y2 > fabsy2y3) ? m1 * (xc - mx1) + my1 :  m2 * (xc - mx2) + my2;
 	    }
 
 	    dx = b.x - xc;
