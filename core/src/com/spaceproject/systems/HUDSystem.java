@@ -6,12 +6,15 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
@@ -30,13 +33,16 @@ public class HUDSystem extends EntitySystem {
 	private Matrix4 projectionMatrix = new Matrix4();	
 	private ShapeRenderer shape = new ShapeRenderer();
 	
+	private Engine engine;
+	
 	//entity storage
 	private ImmutableArray<Entity> mapableObjects;
 	private ImmutableArray<Entity> player;
 	private ImmutableArray<Entity> killables;
 	
 	private boolean drawHud = true;
-	private boolean drawMap = true; //draw edge map
+	private boolean drawEdgeMap = true;
+	public static boolean drawSpaceMap = false;
 	
 	float opacity = 0.7f;
 	Color barBackground = new Color(1,1,1,0.5f);
@@ -50,7 +56,8 @@ public class HUDSystem extends EntitySystem {
 	}
 
 	@Override
-	public void addedToEngine(Engine engine) {		
+	public void addedToEngine(Engine engine) {
+		this.engine = engine;
 		mapableObjects = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
 		player = engine.getEntitiesFor(Family.one(CameraFocusComponent.class).get());
 		killables = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(CameraFocusComponent.class).get());
@@ -63,8 +70,12 @@ public class HUDSystem extends EntitySystem {
 			System.out.println("HUD: " + drawHud);
 		}
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleMap)) {
-			drawMap = !drawMap;
-			System.out.println("Edge map: " + drawMap);
+			drawEdgeMap = !drawEdgeMap;
+			System.out.println("Edge map: " + drawEdgeMap);
+		}
+		if (Gdx.input.isKeyJustPressed(Keys.P)) {
+			drawSpaceMap = !drawSpaceMap;
+			System.out.println("Space map: " + drawSpaceMap);
 		}
 		
 		if (!drawHud) return;
@@ -81,12 +92,16 @@ public class HUDSystem extends EntitySystem {
 		
 		drawPlayerStatus();
 		
-		if (drawMap) drawEdgeMap();
+		if (drawEdgeMap) drawEdgeMap();
+		
+		if (drawSpaceMap) drawSpaceMap();
 		
 		drawHealthBars();
 		
 		shape.end();
 		Gdx.gl.glDisable(GL20.GL_BLEND);
+		
+		
 	}
 
 	/**
@@ -301,5 +316,31 @@ public class HUDSystem extends EntitySystem {
 		*/
 	}
 	
+	private float scale = 500;
+	private void drawSpaceMap() {
+		if (Gdx.input.isKeyPressed(Keys.I)) scale++;
+		if (Gdx.input.isKeyPressed(Keys.O)) scale--;
+		if (scale < 1) scale = 1;
+		int edgePad = 30;
+		int size = 5;
+		Rectangle r = new Rectangle(edgePad, edgePad, Gdx.graphics.getWidth() - edgePad*2, Gdx.graphics.getHeight() - edgePad*2);
+		
+		shape.setColor(0, 1, 1, 0.5f);
+		shape.rect(r.x, r.y, r.width, r.height);
+		
+		shape.setColor(1, 1, 0, 1);
+		for (Vector2 p : engine.getSystem(SpaceLoadingSystem.class).getPoints()) {
+			float x = ((p.x-MyScreenAdapter.cam.position.x)/scale)+Gdx.graphics.getWidth()/2;
+			float y = ((p.y-MyScreenAdapter.cam.position.y)/scale)+Gdx.graphics.getHeight()/2;
+			
+			
+			if (r.contains(x, y)) shape.circle(x, y, size);
 
+		}
+		//screenPos.x -= MyScreenAdapter.cam.position.x;
+		//screenPos.y -= MyScreenAdapter.cam.position.y;
+		//Vector2 t = new Vector2(700,700);
+		//shape.circle((t.x-MyScreenAdapter.cam.position.x)+Gdx.graphics.getWidth()/2, (t.x-MyScreenAdapter.cam.position.y)+Gdx.graphics.getHeight()/2, 10);
+	}
+	
 }

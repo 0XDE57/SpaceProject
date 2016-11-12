@@ -25,7 +25,8 @@ public class TouchUISystem extends EntitySystem {
 	
 	TouchButtonRound btnShoot = new TouchButtonRound(Gdx.graphics.getWidth() - 80, 100, 70, white, blue);
 	TouchButtonRound btnVehicle = new TouchButtonRound(Gdx.graphics.getWidth() - 80, 300, 50, white, blue);
-	TouchButtonRectangle btnLand = new TouchButtonRectangle(Gdx.graphics.getWidth()/2-60, Gdx.graphics.getHeight() - 80, 120, 60, white, blue);
+	TouchButtonRectangle btnLand = new TouchButtonRectangle(Gdx.graphics.getWidth()/2-60, Gdx.graphics.getHeight() - 60 - 20, 120, 60, white, blue);
+	TouchButtonRectangle btnMap = new TouchButtonRectangle(Gdx.graphics.getWidth()-120-20, Gdx.graphics.getHeight() - 60 - 20, 120, 60, white, blue);
 	
 	TouchJoyStick joyMovement = new TouchJoyStick(230, 230, 200, white, blue);
 	
@@ -35,6 +36,9 @@ public class TouchUISystem extends EntitySystem {
 		PlayerControlSystem.shoot = btnShoot.isTouched();
 		PlayerControlSystem.changeVehicle = btnVehicle.isTouched();
 		PlayerControlSystem.land = btnLand.isTouched();
+		if (btnMap.isJustTouched()) {
+			HUDSystem.drawSpaceMap = !HUDSystem.drawSpaceMap;
+		}
 		btnLand.hidden = !PlayerControlSystem.canLand;
 		
 		if (joyMovement.isTouched()) {
@@ -90,6 +94,8 @@ public class TouchUISystem extends EntitySystem {
 		btnVehicle.render(shape);
 		
 		btnLand.render(shape);
+		btnMap.render(shape);
+		
 		shape.end();
 		
 		Gdx.gl.glDisable(GL20.GL_BLEND);

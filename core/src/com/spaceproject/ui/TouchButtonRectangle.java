@@ -48,4 +48,19 @@ public class TouchButtonRectangle {
  
 			return  (Gdx.input.isTouched(0) && finger0 || Gdx.input.isTouched(1) && finger1);
 		}
+		
+		boolean touched = false;
+		public boolean isJustTouched() {
+			if (isTouched()) {
+				touched = true;
+				return false;
+			}
+			
+			if (touched) {
+				touched = false;
+				return true;
+			}
+			
+			return false;
+		}
 }

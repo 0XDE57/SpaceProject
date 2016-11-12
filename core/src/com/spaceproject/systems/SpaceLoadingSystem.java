@@ -279,7 +279,11 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 		return points;
 	}
 
-	@Override
+	
+	public ArrayList<Vector2> getPoints() {
+		return points;
+	}
+
 	public void dispose() {
 		// stop and clear threads
 		for (NoiseThread thread : noiseThreads) {
