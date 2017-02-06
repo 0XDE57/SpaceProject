@@ -300,7 +300,7 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		String count = "   E: " + entityCount + " - C: " + componentCount;
 		
 		//camera position
-		String camera = String.format("Pos: %s %s  Z:%3$.2f", (int)cam.position.x, (int)cam.position.y, cam.zoom);
+		String camera = String.format("Pos: %s %s  Zoom:%3$.2f", (int)cam.position.x, (int)cam.position.y, cam.zoom);
 		
 		//display info
 		int x = 15;
@@ -309,6 +309,18 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		fontLarge.draw(batch, frames + count, x, y);
 		fontLarge.draw(batch, memory + threads, x, y - fontLarge.getLineHeight());
 		fontLarge.draw(batch, camera, x, y - fontLarge.getLineHeight()*2);
+	}
+	
+	private void drawEntityList() {
+		float fontHeight = fontSmall.getLineHeight();
+		int x = 30;
+		int y = 30;
+		fontSmall.setColor(1, 1, 1, 1);
+		
+		int i = 0;
+		for (Entity entity : objects) {
+			fontSmall.draw(batch, entity.toString(), x-fontHeight*i++, y);
+		}
 	}
 	
 	/**  Draw all Entity components and fields. */

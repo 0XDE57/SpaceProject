@@ -138,7 +138,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 			float height = tex.texture.getHeight();
 			float originX = width * 0.5f; //center 
 			float originY = height * 0.5f; //center
-
+			
 			//draw texture
 			batch.draw(tex.texture, (t.pos.x - originX), (t.pos.y - originY),
 					   originX, originY,

@@ -143,7 +143,6 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 						}
 					}
 					engine.removeEntity(star);
-					System.out.println("Removed: " + star.getComponent(TransformComponent.class).pos.toString());
 				}
 			}
 			

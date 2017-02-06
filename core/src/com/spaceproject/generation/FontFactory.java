@@ -34,9 +34,11 @@ public class FontFactory {
 			return newFont;
 		} catch (GdxRuntimeException ex) {
 			System.err.println(ex.getMessage());
-			System.out.println("Not found: " + Gdx.files.getLocalStoragePath() + font);
+			System.out.println("Font not found: " + Gdx.files.getLocalStoragePath() + font);
+			System.out.println("Make sure 'android/assets' is appended to run configuration. ");
 		}
-		
+
+		System.out.println("Loaded default font.");
 		return new BitmapFont();
 
 	}

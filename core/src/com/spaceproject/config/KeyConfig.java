@@ -8,7 +8,7 @@ public class KeyConfig extends Config {
 	public int forward;
 	public int right;
 	public int left;
-	public int breaks;
+	public int back;
 	public int shoot;
 	public int changeVehicle;
 	public int land;
@@ -38,15 +38,12 @@ public class KeyConfig extends Config {
 	public int toggleVector;
 	public int toggleMenu;
 	
-	//---temporary/test/debug controls---
-	public int instantStop;
-	
 	public void loadDefault() {
 		//player
 		forward = Keys.W;
 		right = Keys.D;
 		left = Keys.A;
-		breaks = Keys.S;
+		back = Keys.S;
 		shoot = Keys.SPACE;
 		changeVehicle = Keys.G;
 		land = Keys.T;
@@ -74,10 +71,7 @@ public class KeyConfig extends Config {
 		toggleFPS = Keys.NUMPAD_3;
 		toggleOrbit = Keys.NUMPAD_4;
 		toggleVector = Keys.NUMPAD_5;
-		toggleMenu = Keys.NUMPAD_9;
-		
-		//temporary/debug
-		instantStop = Keys.X;
+		toggleMenu = Keys.NUMPAD_9;		
 	}
 	
 }

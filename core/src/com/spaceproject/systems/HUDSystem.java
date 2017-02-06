@@ -59,7 +59,7 @@ public class HUDSystem extends EntitySystem {
 	public void addedToEngine(Engine engine) {
 		this.engine = engine;
 		mapableObjects = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
-		player = engine.getEntitiesFor(Family.one(CameraFocusComponent.class).get());
+		player = engine.getEntitiesFor(Family.one(CameraFocusComponent.class, HealthComponent.class).get());
 		killables = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(CameraFocusComponent.class).get());
 	}
 	

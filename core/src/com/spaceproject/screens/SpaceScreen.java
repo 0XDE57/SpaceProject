@@ -10,6 +10,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CharacterComponent;
+import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
@@ -21,8 +22,10 @@ import com.spaceproject.systems.DesktopInputSystem;
 import com.spaceproject.systems.ExpireSystem;
 import com.spaceproject.systems.HUDSystem;
 import com.spaceproject.systems.MovementSystem;
+import com.spaceproject.systems.NewControlSystem;
 import com.spaceproject.systems.OrbitSystem;
 import com.spaceproject.systems.PlayerControlSystem;
+import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.systems.SpaceLoadingSystem;
 import com.spaceproject.systems.SpaceParallaxSystem;
 import com.spaceproject.systems.SpaceRenderingSystem;
@@ -48,29 +51,34 @@ public class SpaceScreen extends MyScreenAdapter {
 		engine.addEntity(EntityFactory.createShip3(-400, 400));
 			
 		//add player
-		boolean startAsShip = true;//debug: start as ship or player
+		//boolean startAsShip = true;//debug: start as ship or player
 		Entity player = EntityFactory.createCharacter(landCFG.position.x, landCFG.position.y);
 		Entity playerTESTSHIP = EntityFactory.createShip3(landCFG.position.x, landCFG.position.y, landCFG.shipSeed, player);
 		player.getComponent(CharacterComponent.class).vehicle = playerTESTSHIP;
 		
-		if (startAsShip) {
+		//if (startAsShip) {
 			//start as ship	
 			playerTESTSHIP.add(new CameraFocusComponent());
+			playerTESTSHIP.add(new ControllableComponent());
 			engine.addEntity(playerTESTSHIP);
-		} else {
+		//} else {
 			//start as player
-			player.add(new CameraFocusComponent());
-			engine.addEntity(player);
-		}
+		//	player.add(new CameraFocusComponent());
+		//	player.add(new ControllableComponent());
+		//	engine.addEntity(player);
+		//}
 		
-		// Add systems to engine---------------------------------------------------------
-		engine.addSystem(new PlayerControlSystem(this, player, landCFG));
+		// Add systems to engine---------------------------------------------------------		
 		/*
 		if (startAsShip) {
 			engine.addSystem(new PlayerControlSystem(this, player, playerTESTSHIP, landCFG));//start as ship
 		} else {
 			engine.addSystem(new PlayerControlSystem(this, player, landCFG));//start as player
 		}*/
+		
+		//engine.addSystem(new PlayerControlSystem(this, player, landCFG));
+		engine.addSystem(new NewControlSystem(engine));
+		engine.addSystem(new ScreenTransitionSystem(this, landCFG));
 		
 		engine.addSystem(new SpaceRenderingSystem());
 		engine.addSystem(new SpaceLoadingSystem());

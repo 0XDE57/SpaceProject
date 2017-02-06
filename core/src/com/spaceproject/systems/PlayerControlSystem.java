@@ -161,6 +161,7 @@ public class PlayerControlSystem extends EntitySystem {
 		}
 	}
 
+	
 	/**
 	 * Animate landing on planet. First shrink texture, then zoom camera.
 	 * @param delta

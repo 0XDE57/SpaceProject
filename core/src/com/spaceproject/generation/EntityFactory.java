@@ -12,6 +12,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
+import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
@@ -211,6 +212,7 @@ public class EntityFactory {
 	    CharacterComponent character = new CharacterComponent();
 	    character.walkSpeed = 300f;//70f;
 	    
+	    //entity.add(new ControllableComponent());
 		entity.add(bounds);
 		entity.add(transform);
 		entity.add(texture);
