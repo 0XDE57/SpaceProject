@@ -72,7 +72,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     		setZoomTarget(1);
     	}
     	
-    };
+    }
     
     public static void changeScreen(Screen screen) {
     	Gdx.app.log("Game", "Screen changed: " + screen.getClass().getSimpleName());

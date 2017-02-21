@@ -131,6 +131,8 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		//draw entity position
 		if (drawPos) drawPos();
 		
+		drawEntityList();
+		
 		//draw components on entity
 		if (drawComponentList) drawComponentList();
 
@@ -318,8 +320,8 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 		fontSmall.setColor(1, 1, 1, 1);
 		
 		int i = 0;
-		for (Entity entity : objects) {
-			fontSmall.draw(batch, entity.toString(), x-fontHeight*i++, y);
+		for (Entity entity : engine.getEntities()) {
+			fontSmall.draw(batch, entity.toString(), x, y+fontHeight*i++);
 		}
 	}
 	

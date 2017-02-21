@@ -146,7 +146,7 @@ public class HUDSystem extends EntitySystem {
 		int playerAmmoBarY = playerHPBarY - barWidth - 1;
 
 		//TODO add backing/border. Maybe caps at ends of bar. Make look nice.
-		
+		if (player == null || player.size() == 0) return;
 		HealthComponent health = Mappers.health.get(player.first());		
 		if (health == null) return;
 		

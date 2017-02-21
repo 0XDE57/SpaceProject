@@ -21,7 +21,9 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyIteratingSystem;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.MyScreenAdapter;
@@ -30,13 +32,16 @@ public class NewControlSystem extends MyIteratingSystem {
 
 	private ImmutableArray<Entity> vehicles;
 	private ImmutableArray<Entity> planets;
+	private boolean inSpace;
 	
-	public NewControlSystem(Engine engine) {
+	public NewControlSystem(MyScreenAdapter screen, Engine engine) {
 		super(Family.all(ControllableComponent.class, TransformComponent.class).one(
 				CharacterComponent.class, VehicleComponent.class).get());
 		
 		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
 		planets = engine.getEntitiesFor(Family.all(PlanetComponent.class).get());
+		
+		inSpace = (screen instanceof SpaceScreen);
 	}
 
 	@Override
@@ -115,7 +120,10 @@ public class NewControlSystem extends MyIteratingSystem {
 		}
 		
 		if (control.land) {
-			landOnPlanet(entity);
+			if (inSpace)
+				landOnPlanet(entity);
+			else
+				takeOffPlanet(entity);
 		}
 		
 		//debug force insta-stop
@@ -128,20 +136,35 @@ public class NewControlSystem extends MyIteratingSystem {
 			
 	}
 	
-	private void landOnPlanet(Entity vehicleEntity) {
-		Vector3 vePos = Mappers.transform.get(vehicleEntity).pos;
+	private static void takeOffPlanet(Entity entity) {
+		ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
+		screenTrans.stage = ScreenTransitionComponent.AnimStage.transition;//begin animation
+		screenTrans.landCFG = new LandConfig();
+		//TODO: load location that should be saved from when landed
+		/*
+		screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
+		screenTrans.landCFG.ship = Misc.copyEntity(vehicleEntity);//entity to send to the planet
+		screenTrans.landCFG.position = planetPos;// save position for taking off from planet
+		*/
+		entity.add(screenTrans);
+		
+	}
+
+	private void landOnPlanet(Entity entity) {
+		Vector3 vePos = Mappers.transform.get(entity).pos;
 		for (Entity planet : planets) {
 			Vector3 planetPos = Mappers.transform.get(planet).pos;
 			TextureComponent planetTex = Mappers.texture.get(planet);
 
 			if (MyMath.distance(vePos.x, vePos.y, planetPos.x, planetPos.y) <= planetTex.texture.getWidth() * 0.5 * planetTex.scale) {				
 				ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
-				screenTrans.stage = ScreenTransitionComponent.AnimStage.stopShip;//begin animation
+				screenTrans.stage = ScreenTransitionComponent.AnimStage.shrink;//begin animation
 				screenTrans.landCFG = new LandConfig();
 				screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
-				screenTrans.landCFG.ship = vehicleEntity;//entity to send to the planet
+				screenTrans.landCFG.ship = Misc.copyEntity(entity);//entity to send to the planet
 				screenTrans.landCFG.position = planetPos;// save position for taking off from planet
-				vehicleEntity.add(screenTrans);
+				entity.add(screenTrans);
+				return;
 			}
 		}
 	}

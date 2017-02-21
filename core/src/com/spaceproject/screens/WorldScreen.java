@@ -2,19 +2,23 @@ package com.spaceproject.screens;
 
 import javax.swing.text.DefaultEditorKit.CopyAction;
 
+import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.LandConfig;
+import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.systems.BoundsSystem;
 import com.spaceproject.systems.CameraSystem;
 import com.spaceproject.systems.DebugUISystem;
@@ -24,6 +28,7 @@ import com.spaceproject.systems.NewControlSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.systems.TouchUISystem;
 import com.spaceproject.systems.WorldRenderingSystem;
+import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyScreenAdapter;
 
 public class WorldScreen extends MyScreenAdapter {
@@ -37,24 +42,38 @@ public class WorldScreen extends MyScreenAdapter {
 		
 		int position = landCFG.planet.mapSize*32/2;//32 = tileSize, set position to middle of planet
 		//Entity player = EntityFactory.createCharacter(position, position);
-		Entity player = landCFG.ship.getComponent(VehicleComponent.class).driver;
+		
+		Entity ship = landCFG.ship;		
+		//wEntity player = ship.getComponent(VehicleComponent.class).driver;
+		
+		/*
 		player.getComponent(TransformComponent.class).pos.x = position;
 		player.getComponent(TransformComponent.class).pos.y = position;
 		player.add(new CameraFocusComponent());
 		player.add(new ControllableComponent());
 		engine.addEntity(player);
+		*/
 		
-		landCFG.ship.getComponent(TransformComponent.class).pos.x = position;
-		landCFG.ship.getComponent(TransformComponent.class).pos.y = position;
-		landCFG.ship.remove(CameraFocusComponent.class);
-		landCFG.ship.remove(ControllableComponent.class);
-		engine.addEntity(landCFG.ship);
+		ship.getComponent(TransformComponent.class).pos.x = position;
+		ship.getComponent(TransformComponent.class).pos.y = position;
+		//get out of vehicle instead
+		/*
+		ship.remove(CameraFocusComponent.class);
+		ship.remove(ControllableComponent.class);
+		//ship.remove(ScreenTransitionComponent.class);
+		ship.getComponent(TextureComponent.class).scale = 4;
+		ship.getComponent(VehicleComponent.class).driver = null;*/
+		engine.addEntity(ship);
+		
+		
+		//engine.addEntity(EntityFactory.createShip3(position,position));
 
 		//System.out.println(engine.getEntities().size());
 		
 		//engine.addSystem(new PlayerControlSystem(this, player, landCFG));
-		engine.addSystem(new NewControlSystem(engine));
 		engine.addSystem(new ScreenTransitionSystem(this, landCFG));
+		engine.addSystem(new NewControlSystem(this, engine));
+		
 		engine.addSystem(new WorldRenderingSystem(landCFG.planet));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new CameraSystem());

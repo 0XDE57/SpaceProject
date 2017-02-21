@@ -77,7 +77,7 @@ public class SpaceScreen extends MyScreenAdapter {
 		}*/
 		
 		//engine.addSystem(new PlayerControlSystem(this, player, landCFG));
-		engine.addSystem(new NewControlSystem(engine));
+		engine.addSystem(new NewControlSystem(this, engine));
 		engine.addSystem(new ScreenTransitionSystem(this, landCFG));
 		
 		engine.addSystem(new SpaceRenderingSystem());
@@ -145,6 +145,20 @@ public class SpaceScreen extends MyScreenAdapter {
 	@Override
 	public void hide() {
 		//dispose();
+		/*
+		for (EntitySystem sys : engine.getSystems()) {
+			if (sys instanceof Disposable)
+				((Disposable) sys).dispose();
+		}
+		
+		for (Entity ents : engine.getEntitiesFor(Family.all(TextureComponent.class).get())) {
+			TextureComponent tex = ents.getComponent(TextureComponent.class);
+			if (tex != null)
+				tex.texture.dispose();
+		}
+		
+		engine.removeAllEntities();
+		engine = null;*/
 	}
 	
 	@Override
