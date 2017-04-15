@@ -53,7 +53,7 @@ public class TextureFactory {
 				blue = (blue * 0.5) + 0.5;
 				
 				//draw
-				pixmap.setColor(new Color((float)red, (float)0, (float)blue, (float) opacity));
+				pixmap.setColor(new Color((float)red, 0, (float)blue, (float) opacity));
 				pixmap.drawPixel(x, pixmap.getHeight()-1-y);
 			}
 		}
@@ -64,7 +64,7 @@ public class TextureFactory {
 	}
 	
 	public static Texture generateSpaceBackgroundStars(int tileX, int tileY, int tileSize, float depth) {
-		MathUtils.random.setSeed((long) ((float)MyMath.getSeed(tileX, tileY) * depth));
+		MathUtils.random.setSeed((long) (MyMath.getSeed(tileX, tileY) * depth));
 		
 		//pixmap = new Pixmap(tileSize, tileSize, Format.RGB565);
 		pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);

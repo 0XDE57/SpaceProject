@@ -8,10 +8,8 @@ import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.utils.Disposable;
-import com.spaceproject.components.CameraFocusComponent;
-import com.spaceproject.components.CharacterComponent;
-import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.TextureComponent;
+import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.systems.BoundsSystem;
@@ -24,7 +22,6 @@ import com.spaceproject.systems.HUDSystem;
 import com.spaceproject.systems.MovementSystem;
 import com.spaceproject.systems.NewControlSystem;
 import com.spaceproject.systems.OrbitSystem;
-import com.spaceproject.systems.PlayerControlSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.systems.SpaceLoadingSystem;
 import com.spaceproject.systems.SpaceParallaxSystem;
@@ -42,43 +39,26 @@ public class SpaceScreen extends MyScreenAdapter {
 		engine = new Engine();
 		
 		//add temporary test entities--------------------------------------------
-		//TODO: need refactor, put in spawn system or initializer of sorts...
-		
+
 		//add test ships
 		engine.addEntity(EntityFactory.createShip3(-100, 400));
 		engine.addEntity(EntityFactory.createShip3(-200, 400));		
 		engine.addEntity(EntityFactory.createShip3(-300, 400));
 		engine.addEntity(EntityFactory.createShip3(-400, 400));
-			
-		//add player
-		//boolean startAsShip = true;//debug: start as ship or player
-		Entity player = EntityFactory.createCharacter(landCFG.position.x, landCFG.position.y);
-		Entity playerTESTSHIP = EntityFactory.createShip3(landCFG.position.x, landCFG.position.y, landCFG.shipSeed, player);
-		player.getComponent(CharacterComponent.class).vehicle = playerTESTSHIP;
 		
-		//if (startAsShip) {
-			//start as ship	
-			playerTESTSHIP.add(new CameraFocusComponent());
-			playerTESTSHIP.add(new ControllableComponent());
-			engine.addEntity(playerTESTSHIP);
-		//} else {
-			//start as player
-		//	player.add(new CameraFocusComponent());
-		//	player.add(new ControllableComponent());
-		//	engine.addEntity(player);
-		//}
+
+		//add player
+		Entity ship = landCFG.ship;		
+		ship.getComponent(TransformComponent.class).pos.x = landCFG.position.x;
+		ship.getComponent(TransformComponent.class).pos.y = landCFG.position.y;
+		engine.addEntity(ship);
+	 
+
 		
 		// Add systems to engine---------------------------------------------------------		
-		/*
-		if (startAsShip) {
-			engine.addSystem(new PlayerControlSystem(this, player, playerTESTSHIP, landCFG));//start as ship
-		} else {
-			engine.addSystem(new PlayerControlSystem(this, player, landCFG));//start as player
-		}*/
-		
 		//engine.addSystem(new PlayerControlSystem(this, player, landCFG));
 		engine.addSystem(new NewControlSystem(this, engine));
-		engine.addSystem(new ScreenTransitionSystem(this, landCFG));
+		engine.addSystem(new ScreenTransitionSystem(this));
 		
 		engine.addSystem(new SpaceRenderingSystem());
 		engine.addSystem(new SpaceLoadingSystem());
@@ -118,14 +98,13 @@ public class SpaceScreen extends MyScreenAdapter {
 		System.out.println("Disposing: " + this.getClass().getSimpleName());
 		super.dispose();
 		
-		//clean up after self
-		//dispose of spritebatches and textures
-		
+		//clean up after self			
 		for (EntitySystem sys : engine.getSystems()) {
 			if (sys instanceof Disposable)
 				((Disposable) sys).dispose();
 		}
 		
+		//dispose of spritebatches and textures	
 		for (Entity ents : engine.getEntitiesFor(Family.all(TextureComponent.class).get())) {
 			TextureComponent tex = ents.getComponent(TextureComponent.class);
 			if (tex != null)

@@ -1,13 +1,16 @@
 package com.spaceproject;
 
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.components.CameraFocusComponent;
+import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.config.LandConfig;
-import com.spaceproject.config.WorldConfig;
-import com.spaceproject.screens.*;
+import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.MyScreenAdapter;
 
 public class SpaceProject extends Game {
@@ -28,6 +31,11 @@ public class SpaceProject extends Game {
 		//load test default values
 		LandConfig landCFG = new LandConfig();
 		landCFG.position = new Vector3();//start player at 0,0
+		Entity player = EntityFactory.createCharacter(landCFG.position.x, landCFG.position.y);
+		Entity playerTESTSHIP = EntityFactory.createShip3(landCFG.position.x, landCFG.position.y, landCFG.shipSeed, player);
+		playerTESTSHIP.add(new CameraFocusComponent());
+		playerTESTSHIP.add(new ControllableComponent());
+		landCFG.ship = playerTESTSHIP;
 		
 		//test values for world
 		PlanetComponent planet = new PlanetComponent();

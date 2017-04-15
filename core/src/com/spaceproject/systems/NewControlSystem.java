@@ -119,6 +119,7 @@ public class NewControlSystem extends MyIteratingSystem {
 			fireCannon(transform, cannon, id);
 		}
 		
+		//land or take off from planet
 		if (control.land) {
 			if (inSpace)
 				landOnPlanet(entity);
@@ -141,11 +142,11 @@ public class NewControlSystem extends MyIteratingSystem {
 		screenTrans.stage = ScreenTransitionComponent.AnimStage.transition;//begin animation
 		screenTrans.landCFG = new LandConfig();
 		//TODO: load location that should be saved from when landed
-		/*
-		screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
-		screenTrans.landCFG.ship = Misc.copyEntity(vehicleEntity);//entity to send to the planet
-		screenTrans.landCFG.position = planetPos;// save position for taking off from planet
-		*/
+		
+		//screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
+		screenTrans.landCFG.ship = Misc.copyEntity(entity);//entity to send to the planet
+		//screenTrans.landCFG.position = WORLDSCREEN.planetPos;// save position for taking off from planet
+		
 		entity.add(screenTrans);
 		
 	}
@@ -163,6 +164,8 @@ public class NewControlSystem extends MyIteratingSystem {
 				screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
 				screenTrans.landCFG.ship = Misc.copyEntity(entity);//entity to send to the planet
 				screenTrans.landCFG.position = planetPos;// save position for taking off from planet
+				//TODO: planet moves, set position to what ever planet is instead (will come into play
+				//over more when orbit is based on time)
 				entity.add(screenTrans);
 				return;
 			}

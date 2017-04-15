@@ -19,6 +19,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
+import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.TransformComponent;
@@ -59,7 +60,7 @@ public class HUDSystem extends EntitySystem {
 	public void addedToEngine(Engine engine) {
 		this.engine = engine;
 		mapableObjects = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
-		player = engine.getEntitiesFor(Family.one(CameraFocusComponent.class, HealthComponent.class).get());
+		player = engine.getEntitiesFor(Family.all(ControllableComponent.class).get());
 		killables = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(CameraFocusComponent.class).get());
 	}
 	
@@ -161,7 +162,8 @@ public class HUDSystem extends EntitySystem {
 		//draw ammo
 		CannonComponent cannon = Mappers.cannon.get(player.first());
 		if (cannon == null) return;
-
+		
+		
 		//draw ammo bar
 		float ratioAmmo = (float) cannon.curAmmo / (float) cannon.maxAmmo;
 		shape.setColor(barBackground);
@@ -208,7 +210,7 @@ public class HUDSystem extends EntitySystem {
 
 	/**
 	 * Mark off-screen objects on edge of screen for navigation.
-	 * TODO: load star map markers based on point list instead of star entity for greater distance
+	 * TODO: load star map markers based on point list instead of star entity for stars that aren't loaded yet
 	 */
 	private void drawEdgeMap() {
 		//TODO: move these values into MapComponent
