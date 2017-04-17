@@ -1,15 +1,21 @@
 package com.spaceproject.systems;
 
+import com.badlogic.ashley.core.Engine;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
+import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
+import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.ui.TouchButtonRectangle;
 import com.spaceproject.ui.TouchButtonRound;
 import com.spaceproject.ui.TouchJoyStick;
+import com.spaceproject.utility.Mappers;
 
 /*TODO: test multiple screen sizes
  * https://developer.android.com/guide/practices/screens_support.html
@@ -30,38 +36,53 @@ public class TouchUISystem extends EntitySystem {
 	
 	TouchJoyStick joyMovement = new TouchJoyStick(230, 230, 200, white, blue);
 	
+	private ImmutableArray<Entity> players;
+	
+	@Override
+	public void addedToEngine(Engine engine) {
+		players = engine.getEntitiesFor(Family.all(ControllableComponent.class).get());
+		
+	}
+	
 	@Override
 	public void update(float delta) {
 		
-		PlayerControlSystem.shoot = btnShoot.isTouched();
-		PlayerControlSystem.changeVehicle = btnVehicle.isTouched();
-		PlayerControlSystem.land = btnLand.isTouched();
+		if (players == null || players.size() == 0) return;
+		Entity player = players.first();
+		
+		ControllableComponent control = Mappers.controllable.get(player);
+		
+		
+		control.shoot = btnShoot.isTouched();
+		control.changeVehicle = btnVehicle.isJustTouched();
+		control.land = btnLand.isTouched();
 		if (btnMap.isJustTouched()) {
 			HUDSystem.drawSpaceMap = !HUDSystem.drawSpaceMap;
 		}
-		btnLand.hidden = !PlayerControlSystem.canLand;
+		btnLand.hidden = !control.canLand;
+		
 		
 		if (joyMovement.isTouched()) {
 
 			// face finger
-			PlayerControlSystem.angleFacing = joyMovement.getAngle();
+			control.angleFacing = joyMovement.getAngle();
 
 			//apply thrust
-			PlayerControlSystem.movementMultiplier = joyMovement.getPowerRatio();
+			control.movementMultiplier = joyMovement.getPowerRatio();
 
 			// if finger is close to center of joystick, apply breaks
-			if (joyMovement.getPowerRatio() < 0.20f) {
+			if (joyMovement.getPowerRatio() < 0.25f) {
 				// breaks
-				PlayerControlSystem.moveForward = false;
-				PlayerControlSystem.applyBreaks = true;
+				control.moveForward = false;
+				control.moveBack = true;
 			} else {
 				// move
-				PlayerControlSystem.moveForward = true;
-				PlayerControlSystem.applyBreaks = false;
+				control.moveForward = true;
+				control.moveBack = false;
 			}
 		} else {
-			PlayerControlSystem.moveForward = false;
-			PlayerControlSystem.applyBreaks = false;
+			control.moveForward = false;
+			control.moveBack = false;
 		}
 	
 		//set projection matrix so things render using correct coordinates

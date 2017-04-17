@@ -17,9 +17,10 @@ public class ControllableComponent implements Component {
 	public boolean shoot;
 	public boolean changeVehicle;
 	public boolean land;
+	public boolean canLand;
 	
 	//timers
 	public float timeSinceVehicle;
-	public int timeTillCanGetInVehicle;
+	public int timeTillCanGetInVehicle = 60;
 	
 }

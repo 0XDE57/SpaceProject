@@ -52,6 +52,7 @@ public class DesktopInputSystem extends EntitySystem {
 		control.land = Gdx.input.isKeyJustPressed(SpaceProject.keycfg.land);
 	}
 
+	/*
 	private void playerControls() {
 		///////////////////
 		/////DIRECTION/////
@@ -84,6 +85,7 @@ public class DesktopInputSystem extends EntitySystem {
 		//land on planet
 		PlayerControlSystem.land = Gdx.input.isKeyJustPressed(SpaceProject.keycfg.land);
 	}
+*/
 
 	private static void cameraControls(float delta) {
 		//zoom test

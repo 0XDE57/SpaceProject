@@ -22,6 +22,8 @@ public class TouchButtonRound {
 	}
 	
 	public void render(ShapeRenderer shape) {
+		
+		
 		if (hidden) {
 			return;
 		}
@@ -45,5 +47,21 @@ public class TouchButtonRound {
 		float padding = 40f;//let finger be slightly outside of button
 		return  ((Gdx.input.isTouched(0) && distFinger0 <= radius+padding)
 				|| (Gdx.input.isTouched(1) && distFinger1 <= radius+padding));
+	}
+	
+	
+	boolean touched = false;
+	public boolean isJustTouched() {
+		if (isTouched()) {
+			touched = true;
+			return false;
+		}
+		
+		if (touched) {
+			touched = false;
+			return true;
+		}
+		
+		return false;
 	}
 }

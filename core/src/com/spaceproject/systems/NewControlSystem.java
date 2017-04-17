@@ -32,6 +32,7 @@ public class NewControlSystem extends MyIteratingSystem {
 
 	private ImmutableArray<Entity> vehicles;
 	private ImmutableArray<Entity> planets;
+	
 	private boolean inSpace;
 	
 	public NewControlSystem(MyScreenAdapter screen, Engine engine) {
@@ -49,9 +50,16 @@ public class NewControlSystem extends MyIteratingSystem {
 		
 		ControllableComponent control = Mappers.controllable.get(entity);
 		
+		
+		if (control.timeSinceVehicle < control.timeTillCanGetInVehicle) {
+			control.timeSinceVehicle += 100 * delta;
+		}
+				
+		
 		CharacterComponent character = Mappers.character.get(entity);
 		if (character != null) {
 			controlCharacter(entity, character, control, delta);
+			control.canLand = false;
 		}
 		
 		VehicleComponent vehicle = Mappers.vehicle.get(entity);
@@ -79,56 +87,60 @@ public class NewControlSystem extends MyIteratingSystem {
 			enterVehicle(entity, control);
 		}
 		
+		
 	}
 
 	private void controlShip(Entity entity, VehicleComponent vehicle, ControllableComponent control, float delta) {
 		
-		TransformComponent transform = Mappers.transform.get(entity);
-		//VehicleComponent vehicle = Mappers.vehicle.get(vehicleEntity);
-		
-		CannonComponent cannon = Mappers.cannon.get(entity);	
-		refillAmmo(cannon, delta);
+		TransformComponent transform = Mappers.transform.get(entity);				
 		
 		//make vehicle face angle from mouse/joystick
-		transform.rotation = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f*delta);
+		transform.rotation = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f*delta);		
 		
-		
-		//apply thrust forward accelerate 
 		if (control.moveForward) {
 			accelerate(delta, control, transform, vehicle);
-		}
-		
-		//apply thrust left
+		}		
+
 		if (control.moveLeft) {
 			dodgeLeft();
 		}
 		
-		//apply thrust right
 		if (control.moveRight) {
 			dodgeRight();
 		}
-		
-		//stop vehicle
+
 		if (control.moveBack) {
 			decelerate(delta, transform);
 		}
 		
+		//debug force insta-stop
+		if (Gdx.input.isKeyJustPressed(Keys.X)) transform.velocity.set(0,0);
+		
+		
+		
 		//fire cannon / attack
+		CannonComponent cannon = Mappers.cannon.get(entity);	
+		refillAmmo(cannon, delta);
 		if (control.shoot) {
 			int id = Mappers.vehicle.get(entity).id;
 			fireCannon(transform, cannon, id);
 		}
 		
-		//land or take off from planet
-		if (control.land) {
-			if (inSpace)
-				landOnPlanet(entity);
-			else
-				takeOffPlanet(entity);
-		}
 		
-		//debug force insta-stop
-		if (Gdx.input.isKeyJustPressed(Keys.X)) transform.velocity.set(0,0);
+		//land or take off from planet
+		if (inSpace) {
+			control.canLand = canLandOnPlanet(transform.pos);
+		} else {
+			control.canLand = true;
+		}
+		if (control.land) {
+			if (inSpace) {				
+				landOnPlanet(entity);
+			} else {			
+				takeOffPlanet(entity);
+			}
+		}	
+		
 		
 		//exit vehicle
 		if (control.changeVehicle) {
@@ -172,19 +184,20 @@ public class NewControlSystem extends MyIteratingSystem {
 		}
 	}
 	
-	private boolean canLandOnPlanet(Entity vehicleEntity) {
-		//Entity vehicleEntity = Mappers.character.get(playerEntity).vehicle;
-		Vector3 vePos = Mappers.transform.get(vehicleEntity).pos;
+	
+	private boolean canLandOnPlanet(Vector3 pos) {
 		for (Entity planet : planets) {
 			Vector3 planetPos = Mappers.transform.get(planet).pos;
 			TextureComponent planetTex = Mappers.texture.get(planet);
 			// if player is over planet
-			if (MyMath.distance(vePos.x, vePos.y, planetPos.x, planetPos.y) <= planetTex.texture.getWidth() * 0.5 * planetTex.scale) {				
+			if (MyMath.distance(pos.x, pos.y, planetPos.x, planetPos.y)  
+					<= planetTex.texture.getWidth() * 0.5 * planetTex.scale) {				
 				return true;
 			}
 		}
 		return false;
 	}
+	
 
 	/** Slow down ship. When ship is slow enough, ship will stop completely */
 	private static void decelerate(float delta, TransformComponent transform) {
@@ -218,6 +231,8 @@ public class NewControlSystem extends MyIteratingSystem {
 		float dx = (float) Math.cos(angle) * (thrust * control.movementMultiplier) * delta;
 		float dy = (float) Math.sin(angle) * (thrust * control.movementMultiplier) * delta;
 		transform.velocity.add(dx, dy);
+		
+		//transform.accel.add(dx,dy);????
 		
 		//cap speed at max. if maxSpeed set to -1 it's infinite(no cap)
 		if (vehicle.maxSpeed != -1)
@@ -281,17 +296,11 @@ public class NewControlSystem extends MyIteratingSystem {
 	
 	
 	public void enterVehicle(Entity characterEntity, ControllableComponent control) {
-		//check if already in vehicle
-		//if (isInVehicle(playerEntity))  return;
-		
-		//Mappers.character.get(entity)
-		
 		//action timer
 		if (control.timeSinceVehicle < control.timeTillCanGetInVehicle) {
 			return;
 		}
-		control.timeSinceVehicle = 0;
-		
+				
 		
 		//get all vehicles and check if player is close to one(bounds overlap)
 		BoundsComponent playerBounds = Mappers.bounds.get(characterEntity);
@@ -307,15 +316,8 @@ public class NewControlSystem extends MyIteratingSystem {
 				//set references
 				Mappers.character.get(characterEntity).vehicle = vehicle;
 				Mappers.vehicle.get(vehicle).driver = characterEntity;
-				
-				/*
-				// set focus to vehicle
-				characterEntity.remove(CameraFocusComponent.class);
-				vehicle.add(new CameraFocusComponent());
-				
-				characterEntity.remove(ControllableComponent.class);
-				vehicle.add(new ControllableComponent());
-				*/
+								
+				// set focus to vehicle				
 				vehicle.add(characterEntity.remove(CameraFocusComponent.class));
 				vehicle.add(characterEntity.remove(ControllableComponent.class));
 				
@@ -325,6 +327,9 @@ public class NewControlSystem extends MyIteratingSystem {
 				//if (entity is controlled by player)
 				// zoom out camera, TODO: add pan animation
 				MyScreenAdapter.setZoomTarget(1);
+				
+				
+				control.timeSinceVehicle = 0;
 				
 				return;
 			}
@@ -340,20 +345,14 @@ public class NewControlSystem extends MyIteratingSystem {
 		}
 		control.timeSinceVehicle = 0;
 
+		
 		Entity characterEntity = Mappers.vehicle.get(vehicleEntity).driver;
 		
 		// set the player at the position of vehicle
 		Vector3 vehiclePosition = Mappers.transform.get(vehicleEntity).pos;
 		Mappers.transform.get(characterEntity).pos.set(vehiclePosition);
 		
-		/*
-		// set focus to player entity
-		vehicleEntity.remove(CameraFocusComponent.class);
-		characterEntity.add(new CameraFocusComponent());
-		
-		vehicleEntity.remove(ControllableComponent.class);
-		characterEntity.add(new ControllableComponent());
-		*/
+		//set focus to character
 		characterEntity.add(vehicleEntity.remove(CameraFocusComponent.class));
 		characterEntity.add(vehicleEntity.remove(ControllableComponent.class));
 		
