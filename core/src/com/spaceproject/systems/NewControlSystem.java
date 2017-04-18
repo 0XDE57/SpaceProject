@@ -151,9 +151,9 @@ public class NewControlSystem extends MyIteratingSystem {
 	
 	private static void takeOffPlanet(Entity entity) {
 		ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
-		screenTrans.stage = ScreenTransitionComponent.AnimStage.transition;//begin animation
+		//screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.transition;//begin animation
+		screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.transition;
 		screenTrans.landCFG = new LandConfig();
-		//TODO: load location that should be saved from when landed
 		
 		//screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
 		screenTrans.landCFG.ship = Misc.copyEntity(entity);//entity to send to the planet
@@ -171,7 +171,7 @@ public class NewControlSystem extends MyIteratingSystem {
 
 			if (MyMath.distance(vePos.x, vePos.y, planetPos.x, planetPos.y) <= planetTex.texture.getWidth() * 0.5 * planetTex.scale) {				
 				ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
-				screenTrans.stage = ScreenTransitionComponent.AnimStage.shrink;//begin animation
+				screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.shrink;//begin animation
 				screenTrans.landCFG = new LandConfig();
 				screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
 				screenTrans.landCFG.ship = Misc.copyEntity(entity);//entity to send to the planet
