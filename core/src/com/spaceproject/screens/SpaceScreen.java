@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.Application.ApplicationType;
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.utils.Disposable;
@@ -20,13 +21,13 @@ import com.spaceproject.systems.DesktopInputSystem;
 import com.spaceproject.systems.ExpireSystem;
 import com.spaceproject.systems.HUDSystem;
 import com.spaceproject.systems.MovementSystem;
-import com.spaceproject.systems.NewControlSystem;
+import com.spaceproject.systems.ControlSystem;
 import com.spaceproject.systems.OrbitSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.systems.SpaceLoadingSystem;
 import com.spaceproject.systems.SpaceParallaxSystem;
 import com.spaceproject.systems.SpaceRenderingSystem;
-import com.spaceproject.systems.TouchUISystem;
+import com.spaceproject.systems.MobileInputSystem;
 import com.spaceproject.utility.MyScreenAdapter;
 
 public class SpaceScreen extends MyScreenAdapter {
@@ -38,47 +39,49 @@ public class SpaceScreen extends MyScreenAdapter {
 		// engine to handle all entities and components
 		engine = new Engine();
 		
-		//add temporary test entities--------------------------------------------
 
-		//add test ships
+		//===============ENTITIES===============
+		//test ships
 		engine.addEntity(EntityFactory.createShip3(-100, 400));
 		engine.addEntity(EntityFactory.createShip3(-200, 400));		
 		engine.addEntity(EntityFactory.createShip3(-300, 400));
-		engine.addEntity(EntityFactory.createShip3(-400, 400));
-		
+		engine.addEntity(EntityFactory.createShip3(-400, 400));		
 
 		//add player
 		Entity ship = landCFG.ship;		
 		ship.getComponent(TransformComponent.class).pos.x = landCFG.position.x;
 		ship.getComponent(TransformComponent.class).pos.y = landCFG.position.y;
 		engine.addEntity(ship);
-	 
-
 		
-		// Add systems to engine---------------------------------------------------------		
-		//engine.addSystem(new PlayerControlSystem(this, player, landCFG));
-		engine.addSystem(new NewControlSystem(this, engine));
-		engine.addSystem(new ScreenTransitionSystem(this));
 		
-		engine.addSystem(new SpaceRenderingSystem());
-		engine.addSystem(new SpaceLoadingSystem());
-		engine.addSystem(new SpaceParallaxSystem());
-		engine.addSystem(new MovementSystem());
-		engine.addSystem(new OrbitSystem());
-		engine.addSystem(new DebugUISystem());
-		engine.addSystem(new BoundsSystem());
-		engine.addSystem(new ExpireSystem(1));
-		engine.addSystem(new CameraSystem());
-		engine.addSystem(new CollisionSystem());
-		engine.addSystem(new HUDSystem());
-		
-		//add input system. touch on android and keys on desktop.
-		if (Gdx.app.getType() == ApplicationType.Android) {
-			engine.addSystem(new TouchUISystem());
+		//===============SYSTEMS===============
+		//input
+		if (Gdx.app.getType() == ApplicationType.Android || Gdx.app.getType() == ApplicationType.iOS) {
+			engine.addSystem(new MobileInputSystem());
 		} else {
 			engine.addSystem(new DesktopInputSystem());
 		}
+		engine.addSystem(new ControlSystem(this, engine));	
 		
+		//loading
+		engine.addSystem(new SpaceLoadingSystem());
+		engine.addSystem(new SpaceParallaxSystem());
+		//Ai...
+		
+		//logic
+		engine.addSystem(new ExpireSystem(1));
+		engine.addSystem(new OrbitSystem());
+		engine.addSystem(new MovementSystem());
+		engine.addSystem(new BoundsSystem());
+		engine.addSystem(new CollisionSystem());
+		engine.addSystem(new ScreenTransitionSystem(this));	
+		
+		//rendering
+		engine.addSystem(new CameraSystem());
+		engine.addSystem(new SpaceRenderingSystem());
+		engine.addSystem(new HUDSystem());
+		engine.addSystem(new DebugUISystem());
+				
 	}
 	
 	@Override

@@ -11,14 +11,15 @@ import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.LandConfig;
+import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.systems.BoundsSystem;
 import com.spaceproject.systems.CameraSystem;
 import com.spaceproject.systems.DebugUISystem;
 import com.spaceproject.systems.DesktopInputSystem;
 import com.spaceproject.systems.MovementSystem;
-import com.spaceproject.systems.NewControlSystem;
+import com.spaceproject.systems.ControlSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
-import com.spaceproject.systems.TouchUISystem;
+import com.spaceproject.systems.MobileInputSystem;
 import com.spaceproject.systems.WorldRenderingSystem;
 import com.spaceproject.utility.MyScreenAdapter;
 
@@ -31,32 +32,42 @@ public class WorldScreen extends MyScreenAdapter {
 		// engine to handle all entities and components
 		engine = new Engine();
 		
-	
+		//===============ENTITIES===============				
 		//add player
 		Entity ship = landCFG.ship;
 		int position = landCFG.planet.mapSize*32/2;//32 = tileSize, set position to middle of planet
 		ship.getComponent(TransformComponent.class).pos.x = position;
 		ship.getComponent(TransformComponent.class).pos.y = position;
 		engine.addEntity(ship);
+		
+		//test ships near player
+		engine.addEntity(EntityFactory.createShip3(position+100, position+100));
+		engine.addEntity(EntityFactory.createShip3(position-100, position+100));	
 
-
 		
-		//engine.addSystem(new PlayerControlSystem(this, player, landCFG));
-		engine.addSystem(new ScreenTransitionSystem(this, landCFG));
-		engine.addSystem(new NewControlSystem(this, engine));
-		
-		engine.addSystem(new WorldRenderingSystem(landCFG.planet));
-		engine.addSystem(new MovementSystem());
-		engine.addSystem(new CameraSystem());
-		engine.addSystem(new DebugUISystem());
-		engine.addSystem(new BoundsSystem());
-		
-		//add input system. touch on android and keys on desktop.
-		if (Gdx.app.getType() == ApplicationType.Android) {
-			engine.addSystem(new TouchUISystem());
+		//===============SYSTEMS===============
+		//input
+		if (Gdx.app.getType() == ApplicationType.Android || Gdx.app.getType() == ApplicationType.iOS) {
+			engine.addSystem(new MobileInputSystem());
 		} else {
 			engine.addSystem(new DesktopInputSystem());
-		}
+		}		
+		engine.addSystem(new ControlSystem(this, engine));		
+		
+		//loading
+		//AI...
+		//world...
+		
+		//logic
+		engine.addSystem(new MovementSystem());
+		engine.addSystem(new BoundsSystem());
+		engine.addSystem(new ScreenTransitionSystem(this, landCFG));
+		
+		//rendering
+		engine.addSystem(new CameraSystem());
+		engine.addSystem(new WorldRenderingSystem(landCFG.planet));
+		engine.addSystem(new DebugUISystem());		
+		
 	}
 	
 	@Override

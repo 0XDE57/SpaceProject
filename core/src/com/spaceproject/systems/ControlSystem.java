@@ -28,14 +28,14 @@ import com.spaceproject.utility.MyIteratingSystem;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.MyScreenAdapter;
 
-public class NewControlSystem extends MyIteratingSystem {
+public class ControlSystem extends MyIteratingSystem {
 
 	private ImmutableArray<Entity> vehicles;
 	private ImmutableArray<Entity> planets;
 	
 	private boolean inSpace;
 	
-	public NewControlSystem(MyScreenAdapter screen, Engine engine) {
+	public ControlSystem(MyScreenAdapter screen, Engine engine) {
 		super(Family.all(ControllableComponent.class, TransformComponent.class).one(
 				CharacterComponent.class, VehicleComponent.class).get());
 		
@@ -300,7 +300,7 @@ public class NewControlSystem extends MyIteratingSystem {
 		if (control.timeSinceVehicle < control.timeTillCanGetInVehicle) {
 			return;
 		}
-				
+		control.changeVehicle = false;
 		
 		//get all vehicles and check if player is close to one(bounds overlap)
 		BoundsComponent playerBounds = Mappers.bounds.get(characterEntity);
@@ -336,7 +336,7 @@ public class NewControlSystem extends MyIteratingSystem {
 		}
 	}
 			
-
+	
 	public void exitVehicle(Entity vehicleEntity, ControllableComponent control) {
 		
 		//action timer
@@ -344,7 +344,7 @@ public class NewControlSystem extends MyIteratingSystem {
 			return;
 		}
 		control.timeSinceVehicle = 0;
-
+		control.changeVehicle = false;
 		
 		Entity characterEntity = Mappers.vehicle.get(vehicleEntity).driver;
 		
@@ -367,10 +367,4 @@ public class NewControlSystem extends MyIteratingSystem {
 		MyScreenAdapter.setZoomTarget(0.5f);
 		
 	}
-
-	/*
-	/** Check if player is in vehicle. 
-	public static boolean isInVehicle(Entity character) {
-		return Mappers.character.get(character).vehicle != null;
-	}*/
 }

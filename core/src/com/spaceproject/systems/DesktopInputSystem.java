@@ -25,11 +25,10 @@ public class DesktopInputSystem extends EntitySystem {
 	public void update(float delta) {	
 		cameraControls(delta);
 		
-		//playerControls();	
-		newPlayerControls();
+		playerControls();
 	}
 
-	private void newPlayerControls() {
+	private void playerControls() {
 		if (players == null || players.size() == 0) return;
 		
 		ControllableComponent control = Mappers.controllable.get(players.first());
@@ -48,44 +47,11 @@ public class DesktopInputSystem extends EntitySystem {
 		
 		//actions
 		control.shoot = (Gdx.input.isKeyPressed(SpaceProject.keycfg.shoot) || Gdx.input.isTouched());
-		control.changeVehicle = Gdx.input.isKeyJustPressed(SpaceProject.keycfg.changeVehicle);
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.changeVehicle)) {
+			control.changeVehicle = true;
+		}
 		control.land = Gdx.input.isKeyJustPressed(SpaceProject.keycfg.land);
 	}
-
-	/*
-	private void playerControls() {
-		///////////////////
-		/////DIRECTION/////
-		///////////////////
-		//make ship face mouse		
-		float angle = MyMath.angleTo(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY(), 
-				Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
-		PlayerControlSystem.angleFacing = angle;
-		
-		//////////////////
-		/////MOVEMENT/////
-		//////////////////
-		// set multiplier to full power because a key switch is on or off
-		PlayerControlSystem.movementMultiplier = 1;
-		PlayerControlSystem.moveForward = Gdx.input.isKeyPressed(SpaceProject.keycfg.forward);//forward
-		PlayerControlSystem.moveRight	= Gdx.input.isKeyPressed(SpaceProject.keycfg.right);//right
-		PlayerControlSystem.moveLeft    = Gdx.input.isKeyPressed(SpaceProject.keycfg.left);//left
-		PlayerControlSystem.applyBreaks = Gdx.input.isKeyPressed(SpaceProject.keycfg.back);//breaks	
-		//PlayerControlSystem.stop 		= Gdx.input.isKeyPressed(SpaceProject.keycfg.instantStop);//DEBUG instant stop
-		
-		/////////////////
-		/////ACTIONS/////
-		/////////////////
-		//shoot
-		PlayerControlSystem.shoot = (Gdx.input.isKeyPressed(SpaceProject.keycfg.shoot) || Gdx.input.isTouched());
-		
-		//enter/exit vehicle
-		PlayerControlSystem.changeVehicle = Gdx.input.isKeyPressed(SpaceProject.keycfg.changeVehicle);
-		
-		//land on planet
-		PlayerControlSystem.land = Gdx.input.isKeyJustPressed(SpaceProject.keycfg.land);
-	}
-*/
 
 	private static void cameraControls(float delta) {
 		//zoom test

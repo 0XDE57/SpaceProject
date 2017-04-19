@@ -43,7 +43,6 @@ public class ScreenTransitionSystem extends IteratingSystem {
 		ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(entity); 
 		
 		
-
 		if (screenTrans.landStage != null) {
 			if (curLandStage == null || curLandStage != screenTrans.landStage) {
 				System.out.println("Animation Stage: " + screenTrans.landStage);
@@ -174,10 +173,9 @@ public class ScreenTransitionSystem extends IteratingSystem {
 		screenTrans.landCFG.ship.getComponent(TextureComponent.class).scale = 0;//set size to 0 so texture can grow
 		screenTrans.landCFG.position = landCFG.position;
 		
-		SpaceScreen x = new SpaceScreen(screenTrans.landCFG);
-		x.cam.zoom = 0;
-		MyScreenAdapter.changeScreen(x);
+		MyScreenAdapter.changeScreen(new SpaceScreen(screenTrans.landCFG));
 		//TODO: do current systems run in the background during change?
+		//if so, disable/pause and cleanup/dispose
 	}
 		
 	private static void pause(ScreenTransitionComponent screenTrans, float delta) {				
@@ -189,12 +187,12 @@ public class ScreenTransitionSystem extends IteratingSystem {
 	}
 
 	private static void exit(Entity entity, ScreenTransitionComponent screenTrans) {
-		if (entity.getComponent(VehicleComponent.class) != null) {
-			ControllableComponent control = entity.getComponent(ControllableComponent.class);
+		if (Mappers.vehicle.get(entity) != null) {
+			ControllableComponent control = Mappers.controllable.get(entity);
 			if (control != null) {
 				control.changeVehicle = true;
-				screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.end;				
-			}			
+				screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.end;
+			}
 		}
 	}
 }

@@ -20,7 +20,7 @@ import com.spaceproject.utility.Mappers;
 /*TODO: test multiple screen sizes
  * https://developer.android.com/guide/practices/screens_support.html
  */
-public class TouchUISystem extends EntitySystem {
+public class MobileInputSystem extends EntitySystem {
 
 	//rendering
 	private Matrix4 projectionMatrix = new Matrix4();
