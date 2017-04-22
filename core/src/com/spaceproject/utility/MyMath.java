@@ -1,6 +1,8 @@
 package com.spaceproject.utility;
 
+import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.TransformComponent;
 
 public class MyMath {
 	
@@ -25,6 +27,10 @@ public class MyMath {
 		return (float) Math.hypot(x2 - x1, y2 - y1);
 	}
 	
+	public static float distance(Vector3 a, Vector3 b) {
+		return distance(a.x, a.y, b.x, b.y);
+	}
+	
 	/**
 	 * Get angle from position 1 to position 2.
 	 * @param x1
@@ -35,6 +41,10 @@ public class MyMath {
 	 */
 	public static float angleTo(int x1, int y1, int x2, int y2) {
 		return (float) -(Math.atan2(x2 - x1, y2 - y1)) - 1.57f;
+	}
+	
+	public static float angleTo(Vector3 a, Vector3 b) {
+		return angleTo((int)a.x, (int)a.y, (int)b.x, (int)b.y);
 	}
 	
 	/**
@@ -71,4 +81,5 @@ public class MyMath {
 	    int z = (63 - Long.numberOfLeadingZeros(bytes)) / 10;
 	    return String.format("%.2f%sB", (double)bytes / (1L << (z*10)), " KMGTPE".charAt(z));
 	}
+
 }

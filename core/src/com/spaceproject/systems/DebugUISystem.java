@@ -4,8 +4,10 @@ import java.lang.reflect.Field;
 import java.util.Set;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -31,12 +33,13 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.MyIteratingSystem;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.MyScreenAdapter;
 
-public class DebugUISystem extends MyIteratingSystem implements Disposable {
+public class DebugUISystem extends IteratingSystem implements Disposable {
 
+	private Engine engine;
+	
 	//rendering
 	private static OrthographicCamera cam;
 	private static SpriteBatch batch;
@@ -90,6 +93,12 @@ public class DebugUISystem extends MyIteratingSystem implements Disposable {
 			System.out.println("-------------------------\n");
 			*/
 		}
+	}
+	
+	@Override
+	public void addedToEngine(Engine engine) {		
+		super.addedToEngine(engine);
+		this.engine = engine;
 	}
 
 	@Override

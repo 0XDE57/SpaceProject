@@ -150,6 +150,8 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		renderQueue.clear();
 	}	
 
+	//TODO: <OPTIMIZATION> instead of drawing each tile as an individual batch draw, 
+	//create a large image with a collection of tiles (a tile of tiles) for fewer draw calls
 	private void drawTiles() {
 			
 		// calculate tile that the camera is in

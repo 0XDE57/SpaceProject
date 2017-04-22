@@ -1,6 +1,7 @@
 package com.spaceproject.utility;
 
 import com.badlogic.ashley.core.ComponentMapper;
+import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
@@ -45,4 +46,6 @@ public class Mappers {
 	public static final ComponentMapper<ScreenTransitionComponent> screenTrans = ComponentMapper.getFor(ScreenTransitionComponent.class);
 	
 	public static final ComponentMapper<ControllableComponent> controllable = ComponentMapper.getFor(ControllableComponent.class);
+	
+	public static final ComponentMapper<AIComponent> AI = ComponentMapper.getFor(AIComponent.class);
 }

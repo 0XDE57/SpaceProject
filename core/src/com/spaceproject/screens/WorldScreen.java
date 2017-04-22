@@ -8,10 +8,13 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Disposable;
+import com.spaceproject.components.AIComponent;
+import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.systems.AISystem;
 import com.spaceproject.systems.BoundsSystem;
 import com.spaceproject.systems.CameraSystem;
 import com.spaceproject.systems.DebugUISystem;
@@ -21,6 +24,7 @@ import com.spaceproject.systems.ControlSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.systems.MobileInputSystem;
 import com.spaceproject.systems.WorldRenderingSystem;
+import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyScreenAdapter;
 
 public class WorldScreen extends MyScreenAdapter {
@@ -41,9 +45,18 @@ public class WorldScreen extends MyScreenAdapter {
 		engine.addEntity(ship);
 		
 		//test ships near player
-		engine.addEntity(EntityFactory.createShip3(position+100, position+100));
-		engine.addEntity(EntityFactory.createShip3(position-100, position+100));	
-
+		engine.addEntity(EntityFactory.createShip3(position+100, position+300));
+		engine.addEntity(EntityFactory.createShip3(position-100, position+300));	
+		
+		Entity aiTest = EntityFactory.createCharacter(position, position+50);
+		aiTest.add(new AIComponent());
+		aiTest.add(new ControllableComponent());
+		engine.addEntity(aiTest);
+		//engine.addEntity(Misc.copyEntity(aiTest));
+		//engine.addEntity(Misc.copyEntity(aiTest));
+		//engine.addEntity(Misc.copyEntity(aiTest));
+		//engine.addEntity(Misc.copyEntity(aiTest));
+		
 		
 		//===============SYSTEMS===============
 		//input
@@ -51,14 +64,15 @@ public class WorldScreen extends MyScreenAdapter {
 			engine.addSystem(new MobileInputSystem());
 		} else {
 			engine.addSystem(new DesktopInputSystem());
-		}		
-		engine.addSystem(new ControlSystem(this, engine));		
+		}
+		engine.addSystem(new AISystem());
+		
 		
 		//loading
-		//AI...
-		//world...
+
 		
 		//logic
+		engine.addSystem(new ControlSystem(this));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new BoundsSystem());
 		engine.addSystem(new ScreenTransitionSystem(this, landCFG));

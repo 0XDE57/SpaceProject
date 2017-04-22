@@ -3,6 +3,7 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -24,25 +25,30 @@ import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
-import com.spaceproject.utility.MyIteratingSystem;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.MyScreenAdapter;
 
-public class ControlSystem extends MyIteratingSystem {
+public class ControlSystem extends IteratingSystem {
 
+	private Engine engine;
 	private ImmutableArray<Entity> vehicles;
 	private ImmutableArray<Entity> planets;
 	
 	private boolean inSpace;
 	
-	public ControlSystem(MyScreenAdapter screen, Engine engine) {
+	public ControlSystem(MyScreenAdapter screen) {
 		super(Family.all(ControllableComponent.class, TransformComponent.class).one(
 				CharacterComponent.class, VehicleComponent.class).get());
-		
+			
+		inSpace = (screen instanceof SpaceScreen);
+	}
+	
+	@Override
+	public void addedToEngine(Engine engine) {
+		super.addedToEngine(engine);
 		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
 		planets = engine.getEntitiesFor(Family.all(PlanetComponent.class).get());
-		
-		inSpace = (screen instanceof SpaceScreen);
+		this.engine = engine;
 	}
 
 	@Override

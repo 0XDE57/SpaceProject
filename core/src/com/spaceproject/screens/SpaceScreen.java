@@ -60,8 +60,7 @@ public class SpaceScreen extends MyScreenAdapter {
 			engine.addSystem(new MobileInputSystem());
 		} else {
 			engine.addSystem(new DesktopInputSystem());
-		}
-		engine.addSystem(new ControlSystem(this, engine));	
+		}			
 		
 		//loading
 		engine.addSystem(new SpaceLoadingSystem());
@@ -69,6 +68,7 @@ public class SpaceScreen extends MyScreenAdapter {
 		//Ai...
 		
 		//logic
+		engine.addSystem(new ControlSystem(this));
 		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new OrbitSystem());
 		engine.addSystem(new MovementSystem());

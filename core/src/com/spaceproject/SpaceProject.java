@@ -11,6 +11,7 @@ import com.spaceproject.config.KeyConfig;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.SpaceScreen;
+import com.spaceproject.screens.WorldScreen;
 import com.spaceproject.utility.MyScreenAdapter;
 
 public class SpaceProject extends Game {
