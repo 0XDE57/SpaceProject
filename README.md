@@ -4,7 +4,7 @@ A top-down 2D, procedurally generated space exploration and shooter game.
 Currently in early (unplayable) development. 
 Work in progress....
 
-[screenshot](https://raw.github.com/0XDE57/SpaceProject/Capture.PNG)
+![screenshot](https://raw.github.com/0XDE57/SpaceProject/Capture.PNG)
 
 ### Libraries: 
 - libGDX
