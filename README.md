@@ -4,7 +4,9 @@ A top-down 2D, procedurally generated space exploration and shooter game.
 Currently in early (unplayable) development. 
 Work in progress....
 
-Libraries: 
+[screenshot](https://raw.github.com/0XDE57/SpaceProject/Capture.PNG)
+
+### Libraries: 
 - libGDX
 - Ashley
 - OpenSimplexNoise
