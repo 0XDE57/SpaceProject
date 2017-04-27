@@ -103,6 +103,11 @@ public class HUDSystem extends EntitySystem {
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 		
 		
+		//TODO: temporary fix. engine system priority....
+		MobileInputSystem mobileUI = engine.getSystem(MobileInputSystem.class);
+		if (mobileUI != null)
+			mobileUI.drawControls();
+		
 	}
 
 	/**

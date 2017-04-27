@@ -5,7 +5,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.Application.ApplicationType;
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.utils.Disposable;
@@ -19,18 +18,18 @@ import com.spaceproject.systems.AISystem;
 import com.spaceproject.systems.BoundsSystem;
 import com.spaceproject.systems.CameraSystem;
 import com.spaceproject.systems.CollisionSystem;
+import com.spaceproject.systems.ControlSystem;
 import com.spaceproject.systems.DebugUISystem;
 import com.spaceproject.systems.DesktopInputSystem;
 import com.spaceproject.systems.ExpireSystem;
 import com.spaceproject.systems.HUDSystem;
+import com.spaceproject.systems.MobileInputSystem;
 import com.spaceproject.systems.MovementSystem;
-import com.spaceproject.systems.ControlSystem;
 import com.spaceproject.systems.OrbitSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.systems.SpaceLoadingSystem;
 import com.spaceproject.systems.SpaceParallaxSystem;
 import com.spaceproject.systems.SpaceRenderingSystem;
-import com.spaceproject.systems.MobileInputSystem;
 import com.spaceproject.utility.MyScreenAdapter;
 
 public class SpaceScreen extends MyScreenAdapter {
@@ -77,13 +76,14 @@ public class SpaceScreen extends MyScreenAdapter {
 		//Ai...
 		
 		//logic
+		engine.addSystem(new ScreenTransitionSystem(this));	
 		engine.addSystem(new ControlSystem(this));
 		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new OrbitSystem());
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new BoundsSystem());
 		engine.addSystem(new CollisionSystem());
-		engine.addSystem(new ScreenTransitionSystem(this));	
+		
 		
 		//rendering
 		engine.addSystem(new CameraSystem());

@@ -75,12 +75,13 @@ public class WorldScreen extends MyScreenAdapter {
 
 		
 		//logic
+		engine.addSystem(new ScreenTransitionSystem(this, landCFG));
 		engine.addSystem(new ControlSystem(this));
 		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new BoundsSystem());
 		engine.addSystem(new CollisionSystem());
-		engine.addSystem(new ScreenTransitionSystem(this, landCFG));
+		
 		
 		//rendering
 		engine.addSystem(new CameraSystem());

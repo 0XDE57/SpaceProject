@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
+import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.ui.TouchButtonRectangle;
 import com.spaceproject.ui.TouchButtonRound;
@@ -40,14 +41,14 @@ public class MobileInputSystem extends EntitySystem {
 	
 	@Override
 	public void addedToEngine(Engine engine) {
-		players = engine.getEntitiesFor(Family.all(ControllableComponent.class).get());
-		
+		super.addedToEngine(engine);
+		players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());		
 	}
 	
 	@Override
 	public void update(float delta) {
 		
-		if (players == null || players.size() == 0) return;
+		if (players.size() == 0) return;
 		Entity player = players.first();
 		
 		ControllableComponent control = Mappers.controllable.get(player);
@@ -84,21 +85,21 @@ public class MobileInputSystem extends EntitySystem {
 			control.moveForward = false;
 			control.moveBack = false;
 		}
-	
-		//set projection matrix so things render using correct coordinates
-		// TODO: only needs to be called when screen size changes
-		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		shape.setProjectionMatrix(projectionMatrix);
+		
 			
 		//draw buttons on screen
-		drawControls();
+		//drawControls();
 
 	}
 
 	/**
 	 * Draw on-screen buttons.
 	 */
-	private void drawControls() { 
+	public void drawControls() {
+		//set projection matrix so things render using correct coordinates
+		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		shape.setProjectionMatrix(projectionMatrix);
+				
 		//enable transparency
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
