@@ -31,13 +31,11 @@ public class Misc {
 			return null;
 		
 		Entity targetEntity = entities.first();
-		float tDist = MyMath.distance(position, Mappers.transform.get(targetEntity).pos);
+		float targetDist = MyMath.distance(position, Mappers.transform.get(targetEntity).pos);
 		for (Entity searchEnt : entities) {
-			Vector3 sPos = Mappers.transform.get(searchEnt).pos;
-			Vector3 tPos = Mappers.transform.get(targetEntity).pos;
-			float dist = MyMath.distance(sPos, tPos);
-			if (dist < tDist) {
-				tDist = dist;
+			float dist = MyMath.distance(Mappers.transform.get(searchEnt).pos, position);
+			if (dist < targetDist) {
+				targetDist = dist;
 				targetEntity = searchEnt;
 			}
 		}

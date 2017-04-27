@@ -10,6 +10,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
@@ -128,8 +129,8 @@ public class ControlSystem extends IteratingSystem {
 		CannonComponent cannon = Mappers.cannon.get(entity);	
 		refillAmmo(cannon, delta);
 		if (control.shoot) {
-			int id = Mappers.vehicle.get(entity).id;
-			fireCannon(transform, cannon, id);
+			//int id = Mappers.vehicle.get(entity).id;
+			fireCannon(transform, cannon, entity);
 		}
 		
 		
@@ -157,7 +158,6 @@ public class ControlSystem extends IteratingSystem {
 	
 	private static void takeOffPlanet(Entity entity) {
 		ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
-		//screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.transition;//begin animation
 		screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.transition;
 		screenTrans.landCFG = new LandConfig();
 		
@@ -259,7 +259,7 @@ public class ControlSystem extends IteratingSystem {
 		}
 	}
 
-	private void fireCannon(TransformComponent transform, CannonComponent cannon, long ID) {
+	private void fireCannon(TransformComponent transform, CannonComponent cannon, Entity owner) {
 		//check if can fire before shooting
 		if (!canFire(cannon))
 			return;
@@ -272,7 +272,7 @@ public class ControlSystem extends IteratingSystem {
 		//create missile	
 		float dx = (float) (Math.cos(transform.rotation) * cannon.velocity) + transform.velocity.x;
 		float dy = (float) (Math.sin(transform.rotation) * cannon.velocity) + transform.velocity.y;
-		engine.addEntity(EntityFactory.createMissile(transform, new Vector2(dx, dy), cannon, ID));
+		engine.addEntity(EntityFactory.createMissile(transform, new Vector2(dx, dy), cannon, owner));
 		
 		//subtract ammo
 		--cannon.curAmmo;
@@ -323,8 +323,13 @@ public class ControlSystem extends IteratingSystem {
 				Mappers.character.get(characterEntity).vehicle = vehicle;
 				Mappers.vehicle.get(vehicle).driver = characterEntity;
 								
-				// set focus to vehicle				
-				vehicle.add(characterEntity.remove(CameraFocusComponent.class));
+				// set focus to vehicle
+				if (characterEntity.getComponent(CameraFocusComponent.class) != null) {
+					vehicle.add(characterEntity.remove(CameraFocusComponent.class));
+				}
+				if (characterEntity.getComponent(AIComponent.class) != null) {
+					vehicle.add(characterEntity.remove(AIComponent.class));
+				}
 				vehicle.add(characterEntity.remove(ControllableComponent.class));
 				
 				// remove player from engine

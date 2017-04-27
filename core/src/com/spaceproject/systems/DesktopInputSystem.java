@@ -29,10 +29,11 @@ public class DesktopInputSystem extends EntitySystem {
 	}
 
 	private void playerControls() {
-		if (players == null || players.size() == 0) return;
+		if (players.size() == 0) 
+			return;
 		
 		ControllableComponent control = Mappers.controllable.get(players.first());
-		if (control == null) return;
+		//if (control == null) return;
 		
 		float angle = MyMath.angleTo(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY(), 
 				Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);

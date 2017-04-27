@@ -151,7 +151,7 @@ public class EntityFactory {
 		return entity;
 	}
 	
-	public static Entity createMissile(TransformComponent source, Vector2 velocity, CannonComponent cannon, long ID) {
+	public static Entity createMissile(TransformComponent source, Vector2 velocity, CannonComponent cannon, Entity owner) {
 		Entity entity = new Entity();
 				
 		//create texture
@@ -180,7 +180,7 @@ public class EntityFactory {
 		//missile damage
 		MissileComponent missile = new MissileComponent();
 		missile.damage = cannon.damage;
-		missile.ownerID = ID;
+		missile.owner = owner;
 		
 		
 		entity.add(missile);
@@ -211,6 +211,12 @@ public class EntityFactory {
 	    CharacterComponent character = new CharacterComponent();
 	    character.walkSpeed = 300f;//70f;
 	    
+	    HealthComponent health = new HealthComponent();
+	    health.health = 100;
+	    health.maxHealth = 100;
+	    
+	    
+	    entity.add(health);
 	    //entity.add(new ControllableComponent());
 		entity.add(bounds);
 		entity.add(transform);

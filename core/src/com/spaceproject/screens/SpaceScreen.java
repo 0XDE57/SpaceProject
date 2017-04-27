@@ -9,10 +9,13 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.utils.Disposable;
+import com.spaceproject.components.AIComponent;
+import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.systems.AISystem;
 import com.spaceproject.systems.BoundsSystem;
 import com.spaceproject.systems.CameraSystem;
 import com.spaceproject.systems.CollisionSystem;
@@ -47,6 +50,11 @@ public class SpaceScreen extends MyScreenAdapter {
 		engine.addEntity(EntityFactory.createShip3(-300, 400));
 		engine.addEntity(EntityFactory.createShip3(-400, 400));		
 
+		Entity aiTest = EntityFactory.createCharacter(0, 400);
+		aiTest.add(new AIComponent());
+		aiTest.add(new ControllableComponent());
+		engine.addEntity(aiTest);
+		
 		//add player
 		Entity ship = landCFG.ship;		
 		ship.getComponent(TransformComponent.class).pos.x = landCFG.position.x;
@@ -60,7 +68,8 @@ public class SpaceScreen extends MyScreenAdapter {
 			engine.addSystem(new MobileInputSystem());
 		} else {
 			engine.addSystem(new DesktopInputSystem());
-		}			
+		}
+		engine.addSystem(new AISystem());
 		
 		//loading
 		engine.addSystem(new SpaceLoadingSystem());

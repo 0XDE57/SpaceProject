@@ -60,7 +60,7 @@ public class HUDSystem extends EntitySystem {
 	public void addedToEngine(Engine engine) {
 		this.engine = engine;
 		mapableObjects = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
-		player = engine.getEntitiesFor(Family.all(ControllableComponent.class).get());
+		player = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
 		killables = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(CameraFocusComponent.class).get());
 	}
 	
@@ -70,11 +70,11 @@ public class HUDSystem extends EntitySystem {
 			drawHud = !drawHud;
 			System.out.println("HUD: " + drawHud);
 		}
-		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleMap)) {
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleEdgeMap)) {
 			drawEdgeMap = !drawEdgeMap;
 			System.out.println("Edge map: " + drawEdgeMap);
 		}
-		if (Gdx.input.isKeyJustPressed(Keys.P)) {
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleSpaceMap)) {
 			drawSpaceMap = !drawSpaceMap;
 			System.out.println("Space map: " + drawSpaceMap);
 		}
@@ -121,7 +121,7 @@ public class HUDSystem extends EntitySystem {
 			
 			//ignore full health
 			if (health.health == health.maxHealth) {
-				continue;
+				//continue;
 			}
 			
 			//background

@@ -17,8 +17,11 @@ import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.systems.AISystem;
 import com.spaceproject.systems.BoundsSystem;
 import com.spaceproject.systems.CameraSystem;
+import com.spaceproject.systems.CollisionSystem;
 import com.spaceproject.systems.DebugUISystem;
 import com.spaceproject.systems.DesktopInputSystem;
+import com.spaceproject.systems.ExpireSystem;
+import com.spaceproject.systems.HUDSystem;
 import com.spaceproject.systems.MovementSystem;
 import com.spaceproject.systems.ControlSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
@@ -73,13 +76,16 @@ public class WorldScreen extends MyScreenAdapter {
 		
 		//logic
 		engine.addSystem(new ControlSystem(this));
+		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new BoundsSystem());
+		engine.addSystem(new CollisionSystem());
 		engine.addSystem(new ScreenTransitionSystem(this, landCFG));
 		
 		//rendering
 		engine.addSystem(new CameraSystem());
 		engine.addSystem(new WorldRenderingSystem(landCFG.planet));
+		engine.addSystem(new HUDSystem());
 		engine.addSystem(new DebugUISystem());		
 		
 	}

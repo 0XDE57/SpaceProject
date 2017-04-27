@@ -15,7 +15,8 @@ public class KeyConfig extends Config {
 	
 	//---UI controls---
 	public int toggleHUD;
-	public int toggleMap;
+	public int toggleEdgeMap;
+	public  int toggleSpaceMap;
 	
 	//---screen controls---
 	public int fullscreen;
@@ -50,7 +51,8 @@ public class KeyConfig extends Config {
 		
 		//ui
 		toggleHUD = Keys.H;
-		toggleMap = Keys.M;
+		toggleEdgeMap = Keys.M;
+		toggleSpaceMap = Keys.P;
 		
 		//screen
 		fullscreen = Keys.F11;
