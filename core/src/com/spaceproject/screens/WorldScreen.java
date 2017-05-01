@@ -27,6 +27,7 @@ import com.spaceproject.systems.ControlSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.systems.MobileInputSystem;
 import com.spaceproject.systems.WorldRenderingSystem;
+import com.spaceproject.systems.WorldWrapSystem;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyScreenAdapter;
 
@@ -72,13 +73,14 @@ public class WorldScreen extends MyScreenAdapter {
 		
 		
 		//loading
-
+		
 		
 		//logic
 		engine.addSystem(new ScreenTransitionSystem(this, landCFG));
 		engine.addSystem(new ControlSystem(this));
 		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new MovementSystem());
+		engine.addSystem(new WorldWrapSystem(32, landCFG.planet.mapSize));
 		engine.addSystem(new BoundsSystem());
 		engine.addSystem(new CollisionSystem());
 		
