@@ -43,6 +43,8 @@ public class AISystem extends IteratingSystem {
 		ControllableComponent control = Mappers.controllable.get(entity);
 		Vector3 aiPos = Mappers.transform.get(entity).pos;
 		
+		//aiPos.y += 100 * delta;
+		
 		
 		if (ai.attackTarget != null) {
 			

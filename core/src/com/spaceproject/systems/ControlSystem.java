@@ -182,6 +182,8 @@ public class ControlSystem extends IteratingSystem {
 				screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
 				screenTrans.landCFG.ship = Misc.copyEntity(entity);//entity to send to the planet
 				screenTrans.landCFG.position = planetPos;// save position for taking off from planet
+				System.out.println("Land pos: " + planetPos);
+				
 				//TODO: planet moves, set position to what ever planet is instead (will come into play
 				//over more when orbit is based on time)
 				entity.add(screenTrans);

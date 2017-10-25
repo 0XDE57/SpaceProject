@@ -1,8 +1,11 @@
 package com.spaceproject.utility;
 
+import java.awt.peer.LightweightPeer;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.Tile;
 
 public class NoiseGen {
@@ -161,4 +164,112 @@ public class NoiseGen {
 		}
 		return index;
 	}
+	
+	
+	/**
+	 * 
+	 */
+	public static float[][] createShadowMap(float[][] heightMap, Vector3 lightPos) {
+		float[][] map = new float[heightMap.length][heightMap.length];
+		
+		lightPos.x = MathUtils.clamp(lightPos.x, 0, heightMap.length-1);
+		lightPos.y = MathUtils.clamp(lightPos.y, 0, heightMap.length-1);
+		
+		for (int y = 0; y < heightMap.length; y++) {
+			for (int x = 0; x < heightMap.length; x++) {
+				ArrayList<Vector2> line = brenhamline((int)lightPos.x, (int)lightPos.y, x,y);
+				for (int p = 0; p < line.size(); p++) {
+					Vector2 point = line.get(p);
+					//if (lightPos.z lightPos. > heightMap[x][y]) 
+						map[(int) point.x][(int) point.y] = 0.5f;
+				}
+			}
+		}
+		
+
+		/*
+		 * for (int y = 0; y < map.length; y++) { map[y][4] = 0.2f; for (int x =
+		 * 0; x < map.length; x++) {
+		 * 
+		 * } }
+		 */
+
+		return map;
+	}
+
+	private static ArrayList<Vector2> brenhamline(int x1, int y1, int x2, int y2) {
+		ArrayList<Vector2> points = new ArrayList<>();
+		
+		
+		//int x1 = map.length/2;
+		//int y1 = map.length/2;
+		//int x2 = (int) lightPos.x;
+		//int y2 = (int) lightPos.y;
+
+		int deltaY = y2 - y1;
+		int deltaX = x2 - x1;
+		
+		int fraction, stepX, stepY;
+
+		if (deltaY < 0) {
+			deltaY = -deltaY;
+			stepY = -1;
+		} else {
+			stepY = 1;
+		}
+
+		if (deltaX < 0) {
+			deltaX = -deltaX;
+			stepX = -1;
+		} else {
+			stepX = 1;
+		}
+
+		deltaY *= 2;
+		deltaX *= 2;
+
+		//map[x1][y1] = 1;
+		points.add(new Vector2(x1, y1));
+
+		if (deltaX > deltaY) {
+			fraction = (2 * deltaY) - deltaX;
+
+			while (x1 != x2) {
+				if (fraction >= 0) {
+					y1 += stepY;
+					fraction -= deltaX;
+				}
+
+				x1 += stepX;
+				fraction += deltaY;
+
+				//map[x1][y1] = 1;
+				points.add(new Vector2(x1, y1));
+			}
+		} else {
+			fraction = (2 * deltaX) - deltaY;
+
+			while (y1 != y2) {
+				if (fraction >= 0) {
+					x1 += stepX;
+					fraction -= deltaY;
+				}
+
+				y1 += stepY;
+				fraction += deltaX;
+
+				//map[x1][y1] = 1;
+				points.add(new Vector2(x1, y1));
+			}
+		}
+		
+		return points;
+	}
+
+	static int round(float n) {
+		if (n - ((int) n) >= 0.5)
+			return (int) n + 1;
+		return (int) n;
+	}
+
 }

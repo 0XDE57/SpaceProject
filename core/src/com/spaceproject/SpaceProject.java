@@ -11,6 +11,7 @@ import com.spaceproject.config.KeyConfig;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.SpaceScreen;
+import com.spaceproject.screens.TestNoiseScreen;
 import com.spaceproject.screens.WorldScreen;
 import com.spaceproject.utility.MyScreenAdapter;
 
@@ -40,7 +41,7 @@ public class SpaceProject extends Game {
 		
 		//test values for world
 		PlanetComponent planet = new PlanetComponent();
-		planet.mapSize = 512;
+		planet.mapSize = 128;
 		planet.scale = 100;
 		planet.octaves = 4;
 		planet.persistence = 0.68f;

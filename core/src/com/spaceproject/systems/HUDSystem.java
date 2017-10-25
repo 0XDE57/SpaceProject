@@ -182,7 +182,7 @@ public class HUDSystem extends EntitySystem {
 			int x = playerBarX + (i * barLength / cannon.maxAmmo);
 			shape.line(x, playerAmmoBarY + barWidth, x, playerAmmoBarY);
 			shape.line(x + 1, playerAmmoBarY + barWidth, x + 1, playerAmmoBarY);
-			//shape.line(x - 1, playerAmmoBarY + barWidth, x - 1, playerAmmoBarY);
+			shape.line(x - 1, playerAmmoBarY + barWidth, x - 1, playerAmmoBarY);
 		}
 		
 				

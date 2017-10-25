@@ -25,7 +25,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
 	//TODO: this will not work for multiple entities -> will break when I add AI
 	LandAnimStage curLandStage = null;
 	TakeOffAnimStage curTakeOffStage = null;
-	LandConfig landCFG;
+	static LandConfig landCFG;
 	
 	public ScreenTransitionSystem(ScreenAdapter screen) {
 		super(Family.all(ScreenTransitionComponent.class, TransformComponent.class).get());
@@ -33,15 +33,16 @@ public class ScreenTransitionSystem extends IteratingSystem {
 		
 	}
 
-	public ScreenTransitionSystem(WorldScreen worldScreen, LandConfig landConfig) {
+	public ScreenTransitionSystem(ScreenAdapter worldScreen, LandConfig landConfig) {
 		this(worldScreen);
 		landCFG = landConfig;
+		System.out.println("screentransition constructor: " + landConfig.position);
 	}
 
 	@Override
 	protected void processEntity(Entity entity, float delta) {
 		ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(entity); 
-		
+		//System.out.println("screenTransProcEnt: " + screenTrans.landCFG.position);
 		
 		if (screenTrans.landStage != null) {
 			if (curLandStage == null || curLandStage != screenTrans.landStage) {
@@ -147,23 +148,21 @@ public class ScreenTransitionSystem extends IteratingSystem {
 
 	private static void zoomIn(ScreenTransitionComponent screenTrans) {
 		MyScreenAdapter.setZoomTarget(0);
-		if (MyScreenAdapter.cam.zoom <= 0.01f) {
+		if (MyScreenAdapter.cam.zoom <= 0.01f)
 			screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.transition;
-		}
 	}
 	
 	private static void zoomOut(ScreenTransitionComponent screenTrans) {
 		MyScreenAdapter.setZoomTarget(1);
-		if (MyScreenAdapter.cam.zoom == 1) {
+		if (MyScreenAdapter.cam.zoom == 1)
 			screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.grow;
-		}
 	}
 	
 	private static void landOnPlanet(ScreenTransitionComponent screenTrans) {
 		screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.pause;
 		screenTrans.landCFG.ship.add(screenTrans);
 		screenTrans.landCFG.ship.getComponent(TextureComponent.class).scale = 4;//reset size to normal	
-		
+
 		MyScreenAdapter.changeScreen(new WorldScreen(screenTrans.landCFG));		
 	}
 	
@@ -172,6 +171,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
 		screenTrans.landCFG.ship.add(screenTrans);
 		screenTrans.landCFG.ship.getComponent(TextureComponent.class).scale = 0;//set size to 0 so texture can grow
 		screenTrans.landCFG.position = landCFG.position;
+		System.out.println("Take off:" + landCFG.position);
 		
 		MyScreenAdapter.changeScreen(new SpaceScreen(screenTrans.landCFG));
 		//TODO: do current systems run in the background during change?
@@ -181,9 +181,9 @@ public class ScreenTransitionSystem extends IteratingSystem {
 	private static void pause(ScreenTransitionComponent screenTrans, float delta) {				
 		int transitionTime = 5000;
 		screenTrans.timer += 1000 * delta;		
-		if (screenTrans.timer >= transitionTime) {			
+		if (screenTrans.timer >= transitionTime)		
 			screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.exit;
-		}
+		
 	}
 
 	private static void exit(Entity entity, ScreenTransitionComponent screenTrans) {

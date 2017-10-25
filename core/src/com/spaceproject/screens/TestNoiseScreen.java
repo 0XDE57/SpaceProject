@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
 import com.spaceproject.generation.FontFactory;
@@ -19,6 +20,7 @@ import com.spaceproject.utility.MyScreenAdapter;
 import com.spaceproject.utility.NoiseGen;
 
 /* TODO:
+ * -mapsize
  * -zoom into mouse position
  * -text boxes for names and seed
  * -saving and loading color/feature profiles to json
@@ -111,6 +113,7 @@ public class TestNoiseScreen extends MyScreenAdapter {
 		
 		//draw noise map
 		drawMap();
+		
 		//drawMapLerped();
 		
 		drawPixelatedMap();
@@ -198,9 +201,15 @@ public class TestNoiseScreen extends MyScreenAdapter {
 		float p = persistence.getValue();
 		float l = lacunarity.getValue();
 		heightMap = NoiseGen.generateWrappingNoise4D(seed, mapSize, s, o, p, l);
+		//heightMap = new float[mapSize][mapSize];
 		//tileMap = NoiseGen.createTileMap(heightMap, colorProfile.getTiles());	
 		//pixelatedTileMap = NoiseGen.createPixelatedTileMap(tileMap, colorProfile.getTiles());
+		shadowMap = NoiseGen.createShadowMap(heightMap, 
+				new Vector3((Gdx.input.getX()/pixelSize)-(mapX/pixelSize), (Gdx.input.getY()/pixelSize)-(mapX/pixelSize),1));
 	}
+	
+	float[][] shadowMap;// = new float[0][0];
+	
 	
 	private void drawMap() {		
 		for (int y = 0; y * pixelSize <= mapRenderWindowSize; y++) {
@@ -212,36 +221,54 @@ public class TestNoiseScreen extends MyScreenAdapter {
 				if (tX < 0) tX += heightMap.length;
 				if (tY < 0) tY += heightMap.length;
 				
-				//pick color
-				float i = heightMap[tX][tY];
-				//shape.setColor(colorProfile.getTiles().get(tileMap[tX][tY]).getColor());
+				float height = heightMap[tX][tY];
 				
+				
+				//pick color
+				Color tileColor = new Color();
 				for (int k = colorProfile.getTiles().size()-1; k >= 0; k--) {
 					Tile tile = colorProfile.getTiles().get(k);
-					if (i <= tile.getHeight() || k == 0) {
-						shape.setColor(tile.getColor());
+					if (height <= tile.getHeight() || k == 0) {
+						tileColor = tile.getColor().cpy();
 						break;
 					}
 				}
 				
 				if (colorProfile.getTiles().isEmpty()) {
-					shape.setColor(i, i, i, i);
-				}
-				//draw grid to visualize wrap
-				if (tX == heightMap.length-1 || tY == heightMap.length-1) {
-					shape.setColor(Color.BLACK);
+					tileColor = new Color(height, height, height, height).cpy();
 				}
 				
+				//tileColor = Color.WHITE.cpy();
+				
+				//draw grid to visualize edge/wrap
+				if (tX == heightMap.length-1 || tY == heightMap.length-1) {
+					tileColor = Color.BLACK.cpy();
+				}
+				
+				
+				/*
+				float shadow = shadowMap[tX][tY];
+				tileColor.sub(shadow, shadow, shadow, 1);
+				*/
 				
 				//draw
+				shape.setColor(tileColor);
 				shape.rect(mapX + x * pixelSize, mapY - y * pixelSize, pixelSize, pixelSize);
 				
 				//grayscale debug
-				shape.setColor(i, i, i, i);
+				shape.setColor(height, height, height, height);
 				shape.rect(mapX + x * pixelSize + mapRenderWindowSize, mapY - y * pixelSize, pixelSize, pixelSize);
 			}
 		}	
 	}
+
+	static int round(float n) {
+		if (n - ((int) n) >= 0.5)
+			return (int) n + 1;
+		
+		return (int) n;
+	}
+
 
 	private void drawMapLerped() {
 		for (int y = 0; y * pixelSize <= mapRenderWindowSize; y++) {

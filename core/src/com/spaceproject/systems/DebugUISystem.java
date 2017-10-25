@@ -63,6 +63,8 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	private boolean drawBounds = false;
 	private boolean drawOrbitPath = false;
 	private boolean drawVectors = false;
+	private boolean drawMousePos = true;
+	
 	
 	public DebugUISystem() {
 		this(MyScreenAdapter.cam, MyScreenAdapter.batch, MyScreenAdapter.shape);
@@ -126,6 +128,8 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		//draw the bounding box (collision detection) for collidables
 		if (drawBounds) drawBounds();
 		
+		if (drawMousePos) drawMouseLine();
+		
 		shape.end();
 		
 		
@@ -139,6 +143,9 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		
 		//draw entity position
 		if (drawPos) drawPos();
+		
+		
+		if (drawMousePos) drawMousePos();
 		
 		drawEntityList();
 		
@@ -255,6 +262,8 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	
 	/** Draw bounding boxes (hitbox/collision detection) */
 	private void drawBounds() {
+		boolean polyTriangles = false;
+		
 		for (Entity entity : objects) { 
 			BoundsComponent bounds = Mappers.bounds.get(entity);		
 			TransformComponent t = Mappers.transform.get(entity);
@@ -268,21 +277,22 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 				//draw Orientated bounding box
 				shape.setColor(1, 0, 0, 1);
 				shape.polygon(bounds.poly.getTransformedVertices());
-				
-				/*
-				//draw triangles
-				shape.setColor(Color.BLUE);
-				FloatArray points = new FloatArray(bounds.poly.getTransformedVertices());
-				ShortArray triangles = tri.computeTriangles(points, false);
-				for (int i = 0; i < triangles.size; i += 3) {
-					int p1 = triangles.get(i) * 2;
-					int p2 = triangles.get(i + 1) * 2;
-					int p3 = triangles.get(i + 2) * 2;
-					shape.triangle(
-						points.get(p1), points.get(p1 + 1),
-						points.get(p2), points.get(p2 + 1),
-						points.get(p3), points.get(p3 + 1));
-				}*/
+
+				if (polyTriangles) {
+					// draw triangles
+					shape.setColor(Color.BLUE);
+					FloatArray points = new FloatArray(bounds.poly.getTransformedVertices());
+					ShortArray triangles = tri.computeTriangles(points, false);
+					for (int i = 0; i < triangles.size; i += 3) {
+						int p1 = triangles.get(i) * 2;
+						int p2 = triangles.get(i + 1) * 2;
+						int p3 = triangles.get(i + 2) * 2;
+						shape.triangle(
+								points.get(p1), points.get(p1 + 1), 
+								points.get(p2), points.get(p2 + 1),
+								points.get(p3), points.get(p3 + 1));
+					}
+				}
 			}
 		}
 	}
@@ -295,7 +305,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		
 		//threads
 		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-		String threads = "  Thread: " + threadSet.size();
+		String threads = "  Threads: " + threadSet.size();
 		
 		//memory
 		Runtime runtime = Runtime.getRuntime();
@@ -405,6 +415,27 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			fontSmall.draw(batch, info, screenPos.x, screenPos.y);			
 		}
 	}
+	
+	private void drawMousePos() {
+		int x = Gdx.input.getX();
+		int y = Gdx.input.getY();
+		
+		Vector3 worldPos = cam.unproject(new Vector3(x,y,0));
+		String localPos =  x + "," + y;
+		fontSmall.draw(batch, localPos, x, Gdx.graphics.getHeight()-y);
+		fontSmall.draw(batch, (int)worldPos.x + "," + (int)worldPos.y, x, Gdx.graphics.getHeight()-y+fontSmall.getLineHeight());
+	}
+	
+	private void drawMouseLine() {
+		int crossHairSize = 32;
+		int x = Gdx.input.getX();
+		int y = Gdx.input.getY();
+		Vector3 worldPos = cam.unproject(new Vector3(x,y,0));
+		shape.setColor(Color.BLACK);
+		shape.line(worldPos.x, worldPos.y+crossHairSize, worldPos.x, worldPos.y-crossHairSize);
+		shape.line(worldPos.x+crossHairSize, worldPos.y, worldPos.x-crossHairSize, worldPos.y);
+	}
+	
 	
 	@Override 
 	public void processEntity(Entity entity, float deltaTime) {

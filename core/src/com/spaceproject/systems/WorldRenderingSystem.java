@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.Tile;
@@ -48,7 +49,9 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		
 	private int tileSize; //render size of tiles
 	private int surround; //how many tiles to draw around the camera
-
+	
+	private int mapSize;
+	
 	static Texture tileTex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));
 	
 	public WorldRenderingSystem(PlanetComponent planet) {
@@ -63,9 +66,10 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 
 		tileSize = 32;
 		surround = 30;	
-				
+		
 		loadMap(planet);
 	
+		mapSize = planet.mapSize * tileSize;
 	}
 
 	private void loadMap(PlanetComponent planet) {

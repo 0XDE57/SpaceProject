@@ -59,6 +59,7 @@ public class SpaceScreen extends MyScreenAdapter {
 		ship.getComponent(TransformComponent.class).pos.x = landCFG.position.x;
 		ship.getComponent(TransformComponent.class).pos.y = landCFG.position.y;
 		engine.addEntity(ship);
+		System.out.println("spacescreen ship added: " + ship.getComponent(TransformComponent.class).pos);
 		
 		
 		//===============SYSTEMS===============
@@ -76,7 +77,7 @@ public class SpaceScreen extends MyScreenAdapter {
 		//Ai...
 		
 		//logic
-		engine.addSystem(new ScreenTransitionSystem(this));	
+		engine.addSystem(new ScreenTransitionSystem(this, landCFG));	
 		engine.addSystem(new ControlSystem(this));
 		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new OrbitSystem());
