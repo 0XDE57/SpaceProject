@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.ScreenTransitionComponent.LandAnimStage;
@@ -13,6 +14,7 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.screens.WorldScreen;
 import com.spaceproject.utility.Mappers;
@@ -25,29 +27,25 @@ public class ScreenTransitionSystem extends IteratingSystem {
 	//TODO: this will not work for multiple entities -> will break when I add AI
 	LandAnimStage curLandStage = null;
 	TakeOffAnimStage curTakeOffStage = null;
-	static LandConfig landCFG;
+	Vector3 landPos = null;
 	
-	public ScreenTransitionSystem(ScreenAdapter screen) {
+	public ScreenTransitionSystem() {
 		super(Family.all(ScreenTransitionComponent.class, TransformComponent.class).get());
-		inSpace = (screen instanceof SpaceScreen);
-		
-	}
-
-	public ScreenTransitionSystem(ScreenAdapter worldScreen, LandConfig landConfig) {
-		this(worldScreen);
-		landCFG = landConfig;
-		System.out.println("screentransition constructor: " + landConfig.position);
+		inSpace = GameScreen.inSpace;
+		//landCFG = landConfig;
+		System.out.println("ScreenTransitionSystem()");
 	}
 
 	@Override
 	protected void processEntity(Entity entity, float delta) {
 		ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(entity); 
-		//System.out.println("screenTransProcEnt: " + screenTrans.landCFG.position);
+		System.out.println("screenTransProcEnt: " + screenTrans.landCFG.position);
 		
 		if (screenTrans.landStage != null) {
 			if (curLandStage == null || curLandStage != screenTrans.landStage) {
 				System.out.println("Animation Stage: " + screenTrans.landStage);
 				curLandStage = screenTrans.landStage;
+				landPos = screenTrans.landCFG.position;
 			}
 			switch (screenTrans.landStage) {
 			case shrink:
@@ -81,6 +79,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
 			if (curTakeOffStage == null || curTakeOffStage != screenTrans.takeOffStage) {
 				System.out.println("Animation Stage: " + screenTrans.takeOffStage);
 				curTakeOffStage = screenTrans.takeOffStage;
+				landPos = screenTrans.landCFG.position;
 			}
 			switch (screenTrans.takeOffStage) {
 			case transition:
@@ -163,17 +162,19 @@ public class ScreenTransitionSystem extends IteratingSystem {
 		screenTrans.landCFG.ship.add(screenTrans);
 		screenTrans.landCFG.ship.getComponent(TextureComponent.class).scale = 4;//reset size to normal	
 
-		MyScreenAdapter.changeScreen(new WorldScreen(screenTrans.landCFG));		
+		//MyScreenAdapter.changeScreen(new WorldScreen(screenTrans.landCFG));	
+		GameScreen.transition = true;
 	}
 	
 	private void takeOff(ScreenTransitionComponent screenTrans) {
 		screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.zoomOut;
 		screenTrans.landCFG.ship.add(screenTrans);
 		screenTrans.landCFG.ship.getComponent(TextureComponent.class).scale = 0;//set size to 0 so texture can grow
-		screenTrans.landCFG.position = landCFG.position;
-		System.out.println("Take off:" + landCFG.position);
+		screenTrans.landCFG.position = landPos;//landCFG.position;
+		//System.out.println("Take off:" + landCFG.position);
 		
-		MyScreenAdapter.changeScreen(new SpaceScreen(screenTrans.landCFG));
+		//MyScreenAdapter.changeScreen(new SpaceScreen(screenTrans.landCFG));
+		GameScreen.transition = true;
 		//TODO: do current systems run in the background during change?
 		//if so, disable/pause and cleanup/dispose
 	}

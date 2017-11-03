@@ -23,6 +23,7 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
@@ -35,13 +36,13 @@ public class ControlSystem extends IteratingSystem {
 	private ImmutableArray<Entity> vehicles;
 	private ImmutableArray<Entity> planets;
 	
-	private boolean inSpace;
+	//private boolean inSpace;
 	
 	public ControlSystem(MyScreenAdapter screen) {
 		super(Family.all(ControllableComponent.class, TransformComponent.class).one(
 				CharacterComponent.class, VehicleComponent.class).get());
 			
-		inSpace = (screen instanceof SpaceScreen);
+		//inSpace = (screen instanceof SpaceScreen);
 	}
 	
 	@Override
@@ -135,13 +136,13 @@ public class ControlSystem extends IteratingSystem {
 		
 		
 		//land or take off from planet
-		if (inSpace) {
+		if (GameScreen.inSpace) {
 			control.canLand = canLandOnPlanet(transform.pos);
 		} else {
 			control.canLand = true;
 		}
 		if (control.land) {
-			if (inSpace) {				
+			if (GameScreen.inSpace) {				
 				landOnPlanet(entity);
 			} else {			
 				takeOffPlanet(entity);
@@ -162,7 +163,7 @@ public class ControlSystem extends IteratingSystem {
 		screenTrans.landCFG = new LandConfig();
 		
 		//screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
-		screenTrans.landCFG.ship = Misc.copyEntity(entity);//entity to send to the planet
+		screenTrans.landCFG.ship = entity;// Misc.copyEntity(entity);//entity to send to the planet
 		//screenTrans.landCFG.position = WORLDSCREEN.planetPos;// save position for taking off from planet
 		
 		entity.add(screenTrans);

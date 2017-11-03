@@ -10,6 +10,7 @@ import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.screens.TestNoiseScreen;
 import com.spaceproject.screens.WorldScreen;
@@ -35,8 +36,8 @@ public class SpaceProject extends Game {
 		landCFG.position = new Vector3();//start player at 0,0
 		Entity player = EntityFactory.createCharacter(landCFG.position.x, landCFG.position.y);
 		Entity playerTESTSHIP = EntityFactory.createShip3(landCFG.position.x, landCFG.position.y, landCFG.shipSeed, player);
-		playerTESTSHIP.add(new CameraFocusComponent());
-		playerTESTSHIP.add(new ControllableComponent());
+		//playerTESTSHIP.add(new CameraFocusComponent());
+		//playerTESTSHIP.add(new ControllableComponent());
 		landCFG.ship = playerTESTSHIP;
 		
 		//test values for world
@@ -48,7 +49,9 @@ public class SpaceProject extends Game {
 		planet.lacunarity = 2.6f;
 		landCFG.planet = planet;
 		
-		setScreen(new SpaceScreen(landCFG));
+		boolean inSpace = true;
+		setScreen(new GameScreen(landCFG, inSpace));
+		//setScreen(new SpaceScreen(landCFG));
 		//setScreen(new WorldScreen(landCFG));
 		//setScreen(new TestShipGenerationScreen(this));
 		//setScreen(new TestNoiseScreen(this));

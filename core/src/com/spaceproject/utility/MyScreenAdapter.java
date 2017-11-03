@@ -14,30 +14,33 @@ import com.spaceproject.SpaceProject;
 public abstract class MyScreenAdapter extends ScreenAdapter implements InputProcessor {
 	
 	public static SpaceProject game;
-	
-	//rendering resolution
-	private final static float SCALE = 1f;
-	private final static float INV_SCALE = 1.f / SCALE;
-	private final static float VIEWPORT_WIDTH = 1280 * INV_SCALE;
-	private final static float VIEWPORT_HEIGHT = 720 * INV_SCALE;
 
 	// rendering objects
 	public static OrthographicCamera cam;
 	public static SpriteBatch batch;
 	public static ShapeRenderer shape;
 	public static ExtendViewport viewport;
-	
+
+	// rendering resolution
+	private final static float SCALE = 1f;
+	private final static float INV_SCALE = 1.f / SCALE;
+	private final static float VIEWPORT_WIDTH = 1280 * INV_SCALE;
+	private final static float VIEWPORT_HEIGHT = 720 * INV_SCALE;
+
+	//save window size for switching between fullscreen and windowed
+  	private static int prevWindowWidth = (int) VIEWPORT_WIDTH;
+  	private static int prevWindowHeight = (int) VIEWPORT_HEIGHT;
+  	
 	private static boolean vsync = true;
 	
 	private static float zoomTarget = 1;
 	private static float zoomSpeed = 3;
 	//private static float panSpeed/panTarget(lerp to entity)
 	
-    //save window size for switching between fullscreen and windowed
-  	private static int prevWindowWidth = (int) VIEWPORT_WIDTH;
-  	private static int prevWindowHeight = (int) VIEWPORT_HEIGHT;
-  	
+
     public MyScreenAdapter() {
+    	System.out.println("ScreenAdapter Reset.");	
+    	
     	cam = new OrthographicCamera();
 		batch = new SpriteBatch();
 		shape = new ShapeRenderer();
@@ -52,13 +55,14 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
 		Gdx.input.setInputProcessor(this);
 		
 		//debug
-		System.out.println("ScreenAdapter Reset.");		
+			
 		toggleVsync();
 		//
     }
     
     @Override
     public void render(float delta) {
+    	   	
     	cam.update();   	
     	batch.setProjectionMatrix(cam.combined);
     	shape.setProjectionMatrix(cam.combined);
@@ -73,10 +77,6 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     	
     }
     
-    public static void changeScreen(Screen screen) {
-    	Gdx.app.log("Game", "Screen changed: " + screen.getClass().getSimpleName());
-    	game.setScreen(screen);
-    }
    
     @Override
     public void resize(int width, int height) {

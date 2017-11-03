@@ -36,7 +36,8 @@ public class WorldScreen extends MyScreenAdapter {
 	public static Engine engine;	
 
 	public WorldScreen(LandConfig landCFG) {
-
+		System.out.println("WorldScreen()");
+		
 		// engine to handle all entities and components
 		engine = new Engine();
 		
@@ -76,7 +77,7 @@ public class WorldScreen extends MyScreenAdapter {
 		
 		
 		//logic
-		engine.addSystem(new ScreenTransitionSystem(this, landCFG));
+		//engine.addSystem(new ScreenTransitionSystem(this, landCFG));
 		engine.addSystem(new ControlSystem(this));
 		//engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new MovementSystem());
@@ -99,6 +100,7 @@ public class WorldScreen extends MyScreenAdapter {
 		
 		//update engine
 		engine.update(delta);
+		
 	}
 	
 	@Override
@@ -117,6 +119,8 @@ public class WorldScreen extends MyScreenAdapter {
 			if (tex != null)
 				tex.texture.dispose();
 		}
+		
+		super.dispose();
 		
 		//engine.removeAllEntities();
 		

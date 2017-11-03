@@ -11,7 +11,7 @@ import com.spaceproject.utility.MyScreenAdapter;
 
 public class CameraSystem extends IteratingSystem {
 	
-	private static OrthographicCamera cam;
+	private OrthographicCamera cam;
 	
 	public CameraSystem() {
 		this(MyScreenAdapter.cam);

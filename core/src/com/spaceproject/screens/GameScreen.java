@@ -4,11 +4,11 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
-import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.AIComponent;
+import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -30,14 +30,33 @@ import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.systems.SpaceLoadingSystem;
 import com.spaceproject.systems.SpaceParallaxSystem;
 import com.spaceproject.systems.SpaceRenderingSystem;
+import com.spaceproject.systems.WorldRenderingSystem;
+import com.spaceproject.systems.WorldWrapSystem;
 import com.spaceproject.utility.MyScreenAdapter;
 
-public class SpaceScreen extends MyScreenAdapter {
-	
+public class GameScreen extends MyScreenAdapter {
+
 	public static Engine engine;
+	public static boolean inSpace;
+	public static LandConfig landCFG = null;
+	public static boolean transition;
 	
-	public SpaceScreen(LandConfig landCFG) {
-		System.out.println("SpaceScreen()");
+	public GameScreen(LandConfig landCFG, boolean inSpace) {
+		inSpace = false;
+		GameScreen.inSpace = inSpace;
+		
+		if (inSpace) {
+			initSpace(landCFG);
+		} else {
+			initWorld(landCFG);
+		}		
+	}
+
+	private void initSpace(LandConfig landCFG) {
+		System.out.println("==========SPACE==========");
+		GameScreen.landCFG = landCFG;
+		inSpace = true;
+		
 		
 		// engine to handle all entities and components
 		engine = new Engine();
@@ -56,7 +75,9 @@ public class SpaceScreen extends MyScreenAdapter {
 		engine.addEntity(aiTest);
 		
 		//add player
-		Entity ship = landCFG.ship;		
+		Entity ship = landCFG.ship;
+		ship.add(new CameraFocusComponent());
+		ship.add(new ControllableComponent());
 		ship.getComponent(TransformComponent.class).pos.x = landCFG.position.x;
 		ship.getComponent(TransformComponent.class).pos.y = landCFG.position.y;
 		engine.addEntity(ship);
@@ -78,7 +99,7 @@ public class SpaceScreen extends MyScreenAdapter {
 		//Ai...
 		
 		//logic
-		//engine.addSystem(new ScreenTransitionSystem(this, landCFG));	
+		engine.addSystem(new ScreenTransitionSystem());	
 		engine.addSystem(new ControlSystem(this));
 		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new OrbitSystem());
@@ -92,70 +113,119 @@ public class SpaceScreen extends MyScreenAdapter {
 		engine.addSystem(new SpaceRenderingSystem());
 		engine.addSystem(new HUDSystem());
 		engine.addSystem(new DebugUISystem());
-				
+		
+
 	}
 	
+	
+	private void initWorld(LandConfig landCFG) {
+		System.out.println("==========WORLD==========");
+		GameScreen.landCFG = landCFG;
+		inSpace = false;
+
+		// engine to handle all entities and components
+		engine = new Engine();
+
+		// ===============ENTITIES===============
+		// add player
+		Entity ship = landCFG.ship;
+		int position = landCFG.planet.mapSize * 32 / 2;// 32 = tileSize, set  position to middle of planet
+		ship.getComponent(TransformComponent.class).pos.x = position;
+		ship.getComponent(TransformComponent.class).pos.y = position;
+		ship.add(new CameraFocusComponent());
+		ship.add(new ControllableComponent());
+		engine.addEntity(ship);
+
+		// test ships near player
+		engine.addEntity(EntityFactory.createShip3(position + 100, position + 300));
+		engine.addEntity(EntityFactory.createShip3(position - 100, position + 300));
+
+		Entity aiTest = EntityFactory.createCharacter(position, position + 50);
+		aiTest.add(new AIComponent());
+		aiTest.add(new ControllableComponent());
+		engine.addEntity(aiTest);
+		// engine.addEntity(Misc.copyEntity(aiTest));
+		// engine.addEntity(Misc.copyEntity(aiTest));
+		// engine.addEntity(Misc.copyEntity(aiTest));
+		// engine.addEntity(Misc.copyEntity(aiTest));
+
+		// ===============SYSTEMS===============
+		// input
+		if (Gdx.app.getType() == ApplicationType.Android || Gdx.app.getType() == ApplicationType.iOS) {
+			engine.addSystem(new MobileInputSystem());
+		} else {
+			engine.addSystem(new DesktopInputSystem());
+		}
+		engine.addSystem(new AISystem());
+
+		// loading
+
+		// logic
+		engine.addSystem(new ScreenTransitionSystem());
+		engine.addSystem(new ControlSystem(this));
+		// engine.addSystem(new ExpireSystem(1));
+		engine.addSystem(new MovementSystem());
+		engine.addSystem(new WorldWrapSystem(32, landCFG.planet.mapSize));
+		engine.addSystem(new BoundsSystem());
+		engine.addSystem(new CollisionSystem());
+
+		// rendering
+		engine.addSystem(new CameraSystem());
+		engine.addSystem(new WorldRenderingSystem(landCFG.planet));
+		engine.addSystem(new HUDSystem());
+		engine.addSystem(new DebugUISystem());
+	}
+
 	@Override
 	public void render(float delta) {
 		super.render(delta);
-		
-		//update engine
+
+		// update engine
 		engine.update(delta);
 		
+		if (transition) {
+			if (inSpace) {
+				initWorld(landCFG);
+			} else {
+				initSpace(landCFG);
+			}
+			transition = false;
+		}
 	}
 
 	@Override
 	public void dispose() {
-		
 		System.out.println("Disposing: " + this.getClass().getSimpleName());
-				
-		//clean up after self			
+
+		// clean up after self
+		// dispose of spritebatches and textures
 		for (EntitySystem sys : engine.getSystems()) {
 			if (sys instanceof Disposable)
 				((Disposable) sys).dispose();
 		}
-		
-		//dispose of spritebatches and textures	
+
 		for (Entity ents : engine.getEntitiesFor(Family.all(TextureComponent.class).get())) {
 			TextureComponent tex = ents.getComponent(TextureComponent.class);
 			if (tex != null)
 				tex.texture.dispose();
 		}
-		
+
 		super.dispose();
-		
-		//engine.removeAllEntities();
-		/*
-		 * EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x000007fefe7911cb,
-		 * pid=5620, tid=5876 # # JRE version: Java(TM) SE Runtime Environment
-		 * (8.0_91-b14) (build 1.8.0_91-b14) # Java VM: Java HotSpot(TM) 64-Bit
-		 * Server VM (25.91-b14 mixed mode windows-amd64 compressed oops) #
-		 * Problematic frame: # C [msvcrt.dll+0x11cb]
-		 */
+
+		// engine.removeAllEntities();
+
 	}
-	
+
 	@Override
 	public void hide() {
-		//dispose();
-		/*
-		for (EntitySystem sys : engine.getSystems()) {
-			if (sys instanceof Disposable)
-				((Disposable) sys).dispose();
-		}
-		
-		for (Entity ents : engine.getEntitiesFor(Family.all(TextureComponent.class).get())) {
-			TextureComponent tex = ents.getComponent(TextureComponent.class);
-			if (tex != null)
-				tex.texture.dispose();
-		}
-		
-		engine.removeAllEntities();
-		engine = null;*/
+		// dispose();
 	}
-	
-	@Override
-	public void pause() { }
-	@Override
-	public void resume() { }
 
+	@Override
+	public void pause() {
+	}
+
+	@Override
+	public void resume() {
+	}
 }
