@@ -198,7 +198,7 @@ public class NoiseGen {
 	}
 
 	private static ArrayList<Vector2> brenhamline(int x1, int y1, int x2, int y2) {
-		ArrayList<Vector2> points = new ArrayList<>();
+		ArrayList<Vector2> points = new ArrayList<Vector2>();
 		
 		
 		//int x1 = map.length/2;
