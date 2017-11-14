@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.LandConfig;
@@ -42,7 +43,9 @@ public class GameScreen extends MyScreenAdapter {
 	public static boolean transition;
 	
 	public GameScreen(LandConfig landCFG, boolean inSpace) {
-		inSpace = false;
+		//inSpace = true;
+		//inSpace = false;
+		
 		GameScreen.inSpace = inSpace;
 		
 		if (inSpace) {
@@ -76,12 +79,13 @@ public class GameScreen extends MyScreenAdapter {
 		
 		//add player
 		Entity ship = landCFG.ship;
-		ship.add(new CameraFocusComponent());
 		ship.add(new ControllableComponent());
+		ship.add(new CameraFocusComponent());
+		ship.add(new ControlFocusComponent());
 		ship.getComponent(TransformComponent.class).pos.x = landCFG.position.x;
 		ship.getComponent(TransformComponent.class).pos.y = landCFG.position.y;
 		engine.addEntity(ship);
-		System.out.println("spacescreen ship added: " + ship.getComponent(TransformComponent.class).pos);
+		System.out.println("ship: " + String.format("%X", ship.hashCode()));
 		
 		
 		//===============SYSTEMS===============
@@ -114,7 +118,7 @@ public class GameScreen extends MyScreenAdapter {
 		engine.addSystem(new HUDSystem());
 		engine.addSystem(new DebugUISystem());
 		
-
+		DebugUISystem.printEntities(engine);
 	}
 	
 	
@@ -132,9 +136,12 @@ public class GameScreen extends MyScreenAdapter {
 		int position = landCFG.planet.mapSize * 32 / 2;// 32 = tileSize, set  position to middle of planet
 		ship.getComponent(TransformComponent.class).pos.x = position;
 		ship.getComponent(TransformComponent.class).pos.y = position;
-		ship.add(new CameraFocusComponent());
 		ship.add(new ControllableComponent());
+		
+		ship.add(new CameraFocusComponent());	
+		ship.add(new ControlFocusComponent());
 		engine.addEntity(ship);
+		System.out.println("ship: " + String.format("%X", ship.hashCode()));
 
 		// test ships near player
 		engine.addEntity(EntityFactory.createShip3(position + 100, position + 300));
@@ -143,6 +150,7 @@ public class GameScreen extends MyScreenAdapter {
 		Entity aiTest = EntityFactory.createCharacter(position, position + 50);
 		aiTest.add(new AIComponent());
 		aiTest.add(new ControllableComponent());
+		//aiTest.add(new CameraFocusComponent());
 		engine.addEntity(aiTest);
 		// engine.addEntity(Misc.copyEntity(aiTest));
 		// engine.addEntity(Misc.copyEntity(aiTest));
@@ -163,7 +171,7 @@ public class GameScreen extends MyScreenAdapter {
 		// logic
 		engine.addSystem(new ScreenTransitionSystem());
 		engine.addSystem(new ControlSystem(this));
-		// engine.addSystem(new ExpireSystem(1));
+		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new WorldWrapSystem(32, landCFG.planet.mapSize));
 		engine.addSystem(new BoundsSystem());
@@ -174,6 +182,9 @@ public class GameScreen extends MyScreenAdapter {
 		engine.addSystem(new WorldRenderingSystem(landCFG.planet));
 		engine.addSystem(new HUDSystem());
 		engine.addSystem(new DebugUISystem());
+		
+		
+		DebugUISystem.printEntities(engine);
 	}
 
 	@Override
@@ -184,12 +195,14 @@ public class GameScreen extends MyScreenAdapter {
 		engine.update(delta);
 		
 		if (transition) {
+			dispose();
 			if (inSpace) {
 				initWorld(landCFG);
 			} else {
 				initSpace(landCFG);
 			}
 			transition = false;
+			
 		}
 	}
 
@@ -210,7 +223,7 @@ public class GameScreen extends MyScreenAdapter {
 				tex.texture.dispose();
 		}
 
-		super.dispose();
+		//super.dispose();
 
 		// engine.removeAllEntities();
 

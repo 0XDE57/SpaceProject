@@ -15,6 +15,7 @@ import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
+import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
@@ -333,7 +334,11 @@ public class ControlSystem extends IteratingSystem {
 				if (characterEntity.getComponent(AIComponent.class) != null) {
 					vehicle.add(characterEntity.remove(AIComponent.class));
 				}
-				vehicle.add(characterEntity.remove(ControllableComponent.class));
+				if (characterEntity.getComponent(ControlFocusComponent.class) != null) {
+					vehicle.add(characterEntity.remove(ControlFocusComponent.class));
+				}
+				
+				//vehicle.add(characterEntity.remove(ControllableComponent.class));
 				
 				// remove player from engine
 				engine.removeEntity(characterEntity);
@@ -367,8 +372,20 @@ public class ControlSystem extends IteratingSystem {
 		Mappers.transform.get(characterEntity).pos.set(vehiclePosition);
 		
 		//set focus to character
+		/*
+		characterEntity.add(vehicleEntity.remove(ControlFocusComponent.class));
 		characterEntity.add(vehicleEntity.remove(CameraFocusComponent.class));
-		characterEntity.add(vehicleEntity.remove(ControllableComponent.class));
+		*/
+		if (vehicleEntity.getComponent(CameraFocusComponent.class) != null) {
+			characterEntity.add(vehicleEntity.remove(CameraFocusComponent.class));
+		}
+		if (vehicleEntity.getComponent(AIComponent.class) != null) {
+			characterEntity.add(vehicleEntity.remove(AIComponent.class));
+		}
+		if (vehicleEntity.getComponent(ControlFocusComponent.class) != null) {
+			characterEntity.add(vehicleEntity.remove(ControlFocusComponent.class));
+		}
+		//characterEntity.add(vehicleEntity.remove(ControllableComponent.class));
 		
 		// remove references
 		Mappers.character.get(characterEntity).vehicle = null;
