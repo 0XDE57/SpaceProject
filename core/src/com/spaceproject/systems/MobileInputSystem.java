@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.spaceproject.components.CameraFocusComponent;
+import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.ui.TouchButtonRectangle;
 import com.spaceproject.ui.TouchButtonRound;
@@ -42,7 +43,7 @@ public class MobileInputSystem extends EntitySystem {
 	@Override
 	public void addedToEngine(Engine engine) {
 		super.addedToEngine(engine);
-		players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());		
+		players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());		
 	}
 	
 	@Override

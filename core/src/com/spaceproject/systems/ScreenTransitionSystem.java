@@ -38,8 +38,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
 
 	@Override
 	protected void processEntity(Entity entity, float delta) {
-		ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(entity); 
-		System.out.println("screenTransProcEnt: " + screenTrans.landCFG.position);
+		ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(entity);
 		
 		if (screenTrans.landStage != null) {
 			if (curLandStage == null || curLandStage != screenTrans.landStage) {

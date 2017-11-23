@@ -1,5 +1,9 @@
 ---ENGINE---
 [...] fix land/take-off position bug
+	[ ] test land AI, unsure system supports non-player world switching
+		consider what to keep track of between planet and worlds
+		-what data to keep and discard between screens
+		-AI to remember (persistence)
 [...] wrap planets properly (LOCAL COORDINATE SPACE)
 [ ] time based orbit
 [ ] fixed time step (necessary for multiplayer?)

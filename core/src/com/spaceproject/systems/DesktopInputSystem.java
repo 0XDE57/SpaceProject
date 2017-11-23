@@ -8,6 +8,7 @@ import com.badlogic.gdx.Gdx;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.MyScreenAdapter;
@@ -18,7 +19,7 @@ public class DesktopInputSystem extends EntitySystem {
 	
 	@Override
 	public void addedToEngine(com.badlogic.ashley.core.Engine engine) {
-		players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
+		players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
 	}	
 	
 	@Override

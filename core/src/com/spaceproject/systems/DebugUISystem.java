@@ -157,6 +157,29 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		
 		objects.clear();		
 	}
+	
+	public static void printEntities(Engine eng) {
+		for (Entity entity : eng.getEntities()) {
+			System.out.println(entity.toString());
+			for (Component c : entity.getComponents()) {
+				System.out.println("\t" + c.toString());
+				for (Field f : c.getClass().getFields()) {
+					try {
+						System.out.println(String.format("\t\t%-14s %s", f.getName(), f.get(c)));
+					} catch (IllegalArgumentException e) {
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						e.printStackTrace();
+					}
+				}
+		
+			}
+		}
+	}
+	
+	public void printEntities() {
+		printEntities(engine);
+	}
 
 	private void updateKeyToggles() {
 		//toggle debug
@@ -389,6 +412,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 				//draw backing on empty components
 				if (c.getClass().getFields().length == 0) {
 					batch.draw(texCompBack, screenPos.x, screenPos.y - (fontHeight * curLine) + yOffset, backWidth, -fontHeight);
+					curLine++;
 				}
 				
 				//draw separating line
