@@ -1,19 +1,9 @@
 package com.spaceproject;
 
-import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.math.Vector3;
-import com.spaceproject.components.CameraFocusComponent;
-import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.KeyConfig;
-import com.spaceproject.config.LandConfig;
-import com.spaceproject.generation.EntityFactory;
-import com.spaceproject.screens.GameScreen;
-import com.spaceproject.screens.SpaceScreen;
-import com.spaceproject.screens.TestNoiseScreen;
-import com.spaceproject.screens.WorldScreen;
+import com.spaceproject.screens.*;
 import com.spaceproject.utility.MyScreenAdapter;
 
 public class SpaceProject extends Game {
@@ -31,26 +21,8 @@ public class SpaceProject extends Game {
 		loadConfigs();
 				
 	
-		//load test default values
-		LandConfig landCFG = new LandConfig();
-		landCFG.position = new Vector3();//start player at 0,0
-		Entity player = EntityFactory.createCharacter(landCFG.position.x, landCFG.position.y);
-		Entity playerTESTSHIP = EntityFactory.createShip3(landCFG.position.x, landCFG.position.y, landCFG.shipSeed, player);
-		//playerTESTSHIP.add(new CameraFocusComponent());
-		//playerTESTSHIP.add(new ControllableComponent());
-		landCFG.ship = playerTESTSHIP;
-		
-		//test values for world
-		PlanetComponent planet = new PlanetComponent();
-		planet.mapSize = 128;
-		planet.scale = 100;
-		planet.octaves = 4;
-		planet.persistence = 0.68f;
-		planet.lacunarity = 2.6f;
-		landCFG.planet = planet;
-		
 		boolean inSpace = true;
-		setScreen(new GameScreen(landCFG, inSpace));
+		setScreen(new GameScreen(null, inSpace));
 		//setScreen(new SpaceScreen(landCFG));
 		//setScreen(new WorldScreen(landCFG));
 		//setScreen(new TestShipGenerationScreen(this));

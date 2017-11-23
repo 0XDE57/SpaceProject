@@ -6,6 +6,7 @@ import java.util.Set;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
@@ -177,9 +178,22 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		}
 	}
 	
-	public void printEntities() {
+	private void printEntities() {
 		printEntities(engine);
 	}
+	
+	public static void printSystems(Engine eng) {
+		for (EntitySystem sys : eng.getSystems()) {
+			System.out.println(sys + " (" + sys.priority + ")");
+			
+		}
+		
+	}
+	
+	private void printSystems() {
+		printSystems(engine);
+	}
+	
 
 	private void updateKeyToggles() {
 		//toggle debug
@@ -482,5 +496,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	 	C  [atio6axx.dll+0x3c4370]
 		 */
 	}
+
+
 	
 }

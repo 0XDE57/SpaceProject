@@ -20,10 +20,12 @@ public class CameraSystem extends IteratingSystem {
 	public CameraSystem(OrthographicCamera camera) {
 		super(Family.all(CameraFocusComponent.class, TransformComponent.class).get());
 		cam = camera;
+		System.out.println(this.getFamily());
 	}
 
 	public void processEntity(Entity entity, float delta) {
 		TransformComponent transform = Mappers.transform.get(entity);
+		//System.out.println(String.format("%X", entity.hashCode()));
 		
 		//set camera position to entity
 		cam.position.x = transform.pos.x;

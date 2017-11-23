@@ -4,12 +4,16 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Application.ApplicationType;
+import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -37,14 +41,32 @@ import com.spaceproject.utility.MyScreenAdapter;
 
 public class GameScreen extends MyScreenAdapter {
 
-	public static Engine engine;
+	public Engine engine;
 	public static boolean inSpace;
 	public static LandConfig landCFG = null;
 	public static boolean transition;
 	
 	public GameScreen(LandConfig landCFG, boolean inSpace) {
 		//inSpace = true;
-		//inSpace = false;
+		inSpace = false;
+		
+		// load test default values
+		landCFG = new LandConfig();
+		landCFG.position = new Vector3();// start player at 0,0
+		Entity player = EntityFactory.createCharacter(landCFG.position.x, landCFG.position.y);
+		Entity playerTESTSHIP = EntityFactory.createShip3(landCFG.position.x, landCFG.position.y, landCFG.shipSeed, player);
+		// playerTESTSHIP.add(new CameraFocusComponent());
+		// playerTESTSHIP.add(new ControllableComponent());
+		landCFG.ship = playerTESTSHIP;
+
+		// test values for world
+		PlanetComponent planet = new PlanetComponent();
+		planet.mapSize = 128;
+		planet.scale = 100;
+		planet.octaves = 4;
+		planet.persistence = 0.68f;
+		planet.lacunarity = 2.6f;
+		landCFG.planet = planet;
 		
 		GameScreen.inSpace = inSpace;
 		
@@ -66,6 +88,7 @@ public class GameScreen extends MyScreenAdapter {
 		
 
 		//===============ENTITIES===============
+		/*
 		//test ships
 		engine.addEntity(EntityFactory.createShip3(-100, 400));
 		engine.addEntity(EntityFactory.createShip3(-200, 400));		
@@ -75,7 +98,7 @@ public class GameScreen extends MyScreenAdapter {
 		Entity aiTest = EntityFactory.createCharacter(0, 400);
 		aiTest.add(new AIComponent());
 		aiTest.add(new ControllableComponent());
-		engine.addEntity(aiTest);
+		engine.addEntity(aiTest);*/
 		
 		//add player
 		Entity ship = landCFG.ship;
@@ -98,7 +121,7 @@ public class GameScreen extends MyScreenAdapter {
 		engine.addSystem(new AISystem());
 		
 		//loading
-		engine.addSystem(new SpaceLoadingSystem());
+		//engine.addSystem(new SpaceLoadingSystem());
 		engine.addSystem(new SpaceParallaxSystem());
 		//Ai...
 		
@@ -119,6 +142,7 @@ public class GameScreen extends MyScreenAdapter {
 		engine.addSystem(new DebugUISystem());
 		
 		DebugUISystem.printEntities(engine);
+		DebugUISystem.printSystems(engine);
 	}
 	
 	
@@ -143,6 +167,8 @@ public class GameScreen extends MyScreenAdapter {
 		engine.addEntity(ship);
 		System.out.println("ship: " + String.format("%X", ship.hashCode()));
 
+		
+		/*
 		// test ships near player
 		engine.addEntity(EntityFactory.createShip3(position + 100, position + 300));
 		engine.addEntity(EntityFactory.createShip3(position - 100, position + 300));
@@ -152,11 +178,8 @@ public class GameScreen extends MyScreenAdapter {
 		aiTest.add(new ControllableComponent());
 		//aiTest.add(new CameraFocusComponent());
 		engine.addEntity(aiTest);
-		// engine.addEntity(Misc.copyEntity(aiTest));
-		// engine.addEntity(Misc.copyEntity(aiTest));
-		// engine.addEntity(Misc.copyEntity(aiTest));
-		// engine.addEntity(Misc.copyEntity(aiTest));
-
+		*/
+		
 		// ===============SYSTEMS===============
 		// input
 		if (Gdx.app.getType() == ApplicationType.Android || Gdx.app.getType() == ApplicationType.iOS) {
@@ -185,6 +208,7 @@ public class GameScreen extends MyScreenAdapter {
 		
 		
 		DebugUISystem.printEntities(engine);
+		DebugUISystem.printSystems(engine);
 	}
 
 	@Override
@@ -194,15 +218,27 @@ public class GameScreen extends MyScreenAdapter {
 		// update engine
 		engine.update(delta);
 		
+		if (Gdx.input.isKeyJustPressed(Keys.H)){
+			transition = true;
+		}
+		
+		if (Gdx.input.isKeyJustPressed(Keys.U)) {
+			//DebugUISystem.printEntities(engine);
+			System.out.println("Engine: " + engine + " - " + engine.getEntities().size());
+			for (Entity e : engine.getEntitiesFor(Family.all(CameraFocusComponent.class, TransformComponent.class).get())) {
+				System.out.println("-->"+e);
+			}
+		}
 		if (transition) {
-			dispose();
+			//ImmutableArray<Entity> player = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, TransformComponent.class).get());
+			//landCFG.ship = player.first();
+			//dispose();
 			if (inSpace) {
 				initWorld(landCFG);
 			} else {
 				initSpace(landCFG);
 			}
-			transition = false;
-			
+			transition = false;			
 		}
 	}
 

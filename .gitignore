@@ -67,3 +67,6 @@ build/
 android/assets/config/
 android/assets/save/
 save/stars.txt
+
+##apparently not supposed to be synced
+local.properties
