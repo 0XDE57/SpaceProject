@@ -70,3 +70,5 @@ save/stars.txt
 
 ##apparently not supposed to be synced
 local.properties
+android/debug/output.json
+android/debug/android-debug.apk
