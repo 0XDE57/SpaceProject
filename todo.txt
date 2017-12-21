@@ -1,7 +1,7 @@
 ---ENGINE---
 [...] fix land/take-off position bug
-	[ ] test land AI, unsure system supports non-player world switching
-		consider what to keep track of between planet and worlds
+	[ ] test land AI, system doesn't supports non-player world switching
+		consider what to keep track of between planet and space
 		-what data to keep and discard between screens
 		-AI to remember (persistence)
 [...] wrap planets properly (LOCAL COORDINATE SPACE)
@@ -53,7 +53,7 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
 	https://gist.github.com/nhydock/dc0501f34f89686ddf34
 
 
----GAMEPLAY---
+---GAMEPLAY & DESIGN---
 [ ] destructable(voronoi) asteroids
 	http://www.alanzucconi.com/2015/02/24/to-voronoi-and-beyond/
 	https://stackoverflow.com/questions/20104779/libgdx-create-texture-from-overlay-using-pixmap
@@ -94,7 +94,10 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
 	-light specs
 	-platform(space station) in space
 		isPlayerOnGround - planet, platform
-
+[ ] world content
+    -design base building systems
+    -
+[ ] game start
 
 ---GRAPHICS---
 [ ] glowing ring/rays around planets/stars

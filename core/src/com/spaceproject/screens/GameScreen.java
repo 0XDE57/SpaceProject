@@ -47,8 +47,8 @@ public class GameScreen extends MyScreenAdapter {
 	public static boolean transition;
 	
 	public GameScreen(LandConfig landCFG, boolean inSpace) {
-		//inSpace = true;
-		inSpace = false;
+		 inSpace = true;
+		//inSpace = false;
 		
 		// load test default values
 		landCFG = new LandConfig();
@@ -88,7 +88,7 @@ public class GameScreen extends MyScreenAdapter {
 		
 
 		//===============ENTITIES===============
-		/*
+
 		//test ships
 		engine.addEntity(EntityFactory.createShip3(-100, 400));
 		engine.addEntity(EntityFactory.createShip3(-200, 400));		
@@ -98,7 +98,7 @@ public class GameScreen extends MyScreenAdapter {
 		Entity aiTest = EntityFactory.createCharacter(0, 400);
 		aiTest.add(new AIComponent());
 		aiTest.add(new ControllableComponent());
-		engine.addEntity(aiTest);*/
+		engine.addEntity(aiTest);
 		
 		//add player
 		Entity ship = landCFG.ship;
@@ -121,7 +121,7 @@ public class GameScreen extends MyScreenAdapter {
 		engine.addSystem(new AISystem());
 		
 		//loading
-		//engine.addSystem(new SpaceLoadingSystem());
+		engine.addSystem(new SpaceLoadingSystem());
 		engine.addSystem(new SpaceParallaxSystem());
 		//Ai...
 		
@@ -141,8 +141,8 @@ public class GameScreen extends MyScreenAdapter {
 		engine.addSystem(new HUDSystem());
 		engine.addSystem(new DebugUISystem());
 		
-		DebugUISystem.printEntities(engine);
-		DebugUISystem.printSystems(engine);
+		//DebugUISystem.printEntities(engine);
+		//DebugUISystem.printSystems(engine);
 	}
 	
 	
@@ -168,7 +168,7 @@ public class GameScreen extends MyScreenAdapter {
 		System.out.println("ship: " + String.format("%X", ship.hashCode()));
 
 		
-		/*
+
 		// test ships near player
 		engine.addEntity(EntityFactory.createShip3(position + 100, position + 300));
 		engine.addEntity(EntityFactory.createShip3(position - 100, position + 300));
@@ -178,7 +178,7 @@ public class GameScreen extends MyScreenAdapter {
 		aiTest.add(new ControllableComponent());
 		//aiTest.add(new CameraFocusComponent());
 		engine.addEntity(aiTest);
-		*/
+
 		
 		// ===============SYSTEMS===============
 		// input
@@ -207,8 +207,8 @@ public class GameScreen extends MyScreenAdapter {
 		engine.addSystem(new DebugUISystem());
 		
 		
-		DebugUISystem.printEntities(engine);
-		DebugUISystem.printSystems(engine);
+		//DebugUISystem.printEntities(engine);
+		//DebugUISystem.printSystems(engine);
 	}
 
 	@Override
@@ -217,28 +217,24 @@ public class GameScreen extends MyScreenAdapter {
 
 		// update engine
 		engine.update(delta);
-		
-		if (Gdx.input.isKeyJustPressed(Keys.H)){
-			transition = true;
-		}
-		
+
+
 		if (Gdx.input.isKeyJustPressed(Keys.U)) {
-			//DebugUISystem.printEntities(engine);
-			System.out.println("Engine: " + engine + " - " + engine.getEntities().size());
-			for (Entity e : engine.getEntitiesFor(Family.all(CameraFocusComponent.class, TransformComponent.class).get())) {
-				System.out.println("-->"+e);
-			}
+			DebugUISystem.printEntities(engine);
 		}
+
+		//if (Gdx.input.isKeyJustPressed(Keys.H)) { transition = true; }
 		if (transition) {
-			//ImmutableArray<Entity> player = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, TransformComponent.class).get());
-			//landCFG.ship = player.first();
+			transition = false;
+
 			//dispose();
+			engine.removeAllEntities();
 			if (inSpace) {
 				initWorld(landCFG);
 			} else {
 				initSpace(landCFG);
 			}
-			transition = false;			
+
 		}
 	}
 
@@ -253,16 +249,23 @@ public class GameScreen extends MyScreenAdapter {
 				((Disposable) sys).dispose();
 		}
 
+		//TODO: use entity listener instead
+		//Family family = Family.all(TextureComponent.class).get();
+		//engine.addEntityListener(family, listener);
+		//github.com/libgdx/ashley/wiki/How-to-use-Ashley#entity-events
 		for (Entity ents : engine.getEntitiesFor(Family.all(TextureComponent.class).get())) {
 			TextureComponent tex = ents.getComponent(TextureComponent.class);
 			if (tex != null)
 				tex.texture.dispose();
 		}
 
+		engine.removeAllEntities();//THIS FIXES IT!
+		engine = null;
+
+
+		//System.gc();//not good practice, just testing
+
 		//super.dispose();
-
-		// engine.removeAllEntities();
-
 	}
 
 	@Override
