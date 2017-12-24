@@ -9,9 +9,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
+import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
@@ -27,9 +29,50 @@ import com.spaceproject.utility.IDGen;
 import com.spaceproject.utility.MyMath;
 
 public class EntityFactory {
-	
-	public static float scale = 4.0f;
 
+	//region characters
+	public static Entity createCharacter(float x, float y) {
+		Entity entity = new Entity();
+
+		TransformComponent transform = new TransformComponent();
+		transform.pos.set(x, y, 0);
+
+		TextureComponent texture = new TextureComponent();
+		texture.texture = TextureFactory.generateCharacter();
+		texture.scale = SpaceProject.scale;
+
+		BoundsComponent bounds = new BoundsComponent();
+		float width = texture.texture.getWidth() * SpaceProject.scale;
+		float height = texture.texture.getHeight() * SpaceProject.scale;
+		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
+		bounds.poly.setOrigin(width/2, height/2);
+
+		CharacterComponent character = new CharacterComponent();
+		character.walkSpeed = 300f;//70f;
+
+		HealthComponent health = new HealthComponent();
+		health.health = 100;
+		health.maxHealth = 100;
+
+
+		entity.add(health);
+		entity.add(new ControllableComponent());
+		entity.add(bounds);
+		entity.add(transform);
+		entity.add(texture);
+		entity.add(character);
+
+		return entity;
+	}
+
+	public static Entity createCharacterAI(float x, float y) {
+		Entity character = createCharacter(x, y);
+		character.add(new AIComponent());
+		return character;
+	}
+	//endregion
+
+	//region Celestial objects
 	public static Entity[] createPlanetarySystem(float x, float y) {
 		long seed = MyMath.getSeed(x, y);
 		MathUtils.random.setSeed(MyMath.getSeed(x, y));
@@ -74,7 +117,7 @@ public class EntityFactory {
 		TextureComponent texture = new TextureComponent();
 		int radius = MathUtils.random(SpaceProject.celestcfg.minStarSize, SpaceProject.celestcfg.maxStarSize);	
 		texture.texture = TextureFactory.generateStar(radius);
-		texture.scale = scale;
+		texture.scale = SpaceProject.scale;
 		
 		// set position
 		TransformComponent transform = new TransformComponent();
@@ -151,81 +194,9 @@ public class EntityFactory {
 		
 		return entity;
 	}
-	
-	public static Entity createMissile(TransformComponent source, Vector2 velocity, CannonComponent cannon, Entity owner) {
-		Entity entity = new Entity();
-				
-		//create texture
-		TextureComponent texture = new TextureComponent();
-		texture.texture = TextureFactory.generateProjectile(cannon.size);
-		texture.scale = scale;
-		
-		//bounding box
-		BoundsComponent bounds = new BoundsComponent();
-		float width = texture.texture.getWidth() * scale;
-		float height = texture.texture.getHeight() * scale;
-		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
-	    bounds.poly.setOrigin(width/2, height/2);
-		
-		//set position, orientation, velocity and acceleration
-		TransformComponent transform = new TransformComponent();
-		transform.pos.set(source.pos);
-		transform.rotation = source.rotation;		
-		transform.velocity.add(velocity);
-		transform.accel.add(velocity.cpy().setLength(cannon.acceleration));//speed up over time
-		
-		//set expire time
-		ExpireComponent expire = new ExpireComponent();
-		expire.time = 5;//in seconds ~approx
-		
-		//missile damage
-		MissileComponent missile = new MissileComponent();
-		missile.damage = cannon.damage;
-		missile.owner = owner;
-		
-		
-		entity.add(missile);
-		entity.add(expire);
-		entity.add(texture);
-		entity.add(bounds);
-		entity.add(transform);
-		
-		return entity;
-	}
-	
-	public static Entity createCharacter(float x, float y) {
-		Entity entity = new Entity();
-		
-		TransformComponent transform = new TransformComponent();
-		transform.pos.set(x, y, 0);
-		
-		TextureComponent texture = new TextureComponent();
-		texture.texture = TextureFactory.generateCharacter();
-		texture.scale = scale;
-		
-		BoundsComponent bounds = new BoundsComponent();
-		float width = texture.texture.getWidth() * scale;
-		float height = texture.texture.getHeight() * scale;
-		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
-	    bounds.poly.setOrigin(width/2, height/2);
+	//endregion
 
-	    CharacterComponent character = new CharacterComponent();
-	    character.walkSpeed = 300f;//70f;
-	    
-	    HealthComponent health = new HealthComponent();
-	    health.health = 100;
-	    health.maxHealth = 100;
-	    
-	    
-	    entity.add(health);
-	    entity.add(new ControllableComponent());
-		entity.add(bounds);
-		entity.add(transform);
-		entity.add(texture);
-		entity.add(character);
-		
-		return entity;
-	}
+	//region ships
 	
 	public static Entity createShip3(float x, float y) {
 		return createShip3(x, y, null);
@@ -257,12 +228,12 @@ public class EntityFactory {
 		TextureComponent texture = new TextureComponent();
 		Texture pixmapTex = TextureFactory.generateShip(seed, size);
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
-		texture.scale = scale;
+		texture.scale = SpaceProject.scale;
 		
 		//collision detection
 		BoundsComponent bounds = new BoundsComponent(); 
-		float width = texture.texture.getWidth() * scale;
-		float height = texture.texture.getHeight() * scale;
+		float width = texture.texture.getWidth() * SpaceProject.scale;
+		float height = texture.texture.getHeight() * SpaceProject.scale;
 		bounds.poly = new Polygon(new float[]{0, 0,0, height,  width, height, width, 0});
 	    bounds.poly.setOrigin(width/2, height/2);
 	    
@@ -339,11 +310,11 @@ public class EntityFactory {
 		Texture pixmapTex = new Texture(pixmap);
 		pixmap.dispose(); // clean up
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
-		texture.scale = scale;
+		texture.scale = SpaceProject.scale;
 		
 		BoundsComponent bounds = new BoundsComponent();
-		float width = texture.texture.getWidth() * scale;
-		float height = texture.texture.getHeight() * scale;
+		float width = texture.texture.getWidth() * SpaceProject.scale;
+		float height = texture.texture.getHeight() * SpaceProject.scale;
 		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
 	    bounds.poly.setOrigin(width/2, height/2);
 		
@@ -378,11 +349,11 @@ public class EntityFactory {
 		Texture pixmapTex = new Texture(pixmap);
 		pixmap.dispose(); // clean up
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
-		texture.scale = scale;
+		texture.scale = SpaceProject.scale;
 		
 		BoundsComponent bounds = new BoundsComponent();
-		float width = texture.texture.getWidth() * scale;
-		float height = texture.texture.getHeight() * scale;
+		float width = texture.texture.getWidth() * SpaceProject.scale;
+		float height = texture.texture.getHeight() * SpaceProject.scale;
 		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
 	    bounds.poly.setOrigin(width/2, height/2);
 
@@ -394,24 +365,49 @@ public class EntityFactory {
 		
 		return entity;
 	}
+	//endregion
 
-	/*
-	public static Entity createNoiseTile(int x, int y, int tileSize) {
+
+	public static Entity createMissile(TransformComponent source, Vector2 velocity, CannonComponent cannon, Entity owner) {
 		Entity entity = new Entity();
-		
+
+		//create texture
 		TextureComponent texture = new TextureComponent();
-		texture.texture = TextureFactory.generateNoiseTile(x, y, tileSize);
-		
+		texture.texture = TextureFactory.generateProjectile(cannon.size);
+		texture.scale = SpaceProject.scale;
+
+		//bounding box
+		BoundsComponent bounds = new BoundsComponent();
+		float width = texture.texture.getWidth() * SpaceProject.scale;
+		float height = texture.texture.getHeight() * SpaceProject.scale;
+		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
+		bounds.poly.setOrigin(width/2, height/2);
+
+		//set position, orientation, velocity and acceleration
 		TransformComponent transform = new TransformComponent();
-		transform.pos.x = x;
-		transform.pos.y = y;
-		texture.scale = 8;
-		
-		entity.add(transform);
+		transform.pos.set(source.pos);
+		transform.rotation = source.rotation;
+		transform.velocity.add(velocity);
+		transform.accel.add(velocity.cpy().setLength(cannon.acceleration));//speed up over time
+
+		//set expire time
+		ExpireComponent expire = new ExpireComponent();
+		expire.time = 5;//in seconds ~approx
+
+		//missile damage
+		MissileComponent missile = new MissileComponent();
+		missile.damage = cannon.damage;
+		missile.owner = owner;
+
+
+		entity.add(missile);
+		entity.add(expire);
 		entity.add(texture);
-		
+		entity.add(bounds);
+		entity.add(transform);
+
 		return entity;
-	}*/
+	}
 
 
 

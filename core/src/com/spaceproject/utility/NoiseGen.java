@@ -40,7 +40,7 @@ public class NoiseGen {
 	/**
 	 * Creates a noise map in a torus so the edges wrap around.
 	 * Based off of https://www.youtube.com/watch?v=MRNFcywkUSA
-	 * TODO: scale is incorrect in 4D implementation
+	 * TODO: scaling is incorrect in 4D implementation: stretching/curving distortion due to curvature of torus
 	 * @param seed of noise
 	 * @param size of map to generate
 	 * @param scale or zoom

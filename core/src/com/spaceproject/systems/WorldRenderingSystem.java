@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.TextureComponent;
@@ -46,8 +47,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	
 	private float[][] heightMap;//height of tile
 	private int[][] tileMap;//index of tile
-		
-	private int tileSize; //render size of tiles
+
 	private int surround; //how many tiles to draw around the camera
 	
 	private int mapSize;
@@ -64,12 +64,11 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		cam = camera;
 		batch = spriteBatch;
 
-		tileSize = 32;
 		surround = 30;	
 		
 		loadMap(planet);
 	
-		mapSize = planet.mapSize * tileSize;
+		mapSize = planet.mapSize * SpaceProject.tileSize;
 	}
 
 	private void loadMap(PlanetComponent planet) {
@@ -159,8 +158,8 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	private void drawTiles() {
 			
 		// calculate tile that the camera is in
-		int centerX = (int) (cam.position.x / tileSize);
-		int centerY = (int) (cam.position.y / tileSize);
+		int centerX = (int) (cam.position.x / SpaceProject.tileSize);
+		int centerY = (int) (cam.position.y / SpaceProject.tileSize);
 
 		// subtract 1 from tile position if less than zero to account for -1/n = 0
 		if (cam.position.x < 0) --centerX;		
@@ -178,7 +177,10 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 				//render tile
 				batch.setColor(tiles.get(tileMap[tX][tY]).getColor());
 				//if (tX == heightMap.length-1 || tY == heightMap.length-1) batch.setColor(Color.BLACK);
-				batch.draw(tileTex, tileX * tileSize, tileY * tileSize, tileSize, tileSize);
+				batch.draw(tileTex,
+						tileX * SpaceProject.tileSize,
+						tileY * SpaceProject.tileSize,
+						SpaceProject.tileSize, SpaceProject.tileSize);
 			}
 		}
 

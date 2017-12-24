@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.ScreenTransitionComponent.LandAnimStage;
@@ -137,8 +138,8 @@ public class ScreenTransitionSystem extends IteratingSystem {
 		
 		//grow texture
 		tex.scale += 3f * delta; 
-		if (tex.scale >= EntityFactory.scale) {
-			tex.scale = EntityFactory.scale;
+		if (tex.scale >= SpaceProject.scale) {
+			tex.scale = SpaceProject.scale;
 			
 			screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.end;
 		}
@@ -159,9 +160,8 @@ public class ScreenTransitionSystem extends IteratingSystem {
 	private static void landOnPlanet(ScreenTransitionComponent screenTrans) {
 		screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.pause;
 		screenTrans.landCFG.ship.add(screenTrans);
-		screenTrans.landCFG.ship.getComponent(TextureComponent.class).scale = 4;//reset size to normal	
-
-		//MyScreenAdapter.changeScreen(new WorldScreen(screenTrans.landCFG));	
+		screenTrans.landCFG.ship.getComponent(TextureComponent.class).scale = SpaceProject.scale;//reset size to normal
+		System.out.println("Take off:" + screenTrans.landCFG.position);
 		GameScreen.transition = true;
 	}
 	
@@ -170,9 +170,8 @@ public class ScreenTransitionSystem extends IteratingSystem {
 		screenTrans.landCFG.ship.add(screenTrans);
 		screenTrans.landCFG.ship.getComponent(TextureComponent.class).scale = 0;//set size to 0 so texture can grow
 		screenTrans.landCFG.position = landPos;//landCFG.position;
-		//System.out.println("Take off:" + landCFG.position);
-		
-		//MyScreenAdapter.changeScreen(new SpaceScreen(screenTrans.landCFG));
+		System.out.println("Take off:" + screenTrans.landCFG.position);
+
 		GameScreen.transition = true;
 		//TODO: do current systems run in the background during change?
 		//if so, disable/pause and cleanup/dispose

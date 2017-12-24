@@ -31,6 +31,7 @@ import com.spaceproject.systems.WorldWrapSystem;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyScreenAdapter;
 
+@Deprecated
 public class WorldScreen extends MyScreenAdapter {
 
 	public static Engine engine;	
@@ -81,7 +82,7 @@ public class WorldScreen extends MyScreenAdapter {
 		engine.addSystem(new ControlSystem(this));
 		//engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new MovementSystem());
-		engine.addSystem(new WorldWrapSystem(32, landCFG.planet.mapSize));
+		engine.addSystem(new WorldWrapSystem(landCFG.planet.mapSize));
 		engine.addSystem(new BoundsSystem());
 		engine.addSystem(new CollisionSystem());
 		

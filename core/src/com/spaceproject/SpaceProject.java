@@ -9,10 +9,14 @@ import com.spaceproject.utility.MyScreenAdapter;
 public class SpaceProject extends Game {
 
 	public static long SEED = 4; //test seed
-	
+
 	public static CelestialConfig celestcfg;
 	public static KeyConfig keycfg;
-	
+
+	//TODO: put into a config
+	public static float scale = 4.0f;
+	public static int tileSize = 32;
+
 	@Override
 	public void create() {	
 		MyScreenAdapter.game = this;

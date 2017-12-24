@@ -50,7 +50,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	
 	//textures
 	private Texture texCompBack = TextureFactory.createTile(Color.GRAY);
-	private Texture texCompSeperator = TextureFactory.createTile(Color.RED);
+	private Texture texCompSeparator = TextureFactory.createTile(Color.RED);
 	
 	//entity storage
 	private Array<Entity> objects;
@@ -59,12 +59,12 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	private boolean drawDebugUI = true;
 	private boolean drawMenu = false;
 	private boolean drawFPS = true;
-	private boolean drawComponentList = true;
+	private boolean drawComponentList = false;
 	private boolean drawPos = false;
-	private boolean drawBounds = true;
+	private boolean drawBounds = false;
 	private boolean drawOrbitPath = false;
 	private boolean drawVectors = false;
-	private boolean drawMousePos = true;
+	private boolean drawMousePos = false;
 	
 	
 	public DebugUISystem() {
@@ -430,7 +430,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 				}
 				
 				//draw separating line
-				batch.draw(texCompSeperator, screenPos.x, screenPos.y - (fontHeight * curLine) + yOffset, backWidth, 1);
+				batch.draw(texCompSeparator, screenPos.x, screenPos.y - (fontHeight * curLine) + yOffset, backWidth, 1);
 				
 				//draw component name
 				float yOffComp = screenPos.y - (fontHeight * compLine) + yOffset;
@@ -484,7 +484,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	@Override
 	public void dispose() {
 		texCompBack.dispose();
-		texCompSeperator.dispose();
+		texCompSeparator.dispose();
 		fontSmall.dispose();
 		fontLarge.dispose();
 		//font.dispose();

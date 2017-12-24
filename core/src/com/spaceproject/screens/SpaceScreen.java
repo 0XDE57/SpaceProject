@@ -32,10 +32,11 @@ import com.spaceproject.systems.SpaceParallaxSystem;
 import com.spaceproject.systems.SpaceRenderingSystem;
 import com.spaceproject.utility.MyScreenAdapter;
 
+@Deprecated
 public class SpaceScreen extends MyScreenAdapter {
 	
 	public static Engine engine;
-	
+
 	public SpaceScreen(LandConfig landCFG) {
 		System.out.println("SpaceScreen()");
 		

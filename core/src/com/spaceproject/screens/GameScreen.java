@@ -10,6 +10,7 @@ import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControllableComponent;
@@ -47,19 +48,15 @@ public class GameScreen extends MyScreenAdapter {
 	public static boolean transition;
 	
 	public GameScreen(LandConfig landCFG, boolean inSpace) {
-		 inSpace = true;
-		//inSpace = false;
-		
+
 		// load test default values
 		landCFG = new LandConfig();
 		landCFG.position = new Vector3();// start player at 0,0
 		Entity player = EntityFactory.createCharacter(landCFG.position.x, landCFG.position.y);
 		Entity playerTESTSHIP = EntityFactory.createShip3(landCFG.position.x, landCFG.position.y, landCFG.shipSeed, player);
-		// playerTESTSHIP.add(new CameraFocusComponent());
-		// playerTESTSHIP.add(new ControllableComponent());
 		landCFG.ship = playerTESTSHIP;
 
-		// test values for world
+		// test values for a default world
 		PlanetComponent planet = new PlanetComponent();
 		planet.mapSize = 128;
 		planet.scale = 100;
@@ -95,14 +92,12 @@ public class GameScreen extends MyScreenAdapter {
 		engine.addEntity(EntityFactory.createShip3(-300, 400));
 		engine.addEntity(EntityFactory.createShip3(-400, 400));		
 
-		Entity aiTest = EntityFactory.createCharacter(0, 400);
-		aiTest.add(new AIComponent());
-		aiTest.add(new ControllableComponent());
+		Entity aiTest = EntityFactory.createCharacterAI(0, 400);
+		//aiTest.add(new CameraFocusComponent());
 		engine.addEntity(aiTest);
 		
 		//add player
 		Entity ship = landCFG.ship;
-		ship.add(new ControllableComponent());
 		ship.add(new CameraFocusComponent());
 		ship.add(new ControlFocusComponent());
 		ship.getComponent(TransformComponent.class).pos.x = landCFG.position.x;
@@ -157,12 +152,11 @@ public class GameScreen extends MyScreenAdapter {
 		// ===============ENTITIES===============
 		// add player
 		Entity ship = landCFG.ship;
-		int position = landCFG.planet.mapSize * 32 / 2;// 32 = tileSize, set  position to middle of planet
+		int position = landCFG.planet.mapSize * SpaceProject.tileSize / 2;//set  position to middle of planet
 		ship.getComponent(TransformComponent.class).pos.x = position;
 		ship.getComponent(TransformComponent.class).pos.y = position;
-		ship.add(new ControllableComponent());
-		
-		ship.add(new CameraFocusComponent());	
+		//ship.add(new ControllableComponent());
+		//ship.add(new CameraFocusComponent());
 		ship.add(new ControlFocusComponent());
 		engine.addEntity(ship);
 		System.out.println("ship: " + String.format("%X", ship.hashCode()));
@@ -173,9 +167,7 @@ public class GameScreen extends MyScreenAdapter {
 		engine.addEntity(EntityFactory.createShip3(position + 100, position + 300));
 		engine.addEntity(EntityFactory.createShip3(position - 100, position + 300));
 
-		Entity aiTest = EntityFactory.createCharacter(position, position + 50);
-		aiTest.add(new AIComponent());
-		aiTest.add(new ControllableComponent());
+		Entity aiTest = EntityFactory.createCharacterAI(position, position + 50);
 		//aiTest.add(new CameraFocusComponent());
 		engine.addEntity(aiTest);
 
@@ -196,7 +188,7 @@ public class GameScreen extends MyScreenAdapter {
 		engine.addSystem(new ControlSystem(this));
 		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new MovementSystem());
-		engine.addSystem(new WorldWrapSystem(32, landCFG.planet.mapSize));
+		engine.addSystem(new WorldWrapSystem(landCFG.planet.mapSize));
 		engine.addSystem(new BoundsSystem());
 		engine.addSystem(new CollisionSystem());
 
