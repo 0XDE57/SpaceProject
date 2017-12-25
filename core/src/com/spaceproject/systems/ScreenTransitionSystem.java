@@ -6,6 +6,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.ScreenTransitionComponent.LandAnimStage;
@@ -21,20 +22,12 @@ import com.spaceproject.screens.WorldScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyScreenAdapter;
 
-public class ScreenTransitionSystem extends IteratingSystem {
 
-	public boolean inSpace;
-	
-	//TODO: this will not work for multiple entities -> will break when I add AI
-	LandAnimStage curLandStage = null;
-	TakeOffAnimStage curTakeOffStage = null;
-	Vector3 landPos = null;
+public class ScreenTransitionSystem extends IteratingSystem {
+	//Vector3 landPos = null;
 	
 	public ScreenTransitionSystem() {
 		super(Family.all(ScreenTransitionComponent.class, TransformComponent.class).get());
-		inSpace = GameScreen.inSpace;
-		//landCFG = landConfig;
-		System.out.println("ScreenTransitionSystem()");
 	}
 
 	@Override
@@ -42,10 +35,10 @@ public class ScreenTransitionSystem extends IteratingSystem {
 		ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(entity);
 		
 		if (screenTrans.landStage != null) {
-			if (curLandStage == null || curLandStage != screenTrans.landStage) {
+			if (screenTrans.curLandStage == null || screenTrans.curLandStage != screenTrans.landStage) {
 				System.out.println("Animation Stage: " + screenTrans.landStage);
-				curLandStage = screenTrans.landStage;
-				landPos = screenTrans.landCFG.position;
+				screenTrans.curLandStage = screenTrans.landStage;
+				//landPos = screenTrans.landCFG.position;//?
 			}
 			switch (screenTrans.landStage) {
 			case shrink:
@@ -69,17 +62,17 @@ public class ScreenTransitionSystem extends IteratingSystem {
 				break;
 			default:
 				try {
-					throw new Exception("Uknown Animation Stage: " + screenTrans.landStage);
+					throw new Exception("Unknown Animation Stage: " + screenTrans.landStage);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				break;
 			}
 		} else if (screenTrans.takeOffStage != null) {
-			if (curTakeOffStage == null || curTakeOffStage != screenTrans.takeOffStage) {
+			if (screenTrans.curTakeOffStage == null || screenTrans.curTakeOffStage != screenTrans.takeOffStage) {
 				System.out.println("Animation Stage: " + screenTrans.takeOffStage);
-				curTakeOffStage = screenTrans.takeOffStage;
-				landPos = screenTrans.landCFG.position;
+				screenTrans.curTakeOffStage = screenTrans.takeOffStage;
+				//landPos = screenTrans.landCFG.position;
 			}
 			switch (screenTrans.takeOffStage) {
 			case transition:
@@ -97,7 +90,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
 				break;
 			default:
 				try {
-					throw new Exception("Uknown Animation Stage: " + screenTrans.takeOffStage);
+					throw new Exception("Unknown Animation Stage: " + screenTrans.takeOffStage);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -125,11 +118,12 @@ public class ScreenTransitionSystem extends IteratingSystem {
 		tex.scale -= 3f * delta; 
 		if (tex.scale <= 0.1f) {
 			tex.scale = 0;
-			
-			//if (enitity is ai)
-			//stage = transition;
-			//else, next stage
-			screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.zoomIn;
+
+			if (entity.getComponent(AIComponent.class) != null) {
+				screenTrans.landStage = LandAnimStage.end;
+			} else {
+				screenTrans.landStage = LandAnimStage.zoomIn;
+			}
 		}
 	}
 	
@@ -156,20 +150,24 @@ public class ScreenTransitionSystem extends IteratingSystem {
 		if (MyScreenAdapter.cam.zoom == 1)
 			screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.grow;
 	}
-	
+
+
 	private static void landOnPlanet(ScreenTransitionComponent screenTrans) {
-		screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.pause;
+		screenTrans.landStage = LandAnimStage.pause;
 		screenTrans.landCFG.ship.add(screenTrans);
 		screenTrans.landCFG.ship.getComponent(TextureComponent.class).scale = SpaceProject.scale;//reset size to normal
-		System.out.println("Take off:" + screenTrans.landCFG.position);
+
+		System.out.println("Land: " + screenTrans.landCFG.position);
+		GameScreen.landCFG = screenTrans.landCFG;
 		GameScreen.transition = true;
 	}
 	
 	private void takeOff(ScreenTransitionComponent screenTrans) {
-		screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.zoomOut;
+		screenTrans.takeOffStage = TakeOffAnimStage.zoomOut;
 		screenTrans.landCFG.ship.add(screenTrans);
 		screenTrans.landCFG.ship.getComponent(TextureComponent.class).scale = 0;//set size to 0 so texture can grow
-		screenTrans.landCFG.position = landPos;//landCFG.position;
+		//screenTrans.landCFG.position = landPos;//landCFG.position;
+
 		System.out.println("Take off:" + screenTrans.landCFG.position);
 
 		GameScreen.transition = true;

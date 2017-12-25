@@ -47,7 +47,8 @@ public class GameScreen extends MyScreenAdapter {
 	public static LandConfig landCFG = null;
 	public static boolean transition;
 	
-	public GameScreen(LandConfig landCFG, boolean inSpace) {
+	public GameScreen(boolean inSpace) {
+		GameScreen.inSpace = inSpace;
 
 		// load test default values
 		landCFG = new LandConfig();
@@ -56,16 +57,18 @@ public class GameScreen extends MyScreenAdapter {
 		Entity playerTESTSHIP = EntityFactory.createShip3(landCFG.position.x, landCFG.position.y, landCFG.shipSeed, player);
 		landCFG.ship = playerTESTSHIP;
 
+
 		// test values for a default world
-		PlanetComponent planet = new PlanetComponent();
-		planet.mapSize = 128;
-		planet.scale = 100;
-		planet.octaves = 4;
-		planet.persistence = 0.68f;
-		planet.lacunarity = 2.6f;
-		landCFG.planet = planet;
-		
-		GameScreen.inSpace = inSpace;
+		if (!inSpace) {
+			PlanetComponent planet = new PlanetComponent();
+			planet.mapSize = 128;
+			planet.scale = 100;
+			planet.octaves = 4;
+			planet.persistence = 0.68f;
+			planet.lacunarity = 2.6f;
+			landCFG.planet = planet;
+		}
+
 		
 		if (inSpace) {
 			initSpace(landCFG);
@@ -103,7 +106,7 @@ public class GameScreen extends MyScreenAdapter {
 		ship.getComponent(TransformComponent.class).pos.x = landCFG.position.x;
 		ship.getComponent(TransformComponent.class).pos.y = landCFG.position.y;
 		engine.addEntity(ship);
-		System.out.println("ship: " + String.format("%X", ship.hashCode()));
+		//System.out.println("ship: " + String.format("%X", ship.hashCode()));
 		
 		
 		//===============SYSTEMS===============
@@ -143,6 +146,8 @@ public class GameScreen extends MyScreenAdapter {
 	
 	private void initWorld(LandConfig landCFG) {
 		System.out.println("==========WORLD==========");
+		DebugUISystem.printObjectFields(landCFG.planet);
+
 		GameScreen.landCFG = landCFG;
 		inSpace = false;
 
@@ -159,7 +164,7 @@ public class GameScreen extends MyScreenAdapter {
 		//ship.add(new CameraFocusComponent());
 		ship.add(new ControlFocusComponent());
 		engine.addEntity(ship);
-		System.out.println("ship: " + String.format("%X", ship.hashCode()));
+		//System.out.println("ship: " + String.format("%X", ship.hashCode()));
 
 		
 

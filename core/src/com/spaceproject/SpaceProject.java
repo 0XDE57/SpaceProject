@@ -16,6 +16,7 @@ public class SpaceProject extends Game {
 	//TODO: put into a config
 	public static float scale = 4.0f;
 	public static int tileSize = 32;
+	public static int chunkSize = 8;
 
 	@Override
 	public void create() {	
@@ -26,7 +27,7 @@ public class SpaceProject extends Game {
 				
 	
 		boolean inSpace = true;
-		setScreen(new GameScreen(null, inSpace));
+		setScreen(new GameScreen(inSpace));
 		//setScreen(new SpaceScreen(landCFG));
 		//setScreen(new WorldScreen(landCFG));
 		//setScreen(new TestShipGenerationScreen(this));

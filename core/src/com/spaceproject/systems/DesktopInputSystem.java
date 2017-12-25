@@ -6,7 +6,6 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.utility.Mappers;
@@ -52,7 +51,7 @@ public class DesktopInputSystem extends EntitySystem {
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.changeVehicle)) {
 			control.changeVehicle = true;
 		}
-		control.land = Gdx.input.isKeyJustPressed(SpaceProject.keycfg.land);
+		control.transition = Gdx.input.isKeyJustPressed(SpaceProject.keycfg.land);
 	}
 
 	private static void cameraControls(float delta) {

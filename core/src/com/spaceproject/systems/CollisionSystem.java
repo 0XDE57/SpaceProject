@@ -62,6 +62,7 @@ public class CollisionSystem extends EntitySystem {
 						AIComponent ai = Mappers.AI.get(character);
 						if (ai != null) {
 							ai.attackTarget = misl.owner;
+							ai.state = AIComponent.testState.attack;
 						}
 						
 						

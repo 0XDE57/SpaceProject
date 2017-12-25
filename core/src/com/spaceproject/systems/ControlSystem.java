@@ -25,7 +25,6 @@ import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.screens.SpaceScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
@@ -68,7 +67,7 @@ public class ControlSystem extends IteratingSystem {
 		CharacterComponent character = Mappers.character.get(entity);
 		if (character != null) {
 			controlCharacter(entity, character, control, delta);
-			control.canLand = false;
+			control.canTransition = false;
 		}
 		
 		VehicleComponent vehicle = Mappers.vehicle.get(entity);
@@ -122,11 +121,10 @@ public class ControlSystem extends IteratingSystem {
 			decelerate(delta, transform);
 		}
 		
-		//debug force insta-stop
+		//debug force insta-stop(currently affects all vehicles)
 		if (Gdx.input.isKeyJustPressed(Keys.X)) transform.velocity.set(0,0);
 		
-		
-		
+
 		//fire cannon / attack
 		CannonComponent cannon = Mappers.cannon.get(entity);	
 		refillAmmo(cannon, delta);
@@ -136,13 +134,13 @@ public class ControlSystem extends IteratingSystem {
 		}
 		
 		
-		//land or take off from planet
+		//transition or take off from planet
 		if (GameScreen.inSpace) {
-			control.canLand = canLandOnPlanet(transform.pos);
+			control.canTransition = canLandOnPlanet(transform.pos);
 		} else {
-			control.canLand = true;
+			control.canTransition = true;
 		}
-		if (control.land) {
+		if (control.transition) {
 			if (GameScreen.inSpace) {				
 				landOnPlanet(entity);
 			} else {			
@@ -172,6 +170,10 @@ public class ControlSystem extends IteratingSystem {
 	}
 
 	private void landOnPlanet(Entity entity) {
+		if (Mappers.screenTrans.get(entity) != null) {
+			return;
+		}
+
 		Vector3 vePos = Mappers.transform.get(entity).pos;
 		for (Entity planet : planets) {
 			Vector3 planetPos = Mappers.transform.get(planet).pos;
@@ -182,9 +184,11 @@ public class ControlSystem extends IteratingSystem {
 				screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.shrink;//begin animation
 				screenTrans.landCFG = new LandConfig();
 				screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
+				//DebugUISystem.printObjectFields(planet);
+				//DebugUISystem.printObjectFields(Mappers.planet.get(planet));
 				screenTrans.landCFG.ship = Misc.copyEntity(entity);//entity to send to the planet
 				screenTrans.landCFG.position = planetPos;// save position for taking off from planet
-				System.out.println("Land pos: " + planetPos);
+				//System.out.println("Land pos: " + planetPos);
 				
 				//TODO: planet moves, set position to what ever planet is instead (will come into play
 				//over more when orbit is based on time)
@@ -250,7 +254,6 @@ public class ControlSystem extends IteratingSystem {
 	}
 
 	private static void refillAmmo(CannonComponent cannon, float delta) {
-		//TODO: cannon refill logic needs to be moved to system, all ships need to recharge
 		// deal with cannon timers
 		cannon.timeSinceLastShot -= 100 * delta;
 		cannon.timeSinceRecharge -= 100 * delta;
@@ -338,8 +341,6 @@ public class ControlSystem extends IteratingSystem {
 					vehicle.add(characterEntity.remove(ControlFocusComponent.class));
 				}
 				
-				//vehicle.add(characterEntity.remove(ControllableComponent.class));
-				
 				// remove player from engine
 				engine.removeEntity(characterEntity);
 				
@@ -372,10 +373,6 @@ public class ControlSystem extends IteratingSystem {
 		Mappers.transform.get(characterEntity).pos.set(vehiclePosition);
 		
 		//set focus to character
-		/*
-		characterEntity.add(vehicleEntity.remove(ControlFocusComponent.class));
-		characterEntity.add(vehicleEntity.remove(CameraFocusComponent.class));
-		*/
 		if (vehicleEntity.getComponent(CameraFocusComponent.class) != null) {
 			characterEntity.add(vehicleEntity.remove(CameraFocusComponent.class));
 		}
@@ -385,7 +382,6 @@ public class ControlSystem extends IteratingSystem {
 		if (vehicleEntity.getComponent(ControlFocusComponent.class) != null) {
 			characterEntity.add(vehicleEntity.remove(ControlFocusComponent.class));
 		}
-		//characterEntity.add(vehicleEntity.remove(ControllableComponent.class));
 		
 		// remove references
 		Mappers.character.get(characterEntity).vehicle = null;

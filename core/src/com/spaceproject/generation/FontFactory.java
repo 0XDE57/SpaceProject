@@ -35,7 +35,9 @@ public class FontFactory {
 		} catch (GdxRuntimeException ex) {
 			System.err.println(ex.getMessage());
 			System.out.println("Font not found: " + Gdx.files.getLocalStoragePath() + font);
-			System.out.println("Make sure 'android/assets' is appended to run configuration. ");
+			System.out.println("Make sure 'android/assets' is appended to run configuration.");
+			//https://github.com/libgdx/libgdx/wiki/Gradle-and-Intellij-IDEA
+			//Set Working directory to <project_path>/android/assets/
 		}
 
 		System.out.println("Loaded default font.");

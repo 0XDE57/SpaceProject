@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
-import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.ui.TouchButtonRectangle;
@@ -57,11 +56,11 @@ public class MobileInputSystem extends EntitySystem {
 		
 		control.shoot = btnShoot.isTouched();
 		control.changeVehicle = btnVehicle.isJustTouched();
-		control.land = btnLand.isTouched();
+		control.transition = btnLand.isTouched();
 		if (btnMap.isJustTouched()) {
 			HUDSystem.drawSpaceMap = !HUDSystem.drawSpaceMap;
 		}
-		btnLand.hidden = !control.canLand;
+		btnLand.hidden = !control.canTransition;
 		
 		
 		if (joyMovement.isTouched()) {

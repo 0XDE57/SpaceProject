@@ -16,8 +16,8 @@ public class ControllableComponent implements Component {
 	//actions
 	public boolean shoot;
 	public boolean changeVehicle;
-	public boolean land;
-	public boolean canLand;
+	public boolean transition;
+	public boolean canTransition;
 	
 	//timers
 	public float timeSinceVehicle;

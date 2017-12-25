@@ -94,8 +94,6 @@ public class TextureFactory {
 
 	/**
 	 * Generate a unique ship.
-	 * @param x position for seed
-	 * @param y position for seed
 	 * @param size of ship
 	 * @return Texture of ship
 	 */
@@ -239,7 +237,7 @@ public class TextureFactory {
 		Pixmap pixmap = new Pixmap(pixelatedTileMap.length, pixelatedTileMap.length, Format.RGBA4444);
 		 */
 		
-		int s = mapSize/NoiseGen.chunkSize;//SIZE = chunks = tileMap.length/chunkSize
+		int s = mapSize/SpaceProject.chunkSize;//SIZE = chunks = tileMap.length/chunkSize
 		Pixmap pixmap = new Pixmap(s, s, Format.RGBA4444);
 		
 		// draw circle for planet
@@ -294,8 +292,8 @@ public class TextureFactory {
 		return t;
 	}*/
 
-	public static Texture generateStar(int radius) {
-		OpenSimplexNoise noise = new OpenSimplexNoise();
+	public static Texture generateStar(long seed, int radius) {
+		OpenSimplexNoise noise = new OpenSimplexNoise(seed);
 		
 		Pixmap pixmap = new Pixmap(radius * 2, radius * 2, Format.RGBA4444);
 		

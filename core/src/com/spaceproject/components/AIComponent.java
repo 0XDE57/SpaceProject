@@ -10,7 +10,17 @@ public class AIComponent implements Component {
 	
 	public Entity followTarget;//short index...
 	//public ArrayList<Entity> followTargets;
-	
+
+	public Entity planetTarget; //test land
+
+	public enum testState {
+		dumbwander,
+		attack,
+		landOnPlanet,
+		idle
+	}
+	public testState state;
+
 	//statemachine?
 	/*
 	state {

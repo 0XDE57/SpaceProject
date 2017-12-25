@@ -1,16 +1,14 @@
 package com.spaceproject.utility;
 
-import java.awt.peer.LightweightPeer;
 import java.util.ArrayList;
-
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
 
+
 public class NoiseGen {
-	
-	public static final int chunkSize = 8;
 	
 	public static float[][] generateWrappingNoise4D(long seed, int mapSize, float scale) {
 		float[][] map = new float[mapSize][mapSize];	
@@ -104,9 +102,8 @@ public class NoiseGen {
 	}
 	
 	public static int[][] createPixelatedTileMap(int[][] tileMap, ArrayList<Tile> tiles) {
-		
-		//int chunkSize = 8;
-		int chunks = tileMap.length/chunkSize;
+
+		int chunks = tileMap.length/SpaceProject.chunkSize;
 		int[][] pixelatedMap = new int[chunks][chunks];
 		
 		//for each chunk
@@ -114,15 +111,15 @@ public class NoiseGen {
 			for (int cX = 0; cX < chunks; cX++) {
 				
 				//calculate chunk position
-				int chunkX = cX * chunkSize;
-				int chunkY = cY * chunkSize;
+				int chunkX = cX * SpaceProject.chunkSize;
+				int chunkY = cY * SpaceProject.chunkSize;
 				
 				//reset chunk count
 				int[] count = new int[tiles.size()];
 				
 				//for each tile in chunk, count occurrence of tiles within a chunk
-				for (int y = chunkY; y < chunkY+chunkSize; y++) {
-					for (int x = chunkX; x < chunkX+chunkSize; x++) {
+				for (int y = chunkY; y < chunkY+SpaceProject.chunkSize; y++) {
+					for (int x = chunkX; x < chunkX+SpaceProject.chunkSize; x++) {
 						count[tileMap[x][y]]++;
 					}
 				}

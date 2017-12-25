@@ -75,7 +75,7 @@ public class EntityFactory {
 	//region Celestial objects
 	public static Entity[] createPlanetarySystem(float x, float y) {
 		long seed = MyMath.getSeed(x, y);
-		MathUtils.random.setSeed(MyMath.getSeed(x, y));
+		MathUtils.random.setSeed(seed);
 
 		//number of planets in a system
 		int numPlanets = MathUtils.random(SpaceProject.celestcfg.minPlanets, SpaceProject.celestcfg.maxPlanets);
@@ -116,7 +116,7 @@ public class EntityFactory {
 		// create star texture
 		TextureComponent texture = new TextureComponent();
 		int radius = MathUtils.random(SpaceProject.celestcfg.minStarSize, SpaceProject.celestcfg.maxStarSize);	
-		texture.texture = TextureFactory.generateStar(radius);
+		texture.texture = TextureFactory.generateStar(seed, radius);
 		texture.scale = SpaceProject.scale;
 		
 		// set position
@@ -134,13 +134,16 @@ public class EntityFactory {
 		MapComponent map = new MapComponent();
 		map.color = new Color(0.9f, 0.9f, 0.15f, 0.9f);
 		map.distance = 80000;
-		
+
+		StarComponent star = new StarComponent();
+		star.seed = seed;
+
 		//add components to entity
 		entity.add(orbit);
 		entity.add(transform);
 		entity.add(texture);
 		entity.add(map);
-		entity.add(new StarComponent());
+		entity.add(star);
 
 		return entity;
 	}

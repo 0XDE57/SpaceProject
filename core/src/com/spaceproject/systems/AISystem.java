@@ -11,6 +11,7 @@ import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
@@ -21,6 +22,7 @@ public class AISystem extends IteratingSystem {
 
 	private Engine engine;
 	private ImmutableArray<Entity> vehicles;
+	private ImmutableArray<Entity> planets;
 	//private ImmutableArray<Entity> players;
 	
 	public AISystem() {
@@ -32,8 +34,11 @@ public class AISystem extends IteratingSystem {
 		super.addedToEngine(engine);
 		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
 		//players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
+		planets = engine.getEntitiesFor(Family.all(PlanetComponent.class).get());
 		this.engine = engine;
 	}
+
+
 
 	protected void processEntity(Entity entity, float delta) {
 		/* simple DUMB test "AI" for now just to create structure/skeleton
@@ -44,44 +49,106 @@ public class AISystem extends IteratingSystem {
 		Vector3 aiPos = Mappers.transform.get(entity).pos;
 		
 		//aiPos.y += 100 * delta;
+		if (ai.state == null){
+			//ai.state = AIComponent.testState.dumbwander;
+			ai.state = AIComponent.testState.landOnPlanet;
+		}
 		
-		
-		if (ai.attackTarget != null) {
-			
-			VehicleComponent vehicle = Mappers.vehicle.get(entity);
-			if (vehicle == null) {
-				Entity closestVehicle = Misc.closestEntity(aiPos, vehicles);
-				if (closestVehicle != null) {
-					control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos,aiPos);
+		switch (ai.state) {
+			case attack:
+			if (ai.attackTarget != null) {
+
+				VehicleComponent vehicle = Mappers.vehicle.get(entity);
+				if (vehicle == null) {
+					Entity closestVehicle = Misc.closestEntity(aiPos, vehicles);
+					if (closestVehicle != null) {
+						control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos,aiPos);
+						control.moveForward = true;
+						control.movementMultiplier = 1f;
+						BoundsComponent aiBounds = Mappers.bounds.get(entity);
+						for (Entity v : vehicles) {
+							//skip vehicle is occupied
+							if (Mappers.vehicle.get(v).driver != null) continue;
+
+							//check if character is near a vehicle
+							BoundsComponent vehicleBounds = Mappers.bounds.get(v);
+							if (aiBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {
+								control.changeVehicle = true;
+							}
+						}
+					}
+				} else {
+
+					Vector3 pPos = Mappers.transform.get(ai.attackTarget).pos;
+					control.angleFacing = MyMath.angleTo(pPos, aiPos);
 					control.moveForward = true;
-					control.movementMultiplier = 1f;
-					BoundsComponent aiBounds = Mappers.bounds.get(entity);
-					for (Entity v : vehicles) {	
-						//skip vehicle is occupied
-						if (Mappers.vehicle.get(v).driver != null) continue;
-						
-						//check if character is near a vehicle
-						BoundsComponent vehicleBounds = Mappers.bounds.get(v);
-						if (aiBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {
-							control.changeVehicle = true;
+					control.movementMultiplier = 0.3f;
+					control.shoot = true;
+				}
+
+			} else {
+				ai.state = AIComponent.testState.dumbwander;
+			}
+			break;
+			case dumbwander:
+				control.shoot = false;
+
+				//dumb wander
+				control.angleFacing += 1 * delta;
+				control.moveForward = true;
+				control.movementMultiplier = 0.1f;
+
+			break;
+			case landOnPlanet:
+				if (Mappers.screenTrans.get(entity) != null) {
+					ai.state = AIComponent.testState.idle;
+					control.transition = false;
+					return;
+				}
+
+				VehicleComponent vehicle = Mappers.vehicle.get(entity);
+				if (vehicle == null) {
+					Entity closestVehicle = Misc.closestEntity(aiPos, vehicles);
+					if (closestVehicle != null) {
+						control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos,aiPos);
+						control.moveForward = true;
+						control.movementMultiplier = 1f;
+						BoundsComponent aiBounds = Mappers.bounds.get(entity);
+						for (Entity v : vehicles) {
+							//skip vehicle is occupied
+							if (Mappers.vehicle.get(v).driver != null) continue;
+
+							//check if character is near a vehicle
+							BoundsComponent vehicleBounds = Mappers.bounds.get(v);
+							if (aiBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {
+								control.changeVehicle = true;
+							}
+						}
+					}
+				} else {
+					ai.planetTarget = Misc.closestEntity(aiPos, planets);
+					if (ai.planetTarget != null) {
+
+						Vector3 pPos = Mappers.transform.get(ai.planetTarget).pos;
+						control.angleFacing = MyMath.angleTo(pPos, aiPos);
+
+
+						if (aiPos.dst(pPos) < 200f) {
+							control.moveForward = false;
+							control.moveBack = true;
+							control.transition = true;
+
+						} else {
+							control.moveForward = true;
+							control.movementMultiplier = 1f;
 						}
 					}
 				}
-			} else {
+				break;
+			case idle:
+				//do nothing
 
-				Vector3 pPos = Mappers.transform.get(ai.attackTarget).pos;
-				control.angleFacing = MyMath.angleTo(pPos, aiPos);
-				control.moveForward = true;
-				control.movementMultiplier = 0.3f;
-				control.shoot = true;
-			}
-		} else {
-			control.shoot = false;
-			
-			//dumb wander
-			control.angleFacing += 1 * delta;
-			control.moveForward = true;
-			control.movementMultiplier = 0.1f;
+				break;
 		}
 		
 		

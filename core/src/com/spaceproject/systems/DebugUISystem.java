@@ -177,6 +177,24 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			}
 		}
 	}
+
+	public static void printObjectFields(Object o) {
+		if (o == null) {
+			System.out.println("OBJECT IS NULL");
+			return;
+		}
+
+		System.out.println(o.getClass());
+		for (Field f : o.getClass().getFields()) {
+			try {
+				System.out.println(String.format("\t%-14s %s", f.getName(), f.get(o)));
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 	
 	private void printEntities() {
 		printEntities(engine);

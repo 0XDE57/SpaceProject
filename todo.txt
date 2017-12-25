@@ -1,6 +1,6 @@
 ---ENGINE---
-[...] fix land/take-off position bug
-	[ ] test land AI, system doesn't supports non-player world switching
+[x] fix land/take-off position bug
+	[...] test land AI, system doesn't supports non-player world switching
 		consider what to keep track of between planet and space
 		-what data to keep and discard between screens
 		-AI to remember (persistence)

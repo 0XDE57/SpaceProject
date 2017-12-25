@@ -5,26 +5,28 @@ import com.spaceproject.config.LandConfig;
 
 public class ScreenTransitionComponent implements Component {
 
-	public static enum TakeOffAnimStage {
+	public enum TakeOffAnimStage {
 		//fly
 		transition,
 		zoomOut,
 		grow,
-		end;
+		end
 	}
 	
-	public static enum LandAnimStage {
+	public enum LandAnimStage {
 		shrink,
 		zoomIn,
 		//screenfEffect
 		transition,
 		pause,
 		exit,
-		end;		
+		end
 	}
 	
 	public LandAnimStage landStage;
+	public LandAnimStage curLandStage;
 	public TakeOffAnimStage takeOffStage;
+	public TakeOffAnimStage curTakeOffStage;
 
 	public LandConfig landCFG;
 	
