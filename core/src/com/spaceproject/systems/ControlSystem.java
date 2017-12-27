@@ -35,14 +35,11 @@ public class ControlSystem extends IteratingSystem {
 	private Engine engine;
 	private ImmutableArray<Entity> vehicles;
 	private ImmutableArray<Entity> planets;
+
 	
-	//private boolean inSpace;
-	
-	public ControlSystem(MyScreenAdapter screen) {
+	public ControlSystem() {
 		super(Family.all(ControllableComponent.class, TransformComponent.class).one(
 				CharacterComponent.class, VehicleComponent.class).get());
-			
-		//inSpace = (screen instanceof SpaceScreen);
 	}
 	
 	@Override
@@ -246,7 +243,7 @@ public class ControlSystem extends IteratingSystem {
 		float dy = (float) Math.sin(angle) * (thrust * control.movementMultiplier) * delta;
 		transform.velocity.add(dx, dy);
 		
-		//transform.accel.add(dx,dy);????
+		//transform.accel.add(dx,dy);//????
 		
 		//cap speed at max. if maxSpeed set to -1 it's infinite(no cap)
 		if (vehicle.maxSpeed != -1)

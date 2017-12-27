@@ -125,7 +125,7 @@ public class GameScreen extends MyScreenAdapter {
 		
 		//logic
 		engine.addSystem(new ScreenTransitionSystem());	
-		engine.addSystem(new ControlSystem(this));
+		engine.addSystem(new ControlSystem());
 		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new OrbitSystem());
 		engine.addSystem(new MovementSystem());
@@ -190,7 +190,7 @@ public class GameScreen extends MyScreenAdapter {
 
 		// logic
 		engine.addSystem(new ScreenTransitionSystem());
-		engine.addSystem(new ControlSystem(this));
+		engine.addSystem(new ControlSystem());
 		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new MovementSystem());
 		engine.addSystem(new WorldWrapSystem(landCFG.planet.mapSize));
