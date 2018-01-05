@@ -8,6 +8,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
@@ -46,9 +47,17 @@ public class GameScreen extends MyScreenAdapter {
 	public static boolean inSpace;
 	public static LandConfig landCFG = null;
 	public static boolean transition;
-	
+	ShaderProgram shader = new ShaderProgram(Gdx.files.internal("shaders/quadRotation.vsh"), Gdx.files.internal("shaders/quadRotation.fsh"));
+
 	public GameScreen(boolean inSpace) {
 		GameScreen.inSpace = inSpace;
+
+		/*
+		//playing with shaders
+		ShaderProgram.pedantic = false;
+		System.out.println("Shader compiled: " + shader.isCompiled() + ": " + shader.getLog());
+		batch.setShader(shader);
+		*/
 
 		// load test default values
 		landCFG = new LandConfig();
@@ -58,8 +67,9 @@ public class GameScreen extends MyScreenAdapter {
 		landCFG.ship = playerTESTSHIP;
 
 
+
 		// test values for a default world
-		if (!inSpace) {
+		if (!inSpace && landCFG.planet == null) {
 			PlanetComponent planet = new PlanetComponent();
 			planet.mapSize = 128;
 			planet.scale = 100;
@@ -67,6 +77,7 @@ public class GameScreen extends MyScreenAdapter {
 			planet.persistence = 0.68f;
 			planet.lacunarity = 2.6f;
 			landCFG.planet = planet;
+			System.out.println("=======DEFAULT WORLD=======");
 		}
 
 		
@@ -221,6 +232,9 @@ public class GameScreen extends MyScreenAdapter {
 		}
 
 		//if (Gdx.input.isKeyJustPressed(Keys.H)) { transition = true; }
+		if (Gdx.input.isKeyJustPressed(Keys.B)) {
+			batch.setShader(null);
+		}
 		if (transition) {
 			transition = false;
 

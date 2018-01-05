@@ -22,7 +22,11 @@
 [ ] convert all uses of shaperenderer to spritebatch? (would this increase performance?)
 	https://github.com/mattdesl/lwjgl-basics/blob/master/test/mdesl/test/RectTest.java
 	https://github.com/mattdesl/lwjgl-basics/wiki/Batching-Rectangles-and-Lines
-
+[ ] rotating sprites/textures on 3d/w axis
+    https://stackoverflow.com/questions/12414708/correct-glsl-affine-texture-mapping
+    https://bitlush.com/blog/arbitrary-quadrilaterals-in-opengl-es-2-0
+    https://gamedev.stackexchange.com/questions/46429/how-to-draw-a-trapezoid-in-opengl
+    https://github.com/bitlush/android-arbitrary-quadrilaterals-in-opengl-es-2-0
 
 ---DEBUG---
 [ ] in game console
