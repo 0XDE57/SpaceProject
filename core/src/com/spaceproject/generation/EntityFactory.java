@@ -27,6 +27,9 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.utility.IDGen;
 import com.spaceproject.utility.MyMath;
+import com.spaceproject.utility.SimpleTimer;
+
+import java.util.Timer;
 
 public class EntityFactory {
 
@@ -54,9 +57,12 @@ public class EntityFactory {
 		health.health = 100;
 		health.maxHealth = 100;
 
+		ControllableComponent control = new ControllableComponent();
+		control.timerVehicle = new SimpleTimer(1000);
+		control.timerDodge = new SimpleTimer(500);
 
 		entity.add(health);
-		entity.add(new ControllableComponent());
+		entity.add(control);
 		entity.add(bounds);
 		entity.add(transform);
 		entity.add(texture);
@@ -213,7 +219,7 @@ public class EntityFactory {
 		Entity entity = new Entity();
 
 		MathUtils.random.setSeed(seed);
-		
+
 		//transform
 		TransformComponent transform = new TransformComponent();
 		transform.pos.set(x, y, -10);
@@ -245,11 +251,11 @@ public class EntityFactory {
 		cannon.damage = 15;
 		cannon.maxAmmo = 5;
 		cannon.curAmmo = cannon.maxAmmo;
-		cannon.fireRate = 20; //lower is faster
+		cannon.timerFireRate = new SimpleTimer(200);//lower is faster
 		cannon.size = 1; //higher is bigger
 		cannon.velocity = 680; //higher is faster
 		cannon.acceleration = 200;
-		cannon.rechargeRate = 100; //lower is faster
+		cannon.timerRechargeRate = new SimpleTimer(1000);//lower is faster
 		
 		//engine data and marks entity as drive-able
 		VehicleComponent vehicle = new VehicleComponent();
@@ -268,7 +274,11 @@ public class EntityFactory {
 		MapComponent map = new MapComponent();
 		map.color = new Color(1, 1, 1, 0.9f);
 		map.distance = 3000;
-		
+
+		ControllableComponent control = new ControllableComponent();
+		control.timerVehicle = new SimpleTimer(1000);
+		control.timerDodge = new SimpleTimer(500);
+
 		//add components to entity
 		entity.add(health);
 		entity.add(cannon);
@@ -277,8 +287,7 @@ public class EntityFactory {
 		entity.add(transform);
 		entity.add(vehicle);
 		entity.add(map);
-		entity.add(new ControllableComponent());
-		
+		entity.add(control);
 		return entity;
 	}
 	

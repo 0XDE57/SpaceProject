@@ -1,5 +1,6 @@
 ---ENGINE---
-[x] fix land/take-off position bug
+[...] fix land/take-off position bug
+    [...] when switch to time based orbit, fix take off from current orbit position
 	[...] test land AI, system doesn't supports non-player world switching
 		consider what to keep track of between planet and space
 		-what data to keep and discard between screens
@@ -8,7 +9,7 @@
 [ ] time based orbit
 [ ] fixed time step (necessary for multiplayer?)
 	https://gafferongames.com/post/fix_your_timestep/
-[ ] timer object
+[x] timer object
 [ ] fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
 	https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
 [ ] fix render priority (z-order)
@@ -19,10 +20,7 @@
 [ ] pause/menu
 [ ] simple scripting? text file of commands for creating entities and printing story text?
 [ ] multiplayer/networking...or just commit suicide
-[ ] convert all uses of shaperenderer to spritebatch? (would this increase performance?)
-	https://github.com/mattdesl/lwjgl-basics/blob/master/test/mdesl/test/RectTest.java
-	https://github.com/mattdesl/lwjgl-basics/wiki/Batching-Rectangles-and-Lines
-[ ] rotating sprites/textures on 3d/w axis
+[...] rotating sprites/textures on 3d/w axis
     https://stackoverflow.com/questions/12414708/correct-glsl-affine-texture-mapping
     https://bitlush.com/blog/arbitrary-quadrilaterals-in-opengl-es-2-0
     https://gamedev.stackexchange.com/questions/46429/how-to-draw-a-trapezoid-in-opengl
@@ -61,12 +59,12 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
 [ ] destructable(voronoi) asteroids
 	http://www.alanzucconi.com/2015/02/24/to-voronoi-and-beyond/
 	https://stackoverflow.com/questions/20104779/libgdx-create-texture-from-overlay-using-pixmap
-[ ] combat system
+[...] combat system
 	create types, (normal, red, green, blue)?
 	shoot circles/rectangles with radius relative to damage "weight" of projectile (damage = size * velocity * typeMultiplier)?
 	dodge [Left][Right] (double tap) - move fast to left or right
 	shield [SHIFT] - ring around ship
-	add side to side dodge (jump/burst) [LEFT]/[RIGHT]
+	add side to side barrel roll dodge (jump/burst) [LEFT]/[RIGHT]
 [ ] ship generation
 	wings, engines, weapons, another layer on top for depth/windshield type thing
 	look at some different types of ships like an 'H' ,etc...
@@ -102,6 +100,13 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
     -design base building systems
     -
 [ ] game start
+
+---UI---
+[...] mobile input system
+[...] debug UI
+[ ] pause menu
+[ ] player manager/inventory/shipbuilder thingy
+[ ] career event timeline stats
 
 ---GRAPHICS---
 [ ] glowing ring/rays around planets/stars

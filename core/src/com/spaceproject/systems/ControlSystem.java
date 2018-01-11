@@ -25,6 +25,7 @@ import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.utility.SimpleTimer;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
@@ -54,12 +55,6 @@ public class ControlSystem extends IteratingSystem {
 	protected void processEntity(Entity entity, float delta) {
 		
 		ControllableComponent control = Mappers.controllable.get(entity);
-		
-		
-		if (control.timeSinceVehicle < control.timeTillCanGetInVehicle) {
-			control.timeSinceVehicle += 100 * delta;
-		}
-				
 		
 		CharacterComponent character = Mappers.character.get(entity);
 		if (character != null) {
@@ -96,9 +91,8 @@ public class ControlSystem extends IteratingSystem {
 	}
 
 	private void controlShip(Entity entity, VehicleComponent vehicle, ControllableComponent control, float delta) {
-		
 		TransformComponent transform = Mappers.transform.get(entity);				
-		
+
 		//make vehicle face angle from mouse/joystick
 		transform.rotation = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f*delta);		
 		
@@ -107,11 +101,11 @@ public class ControlSystem extends IteratingSystem {
 		}		
 
 		if (control.moveLeft) {
-			dodgeLeft();
+			dodgeLeft(delta, transform, control);
 		}
 		
 		if (control.moveRight) {
-			dodgeRight();
+			dodgeRight(delta, transform, control);
 		}
 
 		if (control.moveBack) {
@@ -124,7 +118,7 @@ public class ControlSystem extends IteratingSystem {
 
 		//fire cannon / attack
 		CannonComponent cannon = Mappers.cannon.get(entity);	
-		refillAmmo(cannon, delta);
+		refillAmmo(cannon);
 		if (control.shoot) {
 			//int id = Mappers.vehicle.get(entity).id;
 			fireCannon(transform, cannon, entity);
@@ -220,7 +214,7 @@ public class ControlSystem extends IteratingSystem {
 			transform.velocity.set(0,0);
 		} else {
 			//add thrust opposite direction of velocity to slow down ship
-			float thrust = MathUtils.clamp(transform.velocity.len(), minBreakingThrust, maxBreakingThrust);
+			float thrust = transform.velocity.len();//MathUtils.clamp(transform.velocity.len(), minBreakingThrust, maxBreakingThrust);
 			float angle = transform.velocity.angle();
 			float dx = (float) Math.cos(angle) * thrust * delta;
 			float dy = (float) Math.sin(angle) * thrust * delta;
@@ -228,9 +222,29 @@ public class ControlSystem extends IteratingSystem {
 		}
 	}
 
-	private static void dodgeRight() {}
+	private static void dodgeRight(float delta, TransformComponent transform, ControllableComponent control) {
+		if (control.timerDodge.canDoEvent()) {
+			float distance = 100;
+			float angle = transform.rotation - MathUtils.PI / 2;
+			float dx = (float) Math.cos(angle) * distance;
+			float dy = (float) Math.sin(angle) * distance;
+			transform.pos.add(dx, dy, 0);
 
-	private static void dodgeLeft() {}
+			control.timerDodge.reset();
+		}
+	}
+
+	private static void dodgeLeft(float delta, TransformComponent transform, ControllableComponent control) {
+		if (control.timerDodge.canDoEvent()) {
+			float distance = 100;
+			float angle = transform.rotation + MathUtils.PI / 2;
+			float dx = (float) Math.cos(angle) * distance;
+			float dy = (float) Math.sin(angle) * distance;
+			transform.pos.add(dx, dy, 0);
+
+			control.timerDodge.reset();
+		}
+	}
 
 	private static void accelerate(float delta, ControllableComponent control, TransformComponent transform, VehicleComponent vehicle) {
 		//TODO: create a vector method for the dx = cos... dy = sin... It's used multiple times in the program(movement, missiles..)
@@ -250,27 +264,32 @@ public class ControlSystem extends IteratingSystem {
 			transform.velocity.clamp(0, vehicle.maxSpeed);
 	}
 
-	private static void refillAmmo(CannonComponent cannon, float delta) {
-		// deal with cannon timers
-		cannon.timeSinceLastShot -= 100 * delta;
-		cannon.timeSinceRecharge -= 100 * delta;
-		if (cannon.timeSinceRecharge < 0 && cannon.curAmmo < cannon.maxAmmo) {
-			//refill ammo
-			cannon.curAmmo++;		
-			
-			//reset timer
-			cannon.timeSinceRecharge = cannon.rechargeRate;
+	private static void refillAmmo(CannonComponent cannon) {
+		if  (cannon.curAmmo < cannon.maxAmmo && cannon.timerRechargeRate.canDoEvent()) {
+			cannon.curAmmo++; //refill ammo
+			cannon.timerRechargeRate.reset();
 		}
 	}
 
 	private void fireCannon(TransformComponent transform, CannonComponent cannon, Entity owner) {
+		/*
+		 * Cheat for debug:
+		 * fast firing and infinite ammo
+		 */
+		boolean cheat = false;
+		if (cheat) {
+			cannon.curAmmo = cannon.maxAmmo;
+			cannon.timerFireRate.setLastEvent(0);
+		}
+
 		//check if can fire before shooting
-		if (!canFire(cannon))
+		if (!(cannon.curAmmo > 0 && cannon.timerFireRate.canDoEvent()))
 			return;
+
 		
 		//reset timer if ammo is full, to prevent instant recharge
-		if (cannon.curAmmo == cannon.maxAmmo) {			
-			cannon.timeSinceRecharge = cannon.rechargeRate;
+		if (cannon.curAmmo == cannon.maxAmmo) {
+			cannon.timerRechargeRate.reset();
 		}		
 		
 		//create missile	
@@ -282,34 +301,15 @@ public class ControlSystem extends IteratingSystem {
 		--cannon.curAmmo;
 		
 		//reset timer
-		cannon.timeSinceLastShot = cannon.fireRate;
-		
-		/*
-		 * Cheat for debug:
-		 * fast firing and infinite ammo
-		 */
-		boolean cheat = false;
-		if (cheat) {
-			cannon.curAmmo++;
-			cannon.timeSinceLastShot = -1;
-		}
+		cannon.timerFireRate.reset();
 	}
 
-	/**
-	 * Check if has enough ammo and time past since last shot.
-	 * @param cannon
-	 * @return true if can fire
-	 */
-	private static boolean canFire(CannonComponent cannon) {
-		return cannon.curAmmo > 0 && cannon.timeSinceLastShot <= 0;
-	}
-	
 	
 	public void enterVehicle(Entity characterEntity, ControllableComponent control) {
 		//action timer
-		if (control.timeSinceVehicle < control.timeTillCanGetInVehicle) {
+		if (!control.timerVehicle.canDoEvent())
 			return;
-		}
+
 		control.changeVehicle = false;
 		
 		//get all vehicles and check if player is close to one(bounds overlap)
@@ -337,6 +337,9 @@ public class ControlSystem extends IteratingSystem {
 				if (characterEntity.getComponent(ControlFocusComponent.class) != null) {
 					vehicle.add(characterEntity.remove(ControlFocusComponent.class));
 				}
+				if (characterEntity.getComponent(ControllableComponent.class) != null) {
+					vehicle.add(characterEntity.remove(ControllableComponent.class));
+				}
 				
 				// remove player from engine
 				engine.removeEntity(characterEntity);
@@ -346,7 +349,7 @@ public class ControlSystem extends IteratingSystem {
 				MyScreenAdapter.setZoomTarget(1);
 				
 				
-				control.timeSinceVehicle = 0;
+				control.timerVehicle.reset();
 				
 				return;
 			}
@@ -357,10 +360,9 @@ public class ControlSystem extends IteratingSystem {
 	public void exitVehicle(Entity vehicleEntity, ControllableComponent control) {
 		
 		//action timer
-		if (control.timeSinceVehicle < control.timeTillCanGetInVehicle) {
+		if (!control.timerVehicle.canDoEvent())
 			return;
-		}
-		control.timeSinceVehicle = 0;
+
 		control.changeVehicle = false;
 		
 		Entity characterEntity = Mappers.vehicle.get(vehicleEntity).driver;
@@ -379,6 +381,9 @@ public class ControlSystem extends IteratingSystem {
 		if (vehicleEntity.getComponent(ControlFocusComponent.class) != null) {
 			characterEntity.add(vehicleEntity.remove(ControlFocusComponent.class));
 		}
+		if (vehicleEntity.getComponent(ControllableComponent.class) != null) {
+			characterEntity.add(vehicleEntity.remove(ControllableComponent.class));
+		}
 		
 		// remove references
 		Mappers.character.get(characterEntity).vehicle = null;
@@ -389,6 +394,7 @@ public class ControlSystem extends IteratingSystem {
 		
 		// zoom in camera
 		MyScreenAdapter.setZoomTarget(0.5f);
-		
+
+		control.timerVehicle.reset();
 	}
 }

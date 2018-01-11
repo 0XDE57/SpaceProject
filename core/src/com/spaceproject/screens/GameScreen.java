@@ -7,6 +7,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Application.ApplicationType;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector3;
@@ -40,6 +41,7 @@ import com.spaceproject.systems.SpaceRenderingSystem;
 import com.spaceproject.systems.WorldRenderingSystem;
 import com.spaceproject.systems.WorldWrapSystem;
 import com.spaceproject.utility.MyScreenAdapter;
+import com.spaceproject.utility.SimpleTimer;
 
 public class GameScreen extends MyScreenAdapter {
 
@@ -219,6 +221,7 @@ public class GameScreen extends MyScreenAdapter {
 		//DebugUISystem.printSystems(engine);
 	}
 
+
 	@Override
 	public void render(float delta) {
 		super.render(delta);
@@ -231,10 +234,7 @@ public class GameScreen extends MyScreenAdapter {
 			DebugUISystem.printEntities(engine);
 		}
 
-		//if (Gdx.input.isKeyJustPressed(Keys.H)) { transition = true; }
-		if (Gdx.input.isKeyJustPressed(Keys.B)) {
-			batch.setShader(null);
-		}
+
 		if (transition) {
 			transition = false;
 
@@ -247,6 +247,23 @@ public class GameScreen extends MyScreenAdapter {
 			}
 
 		}
+
+		if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
+			if (HUDSystem.drawSpaceMap) {
+				HUDSystem.spaceMapScale = 500;
+			}
+		}
+	}
+
+	@Override
+	public boolean scrolled(int amount) {
+		if (HUDSystem.drawSpaceMap) {
+			HUDSystem.spaceMapScale += amount*20;
+			return false;
+		} else {
+			return super.scrolled(amount);
+		}
+
 	}
 
 	@Override

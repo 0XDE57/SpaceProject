@@ -64,7 +64,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	private boolean drawBounds = false;
 	private boolean drawOrbitPath = false;
 	private boolean drawVectors = false;
-	private boolean drawMousePos = false;
+	private boolean drawMousePos = true;
 	
 	
 	public DebugUISystem() {

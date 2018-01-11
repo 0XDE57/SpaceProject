@@ -6,7 +6,6 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -44,6 +43,7 @@ public class HUDSystem extends EntitySystem {
 	private boolean drawHud = true;
 	private boolean drawEdgeMap = true;
 	public static boolean drawSpaceMap = false;
+	public static float spaceMapScale = 500;
 	
 	float opacity = 0.7f;
 	Color barBackground = new Color(1,1,1,0.5f);
@@ -232,7 +232,7 @@ public class HUDSystem extends EntitySystem {
 		int height = Gdx.graphics.getHeight();	
 		int centerX = width/2;
 		int centerY = height/2;
-		int verticleEdge = (height - padding * 2) / 2;
+		int verticalEdge = (height - padding * 2) / 2;
 		int horizontalEdge = (width - padding * 2) / 2;		
 		
 		for (Entity mapable : mapableObjects) {
@@ -263,12 +263,12 @@ public class HUDSystem extends EntitySystem {
 			//calculate where to position the marker
 			if (screenPos.y < 0) {
 				//top
-				markerX = -verticleEdge/slope;
-				markerY = -verticleEdge;
+				markerX = -verticalEdge/slope;
+				markerY = -verticalEdge;
 			} else {
 				//bottom
-				markerX = verticleEdge/slope;
-				markerY = verticleEdge;
+				markerX = verticalEdge/slope;
+				markerY = verticalEdge;
 			}
 			
 			if (markerX < -horizontalEdge) {
@@ -323,27 +323,34 @@ public class HUDSystem extends EntitySystem {
 		*/
 	}
 	
-	private float scale = 500;
+
 	private void drawSpaceMap() {
-		if (Gdx.input.isKeyPressed(Keys.I)) scale++;
-		if (Gdx.input.isKeyPressed(Keys.O)) scale--;
-		if (scale < 1) scale = 1;
+		if (spaceMapScale < 1) spaceMapScale = 1;
 		int edgePad = 30;
-		int size = 5;
-		Rectangle r = new Rectangle(edgePad, edgePad, Gdx.graphics.getWidth() - edgePad*2, Gdx.graphics.getHeight() - edgePad*2);
+		int size = 6;
+		Rectangle mapBacking = new Rectangle(edgePad, edgePad, Gdx.graphics.getWidth() - edgePad*2, Gdx.graphics.getHeight() - edgePad*2);
 		
-		shape.setColor(0, 1, 1, 0.5f);
-		shape.rect(r.x, r.y, r.width, r.height);
+		shape.setColor(1, 1, 1, 0.5f);
+		shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, mapBacking.height);
 		
 		shape.setColor(1, 1, 0, 1);
 		for (Vector2 p : engine.getSystem(SpaceLoadingSystem.class).getPoints()) {
-			float x = ((p.x-MyScreenAdapter.cam.position.x)/scale)+Gdx.graphics.getWidth()/2;
-			float y = ((p.y-MyScreenAdapter.cam.position.y)/scale)+Gdx.graphics.getHeight()/2;
+			float x = ((p.x-MyScreenAdapter.cam.position.x)/ spaceMapScale)+Gdx.graphics.getWidth()/2;
+			float y = ((p.y-MyScreenAdapter.cam.position.y)/ spaceMapScale)+Gdx.graphics.getHeight()/2;
 			
 			
-			if (r.contains(x, y)) shape.circle(x, y, size);
+			if (mapBacking.contains(x, y)) shape.circle(x, y, size);
 
 		}
+
+
+		int borderWidth = 3;
+		shape.setColor(0.5f,0.5f,0.5f,1f);
+		shape.rect(mapBacking.x, mapBacking.height+mapBacking.y-borderWidth, mapBacking.width, borderWidth);//top
+		shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, borderWidth);//bottom
+		shape.rect(mapBacking.x, mapBacking.y, borderWidth, mapBacking.height);//left
+		shape.rect(mapBacking.width+mapBacking.x-borderWidth, mapBacking.y, borderWidth, mapBacking.height);//right
+
 		//screenPos.x -= MyScreenAdapter.cam.position.x;
 		//screenPos.y -= MyScreenAdapter.cam.position.y;
 		//Vector2 t = new Vector2(700,700);

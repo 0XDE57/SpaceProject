@@ -1,6 +1,7 @@
 package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
+import com.spaceproject.utility.SimpleTimer;
 
 public class ControllableComponent implements Component {
 	
@@ -20,7 +21,6 @@ public class ControllableComponent implements Component {
 	public boolean canTransition;
 	
 	//timers
-	public float timeSinceVehicle;
-	public int timeTillCanGetInVehicle = 60;
-	
+	public SimpleTimer timerVehicle;// = new SimpleTimer(1500);
+	public SimpleTimer timerDodge;// = new SimpleTimer(500);
 }

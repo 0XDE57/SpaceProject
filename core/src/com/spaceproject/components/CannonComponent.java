@@ -1,6 +1,7 @@
 package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
+import com.spaceproject.utility.SimpleTimer;
 
 public class CannonComponent implements Component {
 	
@@ -15,13 +16,9 @@ public class CannonComponent implements Component {
 	public float acceleration;
 	
 	public int size;
-	
-	public float fireRate;
-	
-	public float timeSinceLastShot;
-	
-	public float rechargeRate;
-	
-	public float timeSinceRecharge;
+
+	//timers
+	public SimpleTimer timerFireRate;
+	public SimpleTimer timerRechargeRate;
 	
 }
