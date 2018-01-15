@@ -4,7 +4,9 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
 
 public class VehicleComponent implements Component {
-	
+
+
+
 	public Entity driver;
 	
 	// seed that generated ship
@@ -18,4 +20,5 @@ public class VehicleComponent implements Component {
 	
 	// maximum speed vehicle can achieve
 	public float maxSpeed;
+	public final int NOLIMIT = -1;//no max speed/infinite
 }

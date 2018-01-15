@@ -17,6 +17,8 @@ public class OrbitSystem extends IteratingSystem {
 
 	@Override
 	protected void processEntity(Entity entity, float delta) {
+		//TODO: switch to time based orbit so planets still "move" while on a world.
+		//take off system will have to go from planet ID/seed instead of saved x,y pos (this broken already)
 
 		OrbitComponent orbit = Mappers.orbit.get(entity);
 		TransformComponent position = Mappers.transform.get(entity);		

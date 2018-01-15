@@ -22,19 +22,20 @@ import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.generation.FontFactory;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.MyScreenAdapter;
 
 public class HUDSystem extends EntitySystem {
-	
+
+	private Engine engine;
+
 	//rendering
 	private static OrthographicCamera cam;
 	private Matrix4 projectionMatrix = new Matrix4();	
 	private ShapeRenderer shape = new ShapeRenderer();
-	
-	private Engine engine;
-	
+
 	//entity storage
 	private ImmutableArray<Entity> mapableObjects;
 	private ImmutableArray<Entity> player;
@@ -42,7 +43,7 @@ public class HUDSystem extends EntitySystem {
 	
 	private boolean drawHud = true;
 	private boolean drawEdgeMap = true;
-	public static boolean drawSpaceMap = false;
+	public static boolean drawSpaceMap = true;
 	public static float spaceMapScale = 500;
 	
 	float opacity = 0.7f;
@@ -326,15 +327,38 @@ public class HUDSystem extends EntitySystem {
 
 	private void drawSpaceMap() {
 		if (spaceMapScale < 1) spaceMapScale = 1;
+
+		int chunkSize = 1000;//(int)Math.pow(2,18-1);
+		int scaleChunk = chunkSize/(int)spaceMapScale;
 		int edgePad = 30;
+		int borderWidth = 3;
 		int size = 6;
 		Rectangle mapBacking = new Rectangle(edgePad, edgePad, Gdx.graphics.getWidth() - edgePad*2, Gdx.graphics.getHeight() - edgePad*2);
 		
 		shape.setColor(1, 1, 1, 0.5f);
 		shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, mapBacking.height);
-		
+		shape.setColor(0.5f,0.5f,0.5f,1f);
+		shape.rect(mapBacking.x, mapBacking.height+mapBacking.y-borderWidth, mapBacking.width, borderWidth);//top
+		shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, borderWidth);//bottom
+		shape.rect(mapBacking.x, mapBacking.y, borderWidth, mapBacking.height);//left
+		shape.rect(mapBacking.width+mapBacking.x-borderWidth, mapBacking.y, borderWidth, mapBacking.height);//right
+
+		/*
+		shape.setColor(1f,0.2f,0.2f,1f);
+		int chunkX = (int)MyScreenAdapter.cam.position.x/chunkSize;
+		int ccX = (int)MyScreenAdapter.cam.position.x % chunkSize;
+		System.out.println(chunkX+", "+ ccX);
+		for (int cx = (int)(MyScreenAdapter.cam.position.x-mapBacking.x); cx < (int)(MyScreenAdapter.cam.position.x-mapBacking.x+mapBacking.width); cx+=scaleChunk) {
+			//				30-MyScreenAdapter.cam.position.x
+			float finalX = (0 -MyScreenAdapter.cam.position.x)/ spaceMapScale +Gdx.graphics.getWidth()/2;
+			shape.rect(finalX, mapBacking.y, 1, mapBacking.height);//left
+		}
+		System.out.println("---"+ccX);
+		*/
+
 		shape.setColor(1, 1, 0, 1);
 		for (Vector2 p : engine.getSystem(SpaceLoadingSystem.class).getPoints()) {
+			// n = relative pos / scale + mapPos
 			float x = ((p.x-MyScreenAdapter.cam.position.x)/ spaceMapScale)+Gdx.graphics.getWidth()/2;
 			float y = ((p.y-MyScreenAdapter.cam.position.y)/ spaceMapScale)+Gdx.graphics.getHeight()/2;
 			
@@ -344,12 +368,8 @@ public class HUDSystem extends EntitySystem {
 		}
 
 
-		int borderWidth = 3;
-		shape.setColor(0.5f,0.5f,0.5f,1f);
-		shape.rect(mapBacking.x, mapBacking.height+mapBacking.y-borderWidth, mapBacking.width, borderWidth);//top
-		shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, borderWidth);//bottom
-		shape.rect(mapBacking.x, mapBacking.y, borderWidth, mapBacking.height);//left
-		shape.rect(mapBacking.width+mapBacking.x-borderWidth, mapBacking.y, borderWidth, mapBacking.height);//right
+
+
 
 		//screenPos.x -= MyScreenAdapter.cam.position.x;
 		//screenPos.y -= MyScreenAdapter.cam.position.y;

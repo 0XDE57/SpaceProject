@@ -28,7 +28,6 @@ public class SpaceProject extends Game {
 	
 		boolean inSpace = true;
 		setScreen(new GameScreen(inSpace));
-		//setScreen(new ArbitraryQuadrilateralsActivity());
 		//setScreen(new TestShipGenerationScreen(this));
 		//setScreen(new TestNoiseScreen(this));
 		//setScreen(new TestVoronoiScreen());

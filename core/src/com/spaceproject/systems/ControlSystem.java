@@ -260,7 +260,7 @@ public class ControlSystem extends IteratingSystem {
 		//transform.accel.add(dx,dy);//????
 		
 		//cap speed at max. if maxSpeed set to -1 it's infinite(no cap)
-		if (vehicle.maxSpeed != -1)
+		if (vehicle.maxSpeed != vehicle.NOLIMIT)
 			transform.velocity.clamp(0, vehicle.maxSpeed);
 	}
 

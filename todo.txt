@@ -21,10 +21,13 @@
 [ ] simple scripting? text file of commands for creating entities and printing story text?
 [ ] multiplayer/networking...or just commit suicide
 [...] rotating sprites/textures on 3d/w axis
+    https://xoppa.github.io/blog/a-simple-card-game/
+    https://stackoverflow.com/questions/28290428/implementing-trapezoidal-sprites-in-libgdx
     https://stackoverflow.com/questions/12414708/correct-glsl-affine-texture-mapping
     https://bitlush.com/blog/arbitrary-quadrilaterals-in-opengl-es-2-0
     https://gamedev.stackexchange.com/questions/46429/how-to-draw-a-trapezoid-in-opengl
     https://github.com/bitlush/android-arbitrary-quadrilaterals-in-opengl-es-2-0
+    http://www.glprogramming.com/red/chapter09.html
 
 ---DEBUG---
 [ ] in game console
