@@ -327,35 +327,49 @@ public class HUDSystem extends EntitySystem {
 
 	private void drawSpaceMap() {
 		if (spaceMapScale < 1) spaceMapScale = 1;
+		//TODO:
+		//[...] simplify grid calculation
+		//[ ] make map item relative to middle of map instead of middle of screen(Gdx.graphics.getWidth()/2), verify with small non-centered map
+		//[ ] draw grid pos
 
-		int chunkSize = 1000;//(int)Math.pow(2,18-1);
+		int chunkSize = 10000;//(int)Math.pow(2,18-1);
 		int scaleChunk = chunkSize/(int)spaceMapScale;
-		int edgePad = 30;
+		int edgePad = 50;
 		int borderWidth = 3;
 		int size = 6;
 		Rectangle mapBacking = new Rectangle(edgePad, edgePad, Gdx.graphics.getWidth() - edgePad*2, Gdx.graphics.getHeight() - edgePad*2);
-		
-		shape.setColor(1, 1, 1, 0.5f);
+
+		//draw backing
+		shape.setColor(0, 0, 0, 0.8f);
 		shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, mapBacking.height);
-		shape.setColor(0.5f,0.5f,0.5f,1f);
-		shape.rect(mapBacking.x, mapBacking.height+mapBacking.y-borderWidth, mapBacking.width, borderWidth);//top
-		shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, borderWidth);//bottom
-		shape.rect(mapBacking.x, mapBacking.y, borderWidth, mapBacking.height);//left
-		shape.rect(mapBacking.width+mapBacking.x-borderWidth, mapBacking.y, borderWidth, mapBacking.height);//right
 
-		/*
+
+		//draw mouse pos
 		shape.setColor(1f,0.2f,0.2f,1f);
-		int chunkX = (int)MyScreenAdapter.cam.position.x/chunkSize;
-		int ccX = (int)MyScreenAdapter.cam.position.x % chunkSize;
-		System.out.println(chunkX+", "+ ccX);
-		for (int cx = (int)(MyScreenAdapter.cam.position.x-mapBacking.x); cx < (int)(MyScreenAdapter.cam.position.x-mapBacking.x+mapBacking.width); cx+=scaleChunk) {
-			//				30-MyScreenAdapter.cam.position.x
-			float finalX = (0 -MyScreenAdapter.cam.position.x)/ spaceMapScale +Gdx.graphics.getWidth()/2;
-			shape.rect(finalX, mapBacking.y, 1, mapBacking.height);//left
+		if (mapBacking.contains(Gdx.input.getX(), Gdx.input.getY())) {
+			shape.line(mapBacking.y, Gdx.graphics.getHeight()-Gdx.input.getY(), mapBacking.y+mapBacking.width, Gdx.graphics.getHeight()-Gdx.input.getY());//horizontal
+			shape.line(Gdx.input.getX(), mapBacking.x, Gdx.input.getX(), mapBacking.x+mapBacking.height);//vertical
 		}
-		System.out.println("---"+ccX);
-		*/
 
+
+		//draw grid X
+		shape.setColor(0.2f,0.2f,0.2f,0.8f);
+		int startX = (int)(((mapBacking.x-Gdx.graphics.getWidth()/2)*spaceMapScale)+MyScreenAdapter.cam.position.x)/chunkSize;
+		int endX = (int)(((mapBacking.x+mapBacking.width-Gdx.graphics.getWidth()/2)*spaceMapScale)+MyScreenAdapter.cam.position.x)/chunkSize;
+		for (int i = startX; i < endX+1; i++) {
+			float finalX = ((i*chunkSize)-MyScreenAdapter.cam.position.x )/ spaceMapScale +Gdx.graphics.getWidth()/2;
+			shape.rect(finalX, mapBacking.y, 1, mapBacking.height);
+		}
+		//draw grid Y
+		int startY = (int)(((mapBacking.y-Gdx.graphics.getHeight()/2)*spaceMapScale)+MyScreenAdapter.cam.position.y)/chunkSize;
+		int endY = (int)(((mapBacking.y+mapBacking.height-Gdx.graphics.getHeight()/2)*spaceMapScale)+MyScreenAdapter.cam.position.y)/chunkSize;
+		for (int i = startY; i < endY+1; i++) {
+			float finalY = ((i*chunkSize)-MyScreenAdapter.cam.position.y )/ spaceMapScale +Gdx.graphics.getHeight()/2;
+			shape.rect(mapBacking.x, finalY, mapBacking.width, 1);
+		}
+
+
+		//draw map objects
 		shape.setColor(1, 1, 0, 1);
 		for (Vector2 p : engine.getSystem(SpaceLoadingSystem.class).getPoints()) {
 			// n = relative pos / scale + mapPos
@@ -368,13 +382,12 @@ public class HUDSystem extends EntitySystem {
 		}
 
 
-
-
-
-		//screenPos.x -= MyScreenAdapter.cam.position.x;
-		//screenPos.y -= MyScreenAdapter.cam.position.y;
-		//Vector2 t = new Vector2(700,700);
-		//shape.circle((t.x-MyScreenAdapter.cam.position.x)+Gdx.graphics.getWidth()/2, (t.x-MyScreenAdapter.cam.position.y)+Gdx.graphics.getHeight()/2, 10);
+		//draw border
+		shape.setColor(0.6f,0.6f,0.6f,1f);
+		shape.rect(mapBacking.x, mapBacking.height+mapBacking.y-borderWidth, mapBacking.width, borderWidth);//top
+		shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, borderWidth);//bottom
+		shape.rect(mapBacking.x, mapBacking.y, borderWidth, mapBacking.height);//left
+		shape.rect(mapBacking.width+mapBacking.x-borderWidth, mapBacking.y, borderWidth, mapBacking.height);//right
 	}
 	
 }
