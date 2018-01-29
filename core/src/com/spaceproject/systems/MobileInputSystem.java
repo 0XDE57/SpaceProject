@@ -58,7 +58,7 @@ public class MobileInputSystem extends EntitySystem {
 		control.changeVehicle = btnVehicle.isJustTouched();
 		control.transition = btnLand.isTouched();
 		if (btnMap.isJustTouched()) {
-			HUDSystem.drawSpaceMap = !HUDSystem.drawSpaceMap;
+			HUDSystem.CycleMapState();
 		}
 		btnLand.hidden = !control.canTransition;
 		

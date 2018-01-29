@@ -80,6 +80,7 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
 	research planet attributes //size, temperature, pressure, atmosphere, elements...etc
 	rings around planets? (like saturn)
 	moons/satelites
+	http://www.entropicparticles.com/6-days-of-creation/
 	https://plaxdev.wordpress.com/2017/05/04/procedurally-generating-islands/
 	https://www.reddit.com/search?q=%28perlin|simplex|opensimplex%29+noise&sort=new
 	http://ronvalstar.nl/creating-tileable-noise-maps/ <--looping noise
@@ -121,6 +122,7 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
 	https://www.shadertoy.com/view/XscGzl <--use for stars
 	http://www.alanzucconi.com/2015/07/01/vertex-and-fragment-shaders-in-unity3d/
 	http://www.alanzucconi.com/2016/01/27/arrays-shaders-heatmaps-in-unity3d/
+	http://wwwtyro.net/2016/10/22/2D-space-scene-procgen.html
 [ ] basic light?
 [ ] fractals
 

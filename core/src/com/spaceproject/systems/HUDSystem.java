@@ -22,7 +22,6 @@ import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.generation.FontFactory;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.MyScreenAdapter;
@@ -43,7 +42,13 @@ public class HUDSystem extends EntitySystem {
 	
 	private boolean drawHud = true;
 	private boolean drawEdgeMap = true;
-	public static boolean drawSpaceMap = true;
+	public static MapState drawMap = MapState.off;
+	public enum MapState {
+		full,
+		mini,
+		off
+	}
+
 	public static float spaceMapScale = 500;
 	
 	float opacity = 0.7f;
@@ -64,6 +69,14 @@ public class HUDSystem extends EntitySystem {
 		player = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
 		killables = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(CameraFocusComponent.class).get());
 	}
+
+	public static void CycleMapState() {
+		switch (drawMap) {
+			case full: drawMap = MapState.mini; break;
+			case mini: drawMap = MapState.off; break;
+			case off: drawMap = MapState.full; break;
+		}
+	}
 	
 	@Override
 	public void update(float delta) {
@@ -73,11 +86,12 @@ public class HUDSystem extends EntitySystem {
 		}
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleEdgeMap)) {
 			drawEdgeMap = !drawEdgeMap;
-			System.out.println("Edge map: " + drawEdgeMap);
+			System.out.println("Edge drawMap: " + drawEdgeMap);
 		}
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleSpaceMap)) {
-			drawSpaceMap = !drawSpaceMap;
-			System.out.println("Space map: " + drawSpaceMap);
+			//drawSpaceMap = !drawSpaceMap;
+			CycleMapState();
+			System.out.println("Space drawMap: " + drawMap);
 		}
 		
 		if (!drawHud) return;
@@ -96,7 +110,8 @@ public class HUDSystem extends EntitySystem {
 		
 		if (drawEdgeMap) drawEdgeMap();
 		
-		if (drawSpaceMap) drawSpaceMap();
+		//if (drawSpaceMap)
+		drawSpaceMap();
 		
 		drawHealthBars();
 		
@@ -216,7 +231,7 @@ public class HUDSystem extends EntitySystem {
 
 	/**
 	 * Mark off-screen objects on edge of screen for navigation.
-	 * TODO: load star map markers based on point list instead of star entity for stars that aren't loaded yet
+	 * TODO: load star drawMap markers based on point list instead of star entity for stars that aren't loaded yet
 	 */
 	private void drawEdgeMap() {
 		//TODO: move these values into MapComponent
@@ -224,7 +239,7 @@ public class HUDSystem extends EntitySystem {
 		float markerLarge = 8; //max marker size
 		float distSmall = 8000; //distance when marker is small
 		float distLarge = 2000; //distance when marker is large
-		//gain and offset for transfer function: map [3.5 - 8] to [8000 - 2000]
+		//gain and offset for transfer function: drawMap [3.5 - 8] to [8000 - 2000]
 		double gain = (markerSmall-markerLarge)/(distSmall-distLarge);
 		double offset = markerSmall - gain * distSmall;
 		
@@ -297,7 +312,7 @@ public class HUDSystem extends EntitySystem {
 			shape.circle(markerX, markerY, (float)size);
 			
 			/*
-			switch(map.shape) {
+			switch(drawMap.shape) {
 				case circle: shape.circle(markerX, markerY, (float)size);
 				case square: shape.rect
 				case triangle: shape.poly
@@ -327,17 +342,57 @@ public class HUDSystem extends EntitySystem {
 
 	private void drawSpaceMap() {
 		if (spaceMapScale < 1) spaceMapScale = 1;
+
+		if (drawMap == MapState.off)
+			return;
+
 		//TODO:
+		//[...] fix minimap
 		//[...] simplify grid calculation
-		//[ ] make map item relative to middle of map instead of middle of screen(Gdx.graphics.getWidth()/2), verify with small non-centered map
+		//[ ] make drawMap item relative to middle of drawMap instead of middle of screen(Gdx.graphics.getWidth()/2), verify with small non-centered drawMap
 		//[ ] draw grid pos
 
-		int chunkSize = 10000;//(int)Math.pow(2,18-1);
-		int scaleChunk = chunkSize/(int)spaceMapScale;
-		int edgePad = 50;
+		int chunkSize = (int) Math.pow(2, 17 - 1);
 		int borderWidth = 3;
 		int size = 6;
-		Rectangle mapBacking = new Rectangle(edgePad, edgePad, Gdx.graphics.getWidth() - edgePad*2, Gdx.graphics.getHeight() - edgePad*2);
+
+
+		Rectangle mapBacking;
+		if (drawMap == MapState.full) {
+			int edgePad = 50;
+			mapBacking = new Rectangle(edgePad, edgePad, Gdx.graphics.getWidth() - edgePad * 2, Gdx.graphics.getHeight() - edgePad * 2);
+		} else {
+			int miniWidth = 320;
+			int miniHeight = 240;
+			/*
+			//top-right
+			mapBacking = new Rectangle(
+					Gdx.graphics.getWidth() - miniWidth-10,
+					Gdx.graphics.getHeight() - miniHeight-10,
+					miniWidth,
+					miniHeight); */
+
+			//bottom-left
+			mapBacking = new Rectangle(
+					Gdx.graphics.getWidth() - miniWidth-10,
+					10,
+					miniWidth,
+					miniHeight);
+			/*
+			//bottom-right
+			mapBacking = new Rectangle(
+					10,
+					10,
+					miniWidth,
+					miniHeight); */
+		}
+
+
+
+		float centerX = mapBacking.x + mapBacking.width/2;
+		float centerY = mapBacking.y + mapBacking.height/2;
+		float offX = (mapBacking.x + mapBacking.width/2);
+		float offY = (mapBacking.y + mapBacking.height/2);
 
 		//draw backing
 		shape.setColor(0, 0, 0, 0.8f);
@@ -346,7 +401,9 @@ public class HUDSystem extends EntitySystem {
 
 		//draw mouse pos
 		shape.setColor(1f,0.2f,0.2f,1f);
-		if (mapBacking.contains(Gdx.input.getX(), Gdx.input.getY())) {
+		int mX = Gdx.input.getX();
+		int mY = Gdx.graphics.getHeight()-Gdx.input.getY();
+		if (mX > mapBacking.x && mX < mapBacking.x+mapBacking.width && mY > mapBacking.y && mY < mapBacking.y+mapBacking.height) {
 			shape.line(mapBacking.y, Gdx.graphics.getHeight()-Gdx.input.getY(), mapBacking.y+mapBacking.width, Gdx.graphics.getHeight()-Gdx.input.getY());//horizontal
 			shape.line(Gdx.input.getX(), mapBacking.x, Gdx.input.getX(), mapBacking.x+mapBacking.height);//vertical
 		}
@@ -369,12 +426,12 @@ public class HUDSystem extends EntitySystem {
 		}
 
 
-		//draw map objects
+		//draw drawMap objects
 		shape.setColor(1, 1, 0, 1);
 		for (Vector2 p : engine.getSystem(SpaceLoadingSystem.class).getPoints()) {
 			// n = relative pos / scale + mapPos
-			float x = ((p.x-MyScreenAdapter.cam.position.x)/ spaceMapScale)+Gdx.graphics.getWidth()/2;
-			float y = ((p.y-MyScreenAdapter.cam.position.y)/ spaceMapScale)+Gdx.graphics.getHeight()/2;
+			float x = ((p.x-MyScreenAdapter.cam.position.x)/ spaceMapScale) + (mapBacking.x + mapBacking.width/2);//+Gdx.graphics.getWidth()/2;
+			float y = ((p.y-MyScreenAdapter.cam.position.y)/ spaceMapScale) + (mapBacking.y + mapBacking.height/2);//+Gdx.graphics.getHeight()/2;
 			
 			
 			if (mapBacking.contains(x, y)) shape.circle(x, y, size);

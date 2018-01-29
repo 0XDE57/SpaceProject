@@ -170,7 +170,7 @@ public class TextureFactory {
 			pixmap.setColor(1, 1, 1, 1);
 			//pixmap.fill();
 
-			// corner pins for visual aid----------------
+			// mini pins for visual aid----------------
 			pixmap.setColor(1, 0, 0, 1);// red: top-right
 			pixmap.drawPixel(0, 0);
 

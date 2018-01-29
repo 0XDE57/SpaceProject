@@ -41,7 +41,6 @@ import com.spaceproject.systems.SpaceRenderingSystem;
 import com.spaceproject.systems.WorldRenderingSystem;
 import com.spaceproject.systems.WorldWrapSystem;
 import com.spaceproject.utility.MyScreenAdapter;
-import com.spaceproject.utility.SimpleTimer;
 
 public class GameScreen extends MyScreenAdapter {
 
@@ -119,7 +118,7 @@ public class GameScreen extends MyScreenAdapter {
 		ship.getComponent(TransformComponent.class).pos.x = landCFG.position.x;
 		ship.getComponent(TransformComponent.class).pos.y = landCFG.position.y;
 		engine.addEntity(ship);
-		//System.out.println("ship: " + String.format("%X", ship.hashCode()));
+		//System.out.println("shipTex: " + String.format("%X", shipTex.hashCode()));
 		
 		
 		//===============SYSTEMS===============
@@ -173,11 +172,11 @@ public class GameScreen extends MyScreenAdapter {
 		int position = landCFG.planet.mapSize * SpaceProject.tileSize / 2;//set  position to middle of planet
 		ship.getComponent(TransformComponent.class).pos.x = position;
 		ship.getComponent(TransformComponent.class).pos.y = position;
-		//ship.add(new ControllableComponent());
-		//ship.add(new CameraFocusComponent());
+		//shipTex.add(new ControllableComponent());
+		//shipTex.add(new CameraFocusComponent());
 		ship.add(new ControlFocusComponent());
 		engine.addEntity(ship);
-		//System.out.println("ship: " + String.format("%X", ship.hashCode()));
+		//System.out.println("shipTex: " + String.format("%X", shipTex.hashCode()));
 
 		
 
@@ -249,7 +248,7 @@ public class GameScreen extends MyScreenAdapter {
 		}
 
 		if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
-			if (HUDSystem.drawSpaceMap) {
+			if (HUDSystem.drawMap != HUDSystem.MapState.off) {
 				HUDSystem.spaceMapScale = 500;
 			}
 		}
@@ -257,7 +256,7 @@ public class GameScreen extends MyScreenAdapter {
 
 	@Override
 	public boolean scrolled(int amount) {
-		if (HUDSystem.drawSpaceMap) {
+		if (HUDSystem.drawMap == HUDSystem.MapState.full) {
 			HUDSystem.spaceMapScale += amount*20;
 			return false;
 		} else {

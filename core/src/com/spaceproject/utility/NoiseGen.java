@@ -15,7 +15,7 @@ public class NoiseGen {
 		
 		OpenSimplexNoise noise = new OpenSimplexNoise(seed);	
 		
-		//generate single layer map
+		//generate single layer drawMap
 		for (int y = 0; y < mapSize; ++y) {
 			for (int x = 0; x < mapSize; ++x) {
 				
@@ -36,11 +36,11 @@ public class NoiseGen {
 	}
 	
 	/**
-	 * Creates a noise map in a torus so the edges wrap around.
+	 * Creates a noise drawMap in a torus so the edges wrap around.
 	 * Based off of https://www.youtube.com/watch?v=MRNFcywkUSA
 	 * TODO: scaling is incorrect in 4D implementation: stretching/curving distortion due to curvature of torus
 	 * @param seed of noise
-	 * @param size of map to generate
+	 * @param size of drawMap to generate
 	 * @param scale or zoom
 	 * @param octaves or layers of noise
 	 * @param persistence or weight of layers
@@ -81,7 +81,7 @@ public class NoiseGen {
 					frequency *= lacunarity;				
 				}
 							
-				//set map position to final noise value
+				//set drawMap position to final noise value
 				map[x][y] = noiseHeight;
 				
 				//set min and max for normalization
@@ -185,8 +185,8 @@ public class NoiseGen {
 		
 
 		/*
-		 * for (int y = 0; y < map.length; y++) { map[y][4] = 0.2f; for (int x =
-		 * 0; x < map.length; x++) {
+		 * for (int y = 0; y < drawMap.length; y++) { drawMap[y][4] = 0.2f; for (int x =
+		 * 0; x < drawMap.length; x++) {
 		 * 
 		 * } }
 		 */
@@ -198,8 +198,8 @@ public class NoiseGen {
 		ArrayList<Vector2> points = new ArrayList<Vector2>();
 		
 		
-		//int x1 = map.length/2;
-		//int y1 = map.length/2;
+		//int x1 = drawMap.length/2;
+		//int y1 = drawMap.length/2;
 		//int x2 = (int) lightPos.x;
 		//int y2 = (int) lightPos.y;
 
@@ -225,7 +225,7 @@ public class NoiseGen {
 		deltaY *= 2;
 		deltaX *= 2;
 
-		//map[x1][y1] = 1;
+		//drawMap[x1][y1] = 1;
 		points.add(new Vector2(x1, y1));
 
 		if (deltaX > deltaY) {
@@ -240,7 +240,7 @@ public class NoiseGen {
 				x1 += stepX;
 				fraction += deltaY;
 
-				//map[x1][y1] = 1;
+				//drawMap[x1][y1] = 1;
 				points.add(new Vector2(x1, y1));
 			}
 		} else {
@@ -255,7 +255,7 @@ public class NoiseGen {
 				y1 += stepY;
 				fraction += deltaX;
 
-				//map[x1][y1] = 1;
+				//drawMap[x1][y1] = 1;
 				points.add(new Vector2(x1, y1));
 			}
 		}

@@ -136,7 +136,7 @@ public class EntityFactory {
 		orbit.rotSpeed = MathUtils.random(SpaceProject.celestcfg.minStarRot, 
 				SpaceProject.celestcfg.maxStarRot); //rotation speed of star
 		
-		//map
+		//drawMap
 		MapComponent map = new MapComponent();
 		map.color = new Color(0.9f, 0.9f, 0.15f, 0.9f);
 		map.distance = 80000;
@@ -179,7 +179,7 @@ public class EntityFactory {
 		transform.pos.x = orbitX;
 		transform.pos.y = orbitY;
 		
-		//map
+		//drawMap
 		MapComponent map = new MapComponent();
 		map.color = new Color(0.15f, 0.5f, 0.9f, 0.9f);
 		map.distance = 10000;
@@ -270,7 +270,7 @@ public class EntityFactory {
 		health.health = 100;
 		health.maxHealth = health.health;
 		
-		//map
+		//drawMap
 		MapComponent map = new MapComponent();
 		map.color = new Color(1, 1, 1, 0.9f);
 		map.distance = 3000;
