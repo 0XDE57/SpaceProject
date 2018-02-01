@@ -5,19 +5,29 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
+import com.badlogic.gdx.graphics.g3d.decals.Decal;
+import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.TextureFactory;
@@ -35,9 +45,17 @@ public class Test3DScreen extends ScreenAdapter {
     Texture t = TextureFactory.generateCharacter();
     Texture tile = TextureFactory.createTile(Color.MAGENTA);
     Texture shipTex = TextureFactory.generateShip(123, 20);
+    Texture test = TextureFactory.createTestTile();
     Thing ship3d;
+
+    public Model model;
+    public ModelInstance instance;
+
+
+    DecalBatch decalBatch;
+    Decal shipDecal;
     public Test3DScreen() {
-        cam.position.set(0, 0, 350);
+        cam.position.set(0, 0, 150/*350*/);
         cam.lookAt(0, 0, 0);
         //cam.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         cam.near = 0.1f;
@@ -48,6 +66,21 @@ public class Test3DScreen extends ScreenAdapter {
         Sprite sprite = new Sprite();
         sprite.setTexture(shipTex);
         ship3d = new Thing(sprite, sprite);
+
+        ModelBuilder modelBuilder = new ModelBuilder();
+        /*Material testmat = new Material(
+                TextureAttribute.createDiffuse(shipTex),
+                new BlendingAttribute(false, 1f),
+                FloatAttribute.createAlphaTest(0.5f)
+        );*/
+        model = modelBuilder.createBox(10f, 10f, 10f,
+                new Material(TextureAttribute.createDiffuse(test)),
+                VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
+        instance = new ModelInstance(model);
+
+
+        decalBatch = new DecalBatch(new CameraGroupStrategy(cam));
+        shipDecal = Decal.newDecal(new TextureRegion(shipTex));
     }
 
     @Override
@@ -119,12 +152,20 @@ public class Test3DScreen extends ScreenAdapter {
 
         batch.end();
 
-
+        instance.transform.rotate(Vector3.Y, 90 * delta);
         ship3d.worldTransform.translate(0, 0, 0);
         //ship3d.worldTransform.rotate(Vector3.Y, 90 * delta);
         modelBatch.begin(cam);
-        modelBatch.render(ship3d);
+        //modelBatch.render(instance);
+       // modelBatch.render(ship3d);
         modelBatch.end();
+
+        shipDecal.setPosition(5, 5, 0);
+        shipDecal.rotateX(shipDecal.getX() + 1f);
+        shipDecal.rotateY(shipDecal.getY() + 1f);
+        shipDecal.rotateZ(shipDecal.getZ() + 1f);
+        decalBatch.add(shipDecal);
+        decalBatch.flush();
         //cam.update();
     }
 

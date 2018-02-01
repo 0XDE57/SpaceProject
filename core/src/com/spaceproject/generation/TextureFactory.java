@@ -26,6 +26,17 @@ public class TextureFactory {
 		pixmap.dispose();
 		return tex;
 	}
+
+	public static Texture createTestTile(){
+		pixmap = new Pixmap(4,4,Format.RGB888);
+		pixmap.drawPixel(0,0, Color.RED.toIntBits());
+		pixmap.drawPixel(0,1, Color.YELLOW.toIntBits());
+		pixmap.drawPixel(1,0, Color.BLUE.toIntBits());
+		pixmap.drawPixel(1,1, Color.GREEN.toIntBits());
+		Texture tex = new Texture(pixmap);
+		pixmap.dispose();
+		return tex;
+	}
 	
 	static OpenSimplexNoise opacityGen = new OpenSimplexNoise(SpaceProject.SEED);
 	static OpenSimplexNoise redGen = new OpenSimplexNoise(SpaceProject.SEED + 1);
