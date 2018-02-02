@@ -5,7 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
@@ -20,7 +19,6 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
@@ -28,9 +26,11 @@ import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.utility.MyMath;
 
 
 public class Test3DScreen extends ScreenAdapter {
@@ -53,7 +53,7 @@ public class Test3DScreen extends ScreenAdapter {
 
 
     DecalBatch decalBatch;
-    Decal shipDecal;
+    Decal shipDecalA, shipDecalB, shipDecalC, shipDecalD;
     public Test3DScreen() {
         cam.position.set(0, 0, 150/*350*/);
         cam.lookAt(0, 0, 0);
@@ -80,9 +80,13 @@ public class Test3DScreen extends ScreenAdapter {
 
 
         decalBatch = new DecalBatch(new CameraGroupStrategy(cam));
-        shipDecal = Decal.newDecal(new TextureRegion(shipTex));
+        shipDecalA = Decal.newDecal(new TextureRegion(shipTex));
+        shipDecalB = Decal.newDecal(new TextureRegion(shipTex));
+        shipDecalC = Decal.newDecal(new TextureRegion(shipTex));
+        shipDecalD = Decal.newDecal(new TextureRegion(shipTex));
     }
 
+    float rotX = 0, rotY = 0, rotZ = 0;
     @Override
     public void render(float delta) {
         //Gdx.gl20.glClearColor(0,0,0,0);
@@ -135,21 +139,6 @@ public class Test3DScreen extends ScreenAdapter {
                 0, 0, (int)width, (int)height, false, false);
 
 
-        width = shipTex.getWidth();
-        height = shipTex.getHeight();
-        originX = width * 0.5f; //center
-        originY = height * 0.5f; //center
-        x = -100;
-        y = x;
-
-        //draw texture
-        batch.draw(shipTex, (x - originX), (y - originY),
-                originX, originY,
-                width, height,
-                scale, scale,
-                0,
-                0, 0, (int)width, (int)height, false, false);
-
         batch.end();
 
         instance.transform.rotate(Vector3.Y, 90 * delta);
@@ -160,11 +149,45 @@ public class Test3DScreen extends ScreenAdapter {
        // modelBatch.render(ship3d);
         modelBatch.end();
 
-        shipDecal.setPosition(5, 5, 0);
-        shipDecal.rotateX(shipDecal.getX() + 1f);
-        shipDecal.rotateY(shipDecal.getY() + 1f);
-        shipDecal.rotateZ(shipDecal.getZ() + 1f);
-        decalBatch.add(shipDecal);
+        shipDecalA.setPosition(0, 5, 0);
+        //shipDecalA.rotateX(shipDecalA.getX() + 1f);
+        //shipDecalA.rotateY(shipDecalA.getY() + 0.2f);
+        //shipDecalA.rotateZ(shipDecalA.getZ() + 1f);
+
+        shipDecalA.setRotationX(0);
+        shipDecalA.setRotationY(0);
+        shipDecalA.setRotationZ(0);
+        shipDecalA.rotateZ(MyMath.angleTo(
+                (int)shipDecalA.getPosition().x,
+                (int)shipDecalA.getPosition().y,
+                Gdx.input.getX(),
+                Gdx.graphics.getHeight()-Gdx.input.getY())*MathUtils.radDeg
+        );
+
+        //shipDecalA.rotateY(rotY+=1f);
+        if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+            rotX+=10f;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.E)) {
+            rotX-=10f;
+        }
+        shipDecalA.rotateX(rotX);
+        //shipDecalA.rotateX(rotX+=30f);
+
+
+        decalBatch.add(shipDecalA);
+
+        shipDecalB.setPosition(30, 5, 0);
+        shipDecalB.rotateX(shipDecalB.getX() + 1f);
+        decalBatch.add(shipDecalB);
+
+        shipDecalC.setPosition(60, 5, 0);
+        shipDecalC.rotateY(shipDecalC.getY() + 1f);
+        decalBatch.add(shipDecalC);
+
+        shipDecalD.setPosition(90, 5, 0);
+        shipDecalD.rotateZ(shipDecalD.getZ() + 1f);
+        decalBatch.add(shipDecalD);
         decalBatch.flush();
         //cam.update();
     }

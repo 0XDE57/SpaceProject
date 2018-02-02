@@ -12,20 +12,19 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.generation.FontFactory;
+import com.spaceproject.utility.MyScreenAdapter;
 
-public class MainMenuScreen extends ScreenAdapter {
+public class MainMenuScreen extends MyScreenAdapter {
 
 	SpaceProject game;
 
-	private SpriteBatch batch;
-	private ShapeRenderer shape;
+	//private SpriteBatch batch;
+	//private ShapeRenderer shape;
 
-	private FreeTypeFontGenerator generator;
-	private FreeTypeFontParameter parameter;
 	private BitmapFont fontComfortaaBold;
 	private BitmapFont fontComfortaaBold1;
 
-	// https://www.youtube.com/watch?v=jEmSxcr-rRc
 	// tree
 	private float length;// tree size
 	private float branchAngle;// angle to begin new branch from
@@ -40,49 +39,47 @@ public class MainMenuScreen extends ScreenAdapter {
 		this.game = spaceProject;
 
 		// graphics
-		shape = new ShapeRenderer();
-		batch = new SpriteBatch();
+		//shape = new ShapeRenderer();
+		//batch = new SpriteBatch();
 
 		switchScreen = false;
-		time = 1;
+		time = 3;
 
 		length = 15;
 		branchAngle = 33;
 		tiltAngle = 0;
 		startAngle = 90;
-		iterations = 7;
+		iterations = 8;
 
 		// font
-		generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/ComfortaaBold.ttf"));
-		parameter = new FreeTypeFontParameter();
-		parameter.size = 60;
-		fontComfortaaBold = generator.generateFont(parameter);
-		
-		parameter.size = 30;
-		fontComfortaaBold1 = generator.generateFont(parameter);
-		generator.dispose();
+		fontComfortaaBold = FontFactory.createFont(FontFactory.fontComfortaaBold, 60);
+		fontComfortaaBold1 = FontFactory.createFont(FontFactory.fontComfortaaBold, 30);
+
 
 	}
 
-	private void drawTree(ShapeRenderer g, float x22, float y22, float angle, int depth) {
+	private void drawTree(ShapeRenderer g, float x, float y, float angle, int depth) {
 		if (depth == 0) return;
 		
-		float x2 = (float) (x22 + (Math.cos(Math.toRadians(angle)) * depth * length));
-		float y2 = (float) (y22 + (Math.sin(Math.toRadians(angle)) * depth * length));
-		g.rectLine(x22, y22, x2, y2, depth);
+		float x2 = (float) (x + (Math.cos(Math.toRadians(angle)) * depth * length));
+		float y2 = (float) (y + (Math.sin(Math.toRadians(angle)) * depth * length));
+		g.rectLine(x, y, x2, y2, depth);
 		
 		drawTree(g, x2, y2, angle - branchAngle + tiltAngle, depth - 1);
 		drawTree(g, x2, y2, angle + branchAngle + tiltAngle, depth - 1);
 	}
 
 	public void render(float delta) {
+		super.render(delta);
+
 		Gdx.gl20.glClearColor(0.5f, 0.5f, 0.5f, 1);
 		if (!switchScreen)
 			Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		if (Gdx.input.justTouched())
 			switchScreen = true;
-		
+
+		cam.position.set(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2,0);
 		
 		// rotate tree
 		tiltAngle += 10 * delta;
@@ -102,16 +99,16 @@ public class MainMenuScreen extends ScreenAdapter {
 		batch.begin();
 		fontComfortaaBold.draw(batch, "a space project", 50, Gdx.graphics.getHeight() - 50);
 		//draw stats
-		fontComfortaaBold1.draw(batch, Math.round(startAngle) + " : origin angle", 50, Gdx.graphics.getHeight()/2);
-		fontComfortaaBold1.draw(batch, Math.round(tiltAngle) + " : branch angle", 50, Gdx.graphics.getHeight()/2-25);
+		//fontComfortaaBold1.draw(batch, Math.round(startAngle) + " : origin angle", 50, Gdx.graphics.getHeight()/2);
+		//fontComfortaaBold1.draw(batch, Math.round(tiltAngle) + " : branch angle", 50, Gdx.graphics.getHeight()/2-25);
 		batch.end();
 		
 		if (switchScreen) {
 			time -= 1 * delta;
 			System.out.println(time);
 			if (time < 0) {
-				dispose();
-				//game.setScreen(new SpaceScreen(game, new Vector3()));
+				//dispose();
+				game.setScreen(new GameScreen(true));
 			}
 		}
 
