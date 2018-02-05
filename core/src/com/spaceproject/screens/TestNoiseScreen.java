@@ -56,7 +56,7 @@ public class TestNoiseScreen extends MyScreenAdapter {
 	
 	int mapX, mapY;
 	
-	public TestNoiseScreen(SpaceProject space) {
+	public TestNoiseScreen() {
 		//set this as input processor for mouse wheel scroll events
 		Gdx.input.setInputProcessor(this);
 		
@@ -171,6 +171,11 @@ public class TestNoiseScreen extends MyScreenAdapter {
 		
 		if (change) {
 			updateMap();
+		}
+
+
+		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+			MyScreenAdapter.game.setScreen(new MainMenuScreen(MyScreenAdapter.game));
 		}
 			
 	}

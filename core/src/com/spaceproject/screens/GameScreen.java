@@ -252,6 +252,10 @@ public class GameScreen extends MyScreenAdapter {
 				HUDSystem.spaceMapScale = 500;
 			}
 		}
+
+		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+			game.setScreen(new MainMenuScreen(game));
+		}
 	}
 
 	@Override

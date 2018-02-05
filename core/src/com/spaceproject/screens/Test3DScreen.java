@@ -31,6 +31,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.MyMath;
+import com.spaceproject.utility.MyScreenAdapter;
 
 
 public class Test3DScreen extends ScreenAdapter {
@@ -190,6 +191,10 @@ public class Test3DScreen extends ScreenAdapter {
         decalBatch.add(shipDecalD);
         decalBatch.flush();
         //cam.update();
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            MyScreenAdapter.game.setScreen(new MainMenuScreen(MyScreenAdapter.game));
+        }
     }
 
     @Override

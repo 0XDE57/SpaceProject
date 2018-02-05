@@ -14,6 +14,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.systems.SpaceRenderingSystem;
+import com.spaceproject.utility.MyScreenAdapter;
 
 public class TestShipGenerationScreen extends ScreenAdapter {
 
@@ -27,7 +28,7 @@ public class TestShipGenerationScreen extends ScreenAdapter {
 	int rows = 8;
 	int spacing = 150;
 	
-	public TestShipGenerationScreen(SpaceProject game) {
+	public TestShipGenerationScreen() {
 
 		ships = generateShips();
 				
@@ -84,9 +85,10 @@ public class TestShipGenerationScreen extends ScreenAdapter {
 			ships.clear();
 			ships = generateShips();
 		}
-		
-		//terminate------------------------------------------------
-		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) Gdx.app.exit();
+
+		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+			MyScreenAdapter.game.setScreen(new MainMenuScreen(MyScreenAdapter.game));
+		}
 
 	}
 	

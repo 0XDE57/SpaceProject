@@ -27,11 +27,12 @@ public class SpaceProject extends Game {
 				
 	
 		boolean inSpace = true;
-		setScreen(new GameScreen(inSpace));
+		//setScreen(new GameScreen(inSpace));
+		//setScreen(new Test3DScreen());
 		//setScreen(new TestShipGenerationScreen(this));
 		//setScreen(new TestNoiseScreen(this));
 		//setScreen(new TestVoronoiScreen());
-		//setScreen(new MainMenuScreen(this));
+		setScreen(new MainMenuScreen(this));
 	}
 	
 	private static void loadConfigs() {

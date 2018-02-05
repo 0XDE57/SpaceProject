@@ -431,11 +431,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 					
 					//check collision with convex hull, only draw within hull
 					float[] verticies = hullPoly.getTransformedVertices();
-					for (int v = 0; v < verticies.length - 2; v += 2) {
-						float x1 = verticies[v];
-						float y1 = verticies[v + 1];
-						float x2 = verticies[v + 2];
-						float y2 = verticies[v + 3];
+					for (int elocity = 0; elocity < verticies.length - 2; elocity += 2) {
+						float x1 = verticies[elocity];
+						float y1 = verticies[elocity + 1];
+						float x2 = verticies[elocity + 2];
+						float y2 = verticies[elocity + 3];
 						// convex hull line
 						Vector2 edgeA = new Vector2(x1, y1);
 						Vector2 edgeB = new Vector2(x2, y2);
@@ -485,6 +485,10 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 		updateControls();
 		
 		drawMenu();
+
+		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+			MyScreenAdapter.game.setScreen(new MainMenuScreen(MyScreenAdapter.game));
+		}
 	}
 
 
