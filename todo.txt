@@ -96,16 +96,25 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
 	-stars kill on touch	
 	-wormhole (teleport)
 	-blackhole (death)
-	-dust - fractal/noise
+	-dust
+	-fractal/noise
 	-light specs
 	-platform(space station) in space
 		isPlayerOnGround - planet, platform
 [ ] world content
     -design base building systems
     -
+[ ] difficulty
+        consequences of death
+        resource availability
+        ai accuracy / decision making
+        damage/health
+        "lying to player/cheats" : https://www.reddit.com/r/gamedev/comments/7wlwy0/lying_to_players_for_their_benefit/
+            eg: last bullet in clip does more damage
 [ ] game start
 
 ---UI---
+[...] fix main menu scaling
 [...] mobile input system
 [...] debug UI
 [ ] pause menu

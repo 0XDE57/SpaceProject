@@ -51,7 +51,7 @@ public class MainMenuScreen extends MyScreenAdapter {
 
 	MenuAnimation currentAnim;
 	enum MenuAnimation {
-		tree, delaunay;
+		tree, delaunay
 	}
 
 	public static MenuAnimation randomAnim()  {
@@ -72,7 +72,7 @@ public class MainMenuScreen extends MyScreenAdapter {
 		int pad = 10;
 		btnStart = new Button("Play", menuX,menuY + (height + pad) * 4, width, height);
 		btnVoronoi = new Button("DEBUG: Voronoi", 	menuX, menuY + (height + pad) * 3, width, height);
-		btnNoise = new Button("DEBUG: Noise",		menuX, menuY + ((height + pad) * 2), width, height);
+		btnNoise = new Button("DEBUG: Noise",		menuX, menuY + (height + pad) * 2, width, height);
 		btn3D = new Button("DEBUG: 3D", 			menuX, menuY + (height + pad) * 1, width, height);
 		btnShip = new Button("DEBUG: Ship Gen", 	menuX, menuY + (height + pad) * 0, width, height);
 
@@ -103,23 +103,12 @@ public class MainMenuScreen extends MyScreenAdapter {
 		currentAnim = randomAnim();
 
 		// font
-		fontComfortaaBold = FontFactory.createFont(FontFactory.fontComfortaaBold, 60);
+		fontComfortaaBold = FontFactory.createFont(FontFactory.fontComfortaaBold, 90);
 		fontComfortaaBold1 = FontFactory.createFont(FontFactory.fontComfortaaBold, 20);
 
 		Gdx.graphics.setVSync(true);
 	}
 
-
-	private void drawTree(ShapeRenderer g, float x, float y, float angle, int depth) {
-		if (depth == 0) return;
-		
-		float x2 = (float) (x + (Math.cos(Math.toRadians(angle)) * depth * length));
-		float y2 = (float) (y + (Math.sin(Math.toRadians(angle)) * depth * length));
-		g.rectLine(x, y, x2, y2, depth);
-		
-		drawTree(g, x2, y2, angle - branchAngle + tiltAngle, depth - 1);
-		drawTree(g, x2, y2, angle + branchAngle + tiltAngle, depth - 1);
-	}
 
 	public void render(float delta) {
 		super.render(delta);
@@ -133,6 +122,7 @@ public class MainMenuScreen extends MyScreenAdapter {
 		Gdx.gl.glBlendFunc(Gdx.gl20.GL_SRC_ALPHA, Gdx.gl20.GL_ONE_MINUS_SRC_ALPHA);
 		drawNoise(delta);
 
+
 		switch (currentAnim) {
 			case delaunay:
 				drawDelaunay(delta);
@@ -144,10 +134,6 @@ public class MainMenuScreen extends MyScreenAdapter {
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F5)) {
 			currentAnim = randomAnim();
 		}
-
-
-
-
 
 		//draw title
 		batch.begin();
@@ -235,6 +221,16 @@ public class MainMenuScreen extends MyScreenAdapter {
 		shape.end();
 	}
 
+	private void drawTree(ShapeRenderer g, float x, float y, float angle, int depth) {
+		if (depth == 0) return;
+
+		float x2 = (float) (x + (Math.cos(Math.toRadians(angle)) * depth * length));
+		float y2 = (float) (y + (Math.sin(Math.toRadians(angle)) * depth * length));
+		g.rectLine(x, y, x2, y2, depth);
+
+		drawTree(g, x2, y2, angle - branchAngle + tiltAngle, depth - 1);
+		drawTree(g, x2, y2, angle + branchAngle + tiltAngle, depth - 1);
+	}
 
 	private void drawTrees(float delta) {
 		shape.begin(ShapeType.Filled);
