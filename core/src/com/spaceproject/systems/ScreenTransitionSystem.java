@@ -1,5 +1,6 @@
 package com.spaceproject.systems;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -13,6 +14,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyScreenAdapter;
 
 
@@ -29,7 +31,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
 		
 		if (screenTrans.landStage != null) {
 			if (screenTrans.curLandStage == null || screenTrans.curLandStage != screenTrans.landStage) {
-				System.out.println("Animation Stage: " + screenTrans.landStage);
+				System.out.println("Animation Stage: " + screenTrans.landStage + " for " + Integer.toHexString(entity.hashCode()));
 				screenTrans.curLandStage = screenTrans.landStage;
 				//landPos = screenTrans.landCFG.position;//?
 			}
@@ -51,7 +53,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
 				break;
 			case end:
 				entity.remove(ScreenTransitionComponent.class);
-				System.out.println("Animation complete. Removed ScreenTransitionComponent");
+				System.out.println("Animation complete. Removed ScreenTransitionComponent for " + Integer.toHexString(entity.hashCode()));
 				break;
 			default:
 				try {
@@ -63,13 +65,16 @@ public class ScreenTransitionSystem extends IteratingSystem {
 			}
 		} else if (screenTrans.takeOffStage != null) {
 			if (screenTrans.curTakeOffStage == null || screenTrans.curTakeOffStage != screenTrans.takeOffStage) {
-				System.out.println("Animation Stage: " + screenTrans.takeOffStage);
+				System.out.println("Animation Stage: " + screenTrans.takeOffStage + " for " + Integer.toHexString(entity.hashCode()));
 				screenTrans.curTakeOffStage = screenTrans.takeOffStage;
 				//landPos = screenTrans.landCFG.position;
 			}
 			switch (screenTrans.takeOffStage) {
 			case transition:
+				screenTrans.landCFG.ship = entity;
 				takeOff(screenTrans);
+				System.out.println(this.getClass().getSimpleName() + ".takeOff: " + Integer.toHexString(entity.hashCode()));
+				Misc.printEntity(entity);
 				return;
 			case zoomOut:
 				zoomOut(screenTrans);
@@ -79,7 +84,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
 				break;
 			case end:
 				entity.remove(screenTrans.getClass());
-				System.out.println("Animation complete. Removed ScreenTransitionComponent");
+				System.out.println("Animation complete. Removed ScreenTransitionComponent from " + Misc.myToString(entity));
 				break;
 			default:
 				try {
@@ -152,6 +157,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
 
 		System.out.println("Land: " + screenTrans.landCFG.position);
 		GameScreen.landCFG = screenTrans.landCFG;
+
 		GameScreen.transition = true;
 	}
 	
@@ -163,6 +169,8 @@ public class ScreenTransitionSystem extends IteratingSystem {
 
 		System.out.println("Take off:" + screenTrans.landCFG.position);
 
+		//TODO: GET RID OF GameScreen.landCFG, maybe a better way to handle would be to add an entity to engine "transition entity" and it holds ScreenTransition / landCFG?
+		GameScreen.landCFG = screenTrans.landCFG;
 		GameScreen.transition = true;
 		//TODO: do current systems run in the background during change?
 		//if so, disable/pause and cleanup/dispose

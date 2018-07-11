@@ -158,7 +158,8 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		
 		objects.clear();		
 	}
-	
+
+	/*
 	public static void printEntities(Engine eng) {
 		for (Entity entity : eng.getEntities()) {
 			System.out.println(entity.toString());
@@ -199,7 +200,10 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	private void printEntities() {
 		printEntities(engine);
 	}
-	
+
+	public static void myToString(Entity e) {
+		System.out.println(e.getClass() + "@" + Integer.toHexString(e.hashCode()));
+	}
 	public static void printSystems(Engine eng) {
 		for (EntitySystem sys : eng.getSystems()) {
 			System.out.println(sys + " (" + sys.priority + ")");
@@ -211,7 +215,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	private void printSystems() {
 		printSystems(engine);
 	}
-	
+	*/
 
 	private void updateKeyToggles() {
 		//toggle debug
@@ -395,7 +399,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		
 		int i = 0;
 		for (Entity entity : engine.getEntities()) {
-			fontSmall.draw(batch, entity.toString(), x, y+fontHeight*i++);
+			fontSmall.draw(batch, Integer.toHexString(entity.hashCode()), x, y+fontHeight*i++);
 		}
 	}
 	
@@ -466,9 +470,10 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			
 			String vel = " ~ " + MyMath.round(t.velocity.len(), 1);
 			String info = Math.round(t.pos.x) + "," + Math.round(t.pos.y) + vel;
-			
+
 			Vector3 screenPos = cam.project(t.pos.cpy());
-			fontSmall.draw(batch, info, screenPos.x, screenPos.y);			
+			fontSmall.draw(batch, Integer.toHexString(entity.hashCode()) , screenPos.x, screenPos.y-15);
+			fontSmall.draw(batch, info, screenPos.x, screenPos.y);
 		}
 	}
 	

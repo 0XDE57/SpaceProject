@@ -1,10 +1,13 @@
 ---ENGINE---
 [...] fix land/take-off position bug
-    [...] when switch to time based orbit, fix take off from current orbit position
-	[...] test land AI, system doesn't supports non-player world switching
+    maybe a better way to handle would be to add an entity to engine "transition entity" and it holds ScreenTransition / landCFG?
+    [ ] take off from planet based on not position. seed/ID? star ID and planet index?
+        when switch to time based orbit, fix take off from current orbit position
+	[ ] test land AI, system doesn't supports non-player world switching
 		consider what to keep track of between planet and space
 		-what data to keep and discard between screens
 		-AI to remember (persistence)
+    [ ] ControllableComponent.timerDodge needs to be in VehicleComponent
 [...] wrap planets properly (LOCAL COORDINATE SPACE)
 [ ] time based orbit
 [ ] fixed time step (necessary for multiplayer?)
@@ -41,14 +44,14 @@
 	6 - right
 	2 - down
 	0 - back
-
+[ ] FPS,memory,entity graph
 
 ---MOBILE---
 [ ] if player bounds overlap vehicle, show enter button on touchUI/hud
 [ ] if in vehicle show exit button (if can get out? must be over platform/spacestation? jetpack?)
 [ ] pinch-pull to zoom in-out on touch
 [ ] test touchUI on different screen sizes/resolutions
-[ ] set engine speed max to multiplier on android
+[ ] set engine speed max to multiplier on android?
 http://libgdx.badlogicgames.com/nightlies/docs/api/com/badlogic/gdx/input/GestureDetector.html
 http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.html
 
@@ -68,16 +71,19 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
 	dodge [Left][Right] (double tap) - move fast to left or right
 	shield [SHIFT] - ring around ship
 	add side to side barrel roll dodge (jump/burst) [LEFT]/[RIGHT]
+
+[ ] engine mode:
+        -combat (slow, for interacting with object near, landing planets, fighting)
+        -cruise (medium, for navigating within a system, planet to planet, avoid/escape, faster travel)
+        -warp   (fast, warp to other systems, can't turn, can't fight)
+
 [ ] ship generation
 	wings, engines, weapons, another layer on top for depth/windshield type thing
 	look at some different types of ships like an 'H' ,etc...
 	perhaps come up with some kind of classes of ships (cargo, highspeed traveler, tank/war machine, passenger, personal, commercial...)
-		engine mode:
-			-combat (slow, for interacting with object near, landing planets, fighting)
-			-cruise (medium, for navigating within a system, planet to planet, avoid/escape, faster travel)
-			-warp   (fast, warp to other systems, can't turn, can't fight)
+
 [ ] planet generation
-	research planet attributes //size, temperature, pressure, atmosphere, elements...etc
+	research planet attributes //size, temperature, pressure, atmosphere/elements(https://en.wikipedia.org/wiki/Astronomical_spectroscopy)...etc
 	rings around planets? (like saturn)
 	moons/satelites
 	http://www.entropicparticles.com/6-days-of-creation/

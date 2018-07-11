@@ -3,7 +3,9 @@ package com.spaceproject.utility;
 import java.lang.reflect.Field;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Vector3;
 
@@ -42,4 +44,61 @@ public class Misc {
 
 		return targetEntity;
 	}
+
+
+	public static String myToString(Object e) {
+		//a shorter version to getSimpleName() and hashcode
+		return e.getClass().getSimpleName() + "@" + Integer.toHexString(e.hashCode());
+	}
+
+	public static void printObjectFields(Object o) {
+		if (o == null) {
+			System.out.println("OBJECT IS NULL");
+			return;
+		}
+
+		System.out.println(o.getClass());
+		for (Field f : o.getClass().getFields()) {
+			try {
+				System.out.println(String.format("\t%-14s %s", f.getName(), f.get(o)));
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public static void printEntities(Engine eng) {
+		for (Entity entity : eng.getEntities()) {
+			printEntity(entity);
+		}
+	}
+
+	public static void printEntity(Entity entity) {
+		System.out.println(entity.toString());
+		for (Component c : entity.getComponents()) {
+            System.out.println("\t" + c.toString());
+            for (Field f : c.getClass().getFields()) {
+                try {
+                    System.out.println(String.format("\t\t%-14s %s", f.getName(), f.get(c)));
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+	}
+
+
+	public static void printSystems(Engine eng) {
+		for (EntitySystem sys : eng.getSystems()) {
+			System.out.println(sys + " (" + sys.priority + ")");
+
+		}
+
+	}
+
 }

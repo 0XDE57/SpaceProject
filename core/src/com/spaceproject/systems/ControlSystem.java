@@ -153,18 +153,16 @@ public class ControlSystem extends IteratingSystem {
 		screenTrans.landCFG = new LandConfig();
 		
 		//screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
-		screenTrans.landCFG.ship = entity;// Misc.copyEntity(entity);//entity to send to the planet
+		screenTrans.landCFG.ship = entity;//entity to send to the planet
 		//screenTrans.landCFG.position = WORLDSCREEN.planetPos;// save position for taking off from planet
 		
 		entity.add(screenTrans);
-		
+
+		System.out.println("takeOffPlanet: " + Integer.toHexString(entity.hashCode()));
+		Misc.printEntity(entity);
 	}
 
 	private void landOnPlanet(Entity entity) {
-		if (Mappers.screenTrans.get(entity) != null) {
-			return;
-		}
-
 		Vector3 vePos = Mappers.transform.get(entity).pos;
 		for (Entity planet : planets) {
 			Vector3 planetPos = Mappers.transform.get(planet).pos;
@@ -177,13 +175,17 @@ public class ControlSystem extends IteratingSystem {
 				screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
 				//DebugUISystem.printObjectFields(planet);
 				//DebugUISystem.printObjectFields(Mappers.planet.get(planet));
-				screenTrans.landCFG.ship = Misc.copyEntity(entity);//entity to send to the planet
+				screenTrans.landCFG.ship = entity;//entity to send to the planet
 				screenTrans.landCFG.position = planetPos;// save position for taking off from planet
 				//System.out.println("Land pos: " + planetPos);
 				
 				//TODO: planet moves, set position to what ever planet is instead (will come into play
 				//over more when orbit is based on time)
 				entity.add(screenTrans);
+
+
+				System.out.println("landOnPlanet: " + Integer.toHexString(entity.hashCode()));
+				Misc.printObjectFields(entity);
 				return;
 			}
 		}
@@ -331,15 +333,19 @@ public class ControlSystem extends IteratingSystem {
 				if (characterEntity.getComponent(CameraFocusComponent.class) != null) {
 					vehicle.add(characterEntity.remove(CameraFocusComponent.class));
 				}
-				if (characterEntity.getComponent(AIComponent.class) != null) {
-					vehicle.add(characterEntity.remove(AIComponent.class));
-				}
-				if (characterEntity.getComponent(ControlFocusComponent.class) != null) {
-					vehicle.add(characterEntity.remove(ControlFocusComponent.class));
-				}
 				if (characterEntity.getComponent(ControllableComponent.class) != null) {
 					vehicle.add(characterEntity.remove(ControllableComponent.class));
 				}
+				// move control to vehicle (AI/player)
+				if (characterEntity.getComponent(AIComponent.class) != null) {
+					vehicle.add(characterEntity.remove(AIComponent.class));
+					System.out.println("[AI] " + Misc.myToString(characterEntity) + " -> " + Misc.myToString(vehicle));
+				}
+				if (characterEntity.getComponent(ControlFocusComponent.class) != null) {
+					vehicle.add(characterEntity.remove(ControlFocusComponent.class));
+					System.out.println("[Character] " + Misc.myToString(characterEntity) + " -> " + Misc.myToString(vehicle));
+				}
+
 				
 				// remove player from engine
 				engine.removeEntity(characterEntity);
@@ -347,8 +353,8 @@ public class ControlSystem extends IteratingSystem {
 				//if (entity is controlled by player)
 				// zoom out camera, TODO: add pan animation
 				MyScreenAdapter.setZoomTarget(1);
-				
-				
+
+
 				control.timerVehicle.reset();
 				
 				return;
@@ -375,14 +381,18 @@ public class ControlSystem extends IteratingSystem {
 		if (vehicleEntity.getComponent(CameraFocusComponent.class) != null) {
 			characterEntity.add(vehicleEntity.remove(CameraFocusComponent.class));
 		}
-		if (vehicleEntity.getComponent(AIComponent.class) != null) {
-			characterEntity.add(vehicleEntity.remove(AIComponent.class));
-		}
 		if (vehicleEntity.getComponent(ControlFocusComponent.class) != null) {
 			characterEntity.add(vehicleEntity.remove(ControlFocusComponent.class));
 		}
+
+		//move control to character (AI/player)
+		if (vehicleEntity.getComponent(AIComponent.class) != null) {
+			characterEntity.add(vehicleEntity.remove(AIComponent.class));
+			System.out.println("[AI] " + Misc.myToString(vehicleEntity) + " -> " + Misc.myToString(characterEntity));
+		}
 		if (vehicleEntity.getComponent(ControllableComponent.class) != null) {
 			characterEntity.add(vehicleEntity.remove(ControllableComponent.class));
+			System.out.println("[Character] " + Misc.myToString(vehicleEntity) + " -> " + Misc.myToString(characterEntity));
 		}
 		
 		// remove references

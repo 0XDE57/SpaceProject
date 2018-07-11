@@ -57,9 +57,11 @@ public class EntityFactory {
 		health.health = 100;
 		health.maxHealth = 100;
 
+
 		ControllableComponent control = new ControllableComponent();
 		control.timerVehicle = new SimpleTimer(1000);
 		control.timerDodge = new SimpleTimer(500);
+
 
 		entity.add(health);
 		entity.add(control);
@@ -206,7 +208,6 @@ public class EntityFactory {
 	//endregion
 
 	//region ships
-	
 	public static Entity createShip3(float x, float y) {
 		return createShip3(x, y, null);
 	}
@@ -275,9 +276,11 @@ public class EntityFactory {
 		map.color = new Color(1, 1, 1, 0.9f);
 		map.distance = 3000;
 
+
 		ControllableComponent control = new ControllableComponent();
 		control.timerVehicle = new SimpleTimer(1000);
 		control.timerDodge = new SimpleTimer(500);
+
 
 		//add components to entity
 		entity.add(health);

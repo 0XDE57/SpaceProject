@@ -112,7 +112,7 @@ public class AISystem extends IteratingSystem {
 					if (closestVehicle != null) {
 						control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos,aiPos);
 						control.moveForward = true;
-						control.movementMultiplier = 1f;
+						control.movementMultiplier = 0.5f;
 						BoundsComponent aiBounds = Mappers.bounds.get(entity);
 						for (Entity v : vehicles) {
 							//skip vehicle is occupied
