@@ -165,7 +165,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
 		screenTrans.takeOffStage = TakeOffAnimStage.zoomOut;
 		screenTrans.landCFG.ship.add(screenTrans);
 		screenTrans.landCFG.ship.getComponent(TextureComponent.class).scale = 0;//set size to 0 so texture can grow
-		//screenTrans.landCFG.position = landPos;//landCFG.position;
+		screenTrans.landCFG.position = GameScreen.landCFG.position;
 
 		System.out.println("Take off:" + screenTrans.landCFG.position);
 
