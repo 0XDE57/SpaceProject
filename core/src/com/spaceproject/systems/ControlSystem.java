@@ -251,7 +251,7 @@ public class ControlSystem extends IteratingSystem {
 	private static void accelerate(float delta, ControllableComponent control, TransformComponent transform, VehicleComponent vehicle) {
 		//TODO: create a vector method for the dx = cos... dy = sin... It's used multiple times in the program(movement, missiles..)
 		//TODO: implement rest of engine behavior
-		//float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger radialDistance so that finger radialDistance determines how fast to go
+		//float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go
 	
 		float thrust = vehicle.thrust;
 		float angle = transform.rotation;

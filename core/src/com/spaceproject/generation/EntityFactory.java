@@ -86,8 +86,8 @@ public class EntityFactory {
 		int numPlanets = MathUtils.random(SpaceProject.celestcfg.minPlanets, SpaceProject.celestcfg.maxPlanets);
 		numPlanets = 1;//TODO: debug remember to remove me
 
-		//radialDistance between planets
-		float distance = SpaceProject.celestcfg.minPlanetDist/3; //add some initial radialDistance between star and first planet
+		//distance between planets
+		float distance = SpaceProject.celestcfg.minPlanetDist/3; //add some initial distance between star and first planet
 		
 		//rotation of system (orbits and spins)
 		boolean rotDir = MathUtils.randomBoolean();

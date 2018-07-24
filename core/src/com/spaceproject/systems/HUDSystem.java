@@ -237,8 +237,8 @@ public class HUDSystem extends EntitySystem {
 		//TODO: move these values into MapComponent
 		float markerSmall = 3.5f; //min marker size
 		float markerLarge = 8; //max marker size
-		float distSmall = 8000; //radialDistance when marker is small
-		float distLarge = 2000; //radialDistance when marker is large
+		float distSmall = 8000; //distance when marker is small
+		float distLarge = 2000; //distance when marker is large
 		//gain and offset for transfer function: drawMap [3.5 - 8] to [8000 - 2000]
 		double gain = (markerSmall-markerLarge)/(distSmall-distLarge);
 		double offset = markerSmall - gain * distSmall;
@@ -301,7 +301,7 @@ public class HUDSystem extends EntitySystem {
 			markerX += centerX;
 			markerY += centerY;
 			
-			//calculate size of marker based on radialDistance
+			//calculate size of marker based on distance
 			float dist = MyMath.distance(screenPos.x, screenPos.y, centerX, centerY);
 			double size = gain * dist + offset;
 			if (size < markerSmall) size = markerSmall;

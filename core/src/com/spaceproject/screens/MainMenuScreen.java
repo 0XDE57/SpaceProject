@@ -43,7 +43,7 @@ public class MainMenuScreen extends MyScreenAdapter {
 	//delauney
 	float velocity = 10;
 	int numPoints = 20;
-	int pad = 10;//radialDistance away from edge of screen
+	int pad = 10;//distance away from edge of screen
 	FloatArray points;
 	FloatArray dirs;
 	ShortArray triangles;

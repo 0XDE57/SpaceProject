@@ -6,7 +6,7 @@ public class CelestialConfig extends Config {
 	//number of planets
 	public int minPlanets;
 	public int maxPlanets;	
-	//radialDistance between planets
+	//distance between planets
 	public float minPlanetDist;
 	public float maxPlanetDist;
 	
@@ -34,9 +34,9 @@ public class CelestialConfig extends Config {
 	public int numPoints;
 	// range from origin(0,0) to create points
 	public int pointGenRange; 
-	// minimum radialDistance between points
+	// minimum distance between points
 	public float minPointDistance;
-	//radialDistance to check when to load or unload planets
+	//distance to check when to load or unload planets
 	public float loadSystemDistance;
 	
 	public void loadDefault() {
