@@ -18,7 +18,6 @@ public class WorldWrapSystem extends EntitySystem {
 	 * http://ronvalstar.nl/creating-tileable-noise-maps/
 	 * https://gamedev.stackexchange.com/questions/23625/how-do-you-generate-tileable-perlin-noise
 	 *
-	 *
 	 * But the physics and rendering do not like this and there are some technical difficulties to overcome:
 	 * -“Physics and collision detection have to deal with fact, that object,
 	 * that crossing the border can be in two (or even four) places
@@ -30,6 +29,12 @@ public class WorldWrapSystem extends EntitySystem {
 	 * sides?”
 	 * https://simonschreibt.de/gat/1nsane-carpet-2-repetitive-worlds/
 	 *
+	 *
+	 * https://imgur.com/a/fUD7n
+	 * https://godotdevelopers.org/forum/discussion/18108/how-to-create-a-self-wrapping-2d-world-defender
+	 * https://hero.handmade.network/forums/code-discussion/t/310-movement_on_spherical_vs_toroidal_tile_map
+	 * https://en.wikipedia.org/wiki/Toroidal_coordinates
+	 * http://jsfiddle.net/fg5bLh6e/
 	 */
 
 	int wrap;

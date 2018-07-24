@@ -8,6 +8,10 @@ import com.badlogic.gdx.utils.Json;
 public abstract class Config {
 
 	private final String fileName = "config/" +  this.getClass().getSimpleName() + ".cfg";
+
+	public Config() {
+		loadDefault();
+	}
 	
 	public abstract void loadDefault();
 	

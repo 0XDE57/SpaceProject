@@ -124,7 +124,7 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 		if (checkStarsCurrTime < 0) {
 			checkStarsCurrTime = checkStarsTimer; // reset timer
 			
-			//distance to check when to load planets
+			//radialDistance to check when to load planets
 			int loadDistance = (int) SpaceProject.celestcfg.loadSystemDistance;
 			loadDistance *= loadDistance;//square for dist2
 			
@@ -153,7 +153,7 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 				if (point.dst2(cam.position.x, cam.position.y) < loadDistance) {
 			
 					// check if star is already in world
-					//TODO: check based on an ID rather than distance. more reliable and makes more sense than a distance check
+					//TODO: check based on an ID rather than radialDistance. more reliable and makes more sense than a radialDistance check
 					boolean loaded = false;
 					for (Entity star : loadedStars) {
 						TransformComponent t = Mappers.transform.get(star);
@@ -237,7 +237,7 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 		int numStars = SpaceProject.celestcfg.numPoints;
 		// range from origin(0,0) to create points
 		int genRange = SpaceProject.celestcfg.pointGenRange;
-		// minimum distance between points
+		// minimum radialDistance between points
 		float dist = SpaceProject.celestcfg.minPointDistance; 
 		dist *= dist;//squared for dst2
 

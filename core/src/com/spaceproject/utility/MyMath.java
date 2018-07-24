@@ -16,12 +16,12 @@ public class MyMath {
 	}
 
 	/**
-	 * Get distance from position 1 to position 2.
+	 * Get radialDistance from position 1 to position 2.
 	 * @param x1
 	 * @param y1
 	 * @param x2
 	 * @param y2
-	 * @return distance
+	 * @return radialDistance
 	 */
 	public static float distance(float x1, float y1, float x2, float y2) {
 		return (float) Math.hypot(x2 - x1, y2 - y1);

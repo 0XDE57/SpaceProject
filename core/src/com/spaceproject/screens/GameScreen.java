@@ -43,16 +43,28 @@ import com.spaceproject.systems.WorldWrapSystem;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyScreenAdapter;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 public class GameScreen extends MyScreenAdapter {
 
 	public Engine engine;
 	public static boolean inSpace;
-	public static LandConfig landCFG = null;
-	public static boolean transition;
+	public static long gameTimeCurrent, gameTimeStart;
+
 	ShaderProgram shader = new ShaderProgram(Gdx.files.internal("shaders/quadRotation.vsh"), Gdx.files.internal("shaders/quadRotation.fsh"));
+
+
+	public static LandConfig landCFG = null;//todo: remove this when switch to state entity
+	public static boolean transition;//todo: remove this when switch to state entity
+
 
 	public GameScreen(boolean inSpace) {
 		GameScreen.inSpace = inSpace;
+
+		gameTimeStart = System.nanoTime();
 
 		/*
 		//playing with shaders
@@ -111,9 +123,7 @@ public class GameScreen extends MyScreenAdapter {
 		//engine.addEntity(EntityFactory.createShip3(-400, 400));
 
 
-		Entity aiTest = EntityFactory.createCharacterAI(0, 400);
-		//aiTest.add(new CameraFocusComponent());
-		//engine.addEntity(aiTest);
+
 		
 		//add player
 		Entity ship = landCFG.ship;
@@ -124,7 +134,10 @@ public class GameScreen extends MyScreenAdapter {
 		ship.getComponent(TransformComponent.class).pos.y = landCFG.position.y;
 		engine.addEntity(ship);
 		//System.out.println("shipTex: " + String.format("%X", shipTex.hashCode()));
-		
+
+		Entity aiTest = EntityFactory.createCharacterAI(0, 400);
+		//engine.addEntity(aiTest);
+		//aiTest.add(ship.remove(CameraFocusComponent.class));
 		
 		//===============SYSTEMS===============
 		//input
@@ -195,7 +208,7 @@ public class GameScreen extends MyScreenAdapter {
 
 		Entity aiTest = EntityFactory.createCharacterAI(position, position + 50);
 		//aiTest.add(new CameraFocusComponent());
-		//engine.addEntity(aiTest);
+		engine.addEntity(aiTest);
 
 		
 		// ===============SYSTEMS===============
@@ -235,8 +248,10 @@ public class GameScreen extends MyScreenAdapter {
 		super.render(delta);
 
 		// update engine
+		gameTimeCurrent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - gameTimeStart);
 		engine.update(delta);
 
+		engine.getSystem(DebugUISystem.class).drawMessage("time: " + gameTimeCurrent, 500, Gdx.graphics.getHeight()-10);
 
 		if (Gdx.input.isKeyJustPressed(Keys.U)) {
 			Misc.printEntities(engine);
@@ -248,6 +263,8 @@ public class GameScreen extends MyScreenAdapter {
 
 			//dispose();
 			engine.removeAllEntities();
+			//engine.removeAllSystems();?
+
 			if (inSpace) {
 				initWorld(landCFG);
 			} else {

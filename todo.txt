@@ -1,20 +1,60 @@
 ---ENGINE---
 [...] fix land/take-off position bug
-    maybe a better way to handle would be to add an entity to engine "transition entity" and it holds ScreenTransition / landCFG?
-    [ ] take off from planet based on not position. seed/ID? star ID and planet index?
-        when switch to time based orbit, fix take off from current orbit position
-	[ ] test land AI, system doesn't supports non-player world switching
-		consider what to keep track of between planet and space
-		-what data to keep and discard between screens
-		-AI to remember (persistence)
-    [ ] ControllableComponent.timerDodge needs to be in VehicleComponent
-[...] wrap planets properly (LOCAL COORDINATE SPACE)
-[ ] time based orbit
+    [...] time based orbit
+    [ ] cleanup land and take off for player, base on planet ID of some kind
+    [ ] test land and take off for AI, system doesn't supports non-player world switching
+        dumb loop where AI lands on planet, kept in some kind of background
+        processing state/alt engine, wait a second then take off to test all is working correctly
+        background engine meant to be low processing effort (eg: ultra dumbed down AI or simulations, no rendering, no physics, just states and events) to keep track of important entities
+        and states between space and worlds. eg: give entity important flag component to keep relevant, if dont have flag dont care and remove when switch
+        will be useful for persistence, AI and story type events.
+        eg:
+        Engine backgroundEngine.
+        if (player switch screen) {
+            //move persistent from main to background processing
+            for each entity in mainEngine {
+                if (entity has PersistenceComponent) {
+                    //eg: attacked an AI, AI gets TimedPersistenceComponent and will remain on planet for 5 minutes waiting for you
+                    backgroundEngine.Add(entity);
+                }
+            }
+            //move relevant entity from background processing to main
+            for each entity in backgroundEngine {
+                if (entity has PersistenceComponent) {
+                    if (is persistence relevant to new context) {
+                        //example relevance:
+                        //player in space, important entity on planet
+                        //if land on planet with important entity, load into actual engine
+                        mainEngine.Add(entity);
+                        //could be more nuanced, like perhaps entity is only loaded when event triggers it
+                        //or specific location on planet. dunno till start implementing.
+                        //possibly have multiple engines handling contexts?
+                    }
+                }
+            }
+        }
+        if (AI switch screen) {
+            //similar thing to above
+            //if relevant load it, else keep in background
+
+            //if not important, remove from engine, forget about existence
+        }
+
+        maybe a better way to handle would be to add an entity to engine "transition entity" and it holds ScreenTransition / landCFG?
+
+
 [ ] fixed time step (necessary for multiplayer?)
 	https://gafferongames.com/post/fix_your_timestep/
-[x] timer object
-[ ] fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
-	https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
+    http://gameprogrammingpatterns.com/game-loop.html
+    http://www.koonsolo.com/news/dewitters-gameloop/
+    [ ] fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
+    	https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
+
+[...] wrap planets properly (LOCAL COORDINATE SPACE?)
+    https://www.reddit.com/r/gamedev/comments/1gi6np/magic_carpet_style_infinite_wrapping_terrain/
+    https://simonschreibt.de/gat/1nsane-carpet-2-repetitive-worlds/
+
+
 [ ] fix render priority (z-order)
 [ ] system processing priority
 [ ] make colored tiles use texture regions instead of individual textures. (create one texture with all colors/tiles on it)
@@ -71,6 +111,7 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
 	dodge [Left][Right] (double tap) - move fast to left or right
 	shield [SHIFT] - ring around ship
 	add side to side barrel roll dodge (jump/burst) [LEFT]/[RIGHT]
+    [ ] ControllableComponent.timerDodge needs to be in VehicleComponent
 
 [ ] engine mode:
         -combat (slow, for interacting with object near, landing planets, fighting)
@@ -99,7 +140,8 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
 	http://freespace.virgin.net/hugo.elias/models/m_perlin.htm
 	https://www.reddit.com/user/KdotJPG   <-OpenSimplex creator https://gist.github.com/KdotJPG/b1270127455a94ac5d19
 [ ] space stuff
-	-stars kill on touch	
+    https://en.wikipedia.org/wiki/Astronomical_object#Categories_by_location
+	-stars kill on touch
 	-wormhole (teleport)
 	-blackhole (death)
 	-dust

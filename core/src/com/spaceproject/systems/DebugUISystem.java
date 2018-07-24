@@ -159,64 +159,6 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		objects.clear();		
 	}
 
-	/*
-	public static void printEntities(Engine eng) {
-		for (Entity entity : eng.getEntities()) {
-			System.out.println(entity.toString());
-			for (Component c : entity.getComponents()) {
-				System.out.println("\t" + c.toString());
-				for (Field f : c.getClass().getFields()) {
-					try {
-						System.out.println(String.format("\t\t%-14s %s", f.getName(), f.get(c)));
-					} catch (IllegalArgumentException e) {
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-						e.printStackTrace();
-					}
-				}
-		
-			}
-		}
-	}
-
-	public static void printObjectFields(Object o) {
-		if (o == null) {
-			System.out.println("OBJECT IS NULL");
-			return;
-		}
-
-		System.out.println(o.getClass());
-		for (Field f : o.getClass().getFields()) {
-			try {
-				System.out.println(String.format("\t%-14s %s", f.getName(), f.get(o)));
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	private void printEntities() {
-		printEntities(engine);
-	}
-
-	public static void myToString(Entity e) {
-		System.out.println(e.getClass() + "@" + Integer.toHexString(e.hashCode()));
-	}
-	public static void printSystems(Engine eng) {
-		for (EntitySystem sys : eng.getSystems()) {
-			System.out.println(sys + " (" + sys.priority + ")");
-			
-		}
-		
-	}
-	
-	private void printSystems() {
-		printSystems(engine);
-	}
-	*/
-
 	private void updateKeyToggles() {
 		//toggle debug
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleDebug)) {
@@ -271,6 +213,12 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleMenu)) {
 			drawMenu = !drawMenu;
 		}
+	}
+
+	public void drawMessage(String message, int x, int y) {
+		batch.begin();
+		fontSmall.draw(batch, message, x, y);
+		batch.end();
 	}
 
 	/** Draw menu showing items to draw and toggle keys */

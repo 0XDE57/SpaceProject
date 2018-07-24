@@ -9,10 +9,10 @@ public class PlanetComponent implements Component {
 		id = IDGen++;
 	}
 	
-	public long id;
+	public final long id;//sequential, used for texture gen, should not be used as unique identifier
 	
 	public int mapSize;
-	public long seed;	
+	public long seed;
 	
 	public float scale;
 	public int octaves;

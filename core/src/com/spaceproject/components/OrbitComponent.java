@@ -8,16 +8,17 @@ public class OrbitComponent implements Component {
 	public Entity parent; 
 	
 	//angle from parent position in radians 
-	public float angle;
+	public double angle, startAngle;
 	
 	//how fast to orbit around entity
-	public float orbitSpeed;
+	public long msPerRevolution;
+	public float tangentialVelocity;
 	
 	//how fast to rotate
 	public float rotSpeed;
 	
-	//distance from entity to rotate
-	public float distance;
+	//radialDistance from entity to rotate
+	public float radialDistance;
 	
 	//rotation direction
 	public boolean rotateClockwise;
