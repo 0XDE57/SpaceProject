@@ -84,7 +84,6 @@ public class EntityFactory {
 
 		//number of planets in a system
 		int numPlanets = MathUtils.random(SpaceProject.celestcfg.minPlanets, SpaceProject.celestcfg.maxPlanets);
-		numPlanets = 1;//TODO: debug remember to remove me
 
 		//distance between planets
 		float distance = SpaceProject.celestcfg.minPlanetDist/3; //add some initial distance between star and first planet
@@ -101,9 +100,8 @@ public class EntityFactory {
 		
 		//create planets around star
 		for (int i = 1; i < entities.length; ++i) {
-			//add some radialDistance from previous entity
+			//add some distance from previous entity
 			distance += MathUtils.random(SpaceProject.celestcfg.minPlanetDist, SpaceProject.celestcfg.maxPlanetDist);
-			distance = 20000;//TODO: debug remember to remove me
 			entities[i] = createPlanet(MyMath.getSeed(x, y + distance), star, distance, rotDir);
 		}
 		
@@ -167,15 +165,10 @@ public class EntityFactory {
 		OrbitComponent orbit = new OrbitComponent();
 		orbit.parent = parent; //object to orbit around
 		orbit.radialDistance = radialDistance; //distance relative to star
-		orbit.msPerRevolution = 1000*60*60*2;// 1000*60*60*10;// MathUtils.random(SpaceProject.celestcfg.minPlanetOrbit, SpaceProject.celestcfg.minPlanetOrbit);
-		orbit.startAngle = MathUtils.random(MathUtils.PI2); //angle relative to star
+		orbit.tangentialSpeed = MathUtils.random(SpaceProject.celestcfg.minPlanetTangentialSpeed, SpaceProject.celestcfg.maxPlanetTangentialSpeed);
+		orbit.startAngle = MathUtils.random(MathUtils.PI2); //angle relative to parent
 		orbit.rotSpeed = MathUtils.random(SpaceProject.celestcfg.minPlanetRot, SpaceProject.celestcfg.maxPlanetRot);
 		orbit.rotateClockwise = rotationDir;
-		
-		//transform
-		TransformComponent transform = new TransformComponent();
-		//transform.pos.x = orbitX;
-		//transform.pos.y = orbitY;
 		
 		//drawMap
 		MapComponent map = new MapComponent();
@@ -193,7 +186,7 @@ public class EntityFactory {
 		planet.lacunarity = 2.6f;
 		
 		//add components to entity
-		entity.add(transform);
+		entity.add(new TransformComponent());
 		entity.add(texture);
 		entity.add(orbit);
 		entity.add(map);

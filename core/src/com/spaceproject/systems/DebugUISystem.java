@@ -260,8 +260,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			if (orbit != null && orbit.parent != null) {
 				TransformComponent parentPos = Mappers.transform.get(orbit.parent);
 				TransformComponent entityPos = Mappers.transform.get(entity);
-				float distance = MyMath.distance(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
-				shape.circle(parentPos.pos.x, parentPos.pos.y, distance);
+				shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
 				shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
 			}
 		}

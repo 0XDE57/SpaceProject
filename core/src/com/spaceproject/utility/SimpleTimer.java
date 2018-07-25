@@ -5,7 +5,7 @@ public class SimpleTimer {
     private long interval;
     private long lastEvent;
 
-    //TODO: will break on game pause, time will still be considered passed.
+    //TODO: will break on game pause, time will still be considered passed, use gametime (game time will have to stop on pause too)
     public SimpleTimer(long time) {
         this(time, false);
     }

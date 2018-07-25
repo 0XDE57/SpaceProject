@@ -234,7 +234,7 @@ public class HUDSystem extends EntitySystem {
 	 * TODO: load star drawMap markers based on point list instead of star entity for stars that aren't loaded yet
 	 */
 	private void drawEdgeMap() {
-		//TODO: move these values into MapComponent
+		//TODO: move these values into MapComponent or a config file
 		float markerSmall = 3.5f; //min marker size
 		float markerLarge = 8; //max marker size
 		float distSmall = 8000; //distance when marker is small
@@ -346,7 +346,7 @@ public class HUDSystem extends EntitySystem {
 		if (drawMap == MapState.off)
 			return;
 
-		//TODO:
+		//TODO: fix map
 		//[...] fix minimap
 		//[...] simplify grid calculation
 		//[ ] make drawMap item relative to middle of drawMap instead of middle of screen(Gdx.graphics.getWidth()/2), verify with small non-centered drawMap

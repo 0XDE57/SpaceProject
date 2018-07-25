@@ -26,8 +26,8 @@ public class CelestialConfig extends Config {
 	public float minPlanetRot;
 	public float maxPlanetRot;
 	//planet orbit speed
-	public long minPlanetOrbit;
-	public long maxPlanetOrbit;
+	public float minPlanetTangentialSpeed;
+	public float maxPlanetTangentialSpeed;
 	
 	//---Point generation---
 	// how many stars TRY to create(does not guarantee this many points will actually be generated)
@@ -57,8 +57,8 @@ public class CelestialConfig extends Config {
 		maxPlanetSize = 200;
 		minPlanetRot = 0.015f;
 		maxPlanetRot = 0.09f;
-		minPlanetOrbit = 1000*60;
-		maxPlanetOrbit = 1000*60;
+		minPlanetTangentialSpeed = 1f;
+		maxPlanetTangentialSpeed = 15;
 		
 		// point gen
 		numPoints = 150;

@@ -1,7 +1,7 @@
 ---ENGINE---
 [...] fix land/take-off position bug
-    [...] time based orbit
-    [ ] cleanup land and take off for player, base on planet ID of some kind
+    [x] time based orbit
+    [...] cleanup land and take off for player, base on planet ID of some kind
     [ ] test land and take off for AI, system doesn't supports non-player world switching
         dumb loop where AI lands on planet, kept in some kind of background
         processing state/alt engine, wait a second then take off to test all is working correctly

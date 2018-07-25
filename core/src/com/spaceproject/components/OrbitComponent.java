@@ -2,24 +2,22 @@ package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.math.MathUtils;
 
 public class OrbitComponent implements Component {
 	//the entity to orbit
 	public Entity parent; 
 	
-	//angle from parent position in radians 
+	//angle from parent in radians
 	public double angle, startAngle;
 	
-	//how fast to orbit around entity
-	public long msPerRevolution;
-	public float tangentialVelocity;
-	
+	//orbit parameters
+	public float radialDistance; //distance from entity to rotate
+	public float tangentialSpeed; //how fast to orbit
+
 	//how fast to rotate
 	public float rotSpeed;
-	
-	//radialDistance from entity to rotate
-	public float radialDistance;
-	
+
 	//rotation direction
 	public boolean rotateClockwise;
 	

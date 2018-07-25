@@ -75,6 +75,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
 		//https://www.opengl.org/wiki/OpenGL_and_multithreading
 
 		// timer to check when player has changed tiles
+		//TODO: use Utility.SimpleTimer
 		checkTileCurrTime -= 1000 * delta;
 		if (checkTileCurrTime < 0) {
 			// reset timer
