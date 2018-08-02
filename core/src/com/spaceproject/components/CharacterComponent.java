@@ -2,7 +2,6 @@ package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
-import com.spaceproject.utility.SimpleTimer;
 
 public class CharacterComponent implements Component {
 

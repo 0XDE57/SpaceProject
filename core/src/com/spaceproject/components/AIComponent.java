@@ -6,10 +6,10 @@ import com.badlogic.ashley.core.Entity;
 public class AIComponent implements Component {
 
 	public Entity attackTarget;//short index...
-	//public ArrayList<Entity> attackTargets;
+	//public Array<Entity> attackTargets;
 	
 	public Entity followTarget;//short index...
-	//public ArrayList<Entity> followTargets;
+	//public Array<Entity> followTargets;
 
 	public Entity planetTarget; //test land
 
@@ -28,6 +28,7 @@ public class AIComponent implements Component {
 		attack,
 		gotoPlace,
 		idle,
+		customTask -> delegate to logic
 		...	
 	}	
 	 */

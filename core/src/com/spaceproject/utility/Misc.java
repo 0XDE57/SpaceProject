@@ -1,13 +1,13 @@
 package com.spaceproject.utility;
 
-import java.lang.reflect.Field;
-
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Vector3;
+
+import java.lang.reflect.Field;
 
 /** TODO: Misc is a terrible class name */
 public class Misc {

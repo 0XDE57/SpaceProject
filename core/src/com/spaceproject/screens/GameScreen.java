@@ -4,20 +4,17 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Application.ApplicationType;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.CameraFocusComponent;
-import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ControlFocusComponent;
+import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.LandConfig;
@@ -43,9 +40,6 @@ import com.spaceproject.systems.WorldWrapSystem;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyScreenAdapter;
 
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class GameScreen extends MyScreenAdapter {
@@ -77,7 +71,7 @@ public class GameScreen extends MyScreenAdapter {
 		landCFG = new LandConfig();
 		landCFG.position = new Vector3();// start player at 0,0
 		Entity player = EntityFactory.createCharacter(landCFG.position.x, landCFG.position.y);
-		Entity playerTESTSHIP = EntityFactory.createShip3(landCFG.position.x, landCFG.position.y, landCFG.shipSeed, player);
+		Entity playerTESTSHIP = EntityFactory.createShip3(landCFG.position.x, landCFG.position.y, 0, player);
 		landCFG.ship = playerTESTSHIP;
 
 
@@ -105,15 +99,53 @@ public class GameScreen extends MyScreenAdapter {
 	private void initSpace(LandConfig landCFG) {
 		System.out.println("==========SPACE==========");
 		GameScreen.landCFG = landCFG;
+		/*
 		Misc.printObjectFields(landCFG);
 		Misc.printEntity(landCFG.ship);
+		*/
 
 		inSpace = true;
 		
 		
 		// engine to handle all entities and components
 		engine = new Engine();
-		
+
+
+
+		//===============SYSTEMS===============
+		//input
+		if (Gdx.app.getType() == ApplicationType.Android || Gdx.app.getType() == ApplicationType.iOS) {
+			engine.addSystem(new MobileInputSystem());
+		} else {
+			engine.addSystem(new DesktopInputSystem());
+		}
+		engine.addSystem(new AISystem());
+
+		//loading
+		engine.addSystem(new SpaceLoadingSystem());
+		engine.addSystem(new SpaceParallaxSystem());//TODO: this is the source of jiggering while moving, caused by loading/unloading tiles.
+		//Ai...
+
+		//logic
+		engine.addSystem(new ScreenTransitionSystem());
+		engine.addSystem(new ControlSystem());
+		engine.addSystem(new ExpireSystem(1));
+		engine.addSystem(new OrbitSystem());
+		engine.addSystem(new MovementSystem());
+		engine.addSystem(new BoundsSystem());
+		engine.addSystem(new CollisionSystem());
+
+
+		//rendering
+		engine.addSystem(new CameraSystem());
+		engine.addSystem(new SpaceRenderingSystem());
+		engine.addSystem(new HUDSystem());
+		engine.addSystem(new DebugUISystem());
+
+
+
+
+
 
 		//===============ENTITIES===============
 		//test ships
@@ -139,36 +171,13 @@ public class GameScreen extends MyScreenAdapter {
 		//engine.addEntity(aiTest);
 		//aiTest.add(ship.remove(CameraFocusComponent.class));
 		
-		//===============SYSTEMS===============
-		//input
-		if (Gdx.app.getType() == ApplicationType.Android || Gdx.app.getType() == ApplicationType.iOS) {
-			engine.addSystem(new MobileInputSystem());
-		} else {
-			engine.addSystem(new DesktopInputSystem());
-		}
-		engine.addSystem(new AISystem());
-		
-		//loading
-		engine.addSystem(new SpaceLoadingSystem());
-		engine.addSystem(new SpaceParallaxSystem());
-		//Ai...
-		
-		//logic
-		engine.addSystem(new ScreenTransitionSystem());	
-		engine.addSystem(new ControlSystem());
-		engine.addSystem(new ExpireSystem(1));
-		engine.addSystem(new OrbitSystem());
-		engine.addSystem(new MovementSystem());
-		engine.addSystem(new BoundsSystem());
-		engine.addSystem(new CollisionSystem());
-		
-		
-		//rendering
-		engine.addSystem(new CameraSystem());
-		engine.addSystem(new SpaceRenderingSystem());
-		engine.addSystem(new HUDSystem());
-		engine.addSystem(new DebugUISystem());
-		
+
+
+
+
+
+
+
 		//DebugUISystem.printEntities(engine);
 		//DebugUISystem.printSystems(engine);
 	}
@@ -176,15 +185,45 @@ public class GameScreen extends MyScreenAdapter {
 	
 	private void initWorld(LandConfig landCFG) {
 		System.out.println("==========WORLD==========");
+		/*
 		Misc.printObjectFields(landCFG);
 		Misc.printObjectFields(landCFG.planet);
-		Misc.printEntity(landCFG.ship);
+		Misc.printEntity(landCFG.ship);*/
 
 		GameScreen.landCFG = landCFG;
 		inSpace = false;
 
 		// engine to handle all entities and components
 		engine = new Engine();
+
+
+		// ===============SYSTEMS===============
+		// input
+		if (Gdx.app.getType() == ApplicationType.Android || Gdx.app.getType() == ApplicationType.iOS) {
+			engine.addSystem(new MobileInputSystem());
+		} else {
+			engine.addSystem(new DesktopInputSystem());
+		}
+		engine.addSystem(new AISystem());
+
+		// loading
+
+		// logic
+		engine.addSystem(new ScreenTransitionSystem());
+		engine.addSystem(new ControlSystem());
+		engine.addSystem(new ExpireSystem(1));
+		engine.addSystem(new MovementSystem());
+		engine.addSystem(new WorldWrapSystem(landCFG.planet.mapSize));
+		engine.addSystem(new BoundsSystem());
+		engine.addSystem(new CollisionSystem());
+
+		// rendering
+		engine.addSystem(new CameraSystem());
+		engine.addSystem(new WorldRenderingSystem(landCFG.planet));
+		engine.addSystem(new HUDSystem());
+		engine.addSystem(new DebugUISystem());
+
+
 
 		// ===============ENTITIES===============
 		// add player
@@ -211,32 +250,7 @@ public class GameScreen extends MyScreenAdapter {
 		engine.addEntity(aiTest);
 
 		
-		// ===============SYSTEMS===============
-		// input
-		if (Gdx.app.getType() == ApplicationType.Android || Gdx.app.getType() == ApplicationType.iOS) {
-			engine.addSystem(new MobileInputSystem());
-		} else {
-			engine.addSystem(new DesktopInputSystem());
-		}
-		engine.addSystem(new AISystem());
 
-		// loading
-
-		// logic
-		engine.addSystem(new ScreenTransitionSystem());
-		engine.addSystem(new ControlSystem());
-		engine.addSystem(new ExpireSystem(1));
-		engine.addSystem(new MovementSystem());
-		engine.addSystem(new WorldWrapSystem(landCFG.planet.mapSize));
-		engine.addSystem(new BoundsSystem());
-		engine.addSystem(new CollisionSystem());
-
-		// rendering
-		engine.addSystem(new CameraSystem());
-		engine.addSystem(new WorldRenderingSystem(landCFG.planet));
-		engine.addSystem(new HUDSystem());
-		engine.addSystem(new DebugUISystem());
-		
 		
 		//DebugUISystem.printEntities(engine);
 		//DebugUISystem.printSystems(engine);

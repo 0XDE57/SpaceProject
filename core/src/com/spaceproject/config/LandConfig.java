@@ -8,6 +8,6 @@ public class LandConfig {
 
 	public PlanetComponent planet;
 	public Entity ship;
-	public long shipSeed;
+	//public long shipSeed;
 	public Vector3 position;
 }

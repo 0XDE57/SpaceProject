@@ -1,11 +1,11 @@
 package com.spaceproject;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.utility.MyMath;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class Tile implements Comparable<Tile> {
 	public static ArrayList<Tile> defaultTiles = getDefault();

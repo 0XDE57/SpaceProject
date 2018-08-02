@@ -1,8 +1,5 @@
 package com.spaceproject.systems;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -13,7 +10,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
@@ -25,6 +21,9 @@ import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyScreenAdapter;
 import com.spaceproject.utility.NoiseGen;
+
+import java.util.ArrayList;
+import java.util.Comparator;
 
 public class WorldRenderingSystem extends IteratingSystem implements Disposable {
 		

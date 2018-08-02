@@ -12,7 +12,7 @@ public class VehicleComponent implements Component {
 	// seed that generated ship
 	public long seed = 0;
 
-	// id to identify one vehicle from another
+	// tempGenID to identify one vehicle from another
 	public int id;
 	
 	// how fast to accelerate

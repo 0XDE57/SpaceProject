@@ -8,15 +8,12 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.BoundsComponent;
-import com.spaceproject.components.CameraFocusComponent;
-import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.MyScreenAdapter;
 
 public class AISystem extends IteratingSystem {
 

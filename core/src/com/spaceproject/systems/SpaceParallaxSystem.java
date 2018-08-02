@@ -1,8 +1,5 @@
 package com.spaceproject.systems;
 
-import java.util.ArrayList;
-
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
@@ -11,7 +8,10 @@ import com.spaceproject.SpaceBackgroundTile;
 import com.spaceproject.SpaceBackgroundTile.TileType;
 import com.spaceproject.utility.MyScreenAdapter;
 
+import java.util.ArrayList;
+
 public class SpaceParallaxSystem extends EntitySystem implements Disposable {
+	//TODO: loading, unloading tiles is slow, blame is probably pixmap generation, should try to replace with shader
 
 	//private Engine engine;
 	private static OrthographicCamera cam;

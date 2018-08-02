@@ -2,12 +2,19 @@
 [...] fix land/take-off position bug
     [x] time based orbit
     [...] cleanup land and take off for player, base on planet ID of some kind
+        goal: when leave from planet, load from center of planet at correct orbit location
+        problem: currently SpaceLoadingSystem loads stars after entities, and after at least one engine cycle to trigger
+        update logic to add stars systems with planets. when taking off from planet, we require the planet to be loaded first.
+        location is another issue, planet must not only be loaded first, but orbit system needs an engine cycle to update with correct location
+        also does not support AI or entities other than player from entering/leaving planet
+        seems to require an overhaul of OrbitSystem(), SpaceLoadingSystem() and EntityFactory()
     [ ] test land and take off for AI, system doesn't supports non-player world switching
         dumb loop where AI lands on planet, kept in some kind of background
         processing state/alt engine, wait a second then take off to test all is working correctly
         background engine meant to be low processing effort (eg: ultra dumbed down AI or simulations, no rendering, no physics, just states and events) to keep track of important entities
         and states between space and worlds. eg: give entity important flag component to keep relevant, if dont have flag dont care and remove when switch
         will be useful for persistence, AI and story type events.
+
         eg:
         Engine backgroundEngine.
         if (player switch screen) {
@@ -58,6 +65,7 @@
 [ ] fix render priority (z-order)
 [ ] system processing priority
 [ ] make colored tiles use texture regions instead of individual textures. (create one texture with all colors/tiles on it)
+[ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
 [ ] fix ship edges to use entire width of texture
 [ ] try setting camera rotate to player orientation?
 [ ] pause/menu

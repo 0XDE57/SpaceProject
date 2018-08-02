@@ -1,8 +1,5 @@
 package com.spaceproject.screens;
 
-import java.util.ArrayList;
-
-import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ScreenAdapter;
@@ -11,10 +8,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureFactory;
-import com.spaceproject.systems.SpaceRenderingSystem;
 import com.spaceproject.utility.MyScreenAdapter;
+
+import java.util.ArrayList;
 
 public class TestShipGenerationScreen extends ScreenAdapter {
 

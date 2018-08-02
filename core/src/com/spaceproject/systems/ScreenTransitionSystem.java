@@ -1,6 +1,5 @@
 package com.spaceproject.systems;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -19,8 +18,7 @@ import com.spaceproject.utility.MyScreenAdapter;
 
 
 public class ScreenTransitionSystem extends IteratingSystem {
-	//Vector3 landPos = null;
-	
+
 	public ScreenTransitionSystem() {
 		super(Family.all(ScreenTransitionComponent.class, TransformComponent.class).get());
 	}
@@ -33,7 +31,6 @@ public class ScreenTransitionSystem extends IteratingSystem {
 			if (screenTrans.curLandStage == null || screenTrans.curLandStage != screenTrans.landStage) {
 				System.out.println("Animation Stage: " + screenTrans.landStage + " for " + Integer.toHexString(entity.hashCode()));
 				screenTrans.curLandStage = screenTrans.landStage;
-				//landPos = screenTrans.landCFG.position;//?
 			}
 			switch (screenTrans.landStage) {
 			case shrink:

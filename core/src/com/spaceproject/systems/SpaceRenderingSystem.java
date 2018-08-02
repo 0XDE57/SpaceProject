@@ -1,7 +1,5 @@
 package com.spaceproject.systems;
 
-import java.util.Comparator;
-
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -18,6 +16,9 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyScreenAdapter;
+
+import java.util.ArrayList;
+import java.util.Comparator;
 
 public class SpaceRenderingSystem extends IteratingSystem implements Disposable {
 
@@ -98,7 +99,12 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 	}
 	
 	private void drawParallaxTiles() {
-		for (SpaceBackgroundTile tile : SpaceParallaxSystem.getTiles()) {
+		ArrayList<SpaceBackgroundTile> tiles = SpaceParallaxSystem.getTiles();
+		if (tiles == null){
+			return;
+		}
+
+		for (SpaceBackgroundTile tile : tiles) {
 			//draw = (tile position + (cam position - center of tile)) * depth			
 			float drawX = tile.x + (cam.position.x - (tile.size/2)) * tile.depth;
 			float drawY = tile.y + (cam.position.y - (tile.size/2)) * tile.depth;			

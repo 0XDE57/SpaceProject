@@ -2,7 +2,6 @@ package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.math.MathUtils;
 
 public class OrbitComponent implements Component {
 	//the entity to orbit

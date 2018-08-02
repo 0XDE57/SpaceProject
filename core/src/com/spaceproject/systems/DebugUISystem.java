@@ -1,12 +1,8 @@
 package com.spaceproject.systems;
 
-import java.lang.reflect.Field;
-import java.util.Set;
-
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
@@ -36,6 +32,9 @@ import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.MyScreenAdapter;
+
+import java.lang.reflect.Field;
+import java.util.Set;
 
 public class DebugUISystem extends IteratingSystem implements Disposable {
 

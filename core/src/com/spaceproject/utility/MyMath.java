@@ -2,7 +2,6 @@ package com.spaceproject.utility;
 
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.TransformComponent;
 
 public class MyMath {
 	

@@ -1,9 +1,8 @@
 package com.spaceproject.systems;
 
-import java.util.ArrayList;
-
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
@@ -13,10 +12,12 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
+import com.spaceproject.components.BarycenterComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.StarComponent;
@@ -24,47 +25,65 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyScreenAdapter;
 import com.spaceproject.utility.NoiseThread;
 
-public class SpaceLoadingSystem extends EntitySystem implements Disposable {
+public class SpaceLoadingSystem extends EntitySystem implements EntityListener, Disposable {
 
-	private Engine engine;
-	private static OrthographicCamera cam;
+	//private Engine engine;
+	//private static OrthographicCamera cam;
 	
 	// star entities
-	private ArrayList<Vector2> points;
-	private ImmutableArray<Entity> loadedStars;
+	private Array<Vector2> points;
+	private ImmutableArray<Entity> loadedAstronomicalObjects;
 	private float checkStarsTimer = 4000;
 	private float checkStarsCurrTime;
 	
 	// threads for generating planet texture noise
-	ArrayList<NoiseThread> noiseThreads;
+	Array<NoiseThread> noiseThreads;
 
 	public SpaceLoadingSystem() {
 		this(MyScreenAdapter.cam);
 	}
 	
 	public SpaceLoadingSystem(OrthographicCamera camera) {
-		cam = camera;
-		points = new ArrayList<Vector2>();
-		noiseThreads = new ArrayList<NoiseThread>();
+		//cam = camera;
+		points = new Array<Vector2>();
+		noiseThreads = new Array<NoiseThread>();
 	}
 
 	@Override
 	public void addedToEngine(Engine engine) {
-		this.engine = engine;
+		//this.engine = engine;
 		// currently loaded stars/planets
-		loadedStars = engine.getEntitiesFor(Family.all(StarComponent.class, TransformComponent.class).get());
+		loadedAstronomicalObjects = engine.getEntitiesFor(Family.all(BarycenterComponent.class).get());
+
+		engine.addEntityListener(Family.one(PlanetComponent.class, StarComponent.class).get(),this);
 
 		// generate or load points from disk
 		loadPoints();
-		
+
+
 		// load planetary systems / planets / stars
+		updateStars(1);
 		// load space things (asteroids, wormhole, black hole, etc)
 		// load ai/mobs
 
+	}
+
+	@Override
+	public void entityAdded(Entity entity) {
+		System.out.println("entityAdded++++++++++++++++++++++++++++++++++++");
+		Misc.printEntity(entity);
+	}
+
+	@Override
+	public void entityRemoved(Entity entity) {
+		System.out.println("entityRemoved----------------------------------");
+		//Misc.printEntity(entity);
 	}
 	
 	@Override
@@ -82,15 +101,15 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 	 * Once a texture has been replaced, the thread is then removed from the list and considered processed.
 	 */
 	private void updatePlanetTextures() {
-		if (noiseThreads.isEmpty()) {
+		if (noiseThreads.size == 0) {
 			return;
 		}
 		
 		//if a thread has finished generating the noise, create a texture and replace the blank one
 		for (NoiseThread thread : noiseThreads) {
 			if (thread.isDone() && !thread.isProcessed()) {			
-				for (Entity p : engine.getEntitiesFor(Family.all(PlanetComponent.class).get())) {
-					if (p.getComponent(PlanetComponent.class).id == thread.getID()) {					
+				for (Entity p : getEngine().getEntitiesFor(Family.all(PlanetComponent.class).get())) {
+					if (p.getComponent(PlanetComponent.class).tempGenID == thread.getID()) {
 						int[][] tileMap = thread.getPixelatedMap();
 						if (tileMap != null) {
 							// create planet texture from tileMap, replace texture
@@ -120,6 +139,7 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 	}
 	
 	private void updateStars(float delta) {
+		//TODO: use SimpleTimer
 		checkStarsCurrTime -= 1000 * delta;
 		if (checkStarsCurrTime < 0) {
 			checkStarsCurrTime = checkStarsTimer; // reset timer
@@ -129,20 +149,20 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 			loadDistance *= loadDistance;//square for dist2
 			
 			// remove stars from engine that are too far
-			for (Entity star : loadedStars) {
+			for (Entity star : loadedAstronomicalObjects) {
 				TransformComponent t = Mappers.transform.get(star);
-				if (Vector2.dst2(t.pos.x, t.pos.y, cam.position.x, cam.position.y) > loadDistance) {
-					for (Entity e : engine.getEntitiesFor(Family.all(OrbitComponent.class).get())){
+				if (Vector2.dst2(t.pos.x, t.pos.y, GameScreen.cam.position.x, GameScreen.cam.position.y) > loadDistance) {
+					for (Entity e : getEngine().getEntitiesFor(Family.all(OrbitComponent.class).get())){
 						OrbitComponent orbit = Mappers.orbit.get(e);
 						if (orbit.parent != null) {
 							//TODO: check if parents have parents (eg: moon > planet > star)
 							//TODO: dispose texture. research auto texture dispose -> entity.componentRemoved()?
 							if (orbit.parent == star) {
-								engine.removeEntity(e);
+								getEngine().removeEntity(e);
 							}
 						}
 					}
-					engine.removeEntity(star);
+					getEngine().removeEntity(star);
 					System.out.println("Removed Planetary System: " + star.getComponent(TransformComponent.class).pos.toString());
 				}
 			}
@@ -150,12 +170,12 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 			// add planetary systems to engine
 			for (Vector2 point : points) {
 				//check if point is close enough to be loaded
-				if (point.dst2(cam.position.x, cam.position.y) < loadDistance) {
+				if (point.dst2(GameScreen.cam.position.x, GameScreen.cam.position.y) < loadDistance) {
 			
 					// check if star is already in world
 					//TODO: check based on an ID rather than distance. more reliable and makes more sense than a distance check
 					boolean loaded = false;
-					for (Entity star : loadedStars) {
+					for (Entity star : loadedAstronomicalObjects) {
 						TransformComponent t = Mappers.transform.get(star);
 						if (point.dst(t.pos.x, t.pos.y) < 2f) {
 							loaded = true;
@@ -164,9 +184,9 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 					
 					if (!loaded) {
 						//create new system
-						for (Entity e : EntityFactory.createPlanetarySystem(point.x, point.y)) {
+						for (Entity e : EntityFactory.createAstronomicalObjects(point.x, point.y)) {
 							//add entity to world
-							engine.addEntity(e);
+							getEngine().addEntity(e);
 														
 							PlanetComponent planet = Mappers.planet.get(e);
 							if (planet != null) {
@@ -201,13 +221,13 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 					int y = Integer.parseInt(coords[1]);
 					points.add(new Vector2(x, y));
 				}
-				System.out.println("[LOAD DATA] : Loaded " + points.size() + " points...");
+				System.out.println("[LOAD DATA] : Loaded " + points.size + " points...");
 			} catch (GdxRuntimeException ex) {
 				System.out.println("Could not load file: " + ex.getMessage());
 			}
 		} else {
 			points = generatePoints();// create points
-			System.out.println("[GENERATE DATA] : Created " + points.size() + " points...");
+			System.out.println("[GENERATE DATA] : Created " + points.size + " points...");
 			try {
 				// save points to disk
 				for (Vector2 p : points) {
@@ -220,6 +240,7 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 		}
 		
 		//debug
+		//TODO: don't forget about me
 		points.add(new Vector2(700, 700));//system near origin for debug
 		
 	}
@@ -229,9 +250,9 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 	 * 
 	 * @return list of Vector2 representing points
 	 */
-	private static ArrayList<Vector2> generatePoints() {
+	private static Array<Vector2> generatePoints() {
 		MathUtils.random.setSeed(SpaceProject.SEED);
-		ArrayList<Vector2> points = new ArrayList<Vector2>();
+		Array<Vector2> points = new Array<Vector2>();
 		
 		// how many stars TRY to create(does not guarantee this many points will actually be generated)
 		int numStars = SpaceProject.celestcfg.numPoints;
@@ -256,7 +277,7 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 
 				// check for collisions
 				reGen = false;
-				for (int j = 0; j < points.size() && !reGen; j++) {
+				for (int j = 0; j < points.size && !reGen; j++) {
 					// if point is too close to other point; regenerate
 					if (newPoint.dst2(points.get(j)) <= dist) {
 						reGen = true;
@@ -280,7 +301,7 @@ public class SpaceLoadingSystem extends EntitySystem implements Disposable {
 	}
 
 	
-	public ArrayList<Vector2> getPoints() {
+	public Array<Vector2> getPoints() {
 		return points;
 	}
 

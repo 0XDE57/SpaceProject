@@ -1,9 +1,9 @@
 package com.spaceproject.utility;
 
-import java.util.ArrayList;
-
 import com.spaceproject.Tile;
 import com.spaceproject.components.PlanetComponent;
+
+import java.util.ArrayList;
 
 public class NoiseThread implements Runnable {
 	
@@ -33,7 +33,7 @@ public class NoiseThread implements Runnable {
 	private int[][] pixelatedTileMap;
 
 	public NoiseThread(PlanetComponent planet, ArrayList<Tile> tiles) {
-		this(planet.id, planet.scale, planet.octaves, planet.persistence, planet.lacunarity, planet.seed, planet.mapSize, tiles);
+		this(planet.tempGenID, planet.scale, planet.octaves, planet.persistence, planet.lacunarity, planet.seed, planet.mapSize, tiles);
 	}
 	
 	public NoiseThread(long id, float s, int o, float p, float l, long seed, int mapSize, ArrayList<Tile> tiles) {

@@ -1,21 +1,33 @@
 package com.spaceproject.systems;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.Misc;
 
-public class OrbitSystem extends IteratingSystem {
+public class OrbitSystem extends IteratingSystem implements EntityListener {
 
 	public OrbitSystem() {
 		super(Family.all(OrbitComponent.class, TransformComponent.class).get());
 	}
 
+	@Override
+	public void addedToEngine (Engine engine) {
+		Family test = Family.all(ControlFocusComponent.class).get();
+		engine.addEntityListener(test,this);
+
+		super.addedToEngine(engine);
+
+	}
 
 	@Override
 	protected void processEntity(Entity entity, float delta) {
@@ -72,5 +84,17 @@ public class OrbitSystem extends IteratingSystem {
 			}
 		}
 
+	}
+
+	@Override
+	public void entityAdded(Entity entity) {
+		System.out.println("entityAdded++++++++++++++++++++++++++++++++++++");
+		Misc.printEntity(entity);
+	}
+
+	@Override
+	public void entityRemoved(Entity entity) {
+		System.out.println("entityRemoved----------------------------------");
+		//Misc.printEntity(entity);
 	}
 }

@@ -25,7 +25,6 @@ import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.utility.SimpleTimer;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
@@ -120,7 +119,7 @@ public class ControlSystem extends IteratingSystem {
 		CannonComponent cannon = Mappers.cannon.get(entity);	
 		refillAmmo(cannon);
 		if (control.shoot) {
-			//int id = Mappers.vehicle.get(entity).id;
+			//int tempGenID = Mappers.vehicle.get(entity).tempGenID;
 			fireCannon(transform, cannon, entity);
 		}
 		

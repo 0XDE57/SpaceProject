@@ -1,7 +1,5 @@
 package com.spaceproject.screens;
 
-import java.util.ArrayList;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
@@ -20,6 +18,8 @@ import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.utility.MyScreenAdapter;
+
+import java.util.ArrayList;
 
 //voronoi/polygon stuff
 //END GOAL: https://www.youtube.com/watch?v=pe4_Dimk7v0

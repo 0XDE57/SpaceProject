@@ -1,11 +1,12 @@
 package com.spaceproject.utility;
 
-import java.util.ArrayList;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
+
+import java.util.ArrayList;
 
 
 public class NoiseGen {

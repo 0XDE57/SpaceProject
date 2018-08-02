@@ -1,7 +1,5 @@
 package com.spaceproject.generation;
 
-import java.util.ArrayList;
-
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
@@ -10,8 +8,9 @@ import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.NoiseGen;
 import com.spaceproject.utility.OpenSimplexNoise;
+
+import java.util.ArrayList;
 
 public class TextureFactory {
 

@@ -8,8 +8,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
+import com.spaceproject.components.BarycenterComponent;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
@@ -27,6 +29,7 @@ import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.utility.IDGen;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.SimpleTimer;
+
 
 public class EntityFactory {
 
@@ -77,10 +80,61 @@ public class EntityFactory {
 	}
 	//endregion
 
-	//region Celestial objects
-	public static Entity[] createPlanetarySystem(float x, float y) {
+
+
+	//region Astronomical / Celestial objects and bodies
+	private static Entity CelestialAnchor(float x, float y) {
 		long seed = MyMath.getSeed(x, y);
 		MathUtils.random.setSeed(seed);
+		Entity celestialAnchor = new Entity();
+		BarycenterComponent barycenter = new BarycenterComponent();
+		barycenter.seed = seed;
+		barycenter.bodyType = BarycenterComponent.AstronomicalBodyType.singleStarPlanetary;//MathUtils.random.next...
+		celestialAnchor.add(barycenter);
+		return celestialAnchor;
+	}
+
+	public static Array<Entity> createAstronomicalObjects(float x, float y) {
+		long seed = MyMath.getSeed(x, y);
+		MathUtils.random.setSeed(seed);
+
+		BarycenterComponent barycenter = new BarycenterComponent();
+		barycenter.seed = seed;
+		barycenter.bodyType = BarycenterComponent.AstronomicalBodyType.singleStarPlanetary;//MathUtils.random.next...
+
+		Array<Entity> astronomicalObjects = new Array<Entity>();
+		//do i want a bayercenter object? or make it a property of entities?
+		//answer, yes object because multiple entities may want the same component, better to have anchor entity and set it as orbit body
+
+		//Entity celestialAnchor = CelestialAnchor(x, y);
+		astronomicalObjects.add(celestialAnchor);
+
+		switch (celestialAnchor.getComponent(BarycenterComponent.class).bodyType) {
+			case singleStarPlanetary:
+				//basic planetary system orbiting a single star
+				astronomicalObjects.addAll(createPlanetarySystem(barycenter, x, y));
+				break;
+			case multiStellar:
+				// binary / multiple stars and no planets
+				break;
+			case multiStellarPlanetary:
+				// binary / multiple stars with circumbinary/circumstellar planets
+				break;
+			case rouguePlanet:
+				//nomad planet, free-floating planet not gravitationally bound to any star
+				//createPlanet();
+				break;
+			case lonestar:
+				//createStar();
+				break;
+
+		}
+
+		return astronomicalObjects;
+	}
+
+	private static Entity[] createPlanetarySystem(BarycenterComponent barycenter, float x, float y) {
+		MathUtils.random.setSeed(barycenter.seed);
 
 		//number of planets in a system
 		int numPlanets = MathUtils.random(SpaceProject.celestcfg.minPlanets, SpaceProject.celestcfg.maxPlanets);
@@ -95,7 +149,8 @@ public class EntityFactory {
 		Entity[] entities = new Entity[numPlanets + 1];
 	
 		//add star to center of planetary system
-		Entity star = createStar(seed, x, y, rotDir);
+		Entity star = createStar(barycenter.seed, x, y, rotDir);
+		star.add(barycenter);
 		entities[0] = star;
 		
 		//create planets around star
@@ -111,7 +166,7 @@ public class EntityFactory {
 		
 	}
 	
-	public static Entity createStar(long seed, float x, float y, boolean rotationDir) {
+	private static Entity createStar(long seed, float x, float y, boolean rotationDir) {
 		MathUtils.random.setSeed(seed);
 		Entity entity = new Entity();
 
@@ -150,7 +205,7 @@ public class EntityFactory {
 		return entity;
 	}
 	
-	public static Entity createPlanet(long seed, Entity parent, float radialDistance, boolean rotationDir) {
+	private static Entity createPlanet(long seed, Entity parent, float radialDistance, boolean rotationDir) {
 		MathUtils.random.setSeed(seed);
 		
 		Entity entity = new Entity();	
