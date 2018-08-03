@@ -10,6 +10,7 @@ import com.badlogic.ashley.core.Component;
 public class BarycenterComponent implements Component {
     public long seed;
 
+
     public AstronomicalBodyType bodyType;
     public enum AstronomicalBodyType {
         singleStarPlanetary,

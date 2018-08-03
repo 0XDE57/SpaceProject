@@ -59,7 +59,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 	public void addedToEngine(Engine engine) {
 		//this.engine = engine;
 		// currently loaded stars/planets
-		loadedAstronomicalObjects = engine.getEntitiesFor(Family.all(BarycenterComponent.class).get());
+		loadedAstronomicalObjects = engine.getEntitiesFor(Family.all(BarycenterComponent.class, TransformComponent.class).get());
 
 		engine.addEntityListener(Family.one(PlanetComponent.class, StarComponent.class).get(),this);
 
@@ -183,7 +183,17 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 					}
 					
 					if (!loaded) {
+						/*
 						//create new system
+						Entity e = EntityFactory.createRouguePlanet(point.x, point.y);
+						//add entity to world
+						getEngine().addEntity(e);
+
+						PlanetComponent planet = Mappers.planet.get(e);
+						if (planet != null) {
+							noiseThreads.add(new NoiseThread(planet, Tile.defaultTiles));
+						}*/
+
 						for (Entity e : EntityFactory.createAstronomicalObjects(point.x, point.y)) {
 							//add entity to world
 							getEngine().addEntity(e);
