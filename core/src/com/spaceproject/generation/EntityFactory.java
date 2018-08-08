@@ -83,38 +83,30 @@ public class EntityFactory {
 
 
 	//region Astronomical / Celestial objects and bodies
-	private static Entity CelestialAnchor(float x, float y) {
-		long seed = MyMath.getSeed(x, y);
-		MathUtils.random.setSeed(seed);
-		Entity celestialAnchor = new Entity();
-		BarycenterComponent barycenter = new BarycenterComponent();
-		barycenter.seed = seed;
-		barycenter.bodyType = BarycenterComponent.AstronomicalBodyType.singleStarPlanetary;//MathUtils.random.next...
-		celestialAnchor.add(barycenter);
-		return celestialAnchor;
-	}
-
-
 	public static Array<Entity> createAstronomicalObjects(float x, float y) {
 		long seed = MyMath.getSeed(x, y);
 		MathUtils.random.setSeed(seed);
 
+		//return createPlanetarySystem(x,y,seed);
 
 		switch (MathUtils.random(2)) {
 			case 0:
-				return createPlanetarySystem(x,y,seed);
+				return createPlanetarySystem(x, y, seed);
 			case 1:
 				return createBinarySystem(x, y, seed);
 			case 2:
-				return createRouguePlanet(x, y);
+				return createRoguePlanet(x, y, seed);
 			default:
 				return createPlanetarySystem(x,y,seed);
 		}
 	}
 
+	public static Array<Entity> createPlanetarySystem(float x, float y) {
+		long seed = MyMath.getSeed(x, y);
+		return createPlanetarySystem(x, y, seed);
+	}
 	public static Array<Entity> createPlanetarySystem(float x, float y, long seed) {
 		MathUtils.random.setSeed(seed);
-
 
 		//number of planets in a system
 		int numPlanets = MathUtils.random(SpaceProject.celestcfg.minPlanets, SpaceProject.celestcfg.maxPlanets);
@@ -132,7 +124,7 @@ public class EntityFactory {
 		Entity star = createStar(seed, x, y, rotDir);
 		BarycenterComponent barycenter = new BarycenterComponent();
 		barycenter.seed = seed;
-		barycenter.bodyType = BarycenterComponent.AstronomicalBodyType.singleStarPlanetary;
+		barycenter.bodyType =  numPlanets == 0 ? BarycenterComponent.AstronomicalBodyType.lonestar : BarycenterComponent.AstronomicalBodyType.uniStellar;
 		star.add(barycenter);
 		entities.add(star);
 		
@@ -149,14 +141,17 @@ public class EntityFactory {
 		
 	}
 
-	public static Array<Entity> createRouguePlanet(float x, float y) {
+	public static Array<Entity> createRoguePlanet(float x, float y) {
 		long seed = MyMath.getSeed(x, y);
+		return createRoguePlanet(x, y, seed);
+	}
+	public static Array<Entity> createRoguePlanet(float x, float y, long seed) {
 		MathUtils.random.setSeed(seed);
 
 		//Entity anchorEntity = new Entity();
 		BarycenterComponent barycenter = new BarycenterComponent();
 		barycenter.seed = seed;
-		barycenter.bodyType = BarycenterComponent.AstronomicalBodyType.rouguePlanet;
+		barycenter.bodyType = BarycenterComponent.AstronomicalBodyType.roguePlanet;
 
 		Entity planet = createPlanet(seed, null, 0, MathUtils.randomBoolean());
 		planet.add(barycenter);
@@ -170,6 +165,10 @@ public class EntityFactory {
 		return entities;
 	}
 
+	public static Array<Entity> createBinarySystem(float x, float y) {
+		long seed = MyMath.getSeed(x, y);
+		return createBinarySystem(x, y, seed);
+	}
 	public static Array<Entity> createBinarySystem(float x, float y, long seed) {
 		Entity anchorEntity = new Entity();
 		BarycenterComponent barycenter = new BarycenterComponent();

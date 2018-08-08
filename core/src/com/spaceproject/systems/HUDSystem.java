@@ -161,72 +161,67 @@ public class HUDSystem extends EntitySystem {
 	 * Draw the players health and ammo bar.
 	 */
 	private void drawPlayerStatus() {
-		int barLength = 200;
-		int barWidth = 12;
-		int playerBarX = Gdx.graphics.getWidth()/2 - barLength/2;
+		int barWidth = 200;
+		int barHeight = 12;
+		int playerBarX = Gdx.graphics.getWidth()/2 - barWidth /2;
 		int playerHPBarY = 55;
-		int playerAmmoBarY = playerHPBarY - barWidth - 1;
+		int playerAmmoBarY = playerHPBarY - barHeight - 1;
 
-		//TODO add backing/border. Maybe caps at ends of bar. Make look nice.
 		if (player == null || player.size() == 0) return;
-		HealthComponent health = Mappers.health.get(player.first());		
-		if (health == null) return;
-		
+
 		//draw health bar
-		float ratioHP = health.health/health.maxHealth;
-		shape.setColor(barBackground);
-		shape.rect(playerBarX, playerHPBarY, barLength, barWidth);
-		shape.setColor(new Color(1 - ratioHP, ratioHP, 0, opacity));
-		shape.rect(playerBarX, playerHPBarY, barLength * ratioHP, barWidth);
-				
-		
-		//draw ammo
-		CannonComponent cannon = Mappers.cannon.get(player.first());
-		if (cannon == null) return;
-		
-		
-		//draw ammo bar
-		float ratioAmmo = (float) cannon.curAmmo / (float) cannon.maxAmmo;
-		shape.setColor(barBackground);
-		shape.rect(playerBarX, playerAmmoBarY, barLength, barWidth);
-		shape.setColor(Color.CYAN);
-		shape.rect(playerBarX, playerAmmoBarY, barLength * ratioAmmo, barWidth);
-		
-		//draw divisions to mark individual ammo
-		shape.setColor(Color.BLACK);
-		for (int i = 1; i < cannon.maxAmmo; i++) {
-			int x = playerBarX + (i * barLength / cannon.maxAmmo);
-			shape.line(x, playerAmmoBarY + barWidth, x, playerAmmoBarY);
-			shape.line(x + 1, playerAmmoBarY + barWidth, x + 1, playerAmmoBarY);
-			shape.line(x - 1, playerAmmoBarY + barWidth, x - 1, playerAmmoBarY);
+		HealthComponent health = Mappers.health.get(player.first());		
+		if (health != null) {
+			float ratioHP = health.health / health.maxHealth;
+			shape.setColor(barBackground);
+			shape.rect(playerBarX, playerHPBarY, barWidth, barHeight);
+			shape.setColor(new Color(1 - ratioHP, ratioHP, 0, opacity));
+			shape.rect(playerBarX, playerHPBarY, barWidth * ratioHP, barHeight);
 		}
 		
-				
-		//OLD bar. Length of bar depends on ammo capacity. Looks bad with very large or small capacities. 
+		//draw ammo bar
+		CannonComponent cannon = Mappers.cannon.get(player.first());
+		if (cannon != null) {
+			float ratioAmmo = (float) cannon.curAmmo / (float) cannon.maxAmmo;
+			shape.setColor(barBackground);
+			shape.rect(playerBarX, playerAmmoBarY, barWidth, barHeight);
+			shape.setColor(Color.TEAL);
+			shape.rect(playerBarX, playerAmmoBarY, barWidth * ratioAmmo, barHeight);
+
+
+			for (int i = 0; i < cannon.maxAmmo; i++) {
+				int x = playerBarX + (i * barWidth / cannon.maxAmmo);
+				//draw recharge bar
+				if (i == cannon.curAmmo) {
+					shape.setColor(Color.SLATE);
+					shape.rect(x, playerAmmoBarY, barWidth/cannon.maxAmmo*cannon.timerRechargeRate.ratio(), barHeight);
+				}
+				//draw divisions to mark individual ammo
+				if (i > 0) {
+					shape.setColor(Color.BLACK);
+					shape.rectLine(x, playerAmmoBarY + barHeight, x, playerAmmoBarY,3);
+				}
+			}
+
+			/*
+			//draw recharge bar (style 2)
+			if (cannon.curAmmo < cannon.maxAmmo) {
+				int rechargeBarHeight = 2;
+				shape.setColor(Color.SLATE);
+				shape.rect(playerBarX, playerAmmoBarY, barWidth * cannon.timerRechargeRate.ratio(), rechargeBarHeight);
+			}
+			*/
+		}
+
 		/*
-		Color bar = new Color(1, 1, 1, 0.4f);
-		Color on = new Color(0.15f, 0.5f, 0.9f, 0.9f);
-		Color off = new Color(0f, 0f, 0f, 0.6f);
-				
-		int posY = 30; //pixels from bottom off screen
-		int posX = Gdx.graphics.getWidth() / 2;
-		int border = 5; //width of border on background bar
-		int padding = 4; //space between indicators
-		int indicatorSize = 15;
-		int barWidth1 = cannon.maxAmmo * (indicatorSize + (padding * 2));
-		
-		//draw bar
-		shape.setColor(bar);		
-		shape.rect(posX-barWidth1/2+padding-border, posY-border, posX, (barWidth1/2) + (border*2), (barWidth1-padding*2) + (border*2), indicatorSize + (border*2), 1, 1, 0);
-		
-		//draw indicators
-		for (int i = 0; i < cannon.maxAmmo; ++i) {			
-			//Z = A * (B + (C * 2)) + X - ((D * (B + C * 2))/2) + C
-			//TODO: It works, but can this be simplified?
-			shape.setColor(cannon.curAmmo <= i ? off : on);
-			shape.rect((i * (indicatorSize + (padding * 2))) + posX - (barWidth1/2) + padding, posY, indicatorSize/2, indicatorSize/2, indicatorSize, indicatorSize, 1, 1, 0);
-		}*/
-		
+		//border
+		shape.setColor(new Color(1,1,1,1));
+		int thickness = 1;
+		shape.rectLine(playerBarX, playerHPBarY+barHeight, playerBarX+barWidth, playerHPBarY+barHeight, thickness);//top
+		shape.rectLine(playerBarX, playerHPBarY-barHeight, playerBarX+barWidth, playerHPBarY-barHeight,thickness);//bottom
+		shape.rectLine(playerBarX, playerHPBarY+barHeight, playerBarX, playerHPBarY-barHeight, thickness);//left
+		shape.rectLine(playerBarX+barWidth, playerHPBarY+barHeight, playerBarX+barWidth, playerHPBarY-barHeight, thickness);//right
+		*/
 	}
 
 	/**
@@ -264,6 +259,7 @@ public class HUDSystem extends EntitySystem {
 			screenPos.y -= MyScreenAdapter.cam.position.y;
 			
 			//skip on screen entities
+			//TODO: take camera zoom into account, calculate viewport coords
 			int z = 100; //how close to edge of screen to ignore
 			if (screenPos.x + z > -centerX && screenPos.x - z < centerX 
 					&& screenPos.y + z > -centerY && screenPos.y - z < centerY) {			
@@ -338,7 +334,8 @@ public class HUDSystem extends EntitySystem {
 		shape.rect(0, height - padding*2, width, padding*2, inner, inner, outer, outer);
 		*/
 	}
-	
+
+
 
 	private void drawSpaceMap() {
 		if (spaceMapScale < 1) spaceMapScale = 1;

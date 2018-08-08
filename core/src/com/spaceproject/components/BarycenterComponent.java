@@ -13,10 +13,9 @@ public class BarycenterComponent implements Component {
 
     public AstronomicalBodyType bodyType;
     public enum AstronomicalBodyType {
-        singleStarPlanetary,
+        uniStellar,
         multiStellar,
-        multiStellarPlanetary,
-        rouguePlanet,
+        roguePlanet,
         lonestar
     }
 }

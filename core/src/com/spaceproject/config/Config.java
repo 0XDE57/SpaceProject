@@ -7,11 +7,11 @@ import com.badlogic.gdx.utils.Json;
 
 public abstract class Config {
 
-	private final String fileName = "config/" +  this.getClass().getSimpleName() + ".cfg";
+	private final String fileName = "config/" +  this.getClass().getSimpleName() + ".json";
 
-	public Config() {
+	/*public Config() {
 		loadDefault();
-	}
+	}*/
 	
 	public abstract void loadDefault();
 	
@@ -23,9 +23,10 @@ public abstract class Config {
 		
 		FileHandle keyFile = Gdx.files.local(fileName);		
 		try {
-			keyFile.writeString(json.toJson(this), false);			
+			keyFile.writeString(json.toJson(this), false);
+			System.out.println("Saved: " + fileName);
 		} catch (GdxRuntimeException ex) {
-			System.out.println("Could not save file: " + ex.getMessage());
+			System.out.println("Could not save file: " + fileName + "\n" + ex.getMessage());
 		}
 	}
 	
@@ -40,9 +41,9 @@ public abstract class Config {
 			System.out.println(json.toJson(config));
 			return config;			
 		} else {
+			System.out.println(fileName + " not found. Loading defaults.");
 			loadDefault();
 			saveToJson();
-			System.out.println(fileName + " not found. Loaded defaults.");
 			return this;
 		}
 	}

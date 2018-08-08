@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
@@ -26,6 +27,7 @@ import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.OrbitComponent;
+import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.TextureFactory;
@@ -255,13 +257,27 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	private void drawOrbitPath() {
 		shape.setColor(1f, 1f, 1, 1);
 		for (Entity entity : objects) {
+
 			OrbitComponent orbit = Mappers.orbit.get(entity);
-			if (orbit != null && orbit.parent != null) {
-				TransformComponent parentPos = Mappers.transform.get(orbit.parent);
+			if (orbit != null) {
 				TransformComponent entityPos = Mappers.transform.get(entity);
-				shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
-				shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
+
+				if (orbit.parent != null) {
+					TransformComponent parentPos = Mappers.transform.get(orbit.parent);
+					shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
+					shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
+				}
+
+				TextureComponent tex = Mappers.texture.get(entity);
+				if (tex != null) {
+					int radius = (int)(tex.texture.getWidth()/2*tex.scale);
+					Vector2 orientation = new Vector2(radius,0);
+					orientation.rotateRad(entityPos.rotation);
+					shape.line(entityPos.pos.x, entityPos.pos.y, entityPos.pos.x+orientation.x, entityPos.pos.y+orientation.y);
+					shape.circle(entityPos.pos.x, entityPos.pos.y, radius);
+				}
 			}
+
 		}
 	}
 	

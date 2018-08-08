@@ -8,6 +8,13 @@
         location is another issue, planet must not only be loaded first, but orbit system needs an engine cycle to update with correct location
         also does not support AI or entities other than player from entering/leaving planet
         seems to require an overhaul of OrbitSystem(), SpaceLoadingSystem() and EntityFactory()
+        [x] 1a: id -> seed (anchor/barycenter/star)
+            1b: seed of barycenter / orbit child (planet/star/moon)
+            1c: consider children of children eg: moon->planet->star
+        [ ] when land store seed of landed
+        [ ] when takeoff, one of the addedToEngine events picks up entity, ensures landed seed is loaded, sets entity to position of seed object based on correct time-synced orbit
+            should this happen in OrbitSystem because knows orbit pos, or SpaceLoadingSystem because knows loaded stars? both information are needed...
+
     [ ] test land and take off for AI, system doesn't supports non-player world switching
         dumb loop where AI lands on planet, kept in some kind of background
         processing state/alt engine, wait a second then take off to test all is working correctly
@@ -47,7 +54,7 @@
             //if not important, remove from engine, forget about existence
         }
 
-        maybe a better way to handle would be to add an entity to engine "transition entity" and it holds ScreenTransition / landCFG?
+        maybe a better way to handle would be to add an entity to engine "transition entity" or transition component to entity and it holds ScreenTransition / landCFG?
 
 
 [ ] fixed time step (necessary for multiplayer?)
@@ -60,7 +67,6 @@
 [...] wrap planets properly (LOCAL COORDINATE SPACE?)
     https://www.reddit.com/r/gamedev/comments/1gi6np/magic_carpet_style_infinite_wrapping_terrain/
     https://simonschreibt.de/gat/1nsane-carpet-2-repetitive-worlds/
-
 
 [ ] fix render priority (z-order)
 [ ] system processing priority
@@ -110,7 +116,7 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
 
 
 ---GAMEPLAY & DESIGN---
-[ ] destructable(voronoi) asteroids
+[ ] destructible(voronoi) asteroids
 	http://www.alanzucconi.com/2015/02/24/to-voronoi-and-beyond/
 	https://stackoverflow.com/questions/20104779/libgdx-create-texture-from-overlay-using-pixmap
 [...] combat system
@@ -134,7 +140,7 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
 [ ] planet generation
 	research planet attributes //size, temperature, pressure, atmosphere/elements(https://en.wikipedia.org/wiki/Astronomical_spectroscopy)...etc
 	rings around planets? (like saturn)
-	moons/satelites
+	moons/satellites
 	http://www.entropicparticles.com/6-days-of-creation/
 	https://plaxdev.wordpress.com/2017/05/04/procedurally-generating-islands/
 	https://www.reddit.com/search?q=%28perlin|simplex|opensimplex%29+noise&sort=new
@@ -206,7 +212,7 @@ https://game-development.zeef.com/david.arcila
 //Optimization/performance:
 http://t-machine.org/index.php/2014/03/08/data-structures-for-entity-systems-contiguous-memory/
 http://unseen-academy.de/snippet_component_system.html
-
+consider switch out ashley for artemis-odb? https://github.com/junkdog/entity-system-benchmarks#entity-system-benchmarks
 
 //fonts
 http://www.fontsquirrel.com/

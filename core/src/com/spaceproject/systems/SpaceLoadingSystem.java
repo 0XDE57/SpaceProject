@@ -8,13 +8,13 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.Json;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
 import com.spaceproject.components.BarycenterComponent;
@@ -27,9 +27,56 @@ import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.Misc;
-import com.spaceproject.utility.MyScreenAdapter;
+import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.NoiseThread;
+
+import static com.spaceproject.components.BarycenterComponent.AstronomicalBodyType.*;
+
+
+class AstroObject {
+	int x, y;
+	long seed;
+	BarycenterComponent.AstronomicalBodyType type;
+
+	public AstroObject(Vector2 location) {
+		x = (int)location.x;
+		y = (int)location.y;
+		seed = MyMath.getSeed(x, y);
+
+		switch (MathUtils.random(2)) {
+			case 0: type = uniStellar; break;
+			case 1: type = multiStellar; break;
+			case 2: type = roguePlanet; break;
+		}
+
+	}
+}
+
+class Universe {
+
+	public Array<AstroObject> objects = new Array<AstroObject>();
+
+	public Universe(Array<Vector2> points) {
+		for (Vector2 p : points){
+			objects.add(new AstroObject(p));
+		}
+		saveToJson();
+	}
+
+	public void saveToJson() {
+		Json json = new Json();
+		json.setUsePrototypes(false);
+
+		System.out.println(json.toJson(this));
+
+		FileHandle keyFile = Gdx.files.local("save/" +  this.getClass().getSimpleName() + ".json");
+		try {
+			keyFile.writeString(json.toJson(this), false);
+		} catch (GdxRuntimeException ex) {
+			System.out.println("Could not save file: " + ex.getMessage());
+		}
+	}
+}
 
 public class SpaceLoadingSystem extends EntitySystem implements EntityListener, Disposable {
 
@@ -37,35 +84,28 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 	//private static OrthographicCamera cam;
 	
 	// star entities
-	private Array<Vector2> points;
+	private Array<Vector2> points = new Array<Vector2>();
+	private Universe universe;
 	private ImmutableArray<Entity> loadedAstronomicalObjects;
 	private float checkStarsTimer = 4000;
 	private float checkStarsCurrTime;
 	
 	// threads for generating planet texture noise
-	Array<NoiseThread> noiseThreads;
+	Array<NoiseThread> noiseThreads = new Array<NoiseThread>();
 
-	public SpaceLoadingSystem() {
-		this(MyScreenAdapter.cam);
-	}
-	
-	public SpaceLoadingSystem(OrthographicCamera camera) {
-		//cam = camera;
-		points = new Array<Vector2>();
-		noiseThreads = new Array<NoiseThread>();
-	}
 
 	@Override
 	public void addedToEngine(Engine engine) {
-		//this.engine = engine;
+
 		// currently loaded stars/planets
 		loadedAstronomicalObjects = engine.getEntitiesFor(Family.all(BarycenterComponent.class, TransformComponent.class).get());
 
-		engine.addEntityListener(Family.one(PlanetComponent.class, StarComponent.class).get(),this);
+		engine.addEntityListener(Family.one(PlanetComponent.class, StarComponent.class, BarycenterComponent.class).get(),this);
 
 		// generate or load points from disk
 		loadPoints();
 
+		universe = new Universe(generatePoints());
 
 		// load planetary systems / planets / stars
 		updateStars(1);
@@ -76,13 +116,18 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 
 	@Override
 	public void entityAdded(Entity entity) {
-		System.out.println("entityAdded++++++++++++++++++++++++++++++++++++");
-		Misc.printEntity(entity);
+		//System.out.println("entityAdded++++++++++++++++++++++++++++++++++++");
+		//Misc.printEntity(entity);
+
+		PlanetComponent planet = Mappers.planet.get(entity);
+		if (planet != null) {
+			noiseThreads.add(new NoiseThread(planet, Tile.defaultTiles));
+		}
 	}
 
 	@Override
 	public void entityRemoved(Entity entity) {
-		System.out.println("entityRemoved----------------------------------");
+		//System.out.println("entityRemoved----------------------------------");
 		//Misc.printEntity(entity);
 	}
 	
@@ -185,7 +230,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 					if (!loaded) {
 						/*
 						//create new system
-						Entity e = EntityFactory.createRouguePlanet(point.x, point.y);
+						Entity e = EntityFactory.createRoguePlanet(point.x, point.y);
 						//add entity to world
 						getEngine().addEntity(e);
 
@@ -194,14 +239,16 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 							noiseThreads.add(new NoiseThread(planet, Tile.defaultTiles));
 						}*/
 
+
 						for (Entity e : EntityFactory.createAstronomicalObjects(point.x, point.y)) {
 							//add entity to world
 							getEngine().addEntity(e);
-														
+
+							/*
 							PlanetComponent planet = Mappers.planet.get(e);
 							if (planet != null) {
 								noiseThreads.add(new NoiseThread(planet, Tile.defaultTiles));
-							}
+							}*/
 						}
 					}
 
@@ -251,7 +298,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 		
 		//debug
 		//TODO: don't forget about me
-		points.add(new Vector2(700, 700));//system near origin for debug
+		points.add(new Vector2(1000, 1000));//system near origin for debug
 		
 	}
 
