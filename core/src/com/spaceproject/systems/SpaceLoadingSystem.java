@@ -20,7 +20,7 @@ import com.spaceproject.Tile;
 import com.spaceproject.components.BarycenterComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PlanetComponent;
-import com.spaceproject.components.StarComponent;
+import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
@@ -30,7 +30,9 @@ import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.NoiseThread;
 
-import static com.spaceproject.components.BarycenterComponent.AstronomicalBodyType.*;
+import static com.spaceproject.components.BarycenterComponent.AstronomicalBodyType.multiStellar;
+import static com.spaceproject.components.BarycenterComponent.AstronomicalBodyType.roguePlanet;
+import static com.spaceproject.components.BarycenterComponent.AstronomicalBodyType.uniStellar;
 
 
 class AstroObject {
@@ -100,7 +102,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 		// currently loaded stars/planets
 		loadedAstronomicalObjects = engine.getEntitiesFor(Family.all(BarycenterComponent.class, TransformComponent.class).get());
 
-		engine.addEntityListener(Family.one(PlanetComponent.class, StarComponent.class, BarycenterComponent.class).get(),this);
+		engine.addEntityListener(Family.one(PlanetComponent.class, /*StarComponent.class,*/ BarycenterComponent.class).get(),this);
 
 		// generate or load points from disk
 		loadPoints();
@@ -121,7 +123,8 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 
 		PlanetComponent planet = Mappers.planet.get(entity);
 		if (planet != null) {
-			noiseThreads.add(new NoiseThread(planet, Tile.defaultTiles));
+			SeedComponent seedComp = Mappers.seed.get(entity);
+			noiseThreads.add(new NoiseThread(seedComp, planet, Tile.defaultTiles));
 		}
 	}
 

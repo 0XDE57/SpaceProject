@@ -15,6 +15,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.PlanetComponent;
+import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.LandConfig;
@@ -78,6 +79,9 @@ public class GameScreen extends MyScreenAdapter {
 
 		// test values for a default world
 		if (!inSpace && landCFG.planet == null) {
+			SeedComponent seed = new SeedComponent();
+			seed.seed = 0;
+
 			PlanetComponent planet = new PlanetComponent();
 			planet.mapSize = 128;
 			planet.scale = 100;
@@ -85,6 +89,8 @@ public class GameScreen extends MyScreenAdapter {
 			planet.persistence = 0.68f;
 			planet.lacunarity = 2.6f;
 			landCFG.planet = planet;
+			landCFG.seed = seed;
+
 			System.out.println("NULL PLANET: Default world loaded");
 		}
 
@@ -185,10 +191,10 @@ public class GameScreen extends MyScreenAdapter {
 	
 	private void initWorld(LandConfig landCFG) {
 		System.out.println("==========WORLD==========");
-		/*
-		Misc.printObjectFields(landCFG);
+		//Misc.printObjectFields(landCFG);
+		Misc.printObjectFields(landCFG.seed);
 		Misc.printObjectFields(landCFG.planet);
-		Misc.printEntity(landCFG.ship);*/
+		//Misc.printEntity(landCFG.ship);
 
 		GameScreen.landCFG = landCFG;
 		inSpace = false;
@@ -219,7 +225,7 @@ public class GameScreen extends MyScreenAdapter {
 
 		// rendering
 		engine.addSystem(new CameraSystem());
-		engine.addSystem(new WorldRenderingSystem(landCFG.planet));
+		engine.addSystem(new WorldRenderingSystem(landCFG.seed, landCFG.planet));
 		engine.addSystem(new HUDSystem());
 		engine.addSystem(new DebugUISystem());
 

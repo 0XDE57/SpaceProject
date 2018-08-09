@@ -172,6 +172,8 @@ public class ControlSystem extends IteratingSystem {
 				screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.shrink;//begin animation
 				screenTrans.landCFG = new LandConfig();
 				screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
+				screenTrans.landCFG.seed = Mappers.seed.get(planet);
+
 				//DebugUISystem.printObjectFields(planet);
 				//DebugUISystem.printObjectFields(Mappers.planet.get(planet));
 				screenTrans.landCFG.ship = entity;//entity to send to the planet

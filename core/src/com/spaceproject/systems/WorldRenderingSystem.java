@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
 import com.spaceproject.components.PlanetComponent;
+import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.TextureFactory;
@@ -53,11 +54,11 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	
 	static Texture tileTex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));
 	
-	public WorldRenderingSystem(PlanetComponent planet) {
-		this(planet, MyScreenAdapter.cam, MyScreenAdapter.batch);
+	public WorldRenderingSystem(SeedComponent seed, PlanetComponent planet) {
+		this(seed, planet, MyScreenAdapter.cam, MyScreenAdapter.batch);
 	}
 	
-	public WorldRenderingSystem(PlanetComponent planet, OrthographicCamera camera, SpriteBatch spriteBatch) {
+	public WorldRenderingSystem(SeedComponent seed, PlanetComponent planet, OrthographicCamera camera, SpriteBatch spriteBatch) {
 		super(Family.all(TransformComponent.class, TextureComponent.class).get());
 		
 		cam = camera;
@@ -65,12 +66,12 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 
 		surround = 30;	
 		
-		loadMap(planet);
+		loadMap(seed, planet);
 	
 		mapSize = planet.mapSize * SpaceProject.tileSize;
 	}
 
-	private void loadMap(PlanetComponent planet) {
+	private void loadMap(SeedComponent seed, PlanetComponent planet) {
 		//TODO: use NoiseThread
 		
 		//create tile features
@@ -83,7 +84,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		float persistence = 0.68f;//0 - 1
 		float lacunarity = 2.6f;//1 - x
 		int mapSize = 256; //size of world	*/	
-		heightMap = NoiseGen.generateWrappingNoise4D(planet.seed, planet.mapSize, planet.scale, planet.octaves, planet.persistence, planet.lacunarity);
+		heightMap = NoiseGen.generateWrappingNoise4D(seed.seed, planet.mapSize, planet.scale, planet.octaves, planet.persistence, planet.lacunarity);
 		
 		//create drawMap of tiles based on height
 		tileMap = NoiseGen.createTileMap(heightMap, tiles);		

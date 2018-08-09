@@ -11,7 +11,6 @@ public class PlanetComponent implements Component {
 	
 	public final long tempGenID;//sequential, used for texture gen, should not be used as unique identifier
 
-	public long seed;//can we use this as an identifier? it is unique?
 	public int mapSize;
 	public float scale;
 	public int octaves;
