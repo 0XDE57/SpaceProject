@@ -6,7 +6,7 @@ import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
@@ -38,13 +38,15 @@ public class OrbitSystem extends IteratingSystem implements EntityListener {
 		TransformComponent position = Mappers.transform.get(entity);
 
 		//calculate time-synced angle, dictate position as a function of time based on tangential velocity
+		/*
 		float angularSpeed = orbit.tangentialSpeed / orbit.radialDistance;
 		long msPerRevolution = (long)(1000 * MathUtils.PI2 / angularSpeed);
 		double timeSyncAngle = 0;
 		if (msPerRevolution != 0) {
 			timeSyncAngle = MathUtils.PI2 * ((double)(GameScreen.gameTimeCurrent % msPerRevolution) / (double)msPerRevolution);
-		}
+		}*/
 
+		float timeSyncAngle = getTimeSyncAngle(orbit);
 
 		if (orbit.rotateClockwise) {
 			// add clockwise rotation to entity image and orbit
@@ -69,14 +71,14 @@ public class OrbitSystem extends IteratingSystem implements EntityListener {
 		if (orbit.parent != null) {
 			//apply tangential velocity
 			position.velocity.set(orbit.tangentialSpeed, 0);
-			position.velocity.rotateRad((float)orbit.angle);
+			position.velocity.rotateRad(orbit.angle);
 			position.velocity.rotate90(orbit.rotateClockwise ? 1 : -1);
 
 			// calculate exact orbit position
 			TransformComponent parentPosition = Mappers.transform.get(orbit.parent);
-			double orbitX = parentPosition.pos.x + ((double)orbit.radialDistance * MathUtils.cos((float)orbit.angle));
-			double orbitY = parentPosition.pos.y + ((double)orbit.radialDistance * MathUtils.sin((float)orbit.angle));
-			Vector3 orbitPos = new Vector3((float)orbitX, (float)orbitY, position.pos.z);
+			float orbitX = parentPosition.pos.x + (orbit.radialDistance * MathUtils.cos(orbit.angle));
+			float orbitY = parentPosition.pos.y + (orbit.radialDistance * MathUtils.sin(orbit.angle));
+			Vector2 orbitPos = new Vector2(orbitX, orbitY);
 
 			//ensure object is not too far from synced location
 			if (!position.pos.epsilonEquals(orbitPos, 10)) {
@@ -84,6 +86,17 @@ public class OrbitSystem extends IteratingSystem implements EntityListener {
 			}
 		}
 
+	}
+
+	private float getTimeSyncAngle(OrbitComponent orbit) {
+		//calculate time-synced angle, dictate position as a function of time based on tangential velocity
+		float angularSpeed = orbit.tangentialSpeed / orbit.radialDistance;
+		long msPerRevolution = (long)(1000 * MathUtils.PI2 / angularSpeed);
+		float timeSyncAngle = 0;
+		if (msPerRevolution != 0) {
+			timeSyncAngle = MathUtils.PI2 * ((float)(GameScreen.gameTimeCurrent % msPerRevolution) / (float)msPerRevolution);
+		}
+		return timeSyncAngle;
 	}
 
 	@Override

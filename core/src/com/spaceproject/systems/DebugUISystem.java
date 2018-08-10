@@ -378,7 +378,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			ImmutableArray<Component> components = entity.getComponents();
 			
 			//use Vector3.cpy() to project only the position and avoid modifying projection matrix for all coordinates
-			Vector3 screenPos = cam.project(t.pos.cpy());
+			Vector3 screenPos = cam.project(new Vector3(t.pos.cpy(),0));
 			
 			//calculate spacing and offset for rendering
 			int fields = 0;
@@ -433,7 +433,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			String vel = " ~ " + MyMath.round(t.velocity.len(), 1);
 			String info = Math.round(t.pos.x) + "," + Math.round(t.pos.y) + vel;
 
-			Vector3 screenPos = cam.project(t.pos.cpy());
+			Vector3 screenPos = cam.project(new Vector3(t.pos.cpy(),2));
 			fontSmall.draw(batch, Integer.toHexString(entity.hashCode()) , screenPos.x, screenPos.y-15);
 			fontSmall.draw(batch, info, screenPos.x, screenPos.y);
 		}

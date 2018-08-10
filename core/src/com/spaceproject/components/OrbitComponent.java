@@ -8,7 +8,7 @@ public class OrbitComponent implements Component {
 	public Entity parent; 
 	
 	//angle from parent in radians
-	public double angle, startAngle;
+	public float angle, startAngle;
 	
 	//orbit parameters
 	public float radialDistance; //distance from entity to rotate

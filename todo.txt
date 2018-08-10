@@ -68,7 +68,9 @@
     https://www.reddit.com/r/gamedev/comments/1gi6np/magic_carpet_style_infinite_wrapping_terrain/
     https://simonschreibt.de/gat/1nsane-carpet-2-repetitive-worlds/
 
-[ ] fix render priority (z-order)
+[...] fix render priority (z-order)
+      [X] moved into separate variable
+      [ ] define proper heights for importance as current values are somewhat arbitrary
 [ ] system processing priority
 [ ] make colored tiles use texture regions instead of individual textures. (create one texture with all colors/tiles on it)
 [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader

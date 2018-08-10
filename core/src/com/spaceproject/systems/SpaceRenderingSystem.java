@@ -32,8 +32,8 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 	private Comparator<Entity> comparator = new Comparator<Entity>() {
 		@Override
 		public int compare(Entity entityA, Entity entityB) {
-			return (int) Math.signum(Mappers.transform.get(entityB).pos.z 
-					- Mappers.transform.get(entityA).pos.z);
+			return (int) Math.signum(Mappers.transform.get(entityB).zOrder
+					- Mappers.transform.get(entityA).zOrder);
 		}
 	};
 	

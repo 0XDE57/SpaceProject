@@ -5,7 +5,7 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.Vector2;
 
 import java.lang.reflect.Field;
 
@@ -28,14 +28,14 @@ public class Misc {
 		return newEntity;
 	}
 	
-	public static Entity closestEntity(Vector3 position, ImmutableArray<Entity> entities) {
+	public static Entity closestEntity(Vector2 position, ImmutableArray<Entity> entities) {
 		if (entities == null || entities.size() == 0)
 			return null;
 		
 		Entity targetEntity = entities.first();
-		float targetDist = MyMath.distance(position, Mappers.transform.get(targetEntity).pos);
+		float targetDist = position.dst(Mappers.transform.get(targetEntity).pos);
 		for (Entity searchEnt : entities) {
-			float dist = MyMath.distance(Mappers.transform.get(searchEnt).pos, position);
+			float dist = position.dst(Mappers.transform.get(searchEnt).pos);
 			if (dist < targetDist) {
 				targetDist = dist;
 				targetEntity = searchEnt;

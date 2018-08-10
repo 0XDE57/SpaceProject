@@ -9,7 +9,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
@@ -70,15 +69,17 @@ public class GameScreen extends MyScreenAdapter {
 
 		// load test default values
 		landCFG = new LandConfig();
-		landCFG.position = new Vector3();// start player at 0,0
-		Entity player = EntityFactory.createCharacter(landCFG.position.x, landCFG.position.y);
-		Entity playerTESTSHIP = EntityFactory.createShip3(landCFG.position.x, landCFG.position.y, 0, player);
-		landCFG.ship = playerTESTSHIP;
+
+		//landCFG.position = new Vector2();// start player at 0,0
+		Entity player = EntityFactory.createCharacter(0, 0);
+		Entity playerTESTSHIP = EntityFactory.createShip3(0, 0, 0, player);
+		landCFG.transitioningEntity = playerTESTSHIP;
 
 
 
 		// test values for a default world
 		if (!inSpace && landCFG.planet == null) {
+			/*
 			SeedComponent seed = new SeedComponent();
 			seed.seed = 0;
 
@@ -90,8 +91,10 @@ public class GameScreen extends MyScreenAdapter {
 			planet.lacunarity = 2.6f;
 			landCFG.planet = planet;
 			landCFG.seed = seed;
-
+			*/
+			//landCFG.planet = EntityFactory.createRoguePlanet(0,0).;
 			System.out.println("NULL PLANET: Default world loaded");
+			int a = 1/0;// throw new Exception("");
 		}
 
 		
@@ -164,12 +167,16 @@ public class GameScreen extends MyScreenAdapter {
 
 		
 		//add player
-		Entity ship = landCFG.ship;
+		Entity ship = landCFG.transitioningEntity;
 		ship.add(new CameraFocusComponent());
 		ship.add(new ControlFocusComponent());
-		//ship.add(new ControllableComponent());
-		ship.getComponent(TransformComponent.class).pos.x = landCFG.position.x;
-		ship.getComponent(TransformComponent.class).pos.y = landCFG.position.y;
+		if (landCFG.planet != null) {
+			ship.getComponent(TransformComponent.class).pos.x = landCFG.planet.getComponent(TransformComponent.class).pos.x;
+			ship.getComponent(TransformComponent.class).pos.y = landCFG.planet.getComponent(TransformComponent.class).pos.y;
+		} else {
+			ship.getComponent(TransformComponent.class).pos.set(0,0);
+			System.out.println("NULL PLANET: load player at default pos");
+		}
 		engine.addEntity(ship);
 		//System.out.println("shipTex: " + String.format("%X", shipTex.hashCode()));
 
@@ -192,8 +199,10 @@ public class GameScreen extends MyScreenAdapter {
 	private void initWorld(LandConfig landCFG) {
 		System.out.println("==========WORLD==========");
 		//Misc.printObjectFields(landCFG);
-		Misc.printObjectFields(landCFG.seed);
-		Misc.printObjectFields(landCFG.planet);
+		//Misc.printObjectFields(landCFG.seed);
+		Misc.printObjectFields(landCFG.planet.getComponent(SeedComponent.class));
+		Misc.printObjectFields(landCFG.planet.getComponent(PlanetComponent.class));
+
 		//Misc.printEntity(landCFG.ship);
 
 		GameScreen.landCFG = landCFG;
@@ -219,13 +228,13 @@ public class GameScreen extends MyScreenAdapter {
 		engine.addSystem(new ControlSystem());
 		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new MovementSystem());
-		engine.addSystem(new WorldWrapSystem(landCFG.planet.mapSize));
+		engine.addSystem(new WorldWrapSystem(landCFG.planet.getComponent(PlanetComponent.class).mapSize));
 		engine.addSystem(new BoundsSystem());
 		engine.addSystem(new CollisionSystem());
 
 		// rendering
 		engine.addSystem(new CameraSystem());
-		engine.addSystem(new WorldRenderingSystem(landCFG.seed, landCFG.planet));
+		engine.addSystem(new WorldRenderingSystem(landCFG.planet));
 		engine.addSystem(new HUDSystem());
 		engine.addSystem(new DebugUISystem());
 
@@ -233,9 +242,9 @@ public class GameScreen extends MyScreenAdapter {
 
 		// ===============ENTITIES===============
 		// add player
-		Entity ship = landCFG.ship;
+		Entity ship = landCFG.transitioningEntity;
 
-		int position = landCFG.planet.mapSize * SpaceProject.tileSize / 2;//set  position to middle of planet
+		int position = landCFG.planet.getComponent(PlanetComponent.class).mapSize * SpaceProject.tileSize / 2;//set  position to middle of planet
 		ship.getComponent(TransformComponent.class).pos.x = position;
 		ship.getComponent(TransformComponent.class).pos.y = position;
 		//shipTex.add(new ControllableComponent());

@@ -14,6 +14,6 @@ public class BarycenterComponent implements Component {
         uniStellar,
         multiStellar,
         roguePlanet,
-        lonestar
+        loneStar
     }
 }

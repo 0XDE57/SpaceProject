@@ -5,7 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.ControllableComponent;
@@ -43,7 +43,7 @@ public class AISystem extends IteratingSystem {
 		 */
 		AIComponent ai = Mappers.AI.get(entity);
 		ControllableComponent control = Mappers.controllable.get(entity);
-		Vector3 aiPos = Mappers.transform.get(entity).pos;
+		Vector2 aiPos = Mappers.transform.get(entity).pos;
 		
 		//aiPos.y += 100 * delta;
 		if (ai.state == null){
@@ -76,7 +76,7 @@ public class AISystem extends IteratingSystem {
 					}
 				} else {
 
-					Vector3 pPos = Mappers.transform.get(ai.attackTarget).pos;
+					Vector2 pPos = Mappers.transform.get(ai.attackTarget).pos;
 					control.angleFacing = MyMath.angleTo(pPos, aiPos);
 					control.moveForward = true;
 					control.movementMultiplier = 0.3f;
@@ -126,7 +126,7 @@ public class AISystem extends IteratingSystem {
 					ai.planetTarget = Misc.closestEntity(aiPos, planets);
 					if (ai.planetTarget != null) {
 
-						Vector3 pPos = Mappers.transform.get(ai.planetTarget).pos;
+						Vector2 pPos = Mappers.transform.get(ai.planetTarget).pos;
 						control.angleFacing = MyMath.angleTo(pPos, aiPos);
 
 

@@ -9,7 +9,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CameraFocusComponent;
@@ -79,7 +78,7 @@ public class ControlSystem extends IteratingSystem {
 			float walkSpeed = character.walkSpeed;
 			float dx = (float) Math.cos(transform.rotation) * (walkSpeed * control.movementMultiplier) * delta;
 			float dy = (float) Math.sin(transform.rotation) * (walkSpeed * control.movementMultiplier) * delta;
-			transform.pos.add(dx, dy, 0);
+			transform.pos.add(dx, dy);
 		}
 		
 		if (control.changeVehicle) {			
@@ -117,7 +116,7 @@ public class ControlSystem extends IteratingSystem {
 
 		//fire cannon / attack
 		CannonComponent cannon = Mappers.cannon.get(entity);	
-		refillAmmo(cannon);
+		refillAmmo(cannon);//TODO: ammo should refill on all entities regardless of player presence
 		if (control.shoot) {
 			//int tempGenID = Mappers.vehicle.get(entity).tempGenID;
 			fireCannon(transform, cannon, entity);
@@ -152,7 +151,7 @@ public class ControlSystem extends IteratingSystem {
 		screenTrans.landCFG = new LandConfig();
 		
 		//screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
-		screenTrans.landCFG.ship = entity;//entity to send to the planet
+		screenTrans.landCFG.transitioningEntity = entity;//entity to send to the planet
 		//screenTrans.landCFG.position = WORLDSCREEN.planetPos;// save position for taking off from planet
 		
 		entity.add(screenTrans);
@@ -162,22 +161,22 @@ public class ControlSystem extends IteratingSystem {
 	}
 
 	private void landOnPlanet(Entity entity) {
-		Vector3 vePos = Mappers.transform.get(entity).pos;
+		Vector2 vePos = Mappers.transform.get(entity).pos;
 		for (Entity planet : planets) {
-			Vector3 planetPos = Mappers.transform.get(planet).pos;
+			Vector2 planetPos = Mappers.transform.get(planet).pos;
 			TextureComponent planetTex = Mappers.texture.get(planet);
 
 			if (MyMath.distance(vePos.x, vePos.y, planetPos.x, planetPos.y) <= planetTex.texture.getWidth() * 0.5 * planetTex.scale) {				
 				ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
 				screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.shrink;//begin animation
 				screenTrans.landCFG = new LandConfig();
-				screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
-				screenTrans.landCFG.seed = Mappers.seed.get(planet);
+				screenTrans.landCFG.planet = planet;// Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
+				//screenTrans.landCFG.seed = Mappers.seed.get(planet);
 
 				//DebugUISystem.printObjectFields(planet);
 				//DebugUISystem.printObjectFields(Mappers.planet.get(planet));
-				screenTrans.landCFG.ship = entity;//entity to send to the planet
-				screenTrans.landCFG.position = planetPos;// save position for taking off from planet
+				screenTrans.landCFG.transitioningEntity = entity;//entity to send to the planet
+				//screenTrans.landCFG.position = planetPos;// save position for taking off from planet
 				//System.out.println("Land pos: " + planetPos);
 				
 				//TODO: planet moves, set position to what ever planet is instead (will come into play
@@ -193,9 +192,9 @@ public class ControlSystem extends IteratingSystem {
 	}
 	
 	
-	private boolean canLandOnPlanet(Vector3 pos) {
+	private boolean canLandOnPlanet(Vector2 pos) {
 		for (Entity planet : planets) {
-			Vector3 planetPos = Mappers.transform.get(planet).pos;
+			Vector2 planetPos = Mappers.transform.get(planet).pos;
 			TextureComponent planetTex = Mappers.texture.get(planet);
 			// if player is over planet
 			if (MyMath.distance(pos.x, pos.y, planetPos.x, planetPos.y)  
@@ -231,7 +230,7 @@ public class ControlSystem extends IteratingSystem {
 			float angle = transform.rotation - MathUtils.PI / 2;
 			float dx = (float) Math.cos(angle) * distance;
 			float dy = (float) Math.sin(angle) * distance;
-			transform.pos.add(dx, dy, 0);
+			transform.pos.add(dx, dy);
 
 			control.timerDodge.reset();
 		}
@@ -243,7 +242,7 @@ public class ControlSystem extends IteratingSystem {
 			float angle = transform.rotation + MathUtils.PI / 2;
 			float dx = (float) Math.cos(angle) * distance;
 			float dy = (float) Math.sin(angle) * distance;
-			transform.pos.add(dx, dy, 0);
+			transform.pos.add(dx, dy);
 
 			control.timerDodge.reset();
 		}
@@ -375,7 +374,7 @@ public class ControlSystem extends IteratingSystem {
 		Entity characterEntity = Mappers.vehicle.get(vehicleEntity).driver;
 		
 		// set the player at the position of vehicle
-		Vector3 vehiclePosition = Mappers.transform.get(vehicleEntity).pos;
+		Vector2 vehiclePosition = Mappers.transform.get(vehicleEntity).pos;
 		Mappers.transform.get(characterEntity).pos.set(vehiclePosition);
 		
 		//set focus to character

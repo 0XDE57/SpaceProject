@@ -136,7 +136,7 @@ public class HUDSystem extends EntitySystem {
 		int yOffset = -20; //position from entity		
 		
 		for (Entity entity : killables) {
-			Vector3 pos = cam.project(Mappers.transform.get(entity).pos.cpy());
+			Vector3 pos = cam.project(new Vector3(Mappers.transform.get(entity).pos.cpy(),0));
 			HealthComponent health = Mappers.health.get(entity);
 			
 			
@@ -248,7 +248,7 @@ public class HUDSystem extends EntitySystem {
 		
 		for (Entity mapable : mapableObjects) {
 			MapComponent map = Mappers.map.get(mapable);
-			Vector3 screenPos = Mappers.transform.get(mapable).pos.cpy();
+			Vector3 screenPos = new Vector3(Mappers.transform.get(mapable).pos.cpy(),0);
 			
 			if (screenPos.dst(MyScreenAdapter.cam.position) > map.distance) {
 				continue;

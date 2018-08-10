@@ -68,7 +68,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
 			}
 			switch (screenTrans.takeOffStage) {
 			case transition:
-				screenTrans.landCFG.ship = entity;
+				screenTrans.landCFG.transitioningEntity = entity;
 				takeOff(screenTrans);
 				System.out.println(this.getClass().getSimpleName() + ".takeOff: " + Integer.toHexString(entity.hashCode()));
 				Misc.printEntity(entity);
@@ -149,10 +149,10 @@ public class ScreenTransitionSystem extends IteratingSystem {
 
 	private static void landOnPlanet(ScreenTransitionComponent screenTrans) {
 		screenTrans.landStage = LandAnimStage.pause;
-		screenTrans.landCFG.ship.add(screenTrans);
-		screenTrans.landCFG.ship.getComponent(TextureComponent.class).scale = SpaceProject.scale;//reset size to normal
+		screenTrans.landCFG.transitioningEntity.add(screenTrans);
+		screenTrans.landCFG.transitioningEntity.getComponent(TextureComponent.class).scale = SpaceProject.scale;//reset size to normal
 
-		System.out.println("Land: " + screenTrans.landCFG.position);
+		System.out.println("Land: " + screenTrans.landCFG.planet.getComponent(TransformComponent.class).pos);
 		GameScreen.landCFG = screenTrans.landCFG;
 
 		GameScreen.transition = true;
@@ -160,11 +160,11 @@ public class ScreenTransitionSystem extends IteratingSystem {
 	
 	private void takeOff(ScreenTransitionComponent screenTrans) {
 		screenTrans.takeOffStage = TakeOffAnimStage.zoomOut;
-		screenTrans.landCFG.ship.add(screenTrans);
-		screenTrans.landCFG.ship.getComponent(TextureComponent.class).scale = 0;//set size to 0 so texture can grow
-		screenTrans.landCFG.position = GameScreen.landCFG.position;
+		screenTrans.landCFG.transitioningEntity.add(screenTrans);
+		screenTrans.landCFG.transitioningEntity.getComponent(TextureComponent.class).scale = 0;//set size to 0 so texture can grow
+		screenTrans.landCFG.planet = GameScreen.landCFG.planet;
 
-		System.out.println("Take off:" + screenTrans.landCFG.position);
+		System.out.println("Take off:" + screenTrans.landCFG.planet.getComponent(TransformComponent.class).pos);
 
 		//TODO: GET RID OF GameScreen.landCFG, maybe a better way to handle would be to add an entity to engine "transition entity" and it holds ScreenTransition / landCFG?
 		GameScreen.landCFG = screenTrans.landCFG;

@@ -38,8 +38,8 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	private Comparator<Entity> comparator = new Comparator<Entity>() {
 		@Override
 		public int compare(Entity entityA, Entity entityB) {
-			return (int) Math.signum(Mappers.transform.get(entityB).pos.z 
-					- Mappers.transform.get(entityA).pos.z);
+			return (int) Math.signum(Mappers.transform.get(entityB).zOrder
+					- Mappers.transform.get(entityA).zOrder);
 		}
 	};
 	
@@ -54,21 +54,24 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	
 	static Texture tileTex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));
 	
-	public WorldRenderingSystem(SeedComponent seed, PlanetComponent planet) {
-		this(seed, planet, MyScreenAdapter.cam, MyScreenAdapter.batch);
+	public WorldRenderingSystem(Entity planetEntity) {
+		this(planetEntity, MyScreenAdapter.cam, MyScreenAdapter.batch);
 	}
 	
-	public WorldRenderingSystem(SeedComponent seed, PlanetComponent planet, OrthographicCamera camera, SpriteBatch spriteBatch) {
+	public WorldRenderingSystem(Entity planetEntity, OrthographicCamera camera, SpriteBatch spriteBatch) {
 		super(Family.all(TransformComponent.class, TextureComponent.class).get());
 		
 		cam = camera;
 		batch = spriteBatch;
 
 		surround = 30;	
-		
-		loadMap(seed, planet);
+
+		SeedComponent seedComp = planetEntity.getComponent(SeedComponent.class);
+		PlanetComponent planetComp = planetEntity.getComponent(PlanetComponent.class);
+
+		loadMap(seedComp, planetComp);
 	
-		mapSize = planet.mapSize * SpaceProject.tileSize;
+		mapSize = planetComp.mapSize * SpaceProject.tileSize;
 	}
 
 	private void loadMap(SeedComponent seed, PlanetComponent planet) {

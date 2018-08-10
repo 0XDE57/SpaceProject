@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.TransformComponent;
@@ -58,7 +59,7 @@ public class WorldWrapSystem extends EntitySystem {
 		
 		
 		for (Entity entity : entities) {
-			Vector3 entityPos = Mappers.transform.get(entity).pos;
+			Vector2 entityPos = Mappers.transform.get(entity).pos;
 
 			//simple wrap approach
 			if (entityPos.x >= wrap) entityPos.x -= wrap;

@@ -39,7 +39,8 @@ public class EntityFactory {
 		Entity entity = new Entity();
 
 		TransformComponent transform = new TransformComponent();
-		transform.pos.set(x, y, 0);
+		transform.pos.set(x, y);
+		transform.zOrder = -100;
 
 		TextureComponent texture = new TextureComponent();
 		texture.texture = TextureFactory.generateCharacter();
@@ -124,7 +125,7 @@ public class EntityFactory {
 		//add star to center of planetary system
 		Entity star = createStar(seed, x, y, rotDir);
 		BarycenterComponent barycenter = new BarycenterComponent();
-		barycenter.bodyType =  numPlanets == 0 ? BarycenterComponent.AstronomicalBodyType.lonestar : BarycenterComponent.AstronomicalBodyType.uniStellar;
+		barycenter.bodyType =  numPlanets == 0 ? BarycenterComponent.AstronomicalBodyType.loneStar : BarycenterComponent.AstronomicalBodyType.uniStellar;
 		star.add(barycenter);
 		entities.add(star);
 		
@@ -154,7 +155,7 @@ public class EntityFactory {
 
 		Entity planet = createPlanet(seed, null, 0, MathUtils.randomBoolean());
 		planet.add(barycenter);
-		planet.getComponent(TransformComponent.class).pos.set(x, y, 0);
+		planet.getComponent(TransformComponent.class).pos.set(x, y);
 
 
 		Array<Entity> entities = new Array<Entity>();
@@ -176,7 +177,7 @@ public class EntityFactory {
 		BarycenterComponent barycenter = new BarycenterComponent();
 		barycenter.bodyType = BarycenterComponent.AstronomicalBodyType.multiStellar;
 		TransformComponent transform = new TransformComponent();
-		transform.pos.set(x,y,0);
+		transform.pos.set(x,y);
 		anchorEntity.add(transform);
 		anchorEntity.add(barycenter);
 		anchorEntity.add(seedComp);
@@ -238,7 +239,8 @@ public class EntityFactory {
 		
 		// set position
 		TransformComponent transform = new TransformComponent();
-		transform.pos.set(x, y, 0); 
+		transform.pos.set(x, y);
+		transform.zOrder = 50;
 		
 		//orbit for rotation of self (kinda hacky; not really orbiting, just rotating)
 		OrbitComponent orbit = new OrbitComponent();
@@ -277,6 +279,9 @@ public class EntityFactory {
 		int size = (int) Math.pow(2, MathUtils.random(7, 10));
 		texture.texture = TextureFactory.generatePlanet(size);
 		texture.scale = 16;
+
+		TransformComponent transform = new TransformComponent();
+		transform.zOrder = 50;
 		
 		//orbit
 		OrbitComponent orbit = new OrbitComponent();
@@ -303,7 +308,7 @@ public class EntityFactory {
 		
 		//add components to entity
 		entity.add(seedComp);
-		entity.add(new TransformComponent());
+		entity.add(transform);
 		entity.add(texture);
 		entity.add(orbit);
 		entity.add(map);
@@ -331,7 +336,8 @@ public class EntityFactory {
 
 		//transform
 		TransformComponent transform = new TransformComponent();
-		transform.pos.set(x, y, -10);
+		transform.pos.set(x, y);
+		transform.zOrder = -10;
 		transform.rotation = (float) Math.PI/2; //face upwards
 		
 		//generate random even size 
@@ -410,7 +416,8 @@ public class EntityFactory {
 		TransformComponent transform = new TransformComponent();
 		TextureComponent texture = new TextureComponent();
 
-		transform.pos.set(x, y, -10);
+		transform.pos.set(x, y);
+		transform.zOrder = -10;
 		transform.rotation = (float) Math.PI/2; //face upwards
 		
 		//generate random even size 
@@ -456,7 +463,8 @@ public class EntityFactory {
 		TransformComponent transform = new TransformComponent();
 		TextureComponent texture = new TextureComponent();
 
-		transform.pos.set(x, y, -10);
+		transform.pos.set(x, y);
+		transform.zOrder = -10;
 		transform.rotation = (float) Math.PI/2; //face upwards
 		
 		// generate pixmap texture
@@ -512,6 +520,7 @@ public class EntityFactory {
 		transform.rotation = source.rotation;
 		transform.velocity.add(velocity);
 		transform.accel.add(velocity.cpy().setLength(cannon.acceleration));//speed up over time
+		transform.zOrder = -9;//in front of background objects(eg: planets, tiles), behind collide-able objects (eg: players, vehicles)
 
 		//set expire time
 		ExpireComponent expire = new ExpireComponent();
