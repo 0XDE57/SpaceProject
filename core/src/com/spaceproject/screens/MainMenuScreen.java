@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.DelaunayTriangulator;
@@ -70,11 +71,11 @@ public class MainMenuScreen extends MyScreenAdapter {
 		int width = 200;
 		int height = 30;
 		int pad = 10;
-		btnStart = new Button("Play", menuX,menuY + (height + pad) * 4, width, height);
-		btnVoronoi = new Button("DEBUG: Voronoi", 	menuX, menuY + (height + pad) * 3, width, height);
-		btnNoise = new Button("DEBUG: Noise",		menuX, menuY + (height + pad) * 2, width, height);
-		btn3D = new Button("DEBUG: 3D", 			menuX, menuY + (height + pad) * 1, width, height);
-		btnShip = new Button("DEBUG: Ship Gen", 	menuX, menuY + (height + pad) * 0, width, height);
+		btnStart 	= new Button("Play", 				menuX, menuY + (height + pad) * 4, width, height);
+		btnVoronoi 	= new Button("DEBUG: Voronoi", 	menuX, menuY + (height + pad) * 3, width, height);
+		btnNoise 	= new Button("DEBUG: Noise",		menuX, menuY + (height + pad) * 2, width, height);
+		btn3D 		= new Button("DEBUG: 3D", 			menuX, menuY + (height + pad) * 1, width, height);
+		btnShip 	= new Button("DEBUG: Ship Gen", 	menuX, menuY + (height + pad) * 0, width, height);
 
 		//init delaunay
 		points = new FloatArray();
@@ -103,7 +104,11 @@ public class MainMenuScreen extends MyScreenAdapter {
 		currentAnim = randomAnim();
 
 		// font
-		fontComfortaaBold = FontFactory.createFont(FontFactory.fontComfortaaBold, 90);
+		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+		parameter.size = 90;
+		parameter.borderColor = Color.DARK_GRAY;
+		parameter.borderWidth = 1;
+		fontComfortaaBold = FontFactory.createFont(FontFactory.fontComfortaaBold, parameter);
 		fontComfortaaBold1 = FontFactory.createFont(FontFactory.fontComfortaaBold, 20);
 
 		Gdx.graphics.setVSync(true);

@@ -20,15 +20,12 @@ public class FontFactory {
 	public static final String fontBitstreamVMBold = "fonts/bitstream/VeraMono-Bold.ttf";
 	public static final String fontBitstreamVMItalic = "fonts/bitstream/VeraMono-italic.ttf";
 
-	public static BitmapFont createFont(String font, int size) {
+	public static BitmapFont createFont(String font, FreeTypeFontParameter parameter) {
 		FreeTypeFontGenerator generator;
-		FreeTypeFontParameter parameter;
 		BitmapFont newFont;
 
 		try {
 			generator = new FreeTypeFontGenerator(Gdx.files.internal(font));
-			parameter = new FreeTypeFontParameter();
-			parameter.size = size;
 			newFont = generator.generateFont(parameter);
 			generator.dispose();
 			return newFont;
@@ -42,6 +39,13 @@ public class FontFactory {
 
 		System.out.println("Loaded default font.");
 		return new BitmapFont();
+
+	}
+
+	public static BitmapFont createFont(String font, int size) {
+		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+		parameter.size = size;
+		return createFont(font, parameter);
 
 	}
 }
