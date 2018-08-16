@@ -19,9 +19,10 @@ allprojects {
     version = '1.0'
     ext {
         appName = 'spaceproject'
-        gdxVersion = '1.9.5'
+        gdxVersion = '1.9.8'
         roboVMVersion = '2.3.0'
         ashleyVersion = '1.7.3'
+        visuiVersion = '1.4.1'
     }
 
     repositories {
@@ -114,6 +115,7 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx-controllers:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
+        compile "com.kotcrab.vis:vis-ui:$visuiVersion"
     }
 }
 
