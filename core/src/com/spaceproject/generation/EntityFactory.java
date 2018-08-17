@@ -256,11 +256,12 @@ public class EntityFactory {
 
 		//add components to entity
 		entity.add(seedComponent);
+		entity.add(astro);
 		entity.add(orbit);
+		entity.add(map);
+
 		entity.add(transform);
 		entity.add(texture);
-		entity.add(map);
-		entity.add(astro);
 		return entity;
 	}
 	
@@ -308,12 +309,13 @@ public class EntityFactory {
 		
 		//add components to entity
 		entity.add(seedComp);
-		entity.add(transform);
-		entity.add(texture);
+		entity.add(astro);
+		entity.add(planet);
 		entity.add(orbit);
 		entity.add(map);
-		entity.add(planet);
-		entity.add(astro);
+
+		entity.add(transform);
+		entity.add(texture);
 		return entity;
 	}
 	//endregion

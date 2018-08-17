@@ -1,113 +1,75 @@
 package com.spaceproject.systems;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.Misc;
+import com.spaceproject.utility.MyMath;
 
-public class OrbitSystem extends IteratingSystem implements EntityListener {
+public class OrbitSystem extends IteratingSystem {
 
 	public OrbitSystem() {
 		super(Family.all(OrbitComponent.class, TransformComponent.class).get());
 	}
 
 	@Override
-	public void addedToEngine (Engine engine) {
-		Family test = Family.all(ControlFocusComponent.class).get();
-		engine.addEntityListener(test,this);
-
-		super.addedToEngine(engine);
-
-	}
-
-	@Override
 	protected void processEntity(Entity entity, float delta) {
-		//TODO: time sync planet rotation/spin just like orbit
-		//TODO: take off system will have to go from planet ID/seed instead of saved x,y pos
-
 		OrbitComponent orbit = Mappers.orbit.get(entity);
 		TransformComponent position = Mappers.transform.get(entity);
 
-		//calculate time-synced angle, dictate position as a function of time based on tangential velocity
-		/*
-		float angularSpeed = orbit.tangentialSpeed / orbit.radialDistance;
-		long msPerRevolution = (long)(1000 * MathUtils.PI2 / angularSpeed);
-		double timeSyncAngle = 0;
-		if (msPerRevolution != 0) {
-			timeSyncAngle = MathUtils.PI2 * ((double)(GameScreen.gameTimeCurrent % msPerRevolution) / (double)msPerRevolution);
-		}*/
 
-		float timeSyncAngle = getTimeSyncAngle(orbit);
+		//TODO: time sync planet rotation/spin just like orbit
+		position.rotation += orbit.rotateClockwise ? orbit.rotSpeed * delta : -orbit.rotSpeed * delta;
 
-		if (orbit.rotateClockwise) {
-			// add clockwise rotation to entity image and orbit
-			position.rotation += orbit.rotSpeed * delta;
-			orbit.angle = timeSyncAngle;
-		} else {
-			// add counter-clockwise rotation to entity image and orbit
-			position.rotation -= orbit.rotSpeed * delta;
-			orbit.angle = -timeSyncAngle;
-		}
-
-		//keep angle relative to starting position
-		orbit.angle += orbit.startAngle;
-
-		//keep angles within 0 to 2PI radians
-		if (orbit.angle > MathUtils.PI2){
-			orbit.angle -= MathUtils.PI2;
-		} else if (orbit.angle < 0) {
-			orbit.angle += MathUtils.PI2;
-		}
+		orbit.angle = getTimeSyncAngle(orbit, GameScreen.gameTimeCurrent);
 
 		if (orbit.parent != null) {
 			//apply tangential velocity
-			position.velocity.set(orbit.tangentialSpeed, 0);
-			position.velocity.rotateRad(orbit.angle);
-			position.velocity.rotate90(orbit.rotateClockwise ? 1 : -1);
+			position.velocity.set(orbit.tangentialSpeed, 0).rotateRad(orbit.angle).rotate90(orbit.rotateClockwise ? 1 : -1);
 
 			// calculate exact orbit position
-			TransformComponent parentPosition = Mappers.transform.get(orbit.parent);
-			float orbitX = parentPosition.pos.x + (orbit.radialDistance * MathUtils.cos(orbit.angle));
-			float orbitY = parentPosition.pos.y + (orbit.radialDistance * MathUtils.sin(orbit.angle));
-			Vector2 orbitPos = new Vector2(orbitX, orbitY);
-
+			Vector2 orbitPos = getSyncPos(entity, GameScreen.gameTimeCurrent);
 			//ensure object is not too far from synced location
 			if (!position.pos.epsilonEquals(orbitPos, 10)) {
 				position.pos.set(orbitPos);
 			}
 		}
-
 	}
 
-	private float getTimeSyncAngle(OrbitComponent orbit) {
+	public static Vector2 getSyncPos(Entity entity, long time) {
+		OrbitComponent orbit = Mappers.orbit.get(entity);
+		TransformComponent parentPosition = Mappers.transform.get(orbit.parent);
+		return MyMath.Vector(getTimeSyncAngle(orbit, time), orbit.radialDistance).add(parentPosition.pos);
+	}
+
+
+	public static float getTimeSyncAngle(OrbitComponent orbit, long gameTime) {
 		//calculate time-synced angle, dictate position as a function of time based on tangential velocity
 		float angularSpeed = orbit.tangentialSpeed / orbit.radialDistance;
 		long msPerRevolution = (long)(1000 * MathUtils.PI2 / angularSpeed);
 		float timeSyncAngle = 0;
 		if (msPerRevolution != 0) {
-			timeSyncAngle = MathUtils.PI2 * ((float)(GameScreen.gameTimeCurrent % msPerRevolution) / (float)msPerRevolution);
+			timeSyncAngle = MathUtils.PI2 * ((float)(gameTime % msPerRevolution) / (float)msPerRevolution);
 		}
+
+		timeSyncAngle = orbit.rotateClockwise ? timeSyncAngle : -timeSyncAngle;
+
+		//keep angle relative to starting position
+		timeSyncAngle += orbit.startAngle;
+
+		//keep angle within 0 to 2PI radians
+		if (timeSyncAngle > MathUtils.PI2){
+			timeSyncAngle -= MathUtils.PI2;
+		} else if (timeSyncAngle < 0) {
+			timeSyncAngle += MathUtils.PI2;
+		}
+
 		return timeSyncAngle;
 	}
 
-	@Override
-	public void entityAdded(Entity entity) {
-		System.out.println("entityAdded++++++++++++++++++++++++++++++++++++");
-		Misc.printEntity(entity);
-	}
-
-	@Override
-	public void entityRemoved(Entity entity) {
-		System.out.println("entityRemoved----------------------------------");
-		//Misc.printEntity(entity);
-	}
 }

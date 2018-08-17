@@ -8,12 +8,14 @@ import com.spaceproject.utility.OpenSimplexNoise;
 
 public class NoiseAnim extends MainMenuAnimation {
     float z;
+    float zDelta;
     int size;
     float scale;
     OpenSimplexNoise noise;
 
     public NoiseAnim() {
         z = 0;
+        zDelta = 0.2f;
         size = 10;
         scale = 0.110f;
         noise = new OpenSimplexNoise();
@@ -29,7 +31,7 @@ public class NoiseAnim extends MainMenuAnimation {
                 shape.rect(x*size, y*size, size, size);
             }
         }
-        z+= 0.2 * delta;
+        z+= zDelta * delta;
         shape.end();
 
         if (Gdx.input.isKeyPressed(Input.Keys.V)) scale += 0.001f;

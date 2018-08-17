@@ -81,9 +81,6 @@ public class MainMenuScreen extends MyScreenAdapter {
 
 		backgroundAnimation.render(delta, shape);
 		foregroundAnimation.render(delta, shape);
-		if (Gdx.input.isKeyJustPressed(Input.Keys.F5)) {
-			initForegroundAnim();
-		}
 
 		//draw title
 		batch.begin();
@@ -93,6 +90,15 @@ public class MainMenuScreen extends MyScreenAdapter {
 
 		stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
 		stage.draw();
+
+
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F5)) {
+			initForegroundAnim();
+		}
+
+		if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+			Gdx.app.exit();
+		}
 
 	}
 

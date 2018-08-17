@@ -425,14 +425,17 @@ public class HUDSystem extends EntitySystem {
 
 		//draw drawMap objects
 		shape.setColor(1, 1, 0, 1);
-		for (Vector2 p : engine.getSystem(SpaceLoadingSystem.class).getPoints()) {
-			// n = relative pos / scale + mapPos
-			float x = ((p.x-MyScreenAdapter.cam.position.x)/ spaceMapScale) + (mapBacking.x + mapBacking.width/2);//+Gdx.graphics.getWidth()/2;
-			float y = ((p.y-MyScreenAdapter.cam.position.y)/ spaceMapScale) + (mapBacking.y + mapBacking.height/2);//+Gdx.graphics.getHeight()/2;
-			
-			
-			if (mapBacking.contains(x, y)) shape.circle(x, y, size);
+		SpaceLoadingSystem spaceLoader = engine.getSystem(SpaceLoadingSystem.class);
+		if (spaceLoader != null) {
+			for (Vector2 p : spaceLoader.getPoints()) {
+				// n = relative pos / scale + mapPos
+				float x = ((p.x - MyScreenAdapter.cam.position.x) / spaceMapScale) + (mapBacking.x + mapBacking.width / 2);//+Gdx.graphics.getWidth()/2;
+				float y = ((p.y - MyScreenAdapter.cam.position.y) / spaceMapScale) + (mapBacking.y + mapBacking.height / 2);//+Gdx.graphics.getHeight()/2;
 
+
+				if (mapBacking.contains(x, y)) shape.circle(x, y, size);
+
+			}
 		}
 
 

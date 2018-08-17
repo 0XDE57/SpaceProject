@@ -35,6 +35,7 @@ import static com.spaceproject.components.BarycenterComponent.AstronomicalBodyTy
 import static com.spaceproject.components.BarycenterComponent.AstronomicalBodyType.uniStellar;
 
 
+//region test
 class AstroObject {
 	int x, y;
 	long seed;
@@ -79,12 +80,10 @@ class Universe {
 		}
 	}
 }
+//endregion
 
 public class SpaceLoadingSystem extends EntitySystem implements EntityListener, Disposable {
 
-	//private Engine engine;
-	//private static OrthographicCamera cam;
-	
 	// star entities
 	private Array<Vector2> points = new Array<Vector2>();
 	private Universe universe;
@@ -110,7 +109,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 		universe = new Universe(generatePoints());
 
 		// load planetary systems / planets / stars
-		updateStars(1);
+		//updateStars(1);
 		// load space things (asteroids, wormhole, black hole, etc)
 		// load ai/mobs
 
@@ -118,9 +117,6 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 
 	@Override
 	public void entityAdded(Entity entity) {
-		//System.out.println("entityAdded++++++++++++++++++++++++++++++++++++");
-		//Misc.printEntity(entity);
-
 		PlanetComponent planet = Mappers.planet.get(entity);
 		if (planet != null) {
 			SeedComponent seedComp = Mappers.seed.get(entity);
@@ -130,8 +126,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 
 	@Override
 	public void entityRemoved(Entity entity) {
-		//System.out.println("entityRemoved----------------------------------");
-		//Misc.printEntity(entity);
+
 	}
 	
 	@Override
@@ -265,11 +260,12 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 	 * exist, create points and save to disk.
 	 */
 	private void loadPoints() {
+		//TODO: split up saving, loading and generating
 		points.clear();
 		
 		// create handle for file storing points
 		FileHandle starsFile = Gdx.files.local("save/stars.txt");
-		
+
 		starsFile.delete();//debug, don't save for now
 		
 		if (starsFile.exists()) {

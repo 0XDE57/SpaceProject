@@ -1,21 +1,10 @@
 ---ENGINE---
 [...] fix land/take-off position bug
     [x] time based orbit
-    [...] cleanup land and take off for player, base on planet ID of some kind
-        goal: when leave from planet, load from center of planet at correct orbit location
-        problem: currently SpaceLoadingSystem loads stars after entities, and after at least one engine cycle to trigger
-        update logic to add stars systems with planets. when taking off from planet, we require the planet to be loaded first.
-        location is another issue, planet must not only be loaded first, but orbit system needs an engine cycle to update with correct location
-        also does not support AI or entities other than player from entering/leaving planet
-        seems to require an overhaul of OrbitSystem(), SpaceLoadingSystem() and EntityFactory()
-        [x] 1a: id -> seed (anchor/barycenter/star)
-            1b: seed of barycenter / orbit child (planet/star/moon)
-            1c: consider children of children eg: moon->planet->star
-        [ ] when land store seed of landed
-        [ ] when takeoff, one of the addedToEngine events picks up entity, ensures landed seed is loaded, sets entity to position of seed object based on correct time-synced orbit
-            should this happen in OrbitSystem because knows orbit pos, or SpaceLoadingSystem because knows loaded stars? both information are needed...
-
-    [ ] test land and take off for AI, system doesn't supports non-player world switching
+    [x] time synced takeoff
+    [ ] nested orbit: consider children of children eg: moon->planet->star
+    [ ] clean up
+    [ ] genericize and make work land and take off work for AI, system doesn't supports non-player world switching
         dumb loop where AI lands on planet, kept in some kind of background
         processing state/alt engine, wait a second then take off to test all is working correctly
         background engine meant to be low processing effort (eg: ultra dumbed down AI or simulations, no rendering, no physics, just states and events) to keep track of important entities
@@ -56,6 +45,12 @@
 
         maybe a better way to handle would be to add an entity to engine "transition entity" or transition component to entity and it holds ScreenTransition / landCFG?
 
+
+
+[ ] fix player moving ahead of camera at high speed, seem to happen only when vsync is on...
+
+[ ] take care of some of the todo's
+    there is so much to do...
 
 [ ] fixed time step (necessary for multiplayer?)
 	https://gafferongames.com/post/fix_your_timestep/

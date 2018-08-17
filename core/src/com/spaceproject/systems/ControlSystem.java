@@ -75,10 +75,8 @@ public class ControlSystem extends IteratingSystem {
 		transform.rotation = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f*delta);
 		
 		if (control.moveForward) {
-			float walkSpeed = character.walkSpeed;
-			float dx = (float) Math.cos(transform.rotation) * (walkSpeed * control.movementMultiplier) * delta;
-			float dy = (float) Math.sin(transform.rotation) * (walkSpeed * control.movementMultiplier) * delta;
-			transform.pos.add(dx, dy);
+			float walkSpeed = character.walkSpeed * control.movementMultiplier * delta;
+			transform.pos.add(MyMath.Vector(transform.rotation, walkSpeed));
 		}
 		
 		if (control.changeVehicle) {			
@@ -161,12 +159,12 @@ public class ControlSystem extends IteratingSystem {
 	}
 
 	private void landOnPlanet(Entity entity) {
-		Vector2 vePos = Mappers.transform.get(entity).pos;
+		Vector2 pos = Mappers.transform.get(entity).pos;
 		for (Entity planet : planets) {
 			Vector2 planetPos = Mappers.transform.get(planet).pos;
 			TextureComponent planetTex = Mappers.texture.get(planet);
 
-			if (MyMath.distance(vePos.x, vePos.y, planetPos.x, planetPos.y) <= planetTex.texture.getWidth() * 0.5 * planetTex.scale) {				
+			if (pos.dst(planetPos) <= planetTex.texture.getWidth() * 0.5 * planetTex.scale) {
 				ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
 				screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.shrink;//begin animation
 				screenTrans.landCFG = new LandConfig();
@@ -197,8 +195,7 @@ public class ControlSystem extends IteratingSystem {
 			Vector2 planetPos = Mappers.transform.get(planet).pos;
 			TextureComponent planetTex = Mappers.texture.get(planet);
 			// if player is over planet
-			if (MyMath.distance(pos.x, pos.y, planetPos.x, planetPos.y)  
-					<= planetTex.texture.getWidth() * 0.5 * planetTex.scale) {				
+			if (pos.dst(planetPos)	<= planetTex.texture.getWidth() * 0.5 * planetTex.scale) {
 				return true;
 			}
 		}
@@ -216,11 +213,9 @@ public class ControlSystem extends IteratingSystem {
 			transform.velocity.set(0,0);
 		} else {
 			//add thrust opposite direction of velocity to slow down ship
-			float thrust = transform.velocity.len();//MathUtils.clamp(transform.velocity.len(), minBreakingThrust, maxBreakingThrust);
+			float thrust = transform.velocity.len();//.clamp(minBreakingThrust, maxBreakingThrust);
 			float angle = transform.velocity.angle();
-			float dx = (float) Math.cos(angle) * thrust * delta;
-			float dy = (float) Math.sin(angle) * thrust * delta;
-			transform.velocity.add(dx, dy);
+			transform.velocity.add(MyMath.Vector(angle, thrust * delta));
 		}
 	}
 
@@ -228,9 +223,7 @@ public class ControlSystem extends IteratingSystem {
 		if (control.timerDodge.canDoEvent()) {
 			float distance = 100;
 			float angle = transform.rotation - MathUtils.PI / 2;
-			float dx = (float) Math.cos(angle) * distance;
-			float dy = (float) Math.sin(angle) * distance;
-			transform.pos.add(dx, dy);
+			transform.pos.add(MyMath.Vector(angle, distance));
 
 			control.timerDodge.reset();
 		}
@@ -240,24 +233,18 @@ public class ControlSystem extends IteratingSystem {
 		if (control.timerDodge.canDoEvent()) {
 			float distance = 100;
 			float angle = transform.rotation + MathUtils.PI / 2;
-			float dx = (float) Math.cos(angle) * distance;
-			float dy = (float) Math.sin(angle) * distance;
-			transform.pos.add(dx, dy);
+			transform.pos.add(MyMath.Vector(angle, distance));
 
 			control.timerDodge.reset();
 		}
 	}
 
 	private static void accelerate(float delta, ControllableComponent control, TransformComponent transform, VehicleComponent vehicle) {
-		//TODO: create a vector method for the dx = cos... dy = sin... It's used multiple times in the program(movement, missiles..)
 		//TODO: implement rest of engine behavior
 		//float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go
 	
-		float thrust = vehicle.thrust;
-		float angle = transform.rotation;
-		float dx = (float) Math.cos(angle) * (thrust * control.movementMultiplier) * delta;
-		float dy = (float) Math.sin(angle) * (thrust * control.movementMultiplier) * delta;
-		transform.velocity.add(dx, dy);
+		float thrust = vehicle.thrust * control.movementMultiplier * delta;
+		transform.velocity.add(MyMath.Vector(transform.rotation, thrust));
 		
 		//transform.accel.add(dx,dy);//????
 		
@@ -294,10 +281,10 @@ public class ControlSystem extends IteratingSystem {
 			cannon.timerRechargeRate.reset();
 		}		
 		
-		//create missile	
-		float dx = (float) (Math.cos(transform.rotation) * cannon.velocity) + transform.velocity.x;
-		float dy = (float) (Math.sin(transform.rotation) * cannon.velocity) + transform.velocity.y;
-		engine.addEntity(EntityFactory.createMissile(transform, new Vector2(dx, dy), cannon, owner));
+		//create missile
+		Vector2 vec = MyMath.Vector(transform.rotation, cannon.velocity).add(transform.velocity);
+		engine.addEntity(EntityFactory.createMissile(transform, vec, cannon, owner));
+
 		
 		//subtract ammo
 		--cannon.curAmmo;

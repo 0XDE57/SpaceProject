@@ -6,8 +6,10 @@ import com.spaceproject.config.LandConfig;
 public class ScreenTransitionComponent implements Component {
 
 	public enum TakeOffAnimStage {
-		//fly
+		//fly/hover animation,
+		//screenfEffect.
 		transition,
+		sync,
 		zoomOut,
 		grow,
 		end

@@ -31,6 +31,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.MyScreenAdapter;
@@ -122,10 +123,10 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		shape.begin(ShapeType.Line);
 		
 		//draw vector to visualize speed and direction
-		if (drawVectors) drawMovementVectors();
+		if (drawVectors) drawVelocityVectors();
 		
 		// draw ring to visualize orbit path
-		if (drawOrbitPath) drawOrbitPath();
+		if (drawOrbitPath) drawOrbitPath(true);
 		
 		//draw the bounding box (collision detection) for collidables
 		if (drawBounds) drawBounds();
@@ -236,17 +237,17 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	}
 
 	/** Draw lines to represent speed and direction of entity */
-	private void drawMovementVectors() {
+	private void drawVelocityVectors() {
 		for (Entity entity : objects) {
 			//get entities position and list of components
 			TransformComponent t = Mappers.transform.get(entity);
 
 			//calculate vector angle and length
-			float scale = 4; //how long to make vectors (higher number is shorter line)
-			float length = t.velocity.len();
+			float scale = 20; //how long to make vectors (higher number is longer line)
+			float length = (float)Math.log(t.velocity.len()) * scale;
 			float angle = t.velocity.angle() * MathUtils.degreesToRadians;
-			float pointX = t.pos.x + (length / scale * MathUtils.cos(angle));
-			float pointY = t.pos.y + (length / scale * MathUtils.sin(angle));
+			float pointX = t.pos.x + (length * MathUtils.cos(angle));
+			float pointY = t.pos.y + (length * MathUtils.sin(angle));
 			
 			//draw line to represent movement
 			shape.line(t.pos.x, t.pos.y, pointX, pointY, Color.RED, Color.MAGENTA);
@@ -254,7 +255,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	}
 	
 	/** Draw orbit path, a ring to visualize objects orbit*/
-	private void drawOrbitPath() {
+	private void drawOrbitPath(boolean showSyncedPos) {
 		shape.setColor(1f, 1f, 1, 1);
 		for (Entity entity : objects) {
 
@@ -264,8 +265,19 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 
 				if (orbit.parent != null) {
 					TransformComponent parentPos = Mappers.transform.get(orbit.parent);
+
+					if (showSyncedPos) {
+						Vector2 orbitPos = OrbitSystem.getSyncPos(entity, GameScreen.gameTimeCurrent);
+
+						shape.setColor(1, 0, 0, 1);
+						shape.line(parentPos.pos.x, parentPos.pos.y, orbitPos.x, orbitPos.y);//synced orbit position (where the object should be)
+						shape.setColor(1f, 1f, 1, 1);
+					}
+
 					shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
-					shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
+					shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);//actual position
+
+
 				}
 
 				TextureComponent tex = Mappers.texture.get(entity);
