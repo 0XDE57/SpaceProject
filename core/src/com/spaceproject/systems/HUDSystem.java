@@ -245,7 +245,16 @@ public class HUDSystem extends EntitySystem {
 		int centerY = height/2;
 		int verticalEdge = (height - padding * 2) / 2;
 		int horizontalEdge = (width - padding * 2) / 2;		
-		
+
+		boolean drawBorder = false;
+		if (drawBorder) {
+			shape.setColor(Color.BLACK);
+			shape.line(padding, padding, padding, height-padding);//left
+			shape.line(width - padding, padding, width - padding, height-padding);//right
+			shape.line(padding, padding, width-padding, padding);//bottom
+			shape.line(padding, height-padding, width - padding, height-padding);//top
+		}
+
 		for (Entity mapable : mapableObjects) {
 			MapComponent map = Mappers.map.get(mapable);
 			Vector3 screenPos = new Vector3(Mappers.transform.get(mapable).pos.cpy(),0);
@@ -315,24 +324,7 @@ public class HUDSystem extends EntitySystem {
 			}
 			 */
 		}
-		
-		/*
-		//I'm not sure how to make this look pretty or if borders should be added...
-		//Maybe research some UI design.
-		
-		//draw borders
-		Color outer = new Color(0.6f, 1, 0.7f, 0.3f);
-		Color inner = new Color(1, 1, 1, 0.2f);
-		//left
-		shape.rect(0, 0, padding*2, height, outer, inner, inner, outer);
-		shape.line(padding*2, 0, padding*2, height);
-		//right
-		shape.rect(width - padding*2, 0, padding*2, height, inner, outer, outer, inner);
-		//bottom
-		shape.rect(0, 0, width, padding*2, outer, outer, inner, inner);
-		//top
-		shape.rect(0, height - padding*2, width, padding*2, inner, inner, outer, outer);
-		*/
+
 	}
 
 

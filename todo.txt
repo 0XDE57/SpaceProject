@@ -2,7 +2,7 @@
 [...] fix land/take-off position bug
     [x] time based orbit
     [x] time synced takeoff
-    [ ] nested orbit: consider children of children eg: moon->planet->star
+    [...] nested orbit: consider children of children eg: satellite->moon->planet->star
     [ ] clean up
     [ ] genericize and make work land and take off work for AI, system doesn't supports non-player world switching
         dumb loop where AI lands on planet, kept in some kind of background
@@ -46,6 +46,9 @@
         maybe a better way to handle would be to add an entity to engine "transition entity" or transition component to entity and it holds ScreenTransition / landCFG?
 
 
+[ ] fix spaceloadingsystem
+    [ ] seed based load instead of position
+    [ ] clean up star save/load
 
 [ ] fix player moving ahead of camera at high speed, seem to happen only when vsync is on...
 

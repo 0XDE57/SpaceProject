@@ -32,11 +32,23 @@ public class OrbitSystem extends IteratingSystem {
 			//apply tangential velocity
 			position.velocity.set(orbit.tangentialSpeed, 0).rotateRad(orbit.angle).rotate90(orbit.rotateClockwise ? 1 : -1);
 
+
 			// calculate exact orbit position
 			Vector2 orbitPos = getSyncPos(entity, GameScreen.gameTimeCurrent);
 			//ensure object is not too far from synced location
 			if (!position.pos.epsilonEquals(orbitPos, 10)) {
 				position.pos.set(orbitPos);
+			}
+
+			OrbitComponent parentOrbit = Mappers.orbit.get(orbit.parent);
+			if (parentOrbit.parent != null) {
+				/*
+				System.out.println("I am: " + Mappers.astro.get(entity).classification
+						+ ", Parent is: " +  Mappers.astro.get(orbit.parent).classification
+						+ ", Parent's Parent is: " + Mappers.astro.get(parentOrbit.parent).classification);
+				*/
+				//TODO: make recursive for sake of child of moon: eg satellite, or more generally infinite nesting
+				position.velocity.add(Mappers.transform.get(orbit.parent).velocity);
 			}
 		}
 	}
