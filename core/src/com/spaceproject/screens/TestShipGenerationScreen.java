@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.TextureFactory;
-import com.spaceproject.utility.MyScreenAdapter;
 
 import java.util.ArrayList;
 

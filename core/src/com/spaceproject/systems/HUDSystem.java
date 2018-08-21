@@ -24,7 +24,7 @@ import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.MyScreenAdapter;
+import com.spaceproject.screens.MyScreenAdapter;
 
 public class HUDSystem extends EntitySystem {
 

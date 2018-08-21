@@ -1,10 +1,11 @@
 ---ENGINE---
-[...] fix land/take-off position bug
+[...] fix land/take-off
+    [x] position bug
     [x] time based orbit
     [x] time synced takeoff
     [...] nested orbit: consider children of children eg: satellite->moon->planet->star
-    [ ] clean up
-    [ ] genericize and make work land and take off work for AI, system doesn't supports non-player world switching
+    [...] clean up
+    [...] genericize and make work land and take off work for AI, system doesn't supports non-player world switching
         dumb loop where AI lands on planet, kept in some kind of background
         processing state/alt engine, wait a second then take off to test all is working correctly
         background engine meant to be low processing effort (eg: ultra dumbed down AI or simulations, no rendering, no physics, just states and events) to keep track of important entities

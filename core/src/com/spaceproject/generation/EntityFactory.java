@@ -270,7 +270,7 @@ public class EntityFactory {
 		System.out.println("Rougue Planet: (" + x + ", " + y + ")");
 		return entities;
 	}
-	private static Entity createPlanet(long seed, Entity parent, float radialDistance, boolean rotationDir) {
+	public static Entity createPlanet(long seed, Entity parent, float radialDistance, boolean rotationDir) {
 		MathUtils.random.setSeed(seed);
 		
 		Entity entity = new Entity();

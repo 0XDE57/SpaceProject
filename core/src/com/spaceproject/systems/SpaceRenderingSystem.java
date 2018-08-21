@@ -15,7 +15,7 @@ import com.spaceproject.SpaceBackgroundTile;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.MyScreenAdapter;
+import com.spaceproject.screens.MyScreenAdapter;
 
 import java.util.ArrayList;
 import java.util.Comparator;

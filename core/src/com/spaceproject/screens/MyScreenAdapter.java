@@ -1,4 +1,4 @@
-package com.spaceproject.utility;
+package com.spaceproject.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;

@@ -1,6 +1,5 @@
 package com.spaceproject.utility;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.SpaceProject;
 
@@ -17,11 +16,12 @@ public class MyMath {
 
 
 	public static Vector2 Vector(float direction, float magnitude) {
-		//TODO: does Vector2 / libgdx not have this built in already?
-		//prolly-> add(setLength(magnitude).setAngleRad(dirction))
+		return new Vector2(magnitude,0).setAngleRad(direction);
+		/*
 		float dx = MathUtils.cos(direction) * magnitude;
 		float dy = MathUtils.sin(direction) * magnitude;
 		return new Vector2(dx, dy);
+		*/
 	}
 
 
@@ -32,11 +32,6 @@ public class MyMath {
 	
 	/**
 	 * Get angle from position 1 to position 2.
-	 * @param x1
-	 * @param y1
-	 * @param x2
-	 * @param y2
-	 * @return angle
 	 */
 	public static float angleTo(int x1, int y1, int x2, int y2) {
 		return (float) -(Math.atan2(x2 - x1, y2 - y1)) - 1.57f;

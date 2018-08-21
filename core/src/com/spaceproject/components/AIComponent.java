@@ -17,7 +17,9 @@ public class AIComponent implements Component {
 		dumbwander,
 		attack,
 		landOnPlanet,
-		idle
+		takeOffPlanet,
+		idle,
+		follow
 	}
 	public testState state;
 

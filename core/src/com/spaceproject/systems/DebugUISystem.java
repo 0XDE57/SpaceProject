@@ -34,7 +34,7 @@ import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.MyScreenAdapter;
+import com.spaceproject.screens.MyScreenAdapter;
 
 import java.lang.reflect.Field;
 import java.util.Set;
@@ -256,7 +256,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	
 	/** Draw orbit path, a ring to visualize objects orbit*/
 	private void drawOrbitPath(boolean showSyncedPos) {
-		shape.setColor(1f, 1f, 1, 1);
+
 		for (Entity entity : objects) {
 
 			OrbitComponent orbit = Mappers.orbit.get(entity);
@@ -268,24 +268,20 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 
 					if (showSyncedPos) {
 						Vector2 orbitPos = OrbitSystem.getSyncPos(entity, GameScreen.gameTimeCurrent);
-
 						shape.setColor(1, 0, 0, 1);
 						shape.line(parentPos.pos.x, parentPos.pos.y, orbitPos.x, orbitPos.y);//synced orbit position (where the object should be)
-						shape.setColor(1f, 1f, 1, 1);
 					}
 
+					shape.setColor(1f, 1f, 1, 1);
 					shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
 					shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);//actual position
-
-
 				}
 
 				TextureComponent tex = Mappers.texture.get(entity);
 				if (tex != null) {
 					int radius = (int)(tex.texture.getWidth()/2*tex.scale);
-					Vector2 orientation = new Vector2(radius,0);
-					orientation.rotateRad(entityPos.rotation);
-					shape.line(entityPos.pos.x, entityPos.pos.y, entityPos.pos.x+orientation.x, entityPos.pos.y+orientation.y);
+					Vector2 orientation = MyMath.Vector(entityPos.rotation, radius).add(entityPos.pos);
+					shape.line(entityPos.pos.x, entityPos.pos.y, orientation.x, orientation.y);
 					shape.circle(entityPos.pos.x, entityPos.pos.y, radius);
 				}
 			}

@@ -20,7 +20,7 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
-import com.spaceproject.utility.MyScreenAdapter;
+import com.spaceproject.screens.MyScreenAdapter;
 
 
 public class ScreenTransitionSystem extends IteratingSystem implements EntityListener {
@@ -80,35 +80,23 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
             }
         } else if (screenTrans.takeOffStage != null) {
             if (screenTrans.curTakeOffStage == null || screenTrans.curTakeOffStage != screenTrans.takeOffStage) {
-                System.out.println("Animation Stage: " + screenTrans.takeOffStage + " for " + Misc.myToString(entity));
+                System.out.println(this.getClass().getSimpleName() + ": Animation Stage: " + screenTrans.takeOffStage + " for " + Misc.myToString(entity));
                 screenTrans.curTakeOffStage = screenTrans.takeOffStage;
-                //landPos = screenTrans.landCFG.position;
             }
             switch (screenTrans.takeOffStage) {
                 case transition:
-                    screenTrans.landCFG.transitioningEntity = entity;
-                    takeOff(screenTrans);
-                    System.out.println(this.getClass().getSimpleName() + ".takeOff: " + Misc.myToString(entity));
-                    long seed = screenTrans.landCFG.planet.getComponent(SeedComponent.class).seed;
-                    System.out.println(Misc.myToString(entity) + " is waiting for " + seed);
-                    //Misc.printEntity(entity);
+                    screenTrans.transitioningEntity = entity;
+                    if (entity.getComponent(AIComponent.class) != null) {
+                        System.out.println("REMOVING AI ENTITY");
+                        //getEngine().removeEntity(entity); //TODO: remove entity? backgroundEngine here?
+                    } else {
+                        takeOff(screenTrans);
+                    }
+
                     break;
                 case sync:
-
-                    long desiredSeed = screenTrans.landCFG.planet.getComponent(SeedComponent.class).seed;
-                    System.out.println(Misc.myToString(entity) + " is waiting for " + desiredSeed);
-                    for (Entity astroEnt : astroObjects) {
-                        System.out.println(Mappers.seed.get(astroEnt).seed);
-                        if (Mappers.seed.get(astroEnt).seed == desiredSeed) {
-                            Vector2 orbitPos = OrbitSystem.getSyncPos(astroEnt, GameScreen.gameTimeCurrent);
-                            Mappers.transform.get(entity).pos.set(orbitPos);
-                            screenTrans.takeOffStage = TakeOffAnimStage.zoomOut;
-                            System.out.println("FOUND SEED!!!!");
-                            break;
-                        }
-                    }
+                    syncLoadPosition(entity, screenTrans);
                     break;
-
                 case zoomOut:
                     zoomOut(screenTrans);
                     break;
@@ -135,16 +123,31 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
             transform.velocity.set(0, 0);
             ControllableComponent control = entity.getComponent(ControllableComponent.class);
             if (control != null) {
+                //control.* = false;
                 control.angleFacing = Mappers.transform.get(entity).rotation;
             }
         }
 
     }
 
+    private void syncLoadPosition(Entity entity, ScreenTransitionComponent screenTrans) {
+        long desiredSeed = screenTrans.planet.getComponent(SeedComponent.class).seed;
+        System.out.println(Misc.myToString(entity) + " is waiting for " + desiredSeed);
+        for (Entity astroEnt : astroObjects) {
+            //System.out.println(Mappers.seed.get(astroEnt).seed);
+            if (Mappers.seed.get(astroEnt).seed == desiredSeed) {
+                Vector2 orbitPos = OrbitSystem.getSyncPos(astroEnt, GameScreen.gameTimeCurrent);
+                Mappers.transform.get(entity).pos.set(orbitPos);
+                screenTrans.takeOffStage = TakeOffAnimStage.zoomOut;
+                System.out.println("FOUND SEED "+ desiredSeed);
+                break;
+            }
+        }
+    }
+
     @Override
     public void entityAdded(Entity entity) {
-        System.out.println("Astro object: " + Mappers.seed.get(entity).seed);
-
+        //System.out.println("Astro object: " + Mappers.seed.get(entity).seed);
         //Misc.printEntity(entity);
     }
 
@@ -166,6 +169,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
 
             if (entity.getComponent(AIComponent.class) != null) {
                 screenTrans.landStage = LandAnimStage.end;
+                //getEngine().removeEntity(entity); //TODO: remove entity? backgroundEngine here?
             } else {
                 screenTrans.landStage = LandAnimStage.zoomIn;
             }
@@ -199,26 +203,19 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
 
     private static void landOnPlanet(ScreenTransitionComponent screenTrans) {
         screenTrans.landStage = LandAnimStage.pause;
-        screenTrans.landCFG.transitioningEntity.add(screenTrans);
-        screenTrans.landCFG.transitioningEntity.getComponent(TextureComponent.class).scale = SpaceProject.scale;//reset size to normal
-
-        System.out.println("Land: " + screenTrans.landCFG.planet.getComponent(TransformComponent.class).pos);
-        GameScreen.landCFG = screenTrans.landCFG;
+        screenTrans.transitioningEntity.add(screenTrans);
+        screenTrans.transitioningEntity.getComponent(TextureComponent.class).scale = SpaceProject.scale;//reset size to normal
 
         GameScreen.transition = true;
     }
 
     private void takeOff(ScreenTransitionComponent screenTrans) {
         screenTrans.takeOffStage = TakeOffAnimStage.sync;//TakeOffAnimStage.zoomOut;
-        screenTrans.landCFG.transitioningEntity.add(screenTrans);
-        screenTrans.landCFG.transitioningEntity.getComponent(TextureComponent.class).scale = 0;//set size to 0 so texture can grow
-        screenTrans.landCFG.planet = GameScreen.landCFG.planet;
-
-        System.out.println("Take off:" + screenTrans.landCFG.planet.getComponent(TransformComponent.class).pos);
+        //screenTrans.transitioningEntity.add(screenTrans);
+        screenTrans.transitioningEntity.getComponent(TextureComponent.class).scale = 0;//set size to 0 so texture can grow
+        screenTrans.planet = GameScreen.currentPlanet; //TODO: genericize so AI can take off, this is a bad singleton
 
 
-        //TODO: GET RID OF GameScreen.landCFG, maybe a better way to handle would be to add an entity to engine "transition entity" and it holds ScreenTransition / landCFG?
-        GameScreen.landCFG = screenTrans.landCFG;
         GameScreen.transition = true;
         //TODO: do current systems run in the background during change?
         //if so, disable/pause and cleanup/dispose

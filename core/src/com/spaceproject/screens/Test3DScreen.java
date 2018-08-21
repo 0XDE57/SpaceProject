@@ -31,7 +31,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.MyScreenAdapter;
 
 
 public class Test3DScreen extends ScreenAdapter {

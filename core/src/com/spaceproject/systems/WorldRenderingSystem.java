@@ -20,7 +20,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.MyScreenAdapter;
+import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.NoiseGen;
 
 import java.util.ArrayList;

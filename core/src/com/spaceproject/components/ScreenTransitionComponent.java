@@ -1,7 +1,7 @@
 package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
-import com.spaceproject.config.LandConfig;
+import com.badlogic.ashley.core.Entity;
 
 public class ScreenTransitionComponent implements Component {
 
@@ -30,7 +30,8 @@ public class ScreenTransitionComponent implements Component {
 	public TakeOffAnimStage takeOffStage;
 	public TakeOffAnimStage curTakeOffStage;
 
-	public LandConfig landCFG;
+	public Entity planet;
+	public Entity transitioningEntity;
 	
 	public float timer;
 }

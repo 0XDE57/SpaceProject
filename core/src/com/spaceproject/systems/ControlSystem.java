@@ -21,24 +21,21 @@ import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
-import com.spaceproject.config.LandConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.MyScreenAdapter;
 
 public class ControlSystem extends IteratingSystem {
 
-	private Engine engine;
 	private ImmutableArray<Entity> vehicles;
 	private ImmutableArray<Entity> planets;
 
 	
 	public ControlSystem() {
-		super(Family.all(ControllableComponent.class, TransformComponent.class).one(
-				CharacterComponent.class, VehicleComponent.class).get());
+		super(Family.all(ControllableComponent.class, TransformComponent.class).one(CharacterComponent.class, VehicleComponent.class).get());
 	}
 	
 	@Override
@@ -46,7 +43,6 @@ public class ControlSystem extends IteratingSystem {
 		super.addedToEngine(engine);
 		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
 		planets = engine.getEntitiesFor(Family.all(PlanetComponent.class).get());
-		this.engine = engine;
 	}
 
 	@Override
@@ -67,6 +63,8 @@ public class ControlSystem extends IteratingSystem {
 		
 	}
 
+
+	//region character controls
 	private void controlCharacter(Entity entity, CharacterComponent character, ControllableComponent control, float delta) {
 		//players position
 		TransformComponent transform = Mappers.transform.get(entity);
@@ -82,24 +80,26 @@ public class ControlSystem extends IteratingSystem {
 		if (control.changeVehicle) {			
 			enterVehicle(entity, control);
 		}
-		
-		
 	}
+	//endregion
 
+
+
+	//region ship controls
 	private void controlShip(Entity entity, VehicleComponent vehicle, ControllableComponent control, float delta) {
-		TransformComponent transform = Mappers.transform.get(entity);				
+		TransformComponent transform = Mappers.transform.get(entity);
 
 		//make vehicle face angle from mouse/joystick
-		transform.rotation = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f*delta);		
-		
+		transform.rotation = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f*delta);
+
 		if (control.moveForward) {
 			accelerate(delta, control, transform, vehicle);
-		}		
+		}
 
 		if (control.moveLeft) {
 			dodgeLeft(delta, transform, control);
 		}
-		
+
 		if (control.moveRight) {
 			dodgeRight(delta, transform, control);
 		}
@@ -107,20 +107,20 @@ public class ControlSystem extends IteratingSystem {
 		if (control.moveBack) {
 			decelerate(delta, transform);
 		}
-		
+
 		//debug force insta-stop(currently affects all vehicles)
 		if (Gdx.input.isKeyJustPressed(Keys.X)) transform.velocity.set(0,0);
-		
+
 
 		//fire cannon / attack
-		CannonComponent cannon = Mappers.cannon.get(entity);	
+		CannonComponent cannon = Mappers.cannon.get(entity);
 		refillAmmo(cannon);//TODO: ammo should refill on all entities regardless of player presence
 		if (control.shoot) {
 			//int tempGenID = Mappers.vehicle.get(entity).tempGenID;
 			fireCannon(transform, cannon, entity);
 		}
-		
-		
+
+
 		//transition or take off from planet
 		if (GameScreen.inSpace) {
 			control.canTransition = canLandOnPlanet(transform.pos);
@@ -128,84 +128,37 @@ public class ControlSystem extends IteratingSystem {
 			control.canTransition = true;
 		}
 		if (control.transition) {
-			if (GameScreen.inSpace) {				
+			if (GameScreen.inSpace) {
 				landOnPlanet(entity);
-			} else {			
+			} else {
 				takeOffPlanet(entity);
 			}
-		}	
-		
-		
+		}
+
+
 		//exit vehicle
 		if (control.changeVehicle) {
 			exitVehicle(entity, control);
 		}
-			
-	}
-	
-	private static void takeOffPlanet(Entity entity) {
-		ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
-		screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.transition;
-		screenTrans.landCFG = new LandConfig();
-		
-		//screenTrans.landCFG.planet = Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
-		screenTrans.landCFG.transitioningEntity = entity;//entity to send to the planet
-		//screenTrans.landCFG.position = WORLDSCREEN.planetPos;// save position for taking off from planet
-		
-		entity.add(screenTrans);
 
-		System.out.println("takeOffPlanet: " + Integer.toHexString(entity.hashCode()));
-		Misc.printEntity(entity);
 	}
 
-	private void landOnPlanet(Entity entity) {
-		Vector2 pos = Mappers.transform.get(entity).pos;
-		for (Entity planet : planets) {
-			Vector2 planetPos = Mappers.transform.get(planet).pos;
-			TextureComponent planetTex = Mappers.texture.get(planet);
+	private static void accelerate(float delta, ControllableComponent control, TransformComponent transform, VehicleComponent vehicle) {
+		//TODO: implement rest of engine behavior
+		//float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go
 
-			if (pos.dst(planetPos) <= planetTex.texture.getWidth() * 0.5 * planetTex.scale) {
-				ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
-				screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.shrink;//begin animation
-				screenTrans.landCFG = new LandConfig();
-				screenTrans.landCFG.planet = planet;// Mappers.planet.get(planet);//generation properties(seed,size,octave,etc..)
-				//screenTrans.landCFG.seed = Mappers.seed.get(planet);
+		float thrust = vehicle.thrust * control.movementMultiplier * delta;
+		transform.velocity.add(MyMath.Vector(transform.rotation, thrust));
 
-				//DebugUISystem.printObjectFields(planet);
-				//DebugUISystem.printObjectFields(Mappers.planet.get(planet));
-				screenTrans.landCFG.transitioningEntity = entity;//entity to send to the planet
-				//screenTrans.landCFG.position = planetPos;// save position for taking off from planet
-				//System.out.println("Land pos: " + planetPos);
-				
-				//TODO: planet moves, set position to what ever planet is instead (will come into play
-				//over more when orbit is based on time)
-				entity.add(screenTrans);
+		//transform.accel.add(dx,dy);//????
 
-
-				System.out.println("landOnPlanet: " + Integer.toHexString(entity.hashCode()));
-				Misc.printObjectFields(entity);
-				return;
-			}
-		}
+		//cap speed at max. if maxSpeed set to -1 it's infinite(no cap)
+		if (vehicle.maxSpeed != vehicle.NOLIMIT)
+			transform.velocity.clamp(0, vehicle.maxSpeed);
 	}
-	
-	
-	private boolean canLandOnPlanet(Vector2 pos) {
-		for (Entity planet : planets) {
-			Vector2 planetPos = Mappers.transform.get(planet).pos;
-			TextureComponent planetTex = Mappers.texture.get(planet);
-			// if player is over planet
-			if (pos.dst(planetPos)	<= planetTex.texture.getWidth() * 0.5 * planetTex.scale) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
 
-	/** Slow down ship. When ship is slow enough, ship will stop completely */
 	private static void decelerate(float delta, TransformComponent transform) {
-		int stopThreshold = 20; 
+		int stopThreshold = 20;
 		int minBreakingThrust = 10;
 		int maxBreakingThrust = 1500;
 		if (transform.velocity.len() <= stopThreshold) {
@@ -239,27 +192,166 @@ public class ControlSystem extends IteratingSystem {
 		}
 	}
 
-	private static void accelerate(float delta, ControllableComponent control, TransformComponent transform, VehicleComponent vehicle) {
-		//TODO: implement rest of engine behavior
-		//float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go
-	
-		float thrust = vehicle.thrust * control.movementMultiplier * delta;
-		transform.velocity.add(MyMath.Vector(transform.rotation, thrust));
-		
-		//transform.accel.add(dx,dy);//????
-		
-		//cap speed at max. if maxSpeed set to -1 it's infinite(no cap)
-		if (vehicle.maxSpeed != vehicle.NOLIMIT)
-			transform.velocity.clamp(0, vehicle.maxSpeed);
-	}
+	public void enterVehicle(Entity characterEntity, ControllableComponent control) {
+		//action timer
+		if (!control.timerVehicle.canDoEvent())
+			return;
 
-	private static void refillAmmo(CannonComponent cannon) {
-		if  (cannon.curAmmo < cannon.maxAmmo && cannon.timerRechargeRate.canDoEvent()) {
-			cannon.curAmmo++; //refill ammo
-			cannon.timerRechargeRate.reset();
+		control.changeVehicle = false;
+
+		//get all vehicles and check if player is close to one(bounds overlap)
+		BoundsComponent playerBounds = Mappers.bounds.get(characterEntity);
+		for (Entity vehicle : vehicles) {
+
+			//skip vehicle is occupied
+			if (Mappers.vehicle.get(vehicle).driver != null) {
+				System.out.println("Vehicle already has a driver!");
+				continue;
+			}
+
+			//check if character is near a vehicle
+			BoundsComponent vehicleBounds = Mappers.bounds.get(vehicle);
+			if (playerBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {
+
+				//set references
+				Mappers.character.get(characterEntity).vehicle = vehicle;
+				Mappers.vehicle.get(vehicle).driver = characterEntity;
+
+				// set focus to vehicle
+				if (characterEntity.getComponent(CameraFocusComponent.class) != null) {
+					vehicle.add(characterEntity.remove(CameraFocusComponent.class));
+					System.out.println("[CameraFocus] " + Misc.myToString(characterEntity) + " -> " + Misc.myToString(vehicle));
+				}
+				if (characterEntity.getComponent(ControllableComponent.class) != null) {
+					vehicle.add(characterEntity.remove(ControllableComponent.class));
+					System.out.println("[Controllable] " + Misc.myToString(characterEntity) + " -> " + Misc.myToString(vehicle));
+				}
+				// move control to vehicle (AI/player)
+				if (characterEntity.getComponent(AIComponent.class) != null) {
+					vehicle.add(characterEntity.remove(AIComponent.class));
+					System.out.println("[AI] " + Misc.myToString(characterEntity) + " -> " + Misc.myToString(vehicle));
+				}
+				if (characterEntity.getComponent(ControlFocusComponent.class) != null) {
+					vehicle.add(characterEntity.remove(ControlFocusComponent.class));
+					System.out.println("[ControlFocus] " + Misc.myToString(characterEntity) + " -> " + Misc.myToString(vehicle));
+				}
+
+
+				// remove player from engine
+				getEngine().removeEntity(characterEntity);
+
+				//if (entity is controlled by player)
+				// zoom out camera, TODO: add pan animation
+				MyScreenAdapter.setZoomTarget(1);
+
+
+				control.timerVehicle.reset();
+
+				return;
+			}
 		}
 	}
 
+	public void exitVehicle(Entity vehicleEntity, ControllableComponent control) {
+
+		//action timer
+		if (!control.timerVehicle.canDoEvent())
+			return;
+
+		control.changeVehicle = false;
+
+		Entity characterEntity = Mappers.vehicle.get(vehicleEntity).driver;
+
+		// set the player at the position of vehicle
+		Vector2 vehiclePosition = Mappers.transform.get(vehicleEntity).pos;
+		Mappers.transform.get(characterEntity).pos.set(vehiclePosition);
+
+		//set focus to character
+		if (vehicleEntity.getComponent(CameraFocusComponent.class) != null) {
+			characterEntity.add(vehicleEntity.remove(CameraFocusComponent.class));
+			System.out.println("[CameraFocus] " + Misc.myToString(vehicleEntity) + " -> " + Misc.myToString(characterEntity));
+		}
+		if (vehicleEntity.getComponent(ControlFocusComponent.class) != null) {
+			characterEntity.add(vehicleEntity.remove(ControlFocusComponent.class));
+			System.out.println("[ControlFocus] " + Misc.myToString(vehicleEntity) + " -> " + Misc.myToString(characterEntity));
+		}
+
+		//move control to character (AI/player)
+		if (vehicleEntity.getComponent(AIComponent.class) != null) {
+			characterEntity.add(vehicleEntity.remove(AIComponent.class));
+			System.out.println("[AI] " + Misc.myToString(vehicleEntity) + " -> " + Misc.myToString(characterEntity));
+		}
+		if (vehicleEntity.getComponent(ControllableComponent.class) != null) {
+			characterEntity.add(vehicleEntity.remove(ControllableComponent.class));
+			System.out.println("[Controllable] " + Misc.myToString(vehicleEntity) + " -> " + Misc.myToString(characterEntity));
+		}
+
+		// remove references
+		Mappers.character.get(characterEntity).vehicle = null;
+		Mappers.vehicle.get(vehicleEntity).driver = null;
+
+		// add player back into world
+		getEngine().addEntity(characterEntity);
+
+		// zoom in camera
+		MyScreenAdapter.setZoomTarget(0.5f);
+
+		control.timerVehicle.reset();
+	}
+	//endregion
+
+
+
+	//region transition
+	private static void takeOffPlanet(Entity entity) {
+		ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
+		screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.transition;
+		screenTrans.transitioningEntity = entity;
+		
+		entity.add(screenTrans);
+
+		System.out.println("takeOffPlanet: " + Misc.myToString(entity));
+		//Misc.printEntity(entity);
+	}
+
+	private void landOnPlanet(Entity entity) {
+		Vector2 pos = Mappers.transform.get(entity).pos;
+		for (Entity planet : planets) {
+			Vector2 planetPos = Mappers.transform.get(planet).pos;
+			TextureComponent planetTex = Mappers.texture.get(planet);
+
+			if (pos.dst(planetPos) <= planetTex.texture.getWidth() * 0.5 * planetTex.scale) {
+				ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
+				screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.shrink;//begin animation
+				screenTrans.planet = planet;
+				screenTrans.transitioningEntity = entity;
+
+				entity.add(screenTrans);
+
+
+				System.out.println("landOnPlanet: " +  Misc.myToString(entity));
+				//Misc.printObjectFields(entity);
+				return;
+			}
+		}
+	}
+	
+	private boolean canLandOnPlanet(Vector2 pos) {
+		for (Entity planet : planets) {
+			Vector2 planetPos = Mappers.transform.get(planet).pos;
+			TextureComponent planetTex = Mappers.texture.get(planet);
+			// if player is over planet
+			if (pos.dst(planetPos) <= planetTex.texture.getWidth() * 0.5 * planetTex.scale) {
+				return true;
+			}
+		}
+		return false;
+	}
+	//endregion
+
+
+
+	//region combat
 	private void fireCannon(TransformComponent transform, CannonComponent cannon, Entity owner) {
 		/*
 		 * Cheat for debug:
@@ -283,7 +375,7 @@ public class ControlSystem extends IteratingSystem {
 		
 		//create missile
 		Vector2 vec = MyMath.Vector(transform.rotation, cannon.velocity).add(transform.velocity);
-		engine.addEntity(EntityFactory.createMissile(transform, vec, cannon, owner));
+		getEngine().addEntity(EntityFactory.createMissile(transform, vec, cannon, owner));
 
 		
 		//subtract ammo
@@ -293,105 +385,13 @@ public class ControlSystem extends IteratingSystem {
 		cannon.timerFireRate.reset();
 	}
 
-	
-	public void enterVehicle(Entity characterEntity, ControllableComponent control) {
-		//action timer
-		if (!control.timerVehicle.canDoEvent())
-			return;
-
-		control.changeVehicle = false;
-		
-		//get all vehicles and check if player is close to one(bounds overlap)
-		BoundsComponent playerBounds = Mappers.bounds.get(characterEntity);
-		for (Entity vehicle : vehicles) {
-			
-			//skip vehicle is occupied
-			if (Mappers.vehicle.get(vehicle).driver != null) continue;
-			
-			//check if character is near a vehicle
-			BoundsComponent vehicleBounds = Mappers.bounds.get(vehicle);
-			if (playerBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {			
-				
-				//set references
-				Mappers.character.get(characterEntity).vehicle = vehicle;
-				Mappers.vehicle.get(vehicle).driver = characterEntity;
-								
-				// set focus to vehicle
-				if (characterEntity.getComponent(CameraFocusComponent.class) != null) {
-					vehicle.add(characterEntity.remove(CameraFocusComponent.class));
-				}
-				if (characterEntity.getComponent(ControllableComponent.class) != null) {
-					vehicle.add(characterEntity.remove(ControllableComponent.class));
-				}
-				// move control to vehicle (AI/player)
-				if (characterEntity.getComponent(AIComponent.class) != null) {
-					vehicle.add(characterEntity.remove(AIComponent.class));
-					System.out.println("[AI] " + Misc.myToString(characterEntity) + " -> " + Misc.myToString(vehicle));
-				}
-				if (characterEntity.getComponent(ControlFocusComponent.class) != null) {
-					vehicle.add(characterEntity.remove(ControlFocusComponent.class));
-					System.out.println("[Character] " + Misc.myToString(characterEntity) + " -> " + Misc.myToString(vehicle));
-				}
-
-				
-				// remove player from engine
-				engine.removeEntity(characterEntity);
-				
-				//if (entity is controlled by player)
-				// zoom out camera, TODO: add pan animation
-				MyScreenAdapter.setZoomTarget(1);
-
-
-				control.timerVehicle.reset();
-				
-				return;
-			}
+	private static void refillAmmo(CannonComponent cannon) {
+		if  (cannon.curAmmo < cannon.maxAmmo && cannon.timerRechargeRate.canDoEvent()) {
+			cannon.curAmmo++; //refill ammo
+			cannon.timerRechargeRate.reset();
 		}
 	}
-			
+	//endregion
 	
-	public void exitVehicle(Entity vehicleEntity, ControllableComponent control) {
-		
-		//action timer
-		if (!control.timerVehicle.canDoEvent())
-			return;
 
-		control.changeVehicle = false;
-		
-		Entity characterEntity = Mappers.vehicle.get(vehicleEntity).driver;
-		
-		// set the player at the position of vehicle
-		Vector2 vehiclePosition = Mappers.transform.get(vehicleEntity).pos;
-		Mappers.transform.get(characterEntity).pos.set(vehiclePosition);
-		
-		//set focus to character
-		if (vehicleEntity.getComponent(CameraFocusComponent.class) != null) {
-			characterEntity.add(vehicleEntity.remove(CameraFocusComponent.class));
-		}
-		if (vehicleEntity.getComponent(ControlFocusComponent.class) != null) {
-			characterEntity.add(vehicleEntity.remove(ControlFocusComponent.class));
-		}
-
-		//move control to character (AI/player)
-		if (vehicleEntity.getComponent(AIComponent.class) != null) {
-			characterEntity.add(vehicleEntity.remove(AIComponent.class));
-			System.out.println("[AI] " + Misc.myToString(vehicleEntity) + " -> " + Misc.myToString(characterEntity));
-		}
-		if (vehicleEntity.getComponent(ControllableComponent.class) != null) {
-			characterEntity.add(vehicleEntity.remove(ControllableComponent.class));
-			System.out.println("[Character] " + Misc.myToString(vehicleEntity) + " -> " + Misc.myToString(characterEntity));
-		}
-		
-		// remove references
-		Mappers.character.get(characterEntity).vehicle = null;
-		Mappers.vehicle.get(vehicleEntity).driver = null;
-		
-		// add player back into world
-		engine.addEntity(characterEntity);
-		
-		// zoom in camera
-		MyScreenAdapter.setZoomTarget(0.5f);
-
-		control.timerVehicle.reset();
-	}
 }

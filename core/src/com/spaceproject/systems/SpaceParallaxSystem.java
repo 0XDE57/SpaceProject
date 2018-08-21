@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceBackgroundTile;
 import com.spaceproject.SpaceBackgroundTile.TileType;
-import com.spaceproject.utility.MyScreenAdapter;
+import com.spaceproject.screens.MyScreenAdapter;
 
 import java.util.ArrayList;
 

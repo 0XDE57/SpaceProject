@@ -9,7 +9,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.MyScreenAdapter;
+import com.spaceproject.screens.MyScreenAdapter;
 
 public class WorldWrapSystem extends EntitySystem {
 	/** TODO: fix world wrapping

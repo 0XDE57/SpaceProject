@@ -55,7 +55,7 @@ public class CollisionSystem extends EntitySystem {
 						if (health.health <= 0) {
 							character.getComponent(TextureComponent.class).texture.dispose();
 							engine.removeEntity(character);
-							//System.out.println("[" + Mappers.vehicle.get(character).id + "] killed by: [" + misl.ownerID + "]");
+							System.out.println("[" + Mappers.vehicle.get(character).id + "] killed by: [" + misl.owner + "]");
 						}
 						
 						
@@ -63,6 +63,7 @@ public class CollisionSystem extends EntitySystem {
 						if (ai != null) {
 							ai.attackTarget = misl.owner;
 							ai.state = AIComponent.testState.attack;
+							System.out.println("AI attacked");
 						}
 						
 						
@@ -93,7 +94,7 @@ public class CollisionSystem extends EntitySystem {
 							if (health.health <= 0) {
 								vehicle.getComponent(TextureComponent.class).texture.dispose();
 								engine.removeEntity(vehicle);
-								System.out.println("[" + vehicle + "] killed by: [" + misl + "]");
+								System.out.println("[" + vehicle + "] killed by: [" + misl.owner + "]");
 							}
 							
 							//remove missile

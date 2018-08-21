@@ -21,7 +21,6 @@ import com.spaceproject.screens.menuanim.DelaunayAnimation;
 import com.spaceproject.screens.menuanim.MainMenuAnimation;
 import com.spaceproject.screens.menuanim.NoiseAnim;
 import com.spaceproject.screens.menuanim.TreeAnimation;
-import com.spaceproject.utility.MyScreenAdapter;
 
 public class MainMenuScreen extends MyScreenAdapter {
 

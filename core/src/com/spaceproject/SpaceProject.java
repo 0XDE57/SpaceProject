@@ -4,7 +4,7 @@ import com.badlogic.gdx.Game;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.screens.MainMenuScreen;
-import com.spaceproject.utility.MyScreenAdapter;
+import com.spaceproject.screens.MyScreenAdapter;
 
 public class SpaceProject extends Game {
 
