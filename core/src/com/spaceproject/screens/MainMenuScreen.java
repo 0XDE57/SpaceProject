@@ -20,6 +20,7 @@ import com.spaceproject.generation.FontFactory;
 import com.spaceproject.screens.menuanim.DelaunayAnimation;
 import com.spaceproject.screens.menuanim.MainMenuAnimation;
 import com.spaceproject.screens.menuanim.NoiseAnim;
+import com.spaceproject.screens.menuanim.OrbitAnim;
 import com.spaceproject.screens.menuanim.TreeAnimation;
 
 public class MainMenuScreen extends MyScreenAdapter {
@@ -32,13 +33,8 @@ public class MainMenuScreen extends MyScreenAdapter {
 
 	MainMenuAnimation foregroundAnimation, backgroundAnimation;
 	enum MenuAnimation {
-		tree, delaunay
+		tree, delaunay, orbit
 	}
-
-	public static MenuAnimation randomAnim()  {
-		return MenuAnimation.values()[MathUtils.random(MenuAnimation.values().length-1)];
-	}
-
 
 	public MainMenuScreen(SpaceProject spaceProject) {
 		this.game = spaceProject;
@@ -173,6 +169,11 @@ public class MainMenuScreen extends MyScreenAdapter {
 		return table;
 	}
 
+
+
+	public static MenuAnimation randomAnim()  {
+		return MenuAnimation.values()[MathUtils.random(MenuAnimation.values().length-1)];
+	}
 	private void initForegroundAnim() {
 		switch (randomAnim()) {
 			case delaunay:
@@ -180,6 +181,9 @@ public class MainMenuScreen extends MyScreenAdapter {
 				break;
 			case tree:
 				foregroundAnimation = new TreeAnimation();
+				break;
+			case orbit:
+				foregroundAnimation = new OrbitAnim();
 				break;
 		}
 	}
