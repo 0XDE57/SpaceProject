@@ -359,6 +359,9 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		fontLarge.draw(batch, frames + count, x, y);
 		fontLarge.draw(batch, memory + threads, x, y - fontLarge.getLineHeight());
 		fontLarge.draw(batch, camera, x, y - fontLarge.getLineHeight()*2);
+
+
+		fontLarge.draw(batch, "time: " + GameScreen.gameTimeCurrent, 500, Gdx.graphics.getHeight()-10);
 	}
 	
 	private void drawEntityList() {

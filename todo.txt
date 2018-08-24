@@ -44,7 +44,6 @@
             //if not important, remove from engine, forget about existence
         }
 
-        maybe a better way to handle would be to add an entity to engine "transition entity" or transition component to entity and it holds ScreenTransition / landCFG?
 
 
 [ ] fix spaceloadingsystem

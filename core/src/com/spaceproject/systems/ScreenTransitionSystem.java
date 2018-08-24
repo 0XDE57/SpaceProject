@@ -12,15 +12,13 @@ import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AstronomicalComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
-import com.spaceproject.components.ScreenTransitionComponent.LandAnimStage;
-import com.spaceproject.components.ScreenTransitionComponent.TakeOffAnimStage;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
-import com.spaceproject.screens.MyScreenAdapter;
 
 
 public class ScreenTransitionSystem extends IteratingSystem implements EntityListener {
@@ -58,9 +56,12 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
                     zoomIn(screenTrans);
                     break;
                 case transition:
-                    landOnPlanet(screenTrans);
+                    landOnPlanet(entity, screenTrans);
+
                     return;
                 case pause:
+
+
                     pause(screenTrans, delta);
                     break;
                 case exit:
@@ -85,14 +86,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
             }
             switch (screenTrans.takeOffStage) {
                 case transition:
-                    screenTrans.transitioningEntity = entity;
-                    if (entity.getComponent(AIComponent.class) != null) {
-                        System.out.println("REMOVING AI ENTITY");
-                        //getEngine().removeEntity(entity); //TODO: remove entity? backgroundEngine here?
-                    } else {
-                        takeOff(screenTrans);
-                    }
-
+                    takeOff(entity, screenTrans);
                     break;
                 case sync:
                     syncLoadPosition(entity, screenTrans);
@@ -130,20 +124,6 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
 
     }
 
-    private void syncLoadPosition(Entity entity, ScreenTransitionComponent screenTrans) {
-        long desiredSeed = screenTrans.planet.getComponent(SeedComponent.class).seed;
-        System.out.println(Misc.myToString(entity) + " is waiting for " + desiredSeed);
-        for (Entity astroEnt : astroObjects) {
-            //System.out.println(Mappers.seed.get(astroEnt).seed);
-            if (Mappers.seed.get(astroEnt).seed == desiredSeed) {
-                Vector2 orbitPos = OrbitSystem.getSyncPos(astroEnt, GameScreen.gameTimeCurrent);
-                Mappers.transform.get(entity).pos.set(orbitPos);
-                screenTrans.takeOffStage = TakeOffAnimStage.zoomOut;
-                System.out.println("FOUND SEED "+ desiredSeed);
-                break;
-            }
-        }
-    }
 
     @Override
     public void entityAdded(Entity entity) {
@@ -168,10 +148,11 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
             tex.scale = 0;
 
             if (entity.getComponent(AIComponent.class) != null) {
-                screenTrans.landStage = LandAnimStage.end;
-                //getEngine().removeEntity(entity); //TODO: remove entity? backgroundEngine here?
+                screenTrans.doTransition = true;
+                //screenTrans.landStage = LandAnimStage.end;
             } else {
-                screenTrans.landStage = LandAnimStage.zoomIn;
+                //screenTrans.landStage = LandAnimStage.zoomIn;
+                screenTrans.landStage = screenTrans.landStage.next();
             }
         }
     }
@@ -184,41 +165,58 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
         if (tex.scale >= SpaceProject.scale) {
             tex.scale = SpaceProject.scale;
 
-            screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.end;
+            //screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.end;
+            screenTrans.takeOffStage = screenTrans.takeOffStage.next();
         }
     }
 
     private static void zoomIn(ScreenTransitionComponent screenTrans) {
         MyScreenAdapter.setZoomTarget(0);
-        if (MyScreenAdapter.cam.zoom <= 0.01f)
-            screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.transition;
+        if (MyScreenAdapter.cam.zoom <= 0.01f) {
+            //screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.transition;
+            screenTrans.landStage = screenTrans.landStage.next();
+        }
     }
 
     private static void zoomOut(ScreenTransitionComponent screenTrans) {
         MyScreenAdapter.setZoomTarget(1);
-        if (MyScreenAdapter.cam.zoom == 1)
-            screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.grow;
+        if (MyScreenAdapter.cam.zoom == 1) {
+            //screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.grow;
+            screenTrans.takeOffStage = screenTrans.takeOffStage.next();
+        }
     }
 
 
-    private static void landOnPlanet(ScreenTransitionComponent screenTrans) {
-        screenTrans.landStage = LandAnimStage.pause;
-        screenTrans.transitioningEntity.add(screenTrans);
-        screenTrans.transitioningEntity.getComponent(TextureComponent.class).scale = SpaceProject.scale;//reset size to normal
+    private static void landOnPlanet(Entity transitioningEntity, ScreenTransitionComponent screenTrans) {
+        //screenTrans.landStage = LandAnimStage.pause;
 
-        GameScreen.transition = true;
+        transitioningEntity.getComponent(TextureComponent.class).scale = SpaceProject.scale;//reset size to normal
+        screenTrans.doTransition = true;
+
+        //GameScreen.transition = true;
     }
 
-    private void takeOff(ScreenTransitionComponent screenTrans) {
-        screenTrans.takeOffStage = TakeOffAnimStage.sync;//TakeOffAnimStage.zoomOut;
-        //screenTrans.transitioningEntity.add(screenTrans);
-        screenTrans.transitioningEntity.getComponent(TextureComponent.class).scale = 0;//set size to 0 so texture can grow
-        screenTrans.planet = GameScreen.currentPlanet; //TODO: genericize so AI can take off, this is a bad singleton
+    private void takeOff(Entity transitioningEntity, ScreenTransitionComponent screenTrans) {
+        //screenTrans.takeOffStage = TakeOffAnimStage.sync;//TakeOffAnimStage.zoomOut;
+        transitioningEntity.getComponent(TextureComponent.class).scale = 0;//set size to 0 so texture can grow
+        //screenTrans.planet = GameScreen.currentPlanet; //TODO: genericize so AI can take off, this is a bad singleton
+        screenTrans.doTransition = true;
+    }
 
-
-        GameScreen.transition = true;
-        //TODO: do current systems run in the background during change?
-        //if so, disable/pause and cleanup/dispose
+    private void syncLoadPosition(Entity entity, ScreenTransitionComponent screenTrans) {
+        long desiredSeed = screenTrans.planet.getComponent(SeedComponent.class).seed;
+        System.out.println(Misc.myToString(entity) + " is waiting for " + desiredSeed);
+        for (Entity astroEnt : astroObjects) {
+            //System.out.println(Mappers.seed.get(astroEnt).seed);
+            if (Mappers.seed.get(astroEnt).seed == desiredSeed) {
+                Vector2 orbitPos = OrbitSystem.getSyncPos(astroEnt, GameScreen.gameTimeCurrent);
+                Mappers.transform.get(entity).pos.set(orbitPos);
+                //screenTrans.takeOffStage = TakeOffAnimStage.zoomOut;
+                screenTrans.takeOffStage = screenTrans.takeOffStage.next();
+                System.out.println("FOUND SEED "+ desiredSeed);
+                break;
+            }
+        }
     }
 
     private static void pause(ScreenTransitionComponent screenTrans, float delta) {
@@ -226,8 +224,10 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
         //TODO move value to config
         int transitionTime = 2200;
         screenTrans.timer += 1000 * delta;
-        if (screenTrans.timer >= transitionTime)
-            screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.exit;
+        if (screenTrans.timer >= transitionTime) {
+            //screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.exit;
+            screenTrans.landStage = screenTrans.landStage.next();
+        }
 
     }
 
@@ -236,7 +236,8 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
             ControllableComponent control = Mappers.controllable.get(entity);
             if (control != null) {
                 control.changeVehicle = true;
-                screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.end;
+                //screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.end;
+                screenTrans.landStage = screenTrans.landStage.next();
             }
         }
     }

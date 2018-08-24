@@ -46,12 +46,12 @@ import java.util.concurrent.TimeUnit;
 
 public class GameScreen extends MyScreenAdapter {
 
-	public Engine engine;
+	public Engine engine, backgroundEngine;
 	public static long gameTimeCurrent, gameTimeStart;
-	public static boolean inSpace;
 
-	public static Entity currentPlanet = null;//TODO: i dont like this, consider AI
-	public static boolean transition;//todo: remove this when switch to state entity?
+
+	public static boolean inSpace;
+	private static Entity currentPlanet = null;
 	//perhaps a game state? eg: dont need to regen the universe each time go to space
 	//GameState {
 	//	inSpace
@@ -84,21 +84,23 @@ public class GameScreen extends MyScreenAdapter {
 
 		// load test default values
 		Entity playerTESTSHIP = CreatePlayerShip();
-		ScreenTransitionComponent transComponent = new ScreenTransitionComponent();
-		transComponent.transitioningEntity = playerTESTSHIP;
+		Entity planet = null;
+		//ScreenTransitionComponent transComponent = new ScreenTransitionComponent();
 
-		if (!inSpace && transComponent.planet == null) {
-			transComponent.planet = EntityFactory.createPlanet(0, new Entity(), 0, false);
+		if (!inSpace && planet == null) {
+			planet = EntityFactory.createPlanet(0, new Entity(), 0, false);
 			System.out.println("NULL PLANET: Debug world loaded");
 			//int a = 1/0;// throw new Exception("");
 		}
 
 		
 		if (inSpace) {
-			initSpace(transComponent);
+			initSpace(playerTESTSHIP);
 		} else {
-			initWorld(transComponent);
+			initWorld(playerTESTSHIP, planet);
 		}
+
+		//transitioningEntities = engine.getEntitiesFor(Family.all(ScreenTransitionComponent.class).get());
 
 	}
 
@@ -110,15 +112,8 @@ public class GameScreen extends MyScreenAdapter {
 		return playerTESTSHIP;
 	}
 
-	private void initSpace(ScreenTransitionComponent transitionComponent) {
+	private void initSpace(Entity transitioningEntity) {
 		System.out.println("==========SPACE==========");
-		//ScreenTransitionComponent transitionComponent = Mappers.screenTrans.get(transitioningEntity);
-		//GameScreen.landCFG = landCFG;
-		/*
-		Misc.printObjectFields(landCFG);
-		Misc.printEntity(landCFG.ship);
-		*/
-
 		inSpace = true;
 		currentPlanet = null;
 		
@@ -172,8 +167,7 @@ public class GameScreen extends MyScreenAdapter {
 
 		
 		//add player
-		Entity ship = transitionComponent.transitioningEntity;
-		engine.addEntity(ship);
+		engine.addEntity(transitioningEntity);
 
 
 		Entity aiTest = EntityFactory.createCharacterAI(0, 400);
@@ -193,14 +187,16 @@ public class GameScreen extends MyScreenAdapter {
 	}
 	
 	
-	private void initWorld(ScreenTransitionComponent transitionComponent) {
+	private void initWorld(Entity transitioningEntity, Entity planet) {
 		System.out.println("==========WORLD==========");
-		Misc.printObjectFields(transitionComponent.planet.getComponent(SeedComponent.class));
-		Misc.printObjectFields(transitionComponent.planet.getComponent(PlanetComponent.class));
+		inSpace = false;
+		currentPlanet = planet;
+
+		Misc.printObjectFields(planet.getComponent(SeedComponent.class));
+		Misc.printObjectFields(planet.getComponent(PlanetComponent.class));
 		//Misc.printEntity(transitionComponent.transitioningEntity);
 
-		inSpace = false;
-		currentPlanet = transitionComponent.planet;
+
 
 		// engine to handle all entities and components
 		engine = new Engine();
@@ -222,13 +218,13 @@ public class GameScreen extends MyScreenAdapter {
 		engine.addSystem(new ControlSystem());
 		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new MovementSystem());
-		engine.addSystem(new WorldWrapSystem(transitionComponent.planet.getComponent(PlanetComponent.class).mapSize));
+		engine.addSystem(new WorldWrapSystem(planet.getComponent(PlanetComponent.class).mapSize));
 		engine.addSystem(new BoundsSystem());
 		engine.addSystem(new CollisionSystem());
 
 		// rendering
 		engine.addSystem(new CameraSystem());
-		engine.addSystem(new WorldRenderingSystem(transitionComponent.planet));
+		engine.addSystem(new WorldRenderingSystem(planet));
 		engine.addSystem(new HUDSystem());
 		engine.addSystem(new DebugUISystem());
 
@@ -236,8 +232,8 @@ public class GameScreen extends MyScreenAdapter {
 
 		// ===============ENTITIES===============
 		// add player
-		Entity ship = transitionComponent.transitioningEntity;
-		int position = transitionComponent.planet.getComponent(PlanetComponent.class).mapSize * SpaceProject.tileSize / 2;//set  position to middle of planet
+		Entity ship = transitioningEntity;
+		int position = planet.getComponent(PlanetComponent.class).mapSize * SpaceProject.tileSize / 2;//set  position to middle of planet
 		ship.getComponent(TransformComponent.class).pos.set(position, position);
 		engine.addEntity(ship);
 
@@ -258,7 +254,7 @@ public class GameScreen extends MyScreenAdapter {
 
 	}
 
-
+	ImmutableArray<Entity> transitioningEntities;
 	@Override
 	public void render(float delta) {
 		super.render(delta);
@@ -267,55 +263,91 @@ public class GameScreen extends MyScreenAdapter {
 		gameTimeCurrent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - gameTimeStart);
 		engine.update(delta);
 
-		engine.getSystem(DebugUISystem.class).drawMessage("time: " + gameTimeCurrent, 500, Gdx.graphics.getHeight()-10);
 
-		if (Gdx.input.isKeyJustPressed(Keys.U)) {
-			Misc.printEntities(engine);
-		}
+		CheckTransition();
 
-
-		if (transition) {
-			transition = false;
-
-
-			ImmutableArray<Entity> transitioningEntity = engine.getEntitiesFor(Family.all(ScreenTransitionComponent.class).get());
-			Entity transEntity = transitioningEntity.first();
-			ScreenTransitionComponent transitionComponent = Mappers.screenTrans.get(transEntity);
-			/*
-			if player {
-				switch
-			}
-			if AI {
-				if (important) {
-					keep
-				} else {
-					remove
-				}
-			}
-			  */
-
-
-			engine.removeAllEntities();
-			//engine.removeAllSystems();?
-
-			if (inSpace) {
-				initWorld(transitionComponent);
-			} else {
-				initSpace(transitionComponent);
-			}
-
-			//Misc.printEntities(engine);
-			//Misc.printSystems(engine);
-		}
 
 		if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
+			//todo: move into hudsystem & check button from config
 			if (HUDSystem.drawMap != HUDSystem.MapState.off) {
 				HUDSystem.spaceMapScale = 500;
 			}
 		}
 
+		if (Gdx.input.isKeyJustPressed(Keys.U)) {
+			//debug
+			Misc.printEntities(engine);
+		}
+
 		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
 			game.setScreen(new MainMenuScreen(game));
+		}
+	}
+
+	private void CheckTransition() {
+		boolean transition = false;
+		Entity transEntity = null;
+		if (transitioningEntities == null) {
+			transitioningEntities = engine.getEntitiesFor(Family.all(ScreenTransitionComponent.class).get());
+		}
+
+		//System.out.println(transitioningEntities.size());
+		for (Entity e : transitioningEntities) {
+			//System.out.println("transitioning: " + Misc.myToString(e));
+			ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(e);
+			if (screenTrans.doTransition) {
+				screenTrans.doTransition = false;
+
+
+
+				if (e.getComponent(ControlFocusComponent.class) != null) {
+					transition = true;
+					transEntity = e;
+					//Mappers.screenTrans.get(e).landStage = ScreenTransitionComponent.LandAnimStage.pause;
+				}
+
+				if (Mappers.AI.get(e) != null) {
+					System.out.println("REMOVING: " + Misc.myToString(e));
+					engine.removeEntity(e);
+						/*
+						if (Mappers.persist.get(e)) {
+							System.out.println("MOVED to background engine: " + Misc.myToString(e));
+							backgroundEngine.addEntity(e);
+						}*/
+				}
+
+				if (inSpace) {
+					//screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.pause;
+					screenTrans.landStage = screenTrans.landStage.next();
+				} else {
+					//screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.sync;
+					screenTrans.takeOffStage = screenTrans.takeOffStage.next();
+				}
+			}
+		}
+
+
+		if (transition) {
+			engine.removeAllEntities();
+			//engine.removeAllSystems();?
+
+			if (inSpace) {
+				initWorld(transEntity, Mappers.screenTrans.get(transEntity).planet);
+			} else {
+				Mappers.screenTrans.get(transEntity).planet = currentPlanet;
+				initSpace(transEntity);
+
+			}
+			transitioningEntities = null;//engine.getEntitiesFor(Family.all(ScreenTransitionComponent.class).get());
+			//engine.addEntityListener(Family.all(ScreenTransitionComponent.class).get(),this);
+			/*
+			for (Entity relevantEntity : backgroundEngine.getEntities()) {
+				//if landing on planet, and relevantEntity is on planet, add to engine, remove from backgroundEngine
+				//if going to space, and relevantEntity in space, add to engine, remove from backgroundEngine
+			}*/
+
+			//Misc.printEntities(engine);
+			//Misc.printSystems(engine);
 		}
 	}
 
@@ -372,4 +404,6 @@ public class GameScreen extends MyScreenAdapter {
 	@Override
 	public void resume() {
 	}
+
+
 }

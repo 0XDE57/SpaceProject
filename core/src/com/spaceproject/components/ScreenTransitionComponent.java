@@ -12,7 +12,13 @@ public class ScreenTransitionComponent implements Component {
 		sync,
 		zoomOut,
 		grow,
-		end
+		end;
+
+		private static TakeOffAnimStage[] vals = values();
+		public TakeOffAnimStage next()
+		{
+			return vals[(this.ordinal()+1) % vals.length];
+		}
 	}
 	
 	public enum LandAnimStage {
@@ -22,7 +28,13 @@ public class ScreenTransitionComponent implements Component {
 		transition,
 		pause,
 		exit,
-		end
+		end;
+
+		private static LandAnimStage[] vals = values();
+		public LandAnimStage next()
+		{
+			return vals[(this.ordinal()+1) % vals.length];
+		}
 	}
 	
 	public LandAnimStage landStage;
@@ -31,7 +43,8 @@ public class ScreenTransitionComponent implements Component {
 	public TakeOffAnimStage curTakeOffStage;
 
 	public Entity planet;
-	public Entity transitioningEntity;
+
+	public boolean doTransition;
 	
 	public float timer;
 }

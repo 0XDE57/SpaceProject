@@ -304,10 +304,12 @@ public class ControlSystem extends IteratingSystem {
 
 	//region transition
 	private static void takeOffPlanet(Entity entity) {
+		if (Mappers.screenTrans.get(entity) != null)
+			return;
+
 		ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
 		screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.transition;
-		screenTrans.transitioningEntity = entity;
-		
+		//screenTrans.planet = GameScreen.currentPlanet;
 		entity.add(screenTrans);
 
 		System.out.println("takeOffPlanet: " + Misc.myToString(entity));
@@ -315,19 +317,21 @@ public class ControlSystem extends IteratingSystem {
 	}
 
 	private void landOnPlanet(Entity entity) {
+		if (Mappers.screenTrans.get(entity) != null)
+			return;
+
 		Vector2 pos = Mappers.transform.get(entity).pos;
 		for (Entity planet : planets) {
 			Vector2 planetPos = Mappers.transform.get(planet).pos;
 			TextureComponent planetTex = Mappers.texture.get(planet);
 
 			if (pos.dst(planetPos) <= planetTex.texture.getWidth() * 0.5 * planetTex.scale) {
+
 				ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
 				screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.shrink;//begin animation
 				screenTrans.planet = planet;
-				screenTrans.transitioningEntity = entity;
 
 				entity.add(screenTrans);
-
 
 				System.out.println("landOnPlanet: " +  Misc.myToString(entity));
 				//Misc.printObjectFields(entity);
