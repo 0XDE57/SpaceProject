@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.ui.MiniMap;
 import com.spaceproject.ui.TouchButtonRectangle;
 import com.spaceproject.ui.TouchButtonRound;
 import com.spaceproject.ui.TouchJoyStick;
@@ -58,7 +59,9 @@ public class MobileInputSystem extends EntitySystem {
 		control.changeVehicle = btnVehicle.isJustTouched();
 		control.transition = btnLand.isTouched();
 		if (btnMap.isJustTouched()) {
-			HUDSystem.CycleMapState();
+			HUDSystem hud = getEngine().getSystem(HUDSystem.class);
+			if (hud != null)
+				hud.getMiniMap().cycleMapState();
 		}
 		btnLand.hidden = !control.canTransition;
 		

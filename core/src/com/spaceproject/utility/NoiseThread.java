@@ -27,7 +27,7 @@ public class NoiseThread implements Runnable {
 	private float persistence;
 	private float lacunarity;	
 	
-	//drawMap
+	//map
 	private int mapSize;
 	private float[][] heightMap;
 	private int[][] tileMap;

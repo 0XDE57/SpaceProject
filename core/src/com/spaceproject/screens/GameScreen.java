@@ -11,6 +11,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
+import com.spaceproject.MapState;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.CameraFocusComponent;
@@ -39,6 +40,7 @@ import com.spaceproject.systems.SpaceParallaxSystem;
 import com.spaceproject.systems.SpaceRenderingSystem;
 import com.spaceproject.systems.WorldRenderingSystem;
 import com.spaceproject.systems.WorldWrapSystem;
+import com.spaceproject.ui.MiniMap;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 
@@ -52,6 +54,7 @@ public class GameScreen extends MyScreenAdapter {
 
 	public static boolean inSpace;
 	private static Entity currentPlanet = null;
+	private ImmutableArray<Entity> transitioningEntities;
 	//perhaps a game state? eg: dont need to regen the universe each time go to space
 	//GameState {
 	//	inSpace
@@ -85,7 +88,6 @@ public class GameScreen extends MyScreenAdapter {
 		// load test default values
 		Entity playerTESTSHIP = CreatePlayerShip();
 		Entity planet = null;
-		//ScreenTransitionComponent transComponent = new ScreenTransitionComponent();
 
 		if (!inSpace && planet == null) {
 			planet = EntityFactory.createPlanet(0, new Entity(), 0, false);
@@ -99,8 +101,6 @@ public class GameScreen extends MyScreenAdapter {
 		} else {
 			initWorld(playerTESTSHIP, planet);
 		}
-
-		//transitioningEntities = engine.getEntitiesFor(Family.all(ScreenTransitionComponent.class).get());
 
 	}
 
@@ -251,10 +251,9 @@ public class GameScreen extends MyScreenAdapter {
 		Mappers.AI.get(aiTest2).state = AIComponent.testState.takeOffPlanet;
 		engine.addEntity(aiTest2);
 
-
 	}
 
-	ImmutableArray<Entity> transitioningEntities;
+
 	@Override
 	public void render(float delta) {
 		super.render(delta);
@@ -265,14 +264,6 @@ public class GameScreen extends MyScreenAdapter {
 
 
 		CheckTransition();
-
-
-		if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
-			//todo: move into hudsystem & check button from config
-			if (HUDSystem.drawMap != HUDSystem.MapState.off) {
-				HUDSystem.spaceMapScale = 500;
-			}
-		}
 
 		if (Gdx.input.isKeyJustPressed(Keys.U)) {
 			//debug
@@ -291,19 +282,14 @@ public class GameScreen extends MyScreenAdapter {
 			transitioningEntities = engine.getEntitiesFor(Family.all(ScreenTransitionComponent.class).get());
 		}
 
-		//System.out.println(transitioningEntities.size());
 		for (Entity e : transitioningEntities) {
-			//System.out.println("transitioning: " + Misc.myToString(e));
 			ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(e);
 			if (screenTrans.doTransition) {
 				screenTrans.doTransition = false;
 
-
-
 				if (e.getComponent(ControlFocusComponent.class) != null) {
 					transition = true;
 					transEntity = e;
-					//Mappers.screenTrans.get(e).landStage = ScreenTransitionComponent.LandAnimStage.pause;
 				}
 
 				if (Mappers.AI.get(e) != null) {
@@ -317,10 +303,8 @@ public class GameScreen extends MyScreenAdapter {
 				}
 
 				if (inSpace) {
-					//screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.pause;
 					screenTrans.landStage = screenTrans.landStage.next();
 				} else {
-					//screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.sync;
 					screenTrans.takeOffStage = screenTrans.takeOffStage.next();
 				}
 			}
@@ -328,7 +312,8 @@ public class GameScreen extends MyScreenAdapter {
 
 
 		if (transition) {
-			engine.removeAllEntities();
+			engine.removeAllEntities();//to fix family references when entities added to new engine
+			transitioningEntities = null;
 			//engine.removeAllSystems();?
 
 			if (inSpace) {
@@ -338,7 +323,7 @@ public class GameScreen extends MyScreenAdapter {
 				initSpace(transEntity);
 
 			}
-			transitioningEntities = null;//engine.getEntitiesFor(Family.all(ScreenTransitionComponent.class).get());
+
 			//engine.addEntityListener(Family.all(ScreenTransitionComponent.class).get(),this);
 			/*
 			for (Entity relevantEntity : backgroundEngine.getEntities()) {
@@ -353,13 +338,15 @@ public class GameScreen extends MyScreenAdapter {
 
 	@Override
 	public boolean scrolled(int amount) {
-		if (HUDSystem.drawMap == HUDSystem.MapState.full) {
-			HUDSystem.spaceMapScale += amount*20;
-			return false;
-		} else {
-			return super.scrolled(amount);
+		HUDSystem hud = engine.getSystem(HUDSystem.class);
+		if (hud != null) {
+			if (hud.getMiniMap().mapState == MapState.full) {
+				hud.getMiniMap().scrollMiniMap(amount);
+				return false;
+			}
 		}
 
+		return super.scrolled(amount);
 	}
 
 	@Override

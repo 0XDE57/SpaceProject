@@ -6,15 +6,15 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.MapState;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
@@ -22,9 +22,11 @@ import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.ui.MiniMap;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.screens.MyScreenAdapter;
+
 
 public class HUDSystem extends EntitySystem {
 
@@ -39,17 +41,13 @@ public class HUDSystem extends EntitySystem {
 	private ImmutableArray<Entity> mapableObjects;
 	private ImmutableArray<Entity> player;
 	private ImmutableArray<Entity> killables;
+
+	private MiniMap miniMap = new MiniMap();
 	
 	private boolean drawHud = true;
 	private boolean drawEdgeMap = true;
-	public static MapState drawMap = MapState.off;
-	public enum MapState {
-		full,
-		mini,
-		off
-	}
 
-	public static float spaceMapScale = 500;
+
 	
 	float opacity = 0.7f;
 	Color barBackground = new Color(1,1,1,0.5f);
@@ -70,13 +68,7 @@ public class HUDSystem extends EntitySystem {
 		killables = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(CameraFocusComponent.class).get());
 	}
 
-	public static void CycleMapState() {
-		switch (drawMap) {
-			case full: drawMap = MapState.mini; break;
-			case mini: drawMap = MapState.off; break;
-			case off: drawMap = MapState.full; break;
-		}
-	}
+
 	
 	@Override
 	public void update(float delta) {
@@ -86,12 +78,18 @@ public class HUDSystem extends EntitySystem {
 		}
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleEdgeMap)) {
 			drawEdgeMap = !drawEdgeMap;
-			System.out.println("Edge drawMap: " + drawEdgeMap);
+			System.out.println("Edge mapState: " + drawEdgeMap);
 		}
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleSpaceMap)) {
-			//drawSpaceMap = !drawSpaceMap;
-			CycleMapState();
-			System.out.println("Space drawMap: " + drawMap);
+			miniMap.cycleMapState();
+		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
+			miniMap.cycleMiniMapPosition();
+		}
+		if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
+			if (miniMap.mapState != MapState.off) {
+				miniMap.mapScale = 500;
+			}
 		}
 		
 		if (!drawHud) return;
@@ -109,9 +107,8 @@ public class HUDSystem extends EntitySystem {
 		drawPlayerStatus();
 		
 		if (drawEdgeMap) drawEdgeMap();
-		
-		//if (drawSpaceMap)
-		drawSpaceMap();
+
+		miniMap.drawSpaceMap(engine, shape);
 		
 		drawHealthBars();
 		
@@ -124,6 +121,10 @@ public class HUDSystem extends EntitySystem {
 		if (mobileUI != null)
 			mobileUI.drawControls();
 		
+	}
+
+	public MiniMap getMiniMap() {
+		return miniMap;
 	}
 
 	/**
@@ -226,7 +227,7 @@ public class HUDSystem extends EntitySystem {
 
 	/**
 	 * Mark off-screen objects on edge of screen for navigation.
-	 * TODO: load star drawMap markers based on point list instead of star entity for stars that aren't loaded yet
+	 * TODO: load star mapState markers based on point list instead of star entity for stars that aren't loaded yet
 	 */
 	private void drawEdgeMap() {
 		//TODO: move these values into MapComponent or a config file
@@ -234,7 +235,7 @@ public class HUDSystem extends EntitySystem {
 		float markerLarge = 8; //max marker size
 		float distSmall = 8000; //distance when marker is small
 		float distLarge = 2000; //distance when marker is large
-		//gain and offset for transfer function: drawMap [3.5 - 8] to [8000 - 2000]
+		//gain and offset for transfer function: mapState [3.5 - 8] to [8000 - 2000]
 		double gain = (markerSmall-markerLarge)/(distSmall-distLarge);
 		double offset = markerSmall - gain * distSmall;
 		
@@ -317,7 +318,7 @@ public class HUDSystem extends EntitySystem {
 			shape.circle(markerX, markerY, (float)size);
 			
 			/*
-			switch(drawMap.shape) {
+			switch(mapState.shape) {
 				case circle: shape.circle(markerX, markerY, (float)size);
 				case square: shape.rect
 				case triangle: shape.poly
@@ -327,116 +328,4 @@ public class HUDSystem extends EntitySystem {
 
 	}
 
-
-
-	private void drawSpaceMap() {
-		if (spaceMapScale < 1) spaceMapScale = 1;
-
-		if (drawMap == MapState.off)
-			return;
-
-		//TODO: fix map
-		//[...] fix minimap
-		//[...] simplify grid calculation
-		//[ ] make drawMap item relative to middle of drawMap instead of middle of screen(Gdx.graphics.getWidth()/2), verify with small non-centered drawMap
-		//[ ] draw grid pos
-
-		int chunkSize = (int) Math.pow(2, 17 - 1);
-		int borderWidth = 3;
-		int size = 6;
-
-
-		Rectangle mapBacking;
-		if (drawMap == MapState.full) {
-			int edgePad = 50;
-			mapBacking = new Rectangle(edgePad, edgePad, Gdx.graphics.getWidth() - edgePad * 2, Gdx.graphics.getHeight() - edgePad * 2);
-		} else {
-			int miniWidth = 320;
-			int miniHeight = 240;
-			/*
-			//top-right
-			mapBacking = new Rectangle(
-					Gdx.graphics.getWidth() - miniWidth-10,
-					Gdx.graphics.getHeight() - miniHeight-10,
-					miniWidth,
-					miniHeight); */
-
-			//bottom-left
-			mapBacking = new Rectangle(
-					Gdx.graphics.getWidth() - miniWidth-10,
-					10,
-					miniWidth,
-					miniHeight);
-			/*
-			//bottom-right
-			mapBacking = new Rectangle(
-					10,
-					10,
-					miniWidth,
-					miniHeight); */
-		}
-
-
-
-		float centerX = mapBacking.x + mapBacking.width/2;
-		float centerY = mapBacking.y + mapBacking.height/2;
-		float offX = (mapBacking.x + mapBacking.width/2);
-		float offY = (mapBacking.y + mapBacking.height/2);
-
-		//draw backing
-		shape.setColor(0, 0, 0, 0.8f);
-		shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, mapBacking.height);
-
-
-		//draw mouse pos
-		shape.setColor(1f,0.2f,0.2f,1f);
-		int mX = Gdx.input.getX();
-		int mY = Gdx.graphics.getHeight()-Gdx.input.getY();
-		if (mX > mapBacking.x && mX < mapBacking.x+mapBacking.width && mY > mapBacking.y && mY < mapBacking.y+mapBacking.height) {
-			shape.line(mapBacking.y, Gdx.graphics.getHeight()-Gdx.input.getY(), mapBacking.y+mapBacking.width, Gdx.graphics.getHeight()-Gdx.input.getY());//horizontal
-			shape.line(Gdx.input.getX(), mapBacking.x, Gdx.input.getX(), mapBacking.x+mapBacking.height);//vertical
-		}
-
-
-		//draw grid X
-		shape.setColor(0.2f,0.2f,0.2f,0.8f);
-		int startX = (int)(((mapBacking.x-Gdx.graphics.getWidth()/2)*spaceMapScale)+MyScreenAdapter.cam.position.x)/chunkSize;
-		int endX = (int)(((mapBacking.x+mapBacking.width-Gdx.graphics.getWidth()/2)*spaceMapScale)+MyScreenAdapter.cam.position.x)/chunkSize;
-		for (int i = startX; i < endX+1; i++) {
-			float finalX = ((i*chunkSize)-MyScreenAdapter.cam.position.x )/ spaceMapScale +Gdx.graphics.getWidth()/2;
-			shape.rect(finalX, mapBacking.y, 1, mapBacking.height);
-		}
-		//draw grid Y
-		int startY = (int)(((mapBacking.y-Gdx.graphics.getHeight()/2)*spaceMapScale)+MyScreenAdapter.cam.position.y)/chunkSize;
-		int endY = (int)(((mapBacking.y+mapBacking.height-Gdx.graphics.getHeight()/2)*spaceMapScale)+MyScreenAdapter.cam.position.y)/chunkSize;
-		for (int i = startY; i < endY+1; i++) {
-			float finalY = ((i*chunkSize)-MyScreenAdapter.cam.position.y )/ spaceMapScale +Gdx.graphics.getHeight()/2;
-			shape.rect(mapBacking.x, finalY, mapBacking.width, 1);
-		}
-
-
-		//draw drawMap objects
-		shape.setColor(1, 1, 0, 1);
-		SpaceLoadingSystem spaceLoader = engine.getSystem(SpaceLoadingSystem.class);
-		if (spaceLoader != null) {
-			for (Vector2 p : spaceLoader.getPoints()) {
-				// n = relative pos / scale + mapPos
-				float x = ((p.x - MyScreenAdapter.cam.position.x) / spaceMapScale) + (mapBacking.x + mapBacking.width / 2);//+Gdx.graphics.getWidth()/2;
-				float y = ((p.y - MyScreenAdapter.cam.position.y) / spaceMapScale) + (mapBacking.y + mapBacking.height / 2);//+Gdx.graphics.getHeight()/2;
-
-
-				if (mapBacking.contains(x, y)) shape.circle(x, y, size);
-
-			}
-		}
-
-
-		//draw border
-		shape.setColor(0.6f,0.6f,0.6f,1f);
-		shape.rect(mapBacking.x, mapBacking.height+mapBacking.y-borderWidth, mapBacking.width, borderWidth);//top
-		shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, borderWidth);//bottom
-		shape.rect(mapBacking.x, mapBacking.y, borderWidth, mapBacking.height);//left
-		shape.rect(mapBacking.width+mapBacking.x-borderWidth, mapBacking.y, borderWidth, mapBacking.height);//right
-	}
-	
 }

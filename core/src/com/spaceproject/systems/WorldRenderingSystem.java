@@ -89,7 +89,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		int mapSize = 256; //size of world	*/	
 		heightMap = NoiseGen.generateWrappingNoise4D(seed.seed, planet.mapSize, planet.scale, planet.octaves, planet.persistence, planet.lacunarity);
 		
-		//create drawMap of tiles based on height
+		//create map of tiles based on height
 		tileMap = NoiseGen.createTileMap(heightMap, tiles);		
 	}
 	
@@ -171,7 +171,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		for (int tileY = centerY - surround; tileY <= centerY + surround; tileY++) {
 			for (int tileX = centerX - surround; tileX <= centerX + surround; tileX++) {
 				
-				//wrap tiles when position is outside of drawMap
+				//wrap tiles when position is outside of map
 				int tX = tileX % heightMap.length;
 				int tY = tileY % heightMap.length;
 				if (tX < 0) tX += heightMap.length;

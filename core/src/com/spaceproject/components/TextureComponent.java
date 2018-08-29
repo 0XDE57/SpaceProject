@@ -6,6 +6,6 @@ import com.badlogic.gdx.graphics.Texture;
 public class TextureComponent implements Component {
 	//texture/image
 	public Texture texture = null;
-	//spaceMapScale/size of image
+	//scale/size of image
 	public float scale = 1.0f;
 }

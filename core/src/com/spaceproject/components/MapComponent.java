@@ -7,6 +7,6 @@ public class MapComponent implements Component {
 	/* color of marker */
 	public Color color;
 	
-	/* distance entity must be from player to show up on drawMap */
+	/* distance entity must be from player to show up on map */
 	public int distance;
 }

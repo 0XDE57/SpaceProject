@@ -109,7 +109,7 @@ public class TestNoiseScreen extends MyScreenAdapter {
 		
 		shape.begin(ShapeType.Filled);		
 		
-		//draw noise drawMap
+		//draw noise map
 		drawMap();
 		
 		//drawMapLerped();
@@ -179,7 +179,7 @@ public class TestNoiseScreen extends MyScreenAdapter {
 	}
 
 	private void updateClickDragMapOffset() {	
-		// click and drag move drawMap around
+		// click and drag move map around
 		int mouseX = Gdx.input.getX();
 		int mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
 		if (Gdx.input.justTouched() && mouseX > mapX && mouseX < mapX + mapRenderWindowSize
