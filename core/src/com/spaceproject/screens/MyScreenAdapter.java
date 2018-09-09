@@ -68,7 +68,20 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     	
     	//adjust zoom
     	zoomCamera(delta);
-    	
+
+
+
+		//fullscreen toggle
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.fullscreen)) {
+			MyScreenAdapter.toggleFullscreen();
+		}
+
+		//vsync toggle
+		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.vsync)) {
+			MyScreenAdapter.toggleVsync();
+		}
+
+		//reset zoom
     	if (Gdx.input.isButtonPressed(Buttons.MIDDLE)) {
     		cam.zoom = 1;
     		setZoomTarget(1);

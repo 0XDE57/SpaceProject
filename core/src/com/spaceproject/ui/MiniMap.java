@@ -3,49 +3,47 @@ package com.spaceproject.ui;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.spaceproject.MapState;
+import com.spaceproject.generation.FontFactory;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.systems.SpaceLoadingSystem;
-
-
-enum MiniMapPosition {
-    topLeft,
-    topRight,
-    bottomRight,
-    bottomLeft;
-
-    //custom;
-
-    private static MiniMapPosition[] vals = values();
-    public MiniMapPosition next() {
-        return vals[(this.ordinal()+1) % vals.length];
-    }
-}
+import com.spaceproject.utility.SimpleTimer;
 
 public class MiniMap {
 
     public MapState mapState = MapState.off;
-    public MiniMapPosition miniMapPosition = MiniMapPosition.bottomRight;
+    private MiniMapPosition miniMapPosition = MiniMapPosition.bottomRight;
 
     private int chunkSize = (int) Math.pow(2, 17 - 1);
     private int borderWidth = 3;
     private int size = 6;
     public static float mapScale = 500;
+
+    private SimpleTimer drawScaleTimer = new SimpleTimer(5000);
+
     private Rectangle mapBacking;
+
+    private BitmapFont fontSmall;
+
     public MiniMap() {
-        mapBacking = getMiniMapRectangle();
+        updateMapPosition();
+        fontSmall = FontFactory.createFont(FontFactory.fontPressStart, 12);
     }
 
-    public void drawSpaceMap(Engine engine, ShapeRenderer shape) {
+    public void drawSpaceMap(Engine engine, ShapeRenderer shape, SpriteBatch batch) {
         if (mapState == MapState.off)
             return;
+
+        shape.begin(ShapeRenderer.ShapeType.Filled);
 
         if (mapScale < 1)
             mapScale = 1;
 
+        updateMapPosition();
         float centerMapX = mapBacking.x + mapBacking.width / 2;
         float centerMapY = mapBacking.y + mapBacking.height / 2;
 
@@ -75,7 +73,7 @@ public class MiniMap {
         //TODO: when lines render outside the box
         //when scale = 500 and x > ~80,000
 
-        System.out.println(startX + " , " +endX);
+        //System.out.println(startX + " , " +endX);
         for (int i = startX; i < endX+1; i++) {
             float finalX = (((i*chunkSize) - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
             shape.rect(finalX, mapBacking.y, 1, mapBacking.height);
@@ -120,17 +118,34 @@ public class MiniMap {
 
         shape.setColor(Color.WHITE);
         shape.circle(centerMapX, centerMapY, 2);
+        shape.end();
+
+
+        batch.begin();
+        String mapString = (int) MyScreenAdapter.cam.position.x / chunkSize + ", " + (int) MyScreenAdapter.cam.position.y / chunkSize;
+        if (!drawScaleTimer.canDoEvent()) {
+            mapString += ": " + mapScale;
+        }
+        fontSmall.draw(batch, mapString, mapBacking.x + 10, mapBacking.y + mapBacking.height - fontSmall.getLineHeight());
+        batch.end();
+
     }
+
 
     public void cycleMiniMapPosition() {
         miniMapPosition = miniMapPosition.next();
-        mapBacking = getMiniMapRectangle();
+        //updateMapPosition();
         System.out.println(miniMapPosition);
     }
+
     public void cycleMapState() {
         mapState = mapState.next();
-        mapBacking = getMiniMapRectangle();
+        //updateMapPosition();
         System.out.println(mapState);
+    }
+
+    public void updateMapPosition() {
+        mapBacking = getMiniMapRectangle();
     }
 
     private Rectangle getMiniMapRectangle() {
@@ -172,6 +187,7 @@ public class MiniMap {
 
     public void scrollMiniMap(int amount) {
         mapScale += amount*20;
+        drawScaleTimer.reset();
         System.out.println("map scale: " + mapScale);
     }
 

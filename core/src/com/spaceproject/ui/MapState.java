@@ -1,4 +1,4 @@
-package com.spaceproject;
+package com.spaceproject.ui;
 
 public enum MapState {
     full,

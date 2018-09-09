@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Queue;
 import com.spaceproject.utility.MyMath;
 
 public class OrbitAnim extends MainMenuAnimation {
@@ -24,10 +25,9 @@ public class OrbitAnim extends MainMenuAnimation {
     @Override
     public void render(float delta, ShapeRenderer shape) {
         shape.begin(ShapeRenderer.ShapeType.Filled);
-        shape.setColor(Color.BLACK);
+
         for (OrbitObject orbit : objects) {
-            orbit.update(delta);
-            shape.circle(orbit.pos.x, orbit.pos.y, orbit.size);
+            orbit.update(delta, shape);
         }
         shape.end();
 
@@ -46,11 +46,12 @@ public class OrbitAnim extends MainMenuAnimation {
 }
 
 class OrbitObject {
-    OrbitObject parent;
-    Vector2 pos;
-    float angle, rotSpeed;
-    float distance;
-    int size;
+    private OrbitObject parent;
+    private Vector2 pos;
+    private Queue<Vector2> tail;
+    private float angle, rotSpeed;
+    private float distance;
+    private int size;
 
     public OrbitObject(OrbitObject parent, float distance) {
         this.parent = parent;
@@ -61,7 +62,11 @@ class OrbitObject {
             rotSpeed = -rotSpeed;
 
         size = MathUtils.random(5, 10);
+        if (parent == null){
+            size *= 3;
+        }
 
+        tail = new Queue<Vector2>();
 
         if (parent != null)
             pos = MyMath.Vector(angle, distance).add(parent.pos);
@@ -69,11 +74,34 @@ class OrbitObject {
             pos = new Vector2(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
     }
 
-    public void update(float delta) {
+    public void update(float delta, ShapeRenderer shape) {
         angle += rotSpeed * delta;
 
         if (parent != null) {
-            pos = MyMath.Vector(angle, distance).add(parent.pos);
+            int tailSize = 30;
+            Vector2 newPos = MyMath.Vector(angle, distance).add(parent.pos);
+            if (!newPos.epsilonEquals(pos)) {
+                tail.addFirst(pos);
+                if (tail.size > tailSize) {
+                    tail.removeLast();
+                }
+            }
+            pos = newPos;
+
+            int tPos = 0;
+            for (Vector2 t : tail) {
+                float ratio = (float)tPos++/tail.size;
+                shape.setColor(ratio, ratio, ratio, 1);
+                shape.circle(t.x, t.y, size*(1-ratio));
+            }
+
+        } else {
+            pos.set(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+            shape.setColor(Color.BLACK);
+            shape.circle(pos.x, pos.y, size);
+            shape.setColor(Color.WHITE);
+            shape.circle(pos.x, pos.y, size-1);
         }
+
     }
 }

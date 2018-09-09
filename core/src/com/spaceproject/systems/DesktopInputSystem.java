@@ -82,15 +82,7 @@ public class DesktopInputSystem extends EntitySystem {
 			MyScreenAdapter.cam.rotate(-5f * delta);
 		}
 		
-		//fullscreen toggle
-		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.fullscreen)) { 
-			MyScreenAdapter.toggleFullscreen();
-		}
-		
-		//vsync toggle
-		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.vsync)) {
-			MyScreenAdapter.toggleVsync();
-		}
+
 	}
 
 }

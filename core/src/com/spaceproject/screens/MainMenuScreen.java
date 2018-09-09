@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -29,7 +30,7 @@ public class MainMenuScreen extends MyScreenAdapter {
 
 	private Stage stage;
 	private BitmapFont fontComfortaaBold;
-
+	private Matrix4 projectionMatrix = new Matrix4();
 
 	MainMenuAnimation foregroundAnimation, backgroundAnimation;
 	enum MenuAnimation {
@@ -65,11 +66,14 @@ public class MainMenuScreen extends MyScreenAdapter {
 	public void render(float delta) {
 		super.render(delta);
 
-		Gdx.gl20.glClearColor(0.5f, 0.5f, 0.5f, 1);
+		Gdx.gl20.glClearColor(1, 1, 1, 1);
 		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 
 		cam.position.set(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2,0);
+		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		shape.setProjectionMatrix(projectionMatrix);
+		batch.setProjectionMatrix(projectionMatrix);
 
 		Gdx.gl.glEnable(Gdx.gl20.GL_BLEND);
 		Gdx.gl.glBlendFunc(Gdx.gl20.GL_SRC_ALPHA, Gdx.gl20.GL_ONE_MINUS_SRC_ALPHA);
@@ -102,6 +106,9 @@ public class MainMenuScreen extends MyScreenAdapter {
 		super.resize(width, height);
 
 		stage.getViewport().update(width, height, true);
+
+		//backgroundAnimation.resize();
+		//foregroundAnimation.resize();
 
 		//batch.setProjectionMatrix(cam.combined);
 		//shape.setProjectionMatrix(cam.combined);

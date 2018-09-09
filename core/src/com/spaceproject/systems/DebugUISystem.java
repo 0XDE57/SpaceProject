@@ -45,8 +45,8 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	
 	//rendering
 	private static OrthographicCamera cam;
-	private static SpriteBatch batch;
-	private static ShapeRenderer shape;
+	private SpriteBatch batch;
+	private ShapeRenderer shape;
 	private BitmapFont fontSmall, fontLarge;
 	private Matrix4 projectionMatrix = new Matrix4();
 	

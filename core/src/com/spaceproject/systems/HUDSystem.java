@@ -10,11 +10,12 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import com.spaceproject.MapState;
+import com.spaceproject.ui.MapState;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
@@ -22,10 +23,10 @@ import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.MiniMap;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.screens.MyScreenAdapter;
 
 
 public class HUDSystem extends EntitySystem {
@@ -35,7 +36,9 @@ public class HUDSystem extends EntitySystem {
 	//rendering
 	private static OrthographicCamera cam;
 	private Matrix4 projectionMatrix = new Matrix4();	
-	private ShapeRenderer shape = new ShapeRenderer();
+	private ShapeRenderer shape;
+	private SpriteBatch batch;
+
 
 	//entity storage
 	private ImmutableArray<Entity> mapableObjects;
@@ -53,11 +56,13 @@ public class HUDSystem extends EntitySystem {
 	Color barBackground = new Color(1,1,1,0.5f);
 	
 	public HUDSystem() {
-		this(MyScreenAdapter.cam);
+		this(MyScreenAdapter.cam, MyScreenAdapter.shape, MyScreenAdapter.batch);
 	}
 	
-	public HUDSystem(OrthographicCamera camera) {
+	public HUDSystem(OrthographicCamera camera, ShapeRenderer shape, SpriteBatch batch) {
 		cam = camera;
+		this.shape = shape;
+		this.batch = batch;
 	}
 
 	@Override
@@ -97,6 +102,7 @@ public class HUDSystem extends EntitySystem {
 		//set projection matrix so things render using correct coordinates
 		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); 
 		shape.setProjectionMatrix(projectionMatrix);
+		batch.setProjectionMatrix(projectionMatrix);
 		
 		//enable transparency
 		Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -108,11 +114,11 @@ public class HUDSystem extends EntitySystem {
 		
 		if (drawEdgeMap) drawEdgeMap();
 
-		miniMap.drawSpaceMap(engine, shape);
-		
 		drawHealthBars();
-		
+
 		shape.end();
+
+		miniMap.drawSpaceMap(engine, shape, batch);
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 		
 		

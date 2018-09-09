@@ -24,8 +24,8 @@ public class NoiseAnim extends MainMenuAnimation {
     @Override
     public void render(float delta, ShapeRenderer shape) {
         shape.begin(ShapeRenderer.ShapeType.Filled);
-        for (int x = 0; x < Gdx.graphics.getWidth()/size; x++) {
-            for (int y = 0; y < Gdx.graphics.getHeight()/size; y++) {
+        for (int x = 0; x <= Gdx.graphics.getWidth()/size; x++) {
+            for (int y = 0; y <= Gdx.graphics.getHeight()/size; y++) {
                 float e = MyMath.inverseLerp(-1,1, (float)noise.eval(x*scale, y*scale, z));
                 shape.setColor(e,e,e,1);
                 shape.rect(x*size, y*size, size, size);

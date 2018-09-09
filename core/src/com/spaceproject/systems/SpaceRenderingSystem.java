@@ -24,7 +24,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 
 	//rendering
 	private static OrthographicCamera cam;
-	private static SpriteBatch batch;
+	private SpriteBatch batch;
 	
 	// array of entities to render
 	private Array<Entity> renderQueue = new Array<Entity>();
