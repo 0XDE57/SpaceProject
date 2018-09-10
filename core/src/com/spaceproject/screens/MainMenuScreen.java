@@ -75,8 +75,6 @@ public class MainMenuScreen extends MyScreenAdapter {
 		shape.setProjectionMatrix(projectionMatrix);
 		batch.setProjectionMatrix(projectionMatrix);
 
-		Gdx.gl.glEnable(Gdx.gl20.GL_BLEND);
-		Gdx.gl.glBlendFunc(Gdx.gl20.GL_SRC_ALPHA, Gdx.gl20.GL_ONE_MINUS_SRC_ALPHA);
 
 		backgroundAnimation.render(delta, shape);
 		foregroundAnimation.render(delta, shape);
@@ -104,17 +102,9 @@ public class MainMenuScreen extends MyScreenAdapter {
 	@Override
 	public void resize(int width, int height){
 		super.resize(width, height);
-
 		stage.getViewport().update(width, height, true);
-
-		//backgroundAnimation.resize();
-		//foregroundAnimation.resize();
-
-		//batch.setProjectionMatrix(cam.combined);
-		//shape.setProjectionMatrix(cam.combined);
-		//todo, fix title menu scaling/position
-		//todo, fix animation scaling/position
-		//todo, do for all debug screens...
+		foregroundAnimation.resize(width, height);
+		backgroundAnimation.resize(width, height);
 	}
 
 

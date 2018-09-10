@@ -88,4 +88,8 @@ public class DelaunayAnimation extends MainMenuAnimation {
 		}
 		shape.end();
 	}
+
+	@Override
+	public void resize(int width, int height) {
+	}
 }

@@ -28,22 +28,28 @@ public class TreeAnimation extends MainMenuAnimation {
 		tiltAngle += rotSpeed * delta;
 		startAngle += rotSpeed * delta;
 		shape.setColor(0,0,0,1f);
-		drawTree(shape, Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, startAngle, iterations);
-		drawTree(shape, Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, startAngle - 120, iterations);
-		drawTree(shape, Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, startAngle - 240, iterations);
+		int x = Gdx.graphics.getWidth() / 2;
+		int y = Gdx.graphics.getHeight() / 2;
+		drawTree(shape, x, y, startAngle, iterations);
+		drawTree(shape, x, y, startAngle - 120, iterations);
+		drawTree(shape, x, y, startAngle - 240, iterations);
 		shape.end();
 	}
 
+	@Override
+	public void resize(int width, int height) {
+	}
 
-	private void drawTree(ShapeRenderer shape, float x, float y, float angle, int depth) {
+
+	private void drawTree(ShapeRenderer shape, float x, float y, float angleDegrees, int depth) {
 		if (depth == 0) return;
 
-		float x2 = (float) (x + (Math.cos(Math.toRadians(angle)) * depth * length));
-		float y2 = (float) (y + (Math.sin(Math.toRadians(angle)) * depth * length));
+		float x2 = (float) (x + (Math.cos(Math.toRadians(angleDegrees)) * depth * length));
+		float y2 = (float) (y + (Math.sin(Math.toRadians(angleDegrees)) * depth * length));
 		shape.rectLine(x, y, x2, y2, depth);
 
-		drawTree(shape, x2, y2, angle - branchAngle + tiltAngle, depth - 1);
-		drawTree(shape, x2, y2, angle + branchAngle + tiltAngle, depth - 1);
+		drawTree(shape, x2, y2, angleDegrees - branchAngle + tiltAngle, depth - 1);
+		drawTree(shape, x2, y2, angleDegrees + branchAngle + tiltAngle, depth - 1);
 	}
 
 }

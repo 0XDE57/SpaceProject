@@ -3,6 +3,7 @@ package com.spaceproject.ui;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -38,12 +39,16 @@ public class MiniMap {
         if (mapState == MapState.off)
             return;
 
+        //enable transparency
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
         shape.begin(ShapeRenderer.ShapeType.Filled);
 
         if (mapScale < 1)
             mapScale = 1;
 
-        updateMapPosition();
+        //updateMapPosition();
         float centerMapX = mapBacking.x + mapBacking.width / 2;
         float centerMapY = mapBacking.y + mapBacking.height / 2;
 
@@ -115,10 +120,11 @@ public class MiniMap {
         shape.rect(mapBacking.width+mapBacking.x-borderWidth, mapBacking.y, borderWidth, mapBacking.height);//right
 
 
-
         shape.setColor(Color.WHITE);
         shape.circle(centerMapX, centerMapY, 2);
+
         shape.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
 
 
         batch.begin();
@@ -128,19 +134,18 @@ public class MiniMap {
         }
         fontSmall.draw(batch, mapString, mapBacking.x + 10, mapBacking.y + mapBacking.height - fontSmall.getLineHeight());
         batch.end();
-
     }
 
 
     public void cycleMiniMapPosition() {
         miniMapPosition = miniMapPosition.next();
-        //updateMapPosition();
+        updateMapPosition();
         System.out.println(miniMapPosition);
     }
 
     public void cycleMapState() {
         mapState = mapState.next();
-        //updateMapPosition();
+        updateMapPosition();
         System.out.println(mapState);
     }
 

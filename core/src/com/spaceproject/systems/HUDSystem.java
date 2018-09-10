@@ -15,7 +15,9 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import com.spaceproject.ui.MapState;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.kotcrab.vis.ui.VisUI;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
@@ -24,6 +26,8 @@ import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.ui.MapState;
+import com.spaceproject.ui.Menu;
 import com.spaceproject.ui.MiniMap;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
@@ -31,10 +35,11 @@ import com.spaceproject.utility.MyMath;
 
 public class HUDSystem extends EntitySystem {
 
-	private Engine engine;
+	private Stage stage;
+	private Menu menu;
 
 	//rendering
-	private static OrthographicCamera cam;
+	private OrthographicCamera cam;
 	private Matrix4 projectionMatrix = new Matrix4();	
 	private ShapeRenderer shape;
 	private SpriteBatch batch;
@@ -50,7 +55,6 @@ public class HUDSystem extends EntitySystem {
 	private boolean drawHud = true;
 	private boolean drawEdgeMap = true;
 
-
 	
 	float opacity = 0.7f;
 	Color barBackground = new Color(1,1,1,0.5f);
@@ -59,15 +63,34 @@ public class HUDSystem extends EntitySystem {
 		this(MyScreenAdapter.cam, MyScreenAdapter.shape, MyScreenAdapter.batch);
 	}
 	
-	public HUDSystem(OrthographicCamera camera, ShapeRenderer shape, SpriteBatch batch) {
+	public HUDSystem(OrthographicCamera camera, ShapeRenderer shapeRenderer, SpriteBatch spriteBatch) {
 		cam = camera;
-		this.shape = shape;
-		this.batch = batch;
+		shape = shapeRenderer;
+		batch = spriteBatch;
+
+		//init scene2d and VisUI
+		if (!VisUI.isLoaded())
+			VisUI.load(VisUI.SkinScale.X1);
+		stage = new Stage(new ScreenViewport());
+
+		Gdx.input.setInputProcessor(stage);
+
+
+		menu = new Menu(false);
+		menu.setVisible(false);
+		stage.addActor(menu);
+	}
+
+	public void resize(int width, int height) {
+		menu.setSize(Gdx.graphics.getWidth()-150, Gdx.graphics.getHeight()-150);
+		stage.getViewport().update(width, height, true);
+
+		miniMap.updateMapPosition();
 	}
 
 	@Override
 	public void addedToEngine(Engine engine) {
-		this.engine = engine;
+		//this.engine = engine;
 		mapableObjects = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
 		player = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
 		killables = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(CameraFocusComponent.class).get());
@@ -77,6 +100,48 @@ public class HUDSystem extends EntitySystem {
 	
 	@Override
 	public void update(float delta) {
+
+		CheckInput();
+
+		drawHUD();
+
+		//draw menu
+		stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+		stage.draw();
+
+		miniMap.drawSpaceMap(getEngine(), shape, batch);
+	}
+
+	private void drawHUD() {
+		if (!drawHud) return;
+		//set projection matrix so things render using correct coordinates
+		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		shape.setProjectionMatrix(projectionMatrix);
+		batch.setProjectionMatrix(projectionMatrix);
+
+		//enable transparency
+		Gdx.gl.glEnable(GL20.GL_BLEND);
+		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+		shape.begin(ShapeType.Filled);
+
+		drawPlayerStatus();
+
+		if (drawEdgeMap) drawEdgeMap();
+
+		drawHealthBars();
+
+		shape.end();
+		Gdx.gl.glDisable(GL20.GL_BLEND);
+
+
+		//TODO: temporary fix. engine system priority....
+		MobileInputSystem mobileUI = getEngine().getSystem(MobileInputSystem.class);
+		if (mobileUI != null)
+			mobileUI.drawControls();
+	}
+
+	private void CheckInput() {
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleHUD)) {
 			drawHud = !drawHud;
 			System.out.println("HUD: " + drawHud);
@@ -96,37 +161,13 @@ public class HUDSystem extends EntitySystem {
 				miniMap.mapScale = 500;
 			}
 		}
-		
-		if (!drawHud) return;
-		
-		//set projection matrix so things render using correct coordinates
-		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); 
-		shape.setProjectionMatrix(projectionMatrix);
-		batch.setProjectionMatrix(projectionMatrix);
-		
-		//enable transparency
-		Gdx.gl.glEnable(GL20.GL_BLEND);
-		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
-		shape.begin(ShapeType.Filled);
-		
-		drawPlayerStatus();
-		
-		if (drawEdgeMap) drawEdgeMap();
-
-		drawHealthBars();
-
-		shape.end();
-
-		miniMap.drawSpaceMap(engine, shape, batch);
-		Gdx.gl.glDisable(GL20.GL_BLEND);
-		
-		
-		//TODO: temporary fix. engine system priority....
-		MobileInputSystem mobileUI = engine.getSystem(MobileInputSystem.class);
-		if (mobileUI != null)
-			mobileUI.drawControls();
-		
+		if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+			menu.setVisible(!menu.isVisible());
+			System.out.println("show menu: "+ menu.isVisible());
+		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
+			stage.setDebugAll(!stage.isDebugAll());
+		}
 	}
 
 	public MiniMap getMiniMap() {

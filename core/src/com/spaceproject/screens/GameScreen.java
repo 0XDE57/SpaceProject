@@ -268,8 +268,18 @@ public class GameScreen extends MyScreenAdapter {
 			Misc.printEntities(engine);
 		}
 
+		/*
 		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
 			game.setScreen(new MainMenuScreen(game));
+		}*/
+	}
+
+	@Override
+	public void resize(int width, int height) {
+		super.resize(width, height);
+		HUDSystem hud = engine.getSystem(HUDSystem.class);
+		if (hud != null) {
+			hud.resize(width, height);
 		}
 	}
 

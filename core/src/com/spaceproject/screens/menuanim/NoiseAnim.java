@@ -37,4 +37,8 @@ public class NoiseAnim extends MainMenuAnimation {
         if (Gdx.input.isKeyPressed(Input.Keys.V)) scale += 0.001f;
         if (Gdx.input.isKeyPressed(Input.Keys.B)) scale -= 0.001f;
     }
+
+    @Override
+    public void resize(int width, int height) {
+    }
 }
