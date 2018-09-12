@@ -22,6 +22,9 @@ import static com.spaceproject.screens.MyScreenAdapter.game;
  * Modified from https://github.com/kotcrab/vis-editor/blob/master/ui/src/test/java/com/kotcrab/vis/ui/test/manual/TestTabbedPane.java
  */
 public class Menu extends VisWindow {
+    public final TabbedPane tabbedPane;
+    public TestTab customRenderTab, mapTab, placeholderATab, placeholderBTab;
+
 
     public Menu (boolean vertical) {
         super("a space project");
@@ -34,7 +37,7 @@ public class Menu extends VisWindow {
         final VisTable container = new VisTable();
 
         TabbedPane.TabbedPaneStyle style = VisUI.getSkin().get(vertical ? "vertical" : "default", TabbedPane.TabbedPaneStyle.class);
-        TabbedPane tabbedPane = new TabbedPane(style);
+        tabbedPane = new TabbedPane(style);
         tabbedPane.addListener(new TabbedPaneAdapter() {
             @Override
             public void switchedTab (Tab tab) {
@@ -75,14 +78,34 @@ public class Menu extends VisWindow {
         tabbedPane.add(mainmenu);
 
 
-        tabbedPane.add(new TestTab("Map [M]"));
+        mapTab = new TestTab("Map [M]");
+        tabbedPane.add(mapTab);
 
 
-        TestTab customRender = new TestTab("test render");
-        customRender.getContentTable().add(new TestShapeRenderActor()).grow();
-        tabbedPane.add(customRender);
+        customRenderTab = new TestTab("test render [H]");
+        TestShapeRenderActor shapeRenderActor = new TestShapeRenderActor();
+        /*getStage().addListener(new InputListener() {
+            @Override
+            public boolean keyDown (InputEvent event, int keycode) {
+                if (keycode == Input.Keys.H) {
+                    tabbedPane.switchTab(customRender);
+                    return true;
+                }
 
-        tabbedPane.add(new TestTab("tab4"));
+                return false;
+            }
+        });*/
+        customRenderTab.getContentTable().add(shapeRenderActor).grow();
+        //TODO: something about the .grow (and also .expand().fill()) is breaking the window resizing
+        //customRender.getContentTable().add(new Actor()).grow();
+        //customRender.getContentTable().add(new Actor()).expand().fill();
+        tabbedPane.add(customRenderTab);
+
+        placeholderATab = new TestTab("placeholder [1]");
+        tabbedPane.add(placeholderATab);
+
+        placeholderBTab = new TestTab("placeholder [2]");
+        tabbedPane.add(placeholderBTab);
 
         tabbedPane.switchTab(0);
 

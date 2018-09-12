@@ -15,6 +15,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
@@ -77,8 +79,50 @@ public class HUDSystem extends EntitySystem {
 
 
 		menu = new Menu(false);
-		menu.setVisible(false);
-		stage.addActor(menu);
+		stage.addListener(new InputListener() {
+			@Override
+			public boolean keyDown (InputEvent event, int keycode) {
+				if (keycode == Input.Keys.H) {
+					menu.tabbedPane.switchTab(menu.customRenderTab);
+					if (menu.getStage() == null) {
+						stage.addActor(menu);
+						menu.fadeIn();
+					}
+					return true;
+				}
+				if (keycode == Input.Keys.M) {
+					menu.tabbedPane.switchTab(menu.mapTab);
+
+					if (menu.getStage() == null) {
+						stage.addActor(menu);
+						menu.fadeIn();
+					}
+					return true;
+				}
+				if (keycode == Input.Keys.NUM_1) {
+					menu.tabbedPane.switchTab(menu.placeholderATab);
+
+					if (menu.getStage() == null) {
+						stage.addActor(menu);
+						menu.fadeIn();
+					}
+					return true;
+				}
+				if (keycode == Input.Keys.NUM_2) {
+					menu.tabbedPane.switchTab(menu.placeholderBTab);
+					if (menu.getStage() == null) {
+						stage.addActor(menu);
+						menu.fadeIn();
+					}
+					return true;
+				}
+
+				return false;
+			}
+		});
+		//menu.setVisible(false);
+		//stage.addActor(menu);
+		stage.setDebugUnderMouse(true);
 	}
 
 	public void resize(int width, int height) {
@@ -162,10 +206,21 @@ public class HUDSystem extends EntitySystem {
 			}
 		}
 		if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-			menu.setVisible(!menu.isVisible());
-			System.out.println("show menu: "+ menu.isVisible());
+			if (menu.getStage() != null) {
+				menu.fadeOut();
+
+				System.out.println("show menu: "+ false);
+			} else {
+				stage.addActor(menu);
+				menu.fadeIn();
+				System.out.println("show menu: "+ true);
+			}
+
+			//menu.setVisible(!menu.isVisible());
+			//System.out.println("show menu: "+ menu.isVisible());
+
 		}
-		if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
 			stage.setDebugAll(!stage.isDebugAll());
 		}
 	}
