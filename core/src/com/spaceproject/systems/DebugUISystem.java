@@ -61,7 +61,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	private boolean drawDebugUI = true;
 	private boolean drawMenu = false;
 	private boolean drawFPS = true;
-	private boolean drawComponentList = false;
+	public boolean drawComponentList = false;
 	private boolean drawPos = false;
 	private boolean drawBounds = false;
 	private boolean drawOrbitPath = false;

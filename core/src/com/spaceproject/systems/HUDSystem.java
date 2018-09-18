@@ -78,51 +78,8 @@ public class HUDSystem extends EntitySystem {
 		Gdx.input.setInputProcessor(stage);
 
 
-		menu = new Menu(false);
-		stage.addListener(new InputListener() {
-			@Override
-			public boolean keyDown (InputEvent event, int keycode) {
-				if (keycode == Input.Keys.H) {
-					menu.tabbedPane.switchTab(menu.customRenderTab);
-					if (menu.getStage() == null) {
-						stage.addActor(menu);
-						menu.fadeIn();
-					}
-					return true;
-				}
-				if (keycode == Input.Keys.M) {
-					menu.tabbedPane.switchTab(menu.mapTab);
 
-					if (menu.getStage() == null) {
-						stage.addActor(menu);
-						menu.fadeIn();
-					}
-					return true;
-				}
-				if (keycode == Input.Keys.NUM_1) {
-					menu.tabbedPane.switchTab(menu.placeholderATab);
 
-					if (menu.getStage() == null) {
-						stage.addActor(menu);
-						menu.fadeIn();
-					}
-					return true;
-				}
-				if (keycode == Input.Keys.NUM_2) {
-					menu.tabbedPane.switchTab(menu.placeholderBTab);
-					if (menu.getStage() == null) {
-						stage.addActor(menu);
-						menu.fadeIn();
-					}
-					return true;
-				}
-
-				return false;
-			}
-		});
-		//menu.setVisible(false);
-		//stage.addActor(menu);
-		stage.setDebugUnderMouse(true);
 	}
 
 	public void resize(int width, int height) {
@@ -134,10 +91,28 @@ public class HUDSystem extends EntitySystem {
 
 	@Override
 	public void addedToEngine(Engine engine) {
-		//this.engine = engine;
 		mapableObjects = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
 		player = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
 		killables = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(CameraFocusComponent.class).get());
+
+
+		menu = new Menu(false, engine);
+		stage.addListener(new InputListener() {
+			@Override
+			public boolean keyDown (InputEvent event, int keycode) {
+				if (menu.switchTabForKey(keycode)) {
+					if (menu.getStage() == null) {
+						stage.addActor(menu);
+						menu.fadeIn();
+					}
+					return true;
+				}
+				return false;
+			}
+		});
+		//menu.setVisible(false);
+		//stage.addActor(menu);
+		//stage.setDebugUnderMouse(true);
 	}
 
 
@@ -205,6 +180,7 @@ public class HUDSystem extends EntitySystem {
 				miniMap.mapScale = 500;
 			}
 		}
+		/*
 		if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
 			if (menu.getStage() != null) {
 				menu.fadeOut();
@@ -219,7 +195,7 @@ public class HUDSystem extends EntitySystem {
 			//menu.setVisible(!menu.isVisible());
 			//System.out.println("show menu: "+ menu.isVisible());
 
-		}
+		}*/
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
 			stage.setDebugAll(!stage.isDebugAll());
 		}
