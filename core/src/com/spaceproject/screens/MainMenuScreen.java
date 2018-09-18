@@ -122,6 +122,8 @@ public class MainMenuScreen extends MyScreenAdapter {
 				game.setScreen(new GameScreen(true));
 			}
 		});
+
+
 		TextButton btnVoronoi = new TextButton("voronoi [DEBUG]", VisUI.getSkin());
 		btnVoronoi.getLabel().setAlignment(Align.left);
 		btnVoronoi.addListener(new ChangeListener() {
@@ -130,6 +132,8 @@ public class MainMenuScreen extends MyScreenAdapter {
 				game.setScreen(new TestVoronoiScreen());
 			}
 		});
+
+
 		TextButton btnNoise = new TextButton("noise [DEBUG]", VisUI.getSkin());
 		btnNoise.getLabel().setAlignment(Align.left);
 		btnNoise.addListener(new ChangeListener() {
@@ -138,6 +142,8 @@ public class MainMenuScreen extends MyScreenAdapter {
 				game.setScreen(new TestNoiseScreen());
 			}
 		});
+
+
 		TextButton btnShip = new TextButton("ship gen [DEBUG]", VisUI.getSkin());
 		btnShip.getLabel().setAlignment(Align.left);
 		btnShip.addListener(new ChangeListener() {
@@ -146,6 +152,8 @@ public class MainMenuScreen extends MyScreenAdapter {
 				game.setScreen(new TestShipGenerationScreen());
 			}
 		});
+
+
 		TextButton btn3D = new TextButton("3D rotate [DEBUG]", VisUI.getSkin());
 		btn3D.getLabel().setAlignment(Align.left);
 		btn3D.addListener(new ChangeListener() {
@@ -154,15 +162,48 @@ public class MainMenuScreen extends MyScreenAdapter {
 				game.setScreen(new Test3DScreen());
 			}
 		});
+
+		TextButton btnLoad = new TextButton("load", VisUI.getSkin());
+		btnLoad.getLabel().setAlignment(Align.left);
+		btnLoad.addListener(new ChangeListener() {
+			@Override
+			public void changed (ChangeEvent event, Actor actor) {
+				System.out.println("placeholder");
+			}
+		});
+
+		TextButton btnOption = new TextButton("options", VisUI.getSkin());
+		btnOption.getLabel().setAlignment(Align.left);
+		btnOption.addListener(new ChangeListener() {
+			@Override
+			public void changed (ChangeEvent event, Actor actor) {
+				System.out.println("placeholder");
+			}
+		});
+
+
+
+		TextButton btnExit = new TextButton("exit", VisUI.getSkin());
+		btnExit.getLabel().setAlignment(Align.left);
+		btnExit.addListener(new ChangeListener() {
+			@Override
+			public void changed (ChangeEvent event, Actor actor) {
+				Gdx.app.exit();
+			}
+		});
+
 		table.add(btnPlay).fillX().row();
 		table.add(btnVoronoi).fillX().row();
 		table.add(btnNoise).fillX().row();
 		table.add(btn3D).fillX().row();
 		table.add(btnShip).fillX().row();
+		table.add(btnLoad).left().fillX().row();
+		table.add(btnOption).fillX().row();
+		table.add(btnExit).fillX().row();
 
 		//table.setBackground("blue");
 		//table.setColor(0,0,1,1);
-		table.setPosition(100,100);// table.getHeight()
+		table.setPosition(100,150);// table.getHeight()
 		return table;
 	}
 

@@ -56,17 +56,19 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	
 	//entity storage
 	private Array<Entity> objects;
+	DelaunayTriangulator tri = new DelaunayTriangulator();
 	
 	//config
 	private boolean drawDebugUI = true;
-	private boolean drawMenu = false;
-	private boolean drawFPS = true;
+	//private boolean drawMenu = false;
+	public boolean drawFPS = true, drawExtraInfo = true;
 	public boolean drawComponentList = false;
-	private boolean drawPos = false;
-	private boolean drawBounds = false;
-	private boolean drawOrbitPath = false;
-	private boolean drawVectors = false;
-	private boolean drawMousePos = false;
+	public boolean drawPos = false;
+	public boolean drawBounds = false, drawBoundsPoly = false;
+	public boolean drawOrbitPath = false;
+	public boolean drawVectors = false;
+	public boolean drawMousePos = false;
+	public boolean drawEntityList = false;
 	
 	
 	public DebugUISystem() {
@@ -109,7 +111,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	@Override
 	public void update(float delta) {
 		//check key presses
-		updateKeyToggles();
+		//updateKeyToggles();
 		
 		//don't update if we aren't drawing
 		if (!drawDebugUI) return;				
@@ -118,6 +120,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		//set projection matrix so things render using correct coordinates
 		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());		
 		batch.setProjectionMatrix(projectionMatrix);
+		shape.setProjectionMatrix(cam.combined);
 
 		
 		shape.begin(ShapeType.Line);
@@ -129,7 +132,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		if (drawOrbitPath) drawOrbitPath(true);
 		
 		//draw the bounding box (collision detection) for collidables
-		if (drawBounds) drawBounds();
+		if (drawBounds) drawBounds(drawBoundsPoly);
 		
 		if (drawMousePos) drawMouseLine();
 		
@@ -139,10 +142,10 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		batch.begin();
 		
 		//print debug menu
-		if (drawMenu)  drawDebugMenu();
+		//if (drawMenu)  drawDebugMenu();
 			
 		//draw frames per second and entity count
-		if (drawFPS) drawFPS();
+		if (drawFPS) drawFPS(drawExtraInfo);
 		
 		//draw entity position
 		if (drawPos) drawPos();
@@ -150,7 +153,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		
 		if (drawMousePos) drawMousePos();
 		
-		drawEntityList();
+		if (drawEntityList) drawEntityList();
 		
 		//draw components on entity
 		if (drawComponentList) drawComponentList();
@@ -210,11 +213,12 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			drawVectors = !drawVectors;
 			System.out.println("[debug] draw vectors: " + drawVectors);
 		}
-		
+
+		/*
 		//toggle menu
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleMenu)) {
 			drawMenu = !drawMenu;
-		}
+		}*/
 	}
 
 	public void drawMessage(String message, int x, int y) {
@@ -223,7 +227,8 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		batch.end();
 	}
 
-	/** Draw menu showing items to draw and toggle keys */
+	/*
+	/** Draw menu showing items to draw and toggle keys
 	private void drawDebugMenu() {
 		fontSmall.setColor(1, 1, 1, 1);
 		fontSmall.draw(batch, "***DEBUG [F3]***", 15, Gdx.graphics.getHeight() - 45);
@@ -235,6 +240,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		fontSmall.draw(batch, "[NUM5] Draw Vectors: " + drawVectors, 15, Gdx.graphics.getHeight() - 135);
 		fontSmall.draw(batch, "[NUM9] Hide this menu.", 15, Gdx.graphics.getHeight() - 150);
 	}
+	*/
 
 	/** Draw lines to represent speed and direction of entity */
 	private void drawVelocityVectors() {
@@ -290,9 +296,8 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	}
 	
 	/** Draw bounding boxes (hitbox/collision detection) */
-	private void drawBounds() {
-		boolean polyTriangles = false;
-		
+	private void drawBounds(boolean polyTriangles) {
+
 		for (Entity entity : objects) { 
 			BoundsComponent bounds = Mappers.bounds.get(entity);		
 			TransformComponent t = Mappers.transform.get(entity);
@@ -325,10 +330,10 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			}
 		}
 	}
-	DelaunayTriangulator tri = new DelaunayTriangulator();
+
 
 	/** Draw frames, entity count, position and memory info. */
-	private void drawFPS() {
+	private void drawFPS(boolean drawExtaInfo) {
 		//fps
 		String frames = Integer.toString(Gdx.graphics.getFramesPerSecond());
 		
@@ -356,12 +361,15 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		int x = 15;
 		int y = Gdx.graphics.getHeight() - 15;
 		fontLarge.setColor(1,1,1,1);
-		fontLarge.draw(batch, frames + count, x, y);
-		fontLarge.draw(batch, memory + threads, x, y - fontLarge.getLineHeight());
-		fontLarge.draw(batch, camera, x, y - fontLarge.getLineHeight()*2);
 
-
-		fontLarge.draw(batch, "time: " + GameScreen.gameTimeCurrent, 500, Gdx.graphics.getHeight()-10);
+		if (drawExtaInfo) {
+			fontLarge.draw(batch, frames + count, x, y);
+			fontLarge.draw(batch, memory + threads, x, y - fontLarge.getLineHeight());
+			fontLarge.draw(batch, camera, x, y - fontLarge.getLineHeight() * 2);
+			fontLarge.draw(batch, "time: " + GameScreen.gameTimeCurrent, 500, Gdx.graphics.getHeight() - 10);
+		} else {
+			fontLarge.draw(batch, frames, x, y);
+		}
 	}
 	
 	private void drawEntityList() {
