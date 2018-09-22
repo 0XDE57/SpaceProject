@@ -41,7 +41,7 @@ public class OrbitSystem extends IteratingSystem {
 			}
 
 			OrbitComponent parentOrbit = Mappers.orbit.get(orbit.parent);
-			if (parentOrbit.parent != null) {
+			if (parentOrbit != null && parentOrbit.parent != null) {
 				/*
 				System.out.println("I am: " + Mappers.astro.get(entity).classification
 						+ ", Parent is: " +  Mappers.astro.get(orbit.parent).classification

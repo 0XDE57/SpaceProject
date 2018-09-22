@@ -24,47 +24,52 @@ import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.generation.noise.NoiseThreadPoolExecutor;
+import com.spaceproject.generation.noise.NoiseGenListener;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.NoiseThread;
+import com.spaceproject.generation.noise.NoiseThread;
 
-import static com.spaceproject.components.BarycenterComponent.AstronomicalBodyType.multiStellar;
-import static com.spaceproject.components.BarycenterComponent.AstronomicalBodyType.roguePlanet;
-import static com.spaceproject.components.BarycenterComponent.AstronomicalBodyType.uniStellar;
+import java.util.concurrent.LinkedBlockingQueue;
 
 
 //region test
 class AstroObject {
 	int x, y;
 	long seed;
-	BarycenterComponent.AstronomicalBodyType type;
+	//BarycenterComponent.AstronomicalBodyType type;
 
 	public AstroObject(Vector2 location) {
 		x = (int)location.x;
 		y = (int)location.y;
 		seed = MyMath.getSeed(x, y);
-
+/*
 		switch (MathUtils.random(2)) {
 			case 0: type = uniStellar; break;
 			case 1: type = multiStellar; break;
 			case 2: type = roguePlanet; break;
 		}
-
+*/
 	}
 }
 
 class Universe {
 
+	Array<Vector2> points;
 	public Array<AstroObject> objects = new Array<AstroObject>();
 
 	public Universe(Array<Vector2> points) {
 		for (Vector2 p : points){
 			objects.add(new AstroObject(p));
 		}
+		this.points = points;
 		saveToJson();
 	}
+
+
 
 	public void saveToJson() {
 		Json json = new Json();
@@ -82,18 +87,18 @@ class Universe {
 }
 //endregion
 
-public class SpaceLoadingSystem extends EntitySystem implements EntityListener, Disposable {
+
+public class SpaceLoadingSystem extends EntitySystem implements NoiseGenListener, EntityListener, Disposable {
 
 	// star entities
-	private Array<Vector2> points = new Array<Vector2>();
+	//private Array<Vector2> points = new Array<Vector2>();
 	private Universe universe;
 	private ImmutableArray<Entity> loadedAstronomicalObjects;
 	private float checkStarsTimer = 4000;
 	private float checkStarsCurrTime;
-	
-	// threads for generating planet texture noise
-	Array<NoiseThread> noiseThreads = new Array<NoiseThread>();
 
+	LinkedBlockingQueue<NoiseBuffer> noiseBuffer = new LinkedBlockingQueue<NoiseBuffer>();
+	NoiseThreadPoolExecutor noiseThreadPool;
 
 	@Override
 	public void addedToEngine(Engine engine) {
@@ -104,9 +109,12 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 		engine.addEntityListener(Family.one(PlanetComponent.class, /*StarComponent.class,*/ BarycenterComponent.class).get(),this);
 
 		// generate or load points from disk
-		loadPoints();
+		//loadPoints();
 
 		universe = new Universe(generatePoints());
+
+		noiseThreadPool = new NoiseThreadPoolExecutor(SpaceProject.celestcfg.maxGenThreads);
+		noiseThreadPool.addListener(this);
 
 		// load planetary systems / planets / stars
 		//updateStars(1);
@@ -115,40 +123,87 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 
 	}
 
+
 	@Override
 	public void entityAdded(Entity entity) {
 		PlanetComponent planet = Mappers.planet.get(entity);
 		if (planet != null) {
 			SeedComponent seedComp = Mappers.seed.get(entity);
-			noiseThreads.add(new NoiseThread(seedComp, planet, Tile.defaultTiles));
+			//noiseThreads.add(new NoiseThread(seedComp, planet, Tile.defaultTiles));
+			//TODO: check noise map exists in universe file first, if so load into tileMap queue
+			//if not do noise. perhaps add to some sort of noise queue?
+			//
+			noiseThreadPool.execute(new NoiseThread(seedComp, planet, Tile.defaultTiles));
 		}
 	}
 
 	@Override
 	public void entityRemoved(Entity entity) {
-
+		/*
+		for (Entity e : getEngine().getEntitiesFor(Family.all(OrbitComponent.class).get())){
+			OrbitComponent orbit = Mappers.orbit.get(e);
+			if (orbit.parent != null) {
+				//TODO: check if parents have parents (eg: moon > planet > star)
+				//TODO: dispose texture. research auto texture dispose -> entity.componentRemoved()?
+				if (orbit.parent == star) {
+					getEngine().removeEntity(e);
+				}
+			}
+		}*/
 	}
+
+	@Override
+	public void threadFinished(NoiseThread noise) {
+		//TODO: save in universe file for caching and loading instantly when transition to world
+		noiseBuffer.add(noise.getMap());
+	}
+
 	
 	@Override
 	public void update(float delta) {
 		// load and unload stars
 		updateStars(delta);
 
-		// noise generation threads, update/replace textures
+		// update/replace textures
 		updatePlanetTextures();
 	}
 
-	/**
-	 * Handles noise generating threads. If a thread is finished generating noise, a texture is created
-	 * from the noise and the planets texture is replaced with the new generated one.
-	 * Once a texture has been replaced, the thread is then removed from the list and considered processed.
-	 */
+
 	private void updatePlanetTextures() {
+
+		//check queue for tilemaps / pixmaps to load into textures
+		if (!noiseBuffer.isEmpty()) {
+			try {
+				NoiseBuffer noise = noiseBuffer.take();
+				if (noise.pixelatedTileMap == null) {
+					System.out.println("ERROR, no map for: [" + noise.ID + "]");
+					return;
+				}
+
+				for (Entity p : getEngine().getEntitiesFor(Family.all(PlanetComponent.class).get())) {
+					//if (p.getComponent(SeedComponent.class).seed == noise.seed) {//base on seed instead of ID, but what if duplicate seed? shouldn't happen..
+					if (p.getComponent(PlanetComponent.class).tempGenID == noise.ID) {
+						// create planet texture from tileMap, replace texture
+						Texture newTex = TextureFactory.generatePlanet(noise.pixelatedTileMap, Tile.defaultTiles);
+						p.getComponent(TextureComponent.class).texture = newTex;
+						System.out.println("Texture loaded: [" + noise.ID + "]");
+						return;
+					}
+				}
+
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+
+		/*
 		if (noiseThreads.size == 0) {
 			return;
 		}
 		
 		//if a thread has finished generating the noise, create a texture and replace the blank one
+
 		for (NoiseThread thread : noiseThreads) {
 			if (thread.isDone() && !thread.isProcessed()) {			
 				for (Entity p : getEngine().getEntitiesFor(Family.all(PlanetComponent.class).get())) {
@@ -177,10 +232,12 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 		if (finished) {
 			noiseThreads.clear();
 			System.out.println("All Planet Textures Loaded.");
-		}
+
+		}*/
 		
 	}
-	
+
+
 	private void updateStars(float delta) {
 		//TODO: use SimpleTimer
 		checkStarsCurrTime -= 1000 * delta;
@@ -211,42 +268,28 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 			}
 			
 			// add planetary systems to engine
-			for (Vector2 point : points) {
+			for (AstroObject point : universe.objects) {
 				//check if point is close enough to be loaded
-				if (point.dst2(GameScreen.cam.position.x, GameScreen.cam.position.y) < loadDistance) {
+				if (new Vector2(point.x, point.y).dst2(GameScreen.cam.position.x, GameScreen.cam.position.y) < loadDistance) {
 			
 					// check if star is already in world
 					//TODO: check based on an ID rather than distance. more reliable and makes more sense than a distance check
 					boolean loaded = false;
-					for (Entity star : loadedAstronomicalObjects) {
-						TransformComponent t = Mappers.transform.get(star);
+					for (Entity astroEntity : loadedAstronomicalObjects) {
+						SeedComponent s = Mappers.seed.get(astroEntity);
+						loaded = (s.seed == point.seed);
+						/*
+						TransformComponent t = Mappers.transform.get(astroEntity);
+
 						if (point.dst(t.pos.x, t.pos.y) < 2f) {
 							loaded = true;
-						}
+						}*/
 					}
 					
 					if (!loaded) {
-						/*
-						//create new system
-						Entity e = EntityFactory.createRoguePlanet(point.x, point.y);
-						//add entity to world
-						getEngine().addEntity(e);
-
-						PlanetComponent planet = Mappers.planet.get(e);
-						if (planet != null) {
-							noiseThreads.add(new NoiseThread(planet, Tile.defaultTiles));
-						}*/
-
-
 						for (Entity e : EntityFactory.createAstronomicalObjects(point.x, point.y)) {
 							//add entity to world
 							getEngine().addEntity(e);
-
-							/*
-							PlanetComponent planet = Mappers.planet.get(e);
-							if (planet != null) {
-								noiseThreads.add(new NoiseThread(planet, Tile.defaultTiles));
-							}*/
 						}
 					}
 
@@ -260,46 +303,59 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 	 * exist, create points and save to disk.
 	 */
 	private void loadPoints() {
-		//TODO: split up saving, loading and generating
-		points.clear();
-		
+		//Array<Vector2> points = generatePoints();// create points
+		//points.add(new Vector2(1000, 1000));//debug, don't forget about me
+		//System.out.println("[GENERATE DATA] : Created " + points.size + " points...");
+
+
+		//TODO: replace with new save method in universe
+		/*
 		// create handle for file storing points
 		FileHandle starsFile = Gdx.files.local("save/stars.txt");
 
 		starsFile.delete();//debug, don't save for now
-		
+
 		if (starsFile.exists()) {
-			// load points
-			try {
-				for (String line : starsFile.readString().replaceAll("\\r", "").split("\\n")) {
-					String[] coords = line.split(",");
-					int x = Integer.parseInt(coords[0]);
-					int y = Integer.parseInt(coords[1]);
-					points.add(new Vector2(x, y));
-				}
-				System.out.println("[LOAD DATA] : Loaded " + points.size + " points...");
-			} catch (GdxRuntimeException ex) {
-				System.out.println("Could not load file: " + ex.getMessage());
-			}
+			loadPoints(starsFile);
+
 		} else {
 			points = generatePoints();// create points
 			System.out.println("[GENERATE DATA] : Created " + points.size + " points...");
-			try {
-				// save points to disk
-				for (Vector2 p : points) {
-					starsFile.writeString((int) p.x + "," + (int) p.y + "\n", true);
-				}
-				System.out.println("[SAVE DATA] : Points saved to: " + Gdx.files.getLocalStoragePath() + starsFile.path());
-			} catch (GdxRuntimeException ex) {
-				System.out.println("Could not save file: " + ex.getMessage());
-			}
+			savePoints(starsFile);
 		}
-		
-		//debug
-		//TODO: don't forget about me
-		points.add(new Vector2(1000, 1000));//system near origin for debug
+		*/
+
 		
 	}
+
+	/*
+	private void savePoints(FileHandle starsFile) {
+
+		try {
+            // save points to disk
+            for (Vector2 p : points) {
+                starsFile.writeString((int) p.x + "," + (int) p.y + "\n", true);
+            }
+            System.out.println("[SAVE DATA] : Points saved to: " + Gdx.files.getLocalStoragePath() + starsFile.path());
+        } catch (GdxRuntimeException ex) {
+            System.out.println("Could not save file: " + ex.getMessage());
+        }
+	}
+
+	private void loadPoints(FileHandle starsFile) {
+		// load points
+		try {
+            for (String line : starsFile.readString().replaceAll("\\r", "").split("\\n")) {
+                String[] coords = line.split(",");
+                int x = Integer.parseInt(coords[0]);
+                int y = Integer.parseInt(coords[1]);
+                points.add(new Vector2(x, y));
+            }
+            System.out.println("[LOAD DATA] : Loaded " + points.size + " points...");
+        } catch (GdxRuntimeException ex) {
+            System.out.println("Could not load file: " + ex.getMessage());
+        }
+	}*/
 
 	/**
 	 * Generate list of points for position of stars/planetary systems.
@@ -353,21 +409,28 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener, 
 				points.add(newPoint);
 		}
 
+
+		points.add(new Vector2(1000, 1000));//TODO: system near origin for debug, don't forget about me
+
 		return points;
 	}
 
-	
+
 	public Array<Vector2> getPoints() {
-		return points;
+		return universe.points;
 	}
+
 
 	public void dispose() {
+		noiseThreadPool.shutdown();
+		/*
 		// stop and clear threads
 		for (NoiseThread thread : noiseThreads) {
 			thread.stop();
 		}
-		noiseThreads.clear();
+		noiseThreads.clear();*/
 	}
+
 
 
 }

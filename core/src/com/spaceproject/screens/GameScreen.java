@@ -131,7 +131,7 @@ public class GameScreen extends MyScreenAdapter {
 		engine.addSystem(new AISystem());
 
 		//loading
-		//TODO: SpaceParallaxSystem & SpaceLoadingSystem are a source of jigger/jumping while moving, caused by loading/unloading textures.
+		//TODO: SpaceParallaxSystem & SpaceLoadingSystem are a source of jitter/jumping while moving, caused by loading/unloading textures.
 		engine.addSystem(new SpaceLoadingSystem());
 		engine.addSystem(new SpaceParallaxSystem());
 

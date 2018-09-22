@@ -8,7 +8,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.OpenSimplexNoise;
+import com.spaceproject.generation.noise.OpenSimplexNoise;
 
 import java.util.ArrayList;
 
@@ -219,6 +219,11 @@ public class TextureFactory {
 			}
 		}
 
+		//TODO: cross-thread GLContext issue cause be texuture creation not pixmap, can we create the pixmap in noisethread?
+		//play with drawing the pixmap in the thread too and then delegating the
+		//"No OpenGL context found in the current thread." or straight up crashes
+		//https://github.com/libgdx/libgdx/wiki/Threading
+		//https://www.opengl.org/wiki/OpenGL_and_multithreading
 		Texture t = new Texture(pixmap);
 		pixmap.dispose();
 		return t;

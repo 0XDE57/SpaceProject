@@ -1,10 +1,11 @@
-package com.spaceproject.utility;
+package com.spaceproject.generation.noise;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
+import com.spaceproject.utility.MyMath;
 
 import java.util.ArrayList;
 

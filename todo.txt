@@ -46,9 +46,10 @@
 
 
 
-[ ] fix spaceloadingsystem
+[...] fix spaceloadingsystem
     [ ] seed based load instead of position
     [ ] clean up star save/load
+    [...] fix thread generation to be limited (probably by core count) threadpool?
 
 [ ] fix player moving ahead of camera at high speed, seem to happen only when vsync is on...
 
@@ -69,6 +70,7 @@
 [...] fix render priority (z-order)
       [X] moved into separate variable
       [ ] define proper heights for importance as current values are somewhat arbitrary
+
 [ ] system processing priority
 [ ] make colored tiles use texture regions instead of individual textures. (create one texture with all colors/tiles on it)
 [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
@@ -91,13 +93,6 @@
 [ ] messages/info/log
 [ ] commands
 [ ] cleanup debug UI (component list)
-[ ] change menu to interactive options (like gta native trainer) instead of static hotkeys 
-	5 - select
-	8 - up
-	4 - left
-	6 - right
-	2 - down
-	0 - back
 [ ] FPS,memory,entity graph
 
 ---MOBILE---
@@ -117,6 +112,8 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
 
 ---GAMEPLAY & DESIGN---
 [ ] destructible(voronoi) asteroids
+    https://www.badlogicgames.com/forum/viewtopic.php?f=11&t=22784 (my old thread)
+    https://github.com/mjholtzem/Unity-2D-Destruction
 	http://www.alanzucconi.com/2015/02/24/to-voronoi-and-beyond/
 	https://stackoverflow.com/questions/20104779/libgdx-create-texture-from-overlay-using-pixmap
 [...] combat system
@@ -171,8 +168,6 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
         resource availability
         ai accuracy / decision making
         damage/health
-        "lying to player/cheats" : https://www.reddit.com/r/gamedev/comments/7wlwy0/lying_to_players_for_their_benefit/
-            eg: last bullet in clip does more damage
 [ ] game start
 
 ---UI---

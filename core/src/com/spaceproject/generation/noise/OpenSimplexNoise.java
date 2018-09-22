@@ -1,4 +1,4 @@
-package com.spaceproject.utility;
+package com.spaceproject.generation.noise;
 /*
  * OpenSimplex Noise in Java.
  * by Kurt Spencer

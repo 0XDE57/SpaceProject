@@ -15,7 +15,7 @@ import com.spaceproject.generation.FontFactory;
 import com.spaceproject.ui.ColorProfile;
 import com.spaceproject.ui.Slider;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.NoiseGen;
+import com.spaceproject.generation.noise.NoiseGen;
 
 /* TODO:
  * -mapsize

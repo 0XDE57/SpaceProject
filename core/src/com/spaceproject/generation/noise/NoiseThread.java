@@ -1,4 +1,4 @@
-package com.spaceproject.utility;
+package com.spaceproject.generation.noise;
 
 import com.spaceproject.Tile;
 import com.spaceproject.components.PlanetComponent;
@@ -7,11 +7,8 @@ import com.spaceproject.components.SeedComponent;
 import java.util.ArrayList;
 
 public class NoiseThread implements Runnable {
-	
-	//threading
-	public Thread thread;
-	private volatile boolean isDone = false;	
-	private volatile boolean isProcessed = false;
+
+	private volatile boolean isDone = false;
 	private volatile boolean stop = false;
 	
 	//the texture the noise belongs to
@@ -25,13 +22,12 @@ public class NoiseThread implements Runnable {
 	private float scale;
 	private int octaves;
 	private float persistence;
-	private float lacunarity;	
-	
-	//map
+	private float lacunarity;
 	private int mapSize;
-	private float[][] heightMap;
-	private int[][] tileMap;
-	private int[][] pixelatedTileMap;
+
+	//TODO: move features directly into buffer or directly reference planetcomponent?
+
+	NoiseBuffer noise;
 
 	public NoiseThread(SeedComponent seed, PlanetComponent planet, ArrayList<Tile> tiles) {
 		this(planet.tempGenID, planet.scale, planet.octaves, planet.persistence, planet.lacunarity, seed.seed, planet.mapSize, tiles);
@@ -46,86 +42,69 @@ public class NoiseThread implements Runnable {
 		this.seed = seed;
 		this.mapSize = mapSize;
 		this.tiles = tiles;
-		
-		thread = new Thread(this);
-		thread.start();
+
 	}
 
 	@Override
 	public void run() {
 		//try { Thread.sleep(15000); } catch (InterruptedException e) { }//debug delay to see loading effects
 		
-		System.out.println("Thread [" + ID + "] started. MapSize=" + mapSize);
+		System.out.println("Started: [" + toString());
 		long startTime = System.currentTimeMillis();
-		
+
+		float[][] heightMap = new float[0][0];
+		int[][] tileMap = new int[0][0];
+		int[][] pixelatedTileMap = new int[0][0];
+
 		//do work
 		if (!stop) {
-		 heightMap = NoiseGen.generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity);
+			heightMap = NoiseGen.generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity);
 		}
 		if (!stop) { 
-			tileMap = NoiseGen.createTileMap(heightMap, tiles);	
+			tileMap = NoiseGen.createTileMap(heightMap, tiles);
 		}
 		if (!stop) { 
 			pixelatedTileMap = NoiseGen.createPixelatedTileMap(tileMap, tiles);
 		}
-		
+
+		noise = new NoiseBuffer();
+		noise.ID = ID;
+		noise.seed = seed;
+		noise.heightMap = heightMap;
+		noise.tileMap = tileMap;
+		noise.pixelatedTileMap = pixelatedTileMap;
+		isDone = true;
+
+
 		//finish
 		long endTime = System.currentTimeMillis() - startTime;
-		isDone = true;
 		if (stop) {
-			System.out.println("Thread [" + ID + "] killed. " + endTime + "ms");
+			System.out.println(toString() + " killed. " + endTime + "ms");
 		} else {
-			System.out.println("Thread [" + ID + "] complete in : " + endTime + "ms. MapSize=" + mapSize);
+			System.out.println(toString() + " complete in : " + endTime + "ms.");
 		}
-	}
-	
-	public long getID() {
-		return ID;
-	}
-	
-	public float[][] getHeightMap() {
-		if (!isDone()) {
-			return null;
-		}
-		return heightMap;
 	}
 
-	public int[][] getTileMap() {
+
+	public NoiseBuffer getMap() {
 		if (!isDone()) {
 			return null;
 		}
-		return tileMap;
+		return noise;
 	}
 
-	public int[][] getPixelatedMap() {
-		if (!isDone()) {
-			return null;
-		}
-		return pixelatedTileMap;
-	}
 	
 	public boolean isDone() {
 		return isDone && !stop;
 	}
-	
-	public void setProcessed() {
-		isProcessed = true;
-	}
-	
-	public boolean isProcessed(){
-		if (!isDone()) {
-			return false;
-		}
-		return isProcessed;
-	}
+
 
 	public void stop() {
 		stop = true;
-		thread.interrupt();
 	}
-	
-	public void forceStop() {
-		stop();
-		thread.stop();//find a safer way?
+
+	@Override
+	public String toString() {
+		return "NoiseGenerator["+ID+"]: Seed[" + seed + "], size[" + mapSize+ "]";
 	}
 }

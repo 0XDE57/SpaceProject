@@ -101,5 +101,24 @@ public class Misc {
 
 	}
 
+	/**
+	 * https://stackoverflow.com/a/21701635
+	 */
+	public static String formatDuration(final long millis) {
+		long seconds = (millis / 1000) % 60;
+		long minutes = (millis / (1000 * 60)) % 60;
+		long hours = millis / (1000 * 60 * 60);
+
+		StringBuilder b = new StringBuilder();
+		b.append(hours == 0 ? "00" : hours < 10 ? String.valueOf("0" + hours) :
+				String.valueOf(hours));
+		b.append(":");
+		b.append(minutes == 0 ? "00" : minutes < 10 ? String.valueOf("0" + minutes) :
+				String.valueOf(minutes));
+		b.append(":");
+		b.append(seconds == 0 ? "00" : seconds < 10 ? String.valueOf("0" + seconds) :
+				String.valueOf(seconds));
+		return b.toString();
+	}
 
 }

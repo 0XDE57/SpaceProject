@@ -32,9 +32,10 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.MyMath;
 import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.Misc;
+import com.spaceproject.utility.MyMath;
 
 import java.lang.reflect.Field;
 import java.util.Set;
@@ -221,26 +222,6 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		}*/
 	}
 
-	public void drawMessage(String message, int x, int y) {
-		batch.begin();
-		fontSmall.draw(batch, message, x, y);
-		batch.end();
-	}
-
-	/*
-	/** Draw menu showing items to draw and toggle keys
-	private void drawDebugMenu() {
-		fontSmall.setColor(1, 1, 1, 1);
-		fontSmall.draw(batch, "***DEBUG [F3]***", 15, Gdx.graphics.getHeight() - 45);
-		fontSmall.draw(batch, "[NUM0] Draw Pos: " + drawPos, 15, Gdx.graphics.getHeight() - 60);
-		fontSmall.draw(batch, "[NUM1] Draw Component List: " + drawComponentList, 15, Gdx.graphics.getHeight() - 75);
-		fontSmall.draw(batch, "[NUM2] Draw Bounds: " + drawBounds, 15, Gdx.graphics.getHeight() - 90);
-		fontSmall.draw(batch, "[NUM3] Draw FPS: " + drawFPS, 15, Gdx.graphics.getHeight() - 105);
-		fontSmall.draw(batch, "[NUM4] Draw Orbit Path: " + drawOrbitPath, 15, Gdx.graphics.getHeight() - 120);
-		fontSmall.draw(batch, "[NUM5] Draw Vectors: " + drawVectors, 15, Gdx.graphics.getHeight() - 135);
-		fontSmall.draw(batch, "[NUM9] Hide this menu.", 15, Gdx.graphics.getHeight() - 150);
-	}
-	*/
 
 	/** Draw lines to represent speed and direction of entity */
 	private void drawVelocityVectors() {
@@ -334,41 +315,60 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 
 	/** Draw frames, entity count, position and memory info. */
 	private void drawFPS(boolean drawExtaInfo) {
-		//fps
-		String frames = Integer.toString(Gdx.graphics.getFramesPerSecond());
-		
-		//threads
-		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-		String threads = "  Threads: " + threadSet.size();
-		
-		//memory
-		Runtime runtime = Runtime.getRuntime();
-		long used = runtime.totalMemory() - runtime.freeMemory();
-		String memory = "Mem: " + MyMath.formatBytes(used);
-		
-		//entity/component count
-		int entityCount = engine.getEntities().size();
-		int componentCount = 0;
-		for (Entity ent : engine.getEntities()) {
-			componentCount += ent.getComponents().size();
-		}
-		String count = "   E: " + entityCount + " - C: " + componentCount;
-		
-		//camera position
-		String camera = String.format("Pos: %s %s  Zoom:%3$.2f", (int)cam.position.x, (int)cam.position.y, cam.zoom);
-		
-		//display info
 		int x = 15;
 		int y = Gdx.graphics.getHeight() - 15;
 		fontLarge.setColor(1,1,1,1);
 
+		//fps
+		String frames = Integer.toString(Gdx.graphics.getFramesPerSecond());
+		fontLarge.draw(batch, frames, x, y);
+
 		if (drawExtaInfo) {
+			//camera position
+			String camera = String.format("Pos: %s %s  Zoom:%3$.2f", (int) cam.position.x, (int) cam.position.y, cam.zoom);
+
+			//memory
+			Runtime runtime = Runtime.getRuntime();
+			long used = runtime.totalMemory() - runtime.freeMemory();
+			String memory = "Mem: " + MyMath.formatBytes(used);
+
+			//entity/component count
+			int entityCount = engine.getEntities().size();
+			int componentCount = 0;
+			for (Entity ent : engine.getEntities()) {
+				componentCount += ent.getComponents().size();
+			}
+			String count = "   E: " + entityCount + " - C: " + componentCount;
+
+			//threads
+			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+			String threads = "  Threads: " + threadSet.size();
+
+			int linePos = 1;
+			float lineHeight = fontLarge.getLineHeight();
 			fontLarge.draw(batch, frames + count, x, y);
-			fontLarge.draw(batch, memory + threads, x, y - fontLarge.getLineHeight());
-			fontLarge.draw(batch, camera, x, y - fontLarge.getLineHeight() * 2);
-			fontLarge.draw(batch, "time: " + GameScreen.gameTimeCurrent, 500, Gdx.graphics.getHeight() - 10);
-		} else {
-			fontLarge.draw(batch, frames, x, y);
+			fontLarge.draw(batch, memory + threads, x, y - (lineHeight * linePos++));
+			fontLarge.draw(batch, camera, x, y - (lineHeight * linePos++));
+			fontLarge.draw(batch, "time: " + GameScreen.gameTimeCurrent + " (" + Misc.formatDuration(GameScreen.gameTimeCurrent) + ")",
+					500, Gdx.graphics.getHeight() - 10);
+
+
+			//view threads
+
+			if (GameScreen.inSpace) {
+				SpaceLoadingSystem loader = engine.getSystem(SpaceLoadingSystem.class);
+				if (loader != null) {
+					String noisePool = "active:" + loader.noiseThreadPool.getActiveCount()
+							+ ", completed:" + loader.noiseThreadPool.getCompletedTaskCount()
+							+ ", task count:" + loader.noiseThreadPool.getTaskCount()
+							+ ", pool size:" + loader.noiseThreadPool.getCorePoolSize();
+
+					fontSmall.draw(batch, noisePool,x, y - (lineHeight * linePos++));
+				}
+			}
+			for (Thread t : threadSet) {
+				fontSmall.draw(batch, t.toString(), x, y - (lineHeight * linePos++));
+			}
 		}
 	}
 	

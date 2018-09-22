@@ -13,6 +13,9 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.TableUtils;
 import com.kotcrab.vis.ui.util.dialog.Dialogs;
 import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
+import com.kotcrab.vis.ui.util.value.PrefHeightIfVisibleValue;
+import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisScrollPane;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import com.kotcrab.vis.ui.widget.tabbedpane.Tab;
@@ -29,7 +32,7 @@ import static com.spaceproject.screens.MyScreenAdapter.game;
  */
 public class Menu extends VisWindow {
     public final TabbedPane tabbedPane;
-    public MyTab mainMenuTab, customRenderTab, mapTab, placeholderATab, placeholderBTab, debugMenuTab;
+    public MyTab mainMenuTab, customRenderTab, mapTab, placeholderATab, placeholderBTab, debugMenuTab, testConfigTab;
 
 
     public Menu (boolean vertical, Engine engine) {
@@ -59,9 +62,16 @@ public class Menu extends VisWindow {
             add(tabbedPane.getTable()).growY();
             add(container).expand().fill();
         } else {
+            //force min height for tabbedPane to fix table layout when tab has a VisScrollPane
+            //github.com/kotcrab/vis-editor/issues/206#issuecomment-238012673
+            add(tabbedPane.getTable()).minHeight(new PrefHeightIfVisibleValue()).growX();
+            row();
+            add(container).grow();
+            /*
             add(tabbedPane.getTable()).expandX().fillX();
             row();
             add(container).expand().fill();
+            */
         }
 
 
@@ -95,11 +105,44 @@ public class Menu extends VisWindow {
         debugMenuTab = createDebugMenu(engine);
         tabbedPane.add(debugMenuTab);
 
+
+        testConfigTab = createConfigTab();
+        tabbedPane.add(testConfigTab);
+
         tabbedPane.switchTab(mainMenuTab);
 
 		//debugAll();
         setSize(Gdx.graphics.getWidth()-150, Gdx.graphics.getHeight()-150);
         centerWindow();
+    }
+
+    private MyTab createConfigTab() {
+        MyTab test = new MyTab("config", Input.Keys.NUM_3);
+
+        VisTable scrollContainer = new VisTable();
+        scrollContainer.left().top();
+
+        for (int i = 0; i < 40; i++) {
+            scrollContainer.add(new VisLabel("test: " + i)).row();
+        }
+        /*
+        Config c = SpaceProject.celestcfg;
+        try {
+            for (Field f : c.getClass().getFields()) {
+                Label l = new Label(String.format("%s %s", f.getName(), f.get(c)), VisUI.getSkin());
+                scrollContainer.add(l).expand().fill().row();
+            }
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }*/
+        VisScrollPane scrollPane = new VisScrollPane (scrollContainer);
+        scrollPane.setFlickScroll(false);
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setScrollingDisabled(false, false);
+        test.getContentTable().add(scrollPane).left().top().expand().fill();
+        return test;
     }
 
     private MyTab createDebugMenu(final Engine engine) {
@@ -330,5 +373,6 @@ public class Menu extends VisWindow {
         public Table getContentTable () {
             return content;
         }
+
     }
 }

@@ -1,5 +1,8 @@
 package com.spaceproject.config;
 
+import com.badlogic.gdx.Application;
+import com.badlogic.gdx.Gdx;
+
 public class CelestialConfig extends Config {
 
 	//---Planetary system generation---	
@@ -38,7 +41,9 @@ public class CelestialConfig extends Config {
 	public float minPointDistance;
 	//distance to check when to load or unload planets
 	public float loadSystemDistance;
-	
+
+	public int maxGenThreads;
+
 	public void loadDefault() {
 		//system gen
 		minPlanets = 0;
@@ -66,6 +71,8 @@ public class CelestialConfig extends Config {
 		pointGenRange = 400000;
 		minPointDistance = maxPlanets*maxPlanetDist*6f;	
 		loadSystemDistance = maxPlanets*maxPlanetDist*1.5f;
+
+		maxGenThreads = Gdx.app.getType() == Application.ApplicationType.Desktop ? 4 : 2; //Runtime.getRuntime().availableProcessors()-1;
 	}
 	
 }

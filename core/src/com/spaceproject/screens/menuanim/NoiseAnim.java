@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.OpenSimplexNoise;
+import com.spaceproject.generation.noise.OpenSimplexNoise;
 
 public class NoiseAnim extends MainMenuAnimation {
     float z;

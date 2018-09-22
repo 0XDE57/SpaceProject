@@ -21,7 +21,7 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.screens.MyScreenAdapter;
-import com.spaceproject.utility.NoiseGen;
+import com.spaceproject.generation.noise.NoiseGen;
 
 import java.util.ArrayList;
 import java.util.Comparator;

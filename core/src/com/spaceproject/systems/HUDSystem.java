@@ -75,9 +75,12 @@ public class HUDSystem extends EntitySystem {
 			VisUI.load(VisUI.SkinScale.X1);
 		stage = new Stage(new ScreenViewport());
 
+
+		//TODO: fix input handling with multiplexer: github.com/libgdx/libgdx/wiki/Event-handling#inputmultiplexer
+		//game controls should not be affecting game when menu is visible
+		//menu should always receive hotkeys to open tabs
+		//scroll is broken in game when stage is input processor
 		Gdx.input.setInputProcessor(stage);
-
-
 
 
 	}
