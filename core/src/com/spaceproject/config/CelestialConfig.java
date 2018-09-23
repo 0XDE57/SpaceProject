@@ -71,6 +71,7 @@ public class CelestialConfig extends Config {
 		pointGenRange = 400000;
 		minPointDistance = maxPlanets*maxPlanetDist*6f;	
 		loadSystemDistance = maxPlanets*maxPlanetDist*1.5f;
+		//loadSystemDistance = 5000;//debug force short load
 
 		maxGenThreads = Gdx.app.getType() == Application.ApplicationType.Desktop ? 4 : 2; //Runtime.getRuntime().availableProcessors()-1;
 	}

@@ -24,14 +24,16 @@ import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
-import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.generation.TextureFactory;
-import com.spaceproject.generation.noise.NoiseThreadPoolExecutor;
+import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.generation.noise.NoiseGenListener;
+import com.spaceproject.generation.noise.NoiseThread;
+import com.spaceproject.generation.noise.NoiseThreadPoolExecutor;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.generation.noise.NoiseThread;
+import com.spaceproject.utility.SimpleTimer;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -90,37 +92,31 @@ class Universe {
 
 public class SpaceLoadingSystem extends EntitySystem implements NoiseGenListener, EntityListener, Disposable {
 
-	// star entities
-	//private Array<Vector2> points = new Array<Vector2>();
 	private Universe universe;
-	private ImmutableArray<Entity> loadedAstronomicalObjects;
-	private float checkStarsTimer = 4000;
-	private float checkStarsCurrTime;
-
-	LinkedBlockingQueue<NoiseBuffer> noiseBuffer = new LinkedBlockingQueue<NoiseBuffer>();
+	private ImmutableArray<Entity> loadedAstronomicalBodies;
+	private LinkedBlockingQueue<NoiseBuffer> noiseBufferQueue;
 	NoiseThreadPoolExecutor noiseThreadPool;
+
+	SimpleTimer checkStarsTimer;//this system might make sense as an interval system instead of timer
 
 	@Override
 	public void addedToEngine(Engine engine) {
 
 		// currently loaded stars/planets
-		loadedAstronomicalObjects = engine.getEntitiesFor(Family.all(BarycenterComponent.class, TransformComponent.class).get());
+		loadedAstronomicalBodies = engine.getEntitiesFor(Family.all(BarycenterComponent.class, TransformComponent.class).get());
 
-		engine.addEntityListener(Family.one(PlanetComponent.class, /*StarComponent.class,*/ BarycenterComponent.class).get(),this);
+		engine.addEntityListener(Family.one(PlanetComponent.class, BarycenterComponent.class).get(),this);
 
-		// generate or load points from disk
-		//loadPoints();
-
+		// generate universe
 		universe = new Universe(generatePoints());
-
-		noiseThreadPool = new NoiseThreadPoolExecutor(SpaceProject.celestcfg.maxGenThreads);
-		noiseThreadPool.addListener(this);
-
-		// load planetary systems / planets / stars
-		//updateStars(1);
 		// load space things (asteroids, wormhole, black hole, etc)
 		// load ai/mobs
 
+		noiseBufferQueue = new LinkedBlockingQueue<NoiseBuffer>();
+		noiseThreadPool = new NoiseThreadPoolExecutor(SpaceProject.celestcfg.maxGenThreads);
+		noiseThreadPool.addListener(this);
+
+		checkStarsTimer = new SimpleTimer(4000);
 	}
 
 
@@ -139,30 +135,20 @@ public class SpaceLoadingSystem extends EntitySystem implements NoiseGenListener
 
 	@Override
 	public void entityRemoved(Entity entity) {
-		/*
-		for (Entity e : getEngine().getEntitiesFor(Family.all(OrbitComponent.class).get())){
-			OrbitComponent orbit = Mappers.orbit.get(e);
-			if (orbit.parent != null) {
-				//TODO: check if parents have parents (eg: moon > planet > star)
-				//TODO: dispose texture. research auto texture dispose -> entity.componentRemoved()?
-				if (orbit.parent == star) {
-					getEngine().removeEntity(e);
-				}
-			}
-		}*/
+		//TODO: if has texture, dispose
 	}
 
 	@Override
 	public void threadFinished(NoiseThread noise) {
 		//TODO: save in universe file for caching and loading instantly when transition to world
-		noiseBuffer.add(noise.getMap());
+		noiseBufferQueue.add(noise.getMap());
 	}
 
 	
 	@Override
 	public void update(float delta) {
 		// load and unload stars
-		updateStars(delta);
+		updateStars();
 
 		// update/replace textures
 		updatePlanetTextures();
@@ -170,11 +156,10 @@ public class SpaceLoadingSystem extends EntitySystem implements NoiseGenListener
 
 
 	private void updatePlanetTextures() {
-
 		//check queue for tilemaps / pixmaps to load into textures
-		if (!noiseBuffer.isEmpty()) {
+		if (!noiseBufferQueue.isEmpty()) {
 			try {
-				NoiseBuffer noise = noiseBuffer.take();
+				NoiseBuffer noise = noiseBufferQueue.take();
 				if (noise.pixelatedTileMap == null) {
 					System.out.println("ERROR, no map for: [" + noise.ID + "]");
 					return;
@@ -195,109 +180,89 @@ public class SpaceLoadingSystem extends EntitySystem implements NoiseGenListener
 				e.printStackTrace();
 			}
 		}
-
-
-		/*
-		if (noiseThreads.size == 0) {
-			return;
-		}
-		
-		//if a thread has finished generating the noise, create a texture and replace the blank one
-
-		for (NoiseThread thread : noiseThreads) {
-			if (thread.isDone() && !thread.isProcessed()) {			
-				for (Entity p : getEngine().getEntitiesFor(Family.all(PlanetComponent.class).get())) {
-					if (p.getComponent(PlanetComponent.class).tempGenID == thread.getID()) {
-						int[][] tileMap = thread.getPixelatedMap();
-						if (tileMap != null) {
-							// create planet texture from tileMap, replace texture
-							Texture newTex = TextureFactory.generatePlanet(tileMap, Tile.defaultTiles);
-							p.getComponent(TextureComponent.class).texture = newTex;
-							
-							thread.setProcessed();//set flag to signify we are done with the thread
-							System.out.println("Texture loaded: [" + thread.getID() + "]");
-						}
-					}
-				}
-			}
-		}
-		
-		//remove completed threads
-		//noiseThreads.removeIf(o -> o.isProcessed());//java8 lamba only supported in androidN+
-		boolean finished = true;
-		for (NoiseThread thread : noiseThreads) {
-			if (!thread.isProcessed())
-				finished = false;
-		}
-		if (finished) {
-			noiseThreads.clear();
-			System.out.println("All Planet Textures Loaded.");
-
-		}*/
-		
 	}
 
 
-	private void updateStars(float delta) {
-		//TODO: use SimpleTimer
-		checkStarsCurrTime -= 1000 * delta;
-		if (checkStarsCurrTime < 0) {
-			checkStarsCurrTime = checkStarsTimer; // reset timer
+	private void updateStars() {
+		if (checkStarsTimer.canDoEvent()){
+			checkStarsTimer.reset();
 			
 			//distance to check when to load planets
 			int loadDistance = (int) SpaceProject.celestcfg.loadSystemDistance;
 			loadDistance *= loadDistance;//square for dist2
 			
 			// remove stars from engine that are too far
-			for (Entity star : loadedAstronomicalObjects) {
-				TransformComponent t = Mappers.transform.get(star);
-				if (Vector2.dst2(t.pos.x, t.pos.y, GameScreen.cam.position.x, GameScreen.cam.position.y) > loadDistance) {
-					for (Entity e : getEngine().getEntitiesFor(Family.all(OrbitComponent.class).get())){
-						OrbitComponent orbit = Mappers.orbit.get(e);
-						if (orbit.parent != null) {
-							//TODO: check if parents have parents (eg: moon > planet > star)
-							//TODO: dispose texture. research auto texture dispose -> entity.componentRemoved()?
-							if (orbit.parent == star) {
-								getEngine().removeEntity(e);
-							}
-						}
-					}
-					getEngine().removeEntity(star);
-					System.out.println("Removed Planetary System: " + star.getComponent(TransformComponent.class).pos.toString());
-				}
-			}
-			
+			unloadFarEntities(loadDistance);
+
 			// add planetary systems to engine
-			for (AstroObject point : universe.objects) {
-				//check if point is close enough to be loaded
-				if (new Vector2(point.x, point.y).dst2(GameScreen.cam.position.x, GameScreen.cam.position.y) < loadDistance) {
-			
-					// check if star is already in world
-					//TODO: check based on an ID rather than distance. more reliable and makes more sense than a distance check
-					boolean loaded = false;
-					for (Entity astroEntity : loadedAstronomicalObjects) {
-						SeedComponent s = Mappers.seed.get(astroEntity);
-						loaded = (s.seed == point.seed);
-						/*
-						TransformComponent t = Mappers.transform.get(astroEntity);
-
-						if (point.dst(t.pos.x, t.pos.y) < 2f) {
-							loaded = true;
-						}*/
-					}
-					
-					if (!loaded) {
-						for (Entity e : EntityFactory.createAstronomicalObjects(point.x, point.y)) {
-							//add entity to world
-							getEngine().addEntity(e);
-						}
-					}
-
-				}
-			}	
+			loadCloseEntities(loadDistance);
 		}
 	}
-	
+
+	private void loadCloseEntities(int loadDistance) {
+		for (AstroObject astroBodies : universe.objects) {
+            //check if point is close enough to be loaded
+            if (Vector2.dst2(astroBodies.x, astroBodies.y, GameScreen.cam.position.x, GameScreen.cam.position.y) < loadDistance) {
+
+                // check if astro bodies already in world
+                boolean loaded = false;
+                for (Entity astroEntity : loadedAstronomicalBodies) {
+                    SeedComponent s = Mappers.seed.get(astroEntity);
+                    if (s.seed == astroBodies.seed) {
+						loaded = true;
+                        break;
+                    }
+                }
+
+                if (!loaded) {
+                    for (Entity e : EntityFactory.createAstronomicalObjects(astroBodies.x, astroBodies.y)) {
+                        getEngine().addEntity(e);
+                    }
+                }
+
+            }
+        }
+	}
+
+	private void unloadFarEntities(int loadDistance) {
+		for (Entity entity : loadedAstronomicalBodies) {
+            TransformComponent t = Mappers.transform.get(entity);
+            if (Vector2.dst2(t.pos.x, t.pos.y, GameScreen.cam.position.x, GameScreen.cam.position.y) > loadDistance) {
+
+                for (Entity e : getEngine().getEntitiesFor(Family.all(OrbitComponent.class).get())){
+                    OrbitComponent orbit = Mappers.orbit.get(e);
+                    if (orbit.parent != null) {
+                        //TODO: check if parents have parents (eg: moon > planet > star)
+						//this currently leaves moons behind...
+                        if (orbit.parent == entity) {
+                            getEngine().removeEntity(e);
+                        }
+                    }
+                }
+                getEngine().removeEntity(entity);
+
+				//removedEntityAndChildren(entity, getEngine().getEntitiesFor(Family.all(OrbitComponent.class).get()));
+                System.out.println("Removing Planetary System: " + entity.getComponent(TransformComponent.class).pos.toString());
+            }
+        }
+	}
+
+	public void removedEntityAndChildren(Entity entity, ImmutableArray<Entity> list) {
+		for (Entity e : list){
+			OrbitComponent orbit = Mappers.orbit.get(e);
+			if (orbit.parent != null) {
+				if (orbit.parent == entity) {
+					getEngine().removeEntity(entity);
+
+					removedEntityAndChildren(orbit.parent, list);
+					break;
+				}
+			}
+		}
+		getEngine().removeEntity(entity);
+		System.out.println("Removed " + Misc.myToString(entity));
+	}
+
 	/**
 	 * Fill universe with stars and planets. Load points from disk or if no points
 	 * exist, create points and save to disk.
@@ -328,34 +293,6 @@ public class SpaceLoadingSystem extends EntitySystem implements NoiseGenListener
 		
 	}
 
-	/*
-	private void savePoints(FileHandle starsFile) {
-
-		try {
-            // save points to disk
-            for (Vector2 p : points) {
-                starsFile.writeString((int) p.x + "," + (int) p.y + "\n", true);
-            }
-            System.out.println("[SAVE DATA] : Points saved to: " + Gdx.files.getLocalStoragePath() + starsFile.path());
-        } catch (GdxRuntimeException ex) {
-            System.out.println("Could not save file: " + ex.getMessage());
-        }
-	}
-
-	private void loadPoints(FileHandle starsFile) {
-		// load points
-		try {
-            for (String line : starsFile.readString().replaceAll("\\r", "").split("\\n")) {
-                String[] coords = line.split(",");
-                int x = Integer.parseInt(coords[0]);
-                int y = Integer.parseInt(coords[1]);
-                points.add(new Vector2(x, y));
-            }
-            System.out.println("[LOAD DATA] : Loaded " + points.size + " points...");
-        } catch (GdxRuntimeException ex) {
-            System.out.println("Could not load file: " + ex.getMessage());
-        }
-	}*/
 
 	/**
 	 * Generate list of points for position of stars/planetary systems.
@@ -423,12 +360,6 @@ public class SpaceLoadingSystem extends EntitySystem implements NoiseGenListener
 
 	public void dispose() {
 		noiseThreadPool.shutdown();
-		/*
-		// stop and clear threads
-		for (NoiseThread thread : noiseThreads) {
-			thread.stop();
-		}
-		noiseThreads.clear();*/
 	}
 
 
