@@ -11,11 +11,12 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
     private Array<NoiseGenListener> listeners;
 
     public NoiseThreadPoolExecutor(int numThreads) {
-        super(numThreads, numThreads, 0,	 TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
-        //super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
+        super(numThreads, numThreads, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+        allowCoreThreadTimeOut(true);
+
         listeners = new Array<NoiseGenListener>();
 
-        System.out.println("NoiseThreadPool with " + numThreads + " threads");
+        System.out.println("NoiseThreadPool with " + getMaximumPoolSize() + " threads");
     }
 
 
@@ -33,11 +34,11 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
     protected void afterExecute(Runnable r, Throwable t) {
         super.afterExecute(r, t);
         if (t == null) {
-            //System.out.println("Task completed successfully!");
             notifyListenersNoiseFinished((NoiseThread)r);
         } else {
             System.out.println("Task failed:  " + t.getMessage());
         }
     }
+
 
 }

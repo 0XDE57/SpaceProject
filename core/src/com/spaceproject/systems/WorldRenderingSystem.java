@@ -75,7 +75,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	}
 
 	private void loadMap(SeedComponent seed, PlanetComponent planet) {
-		//TODO: use NoiseThread
+		//TODO: use cached noise, if not cached and if not in process of being generated, only then generate
 		
 		//create tile features
 		//createTiles();

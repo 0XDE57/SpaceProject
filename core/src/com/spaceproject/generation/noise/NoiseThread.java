@@ -10,9 +10,7 @@ public class NoiseThread implements Runnable {
 
 	private volatile boolean isDone = false;
 	private volatile boolean stop = false;
-	
-	//the texture the noise belongs to
-	private long ID;
+
 	
 	//color/height
 	private ArrayList<Tile> tiles;
@@ -30,11 +28,10 @@ public class NoiseThread implements Runnable {
 	NoiseBuffer noise;
 
 	public NoiseThread(SeedComponent seed, PlanetComponent planet, ArrayList<Tile> tiles) {
-		this(planet.tempGenID, planet.scale, planet.octaves, planet.persistence, planet.lacunarity, seed.seed, planet.mapSize, tiles);
+		this(planet.scale, planet.octaves, planet.persistence, planet.lacunarity, seed.seed, planet.mapSize, tiles);
 	}
 	
-	public NoiseThread(long id, float s, int o, float p, float l, long seed, int mapSize, ArrayList<Tile> tiles) {
-		this.ID = id;
+	public NoiseThread(float s, int o, float p, float l, long seed, int mapSize, ArrayList<Tile> tiles) {
 		this.scale = s;
 		this.octaves = o;
 		this.persistence = p;
@@ -68,7 +65,6 @@ public class NoiseThread implements Runnable {
 		}
 
 		noise = new NoiseBuffer();
-		noise.ID = ID;
 		noise.seed = seed;
 		noise.heightMap = heightMap;
 		noise.tileMap = tileMap;
@@ -86,13 +82,16 @@ public class NoiseThread implements Runnable {
 	}
 
 
-	public NoiseBuffer getMap() {
-		if (!isDone()) {
-			return null;
-		}
-		return noise;
+	public NoiseBuffer getNoise() {
+		if (isDone())
+			return noise;
+
+		return null;
 	}
 
+	public long getSeed() {
+		return seed;
+	}
 	
 	public boolean isDone() {
 		return isDone && !stop;
@@ -104,7 +103,23 @@ public class NoiseThread implements Runnable {
 	}
 
 	@Override
-	public String toString() {
-		return "NoiseGenerator["+ID+"]: Seed[" + seed + "], size[" + mapSize+ "]";
+	public boolean equals(Object o) {
+		if (!(o instanceof NoiseThread)) {
+			return ((NoiseThread)o).getSeed() == this.getSeed();
+		}
+
+		return false;
 	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return "NoiseGenerator: Seed[" + seed + "], size[" + mapSize+ "]";
+	}
+
+
 }
