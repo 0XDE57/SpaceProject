@@ -19,9 +19,10 @@ import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.TextureFactory;
-import com.spaceproject.utility.Mappers;
+import com.spaceproject.generation.noise.NoiseBuffer;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
-import com.spaceproject.generation.noise.NoiseGen;
+import com.spaceproject.utility.Mappers;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,8 +30,8 @@ import java.util.Comparator;
 public class WorldRenderingSystem extends IteratingSystem implements Disposable {
 		
 	// rendering
-	private static OrthographicCamera cam;
-	private static SpriteBatch batch;
+	private OrthographicCamera cam;
+	private SpriteBatch batch;
 
 	// array of entities to render
 	private Array<Entity> renderQueue = new Array<Entity>();
@@ -44,15 +45,17 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	};
 	
 	private ArrayList<Tile> tiles = Tile.defaultTiles;
-	
-	private float[][] heightMap;//height of tile
-	private int[][] tileMap;//index of tile
+
+	long seed;
+	NoiseBuffer noise;
+	//private float[][] heightMap;//height of tile
+	//private int[][] tileMap;//index of tile
 
 	private int surround; //how many tiles to draw around the camera
 	
 	private int mapSize;
 	
-	static Texture tileTex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));
+	private Texture tileTex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));
 	
 	public WorldRenderingSystem(Entity planetEntity) {
 		this(planetEntity, MyScreenAdapter.cam, MyScreenAdapter.batch);
@@ -69,14 +72,27 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		SeedComponent seedComp = planetEntity.getComponent(SeedComponent.class);
 		PlanetComponent planetComp = planetEntity.getComponent(PlanetComponent.class);
 
-		loadMap(seedComp, planetComp);
+		seed = seedComp.seed;
+		loadMap();
 	
-		mapSize = planetComp.mapSize * SpaceProject.tileSize;
+		//mapSize = planetComp.mapSize * SpaceProject.tileSize;
 	}
 
-	private void loadMap(SeedComponent seed, PlanetComponent planet) {
-		//TODO: use cached noise, if not cached and if not in process of being generated, only then generate
-		
+	private void loadMap() {
+		//use cached noise
+		//TODO: if not cached and if not in process of being generated, only then generate, but this should probably never happen
+
+		NoiseBuffer newNoise = GameScreen.universe.getNoiseForSeed(seed);
+		if (newNoise != null) {
+			noise = newNoise;
+			mapSize = newNoise.heightMap.length * SpaceProject.tileSize;
+		}
+
+		if (noise == null) {
+			System.out.println("no map found");
+		} else {
+			System.out.println("map found");
+		}
 		//create tile features
 		//createTiles();
 
@@ -87,10 +103,10 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		float persistence = 0.68f;//0 - 1
 		float lacunarity = 2.6f;//1 - x
 		int mapSize = 256; //size of world	*/	
-		heightMap = NoiseGen.generateWrappingNoise4D(seed.seed, planet.mapSize, planet.scale, planet.octaves, planet.persistence, planet.lacunarity);
+		//heightMap = NoiseGen.generateWrappingNoise4D(seed.seed, planet.mapSize, planet.scale, planet.octaves, planet.persistence, planet.lacunarity);
 		
 		//create map of tiles based on height
-		tileMap = NoiseGen.createTileMap(heightMap, tiles);		
+		//tileMap = NoiseGen.createTileMap(heightMap, tiles);
 	}
 	
 	
@@ -118,10 +134,14 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		batch.begin();
-		
-		//render background tiles
-		drawTiles();
-		
+
+		if (noise == null) {
+			loadMap();
+		} else {
+			//render background tiles
+			drawTiles();
+		}
+
 		//draw game objects
 		drawEntities();
 		
@@ -172,13 +192,13 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 			for (int tileX = centerX - surround; tileX <= centerX + surround; tileX++) {
 				
 				//wrap tiles when position is outside of map
-				int tX = tileX % heightMap.length;
-				int tY = tileY % heightMap.length;
-				if (tX < 0) tX += heightMap.length;
-				if (tY < 0) tY += heightMap.length;
+				int tX = tileX % noise.heightMap.length;
+				int tY = tileY % noise.heightMap.length;
+				if (tX < 0) tX += noise.heightMap.length;
+				if (tY < 0) tY += noise.heightMap.length;
 							
 				//render tile
-				batch.setColor(tiles.get(tileMap[tX][tY]).getColor());
+				batch.setColor(tiles.get(noise.tileMap[tX][tY]).getColor());
 				//if (tX == heightMap.length-1 || tY == heightMap.length-1) batch.setColor(Color.BLACK);
 				batch.draw(tileTex,
 						tileX * SpaceProject.tileSize,

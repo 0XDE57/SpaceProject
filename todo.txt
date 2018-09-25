@@ -46,11 +46,13 @@
 
 
 
-[...] fix spaceloadingsystem
+[...] fix texture / map loading
     [x] seed based load instead of position
     [ ] clean up star save/load
     [x] fix thread generation to be limited (probably by core count) threadpool?
-    [ ] planets load from cache
+    [x] planets load from cache
+    [ ] prevent generating duplicate seed when one is in process of being created but not yet created
+    [ ] clean up
 
 [ ] fix player moving ahead of camera at high speed, seem to happen only when vsync is on...
 

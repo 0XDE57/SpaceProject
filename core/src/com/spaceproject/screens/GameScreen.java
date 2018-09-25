@@ -10,7 +10,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
-import com.spaceproject.ui.MapState;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.CameraFocusComponent;
@@ -21,6 +20,11 @@ import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.Universe;
+import com.spaceproject.generation.noise.NoiseBuffer;
+import com.spaceproject.generation.noise.NoiseGenListener;
+import com.spaceproject.generation.noise.NoiseThread;
+import com.spaceproject.generation.noise.NoiseThreadPoolExecutor;
 import com.spaceproject.systems.AISystem;
 import com.spaceproject.systems.BoundsSystem;
 import com.spaceproject.systems.CameraSystem;
@@ -39,12 +43,14 @@ import com.spaceproject.systems.SpaceParallaxSystem;
 import com.spaceproject.systems.SpaceRenderingSystem;
 import com.spaceproject.systems.WorldRenderingSystem;
 import com.spaceproject.systems.WorldWrapSystem;
+import com.spaceproject.ui.MapState;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class GameScreen extends MyScreenAdapter {
+public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 	public Engine engine, backgroundEngine;
 	public static long gameTimeCurrent, gameTimeStart;
@@ -53,12 +59,10 @@ public class GameScreen extends MyScreenAdapter {
 	public static boolean inSpace;
 	private static Entity currentPlanet = null;
 	private ImmutableArray<Entity> transitioningEntities;
-	//perhaps a game state? eg: dont need to regen the universe each time go to space
-	//GameState {
-	//	inSpace
-	//	universe
-	//	currentPlanet
-	//}
+
+	public static Universe universe;
+	public static LinkedBlockingQueue<NoiseBuffer> noiseBufferQueue;
+	public static NoiseThreadPoolExecutor noiseThreadPool;
 
 
 	ShaderProgram shader = null;
@@ -68,6 +72,13 @@ public class GameScreen extends MyScreenAdapter {
 		GameScreen.inSpace = inSpace;
 
 		gameTimeStart = System.nanoTime();
+
+		universe = new Universe();
+		noiseBufferQueue = new LinkedBlockingQueue<NoiseBuffer>();
+		noiseThreadPool = new NoiseThreadPoolExecutor(SpaceProject.celestcfg.maxGenThreads);
+		noiseThreadPool.addListener(universe);
+		noiseThreadPool.addListener(this);
+
 
 
 		//playing with shaders
@@ -83,6 +94,7 @@ public class GameScreen extends MyScreenAdapter {
 		}
 
 
+
 		// load test default values
 		Entity playerTESTSHIP = CreatePlayerShip();
 		Entity planet = null;
@@ -92,7 +104,6 @@ public class GameScreen extends MyScreenAdapter {
 			System.out.println("NULL PLANET: Debug world loaded");
 			//int a = 1/0;// throw new Exception("");
 		}
-
 		
 		if (inSpace) {
 			initSpace(playerTESTSHIP);
@@ -251,6 +262,10 @@ public class GameScreen extends MyScreenAdapter {
 
 	}
 
+	@Override
+	public void threadFinished(NoiseThread noise) {
+		noiseBufferQueue.add(noise.getNoise());
+	}
 
 	@Override
 	public void render(float delta) {
@@ -263,25 +278,13 @@ public class GameScreen extends MyScreenAdapter {
 
 		CheckTransition();
 
-		if (Gdx.input.isKeyJustPressed(Keys.U)) {
+		if (Gdx.input.isKeyJustPressed(Keys.F1)) {
 			//debug
 			Misc.printEntities(engine);
 		}
 
-		/*
-		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
-			game.setScreen(new MainMenuScreen(game));
-		}*/
 	}
 
-	@Override
-	public void resize(int width, int height) {
-		super.resize(width, height);
-		HUDSystem hud = engine.getSystem(HUDSystem.class);
-		if (hud != null) {
-			hud.resize(width, height);
-		}
-	}
 
 	private void CheckTransition() {
 		boolean transition = false;
@@ -341,6 +344,15 @@ public class GameScreen extends MyScreenAdapter {
 
 			//Misc.printEntities(engine);
 			//Misc.printSystems(engine);
+		}
+	}
+
+	@Override
+	public void resize(int width, int height) {
+		super.resize(width, height);
+		HUDSystem hud = engine.getSystem(HUDSystem.class);
+		if (hud != null) {
+			hud.resize(width, height);
 		}
 	}
 

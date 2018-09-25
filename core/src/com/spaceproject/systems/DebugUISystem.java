@@ -354,18 +354,13 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 
 
 			//view threads
+			String noisePool = "active:" + GameScreen.noiseThreadPool.getActiveCount()
+					+ ", completed:" + GameScreen.noiseThreadPool.getCompletedTaskCount()
+					+ ", task count:" + GameScreen.noiseThreadPool.getTaskCount()
+					+ ", pool size:" + GameScreen.noiseThreadPool.getCorePoolSize();
 
-			if (GameScreen.inSpace) {
-				SpaceLoadingSystem loader = engine.getSystem(SpaceLoadingSystem.class);
-				if (loader != null) {
-					String noisePool = "active:" + loader.noiseThreadPool.getActiveCount()
-							+ ", completed:" + loader.noiseThreadPool.getCompletedTaskCount()
-							+ ", task count:" + loader.noiseThreadPool.getTaskCount()
-							+ ", pool size:" + loader.noiseThreadPool.getCorePoolSize();
+			fontSmall.draw(batch, noisePool, x, y - (lineHeight * linePos++));
 
-					fontSmall.draw(batch, noisePool,x, y - (lineHeight * linePos++));
-				}
-			}
 			for (Thread t : threadSet) {
 				fontSmall.draw(batch, t.toString(), x, y - (lineHeight * linePos++));
 			}

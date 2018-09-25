@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -23,7 +24,7 @@ import java.util.Comparator;
 public class SpaceRenderingSystem extends IteratingSystem implements Disposable {
 
 	//rendering
-	private static OrthographicCamera cam;
+	private OrthographicCamera cam;
 	private SpriteBatch batch;
 	
 	// array of entities to render
@@ -53,7 +54,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 		super.update(delta); //adds entities to render queue
 			
 		//clear screen with color based on camera position
-		Color color = backgroundColor();
+		Color color = backgroundColor(cam);
 		Gdx.gl20.glClearColor(color.r, color.g, color.b, 1);
 		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -126,7 +127,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 	 * Return color based on camera position
 	 * @return color
 	 */
-	private static Color backgroundColor() {
+	private static Color backgroundColor(Camera cam) {
 		//still playing with these values to get the right feel/intensity of color...
 		float maxColor = 0.25f;
 		float ratio = 0.00001f;
