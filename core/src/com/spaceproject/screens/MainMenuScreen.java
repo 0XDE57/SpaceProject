@@ -81,7 +81,7 @@ public class MainMenuScreen extends MyScreenAdapter {
 
 		//draw title
 		batch.begin();
-		fontComfortaaBold.draw(batch, "a space project", 50, Gdx.graphics.getHeight() - 50);
+		fontComfortaaBold.draw(batch, SpaceProject.TITLE, 50, Gdx.graphics.getHeight() - 50);
 		batch.end();
 
 

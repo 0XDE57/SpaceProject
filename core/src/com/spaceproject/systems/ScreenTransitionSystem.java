@@ -2,7 +2,6 @@ package com.spaceproject.systems;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
@@ -21,9 +20,8 @@ import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 
 
-public class ScreenTransitionSystem extends IteratingSystem implements EntityListener {
+public class ScreenTransitionSystem extends IteratingSystem {
 
-    Family test;
     public ImmutableArray<Entity> astroObjects;
 
     public ScreenTransitionSystem() {
@@ -32,9 +30,8 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
 
     @Override
     public void addedToEngine(Engine engine) {
-        test = Family.all(AstronomicalComponent.class, SeedComponent.class).get();
-        astroObjects = engine.getEntitiesFor(test);
-        engine.addEntityListener(test, this);
+        Family astro = Family.all(AstronomicalComponent.class, SeedComponent.class).get();
+        astroObjects = engine.getEntitiesFor(astro);
 
         super.addedToEngine(engine);
     }
@@ -124,21 +121,6 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
 
     }
 
-
-    @Override
-    public void entityAdded(Entity entity) {
-        //System.out.println("Astro object: " + Mappers.seed.get(entity).seed);
-        //Misc.printEntity(entity);
-    }
-
-
-    @Override
-    public void entityRemoved(Entity entity) {
-        //System.out.println("entityRemoved");
-        //Misc.printEntity(entity);
-    }
-
-
     private static void shrink(Entity entity, ScreenTransitionComponent screenTrans, float delta) {
         TextureComponent tex = Mappers.texture.get(entity);
 
@@ -149,9 +131,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
 
             if (entity.getComponent(AIComponent.class) != null) {
                 screenTrans.doTransition = true;
-                //screenTrans.landStage = LandAnimStage.end;
             } else {
-                //screenTrans.landStage = LandAnimStage.zoomIn;
                 screenTrans.landStage = screenTrans.landStage.next();
             }
         }
@@ -165,7 +145,6 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
         if (tex.scale >= SpaceProject.scale) {
             tex.scale = SpaceProject.scale;
 
-            //screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.end;
             screenTrans.takeOffStage = screenTrans.takeOffStage.next();
         }
     }
@@ -173,7 +152,6 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
     private static void zoomIn(ScreenTransitionComponent screenTrans) {
         MyScreenAdapter.setZoomTarget(0);
         if (MyScreenAdapter.cam.zoom <= 0.01f) {
-            //screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.transition;
             screenTrans.landStage = screenTrans.landStage.next();
         }
     }
@@ -181,25 +159,19 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
     private static void zoomOut(ScreenTransitionComponent screenTrans) {
         MyScreenAdapter.setZoomTarget(1);
         if (MyScreenAdapter.cam.zoom == 1) {
-            //screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.grow;
             screenTrans.takeOffStage = screenTrans.takeOffStage.next();
         }
     }
 
 
     private static void landOnPlanet(Entity transitioningEntity, ScreenTransitionComponent screenTrans) {
-        //screenTrans.landStage = LandAnimStage.pause;
-
         transitioningEntity.getComponent(TextureComponent.class).scale = SpaceProject.scale;//reset size to normal
         screenTrans.doTransition = true;
 
-        //GameScreen.transition = true;
     }
 
     private void takeOff(Entity transitioningEntity, ScreenTransitionComponent screenTrans) {
-        //screenTrans.takeOffStage = TakeOffAnimStage.sync;//TakeOffAnimStage.zoomOut;
         transitioningEntity.getComponent(TextureComponent.class).scale = 0;//set size to 0 so texture can grow
-        //screenTrans.planet = GameScreen.currentPlanet; //TODO: genericize so AI can take off, this is a bad singleton
         screenTrans.doTransition = true;
     }
 
@@ -207,11 +179,9 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
         long desiredSeed = screenTrans.planet.getComponent(SeedComponent.class).seed;
         System.out.println(Misc.myToString(entity) + " is waiting for " + desiredSeed);
         for (Entity astroEnt : astroObjects) {
-            //System.out.println(Mappers.seed.get(astroEnt).seed);
             if (Mappers.seed.get(astroEnt).seed == desiredSeed) {
                 Vector2 orbitPos = OrbitSystem.getSyncPos(astroEnt, GameScreen.gameTimeCurrent);
                 Mappers.transform.get(entity).pos.set(orbitPos);
-                //screenTrans.takeOffStage = TakeOffAnimStage.zoomOut;
                 screenTrans.takeOffStage = screenTrans.takeOffStage.next();
                 System.out.println("FOUND SEED "+ desiredSeed);
                 break;
@@ -225,7 +195,6 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
         int transitionTime = 2200;
         screenTrans.timer += 1000 * delta;
         if (screenTrans.timer >= transitionTime) {
-            //screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.exit;
             screenTrans.landStage = screenTrans.landStage.next();
         }
 
@@ -236,7 +205,6 @@ public class ScreenTransitionSystem extends IteratingSystem implements EntityLis
             ControllableComponent control = Mappers.controllable.get(entity);
             if (control != null) {
                 control.changeVehicle = true;
-                //screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.end;
                 screenTrans.landStage = screenTrans.landStage.next();
             }
         }

@@ -14,7 +14,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
-import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -48,8 +47,6 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 
 	long seed;
 	NoiseBuffer noise;
-	//private float[][] heightMap;//height of tile
-	//private int[][] tileMap;//index of tile
 
 	private int surround; //how many tiles to draw around the camera
 	
@@ -67,15 +64,14 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		cam = camera;
 		batch = spriteBatch;
 
-		surround = 30;	
+		surround = 30;//TODO: split into surrondX/Y, change to be calculated by tileSize and window height/width
 
 		SeedComponent seedComp = planetEntity.getComponent(SeedComponent.class);
-		PlanetComponent planetComp = planetEntity.getComponent(PlanetComponent.class);
+		//PlanetComponent planetComp = planetEntity.getComponent(PlanetComponent.class);
 
 		seed = seedComp.seed;
 		loadMap();
-	
-		//mapSize = planetComp.mapSize * SpaceProject.tileSize;
+
 	}
 
 	private void loadMap() {
@@ -93,37 +89,10 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		} else {
 			System.out.println("map found");
 		}
-		//create tile features
-		//createTiles();
-
-		//create world features
-		/*
-		float scale = 100; //scale of noise = 40;
-		int octaves = 4;
-		float persistence = 0.68f;//0 - 1
-		float lacunarity = 2.6f;//1 - x
-		int mapSize = 256; //size of world	*/	
-		//heightMap = NoiseGen.generateWrappingNoise4D(seed.seed, planet.mapSize, planet.scale, planet.octaves, planet.persistence, planet.lacunarity);
-		
-		//create map of tiles based on height
-		//tileMap = NoiseGen.createTileMap(heightMap, tiles);
 	}
 	
 	
-	/*
-	private void createTiles() {
-		tiles.add(new Tile("water",  0.41f,  Color.BLUE));
-		tiles.add(new Tile("water1", 0.345f, new Color(0,0,0.42f,1)));
-		tiles.add(new Tile("water2", 0.240f, new Color(0,0,0.23f,1)));
-		tiles.add(new Tile("water3", 0.085f, new Color(0,0,0.1f,1)));
-		tiles.add(new Tile("sand",   0.465f, Color.YELLOW));
-		tiles.add(new Tile("grass",  0.625f, Color.GREEN));
-		tiles.add(new Tile("grass1", 0.725f, new Color(0,0.63f,0,1)));
-		tiles.add(new Tile("grass2", 0.815f, new Color(0,0.48f,0,1)));
-		tiles.add(new Tile("lava",   1f,     Color.RED));
-		tiles.add(new Tile("rock",   0.95f,  Color.BROWN));
-		Collections.sort(tiles);
-	}*/
+
 
 	@Override
 	public void update(float delta) {
@@ -176,8 +145,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		renderQueue.clear();
 	}	
 
-	//TODO: <OPTIMIZATION> instead of drawing each tile as an individual batch draw, 
-	//create a large image with a collection of tiles (a tile of tiles) for fewer draw calls
+
 	private void drawTiles() {
 			
 		// calculate tile that the camera is in
@@ -217,20 +185,12 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 
 	@Override
 	public void dispose() {
-		
 		//dispose of all textures
 		for (Entity entity : renderQueue) {
 			TextureComponent tex = Mappers.texture.get(entity);	
 			if (tex.texture != null)
 				tex.texture.dispose();
 		}
-		
-		//batch.dispose();//crashes: 
-		/*
-		EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x0000000054554370, pid=5604, tid=2364
-		Problematic frame:
-	 	C  [atio6axx.dll+0x3c4370]
-		 */
 	}
 
 }

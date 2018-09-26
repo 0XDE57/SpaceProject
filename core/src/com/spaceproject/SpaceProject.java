@@ -8,6 +8,7 @@ import com.spaceproject.screens.MyScreenAdapter;
 
 public class SpaceProject extends Game {
 
+	public static final String TITLE = "a space project";
 	public static long SEED = 4; //test seed
 
 	public static CelestialConfig celestcfg;

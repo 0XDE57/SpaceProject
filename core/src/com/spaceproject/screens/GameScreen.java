@@ -137,7 +137,9 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		if (Gdx.app.getType() == ApplicationType.Android || Gdx.app.getType() == ApplicationType.iOS) {
 			engine.addSystem(new MobileInputSystem());
 		} else {
-			engine.addSystem(new DesktopInputSystem());
+			DesktopInputSystem desktopInputSystem = new DesktopInputSystem();
+			inputMultiplexer.addProcessor(desktopInputSystem);
+			engine.addSystem(desktopInputSystem);
 		}
 		engine.addSystem(new AISystem());
 
@@ -159,7 +161,9 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		//rendering
 		engine.addSystem(new CameraSystem());
 		engine.addSystem(new SpaceRenderingSystem());
-		engine.addSystem(new HUDSystem());
+		HUDSystem hudSystem = new HUDSystem();
+		inputMultiplexer.addProcessor(0, hudSystem.getStage());
+		engine.addSystem(hudSystem);
 		engine.addSystem(new DebugUISystem());
 
 
@@ -201,6 +205,8 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		inSpace = false;
 		currentPlanet = planet;
 
+		int mapSize = planet.getComponent(PlanetComponent.class).mapSize;
+
 		Misc.printObjectFields(planet.getComponent(SeedComponent.class));
 		Misc.printObjectFields(planet.getComponent(PlanetComponent.class));
 		//Misc.printEntity(transitionComponent.transitioningEntity);
@@ -216,7 +222,9 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		if (Gdx.app.getType() == ApplicationType.Android || Gdx.app.getType() == ApplicationType.iOS) {
 			engine.addSystem(new MobileInputSystem());
 		} else {
-			engine.addSystem(new DesktopInputSystem());
+			DesktopInputSystem desktopInputSystem = new DesktopInputSystem();
+			inputMultiplexer.addProcessor(desktopInputSystem);
+			engine.addSystem(desktopInputSystem);
 		}
 		engine.addSystem(new AISystem());
 
@@ -227,14 +235,16 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		engine.addSystem(new ControlSystem());
 		engine.addSystem(new ExpireSystem(1));
 		engine.addSystem(new MovementSystem());
-		engine.addSystem(new WorldWrapSystem(planet.getComponent(PlanetComponent.class).mapSize));
+		engine.addSystem(new WorldWrapSystem(mapSize));
 		engine.addSystem(new BoundsSystem());
 		engine.addSystem(new CollisionSystem());
 
 		// rendering
 		engine.addSystem(new CameraSystem());
 		engine.addSystem(new WorldRenderingSystem(planet));
-		engine.addSystem(new HUDSystem());
+		HUDSystem hudSystem = new HUDSystem();
+		inputMultiplexer.addProcessor(0, hudSystem.getStage());
+		engine.addSystem(hudSystem);
 		engine.addSystem(new DebugUISystem());
 
 
@@ -242,7 +252,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		// ===============ENTITIES===============
 		// add player
 		Entity ship = transitioningEntity;
-		int position = planet.getComponent(PlanetComponent.class).mapSize * SpaceProject.tileSize / 2;//set  position to middle of planet
+		int position = mapSize * SpaceProject.tileSize / 2;//set  position to middle of planet
 		ship.getComponent(TransformComponent.class).pos.set(position, position);
 		engine.addEntity(ship);
 
@@ -306,7 +316,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 				if (Mappers.AI.get(e) != null) {
 					System.out.println("REMOVING: " + Misc.myToString(e));
 					engine.removeEntity(e);
-						/*
+						/*//TODO: background stuff
 						if (Mappers.persist.get(e)) {
 							System.out.println("MOVED to background engine: " + Misc.myToString(e));
 							backgroundEngine.addEntity(e);
@@ -327,6 +337,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 			transitioningEntities = null;
 			//engine.removeAllSystems();?
 
+			inputMultiplexer.clear();
 			if (inSpace) {
 				initWorld(transEntity, Mappers.screenTrans.get(transEntity).planet);
 			} else {
@@ -334,9 +345,10 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 				initSpace(transEntity);
 
 			}
+			inputMultiplexer.addProcessor(0,this);
 
-			//engine.addEntityListener(Family.all(ScreenTransitionComponent.class).get(),this);
 			/*
+			//TODO: background stuff
 			for (Entity relevantEntity : backgroundEngine.getEntities()) {
 				//if landing on planet, and relevantEntity is on planet, add to engine, remove from backgroundEngine
 				//if going to space, and relevantEntity in space, add to engine, remove from backgroundEngine
@@ -358,6 +370,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 	@Override
 	public boolean scrolled(int amount) {
+		//TODO: move into hud, hud as input processor
 		HUDSystem hud = engine.getSystem(HUDSystem.class);
 		if (hud != null) {
 			if (hud.getMiniMap().mapState == MapState.full) {
@@ -380,21 +393,14 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 				((Disposable) sys).dispose();
 		}
 
-		//TODO: use entity listener instead
-		//Family family = Family.all(TextureComponent.class).get();
-		//engine.addEntityListener(family, listener);
-		//github.com/libgdx/ashley/wiki/How-to-use-Ashley#entity-events
 		for (Entity ents : engine.getEntitiesFor(Family.all(TextureComponent.class).get())) {
 			TextureComponent tex = ents.getComponent(TextureComponent.class);
 			if (tex != null)
 				tex.texture.dispose();
 		}
 
-		engine.removeAllEntities();//THIS FIXES IT!
+		engine.removeAllEntities();
 		engine = null;
-
-
-		//System.gc();//not good practice, just testing
 
 		//super.dispose();
 	}

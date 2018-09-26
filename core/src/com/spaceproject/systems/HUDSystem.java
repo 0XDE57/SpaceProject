@@ -75,14 +75,6 @@ public class HUDSystem extends EntitySystem {
 			VisUI.load(VisUI.SkinScale.X1);
 		stage = new Stage(new ScreenViewport());
 
-
-		//TODO: fix input handling with multiplexer: github.com/libgdx/libgdx/wiki/Event-handling#inputmultiplexer
-		//game controls should not be affecting game when menu is visible
-		//menu should always receive hotkeys to open tabs
-		//scroll is broken in game when stage is input processor
-		Gdx.input.setInputProcessor(stage);
-
-
 	}
 
 	public void resize(int width, int height) {
@@ -104,22 +96,29 @@ public class HUDSystem extends EntitySystem {
 			@Override
 			public boolean keyDown (InputEvent event, int keycode) {
 				if (menu.switchTabForKey(keycode)) {
-					if (menu.getStage() == null) {
-						stage.addActor(menu);
-						menu.fadeIn();
+					if (!menu.isVisible()) {
+						menu.show(stage);
 					}
 					return true;
 				}
-				return false;
+				return menu.isVisible();
+			}
+
+			@Override
+			public boolean keyUp(InputEvent event, int keycode) {
+				super.keyUp(event, keycode);
+				return menu.isVisible();
+			}
+
+			@Override
+			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+				super.touchDown(event, x, y, pointer, button);
+				return menu.isVisible();
 			}
 		});
-		//menu.setVisible(false);
-		//stage.addActor(menu);
-		//stage.setDebugUnderMouse(true);
 	}
 
 
-	
 	@Override
 	public void update(float delta) {
 
@@ -183,30 +182,12 @@ public class HUDSystem extends EntitySystem {
 				miniMap.mapScale = 500;
 			}
 		}
-		/*
-		if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-			if (menu.getStage() != null) {
-				menu.fadeOut();
 
-				System.out.println("show menu: "+ false);
-			} else {
-				stage.addActor(menu);
-				menu.fadeIn();
-				System.out.println("show menu: "+ true);
-			}
-
-			//menu.setVisible(!menu.isVisible());
-			//System.out.println("show menu: "+ menu.isVisible());
-
-		}*/
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
 			stage.setDebugAll(!stage.isDebugAll());
 		}
 	}
 
-	public MiniMap getMiniMap() {
-		return miniMap;
-	}
 
 	/**
 	 * Draw health bars on entities.
@@ -407,6 +388,16 @@ public class HUDSystem extends EntitySystem {
 			 */
 		}
 
+	}
+
+
+	public MiniMap getMiniMap() {
+		return miniMap;
+	}
+
+
+	public Stage getStage() {
+		return stage;
 	}
 
 }

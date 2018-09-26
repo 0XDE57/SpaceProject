@@ -2,6 +2,7 @@ package com.spaceproject.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -35,7 +36,8 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
 	private static float zoomTarget = 1;
 	private static float zoomSpeed = 3;
 	//private static float panSpeed/panTarget(lerp to entity)
-	
+
+	protected InputMultiplexer inputMultiplexer;
 
     public MyScreenAdapter() {
     	System.out.println("ScreenAdapter Reset.");	
@@ -51,13 +53,17 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
 		setZoomTarget(1);
 		
 		//set this as input processor for mouse wheel scroll events
-		Gdx.input.setInputProcessor(this);
+		inputMultiplexer = new InputMultiplexer();
+		inputMultiplexer.addProcessor(this);
+		Gdx.input.setInputProcessor(inputMultiplexer);
 		
 		//debug
 			
 		toggleVsync();
 		//
     }
+
+
     
     @Override
     public void render(float delta) {
@@ -186,4 +192,6 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) { return false; }
+
+
 }

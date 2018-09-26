@@ -5,14 +5,15 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.screens.MyScreenAdapter;
 
-public class DesktopInputSystem extends EntitySystem {
+public class DesktopInputSystem extends EntitySystem implements InputProcessor {
 
 	private ImmutableArray<Entity> players;
 	
@@ -24,35 +25,59 @@ public class DesktopInputSystem extends EntitySystem {
 	@Override
 	public void update(float delta) {	
 		cameraControls(delta);
-		
-		playerControls();
 	}
 
-	private void playerControls() {
+	private boolean playerControls(int keycode, boolean keyDown) {
 		if (players.size() == 0) 
-			return;
-		
+			return false;
+
+		boolean handled = false;
+
 		ControllableComponent control = Mappers.controllable.get(players.first());
-		//if (control == null) return;
 		
-		float angle = MyMath.angleTo(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY(), 
+		//movement
+		control.movementMultiplier = 1; // set multiplier to full power because a key switch is on or off
+		if (keycode == SpaceProject.keycfg.forward) {
+			control.moveForward = keyDown;
+			handled = true;
+		}
+		if (keycode == SpaceProject.keycfg.right) {
+			control.moveRight = keyDown;
+			handled = true;
+		}
+		if (keycode == SpaceProject.keycfg.left) {
+			control.moveLeft = keyDown;
+			handled = true;
+		}
+		if (keycode == SpaceProject.keycfg.back) {
+			control.moveBack = keyDown;
+			handled = true;
+		}
+
+		if (keycode == SpaceProject.keycfg.changeVehicle) {
+			control.changeVehicle = keyDown;
+			handled = true;
+		}
+		if (keycode == SpaceProject.keycfg.land) {
+			control.transition = keyDown;
+			handled = true;
+		}
+
+		return handled;
+	}
+
+	private boolean playerFace(int x, int y) {
+		if (players.size() == 0)
+			return false;
+
+		ControllableComponent control = Mappers.controllable.get(players.first());
+
+		float angle = MyMath.angleTo(x, Gdx.graphics.getHeight() - y,
 				Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
 		control.angleFacing = angle;
-		
-		//movement		
-		control.moveForward = Gdx.input.isKeyPressed(SpaceProject.keycfg.forward);
-		control.moveRight	= Gdx.input.isKeyPressed(SpaceProject.keycfg.right);
-		control.moveLeft    = Gdx.input.isKeyPressed(SpaceProject.keycfg.left);
-		control.moveBack    = Gdx.input.isKeyPressed(SpaceProject.keycfg.back);
-		control.movementMultiplier = 1; // set multiplier to full power because a key switch is on or off
-		
-		//actions
-		control.shoot = (Gdx.input.isKeyPressed(SpaceProject.keycfg.shoot) || Gdx.input.isTouched());
-		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.changeVehicle)) {
-			control.changeVehicle = true;
-		}
-		control.transition = Gdx.input.isKeyJustPressed(SpaceProject.keycfg.land);
+		return true;
 	}
+
 
 	private static void cameraControls(float delta) {
 		//zoom test
@@ -85,4 +110,55 @@ public class DesktopInputSystem extends EntitySystem {
 
 	}
 
+
+	@Override
+	public boolean keyDown(int keycode) {
+		return playerControls(keycode, true);
+	}
+
+
+	@Override
+	public boolean keyUp(int keycode) {
+		return playerControls(keycode, false);
+	}
+
+	@Override
+	public boolean keyTyped(char character) {
+		return false;
+	}
+
+	@Override
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		if (players.size() != 0) {
+			ControllableComponent control = Mappers.controllable.get(players.first());
+			control.shoot = true;
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+		if (players.size() != 0) {
+			ControllableComponent control = Mappers.controllable.get(players.first());
+			control.shoot = false;
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		return playerFace(screenX, screenY);
+	}
+
+	@Override
+	public boolean mouseMoved(int screenX, int screenY) {
+		return playerFace(screenX, screenY);
+	}
+
+	@Override
+	public boolean scrolled(int amount) {
+		return false;
+	}
 }

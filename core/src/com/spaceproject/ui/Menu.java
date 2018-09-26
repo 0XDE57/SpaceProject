@@ -5,10 +5,12 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.TableUtils;
 import com.kotcrab.vis.ui.util.dialog.Dialogs;
@@ -21,27 +23,31 @@ import com.kotcrab.vis.ui.widget.VisWindow;
 import com.kotcrab.vis.ui.widget.tabbedpane.Tab;
 import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPane;
 import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPaneAdapter;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.screens.MainMenuScreen;
 import com.spaceproject.systems.DebugUISystem;
 
 import static com.spaceproject.screens.MyScreenAdapter.game;
 
 /**
- *
  * Modified from https://github.com/kotcrab/vis-editor/blob/master/ui/src/test/java/com/kotcrab/vis/ui/test/manual/TestTabbedPane.java
  */
 public class Menu extends VisWindow {
-    public final TabbedPane tabbedPane;
-    public MyTab mainMenuTab, customRenderTab, mapTab, placeholderATab, placeholderBTab, debugMenuTab, testConfigTab;
+    private final TabbedPane tabbedPane;
+    private MyTab mainMenuTab, customRenderTab, mapTab, placeholderATab, placeholderBTab, debugMenuTab, testConfigTab;
 
+    private boolean alwaysHideOnEscape = false;
 
     public Menu (boolean vertical, Engine engine) {
-        super("a space project");
+        super(SpaceProject.TITLE);
+        getTitleLabel().setAlignment(Align.center);
 
         TableUtils.setSpacingDefaults(this);
-        defaults().spaceRight(10);
 
         setResizable(true);
+        setMovable(true);
+        setSize(Gdx.graphics.getWidth()-150, Gdx.graphics.getHeight()-150);
+        centerWindow();
         addCloseButton();
 
         final VisTable container = new VisTable();
@@ -67,11 +73,6 @@ public class Menu extends VisWindow {
             add(tabbedPane.getTable()).minHeight(new PrefHeightIfVisibleValue()).growX();
             row();
             add(container).grow();
-            /*
-            add(tabbedPane.getTable()).expandX().fillX();
-            row();
-            add(container).expand().fill();
-            */
         }
 
 
@@ -109,12 +110,54 @@ public class Menu extends VisWindow {
         testConfigTab = createConfigTab();
         tabbedPane.add(testConfigTab);
 
-        tabbedPane.switchTab(mainMenuTab);
 
-		//debugAll();
-        setSize(Gdx.graphics.getWidth()-150, Gdx.graphics.getHeight()-150);
-        centerWindow();
+        tabbedPane.switchTab(mainMenuTab);
     }
+
+
+    //region menu controls
+    public boolean isVisible() {
+        return getStage() != null;
+    }
+
+    public void hide() {
+        fadeOut();
+    }
+
+    public void show(Stage stage) {
+        stage.addActor(this);
+        fadeIn();
+    }
+
+    public boolean switchTabForKey(int keycode) {
+        //exception for escape key, always hide if shown, or focus main
+        if (alwaysHideOnEscape) {
+            if (keycode == Input.Keys.ESCAPE) {
+                if (isVisible()) {
+                    hide();
+                } else {
+                    tabbedPane.switchTab(mainMenuTab);
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        for (Tab tab : tabbedPane.getTabs()) {
+            if (((MyTab)tab).getHotKey() == keycode) {
+                if (tabbedPane.getActiveTab().equals(tab) && getStage() != null) {
+                    fadeOut();
+                    return false;
+                }
+                tabbedPane.switchTab(tab);
+                return true;
+
+            }
+        }
+        return false;
+    }
+    //endregion
+
 
     private MyTab createConfigTab() {
         MyTab test = new MyTab("config", Input.Keys.NUM_3);
@@ -316,32 +359,6 @@ public class Menu extends VisWindow {
         menu.getContentTable().add(new TextButton("options", VisUI.getSkin())).growX().row();
         menu.getContentTable().add(btnExit).growX().row();
         return menu;
-    }
-
-    public boolean switchTabForKey(int keycode) {
-        /* //exception for escape key, always hide if shown, or focus main
-        if (keycode == mainmenu.hotKey) {
-            if (getStage() != null) {
-                fadeOut();
-            } else {
-                tabbedPane.switchTab(mainmenu);
-                return true;
-            }
-            return false;
-        }*/
-
-        for (Tab tab : tabbedPane.getTabs()) {
-            if (((MyTab)tab).getHotKey() == keycode) {
-                if (tabbedPane.getActiveTab().equals(tab) && getStage() != null) {
-                    fadeOut();
-                    return false;
-                }
-                tabbedPane.switchTab(tab);
-                return true;
-
-            }
-        }
-        return false;
     }
 
 
