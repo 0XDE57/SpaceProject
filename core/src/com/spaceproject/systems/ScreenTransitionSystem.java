@@ -54,12 +54,9 @@ public class ScreenTransitionSystem extends IteratingSystem {
                     break;
                 case transition:
                     landOnPlanet(entity, screenTrans);
-
                     return;
                 case pause:
-
-
-                    pause(screenTrans, delta);
+                    pause(screenTrans);
                     break;
                 case exit:
                     exit(entity, screenTrans);
@@ -115,7 +112,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
             ControllableComponent control = entity.getComponent(ControllableComponent.class);
             if (control != null) {
                 //control.* = false;
-                control.angleFacing = Mappers.transform.get(entity).rotation;
+                control.angleFacing = transform.rotation;
             }
         }
 
@@ -189,15 +186,11 @@ public class ScreenTransitionSystem extends IteratingSystem {
         }
     }
 
-    private static void pause(ScreenTransitionComponent screenTrans, float delta) {
-        //TODO use SimpleTimer...
-        //TODO move value to config
-        int transitionTime = 2200;
-        screenTrans.timer += 1000 * delta;
-        if (screenTrans.timer >= transitionTime) {
+    private static void pause(ScreenTransitionComponent screenTrans) {
+        if (screenTrans.timer.canDoEvent()) {
+            screenTrans.timer.reset();
             screenTrans.landStage = screenTrans.landStage.next();
         }
-
     }
 
     private static void exit(Entity entity, ScreenTransitionComponent screenTrans) {

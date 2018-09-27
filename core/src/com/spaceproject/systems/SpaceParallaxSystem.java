@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceBackgroundTile;
 import com.spaceproject.SpaceBackgroundTile.TileType;
 import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.utility.SimpleTimer;
 
 import java.util.ArrayList;
 
@@ -33,9 +34,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
 	private int surround = 1;// how many tiles to load around center tile
 
 	// timer for how often to check if player moved tiles
-	private float checkTileTimer = 500;
-	private float checkTileCurrTime;
-	
+	private SimpleTimer checkTileTimer;
 
 	public SpaceParallaxSystem() {
 		this(MyScreenAdapter.cam);
@@ -46,8 +45,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
 		
 		tiles = new ArrayList<SpaceBackgroundTile>();
 		
-		
-				
+		checkTileTimer = new SimpleTimer(500);
 	}
 
 	@Override
@@ -75,11 +73,8 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
 		//https://www.opengl.org/wiki/OpenGL_and_multithreading
 
 		// timer to check when player has changed tiles
-		//TODO: use Utility.SimpleTimer
-		checkTileCurrTime -= 1000 * delta;
-		if (checkTileCurrTime < 0) {
-			// reset timer
-			checkTileCurrTime = checkTileTimer;
+		if (checkTileTimer.canDoEvent()) {
+			checkTileTimer.reset();
 			
 			//update each layer in order of depth
 			dustCenterTile = updateLayer(dustCenterTile, dustTileDepth, SpaceBackgroundTile.TileType.Dust);

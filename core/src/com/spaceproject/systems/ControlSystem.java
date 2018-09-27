@@ -27,6 +27,7 @@ import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
+import com.spaceproject.utility.SimpleTimer;
 
 public class ControlSystem extends IteratingSystem {
 
@@ -330,7 +331,7 @@ public class ControlSystem extends IteratingSystem {
 				ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
 				screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.shrink;//begin animation
 				screenTrans.planet = planet;
-
+				screenTrans.timer = new SimpleTimer(2200);
 				entity.add(screenTrans);
 
 				System.out.println("landOnPlanet: " +  Misc.myToString(entity));
