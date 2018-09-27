@@ -1,6 +1,8 @@
 package com.spaceproject;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.screens.MainMenuScreen;
@@ -10,6 +12,8 @@ public class SpaceProject extends Game {
 
 	public static final String TITLE = "a space project";
 	public static long SEED = 4; //test seed
+
+	private static boolean isMobile;
 
 	public static CelestialConfig celestcfg;
 	public static KeyConfig keycfg;
@@ -22,7 +26,9 @@ public class SpaceProject extends Game {
 	@Override
 	public void create() {	
 		MyScreenAdapter.game = this;
-		
+
+		isMobile = Gdx.app.getType() != Application.ApplicationType.Desktop;
+
 		//load values for things like key mapping, settings, default values for generation
 		loadConfigs();
 				
@@ -50,6 +56,9 @@ public class SpaceProject extends Game {
 		//WorldConfig worldcfg = (WorldConfig) new WorldConfig().loadFromJson();
 		//worldcfg.loadDefault();
 		//worldcfg.saveToJson();
-	}		
-	
+	}
+
+	public static boolean isMobile() {
+		return isMobile;
+	}
 }

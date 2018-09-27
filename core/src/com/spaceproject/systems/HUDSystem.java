@@ -70,9 +70,10 @@ public class HUDSystem extends EntitySystem {
 		shape = shapeRenderer;
 		batch = spriteBatch;
 
-		//init scene2d and VisUI
-		if (!VisUI.isLoaded())
-			VisUI.load(VisUI.SkinScale.X1);
+		//init scene2d/VisUI
+		if (VisUI.isLoaded())
+			VisUI.dispose(true);
+		VisUI.load(SpaceProject.isMobile() ? VisUI.SkinScale.X2 : VisUI.SkinScale.X1);
 		stage = new Stage(new ScreenViewport());
 
 	}
@@ -400,4 +401,7 @@ public class HUDSystem extends EntitySystem {
 		return stage;
 	}
 
+	public Menu getMenu() {
+		return menu;
+	}
 }

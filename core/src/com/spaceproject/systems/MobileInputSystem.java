@@ -13,7 +13,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.ui.MiniMap;
+import com.spaceproject.ui.Menu;
 import com.spaceproject.ui.TouchButtonRectangle;
 import com.spaceproject.ui.TouchButtonRound;
 import com.spaceproject.ui.TouchJoyStick;
@@ -35,37 +35,50 @@ public class MobileInputSystem extends EntitySystem {
 	TouchButtonRound btnVehicle = new TouchButtonRound(Gdx.graphics.getWidth() - 80, 300, 50, white, blue);
 	TouchButtonRectangle btnLand = new TouchButtonRectangle(Gdx.graphics.getWidth()/2-60, Gdx.graphics.getHeight() - 60 - 20, 120, 60, white, blue);
 	TouchButtonRectangle btnMap = new TouchButtonRectangle(Gdx.graphics.getWidth()-120-20, Gdx.graphics.getHeight() - 60 - 20, 120, 60, white, blue);
-	
+	TouchButtonRectangle btnMenu = new TouchButtonRectangle(20, Gdx.graphics.getHeight() - 60 - 20, 120, 60, white, blue);
 	TouchJoyStick joyMovement = new TouchJoyStick(230, 230, 200, white, blue);
-	
+
 	private ImmutableArray<Entity> players;
-	
+
 	@Override
 	public void addedToEngine(Engine engine) {
 		super.addedToEngine(engine);
-		players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());		
+		players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
 	}
-	
+
 	@Override
 	public void update(float delta) {
-		
-		if (players.size() == 0) return;
-		Entity player = players.first();
-		
-		ControllableComponent control = Mappers.controllable.get(player);
-		
-		
-		control.shoot = btnShoot.isTouched();
-		control.changeVehicle = btnVehicle.isJustTouched();
-		control.transition = btnLand.isTouched();
+		HUDSystem hud = getEngine().getSystem(HUDSystem.class);
+
+		if (btnMenu.isJustTouched()) {
+			if (hud != null) {
+				Menu menu = hud.getMenu();
+				if (menu.isVisible()) {
+					menu.hide();
+				} else {
+					menu.show(hud.getStage());
+				}
+			}
+		}
+		if (hud.getMenu().isVisible())
+			return;
+
 		if (btnMap.isJustTouched()) {
-			HUDSystem hud = getEngine().getSystem(HUDSystem.class);
 			if (hud != null)
 				hud.getMiniMap().cycleMapState();
 		}
+
+
+		//player controls
+		if (players.size() == 0) return;
+		Entity player = players.first();
+
+		ControllableComponent control = Mappers.controllable.get(player);
+		control.shoot = btnShoot.isTouched();
+		control.changeVehicle = btnVehicle.isJustTouched();
+		control.transition = btnLand.isTouched();
 		btnLand.hidden = !control.canTransition;
-		
-		
+
 		if (joyMovement.isTouched()) {
 
 			// face finger
@@ -88,10 +101,6 @@ public class MobileInputSystem extends EntitySystem {
 			control.moveForward = false;
 			control.moveBack = false;
 		}
-		
-			
-		//draw buttons on screen
-		//drawControls();
 
 	}
 
@@ -120,7 +129,8 @@ public class MobileInputSystem extends EntitySystem {
 		
 		btnLand.render(shape);
 		btnMap.render(shape);
-		
+		btnMenu.render(shape);
+
 		shape.end();
 		
 		Gdx.gl.glDisable(GL20.GL_BLEND);

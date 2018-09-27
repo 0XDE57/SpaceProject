@@ -42,12 +42,15 @@ public class MainMenuScreen extends MyScreenAdapter {
 
 		//init scene2d and VisUI
 		if (!VisUI.isLoaded())
-			VisUI.load(VisUI.SkinScale.X1);
+			VisUI.load(VisUI.SkinScale.X2);
 		stage = new Stage(new ScreenViewport());
 		Gdx.input.setInputProcessor(stage);
 
-		Table table = CreateMainMenu();
+		Table table = CreateMainMenu(true);
 		stage.addActor(table);
+		table.pack(); //force table to calculate size
+		int edgePad = SpaceProject.isMobile() ? 20 : 10;
+		table.setPosition(edgePad,edgePad);
 
 
 		backgroundAnimation = new NoiseAnim();
@@ -108,12 +111,9 @@ public class MainMenuScreen extends MyScreenAdapter {
 	}
 
 
-	private Table CreateMainMenu() {
-		Table table = new Table();//VisUI.getSkin());
-		//table.setDebug(true, true);
-		//table.right();
-		//table.setFillParent(true);
+	private Table CreateMainMenu(boolean showDebugScreens) {
 
+		//create buttons
 		TextButton btnPlay = new TextButton("play", VisUI.getSkin());
 		btnPlay.getLabel().setAlignment(Align.left);
 		btnPlay.addListener(new ChangeListener() {
@@ -181,8 +181,6 @@ public class MainMenuScreen extends MyScreenAdapter {
 			}
 		});
 
-
-
 		TextButton btnExit = new TextButton("exit", VisUI.getSkin());
 		btnExit.getLabel().setAlignment(Align.left);
 		btnExit.addListener(new ChangeListener() {
@@ -192,18 +190,32 @@ public class MainMenuScreen extends MyScreenAdapter {
 			}
 		});
 
+
+		//add buttons to table
+		Table table = new Table();
 		table.add(btnPlay).fillX().row();
-		table.add(btnVoronoi).fillX().row();
-		table.add(btnNoise).fillX().row();
-		table.add(btn3D).fillX().row();
-		table.add(btnShip).fillX().row();
+		if (showDebugScreens) {
+			table.add(btnVoronoi).fillX().row();
+			table.add(btnNoise).fillX().row();
+			table.add(btn3D).fillX().row();
+			table.add(btnShip).fillX().row();
+		}
 		table.add(btnLoad).left().fillX().row();
 		table.add(btnOption).fillX().row();
 		table.add(btnExit).fillX().row();
 
-		//table.setBackground("blue");
-		//table.setColor(0,0,1,1);
-		table.setPosition(100,150);// table.getHeight()
+
+		//set bigger labels on mobile
+		if (SpaceProject.isMobile()) {
+			for (Actor button : table.getChildren()) {
+				if (button instanceof TextButton) {
+					//((TextButton) button).getLabel().getFont???.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+					((TextButton) button).getLabel().setFontScale(2f);
+				}
+			}
+		}
+
+
 		return table;
 	}
 

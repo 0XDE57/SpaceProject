@@ -22,7 +22,7 @@ import com.spaceproject.utility.Misc;
 
 public class ScreenTransitionSystem extends IteratingSystem {
 
-    public ImmutableArray<Entity> astroObjects;
+    private ImmutableArray<Entity> astroObjects;
 
     public ScreenTransitionSystem() {
         super(Family.all(ScreenTransitionComponent.class, TransformComponent.class).get());

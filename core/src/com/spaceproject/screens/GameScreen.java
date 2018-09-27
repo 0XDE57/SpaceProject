@@ -5,7 +5,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -134,7 +133,8 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 		//===============SYSTEMS===============
 		//input
-		if (Gdx.app.getType() == ApplicationType.Android || Gdx.app.getType() == ApplicationType.iOS) {
+
+		if (SpaceProject.isMobile()) {
 			engine.addSystem(new MobileInputSystem());
 		} else {
 			DesktopInputSystem desktopInputSystem = new DesktopInputSystem();
@@ -219,7 +219,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 		// ===============SYSTEMS===============
 		// input
-		if (Gdx.app.getType() == ApplicationType.Android || Gdx.app.getType() == ApplicationType.iOS) {
+		if (SpaceProject.isMobile()) {
 			engine.addSystem(new MobileInputSystem());
 		} else {
 			DesktopInputSystem desktopInputSystem = new DesktopInputSystem();
