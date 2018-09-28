@@ -1,4 +1,4 @@
-package com.spaceproject.screens;
+package com.spaceproject.screens.debug;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.screens.TitleScreen;
 
 import java.util.ArrayList;
 
@@ -83,7 +85,7 @@ public class TestShipGenerationScreen extends ScreenAdapter {
 		}
 
 		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
-			MyScreenAdapter.game.setScreen(new MainMenuScreen(MyScreenAdapter.game));
+			MyScreenAdapter.game.setScreen(new TitleScreen(MyScreenAdapter.game));
 		}
 
 	}

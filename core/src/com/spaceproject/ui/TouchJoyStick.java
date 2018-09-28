@@ -36,9 +36,10 @@ public class TouchJoyStick {
 		shape.setColor(color);
 		shape.circle(x, y, radius, 12);
 		shape.end();
-		shape.begin(ShapeType.Filled);		
+
 		
 		//draw stick on joystick
+		shape.begin(ShapeType.Filled);
 		shape.setColor(isTouched() ? colorTouched : color);
 		shape.circle(stickX, stickY, radius / 5, 6);
 		shape.line(x, y, stickX, stickY);

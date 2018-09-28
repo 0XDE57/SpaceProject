@@ -18,13 +18,17 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.FontFactory;
-import com.spaceproject.screens.menuanim.DelaunayAnimation;
-import com.spaceproject.screens.menuanim.MainMenuAnimation;
-import com.spaceproject.screens.menuanim.NoiseAnim;
-import com.spaceproject.screens.menuanim.OrbitAnim;
-import com.spaceproject.screens.menuanim.TreeAnimation;
+import com.spaceproject.screens.debug.Test3DScreen;
+import com.spaceproject.screens.debug.TestNoiseScreen;
+import com.spaceproject.screens.debug.TestShipGenerationScreen;
+import com.spaceproject.screens.debug.TestVoronoiScreen;
+import com.spaceproject.screens.animations.DelaunayAnim;
+import com.spaceproject.screens.animations.TitleAnimation;
+import com.spaceproject.screens.animations.NoiseAnim;
+import com.spaceproject.screens.animations.OrbitAnim;
+import com.spaceproject.screens.animations.TreeAnim;
 
-public class MainMenuScreen extends MyScreenAdapter {
+public class TitleScreen extends MyScreenAdapter {
 
 	SpaceProject game;
 
@@ -32,12 +36,12 @@ public class MainMenuScreen extends MyScreenAdapter {
 	private BitmapFont fontComfortaaBold;
 	private Matrix4 projectionMatrix = new Matrix4();
 
-	MainMenuAnimation foregroundAnimation, backgroundAnimation;
-	enum MenuAnimation {
+	TitleAnimation foregroundAnimation, backgroundAnimation;
+	enum ForgroundAnimation {
 		tree, delaunay, orbit
 	}
 
-	public MainMenuScreen(SpaceProject spaceProject) {
+	public TitleScreen(SpaceProject spaceProject) {
 		this.game = spaceProject;
 
 		//init scene2d and VisUI
@@ -221,16 +225,16 @@ public class MainMenuScreen extends MyScreenAdapter {
 
 
 
-	public static MenuAnimation randomAnim()  {
-		return MenuAnimation.values()[MathUtils.random(MenuAnimation.values().length-1)];
+	public static ForgroundAnimation randomAnim()  {
+		return ForgroundAnimation.values()[MathUtils.random(ForgroundAnimation.values().length-1)];
 	}
 	private void initForegroundAnim() {
 		switch (randomAnim()) {
 			case delaunay:
-				foregroundAnimation = new DelaunayAnimation();
+				foregroundAnimation = new DelaunayAnim();
 				break;
 			case tree:
-				foregroundAnimation = new TreeAnimation();
+				foregroundAnimation = new TreeAnim();
 				break;
 			case orbit:
 				foregroundAnimation = new OrbitAnim();

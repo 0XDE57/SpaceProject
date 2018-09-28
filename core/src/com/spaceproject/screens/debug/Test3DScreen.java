@@ -1,4 +1,4 @@
-package com.spaceproject.screens;
+package com.spaceproject.screens.debug;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -30,6 +30,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.screens.TitleScreen;
 import com.spaceproject.utility.MyMath;
 
 
@@ -192,7 +194,7 @@ public class Test3DScreen extends ScreenAdapter {
         //cam.update();
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            MyScreenAdapter.game.setScreen(new MainMenuScreen(MyScreenAdapter.game));
+            MyScreenAdapter.game.setScreen(new TitleScreen(MyScreenAdapter.game));
         }
     }
 

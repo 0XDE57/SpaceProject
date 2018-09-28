@@ -1,4 +1,4 @@
-package com.spaceproject.screens;
+package com.spaceproject.screens.debug;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
@@ -17,6 +17,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.generation.FontFactory;
+import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.screens.TitleScreen;
 
 import java.util.ArrayList;
 
@@ -486,7 +488,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 		drawMenu();
 
 		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
-			MyScreenAdapter.game.setScreen(new MainMenuScreen(MyScreenAdapter.game));
+			MyScreenAdapter.game.setScreen(new TitleScreen(MyScreenAdapter.game));
 		}
 	}
 

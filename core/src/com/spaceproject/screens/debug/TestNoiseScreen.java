@@ -1,4 +1,4 @@
-package com.spaceproject.screens;
+package com.spaceproject.screens.debug;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -12,6 +12,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.Tile;
 import com.spaceproject.generation.FontFactory;
+import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.screens.TitleScreen;
 import com.spaceproject.ui.ColorProfile;
 import com.spaceproject.ui.Slider;
 import com.spaceproject.utility.MyMath;
@@ -173,7 +175,7 @@ public class TestNoiseScreen extends MyScreenAdapter {
 
 
 		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
-			MyScreenAdapter.game.setScreen(new MainMenuScreen(MyScreenAdapter.game));
+			MyScreenAdapter.game.setScreen(new TitleScreen(MyScreenAdapter.game));
 		}
 			
 	}

@@ -1,10 +1,10 @@
-package com.spaceproject.screens.menuanim;
+package com.spaceproject.screens.animations;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 
-public class TreeAnimation extends MainMenuAnimation {
+public class TreeAnim extends TitleAnimation {
 
 	float length;
 	float branchAngle;
@@ -13,7 +13,7 @@ public class TreeAnimation extends MainMenuAnimation {
 	int iterations;
 	float rotSpeed ;
 
-	public TreeAnimation() {
+	public TreeAnim() {
 		length = 15;
 		branchAngle = 33;
 		tiltAngle = 180;

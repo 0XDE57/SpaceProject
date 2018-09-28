@@ -5,7 +5,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.KeyConfig;
-import com.spaceproject.screens.MainMenuScreen;
+import com.spaceproject.screens.TitleScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 
 public class SpaceProject extends Game {
@@ -39,7 +39,7 @@ public class SpaceProject extends Game {
 		//setScreen(new TestShipGenerationScreen(this));
 		//setScreen(new TestNoiseScreen(this));
 		//setScreen(new TestVoronoiScreen());
-		setScreen(new MainMenuScreen(this));
+		setScreen(new TitleScreen(this));
 	}
 	
 	private static void loadConfigs() {

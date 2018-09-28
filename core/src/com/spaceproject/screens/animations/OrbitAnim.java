@@ -1,4 +1,4 @@
-package com.spaceproject.screens.menuanim;
+package com.spaceproject.screens.animations;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Queue;
 import com.spaceproject.utility.MyMath;
 
-public class OrbitAnim extends MainMenuAnimation {
+public class OrbitAnim extends TitleAnimation {
 
     Array<OrbitObject> objects;
 

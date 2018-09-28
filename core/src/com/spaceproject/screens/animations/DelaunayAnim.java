@@ -1,4 +1,4 @@
-package com.spaceproject.screens.menuanim;
+package com.spaceproject.screens.animations;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ShortArray;
 
 
-public class DelaunayAnimation extends MainMenuAnimation {
+public class DelaunayAnim extends TitleAnimation {
 
 	float velocity;
 	int numPoints;
@@ -20,7 +20,7 @@ public class DelaunayAnimation extends MainMenuAnimation {
 	ShortArray triangles;
 	DelaunayTriangulator delaunay = new DelaunayTriangulator();
 
-	public DelaunayAnimation() {
+	public DelaunayAnim() {
 		velocity = 10;
 		numPoints = 20;
 		pad = 10;

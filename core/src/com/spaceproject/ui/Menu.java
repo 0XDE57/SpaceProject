@@ -5,27 +5,41 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Event;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.ObjectIntMap;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.TableUtils;
 import com.kotcrab.vis.ui.util.dialog.Dialogs;
 import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
 import com.kotcrab.vis.ui.util.value.PrefHeightIfVisibleValue;
-import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisScrollPane;
+import com.kotcrab.vis.ui.widget.VisSelectBox;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisWindow;
+import com.kotcrab.vis.ui.widget.spinner.IntSpinnerModel;
+import com.kotcrab.vis.ui.widget.spinner.SimpleFloatSpinnerModel;
+import com.kotcrab.vis.ui.widget.spinner.Spinner;
 import com.kotcrab.vis.ui.widget.tabbedpane.Tab;
 import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPane;
 import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPaneAdapter;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.screens.MainMenuScreen;
+import com.spaceproject.config.Config;
+import com.spaceproject.config.KeyConfig;
+import com.spaceproject.config.TestConfig;
+import com.spaceproject.screens.TitleScreen;
 import com.spaceproject.systems.DebugUISystem;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 
 import static com.spaceproject.screens.MyScreenAdapter.game;
 
@@ -107,9 +121,11 @@ public class Menu extends VisWindow {
         tabbedPane.add(debugMenuTab);
 
 
-        testConfigTab = createConfigTab();
+        testConfigTab = createConfigTab(SpaceProject.celestcfg);
         tabbedPane.add(testConfigTab);
 
+        tabbedPane.add(createConfigTab(SpaceProject.keycfg));
+        tabbedPane.add(createConfigTab(new TestConfig()));
 
         tabbedPane.switchTab(mainMenuTab);
     }
@@ -159,28 +175,137 @@ public class Menu extends VisWindow {
     //endregion
 
 
-    private MyTab createConfigTab() {
-        MyTab test = new MyTab("config", Input.Keys.NUM_3);
 
-        VisTable scrollContainer = new VisTable();
+    private MyTab createConfigTab(Config config) {
+        MyTab test = new MyTab(config.getClass().getSimpleName(), Input.Keys.NUM_3);
+        int padSize = 2;
+
+        final VisTable scrollContainer = new VisTable();
         scrollContainer.left().top();
 
-        for (int i = 0; i < 40; i++) {
-            scrollContainer.add(new VisLabel("test: " + i)).row();
-        }
-        /*
-        Config c = SpaceProject.celestcfg;
-        try {
-            for (Field f : c.getClass().getFields()) {
-                Label l = new Label(String.format("%s %s", f.getName(), f.get(c)), VisUI.getSkin());
-                scrollContainer.add(l).expand().fill().row();
+
+        if (config instanceof KeyConfig) {
+            ObjectIntMap<String> keyNames = new ObjectIntMap<String>();
+            for (int i = 0; i < 256; i++) {
+                String keyName = Input.Keys.toString(i);
+                if (keyName != null) keyNames.put(keyName, i);
             }
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }*/
-        VisScrollPane scrollPane = new VisScrollPane (scrollContainer);
+
+            try {
+                for (Field f : config.getClass().getFields()) {
+                    final String key = Input.Keys.toString((Integer)f.get(config));
+                    Label keyLabel = new Label(f.getName(), VisUI.getSkin());
+                    keyLabel.setAlignment(Align.right);
+                    final VisSelectBox<String> testKeys = new VisSelectBox<String>();
+                    /*//TODO: set selected index/highlight key that was pressed wehn drop down activated
+                    testKeys.addListener(new InputListener() {
+                        @Override
+                        public boolean keyDown(InputEvent event, int keycode) {
+                            String keyPressed = Input.Keys.toString(keycode);
+                            if (testKeys.getItems().contains(keyPressed, false)) {
+                                testKeys.setSelected(keyPressed);
+                            }
+                            return super.keyDown(event, keycode);
+                        }
+                    });*/
+                    testKeys.getScrollPane().addListener(new EventListener() {
+                        //auto focus scroll on mouse enter
+                        //credit: Ecumene
+                        //java-gaming.org/index.php?topic=38333.0
+                        @Override
+                        public boolean handle(Event event) {
+                            if (event instanceof InputEvent)
+                                if (((InputEvent) event).getType() == InputEvent.Type.enter)
+                                    event.getStage().setScrollFocus(testKeys.getScrollPane());
+                            return false;
+                        }
+                    });
+
+                    testKeys.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            //check if key already assigned to another action
+                            boolean keyInUse = false;
+                            String selected = (String)((VisSelectBox)actor).getSelected();
+                            for (Actor other : scrollContainer.getChildren()) {
+                                if (other instanceof VisSelectBox) {
+                                    if (!other.equals(testKeys)) {
+                                        if ((((VisSelectBox)other).getSelected()).equals(selected)) {
+                                            keyInUse = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if (keyInUse){
+                                System.out.println("Key already in use");
+                                event.cancel();
+                            } else {
+                                System.out.println("Key is free to use");
+                            }
+
+                        }
+                    });
+                    testKeys.setItems(keyNames.keys().toArray());
+                    testKeys.setSelected(key);
+
+
+                    scrollContainer.add(keyLabel).expand().pad(padSize).fill();
+                    scrollContainer.add(testKeys).expand().pad(padSize).fill();
+                    scrollContainer.row();
+                }
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                scrollContainer.add(new Label("Failed to reflect field: " + e.getMessage(), VisUI.getSkin()));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                scrollContainer.add(new Label("Failed to reflect field: " + e.getMessage(), VisUI.getSkin()));
+            }
+        } else {
+
+            try {
+                for (Field f : config.getClass().getFields()) {
+                    String fieldName = f.getName();
+                    Type t = f.getType();
+                    Actor a;
+
+                    if (t == Integer.TYPE) {
+                        a = new Spinner(fieldName, new IntSpinnerModel((Integer) f.get(config), Integer.MIN_VALUE, Integer.MAX_VALUE));
+                    } else if (t == Float.TYPE) {
+                        a = new Spinner(fieldName, new SimpleFloatSpinnerModel((Float) f.get(config), -Float.MAX_VALUE, Float.MAX_VALUE, 0.1f, 4));
+                    } else if (t == Boolean.TYPE) {
+                        a = new CheckBox(fieldName, VisUI.getSkin());
+                        ((CheckBox) a).setChecked((Boolean) f.get(config));
+                    } else {
+                        a = new Label(String.format("%s %s", fieldName, f.get(config)), VisUI.getSkin());
+                    }
+
+                    if (a != null) {
+                        scrollContainer.add(a).expand().fill().pad(padSize).row();
+                    } else {
+                        scrollContainer.add(new Label("Failed to reflect field: " + fieldName, VisUI.getSkin()));
+                    }
+                }
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                scrollContainer.add(new Label("Failed to reflect field: " + e.getMessage(), VisUI.getSkin()));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                scrollContainer.add(new Label("Failed to reflect field: " + e.getMessage(), VisUI.getSkin()));
+            }
+        }
+
+        final VisScrollPane scrollPane = new VisScrollPane (scrollContainer);
+        scrollPane.addListener(new EventListener() {
+            //auto focus scroll on mouse enter
+            @Override
+            public boolean handle(Event event) {
+                if (event instanceof InputEvent)
+                    if (((InputEvent) event).getType() == InputEvent.Type.enter)
+                        event.getStage().setScrollFocus(scrollPane);
+                return false;
+            }
+        });
         scrollPane.setFlickScroll(false);
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(false, false);
@@ -333,7 +458,7 @@ public class Menu extends VisWindow {
                 Dialogs.showOptionDialog(getStage(), "Exit", "go to the main menu?", Dialogs.OptionDialogType.YES_NO, new OptionDialogAdapter() {
                     @Override
                     public void yes () {
-                        game.setScreen(new MainMenuScreen(game));
+                        game.setScreen(new TitleScreen(game));
                     }
                 });
             }
@@ -353,13 +478,15 @@ public class Menu extends VisWindow {
             }
         });
 
-        menu.getContentTable().add(btnGotoMain).growX().row();
-        menu.getContentTable().add(new TextButton("save", VisUI.getSkin())).growX().row();
-        menu.getContentTable().add(new TextButton("load", VisUI.getSkin())).growX().row();
-        menu.getContentTable().add(new TextButton("options", VisUI.getSkin())).growX().row();
-        menu.getContentTable().add(btnExit).growX().row();
+        menu.getContentTable().add(btnGotoMain).growX().pad(2).row();
+        menu.getContentTable().add(new TextButton("save", VisUI.getSkin())).growX().pad(2).row();
+        menu.getContentTable().add(new TextButton("load", VisUI.getSkin())).growX().pad(2).row();
+        menu.getContentTable().add(new TextButton("options", VisUI.getSkin())).growX().pad(2).row();
+        menu.getContentTable().add(btnExit).growX().pad(2).row();
         return menu;
     }
+
+
 
 
     private class MyTab extends Tab {
@@ -392,4 +519,5 @@ public class Menu extends VisWindow {
         }
 
     }
+
 }

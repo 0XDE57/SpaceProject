@@ -1,4 +1,4 @@
-package com.spaceproject.screens.menuanim;
+package com.spaceproject.screens.animations;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.generation.noise.OpenSimplexNoise;
 
-public class NoiseAnim extends MainMenuAnimation {
+public class NoiseAnim extends TitleAnimation {
     float z;
     float zDelta;
     int size;
