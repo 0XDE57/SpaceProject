@@ -15,14 +15,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.ObjectIntMap;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.TableUtils;
 import com.kotcrab.vis.ui.util.dialog.Dialogs;
 import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
 import com.kotcrab.vis.ui.util.value.PrefHeightIfVisibleValue;
 import com.kotcrab.vis.ui.widget.VisScrollPane;
-import com.kotcrab.vis.ui.widget.VisSelectBox;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import com.kotcrab.vis.ui.widget.spinner.IntSpinnerModel;
@@ -33,8 +31,6 @@ import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPane;
 import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPaneAdapter;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.Config;
-import com.spaceproject.config.KeyConfig;
-import com.spaceproject.config.TestConfig;
 import com.spaceproject.screens.TitleScreen;
 import com.spaceproject.systems.DebugUISystem;
 
@@ -48,7 +44,7 @@ import static com.spaceproject.screens.MyScreenAdapter.game;
  */
 public class Menu extends VisWindow {
     private final TabbedPane tabbedPane;
-    private MyTab mainMenuTab, customRenderTab, mapTab, placeholderATab, placeholderBTab, debugMenuTab, testConfigTab;
+    private Tab mainMenuTab, customRenderTab, mapTab, placeholderATab, placeholderBTab, debugMenuTab, testConfigTab, keyConfigTab;
 
     private boolean alwaysHideOnEscape = false;
 
@@ -71,6 +67,7 @@ public class Menu extends VisWindow {
         tabbedPane.addListener(new TabbedPaneAdapter() {
             @Override
             public void switchedTab (Tab tab) {
+                System.out.println("TabbedPaneAdapter switched tab");
                 container.clearChildren();
                 container.add(tab.getContentTable()).expand().fill();
             }
@@ -94,11 +91,11 @@ public class Menu extends VisWindow {
         tabbedPane.add(mainMenuTab);
 
 
-        mapTab = new MyTab("map", Input.Keys.M);
+        mapTab = new HotKeyTab("map", Input.Keys.M);
         tabbedPane.add(mapTab);
 
 
-        customRenderTab = new MyTab("test render", Input.Keys.H);
+        customRenderTab = new HotKeyTab("test render", Input.Keys.H);
         TestShapeRenderActor shapeRenderActor = new TestShapeRenderActor();
 
         customRenderTab.getContentTable().add(shapeRenderActor).grow();
@@ -109,11 +106,11 @@ public class Menu extends VisWindow {
 
 
 
-        placeholderATab = new MyTab("placeholder", Input.Keys.NUM_1);
+        placeholderATab = new HotKeyTab("placeholder", Input.Keys.NUM_1);
         placeholderATab.getContentTable().add(new TextButton("do stuff", VisUI.getSkin()));
         tabbedPane.add(placeholderATab);
 
-        placeholderBTab = new MyTab("placeholder", Input.Keys.NUM_2);
+        placeholderBTab = new HotKeyTab("placeholder", Input.Keys.NUM_2);
         tabbedPane.add(placeholderBTab);
 
 
@@ -124,8 +121,10 @@ public class Menu extends VisWindow {
         testConfigTab = createConfigTab(SpaceProject.celestcfg);
         tabbedPane.add(testConfigTab);
 
-        tabbedPane.add(createConfigTab(SpaceProject.keycfg));
-        tabbedPane.add(createConfigTab(new TestConfig()));
+        keyConfigTab = new KeyConfigTab("Input Settings", SpaceProject.keycfg);
+        //tabbedPane.add(keyConfigTab);
+
+        //tabbedPane.add(createConfigTab(new TestConfig()));
 
         tabbedPane.switchTab(mainMenuTab);
     }
@@ -137,12 +136,46 @@ public class Menu extends VisWindow {
     }
 
     public void hide() {
+        System.out.println("menu hide");
+        /*
+        ConfigTab tab = checkTabChanges();
+        if (tab != null) {
+            tab.promptSaveChanges();
+            return;
+        }
+        */
+
         fadeOut();
+    }
+
+    @Override
+    protected void close() {
+        System.out.println("menu close");
+        /*
+        ConfigTab tab = checkTabChanges();
+        if (tab != null) {
+            tab.promptSaveChanges();
+            return;
+        }
+        */
+
+        super.close();
     }
 
     public void show(Stage stage) {
         stage.addActor(this);
         fadeIn();
+    }
+
+    private ConfigTab checkTabChanges() {
+        for (final Tab tab : tabbedPane.getTabs()) {
+            if (tab instanceof ConfigTab) {
+                if (((ConfigTab)tab).isDirty()) {
+                    return (ConfigTab)tab;
+                }
+            }
+        }
+        return null;
     }
 
     public boolean switchTabForKey(int keycode) {
@@ -160,14 +193,16 @@ public class Menu extends VisWindow {
         }
 
         for (Tab tab : tabbedPane.getTabs()) {
-            if (((MyTab)tab).getHotKey() == keycode) {
-                if (tabbedPane.getActiveTab().equals(tab) && getStage() != null) {
-                    fadeOut();
-                    return false;
-                }
-                tabbedPane.switchTab(tab);
-                return true;
+            if (tab instanceof HotKeyTab) {
+                if (((HotKeyTab) tab).getHotKey() == keycode) {
+                    if (tabbedPane.getActiveTab().equals(tab) && getStage() != null) {
+                        fadeOut();
+                        return false;
+                    }
+                    tabbedPane.switchTab(tab);
+                    return true;
 
+                }
             }
         }
         return false;
@@ -176,92 +211,14 @@ public class Menu extends VisWindow {
 
 
 
-    private MyTab createConfigTab(Config config) {
-        MyTab test = new MyTab(config.getClass().getSimpleName(), Input.Keys.NUM_3);
+    private HotKeyTab createConfigTab(Config config) {
+        HotKeyTab test = new HotKeyTab(config.getClass().getSimpleName(), Input.Keys.NUM_3);
         int padSize = 2;
 
         final VisTable scrollContainer = new VisTable();
         scrollContainer.left().top();
 
 
-        if (config instanceof KeyConfig) {
-            ObjectIntMap<String> keyNames = new ObjectIntMap<String>();
-            for (int i = 0; i < 256; i++) {
-                String keyName = Input.Keys.toString(i);
-                if (keyName != null) keyNames.put(keyName, i);
-            }
-
-            try {
-                for (Field f : config.getClass().getFields()) {
-                    final String key = Input.Keys.toString((Integer)f.get(config));
-                    Label keyLabel = new Label(f.getName(), VisUI.getSkin());
-                    keyLabel.setAlignment(Align.right);
-                    final VisSelectBox<String> testKeys = new VisSelectBox<String>();
-                    /*//TODO: set selected index/highlight key that was pressed wehn drop down activated
-                    testKeys.addListener(new InputListener() {
-                        @Override
-                        public boolean keyDown(InputEvent event, int keycode) {
-                            String keyPressed = Input.Keys.toString(keycode);
-                            if (testKeys.getItems().contains(keyPressed, false)) {
-                                testKeys.setSelected(keyPressed);
-                            }
-                            return super.keyDown(event, keycode);
-                        }
-                    });*/
-                    testKeys.getScrollPane().addListener(new EventListener() {
-                        //auto focus scroll on mouse enter
-                        //credit: Ecumene
-                        //java-gaming.org/index.php?topic=38333.0
-                        @Override
-                        public boolean handle(Event event) {
-                            if (event instanceof InputEvent)
-                                if (((InputEvent) event).getType() == InputEvent.Type.enter)
-                                    event.getStage().setScrollFocus(testKeys.getScrollPane());
-                            return false;
-                        }
-                    });
-
-                    testKeys.addListener(new ChangeListener() {
-                        @Override
-                        public void changed(ChangeEvent event, Actor actor) {
-                            //check if key already assigned to another action
-                            boolean keyInUse = false;
-                            String selected = (String)((VisSelectBox)actor).getSelected();
-                            for (Actor other : scrollContainer.getChildren()) {
-                                if (other instanceof VisSelectBox) {
-                                    if (!other.equals(testKeys)) {
-                                        if ((((VisSelectBox)other).getSelected()).equals(selected)) {
-                                            keyInUse = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if (keyInUse){
-                                System.out.println("Key already in use");
-                                event.cancel();
-                            } else {
-                                System.out.println("Key is free to use");
-                            }
-
-                        }
-                    });
-                    testKeys.setItems(keyNames.keys().toArray());
-                    testKeys.setSelected(key);
-
-
-                    scrollContainer.add(keyLabel).expand().pad(padSize).fill();
-                    scrollContainer.add(testKeys).expand().pad(padSize).fill();
-                    scrollContainer.row();
-                }
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-                scrollContainer.add(new Label("Failed to reflect field: " + e.getMessage(), VisUI.getSkin()));
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                scrollContainer.add(new Label("Failed to reflect field: " + e.getMessage(), VisUI.getSkin()));
-            }
-        } else {
 
             try {
                 for (Field f : config.getClass().getFields()) {
@@ -293,7 +250,7 @@ public class Menu extends VisWindow {
                 e.printStackTrace();
                 scrollContainer.add(new Label("Failed to reflect field: " + e.getMessage(), VisUI.getSkin()));
             }
-        }
+        //}
 
         final VisScrollPane scrollPane = new VisScrollPane (scrollContainer);
         scrollPane.addListener(new EventListener() {
@@ -313,8 +270,8 @@ public class Menu extends VisWindow {
         return test;
     }
 
-    private MyTab createDebugMenu(final Engine engine) {
-        MyTab debugTab = new MyTab("Debug", Input.Keys.F4);
+    private HotKeyTab createDebugMenu(final Engine engine) {
+        HotKeyTab debugTab = new HotKeyTab("Debug", Input.Keys.F4);
 
 
         final CheckBox toggleComponentList = new CheckBox("show components", VisUI.getSkin());
@@ -447,8 +404,8 @@ public class Menu extends VisWindow {
         return debugTab;
     }
 
-    private MyTab createMainMenu() {
-        MyTab menu = new MyTab("Menu", Input.Keys.ESCAPE);
+    private HotKeyTab createMainMenu() {
+        HotKeyTab menu = new HotKeyTab("Menu", Input.Keys.ESCAPE);
 
 
         TextButton btnGotoMain = new TextButton("main menu", VisUI.getSkin());
@@ -478,46 +435,24 @@ public class Menu extends VisWindow {
             }
         });
 
+        TextButton btnOptions = new TextButton("options", VisUI.getSkin());
+        btnOptions.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (!tabbedPane.getTabs().contains(keyConfigTab, false)) {
+                    tabbedPane.add(keyConfigTab);
+                }
+                tabbedPane.switchTab(keyConfigTab);
+            }
+        });
+
         menu.getContentTable().add(btnGotoMain).growX().pad(2).row();
         menu.getContentTable().add(new TextButton("save", VisUI.getSkin())).growX().pad(2).row();
         menu.getContentTable().add(new TextButton("load", VisUI.getSkin())).growX().pad(2).row();
-        menu.getContentTable().add(new TextButton("options", VisUI.getSkin())).growX().pad(2).row();
+        menu.getContentTable().add(btnOptions).growX().pad(2).row();
         menu.getContentTable().add(btnExit).growX().pad(2).row();
         return menu;
     }
 
-
-
-
-    private class MyTab extends Tab {
-        private String title;
-        private Table content;
-        private int hotKey;
-
-        public MyTab(String title, int hotKey) {
-            super(false, false);
-            this.hotKey = hotKey;
-            this.title = title + " [" + Input.Keys.toString(hotKey) + "]";
-
-            content = new VisTable();
-            content.setFillParent(true);
-
-        }
-
-        public int getHotKey() {
-            return hotKey;
-        }
-
-        @Override
-        public String getTabTitle () {
-            return title;
-        }
-
-        @Override
-        public Table getContentTable () {
-            return content;
-        }
-
-    }
 
 }

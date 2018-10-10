@@ -330,7 +330,12 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			//memory
 			Runtime runtime = Runtime.getRuntime();
 			long used = runtime.totalMemory() - runtime.freeMemory();
+			long javaHeap = Gdx.app.getJavaHeap();
+			long nativeHeap = Gdx.app.getNativeHeap();
 			String memory = "Mem: " + MyMath.formatBytes(used);
+			//all 3 values seem to agree
+			// + ", java heap: " + MyMath.formatBytes(javaHeap) + ", native heap: " + MyMath.formatBytes(nativeHeap);
+
 
 			//entity/component count
 			int entityCount = engine.getEntities().size();
