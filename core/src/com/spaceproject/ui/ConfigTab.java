@@ -5,9 +5,6 @@ import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.kotcrab.vis.ui.util.dialog.Dialogs;
-import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
-import com.kotcrab.vis.ui.widget.Separator;
 import com.kotcrab.vis.ui.widget.VisScrollPane;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.tabbedpane.Tab;
@@ -20,7 +17,6 @@ public abstract class ConfigTab extends Tab {
     VisTable scrollContainer;
 
     Config localConfig;
-    //boolean hasChanged = false;
     int padSize = 2;
 
     public ConfigTab(String title, Config config) {
@@ -43,7 +39,7 @@ public abstract class ConfigTab extends Tab {
         getContentTable().add(scrollPane).left().top().expand().fill();
 
         getContentTable().row();
-        getContentTable().add(new Separator()).fillX().row();
+        //getContentTable().add(new Separator()).fillX().row();
         //getContentTable().add(new TextButton("save", VisUI.getSkin()));
         //getContentTable().add(new TextButton("reset", VisUI.getSkin()));
     }
@@ -69,11 +65,11 @@ public abstract class ConfigTab extends Tab {
         if (isDirty()) {
             TabbedPane pane = getPane();
             if (pane != null) {
-                pane.switchTab(this);
+                pane.switchTab(this);//keep focus on this
+                pane.remove(this,false);//trigger save changes dialog
             } else {
                 discardChanges();
             }
-            //promptSaveChanges();
         } else {
             super.onHide();
         }
@@ -99,25 +95,4 @@ public abstract class ConfigTab extends Tab {
 
     public abstract void discardChanges();
 
-    void promptSaveChanges() {
-        Dialogs.showOptionDialog(getPane().getTable().getStage(), "Save Changes?", "Yes to keep settings, No to discard.",
-                Dialogs.OptionDialogType.YES_NO_CANCEL,
-                new OptionDialogAdapter() {
-                    @Override
-                    public void yes() {
-                        saveChanges();
-                    }
-
-                    @Override
-                    public void no() {
-                        discardChanges();
-
-                    }
-
-                    @Override
-                    public void cancel() {
-                        //return;//do not hide
-                    }
-                });
-    }
 }
