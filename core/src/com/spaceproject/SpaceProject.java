@@ -4,6 +4,7 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.spaceproject.config.CelestialConfig;
+import com.spaceproject.config.EntityConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.screens.TitleScreen;
 import com.spaceproject.screens.MyScreenAdapter;
@@ -15,6 +16,7 @@ public class SpaceProject extends Game {
 
 	private static boolean isMobile;
 
+	public static EntityConfig entitycfg;
 	public static CelestialConfig celestcfg;
 	public static KeyConfig keycfg;
 
@@ -43,6 +45,10 @@ public class SpaceProject extends Game {
 	}
 	
 	private static void loadConfigs() {
+		entitycfg = new EntityConfig();
+		entitycfg.loadDefault();
+
+
 		//keycfg = (KeyConfig) new KeyConfig().loadFromJson();
 		keycfg = new KeyConfig();
 		keycfg.loadDefault();

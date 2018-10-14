@@ -20,5 +20,5 @@ public class VehicleComponent implements Component {
 	
 	// maximum speed vehicle can achieve
 	public float maxSpeed;
-	public final int NOLIMIT = -1;//no max speed/infinite
+	public static final int NOLIMIT = -1;//no max speed/infinite
 }

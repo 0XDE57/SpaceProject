@@ -29,7 +29,11 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.utility.IDGen;
 import com.spaceproject.utility.MyMath;
+import com.spaceproject.utility.RenderOrder;
 import com.spaceproject.utility.SimpleTimer;
+
+import static com.spaceproject.SpaceProject.celestcfg;
+import static com.spaceproject.SpaceProject.entitycfg;
 
 
 public class EntityFactory {
@@ -53,16 +57,15 @@ public class EntityFactory {
 		bounds.poly.setOrigin(width/2, height/2);
 
 		CharacterComponent character = new CharacterComponent();
-		character.walkSpeed = 300f;//70f;
+		character.walkSpeed = entitycfg.characterWalkSpeed;
 
 		HealthComponent health = new HealthComponent();
-		health.health = 100;
-		health.maxHealth = 100;
-
+		health.maxHealth = entitycfg.characterHealth;
+		health.health = health.maxHealth;
 
 		ControllableComponent control = new ControllableComponent();
-		control.timerVehicle = new SimpleTimer(1000);
-		control.timerDodge = new SimpleTimer(500);
+		control.timerVehicle = new SimpleTimer(entitycfg.controlTimerVehicle);
+		control.timerDodge = new SimpleTimer(entitycfg.controlTimerDodge);
 
 
 		entity.add(health);
@@ -110,10 +113,10 @@ public class EntityFactory {
 		MathUtils.random.setSeed(seed);
 
 		//number of planets in a system
-		int numPlanets = MathUtils.random(SpaceProject.celestcfg.minPlanets, SpaceProject.celestcfg.maxPlanets);
+		int numPlanets = MathUtils.random(celestcfg.minPlanets, celestcfg.maxPlanets);
 
 		//distance between planets
-		float distance = SpaceProject.celestcfg.minPlanetDist/3; //add some initial distance between star and first planet
+		float distance = celestcfg.minPlanetDist/3; //add some initial distance between star and first planet
 		
 		//rotation of system (orbits and spins)
 		boolean rotDir = MathUtils.randomBoolean();
@@ -131,13 +134,12 @@ public class EntityFactory {
 		//create planets around star
 		for (int i = 0; i < numPlanets; ++i) {
 			//add some distance from previous entity
-			distance += MathUtils.random(SpaceProject.celestcfg.minPlanetDist, SpaceProject.celestcfg.maxPlanetDist);
+			distance += MathUtils.random(celestcfg.minPlanetDist, celestcfg.maxPlanetDist);
 			Entity planet = createPlanet(MyMath.getSeed(x, y + distance), star, distance, rotDir);
 			boolean hasMoon = MathUtils.randomBoolean();
-			hasMoon = true;
 			if (hasMoon) {
 				float moonDist = planet.getComponent(TextureComponent.class).texture.getWidth() *  planet.getComponent(TextureComponent.class).scale * 2;
-
+				distance += moonDist;
 				Entity moon = createMoon(MyMath.getSeed(x, y + moonDist), planet, moonDist, rotDir);
 				entities.add(moon);
 			}
@@ -154,6 +156,7 @@ public class EntityFactory {
 		long seed = MyMath.getSeed(x, y);
 		return createBinarySystem(x, y, seed);
 	}
+
 	public static Array<Entity> createBinarySystem(float x, float y, long seed) {
 		Entity anchorEntity = new Entity();
 
@@ -169,7 +172,7 @@ public class EntityFactory {
 
 
 		//distance between planets
-		float distance = SpaceProject.celestcfg.maxPlanetSize *2 + SpaceProject.celestcfg.maxPlanetDist * 2; //add distance between stars
+		float distance = celestcfg.maxPlanetSize * 2 + celestcfg.maxPlanetDist * 2; //add distance between stars
 
 		//rotation of system (orbits and spins)
 		boolean rotDir = MathUtils.randomBoolean();
@@ -179,7 +182,7 @@ public class EntityFactory {
 
 		//add stars
 		float startAngle = MathUtils.random(MathUtils.PI2);
-		float tangentialSpeed = MathUtils.random(SpaceProject.celestcfg.minPlanetTangentialSpeed, SpaceProject.celestcfg.maxPlanetTangentialSpeed);
+		float tangentialSpeed = MathUtils.random(celestcfg.minPlanetTangentialSpeed, celestcfg.maxPlanetTangentialSpeed);
 		Entity starA = createStar(MyMath.getSeed(x+distance, y), x+distance, y, rotDir);
 		OrbitComponent orbitA = starA.getComponent(OrbitComponent.class);
 		orbitA.parent = anchorEntity;
@@ -217,7 +220,7 @@ public class EntityFactory {
 
 		// create star texture
 		TextureComponent texture = new TextureComponent();
-		int radius = MathUtils.random(SpaceProject.celestcfg.minStarSize, SpaceProject.celestcfg.maxStarSize);	
+		int radius = MathUtils.random(celestcfg.minStarSize, celestcfg.maxStarSize);
 		texture.texture = TextureFactory.generateStar(seed, radius);
 		texture.scale = SpaceProject.scale;
 		
@@ -230,7 +233,7 @@ public class EntityFactory {
 		OrbitComponent orbit = new OrbitComponent();
 		orbit.parent = null;//set to null to negate orbit, but keep rotation
 		orbit.rotateClockwise = rotationDir;
-		orbit.rotSpeed = MathUtils.random(SpaceProject.celestcfg.minStarRot, SpaceProject.celestcfg.maxStarRot); //rotation speed of star
+		orbit.rotSpeed = MathUtils.random(celestcfg.minStarRot, celestcfg.maxStarRot); //rotation speed of star
 		
 		//mapState
 		MapComponent map = new MapComponent();
@@ -293,9 +296,9 @@ public class EntityFactory {
 		OrbitComponent orbit = new OrbitComponent();
 		orbit.parent = parent; //object to orbit around
 		orbit.radialDistance = radialDistance; //distance relative to star
-		orbit.tangentialSpeed = MathUtils.random(SpaceProject.celestcfg.minPlanetTangentialSpeed, SpaceProject.celestcfg.maxPlanetTangentialSpeed);
+		orbit.tangentialSpeed = MathUtils.random(celestcfg.minPlanetTangentialSpeed, celestcfg.maxPlanetTangentialSpeed);
 		orbit.startAngle = MathUtils.random(MathUtils.PI2); //angle relative to parent
-		orbit.rotSpeed = MathUtils.random(SpaceProject.celestcfg.minPlanetRot, SpaceProject.celestcfg.maxPlanetRot);
+		orbit.rotSpeed = MathUtils.random(celestcfg.minPlanetRot, celestcfg.maxPlanetRot);
 		orbit.rotateClockwise = rotationDir;
 		
 		//map
@@ -336,7 +339,7 @@ public class EntityFactory {
 
 		//create placeholder texture. real texture will be generated by a thread
 		TextureComponent texture = new TextureComponent();
-		//int size = (int) Math.pow(2, MathUtils.random(2, 5));
+		int size = (int) Math.pow(2, MathUtils.random(2, 5));
 		texture.texture = TextureFactory.generatePlanet(100);
 		texture.scale = 16;
 
@@ -347,9 +350,9 @@ public class EntityFactory {
 		OrbitComponent orbit = new OrbitComponent();
 		orbit.parent = parent; //object to orbit around
 		orbit.radialDistance = radialDistance; //distance relative to star
-		orbit.tangentialSpeed = MathUtils.random(SpaceProject.celestcfg.minPlanetTangentialSpeed, SpaceProject.celestcfg.maxPlanetTangentialSpeed);
+		orbit.tangentialSpeed = MathUtils.random(celestcfg.minPlanetTangentialSpeed, celestcfg.maxPlanetTangentialSpeed);
 		orbit.startAngle = MathUtils.random(MathUtils.PI2); //angle relative to parent
-		orbit.rotSpeed = MathUtils.random(SpaceProject.celestcfg.minPlanetRot, SpaceProject.celestcfg.maxPlanetRot);
+		orbit.rotSpeed = MathUtils.random(celestcfg.minPlanetRot, celestcfg.maxPlanetRot);
 		orbit.rotateClockwise = rotationDir;
 
 		//map
@@ -368,9 +371,8 @@ public class EntityFactory {
 		entity.add(texture);
 		return entity;
 	}
-
-
 	//endregion
+
 
 	//region ships
 	public static Entity createShip3(float x, float y) {
@@ -394,15 +396,13 @@ public class EntityFactory {
 		transform.zOrder = -10;
 		transform.rotation = (float) Math.PI/2; //face upwards
 		
-		//generate random even size 
+		//generate random even size
 		int size;
-		int minSize = 10;
-		int maxSize = 36;
-		
 		do {
 			//generate even size
-			size = MathUtils.random(minSize, maxSize);
+			size = MathUtils.random(entitycfg.shipSizeMin, entitycfg.shipSizeMax);
 		} while (size % 2 == 1);
+
 		TextureComponent texture = new TextureComponent();
 		Texture pixmapTex = TextureFactory.generateShip(seed, size);
 		texture.texture = pixmapTex;// give texture component the generated pixmapTexture
@@ -417,27 +417,27 @@ public class EntityFactory {
 	    
 		//weapon
 		CannonComponent cannon = new CannonComponent();
-		cannon.damage = 15;
-		cannon.maxAmmo = 5;
+		cannon.damage = entitycfg.cannonDamage;
+		cannon.maxAmmo = entitycfg.cannonAmmo;
 		cannon.curAmmo = cannon.maxAmmo;
-		cannon.timerFireRate = new SimpleTimer(200);//lower is faster
-		cannon.size = 1; //higher is bigger
-		cannon.velocity = 680; //higher is faster
-		cannon.acceleration = 200;
-		cannon.timerRechargeRate = new SimpleTimer(1000);//lower is faster
+		cannon.timerFireRate = new SimpleTimer(entitycfg.cannonFireRate);//lower is faster
+		cannon.size = entitycfg.cannonSize; //higher is bigger
+		cannon.velocity = entitycfg.cannonVelocity; //higher is faster
+		cannon.acceleration = entitycfg.cannonAcceleration;
+		cannon.timerRechargeRate = new SimpleTimer(entitycfg.cannonRechargeRate);//lower is faster
 		
 		//engine data and marks entity as drive-able
 		VehicleComponent vehicle = new VehicleComponent();
 		vehicle.driver = driver;
-		vehicle.thrust = 320;//higher is faster
+		vehicle.thrust = entitycfg.engineThrust;//higher is faster
 		vehicle.maxSpeed = vehicle.NOLIMIT;
 		vehicle.id = IDGen.get();
 
 		
 		//health
 		HealthComponent health = new HealthComponent();
-		health.health = 100;
-		health.maxHealth = health.health;
+		health.maxHealth = entitycfg.shipHealth;
+		health.health = health.maxHealth;
 		
 		//map
 		MapComponent map = new MapComponent();
@@ -446,8 +446,8 @@ public class EntityFactory {
 
 
 		ControllableComponent control = new ControllableComponent();
-		control.timerVehicle = new SimpleTimer(1000);
-		control.timerDodge = new SimpleTimer(500);
+		control.timerVehicle = new SimpleTimer(entitycfg.controlTimerVehicle);
+		control.timerDodge = new SimpleTimer(entitycfg.controlTimerDodge);
 
 
 		//add components to entity
