@@ -139,8 +139,8 @@ public class ScreenTransitionSystem extends IteratingSystem {
 
         //grow texture
         tex.scale += 3f * delta;
-        if (tex.scale >= SpaceProject.scale) {
-            tex.scale = SpaceProject.scale;
+        if (tex.scale >= SpaceProject.entitycfg.renderScale) {
+            tex.scale = SpaceProject.entitycfg.renderScale;
 
             screenTrans.takeOffStage = screenTrans.takeOffStage.next();
         }
@@ -162,7 +162,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
 
 
     private static void landOnPlanet(Entity transitioningEntity, ScreenTransitionComponent screenTrans) {
-        transitioningEntity.getComponent(TextureComponent.class).scale = SpaceProject.scale;//reset size to normal
+        transitioningEntity.getComponent(TextureComponent.class).scale = SpaceProject.entitycfg.renderScale;//reset size to normal
         screenTrans.doTransition = true;
 
     }

@@ -43,7 +43,7 @@ public class WorldWrapSystem extends EntitySystem {
 	ImmutableArray<Entity> entities;
 	
 	public WorldWrapSystem(int mapSize) {
-		wrap = SpaceProject.tileSize * mapSize;
+		wrap = SpaceProject.worldcfg.tileSize * mapSize;
 	}
 	
 	@Override

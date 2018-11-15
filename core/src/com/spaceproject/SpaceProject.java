@@ -6,6 +6,8 @@ import com.badlogic.gdx.Gdx;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.EntityConfig;
 import com.spaceproject.config.KeyConfig;
+import com.spaceproject.config.UIConfig;
+import com.spaceproject.config.WorldConfig;
 import com.spaceproject.screens.TitleScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 
@@ -18,12 +20,10 @@ public class SpaceProject extends Game {
 
 	public static EntityConfig entitycfg;
 	public static CelestialConfig celestcfg;
+	public static WorldConfig worldcfg;
+	public static UIConfig uicfg;
 	public static KeyConfig keycfg;
 
-	//TODO: put into a config
-	public static float scale = 4.0f;
-	public static int tileSize = 32;
-	public static int chunkSize = 8;
 
 	@Override
 	public void create() {	
@@ -57,11 +57,14 @@ public class SpaceProject extends Game {
 		//celestcfg = (CelestialConfig) new CelestialConfig().loadFromJson();
 		celestcfg = new CelestialConfig();
 		celestcfg.loadDefault();
-		
-		
-		//WorldConfig worldcfg = (WorldConfig) new WorldConfig().loadFromJson();
-		//worldcfg.loadDefault();
-		//worldcfg.saveToJson();
+
+
+		worldcfg = new WorldConfig();
+		worldcfg.loadDefault();
+
+
+		uicfg = new UIConfig();
+		uicfg.loadDefault();
 	}
 
 	public static boolean isMobile() {

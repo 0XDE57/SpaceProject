@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.systems.SpaceLoadingSystem;
@@ -19,10 +20,10 @@ public class MiniMap {
     public MapState mapState = MapState.off;
     private MiniMapPosition miniMapPosition = MiniMapPosition.bottomRight;
 
-    private int chunkSize = (int) Math.pow(2, 17 - 1);
+    private int chunkSize;
     private int borderWidth = 3;
     private int size = 6;
-    public static float mapScale = 500;
+    private float mapScale;
 
     private SimpleTimer drawScaleTimer = new SimpleTimer(5000);
 
@@ -32,6 +33,10 @@ public class MiniMap {
 
     public MiniMap() {
         updateMapPosition();
+        resetMapScale();
+
+        chunkSize = SpaceProject.uicfg.mapChunkSize;
+
         fontSmall = FontFactory.createFont(FontFactory.fontPressStart, 12);
     }
 
@@ -196,5 +201,8 @@ public class MiniMap {
         System.out.println("map scale: " + mapScale);
     }
 
+    public void resetMapScale() {
+        mapScale = SpaceProject.uicfg.mapScale;
+    }
 }
 

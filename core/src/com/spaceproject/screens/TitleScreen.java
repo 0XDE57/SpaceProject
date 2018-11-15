@@ -31,13 +31,13 @@ import com.spaceproject.screens.animations.TreeAnim;
 
 public class TitleScreen extends MyScreenAdapter {
 
-	SpaceProject game;
+	private SpaceProject game;
 
 	private Stage stage;
 	private BitmapFont fontComfortaaBold;
 	private Matrix4 projectionMatrix = new Matrix4();
 
-	TitleAnimation foregroundAnimation, backgroundAnimation;
+	private TitleAnimation foregroundAnimation, backgroundAnimation;
 	enum ForegroundAnimation {
 		tree, delaunay, orbit, drop
 	}

@@ -3,6 +3,8 @@ package com.spaceproject.config;
 
 public class EntityConfig extends Config {
 
+    public float renderScale;
+
     //character
     public float characterHealth;
     public float characterWalkSpeed;
@@ -27,6 +29,8 @@ public class EntityConfig extends Config {
 
     @Override
     public void loadDefault() {
+        renderScale = 4.0f;
+
         characterHealth = 100;
         characterWalkSpeed = 300;//70f
 
@@ -35,6 +39,7 @@ public class EntityConfig extends Config {
 
         shipSizeMin = 10;
         shipSizeMax = 36;
+        shipHealth = 200;
         engineThrust = 320;
         cannonSize = 1;
         cannonAmmo = 5;

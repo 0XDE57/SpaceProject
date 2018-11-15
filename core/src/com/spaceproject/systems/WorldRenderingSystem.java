@@ -45,13 +45,11 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	
 	private ArrayList<Tile> tiles = Tile.defaultTiles;
 
-	long seed;
-	NoiseBuffer noise;
+	private long seed;
+	private NoiseBuffer noise;
 
 	private int surround; //how many tiles to draw around the camera
-	
-	private int mapSize;
-	
+
 	private Texture tileTex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));
 	
 	public WorldRenderingSystem(Entity planetEntity) {
@@ -67,7 +65,6 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		surround = 30;//TODO: split into surrondX/Y, change to be calculated by tileSize and window height/width
 
 		SeedComponent seedComp = planetEntity.getComponent(SeedComponent.class);
-		//PlanetComponent planetComp = planetEntity.getComponent(PlanetComponent.class);
 
 		seed = seedComp.seed;
 		loadMap();
@@ -81,7 +78,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		NoiseBuffer newNoise = GameScreen.universe.getNoiseForSeed(seed);
 		if (newNoise != null) {
 			noise = newNoise;
-			mapSize = newNoise.heightMap.length * SpaceProject.tileSize;
+			//mapSize = newNoise.heightMap.length * SpaceProject.worldcfg.tileSize;
 		}
 
 		if (noise == null) {
@@ -149,8 +146,9 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	private void drawTiles() {
 			
 		// calculate tile that the camera is in
-		int centerX = (int) (cam.position.x / SpaceProject.tileSize);
-		int centerY = (int) (cam.position.y / SpaceProject.tileSize);
+		int tileSize = SpaceProject.worldcfg.tileSize;
+		int centerX = (int) (cam.position.x / tileSize);
+		int centerY = (int) (cam.position.y / tileSize);
 
 		// subtract 1 from tile position if less than zero to account for -1/n = 0
 		if (cam.position.x < 0) --centerX;		
@@ -169,9 +167,9 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 				batch.setColor(tiles.get(noise.tileMap[tX][tY]).getColor());
 				//if (tX == heightMap.length-1 || tY == heightMap.length-1) batch.setColor(Color.BLACK);
 				batch.draw(tileTex,
-						tileX * SpaceProject.tileSize,
-						tileY * SpaceProject.tileSize,
-						SpaceProject.tileSize, SpaceProject.tileSize);
+						tileX * tileSize,
+						tileY * tileSize,
+						tileSize, tileSize);
 			}
 		}
 

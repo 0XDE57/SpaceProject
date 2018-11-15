@@ -75,11 +75,9 @@
       [ ] define proper heights for importance as current values are somewhat arbitrary
 
 [ ] system processing priority
-[ ] make colored tiles use texture regions instead of individual textures. (create one texture with all colors/tiles on it)
 [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
 [ ] fix ship edges to use entire width of texture
 [ ] try setting camera rotate to player orientation?
-[ ] pause/menu
 [ ] simple scripting? text file of commands for creating entities and printing story text?
 [ ] multiplayer/networking...or just commit suicide
 [...] rotating sprites/textures on 3d/w axis
@@ -174,10 +172,10 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
 [ ] game start
 
 ---UI---
-[...] fix main menu scaling
+[x] fix main menu scaling
 [...] mobile input system
 [...] debug UI
-[ ] pause menu
+[...] pause menu
 [ ] player manager/inventory/shipbuilder thingy
 [ ] career event timeline stats
 

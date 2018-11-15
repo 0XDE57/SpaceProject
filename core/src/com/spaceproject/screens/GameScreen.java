@@ -252,7 +252,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		// ===============ENTITIES===============
 		// add player
 		Entity ship = transitioningEntity;
-		int position = mapSize * SpaceProject.tileSize / 2;//set  position to middle of planet
+		int position = mapSize * SpaceProject.worldcfg.tileSize / 2;//set  position to middle of planet
 		ship.getComponent(TransformComponent.class).pos.set(position, position);
 		engine.addEntity(ship);
 

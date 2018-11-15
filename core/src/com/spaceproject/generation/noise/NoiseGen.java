@@ -105,7 +105,8 @@ public class NoiseGen {
 	
 	public static int[][] createPixelatedTileMap(int[][] tileMap, ArrayList<Tile> tiles) {
 
-		int chunks = tileMap.length/SpaceProject.chunkSize;
+		int chunkSize = SpaceProject.worldcfg.chunkSize;
+		int chunks = tileMap.length / chunkSize;
 		int[][] pixelatedMap = new int[chunks][chunks];
 		
 		//for each chunk
@@ -113,15 +114,15 @@ public class NoiseGen {
 			for (int cX = 0; cX < chunks; cX++) {
 				
 				//calculate chunk position
-				int chunkX = cX * SpaceProject.chunkSize;
-				int chunkY = cY * SpaceProject.chunkSize;
+				int chunkX = cX * chunkSize;
+				int chunkY = cY * chunkSize;
 				
 				//reset chunk count
 				int[] count = new int[tiles.size()];
 				
 				//for each tile in chunk, count occurrence of tiles within a chunk
-				for (int y = chunkY; y < chunkY+SpaceProject.chunkSize; y++) {
-					for (int x = chunkX; x < chunkX+SpaceProject.chunkSize; x++) {
+				for (int y = chunkY; y < chunkY + chunkSize; y++) {
+					for (int x = chunkX; x < chunkX + chunkSize; x++) {
 						count[tileMap[x][y]]++;
 					}
 				}

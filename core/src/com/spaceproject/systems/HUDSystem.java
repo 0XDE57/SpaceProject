@@ -58,9 +58,6 @@ public class HUDSystem extends EntitySystem {
 	private boolean drawEdgeMap = true;
 
 	
-	float opacity = 0.7f;
-	Color barBackground = new Color(1,1,1,0.5f);
-	
 	public HUDSystem() {
 		this(MyScreenAdapter.cam, MyScreenAdapter.shape, MyScreenAdapter.batch);
 	}
@@ -180,7 +177,7 @@ public class HUDSystem extends EntitySystem {
 		}
 		if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
 			if (miniMap.mapState != MapState.off) {
-				miniMap.mapScale = 500;
+				miniMap.resetMapScale();
 			}
 		}
 
@@ -193,29 +190,29 @@ public class HUDSystem extends EntitySystem {
 	/**
 	 * Draw health bars on entities.
 	 */
-	private void drawHealthBars() {		
+	private void drawHealthBars() {
 		//bar dimensions
-		int barLength = 40;
-		int barWidth = 8;
-		int yOffset = -20; //position from entity		
-		
+		int barLength = SpaceProject.uicfg.entityHPbarLength;
+		int barWidth = SpaceProject.uicfg.entityHPbarWidth;
+		int yOffset = SpaceProject.uicfg.entityHPbarYOffset;
+
 		for (Entity entity : killables) {
 			Vector3 pos = cam.project(new Vector3(Mappers.transform.get(entity).pos.cpy(),0));
 			HealthComponent health = Mappers.health.get(entity);
 			
 			
 			//ignore full health
-			if (health.health == health.maxHealth) {
-				//continue;
+			if (!SpaceProject.uicfg.renderFullHealth && health.health == health.maxHealth) {
+				continue;
 			}
 			
 			//background
-			shape.setColor(barBackground);
+			shape.setColor(SpaceProject.uicfg.entityHPbarBackground);
 			shape.rect(pos.x-barLength/2, pos.y+yOffset, barLength, barWidth);
 			
 			//health
 			float ratio = health.health/health.maxHealth;
-			shape.setColor(new Color(1 - ratio, ratio, 0, opacity)); //creates color between red and green
+			shape.setColor(1 - ratio, ratio, 0, SpaceProject.uicfg.entityHPbarOpacity); //creates color between red and green
 			shape.rect(pos.x-barLength/2, pos.y+yOffset, barLength * ratio, barWidth);
 		}
 			
@@ -225,10 +222,10 @@ public class HUDSystem extends EntitySystem {
 	 * Draw the players health and ammo bar.
 	 */
 	private void drawPlayerStatus() {
-		int barWidth = 200;
-		int barHeight = 12;
+		int barWidth = SpaceProject.uicfg.playerHPBarWidth;
+		int barHeight = SpaceProject.uicfg.playerHPBarHeight;
 		int playerBarX = Gdx.graphics.getWidth()/2 - barWidth /2;
-		int playerHPBarY = 55;
+		int playerHPBarY = SpaceProject.uicfg.playerHPBarY;
 		int playerAmmoBarY = playerHPBarY - barHeight - 1;
 
 		if (player == null || player.size() == 0) return;
@@ -237,9 +234,9 @@ public class HUDSystem extends EntitySystem {
 		HealthComponent health = Mappers.health.get(player.first());		
 		if (health != null) {
 			float ratioHP = health.health / health.maxHealth;
-			shape.setColor(barBackground);
+			shape.setColor(SpaceProject.uicfg.entityHPbarBackground);
 			shape.rect(playerBarX, playerHPBarY, barWidth, barHeight);
-			shape.setColor(new Color(1 - ratioHP, ratioHP, 0, opacity));
+			shape.setColor(1 - ratioHP, ratioHP, 0, SpaceProject.uicfg.entityHPbarOpacity);
 			shape.rect(playerBarX, playerHPBarY, barWidth * ratioHP, barHeight);
 		}
 		
@@ -247,9 +244,9 @@ public class HUDSystem extends EntitySystem {
 		CannonComponent cannon = Mappers.cannon.get(player.first());
 		if (cannon != null) {
 			float ratioAmmo = (float) cannon.curAmmo / (float) cannon.maxAmmo;
-			shape.setColor(barBackground);
+			shape.setColor(SpaceProject.uicfg.entityHPbarBackground);
 			shape.rect(playerBarX, playerAmmoBarY, barWidth, barHeight);
-			shape.setColor(Color.TEAL);
+			shape.setColor(SpaceProject.uicfg.playerAmmoBarColor);
 			shape.rect(playerBarX, playerAmmoBarY, barWidth * ratioAmmo, barHeight);
 
 
@@ -257,7 +254,7 @@ public class HUDSystem extends EntitySystem {
 				int x = playerBarX + (i * barWidth / cannon.maxAmmo);
 				//draw recharge bar
 				if (i == cannon.curAmmo) {
-					shape.setColor(Color.SLATE);
+					shape.setColor(SpaceProject.uicfg.playerAmmoBarRechargeColor);
 					shape.rect(x, playerAmmoBarY, barWidth/cannon.maxAmmo*cannon.timerRechargeRate.ratio(), barHeight);
 				}
 				//draw divisions to mark individual ammo
@@ -302,7 +299,7 @@ public class HUDSystem extends EntitySystem {
 		double gain = (markerSmall-markerLarge)/(distSmall-distLarge);
 		double offset = markerSmall - gain * distSmall;
 		
-		int padding = (int) (markerLarge + 4); //how close to draw from edge of screen (in pixels)
+		int padding = (int)(markerLarge + 4); //how close to draw from edge of screen (in pixels)
 		int width = Gdx.graphics.getWidth();
 		int height = Gdx.graphics.getHeight();	
 		int centerX = width/2;
@@ -340,7 +337,7 @@ public class HUDSystem extends EntitySystem {
 			}
 			
 			//position to draw marker
-			float markerX = 0, markerY = 0; 
+			float markerX, markerY;
 			
 			//calculate slope of line (y = mx+b)
 			float slope = screenPos.y / screenPos.x;

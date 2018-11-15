@@ -130,7 +130,7 @@ public class Test3DScreen extends ScreenAdapter {
         float originY = height * 0.5f; //center
         int x = Gdx.input.getX();
         int y = Gdx.graphics.getHeight()-Gdx.input.getY();
-        float scale = SpaceProject.scale;
+        float scale = SpaceProject.entitycfg.renderScale;
 
         //draw texture
         batch.draw(t, (x - originX), (y - originY),

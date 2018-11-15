@@ -252,12 +252,12 @@ public class TextureFactory {
 		Pixmap pixmap = new Pixmap(pixelatedTileMap.length, pixelatedTileMap.length, Format.RGBA4444);
 		 */
 		
-		int s = mapSize/SpaceProject.chunkSize;//SIZE = chunks = tileMap.length/chunkSize
-		Pixmap pixmap = new Pixmap(s, s, Format.RGBA4444);
+		int size = mapSize/SpaceProject.worldcfg.chunkSize;//SIZE = chunks = tileMap.length/chunkSize
+		Pixmap pixmap = new Pixmap(size, size, Format.RGBA4444);
 		
 		// draw circle for planet
 		pixmap.setColor(1, 1, 1, 1);
-		pixmap.fillCircle(s/2,s/2,s/2-1);
+		pixmap.fillCircle(size/2,size/2,size/2-1);
 		/*
 		//draw noise
 		for (int y = 0; y < s; ++y) {
