@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.FontFactory;
+import com.spaceproject.screens.animations.DropAnim;
 import com.spaceproject.screens.debug.Test3DScreen;
 import com.spaceproject.screens.debug.TestNoiseScreen;
 import com.spaceproject.screens.debug.TestShipGenerationScreen;
@@ -37,8 +38,8 @@ public class TitleScreen extends MyScreenAdapter {
 	private Matrix4 projectionMatrix = new Matrix4();
 
 	TitleAnimation foregroundAnimation, backgroundAnimation;
-	enum ForgroundAnimation {
-		tree, delaunay, orbit
+	enum ForegroundAnimation {
+		tree, delaunay, orbit, drop
 	}
 
 	public TitleScreen(SpaceProject spaceProject) {
@@ -84,7 +85,14 @@ public class TitleScreen extends MyScreenAdapter {
 
 
 		backgroundAnimation.render(delta, shape);
+
+		//enable transparency
+		Gdx.gl.glEnable(GL20.GL_BLEND);
+		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
 		foregroundAnimation.render(delta, shape);
+
+		Gdx.gl.glDisable(GL20.GL_BLEND);
 
 		//draw title
 		batch.begin();
@@ -224,10 +232,10 @@ public class TitleScreen extends MyScreenAdapter {
 	}
 
 
-
-	public static ForgroundAnimation randomAnim()  {
-		return ForgroundAnimation.values()[MathUtils.random(ForgroundAnimation.values().length-1)];
+	private static ForegroundAnimation randomAnim()  {
+		return ForegroundAnimation.values()[MathUtils.random(ForegroundAnimation.values().length-1)];
 	}
+
 	private void initForegroundAnim() {
 		switch (randomAnim()) {
 			case delaunay:
@@ -238,6 +246,9 @@ public class TitleScreen extends MyScreenAdapter {
 				break;
 			case orbit:
 				foregroundAnimation = new OrbitAnim();
+				break;
+			case drop:
+				foregroundAnimation = new DropAnim();
 				break;
 		}
 	}
