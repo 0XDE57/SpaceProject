@@ -113,7 +113,7 @@ public class TextureFactory {
 		boolean debugImage = false;
 		
 		// generate pixmap texture
-		pixmap = new Pixmap(size, size / 2, Format.RGBA4444);
+		Pixmap pixmap = new Pixmap(size, size / 2, Format.RGBA4444);
 
 		int width = pixmap.getWidth() - 1;
 		int height = pixmap.getHeight() - 1;
@@ -196,7 +196,21 @@ public class TextureFactory {
 				
 		// create texture and dispose pixmap to prevent memory leak
 		Texture t = new Texture(pixmap);
-		pixmap.dispose();
+		//pixmap.dispose();//or rather don't dispose because it causing issue when trying to retrieve later
+
+		/*if pixmap is disposed, pixmap reads bad even though the texture is still fine, TODO: investigate
+		Pixmap shipMap = t.getTextureData().consumePixmap();
+		for (int x = 0; x < shipMap.getWidth(); x++) {
+			for (int y = 0; y < shipMap.getHeight(); y++) {
+
+				int pixel = shipMap.getPixel(x, y);
+				System.out.print(pixel+" ");
+			}
+			System.out.println("");
+		}
+		System.out.println("");
+		*/
+
 		return t;
 	}
 	
@@ -394,4 +408,94 @@ public class TextureFactory {
 		return t;
 	}
 
+    public static Texture generateShip2(long seed, int size) {
+		MathUtils.random.setSeed(seed);
+
+		boolean debugImage = false;
+
+		// generate pixmap texture
+		Pixmap pixmap = new Pixmap(size, size / 2, Format.RGBA4444);
+
+		int width = pixmap.getWidth() - 1;
+		int height = pixmap.getHeight() - 1;
+
+		// 0-----width
+		// |
+		// |
+		// |
+		// height
+
+		// smallest height a ship can be (4 because player is 4 pixels)
+		int minEdge = 4;
+		// smallest starting point for an edge
+		float initialMinimumEdge = height * 0.8f;
+		// edge to create shape of ship. initialize to random starting size
+		int edge = MathUtils.random((int) initialMinimumEdge, height - 1);
+
+		for (int yY = 0; yY <= width; yY++) {
+			// draw body
+			if (yY == 0 || yY == width) {
+				// if first or last position of texture, "cap" it to complete
+				// the edging
+				pixmap.setColor(0.5f, 0.5f, 0.5f, 1);
+			} else {
+				pixmap.setColor(0, 0.2f, 0.2f, 1);
+			}
+
+			if (!debugImage) {
+				pixmap.drawLine(yY, edge, yY, height - edge);
+			}
+
+			// draw edging
+			pixmap.setColor(0.5f, 0.5f, 0.5f, 1);
+			pixmap.drawPixel(yY, edge);// bottom edge
+			pixmap.drawPixel(yY, height - edge);// top edge
+
+			// generate next edge
+			// beginning and end of ship have special rule to not be greater
+			// than the consecutive or previous edge
+			// so that the "caps" look right
+			if (yY == 0) { // beginning
+				++edge;
+			} else if (yY == width - 1) { // end
+				--edge;
+			} else { // body
+				// random decide to move edge. if so, move edge either up or
+				// down 1 pixel
+				edge = MathUtils.randomBoolean() ? (MathUtils.randomBoolean() ? --edge
+						: ++edge)
+						: edge;
+			}
+
+			// keep edges within height and minEdge
+			if (edge > height) {
+				edge = height;
+			}
+			if (edge - (height - edge) < minEdge) {
+				edge = (height + minEdge) / 2;
+			}
+		}
+
+		if (debugImage) {
+			// fill to see image size/visual aid---------
+			pixmap.setColor(1, 1, 1, 1);
+			//pixmap.fill();
+
+			// mini pins for visual aid----------------
+			pixmap.setColor(1, 0, 0, 1);// red: top-right
+			pixmap.drawPixel(0, 0);
+
+			pixmap.setColor(0, 1, 0, 1);// green: top-left
+			pixmap.drawPixel(width, 0);
+
+			pixmap.setColor(0, 0, 1, 1);// blue: bottom-left
+			pixmap.drawPixel(0, height);
+
+			pixmap.setColor(1, 1, 0, 1);// yellow: bottom-right
+			pixmap.drawPixel(width, height);
+		}
+
+		// create texture
+		return new Texture(pixmap);
+	}
 }
