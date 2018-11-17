@@ -408,7 +408,7 @@ public class TextureFactory {
 		return t;
 	}
 
-    public static Texture generateShip2(long seed, int size) {
+    public static Texture generateShipUnderSide(long seed, int size) {
 		MathUtils.random.setSeed(seed);
 
 		boolean debugImage = false;

@@ -44,7 +44,9 @@
             //if not important, remove from engine, forget about existence
         }
 
-
+[...] 3D roll animation for dodge
+    [x] fix 3D texture test
+    [ ] integrate
 
 [...] fix texture / map loading
     [x] seed based load instead of position

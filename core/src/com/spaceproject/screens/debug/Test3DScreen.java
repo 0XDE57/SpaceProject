@@ -3,19 +3,15 @@ package com.spaceproject.screens.debug;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -23,16 +19,16 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
+import com.spaceproject.utility.MyMath;
 
 
 public class Test3DScreen extends ScreenAdapter {
@@ -43,15 +39,12 @@ public class Test3DScreen extends ScreenAdapter {
     SpriteBatch batch = new SpriteBatch();
     ModelBatch modelBatch = new ModelBatch();
 
-    //Entity test = EntityFactory.createPlanet(0, new Entity(),0, 0, 0, 0,false);
     Texture t = TextureFactory.generateCharacter();
-    Texture tile = TextureFactory.createTile(Color.MAGENTA);
-    Texture shipTex;
     Texture test = TextureFactory.createTestTile();
     Thing ship3d;
     Sprite front, back;
 
-    Texture testtex;
+    Texture combinedTex;
 
     public Model model;
     public ModelInstance instance;
@@ -68,76 +61,33 @@ public class Test3DScreen extends ScreenAdapter {
         camController = new CameraInputController(cam);
         Gdx.input.setInputProcessor(camController);
 
-        shipTex = TextureFactory.generateShip(123, 20);
+        //create ship textures
+        Texture shipTop = TextureFactory.generateShip(123, 20);
+        Texture shipBottom = TextureFactory.generateShipUnderSide(123, 20);
 
-
-        /*
-        Pixmap shipMap = shipTex.getTextureData().consumePixmap();
-        for (int x = 0; x < shipMap.getWidth(); x++) {
-            for (int y = 0; y < shipMap.getHeight(); y++) {
-                int pixel = shipMap.getPixel(x, y);
-                System.out.print(pixel+" ");
-            }
-            System.out.println("");
-        }
-        System.out.println("");*/
-
-        Texture shipTex2 = TextureFactory.generateShip2(123, 20);
-
-        int width = shipTex.getWidth(), height = shipTex.getHeight();
+        //combine textures
+        int width = shipTop.getWidth(), height = shipTop.getHeight();
         Pixmap pixmap = new Pixmap(width, height*2, Pixmap.Format.RGBA8888);
+        pixmap.drawPixmap(shipTop.getTextureData().consumePixmap(), 0, 0);
+        pixmap.drawPixmap(shipBottom.getTextureData().consumePixmap(),0, height);
+        combinedTex = new Texture(pixmap);
 
-        /*
-        for (int y = 0; y < shipTex.getHeight(); y++) {
-            for (int x = 0; x < shipTex.getWidth(); x++) {
-                int pixel = shipMap.getPixel(x, y);
-                System.out.print(pixel+" ");
-                //pixmap.drawPixel(x, y, pixel);
-            }
-            System.out.println("");
-        }
+        /*//put combined texture into atlas
+        TextureAtlas texAtlas = new TextureAtlas();
+        texAtlas.addRegion("front", new TextureRegion(combinedTex, 0, 0, width, height));
+        texAtlas.addRegion("back", new TextureRegion(combinedTex, 0, height, width, height));
+        front = texAtlas.createSprite("front");
+        back = texAtlas.createSprite("back");
         */
 
-        pixmap.drawPixmap(shipTex.getTextureData().consumePixmap(), 0, 0);
-        pixmap.drawPixmap(shipTex2.getTextureData().consumePixmap(),0, height);
-        //shipTex.draw(pixmap, 0, 0);
-        //shipTex2.draw(pixmap, 0, height);
-
-
-        /*
-        for (int y = 0; y < shipTex.getHeight(); y++) {
-            for (int x = 0; x < shipTex.getWidth(); x++) {
-                //pixmap.drawPixel(x, y, shipTex.getTextureData().consumePixmap().getPixel(x, y));
-            }
-        }*/
-
-        /*
-        */
-        testtex = new Texture(pixmap);
-        TextureAtlas ttatlas = new TextureAtlas();
-        ttatlas.addRegion("front", new TextureRegion(testtex,0,0, width, height));
-        ttatlas.addRegion("back", new TextureRegion(testtex, 0, height, width, height));
-
-        //Sprite backSprite = new Sprite(shipTex2);
-
-        //TextureAtlas testAtlas = new TextureAtlas();
-        //testAtlas.addRegion("front", shipTex, 0, 0, shipTex.getWidth(), shipTex.getHeight());
-        //testAtlas.addRegion("back", shipTex2, 0, 0, shipTex2.getWidth(), shipTex2.getHeight());
-        Sprite a = ttatlas.createSprite("front");
-        Sprite b = ttatlas.createSprite("back");
-
-        //TextureAtlas atlas = new TextureAtlas("data/carddeck.atlas");
-        front = a;//atlas.createSprite("clubs");
-        back = b;//atlas.createSprite("back");
-
+        //create 3D ship with front and back texture
+        front = new Sprite(combinedTex,0,0, width, height);
+        back = new Sprite(combinedTex, 0, height, width, height);
         ship3d = new Thing(front, back);
 
+
+        /*
         ModelBuilder modelBuilder = new ModelBuilder();
-        /*Material testmat = new Material(
-                TextureAttribute.createDiffuse(shipTex),
-                new BlendingAttribute(false, 1f),
-                FloatAttribute.createAlphaTest(0.5f)
-        );*/
         model = modelBuilder.createBox(10f, 10f, 10f,
                 new Material(TextureAttribute.createDiffuse(test)),
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
@@ -145,12 +95,12 @@ public class Test3DScreen extends ScreenAdapter {
 
 
         decalBatch = new DecalBatch(new CameraGroupStrategy(cam));
-        shipDecalA = Decal.newDecal(new TextureRegion(shipTex));
-        shipDecalB = Decal.newDecal(new TextureRegion(shipTex));
-        shipDecalC = Decal.newDecal(new TextureRegion(shipTex));
-        shipDecalD = Decal.newDecal(new TextureRegion(shipTex));
-
-        t = testtex;
+        shipDecalA = Decal.newDecal(new TextureRegion(shipTop));
+        shipDecalB = Decal.newDecal(new TextureRegion(shipTop));
+        shipDecalC = Decal.newDecal(new TextureRegion(shipTop));
+        shipDecalD = Decal.newDecal(new TextureRegion(shipTop));
+        */
+        t = combinedTex;
     }
 
     float rotX = 0, rotY = 0, rotZ = 0;
@@ -162,7 +112,6 @@ public class Test3DScreen extends ScreenAdapter {
 
         camController.update();
         cam.update();
-        //System.out.println(cam.position + "-" + cam.direction);
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             cam.position.x += 1f;
         }
@@ -183,7 +132,7 @@ public class Test3DScreen extends ScreenAdapter {
         batch.setProjectionMatrix(cam.combined);
         //batch.setTransformMatrix(cam.combined);
         batch.begin();
-        batch.draw(testtex, -100,-100,50,50);
+        batch.draw(combinedTex, -100,-100,50,50);
         batch.draw(t, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
 
 
@@ -208,16 +157,31 @@ public class Test3DScreen extends ScreenAdapter {
 
         batch.end();
 
-        instance.transform.rotate(Vector3.Y, 90 * delta);
-        //ship3d.worldTransform.translate(0, 0, 0);
         modelBatch.begin(cam);
         //modelBatch.render(instance);
         modelBatch.render(ship3d);
         modelBatch.end();
 
-        ship3d.worldTransform.rotate(Vector3.X, 90 * delta);
+        //ship3d.worldTransform.rotate(Vector3.X, 90 * delta);
         //ship3d.worldTransform.rotate(Vector3.Y, 60 * delta);
         //ship3d.worldTransform.rotate(Vector3.Z, 90 * delta);
+        ship3d.worldTransform.setToRotation(Vector3.Z, MyMath.angleTo(
+                (int) Gdx.graphics.getWidth()/2,//ship3d.worldTransform.getTranslation(Vector3.X).x,
+                (int)Gdx.graphics.getHeight()/2,//ship3d.worldTransform.getTranslation(Vector3.Y).y,
+                Gdx.input.getX(),
+                Gdx.graphics.getHeight()-Gdx.input.getY())* MathUtils.radDeg);
+
+        if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+            rotX+=10f;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.E)) {
+            rotX-=10f;
+        }
+        //ship3d.worldTransform.setToRotation(Vector3.X, rotX);
+        ship3d.worldTransform.rotate(Vector3.X, rotX);
+
+
+
 
         /*
         shipDecalA.setPosition(0, 5, 0);
