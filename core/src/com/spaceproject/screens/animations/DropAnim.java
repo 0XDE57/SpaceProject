@@ -9,13 +9,35 @@ import java.util.Iterator;
 
 public class DropAnim extends TitleAnimation {
 
+    int maxDrops;
+    int ringChance;
+    int maxRings;
+
     private ArrayList<Drop> drops = new ArrayList<Drop>();
+
+    public DropAnim() {
+        this(6, 30, 5);
+    }
+
+    public DropAnim(int maxDrops, int ringChance, int maxRings) {
+        this.maxDrops = maxDrops;
+        this.ringChance = ringChance;
+        this.maxRings = maxRings;
+    }
 
     @Override
     public void render(float delta, ShapeRenderer shape) {
 
-        if (drops.size() < 10 && MathUtils.random(20) == 0) {
-            drops.add(new Drop(MathUtils.random(0, Gdx.graphics.getWidth()), MathUtils.random(0, Gdx.graphics.getHeight()), 3, 80f));
+        if (drops.size() < maxDrops && MathUtils.random(ringChance) == 0) {
+            int numRings = MathUtils.random(1, maxRings);
+            float ringRad = MathUtils.random(40, 150);
+            float nextRing = MathUtils.random(8f, 20f);
+
+            //could improve by not allowing overlapping rings (low priority, just playing)
+            int x = MathUtils.random(0, Gdx.graphics.getWidth());
+            int y = MathUtils.random(0, Gdx.graphics.getHeight());
+
+            drops.add(new Drop(x, y, numRings, ringRad, nextRing));
         }
 
 
@@ -39,13 +61,15 @@ public class DropAnim extends TitleAnimation {
         int x, y;
         int numRings, maxRings;
         float ringRad;
+        float nextRing;
         ArrayList<Ring> rings;
 
-        Drop(int x, int y, int maxRings, float ringRad) {
+        Drop(int x, int y, int maxRings, float ringRad, float nextRing) {
             this.x = x;
             this.y = y;
             this.maxRings = maxRings;
             this.ringRad = ringRad;
+            this.nextRing = nextRing;
             rings = new ArrayList<Ring>();
         }
 
@@ -54,7 +78,7 @@ public class DropAnim extends TitleAnimation {
                 if (rings.size() == 0) {
                     rings.add(new Ring(ringRad));
                     numRings++;
-                } else if (rings.get(rings.size()-1).radius > 10f) {
+                } else if (rings.get(rings.size()-1).radius > nextRing) {
                     rings.add(new Ring(ringRad));
                     numRings++;
                 }
