@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -13,14 +14,10 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.graphics.g3d.decals.Decal;
-import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
@@ -34,32 +31,44 @@ import com.spaceproject.utility.MyMath;
 public class Test3DScreen extends ScreenAdapter {
 
     CameraInputController camController;
-    PerspectiveCamera cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-    //OrthographicCamera cam = new OrthographicCamera();
+    PerspectiveCamera perpectiveCam = new PerspectiveCamera(45, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    OrthographicCamera orthographicCam;
     SpriteBatch batch = new SpriteBatch();
     ModelBatch modelBatch = new ModelBatch();
 
-    Texture t = TextureFactory.generateCharacter();
-    Texture test = TextureFactory.createTestTile();
+    Texture t; //= TextureFactory.generateCharacter();
+    //Texture test = TextureFactory.createTestTile();
     Thing ship3d;
-    Sprite front, back;
+    //Sprite front, back;
 
     Texture combinedTex;
 
+    /*
     public Model model;
     public ModelInstance instance;
 
-
     DecalBatch decalBatch;
     Decal shipDecalA, shipDecalB, shipDecalC, shipDecalD;
+    */
+    int playerX, playerY;
+
     public Test3DScreen() {
-        cam.position.set(0, 0, 100/*350*/);
-        cam.lookAt(0, 0, 0);
+        //integration approaches:
+        //a: two separate cameras, keeps current one game is based around, and use perspective cam for 3D stuff
+        //b: move entire game to perspective camera
+
+        perpectiveCam.position.set(0, 0, 100/*350*/);
+        perpectiveCam.lookAt(0, 0, 0);
         //cam.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        cam.near = 1f;
-        cam.far = 400f;
-        camController = new CameraInputController(cam);
+        perpectiveCam.near = 1f;
+        perpectiveCam.far = 400f;
+        // setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camController = new CameraInputController(perpectiveCam);
         Gdx.input.setInputProcessor(camController);
+
+        orthographicCam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        perpectiveCam.near = 1f;
+        perpectiveCam.far = 400f;
 
         //create ship textures
         Texture shipTop = TextureFactory.generateShip(123, 20);
@@ -72,17 +81,9 @@ public class Test3DScreen extends ScreenAdapter {
         pixmap.drawPixmap(shipBottom.getTextureData().consumePixmap(),0, height);
         combinedTex = new Texture(pixmap);
 
-        /*//put combined texture into atlas
-        TextureAtlas texAtlas = new TextureAtlas();
-        texAtlas.addRegion("front", new TextureRegion(combinedTex, 0, 0, width, height));
-        texAtlas.addRegion("back", new TextureRegion(combinedTex, 0, height, width, height));
-        front = texAtlas.createSprite("front");
-        back = texAtlas.createSprite("back");
-        */
-
         //create 3D ship with front and back texture
-        front = new Sprite(combinedTex,0,0, width, height);
-        back = new Sprite(combinedTex, 0, height, width, height);
+        Sprite front = new Sprite(combinedTex,0,0, width, height);
+        Sprite back = new Sprite(combinedTex, 0, height, width, height);
         ship3d = new Thing(front, back);
 
 
@@ -101,6 +102,8 @@ public class Test3DScreen extends ScreenAdapter {
         shipDecalD = Decal.newDecal(new TextureRegion(shipTop));
         */
         t = combinedTex;
+
+        System.out.print(orthographicCam.far);
     }
 
     float rotX = 0, rotY = 0, rotZ = 0;
@@ -111,28 +114,33 @@ public class Test3DScreen extends ScreenAdapter {
         Gdx.gl.glClear(Gdx.gl20.GL_COLOR_BUFFER_BIT | Gdx.gl20.GL_DEPTH_BUFFER_BIT);
 
         camController.update();
-        cam.update();
+        perpectiveCam.update();
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            cam.position.x += 1f;
+            playerX += 1f;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            cam.position.x -= 1f;
+            playerX -= 1f;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            cam.position.y += 1f;
+            playerY += 1f;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            cam.position.y -= 1f;
+            playerY -= 1f;
         }
 
+        perpectiveCam.position.x = playerX;
+        perpectiveCam.position.y = playerY;
+        orthographicCam.position.x = playerX;
+        orthographicCam.position.y = playerY;
 
 
         //Texture t = test.getComponent(TextureComponent.class).texture;
         //Vector3 pos = test.getComponent(TransformComponent.class).pos;
-        batch.setProjectionMatrix(cam.combined);
+        orthographicCam.update();
+        batch.setProjectionMatrix(orthographicCam.combined);
         //batch.setTransformMatrix(cam.combined);
         batch.begin();
-        batch.draw(combinedTex, -100,-100,50,50);
+        batch.draw(combinedTex, 100,100,50,50);
         batch.draw(t, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
 
 
@@ -157,10 +165,10 @@ public class Test3DScreen extends ScreenAdapter {
 
         batch.end();
 
-        modelBatch.begin(cam);
-        //modelBatch.render(instance);
+        modelBatch.begin(orthographicCam);
         modelBatch.render(ship3d);
         modelBatch.end();
+        //ship3d.worldTransform.scl()
 
         //ship3d.worldTransform.rotate(Vector3.X, 90 * delta);
         //ship3d.worldTransform.rotate(Vector3.Y, 60 * delta);
@@ -179,8 +187,8 @@ public class Test3DScreen extends ScreenAdapter {
         }
         //ship3d.worldTransform.setToRotation(Vector3.X, rotX);
         ship3d.worldTransform.rotate(Vector3.X, rotX);
-
-
+        ship3d.worldTransform.setTranslation(playerX,playerY,-50);//bring z closer to camera so it doesn't clip outside the camera's near & far (should be at least sprites width/height)
+        //ship3d.worldTransform.
 
 
         /*
@@ -276,7 +284,7 @@ class Thing extends Renderable {
                 //,FloatAttribute.createAlphaTest(0.5f)
         );
 
-        float scale = 10;
+        float scale = front.getWidth()*4;
         float height = scale * front.getHeight()/front.getWidth();
 
         front.setSize(scale, height);
