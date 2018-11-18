@@ -9,14 +9,21 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceBackgroundTile;
+import com.spaceproject.Sprite3D;
+import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.utility.MyMath;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,7 +32,8 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 
 	//rendering
 	private OrthographicCamera cam;
-	private SpriteBatch batch;
+	private SpriteBatch spriteBatch;
+	private ModelBatch modelBatch;
 	
 	// array of entities to render
 	private Array<Entity> renderQueue = new Array<Entity>();
@@ -37,16 +45,21 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 					- Mappers.transform.get(entityA).zOrder);
 		}
 	};
+
+	private Array<Entity> renderQueue3D = new Array<Entity>();
 	
 	public SpaceRenderingSystem() {
 		this(MyScreenAdapter.cam, MyScreenAdapter.batch);
 	}
 	
 	public SpaceRenderingSystem(OrthographicCamera camera, SpriteBatch spriteBatch) {
-		super(Family.all(TransformComponent.class, TextureComponent.class).get());
+		super(Family.all(TransformComponent.class).one(TextureComponent.class, Sprite3DComponent.class).get());
+
 					
 		cam = camera;
-		batch = spriteBatch;
+		this.spriteBatch = spriteBatch;
+
+		modelBatch = new ModelBatch();
 	}
 	
 	@Override
@@ -58,7 +71,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 		Gdx.gl20.glClearColor(color.r, color.g, color.b, 1);
 		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		batch.begin();
+		spriteBatch.begin();
 		
 		//draw background tiles (stars)
 		drawParallaxTiles();
@@ -66,7 +79,36 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 		//draw game objects
 		drawEntities();
 		
-		batch.end();	
+		spriteBatch.end();
+
+
+		modelBatch.begin(cam);
+		for (Entity entity : renderQueue3D) {
+			Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
+			TransformComponent t = Mappers.transform.get(entity);
+
+			t.rotation += 0.1*delta;
+			//System.out.println(t.rotation);
+			//sprite3D.sprite.worldTransform.setToRotationRad(Vector3.Z, t.rotation);
+			//System.out.println(sprite3D.sprite.worldTransform);
+			sprite3D.sprite.worldTransform.rotateRad(Vector3.Z, t.rotation);
+
+			sprite3D.roll += 50 * delta;
+
+			//TODO:
+			//-object disappears when any rotation applied to X
+			//-object disappears somewhat arbitrarily
+			//-some strange rendering artifacts, looks like z-fighting
+			//z rotation seems kinda odd and inconsistent
+
+			//sprite3D.sprite.worldTransform.rotate(Vector3.X, sprite3D.roll);
+
+			sprite3D.sprite.worldTransform.setTranslation(0,-70,-50);
+			modelBatch.render(sprite3D.sprite);
+		}
+		renderQueue3D.clear();
+		modelBatch.end();
+
 	
 	}
 
@@ -88,7 +130,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 			float originY = height * 0.5f; //center
 			
 			//draw texture
-			batch.draw(tex.texture, (t.pos.x - originX), (t.pos.y - originY),
+			spriteBatch.draw(tex.texture, (t.pos.x - originX), (t.pos.y - originY),
 					   originX, originY,
 					   width, height,
 					   tex.scale, tex.scale,
@@ -114,7 +156,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 			//draw texture
 			float width = tile.tex.getWidth();
 			float height = tile.tex.getHeight();
-			batch.draw(tile.tex, drawX, drawY,
+			spriteBatch.draw(tile.tex, drawX, drawY,
 					   0,0,
 					   width, height,
 					   tile.scale, tile.scale,
@@ -153,8 +195,13 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 
 	@Override
 	public void processEntity(Entity entity, float deltaTime) {
-		//Add entities to render queue
-		renderQueue.add(entity);
+		if (Mappers.texture.get(entity) != null) {
+			//Add entities to render queue
+			renderQueue.add(entity);
+		} else {
+			renderQueue3D.add(entity);
+		}
+
 	}
 	
 	@Override

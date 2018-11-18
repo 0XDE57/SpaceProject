@@ -1,8 +1,11 @@
 package com.spaceproject.screens.animations;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.spaceproject.utility.MyMath;
 
 public class TreeAnim extends TitleAnimation {
 
@@ -11,7 +14,8 @@ public class TreeAnim extends TitleAnimation {
 	float tiltAngle;
 	float startAngle;
 	int iterations;
-	float rotSpeed ;
+	float rotSpeed;
+	float[] highlightAngles;
 
 	public TreeAnim() {
 		length = 15;
@@ -19,7 +23,15 @@ public class TreeAnim extends TitleAnimation {
 		tiltAngle = 180;
 		startAngle = MathUtils.PI2;
 		iterations = 8;
-		rotSpeed = 1;
+		rotSpeed = MathUtils.randomBoolean() ? 1 : -1;
+
+		highlightAngles = new float[] {
+				33,
+				211,
+				257,
+				309,
+				360,
+		};
 	}
 
 	@Override
@@ -28,12 +40,27 @@ public class TreeAnim extends TitleAnimation {
 		tiltAngle += rotSpeed * delta;
 		startAngle += rotSpeed * delta;
 		shape.setColor(0,0,0,1f);
+		//if (startAngle in highlightAngles) { shape.setColor(Color.WHITE); }
+
 		int x = Gdx.graphics.getWidth() / 2;
 		int y = Gdx.graphics.getHeight() / 2;
 		drawTree(shape, x, y, startAngle, iterations);
 		drawTree(shape, x, y, startAngle - 120, iterations);
 		drawTree(shape, x, y, startAngle - 240, iterations);
 		shape.end();
+
+
+		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+			tiltAngle -= rotSpeed * delta;
+			startAngle -= rotSpeed * delta;
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+			tiltAngle -= rotSpeed*4 * delta;
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+			tiltAngle += rotSpeed*4 * delta;
+		}
+		//System.out.println(MyMath.round(tiltAngle,2));
 	}
 
 	@Override

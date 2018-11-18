@@ -7,18 +7,22 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.Sprite3D;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
+import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.generation.Universe;
 import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.generation.noise.NoiseGenListener;
@@ -95,7 +99,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 
 		// load test default values
-		Entity playerTESTSHIP = CreatePlayerShip();
+		Entity playerTESTSHIP = createPlayerShip();
 		Entity planet = null;
 
 		if (!inSpace && planet == null) {
@@ -112,7 +116,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 	}
 
-	private Entity CreatePlayerShip() {
+	private Entity createPlayerShip() {
 		Entity player = EntityFactory.createCharacter(0, 0);
 		Entity playerTESTSHIP = EntityFactory.createShip3(0, 0, 0, player);
 		playerTESTSHIP.add(new CameraFocusComponent());
@@ -197,6 +201,14 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		engine.addEntity(aiTest3);
 
 
+		Entity test3DEntity = EntityFactory.createShip3(0, -100);
+		Texture shipTop = TextureFactory.generateShip(123, 20);
+		Texture shipBottom = TextureFactory.generateShipUnderSide(123, 20);
+		Sprite3DComponent sprite3DComp = new Sprite3DComponent();
+		sprite3DComp.sprite = new Sprite3D(shipTop, shipBottom);
+		test3DEntity.remove(TextureComponent.class);
+		test3DEntity.add(sprite3DComp);
+		engine.addEntity(test3DEntity);
 	}
 	
 	
@@ -286,7 +298,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		engine.update(delta);
 
 
-		CheckTransition();
+		checkTransition();
 
 		if (Gdx.input.isKeyJustPressed(Keys.F1)) {
 			//debug
@@ -296,7 +308,10 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 	}
 
 
-	private void CheckTransition() {
+	private void checkTransition() {
+		//TODO: still a bit too much transitions logic in here, should move more to transition system
+		//maybe a separete component DoTransitionComp added when stage hits transition, in order to move
+		//animation next stage call to system with other similar calls and logic?
 		boolean transition = false;
 		Entity transEntity = null;
 		if (transitioningEntities == null) {
