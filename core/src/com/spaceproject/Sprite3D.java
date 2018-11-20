@@ -12,11 +12,23 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 
 
 //based on: xoppa.github.io/blog/a-simple-card-game/
+//also thanks to LiquidNitrogen in freenode: #libgdx
 public class Sprite3D extends Renderable implements Disposable {
+
+    //public final Matrix4 transform = new Matrix4();
+    public final Vector3 position = new Vector3();
+    public final Quaternion rotation = new Quaternion();
+    public float angle;
+
+    public void update() {
+        this.worldTransform.set(position, rotation);
+    }
 
     public Sprite3D(Texture frontTex, Texture backTex) {
         //combine textures: Sprites loaded into material texture must come from same texture
@@ -77,5 +89,6 @@ public class Sprite3D extends Renderable implements Disposable {
     @Override
     public void dispose() {
         meshPart.mesh.dispose();
+        //TODO: do i also need to dispose the texture used? material
     }
 }

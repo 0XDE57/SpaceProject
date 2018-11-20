@@ -205,7 +205,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		Texture shipTop = TextureFactory.generateShip(123, 20);
 		Texture shipBottom = TextureFactory.generateShipUnderSide(123, 20);
 		Sprite3DComponent sprite3DComp = new Sprite3DComponent();
-		sprite3DComp.sprite = new Sprite3D(shipTop, shipBottom);
+		sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom);
 		test3DEntity.remove(TextureComponent.class);
 		test3DEntity.add(sprite3DComp);
 		engine.addEntity(test3DEntity);
