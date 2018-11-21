@@ -24,10 +24,11 @@ public class Sprite3D extends Renderable implements Disposable {
     //public final Matrix4 transform = new Matrix4();
     public final Vector3 position = new Vector3();
     public final Quaternion rotation = new Quaternion();
+    public final Vector3 scale = new Vector3(1,1,1);
     public float angle;
 
     public void update() {
-        this.worldTransform.set(position, rotation);
+        this.worldTransform.set(position, rotation, scale);
     }
 
     public Sprite3D(Texture frontTex, Texture backTex) {

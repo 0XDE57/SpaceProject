@@ -12,6 +12,7 @@ import com.spaceproject.components.AstronomicalComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
+import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
@@ -120,16 +121,34 @@ public class ScreenTransitionSystem extends IteratingSystem {
 
     private static void shrink(Entity entity, ScreenTransitionComponent screenTrans, float delta) {
         TextureComponent tex = Mappers.texture.get(entity);
+        if (tex != null) {
 
-        //shrink texture
-        tex.scale -= 3f * delta;
-        if (tex.scale <= 0.1f) {
-            tex.scale = 0;
+            //shrink texture
+            tex.scale -= 3f * delta;
+            if (tex.scale <= 0.1f) {
+                tex.scale = 0;
 
-            if (entity.getComponent(AIComponent.class) != null) {
-                screenTrans.doTransition = true;
-            } else {
-                screenTrans.landStage = screenTrans.landStage.next();
+                if (entity.getComponent(AIComponent.class) != null) {
+                    screenTrans.doTransition = true;
+                } else {
+                    screenTrans.landStage = screenTrans.landStage.next();
+                }
+            }
+        }
+
+
+        Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
+        if (sprite3D != null) {
+            //shrink texture
+            sprite3D.renderable.scale.sub(3f * delta);
+            if (sprite3D.renderable.scale.len() <= 0.1f) {
+                sprite3D.renderable.scale.set(0,0,0);
+
+                if (entity.getComponent(AIComponent.class) != null) {
+                    screenTrans.doTransition = true;
+                } else {
+                    screenTrans.landStage = screenTrans.landStage.next();
+                }
             }
         }
     }

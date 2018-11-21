@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.Sprite3D;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AstronomicalComponent;
 import com.spaceproject.components.BarycenterComponent;
@@ -24,6 +25,7 @@ import com.spaceproject.components.MissileComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.SeedComponent;
+import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
@@ -402,15 +404,19 @@ public class EntityFactory {
 			size = MathUtils.random(entitycfg.shipSizeMin, entitycfg.shipSizeMax);
 		} while (size % 2 == 1);
 
-		TextureComponent texture = new TextureComponent();
+		//TextureComponent texture = new TextureComponent();
 		Texture pixmapTex = TextureFactory.generateShip(seed, size);
-		texture.texture = pixmapTex;// give texture component the generated pixmap texture
-		texture.scale = SpaceProject.entitycfg.renderScale;
+		//texture.texture = pixmapTex;// give texture component the generated pixmap texture
+		//texture.scale = SpaceProject.entitycfg.renderScale;
+		Texture shipBottom = TextureFactory.generateShipUnderSide(seed, size);
+		Sprite3DComponent sprite3DComp = new Sprite3DComponent();
+		sprite3DComp.renderable = new Sprite3D(pixmapTex, shipBottom);
+
 		
 		//collision detection
 		BoundsComponent bounds = new BoundsComponent(); 
-		float width = texture.texture.getWidth() * SpaceProject.entitycfg.renderScale;
-		float height = texture.texture.getHeight() * SpaceProject.entitycfg.renderScale;
+		float width = pixmapTex.getWidth() * SpaceProject.entitycfg.renderScale;
+		float height = pixmapTex.getHeight() * SpaceProject.entitycfg.renderScale;
 		bounds.poly = new Polygon(new float[]{0, 0,0, height,  width, height, width, 0});
 	    bounds.poly.setOrigin(width/2, height/2);
 	    
@@ -453,7 +459,8 @@ public class EntityFactory {
 		entity.add(health);
 		entity.add(cannon);
 		entity.add(bounds);
-		entity.add(texture);
+		//entity.add(texture);
+		entity.add(sprite3DComp);
 		entity.add(transform);
 		entity.add(vehicle);
 		entity.add(map);
