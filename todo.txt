@@ -15,6 +15,7 @@
 
 
 [...] fix land/take-off
+    [ ] bug: landed on planet which had finished generating, but did't load (no map found)
     [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
     [...] nested orbit: consider children of children eg: satellite->moon->planet->star
     [...] clean up
@@ -68,6 +69,8 @@
     [ ] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
 
 
+
+
 [ ] fix player moving ahead of camera at high speed, seem to happen only when vsync is on...
 
 [ ] take care of some of the todo's
@@ -97,10 +100,15 @@
         [...] 3D roll animation for dodge / barrel roll
                 [x] fix 3D texture test
                 [x] integrate
+                [ ] lock orientation and changes to velocity
                 [...] scale bounding box during rotation
-                [ ] fix take off and landing shink/grow animation
+                [...] fix take off and landing shrink/grow animation
+                    [x] fix crash
+                    [ ] sometimes model doesn't shrink, and never grows, fix len() check should not be 1
+                [ ] should use native texture size then scale the model instead?
                 [ ] clean up: should move values to config
                 [ ] clean up: optimize rendering -> ModelCache
+                [ ] clean up: ensure proper disposal
                 [ ] lock facing orientation while rolling, looks funny
                 [ ] mobile/touch UI way of activating dodge, a swipe on the joystick may be intuitive
         [ ] shield
@@ -109,7 +117,7 @@
             [x] basic cannon
             [ ] grow cannon shoot circles/rectangles with radius relative to damage "weight" of projectile (damage = size * velocity * typeMultiplier)?
             [ ] L cannon, touhou style multiple bullet cannon
-            [ ] Laset cannon
+            [ ] Laser cannon
     [ ] engine mode:
             [x] local/combat (slow, for interacting with object near, landing planets, fighting)
             [ ] travel/cruise (medium, for navigating within a system, planet to planet, avoid/escape, faster travel)

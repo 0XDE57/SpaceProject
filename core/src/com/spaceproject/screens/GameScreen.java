@@ -7,22 +7,18 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.Sprite3D;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
-import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
-import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.generation.Universe;
 import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.generation.noise.NoiseGenListener;
@@ -280,9 +276,11 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		Mappers.AI.get(aiTest).state = AIComponent.testState.dumbwander;
 		engine.addEntity(aiTest);
 
+		/*
 		Entity aiTest2 = EntityFactory.createCharacterAI(position, position - 500);
 		Mappers.AI.get(aiTest2).state = AIComponent.testState.takeOffPlanet;
 		engine.addEntity(aiTest2);
+		*/
 
 	}
 

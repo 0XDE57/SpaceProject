@@ -155,14 +155,25 @@ public class ScreenTransitionSystem extends IteratingSystem {
 
     private static void grow(Entity entity, ScreenTransitionComponent screenTrans, float delta) {
         TextureComponent tex = Mappers.texture.get(entity);
+        if (tex != null) {
+            //grow texture
+            tex.scale += 3f * delta;
+            if (tex.scale >= SpaceProject.entitycfg.renderScale) {
+                tex.scale = SpaceProject.entitycfg.renderScale;
 
-        //grow texture
-        tex.scale += 3f * delta;
-        if (tex.scale >= SpaceProject.entitycfg.renderScale) {
-            tex.scale = SpaceProject.entitycfg.renderScale;
-
-            screenTrans.takeOffStage = screenTrans.takeOffStage.next();
+                screenTrans.takeOffStage = screenTrans.takeOffStage.next();
+            }
         }
+
+        Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
+        if (sprite3D != null) {
+            sprite3D.renderable.scale.add(3f * delta);
+            if (sprite3D.renderable.scale.len() <= 1) {
+                sprite3D.renderable.scale.set(1,1,1);
+                screenTrans.takeOffStage = screenTrans.takeOffStage.next();
+            }
+        }
+
     }
 
     private static void zoomIn(ScreenTransitionComponent screenTrans) {
@@ -180,14 +191,34 @@ public class ScreenTransitionSystem extends IteratingSystem {
     }
 
 
-    private static void landOnPlanet(Entity transitioningEntity, ScreenTransitionComponent screenTrans) {
-        transitioningEntity.getComponent(TextureComponent.class).scale = SpaceProject.entitycfg.renderScale;//reset size to normal
-        screenTrans.doTransition = true;
+    private static void landOnPlanet(Entity entity, ScreenTransitionComponent screenTrans) {
+        //reset size to normal
+        TextureComponent tex = Mappers.texture.get(entity);
+        if (tex != null) {
+            tex.scale = SpaceProject.entitycfg.renderScale;
+        }
 
+        Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
+        if (sprite3D != null) {
+            //sprite3D.renderable.scale.set(SpaceProject.entitycfg.renderScale,SpaceProject.entitycfg.renderScale,SpaceProject.entitycfg.renderScale);
+            sprite3D.renderable.scale.set(1,1,1);
+        }
+
+        screenTrans.doTransition = true;
     }
 
-    private void takeOff(Entity transitioningEntity, ScreenTransitionComponent screenTrans) {
-        transitioningEntity.getComponent(TextureComponent.class).scale = 0;//set size to 0 so texture can grow
+    private void takeOff(Entity entity, ScreenTransitionComponent screenTrans) {
+        //set size to 0 so texture can grow
+        TextureComponent tex = Mappers.texture.get(entity);
+        if (tex != null) {
+            tex.scale = 0;
+        }
+
+        Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
+        if (sprite3D != null) {
+            sprite3D.renderable.scale.set(0,0,0);
+        }
+
         screenTrans.doTransition = true;
     }
 

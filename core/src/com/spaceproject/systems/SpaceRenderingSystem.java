@@ -86,48 +86,6 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 	
 	}
 
-	private void draw3DRenderables(float delta) {
-		for (Entity entity : renderQueue3D) {
-			Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
-			TransformComponent t = Mappers.transform.get(entity);
-
-
-			/*
-			if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-				sprite3D.renderable.angle += 15*delta;
-			}
-			if (Gdx.input.isKeyPressed(Input.Keys.E)) {
-				sprite3D.renderable.angle -= 15*delta;
-			}
-			if (Gdx.input.isKeyPressed(Input.Keys.R)) {
-				sprite3D.renderable.angle += (float)Math.PI;
-			}
-			System.out.println(sprite3D.renderable.angle * MathUtils.radDeg);
-			*/
-
-			/*
-			//TODO: would prefer to use this method rather than direct world trasnform, prolems:
-			//		set() seems to overwrite previous rotation only applying last called set
-			//		setEulerAnglesRad() seems to apply pitch and yaw in the opposite order we desire
-			sprite3D.renderable.position.set(t.pos.x, t.pos.y, -50);
-			//sprite3D.renderable.rotation.set(Vector3.X, MathUtils.radDeg * sprite3D.renderable.angle);//"roll"
-			//sprite3D.renderable.rotation.set(Vector3.Z, MathUtils.radDeg * t.rotation);//"orientation facing"
-			sprite3D.renderable.rotation.setEulerAnglesRad(0, sprite3D.renderable.angle, t.rotation);//this applies in the wrong order resulting in funny rotation
-			sprite3D.renderable.update();
-			*/
-
-
-			//TODO: the switch to renderables from textures seems to have a performance impact. currently it's a mesh and texture per entity.
-			//see https://xoppa.github.io/blog/a-simple-card-game/#reduce-the-number-of-render-calls
-			sprite3D.renderable.worldTransform.setToRotation(Vector3.Z, MathUtils.radDeg * t.rotation);
-			sprite3D.renderable.worldTransform.rotate(Vector3.X, MathUtils.radDeg * sprite3D.renderable.angle);
-			sprite3D.renderable.worldTransform.setTranslation(t.pos.x,t.pos.y,-50);
-
-			modelBatch.render(sprite3D.renderable);
-		}
-		renderQueue3D.clear();
-	}
-
 	private void drawEntities() {
 		//sort render order of entities
 		renderQueue.sort(comparator);
@@ -180,6 +138,48 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 		}
 	}
 
+	private void draw3DRenderables(float delta) {
+		for (Entity entity : renderQueue3D) {
+			Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
+			TransformComponent t = Mappers.transform.get(entity);
+
+
+			/*
+			if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+				sprite3D.renderable.angle += 15*delta;
+			}
+			if (Gdx.input.isKeyPressed(Input.Keys.E)) {
+				sprite3D.renderable.angle -= 15*delta;
+			}
+			if (Gdx.input.isKeyPressed(Input.Keys.R)) {
+				sprite3D.renderable.angle += (float)Math.PI;
+			}
+			System.out.println(sprite3D.renderable.angle * MathUtils.radDeg);
+			*/
+
+			/*
+			//TODO: would prefer to use this method rather than direct world trasnform, prolems:
+			//		set() seems to overwrite previous rotation only applying last called set
+			//		setEulerAnglesRad() seems to apply pitch and yaw in the opposite order we desire
+			sprite3D.renderable.position.set(t.pos.x, t.pos.y, -50);
+			//sprite3D.renderable.rotation.set(Vector3.X, MathUtils.radDeg * sprite3D.renderable.angle);//"roll"
+			//sprite3D.renderable.rotation.set(Vector3.Z, MathUtils.radDeg * t.rotation);//"orientation facing"
+			sprite3D.renderable.rotation.setEulerAnglesRad(0, sprite3D.renderable.angle, t.rotation);//this applies in the wrong order resulting in funny rotation
+			sprite3D.renderable.update();
+			*/
+
+
+			//TODO: the switch to renderables from textures seems to have a performance impact. currently it's a mesh and texture per entity.
+			//see https://xoppa.github.io/blog/a-simple-card-game/#reduce-the-number-of-render-calls
+			sprite3D.renderable.worldTransform.setToRotation(Vector3.Z, MathUtils.radDeg * t.rotation);
+			sprite3D.renderable.worldTransform.rotate(Vector3.X, MathUtils.radDeg * sprite3D.renderable.angle);
+			sprite3D.renderable.worldTransform.setTranslation(t.pos.x,t.pos.y,-50);
+			sprite3D.renderable.worldTransform.scl(sprite3D.renderable.scale);
+
+			modelBatch.render(sprite3D.renderable);
+		}
+		renderQueue3D.clear();
+	}
 
 	/**
 	 * Return color based on camera position
@@ -228,6 +228,11 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 			TextureComponent tex = Mappers.texture.get(entity);	
 			if (tex.texture != null)
 				tex.texture.dispose();
+
+			Sprite3DComponent s3d = Mappers.sprite3D.get(entity);
+			if (s3d != null) {
+				s3d.renderable.dispose();
+			}
 		}
 		
 		for (SpaceBackgroundTile tile : SpaceParallaxSystem.getTiles()) {
