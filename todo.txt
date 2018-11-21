@@ -1,8 +1,21 @@
 ---ENGINE---
+[ ] voronoi, for destructible asteroids and world generation (can be used for tectonic plates / countries / biomes)
+    https://www.badlogicgames.com/forum/viewtopic.php?f=11&t=22784 (my old thread)
+    https://github.com/mjholtzem/Unity-2D-Destruction
+	http://www.alanzucconi.com/2015/02/24/to-voronoi-and-beyond/
+	https://stackoverflow.com/questions/20104779/libgdx-create-texture-from-overlay-using-pixmap
+	https://pvigier.github.io/2018/11/18/fortune-algorithm-details.html
+    http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/
+    https://leatherbee.org/index.php/2018/10/06/terrain-generation-3-voronoi-diagrams/
+
+
+[...] wrap planets properly (LOCAL COORDINATE SPACE?)
+    https://www.reddit.com/r/gamedev/comments/1gi6np/magic_carpet_style_infinite_wrapping_terrain/
+    https://simonschreibt.de/gat/1nsane-carpet-2-repetitive-worlds/
+
+
 [...] fix land/take-off
-    [x] position bug
-    [x] time based orbit
-    [x] time synced takeoff
+    [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
     [...] nested orbit: consider children of children eg: satellite->moon->planet->star
     [...] clean up
     [...] genericize and make work land and take off work for AI, system doesn't supports non-player world switching
@@ -44,107 +57,78 @@
             //if not important, remove from engine, forget about existence
         }
 
-[...] 3D roll animation for dodge / barrel roll
-    [x] fix 3D texture test
-    [x] integrate
-    [...] scale bounding box during rotation
-    [ ] fix take off and landing shink/grow animation
-    [ ] clean up: should move values to config
-    [ ] clean up: optimize rendering -> ModelCache
-    [ ] mobile/touch UI way of activating dodge, a swipe on the joystick may be intuitive
-
 
 [...] fix texture / map loading
     [x] seed based load instead of position
     [ ] clean up star save/load
     [x] fix thread generation to be limited (probably by core count) threadpool?
     [x] planets load from cache
-    [ ] prevent generating duplicate seed when one is in process of being created but not yet created
+    [ ] prevent generating duplicate seed when one is in process of being created but not yet created (multiple threads trying to make the same data)
     [ ] clean up
     [ ] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
+
 
 [ ] fix player moving ahead of camera at high speed, seem to happen only when vsync is on...
 
 [ ] take care of some of the todo's
-    there is so much to do...
+    there is so much to do, and I keep adding more...
 
 [ ] fixed time step (necessary for multiplayer?)
 	https://gafferongames.com/post/fix_your_timestep/
     http://gameprogrammingpatterns.com/game-loop.html
     http://www.koonsolo.com/news/dewitters-gameloop/
-    [ ] fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
-    	https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
 
-[...] wrap planets properly (LOCAL COORDINATE SPACE?)
-    https://www.reddit.com/r/gamedev/comments/1gi6np/magic_carpet_style_infinite_wrapping_terrain/
-    https://simonschreibt.de/gat/1nsane-carpet-2-repetitive-worlds/
+[ ] fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
+    https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
+
 
 [...] fix render priority (z-order)
       [X] moved into separate variable
       [ ] define proper heights for importance as current values are somewhat arbitrary
 
-[ ] system processing priority
+
 [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
-[ ] fix ship edges to use entire width of texture
-[ ] try setting camera rotate to player orientation?
-[ ] simple scripting? text file of commands for creating entities and printing story text?
-[ ] multiplayer/networking...or just commit suicide
-[...] rotating sprites/textures on 3d/w axis
-    https://xoppa.github.io/blog/a-simple-card-game/
-    https://stackoverflow.com/questions/28290428/implementing-trapezoidal-sprites-in-libgdx
-    https://stackoverflow.com/questions/12414708/correct-glsl-affine-texture-mapping
-    https://bitlush.com/blog/arbitrary-quadrilaterals-in-opengl-es-2-0
-    https://gamedev.stackexchange.com/questions/46429/how-to-draw-a-trapezoid-in-opengl
-    https://github.com/bitlush/android-arbitrary-quadrilaterals-in-opengl-es-2-0
-    http://www.glprogramming.com/red/chapter09.html
 
----DEBUG---
-[ ] in game console
-[ ] messages/info/log
-[ ] commands
-[ ] cleanup debug UI (component list)
-[ ] FPS,memory,entity graph
-
----MOBILE---
-[ ] if player bounds overlap vehicle, show enter button on touchUI/hud
-[ ] if in vehicle show exit button (if can get out? must be over platform/spacestation? jetpack?)
-[ ] pinch-pull to zoom in-out on touch
-[ ] test touchUI on different screen sizes/resolutions
-[ ] set engine speed max to multiplier on android?
-http://libgdx.badlogicgames.com/nightlies/docs/api/com/badlogic/gdx/input/GestureDetector.html
-http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.html
-
-
----INPUT---
-[ ] controller/gamepad input support
-	https://gist.github.com/nhydock/dc0501f34f89686ddf34
 
 
 ---GAMEPLAY & DESIGN---
-[ ] destructible(voronoi) asteroids
-    https://www.badlogicgames.com/forum/viewtopic.php?f=11&t=22784 (my old thread)
-    https://github.com/mjholtzem/Unity-2D-Destruction
-	http://www.alanzucconi.com/2015/02/24/to-voronoi-and-beyond/
-	https://stackoverflow.com/questions/20104779/libgdx-create-texture-from-overlay-using-pixmap
-[...] combat system
-	create types, (normal, red, green, blue)?
-	shoot circles/rectangles with radius relative to damage "weight" of projectile (damage = size * velocity * typeMultiplier)?
-	dodge [Left][Right] (double tap) - move fast to left or right
-	shield [SHIFT] - ring around ship
-	add side to side barrel roll dodge (jump/burst) [LEFT]/[RIGHT]
-    [ ] ControllableComponent.timerDodge needs to be in VehicleComponent
+[...] SHIPS
+    [... ] COMBAT
+        [...] 3D roll animation for dodge / barrel roll
+                [x] fix 3D texture test
+                [x] integrate
+                [...] scale bounding box during rotation
+                [ ] fix take off and landing shink/grow animation
+                [ ] clean up: should move values to config
+                [ ] clean up: optimize rendering -> ModelCache
+                [ ] lock facing orientation while rolling, looks funny
+                [ ] mobile/touch UI way of activating dodge, a swipe on the joystick may be intuitive
+        [ ] shield
+        [ ] bullet come from gun rather than magically from ship
+        [ ] weapon types
+            [x] basic cannon
+            [ ] grow cannon shoot circles/rectangles with radius relative to damage "weight" of projectile (damage = size * velocity * typeMultiplier)?
+            [ ] L cannon, touhou style multiple bullet cannon
+            [ ] Laset cannon
+    [ ] engine mode:
+            [x] local/combat (slow, for interacting with object near, landing planets, fighting)
+            [ ] travel/cruise (medium, for navigating within a system, planet to planet, avoid/escape, faster travel)
+            [ ] hyper/warp   (fast, warp to other systems, can't turn, can't fight)
 
-[ ] engine mode:
-        -combat (slow, for interacting with object near, landing planets, fighting)
-        -cruise (medium, for navigating within a system, planet to planet, avoid/escape, faster travel)
-        -warp   (fast, warp to other systems, can't turn, can't fight)
+    [ ] ship generation
+        [ ] fix ship edges to use entire width of texture
+	    [ ] wings
+	    [ ] engines
+	    [ ] weapons
+	    [ ] details: eg: lines, another layer on top for depth/windshield type thing, different stuff on underside of sprite
+	    [ ] generation styles and classes, perhaps come up with some kind of classes of ships (cargo, highspeed traveler, tank/war machine, passenger, personal, commercial...)
 
-[ ] ship generation
-	wings, engines, weapons, another layer on top for depth/windshield type thing
-	look at some different types of ships like an 'H' ,etc...
-	perhaps come up with some kind of classes of ships (cargo, highspeed traveler, tank/war machine, passenger, personal, commercial...)
 
-[ ] planet generation
+[ ] game start
+    [ ] birth/tutorial screen
+    [ ] death
+
+[...] planet generation
 	research planet attributes //size, temperature, pressure, atmosphere/elements(https://en.wikipedia.org/wiki/Astronomical_spectroscopy)...etc
 	rings around planets? (like saturn)
 	moons/satellites
@@ -160,6 +144,7 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
 	http://blog.kaelan.org/randomly-generated-world-map/ <--biome
 	http://freespace.virgin.net/hugo.elias/models/m_perlin.htm
 	https://www.reddit.com/user/KdotJPG   <-OpenSimplex creator https://gist.github.com/KdotJPG/b1270127455a94ac5d19
+
 [ ] space stuff
     https://en.wikipedia.org/wiki/Astronomical_object#Categories_by_location
 	-stars kill on touch
@@ -168,50 +153,53 @@ http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.htm
 	-dust
 	-fractal/noise
 	-light specs
-	-platform(space station) in space
-		isPlayerOnGround - planet, platform
-[ ] world content
-    -design base building systems
-    -
-[ ] difficulty
-        consequences of death
-        resource availability
-        ai accuracy / decision making
-        damage/health
-[ ] game start
+
+
+
+
+
+---DEBUG---
+    [ ] in game console
+    [ ] messages/info/log
+    [ ] commands
+    [ ] cleanup debug UI (component list)
+    [ ] FPS,memory,entity graph
+
+
+---INPUT---
+    [ ] controller/gamepad input support
+        https://github.com/libgdx/libgdx/wiki/Controllers
+	    https://gist.github.com/nhydock/dc0501f34f89686ddf34
+    [ ] mobile
+        [ ] if player bounds overlap vehicle, show enter button on touchUI/hud
+        [ ] if in vehicle show exit button (if can get out? must be over platform/spacestation? jetpack?)
+        [ ] pinch-pull to zoom in-out on touch
+        [ ] test touchUI on different screen sizes/resolutions
+        [ ] set engine speed max to multiplier on android?
+        http://libgdx.badlogicgames.com/nightlies/docs/api/com/badlogic/gdx/input/GestureDetector.html
+        http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.html
+
 
 ---UI---
-[x] fix main menu scaling
-[...] mobile input system
-[...] debug UI
-[...] pause menu
-[ ] player manager/inventory/shipbuilder thingy
-[ ] career event timeline stats
+    [...] map
+        needs more details, select planets and get info, set way points
+    [...] menu menu
+        [ ] pause / freeze game
+        [...] settings and config
+    [ ] player manager/inventory/shipbuilder thingy
+    [ ] career event timeline stats
 
 ---GRAPHICS---
-[ ] glowing ring/rays around planets/stars
-[ ] particles!!!!!!
-[...] space dust
-[ ] shaders, shaders, shaders
+[ ] particles
+[ ] shaders
 	https://github.com/mattdesl/lwjgl-basics/wiki/Shaders
 	https://github.com/mattdesl/lwjgl-basics/wiki
 	https://www.shadertoy.com/view/XscGzl <--use for stars
 	http://www.alanzucconi.com/2015/07/01/vertex-and-fragment-shaders-in-unity3d/
 	http://www.alanzucconi.com/2016/01/27/arrays-shaders-heatmaps-in-unity3d/
 	http://wwwtyro.net/2016/10/22/2D-space-scene-procgen.html
-[ ] basic light?
-[ ] fractals
 
-https://www.youtube.com/watch?v=TbdH28prqac
-http://www.reddit.com/r/gamedev/comments/mtq01/how_are_universes_that_allow_zoom_inout_from/
 http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
-
-
-
-
-##general RESOURCES###
-https://docs.google.com/spreadsheets/d/1o9VvQ2CqXXktuE1diTuM1ZBE79LxW1t3GKD3tdgt6xw/edit#gid=0
-https://game-development.zeef.com/david.arcila
 
 
 //Optimization/performance:
@@ -221,18 +209,6 @@ consider switch out ashley for artemis-odb? https://github.com/junkdog/entity-sy
 
 //fonts
 http://www.fontsquirrel.com/
-
-
-//sound
-https://www.youtube.com/watch?v=BpgPXZh1WEQ
-there is no sound in space...find real space sounds(satellite radio noise, gravitational waves)
-
-
-//Publish
-http://www.reddit.com/r/gamedev/comments/20ciej/media_presence_what_platforms_are_you_active_on/
-
-
-
 
 
 
