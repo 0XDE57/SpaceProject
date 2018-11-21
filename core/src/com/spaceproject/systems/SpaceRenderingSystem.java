@@ -4,7 +4,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -67,7 +66,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 		Color color = backgroundColor(cam);
 		Gdx.gl20.glClearColor(color.r, color.g, color.b, 1);
 		Gdx.gl.glClearDepthf(1f);
-		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | Gdx.gl20.GL_DEPTH_BUFFER_BIT);
+		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
 		spriteBatch.begin();
 		
@@ -81,40 +80,35 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 
 
 		modelBatch.begin(cam);
+		draw3DRenderables(delta);
+		modelBatch.end();
+
+	
+	}
+
+	private void draw3DRenderables(float delta) {
 		for (Entity entity : renderQueue3D) {
 			Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
 			TransformComponent t = Mappers.transform.get(entity);
 
 
-			//System.out.println(t.rotation);
-			//sprite3D.sprite.worldTransform.setToRotationRad(Vector3.Z, t.rotation);
-			//System.out.println(sprite3D.sprite.worldTransform);
-			//sprite3D.renderable.worldTransform.rotateRad(Vector3.Z, t.rotation);
-
-
+			/*
 			if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-				//sprite3D.roll += 50 * delta;
-				//sprite3D.sprite.worldTransform.rotate(Vector3.X, sprite3D.roll);
 				sprite3D.renderable.angle += 15*delta;
-				//t.zOrder+=1;
 			}
 			if (Gdx.input.isKeyPressed(Input.Keys.E)) {
-				//sprite3D.roll -= 50 * delta;
-				//sprite3D.sprite.worldTransform.rotate(Vector3.X, sprite3D.roll);
 				sprite3D.renderable.angle -= 15*delta;
-				//t.zOrder-=1;
 			}
 			if (Gdx.input.isKeyPressed(Input.Keys.R)) {
 				sprite3D.renderable.angle += (float)Math.PI;
 			}
-
-
-
+			System.out.println(sprite3D.renderable.angle * MathUtils.radDeg);
+			*/
 
 			/*
 			//TODO: would prefer to use this method rather than direct world trasnform, prolems:
-			//		set() seems to overwrite previous rotation
-			 		setEulerAnglesRad() seems to apply pitch and yaw in the opposite order we desire
+			//		set() seems to overwrite previous rotation only applying last called set
+			//		setEulerAnglesRad() seems to apply pitch and yaw in the opposite order we desire
 			sprite3D.renderable.position.set(t.pos.x, t.pos.y, -50);
 			//sprite3D.renderable.rotation.set(Vector3.X, MathUtils.radDeg * sprite3D.renderable.angle);//"roll"
 			//sprite3D.renderable.rotation.set(Vector3.Z, MathUtils.radDeg * t.rotation);//"orientation facing"
@@ -132,9 +126,6 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 			modelBatch.render(sprite3D.renderable);
 		}
 		renderQueue3D.clear();
-		modelBatch.end();
-
-	
 	}
 
 	private void drawEntities() {

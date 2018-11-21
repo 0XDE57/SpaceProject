@@ -21,15 +21,12 @@ import com.badlogic.gdx.utils.Disposable;
 //also thanks to LiquidNitrogen in freenode: #libgdx
 public class Sprite3D extends Renderable implements Disposable {
 
-    //public final Matrix4 transform = new Matrix4();
+
     public final Vector3 position = new Vector3();
     public final Quaternion rotation = new Quaternion();
     public final Vector3 scale = new Vector3(1,1,1);
     public float angle;
 
-    public void update() {
-        this.worldTransform.set(position, rotation, scale);
-    }
 
     public Sprite3D(Texture frontTex, Texture backTex) {
         //combine textures: Sprites loaded into material texture must come from same texture
@@ -85,6 +82,10 @@ public class Sprite3D extends Renderable implements Disposable {
                 back[Batch.X3], back[Batch.Y3], 0, 0, 0, -1, back[Batch.U3], back[Batch.V3],
                 back[Batch.X4], back[Batch.Y4], 0, 0, 0, -1, back[Batch.U4], back[Batch.V4]
         };
+    }
+
+    public void update() {
+        this.worldTransform.set(position, rotation, scale);
     }
 
     @Override

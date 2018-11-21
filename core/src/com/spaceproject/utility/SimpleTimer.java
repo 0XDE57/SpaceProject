@@ -16,6 +16,14 @@ public class SimpleTimer {
             lastEvent = System.currentTimeMillis();
     }
 
+    public boolean tryEvent() {
+        if (canDoEvent()) {
+            reset();
+            return true;
+        }
+        return false;
+    }
+
     public boolean canDoEvent() {
         return timeSinceLastEvent() >= interval;
     }

@@ -44,9 +44,15 @@
             //if not important, remove from engine, forget about existence
         }
 
-[...] 3D roll animation for dodge
+[...] 3D roll animation for dodge / barrel roll
     [x] fix 3D texture test
-    [...] integrate
+    [x] integrate
+    [...] scale bounding box during rotation
+    [ ] fix take off and landing shink/grow animation
+    [ ] clean up: should move values to config
+    [ ] clean up: optimize rendering -> ModelCache
+    [ ] mobile/touch UI way of activating dodge, a swipe on the joystick may be intuitive
+
 
 [...] fix texture / map loading
     [x] seed based load instead of position
@@ -55,6 +61,7 @@
     [x] planets load from cache
     [ ] prevent generating duplicate seed when one is in process of being created but not yet created
     [ ] clean up
+    [ ] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
 
 [ ] fix player moving ahead of camera at high speed, seem to happen only when vsync is on...
 
