@@ -21,6 +21,7 @@
         [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
             see: ScreenTransitionSystem.syncLoadPosition()
     [ ] bug: shrink sometimes doesn't scale properly or at all
+    [ ] pause stage is also now broken, need to reset timer
     [ ] nested orbit: consider children of children eg: satellite->moon->planet->star
     [ ] finish transistor animation, should have screen effect for polish and to hide loading/level change. goal feel a little more seamless
         (fade to white/pixelate shader during landing, load map (can wait here for a second if not finished generating, when generations finished start white then fade normal, continue)
@@ -136,7 +137,7 @@
 
     [ ] ship generation
         [ ] fix ship edges to use entire width of texture
-	    [ ] wings
+	    [...] wings
 	    [ ] engines
 	    [ ] weapons
 	    [ ] details: eg: lines, another layer on top for depth/windshield type thing, different stuff on underside of sprite

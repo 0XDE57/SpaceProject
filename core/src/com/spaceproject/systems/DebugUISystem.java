@@ -528,15 +528,16 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		 */
 	}
 
-}
+	private static class TempText {
+		public String text;
+		public int x, y;
 
-class TempText {
-	public String text;
-	public int x, y;
-
-	public TempText(String text, int x, int y) {
-		this.text = text;
-		this.x = x;
-		this.y = y;
+		public TempText(String text, int x, int y) {
+			this.text = text;
+			this.x = x;
+			this.y = y;
+		}
 	}
 }
+
+

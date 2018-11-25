@@ -36,10 +36,15 @@ public class TestShipGenerationScreen extends ScreenAdapter {
 	private ArrayList<Texture> generateShips() {
 		ArrayList<Texture> tex = new ArrayList<Texture>();
 		MathUtils.random.setSeed(SpaceProject.SEED);
-		for (int i = 0; i < numShips; i++) {
-			int x = i % rows;
-			int y = i / rows;
-			tex.add(TextureFactory.generateShip(MathUtils.random(Long.MAX_VALUE), MathUtils.random(10, 36)));
+
+		while (tex.size() < numShips) {
+			Texture body = TextureFactory.generateShip(MathUtils.random(Long.MAX_VALUE), MathUtils.random(10, 36));
+			Texture leftWing = TextureFactory.generateShipWingLeft(MathUtils.random(Long.MAX_VALUE), (body.getWidth()+1)/2);
+			Texture rightWing = TextureFactory.FlipTexture(leftWing, false, true);
+			tex.add(leftWing);
+			tex.add(rightWing);
+			tex.add(body);
+			tex.add(TextureFactory.combineShip(body, leftWing));
 		}
 		
 		
@@ -69,8 +74,8 @@ public class TestShipGenerationScreen extends ScreenAdapter {
 			batch.draw(tex, x * spacing + (hor/6), y * spacing + (ver/2),
 					   originX, originY,
 					   width, height,
-					   scale, scale, 
-					   (float) Math.PI/2 * MathUtils.radiansToDegrees, 
+					   scale, scale,
+					   (float) Math.PI/2 * MathUtils.radiansToDegrees,
 					   0, 0, (int)width, (int)height, false, false);
 		}
 		batch.end();

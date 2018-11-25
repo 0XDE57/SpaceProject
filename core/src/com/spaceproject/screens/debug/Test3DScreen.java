@@ -4,19 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
@@ -36,7 +27,6 @@ public class Test3DScreen extends ScreenAdapter {
 
 
     Sprite3D ship3d;
-    //Texture shipTop, shipBottom, combinedTex;
 
     int playerX, playerY;
     float rotX = 0, rotY = 0, rotZ = 0;
@@ -45,31 +35,27 @@ public class Test3DScreen extends ScreenAdapter {
 
         orthographicCam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        //create ship textures
-        Texture shipTop = TextureFactory.generateShip(123, 20);
-        Texture shipBottom = TextureFactory.generateShipUnderSide(123, 20);
+        generateShip();
+    }
 
-        /*
-        //combine textures
-        int width = shipTop.getWidth(), height = shipTop.getHeight();
-        Pixmap pixmap = new Pixmap(width, height*2, Pixmap.Format.RGBA8888);
-        pixmap.drawPixmap(shipTop.getTextureData().consumePixmap(), 0, 0);
-        pixmap.drawPixmap(shipBottom.getTextureData().consumePixmap(),0, height);
-        combinedTex = new Texture(pixmap);
+    private void generateShip() {
+        long seed = MathUtils.random(Long.MAX_VALUE);
+        Texture body = TextureFactory.generateShip(seed, MathUtils.random(20,30));
+        Texture wing = TextureFactory.generateShipWingLeft(seed, (body.getWidth()+1)/2);
+        Texture shipTop = TextureFactory.combineShip(body, wing);
+        Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
 
-        //create 3D ship with front and back texture
-        Sprite front = new Sprite(combinedTex,0,0, width, height);
-        Sprite back = new Sprite(combinedTex, 0, height, width, height);
-        ship3d = new Sprite3D(front, back);
-        */
         ship3d = new Sprite3D(shipTop, shipBottom);
     }
 
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClear(Gdx.gl20.GL_COLOR_BUFFER_BIT | Gdx.gl20.GL_DEPTH_BUFFER_BIT);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            generateShip();
+        }
 
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             playerX -= 1f;
@@ -85,10 +71,10 @@ public class Test3DScreen extends ScreenAdapter {
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-            rotX+=200f*delta;
+            rotX+=400f*delta;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.E)) {
-            rotX-=200f*delta;
+            rotX-=400f*delta;
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
