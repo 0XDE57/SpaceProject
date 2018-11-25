@@ -81,6 +81,8 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 	private void loadMap() {
 		//use cached noise
 		//TODO: if not cached and if not in process of being generated, only then generate, but this should probably never happen
+		//TODO: bug, this is unreliable -> sometimes map doesn't load
+		//TODO: architecture, rendering system shouldn't be responsible for loading map
 
 		NoiseBuffer newNoise = GameScreen.universe.getNoiseForSeed(seed);
 		if (newNoise != null) {
@@ -89,9 +91,14 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		}
 
 		if (noise == null) {
-			System.out.println("no map found");
+			System.out.println("no map found for: " + seed);
+			for (long k : GameScreen.universe.loadedNoise.keySet()) {
+				System.out.print(k);
+			}
+			System.out.println();
+			//print noise threads
 		} else {
-			System.out.println("map found");
+			System.out.println("map found for: " + seed);
 		}
 	}
 	
@@ -207,7 +214,7 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 			*/
 
 			/*
-			//TODO: would prefer to use this method rather than direct world trasnform, prolems:
+			//TODO: would prefer to use this method rather than direct world transform, problems:
 			//		set() seems to overwrite previous rotation only applying last called set
 			//		setEulerAnglesRad() seems to apply pitch and yaw in the opposite order we desire
 			sprite3D.renderable.position.set(t.pos.x, t.pos.y, -50);

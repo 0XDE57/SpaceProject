@@ -38,6 +38,7 @@ import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Set;
 
 public class DebugUISystem extends IteratingSystem implements Disposable {
@@ -58,6 +59,8 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	//entity storage
 	private Array<Entity> objects;
 	DelaunayTriangulator tri = new DelaunayTriangulator();
+
+	public static ArrayList<TempText> tmpText = new ArrayList<TempText>();
 	
 	//config
 	private boolean drawDebugUI = true;
@@ -159,11 +162,14 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		//draw components on entity
 		if (drawComponentList) drawComponentList();
 
+		drawTempText(batch);
+
 		batch.end();	
 		
 		
 		objects.clear();		
 	}
+
 
 	private void updateKeyToggles() {
 		//toggle debug
@@ -478,7 +484,27 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		shape.line(worldPos.x, worldPos.y+crossHairSize, worldPos.x, worldPos.y-crossHairSize);
 		shape.line(worldPos.x+crossHairSize, worldPos.y, worldPos.x-crossHairSize, worldPos.y);
 	}
-	
+
+
+	public static void addTempText(String text, float x, float y, boolean project) {
+		addTempText(text, (int)x, (int)y, project);
+	}
+
+	public static void addTempText(String text, int x, int y, boolean project) {
+		if (project) {
+			Vector3 screenPos = cam.project(new Vector3(x, y, 0));
+			x = (int)screenPos.x;
+			y = (int)screenPos.y;
+		}
+		tmpText.add(new TempText(text, x, y));
+	}
+
+	private void drawTempText(SpriteBatch batch) {
+		for (TempText t : tmpText) {
+			fontSmall.draw(batch, t.text, t.x, t.y);
+		}
+		tmpText.clear();
+	}
 	
 	@Override 
 	public void processEntity(Entity entity, float deltaTime) {
@@ -502,6 +528,15 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		 */
 	}
 
+}
 
-	
+class TempText {
+	public String text;
+	public int x, y;
+
+	public TempText(String text, int x, int y) {
+		this.text = text;
+		this.x = x;
+		this.y = y;
+	}
 }

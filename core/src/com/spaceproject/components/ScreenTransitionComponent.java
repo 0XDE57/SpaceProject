@@ -2,6 +2,7 @@ package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.math.Interpolation;
 import com.spaceproject.utility.SimpleTimer;
 
 public class ScreenTransitionComponent implements Component {
@@ -46,6 +47,7 @@ public class ScreenTransitionComponent implements Component {
 	public Entity planet;
 
 	public boolean doTransition;
-	
+
 	public SimpleTimer timer;
+	public Interpolation animInterpolation;
 }

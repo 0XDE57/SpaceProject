@@ -36,6 +36,12 @@ public class SimpleTimer {
         return  interval;
     }
 
+    public void setInterval(long interval, boolean reset) {
+        this.interval = interval;
+        if (reset)
+            reset();
+    }
+
     public void setLastEvent(long time) {
         lastEvent = time;
     }

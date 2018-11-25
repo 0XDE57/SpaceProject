@@ -6,14 +6,12 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Vector2;
-import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AstronomicalComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.Sprite3DComponent;
-import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
@@ -48,7 +46,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
             }
             switch (screenTrans.landStage) {
                 case shrink:
-                    shrink(entity, screenTrans, delta);
+                    shrink(entity, screenTrans);
                     break;
                 case zoomIn:
                     zoomIn(screenTrans);
@@ -90,7 +88,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
                     zoomOut(screenTrans);
                     break;
                 case grow:
-                    grow(entity, screenTrans, delta);
+                    grow(entity, screenTrans);
                     break;
                 case end:
                     entity.remove(screenTrans.getClass());
@@ -107,6 +105,8 @@ public class ScreenTransitionSystem extends IteratingSystem {
         }
 
         // freeze movement during animation
+        //TODO: move this into control system, ignore action if ScreenTrans component present
+        //do same for other controls like dodge/shoot
         TransformComponent transform = Mappers.transform.get(entity);
         if (transform != null) {
             transform.velocity.set(0, 0);
@@ -119,7 +119,8 @@ public class ScreenTransitionSystem extends IteratingSystem {
 
     }
 
-    private static void shrink(Entity entity, ScreenTransitionComponent screenTrans, float delta) {
+    private static void shrink(Entity entity, ScreenTransitionComponent screenTrans) {
+        /*
         TextureComponent tex = Mappers.texture.get(entity);
         if (tex != null) {
 
@@ -135,25 +136,35 @@ public class ScreenTransitionSystem extends IteratingSystem {
                 }
             }
         }
-
+        */
 
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
-        if (sprite3D != null) {
-            //shrink texture
-            sprite3D.renderable.scale.sub(3f * delta);
-            if (sprite3D.renderable.scale.len() <= 0.1f) {
-                sprite3D.renderable.scale.set(0,0,0);
 
-                if (entity.getComponent(AIComponent.class) != null) {
-                    screenTrans.doTransition = true;
-                } else {
-                    screenTrans.landStage = screenTrans.landStage.next();
-                }
+
+        float interp = screenTrans.animInterpolation.apply(1, 0, screenTrans.timer.ratio());
+        sprite3D.renderable.scale.set(interp, interp, interp);
+        //TODO: something is wrong with scaling/rendering. the interpolation numbers feel right, but often the entity often much larger than it should be
+        //also the entity scale should be down to 0 by the end but the sprite sometimes only partially scales or seemingly doesn't scale at all.
+        /*
+        TransformComponent trans = Mappers.transform.get(entity);
+        String text = MyMath.round(sprite3D.renderable.scale.x, 3) + ", " + MyMath.round(sprite3D.renderable.scale.y, 3);
+        DebugUISystem.addTempText(text, trans.pos.x, trans.pos.y, true);
+        //System.out.println(text);
+        */
+
+
+        if (screenTrans.timer.tryEvent()) {
+            sprite3D.renderable.scale.set(0, 0, 0);
+            if (entity.getComponent(AIComponent.class) != null) {
+                screenTrans.doTransition = true;
+            } else {
+                screenTrans.landStage = screenTrans.landStage.next();
             }
         }
     }
 
-    private static void grow(Entity entity, ScreenTransitionComponent screenTrans, float delta) {
+    private static void grow(Entity entity, ScreenTransitionComponent screenTrans) {
+        /*
         TextureComponent tex = Mappers.texture.get(entity);
         if (tex != null) {
             //grow texture
@@ -163,17 +174,17 @@ public class ScreenTransitionSystem extends IteratingSystem {
 
                 screenTrans.takeOffStage = screenTrans.takeOffStage.next();
             }
-        }
+        }*/
 
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
-        if (sprite3D != null) {
-            sprite3D.renderable.scale.add(3f * delta);
-            if (sprite3D.renderable.scale.len() <= 1) {
-                sprite3D.renderable.scale.set(1,1,1);
-                screenTrans.takeOffStage = screenTrans.takeOffStage.next();
-            }
-        }
 
+        float interp = screenTrans.animInterpolation.apply(0, 1, screenTrans.timer.ratio());
+        sprite3D.renderable.scale.set(interp, interp, interp);
+
+        if (screenTrans.timer.canDoEvent()) {
+            sprite3D.renderable.scale.set(1, 1, 1);
+            screenTrans.takeOffStage = screenTrans.takeOffStage.next();
+        }
     }
 
     private static void zoomIn(ScreenTransitionComponent screenTrans) {
@@ -192,32 +203,29 @@ public class ScreenTransitionSystem extends IteratingSystem {
 
 
     private static void landOnPlanet(Entity entity, ScreenTransitionComponent screenTrans) {
+        /*
         //reset size to normal
         TextureComponent tex = Mappers.texture.get(entity);
         if (tex != null) {
             tex.scale = SpaceProject.entitycfg.renderScale;
-        }
+        }*/
 
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
-        if (sprite3D != null) {
-            //sprite3D.renderable.scale.set(SpaceProject.entitycfg.renderScale,SpaceProject.entitycfg.renderScale,SpaceProject.entitycfg.renderScale);
-            sprite3D.renderable.scale.set(1,1,1);
-        }
+        sprite3D.renderable.scale.set(1,1,1);
 
         screenTrans.doTransition = true;
     }
 
     private void takeOff(Entity entity, ScreenTransitionComponent screenTrans) {
         //set size to 0 so texture can grow
+        /*
         TextureComponent tex = Mappers.texture.get(entity);
         if (tex != null) {
             tex.scale = 0;
-        }
+        }*/
 
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
-        if (sprite3D != null) {
-            sprite3D.renderable.scale.set(0,0,0);
-        }
+        sprite3D.renderable.scale.set(0,0,0);
 
         screenTrans.doTransition = true;
     }
@@ -237,8 +245,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
     }
 
     private static void pause(ScreenTransitionComponent screenTrans) {
-        if (screenTrans.timer.canDoEvent()) {
-            screenTrans.timer.reset();
+        if (screenTrans.timer.tryEvent()) {
             screenTrans.landStage = screenTrans.landStage.next();
         }
     }

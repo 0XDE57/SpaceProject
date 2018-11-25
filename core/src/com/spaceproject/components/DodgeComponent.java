@@ -8,7 +8,6 @@ public class DodgeComponent implements Component {
 
     public SimpleTimer animationTimer;
 
-    //public Vector2 targetLocation;
     public Interpolation animInterpolation;
 
     public float distance;

@@ -158,7 +158,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 			*/
 
 			/*
-			//TODO: would prefer to use this method rather than direct world trasnform, prolems:
+			//TODO: would prefer to use this method rather than direct world transform, problems:
 			//		set() seems to overwrite previous rotation only applying last called set
 			//		setEulerAnglesRad() seems to apply pitch and yaw in the opposite order we desire
 			sprite3D.renderable.position.set(t.pos.x, t.pos.y, -50);

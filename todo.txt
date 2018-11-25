@@ -15,10 +15,15 @@
 
 
 [...] fix land/take-off
-    [ ] bug: landed on planet which had finished generating, but did't load (no map found)
-    [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
-    [...] nested orbit: consider children of children eg: satellite->moon->planet->star
-    [...] clean up
+    [ ] transition feels unreliable
+        [ ] bug: landed on planet which had finished generating, but did't load (no map found)
+            see: WorldRenderingSystem.loadMap() (also rendering shouldn't be responsible for loading...)
+        [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
+            see: ScreenTransitionSystem.syncLoadPosition()
+    [ ] bug: shrink sometimes doesn't scale properly or at all
+    [ ] nested orbit: consider children of children eg: satellite->moon->planet->star
+    [ ] finish transistor animation, should have screen effect for polish and to hide loading/level change. goal feel a little more seamless
+        (fade to white/pixelate shader during landing, load map (can wait here for a second if not finished generating, when generations finished start white then fade normal, continue)
     [...] genericize and make work land and take off work for AI, system doesn't supports non-player world switching
         dumb loop where AI lands on planet, kept in some kind of background
         processing state/alt engine, wait a second then take off to test all is working correctly
@@ -71,6 +76,7 @@
 
 
 
+
 [ ] fix player moving ahead of camera at high speed, seem to happen only when vsync is on...
 
 [ ] take care of some of the todo's
@@ -83,11 +89,16 @@
 
 [ ] fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
     https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
+    https://www.youtube.com/watch?v=mXTxQko-JH0&t=4m18s
 
-
-[...] fix render priority (z-order)
-      [X] moved into separate variable
-      [ ] define proper heights for importance as current values are somewhat arbitrary
+[...] rendering system
+    [...] fix render priority (z-order)
+          [X] moved into separate variable
+          [ ] define proper heights for importance as current values are somewhat arbitrary
+          [ ] this is now a bit more complex, as there is a mix of 2d sprites and 3d renderables, that are rendered in separate batches (2d then 3d overlaye).
+              to mix the z between them may require multiple batch passes, or migrating to 3d
+    [ ] should consider merging SpaceRenderingSystem & WorldRenderingSystem because they are basically duplicates which the difference of background tiles
+        or at least have them share rendering functions as the drawEntities() & draw3DRenderables() are identical between them
 
 
 [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
@@ -104,7 +115,7 @@
                 [...] scale bounding box during rotation
                 [...] fix take off and landing shrink/grow animation
                     [x] fix crash
-                    [ ] sometimes model doesn't shrink, and never grows, fix len() check should not be 1
+                    [...] sometimes model doesn't shrink, and never grows
                 [ ] should use native texture size then scale the model instead?
                 [ ] clean up: should move values to config
                 [ ] clean up: optimize rendering -> ModelCache

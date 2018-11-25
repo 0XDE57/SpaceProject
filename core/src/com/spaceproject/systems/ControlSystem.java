@@ -10,6 +10,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.CameraFocusComponent;
@@ -101,11 +102,11 @@ public class ControlSystem extends IteratingSystem {
 		}
 
 		if (control.moveLeft) {
-			dodgeLeft(delta, entity, transform, control);
+			dodgeLeft(entity, transform, control);
 		}
 
 		if (control.moveRight) {
-			dodgeRight(delta, entity, transform, control);
+			dodgeRight(entity, transform, control);
 		}
 
 		if (control.moveBack) {
@@ -176,7 +177,7 @@ public class ControlSystem extends IteratingSystem {
 		}
 	}
 
-	private static void dodgeRight(float delta, Entity entity, TransformComponent transform, ControllableComponent control) {
+	private static void dodgeRight(Entity entity, TransformComponent transform, ControllableComponent control) {
 		if (control.timerDodge.canDoEvent() &&  Mappers.dodge.get(entity) == null) {
 			control.timerDodge.reset();
 
@@ -191,7 +192,7 @@ public class ControlSystem extends IteratingSystem {
 		}
 	}
 
-	private static void dodgeLeft(float delta, Entity entity, TransformComponent transform, ControllableComponent control) {
+	private static void dodgeLeft(Entity entity, TransformComponent transform, ControllableComponent control) {
 		if (control.timerDodge.canDoEvent() && Mappers.dodge.get(entity) == null) {
 			control.timerDodge.reset();
 
@@ -327,7 +328,8 @@ public class ControlSystem extends IteratingSystem {
 
 		// set the player at the position of vehicle
 		Vector2 vehiclePosition = Mappers.transform.get(vehicleEntity).pos;
-		Mappers.transform.get(characterEntity).pos.set(vehiclePosition);
+		Vector2 offset = MyMath.Vector(MathUtils.random(360) * MathUtils.degRad, 50);//set player next to vehicle
+		Mappers.transform.get(characterEntity).pos.set(vehiclePosition).add(offset);
 
 		//set focus to character
 		if (vehicleEntity.getComponent(CameraFocusComponent.class) != null) {
@@ -372,7 +374,8 @@ public class ControlSystem extends IteratingSystem {
 
 		ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
 		screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.transition;
-		//screenTrans.planet = GameScreen.currentPlanet;
+		screenTrans.timer = new SimpleTimer(SpaceProject.entitycfg.shrinkGrowAnimTime, true);
+		screenTrans.animInterpolation = Interpolation.pow2;
 		entity.add(screenTrans);
 
 		System.out.println("takeOffPlanet: " + Misc.myToString(entity));
@@ -393,7 +396,8 @@ public class ControlSystem extends IteratingSystem {
 				ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
 				screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.shrink;//begin animation
 				screenTrans.planet = planet;
-				screenTrans.timer = new SimpleTimer(2200);
+				screenTrans.timer = new SimpleTimer(SpaceProject.entitycfg.shrinkGrowAnimTime, true);
+				screenTrans.animInterpolation = Interpolation.sineIn;
 				entity.add(screenTrans);
 
 				System.out.println("landOnPlanet: " +  Misc.myToString(entity));

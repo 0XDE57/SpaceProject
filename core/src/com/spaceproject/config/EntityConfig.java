@@ -25,6 +25,7 @@ public class EntityConfig extends Config {
     public long cannonRechargeRate;
     public float cannonVelocity;
     public float cannonAcceleration;
+    public long shrinkGrowAnimTime;
 
 
     @Override
@@ -48,6 +49,7 @@ public class EntityConfig extends Config {
         cannonRechargeRate = 1000;
         cannonVelocity = 680;
         cannonAcceleration = 200;
+        shrinkGrowAnimTime = 2500;
 
     }
 
