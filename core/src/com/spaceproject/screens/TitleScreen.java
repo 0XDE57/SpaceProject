@@ -39,7 +39,7 @@ public class TitleScreen extends MyScreenAdapter {
 
 	private TitleAnimation foregroundAnimation, backgroundAnimation;
 	enum ForegroundAnimation {
-		tree, delaunay, orbit, drop
+		tree, delaunay, orbit, drop, crossNoise
 	}
 
 	public TitleScreen(SpaceProject spaceProject) {
@@ -249,6 +249,9 @@ public class TitleScreen extends MyScreenAdapter {
 				break;
 			case drop:
 				foregroundAnimation = new DropAnim();
+				break;
+			case crossNoise:
+				foregroundAnimation = new NoiseAnim(0, 0.01f, 3, 0.013f, true);
 				break;
 		}
 	}
