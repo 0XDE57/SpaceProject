@@ -27,8 +27,9 @@ public class DropAnim extends TitleAnimation {
 
     @Override
     public void render(float delta, ShapeRenderer shape) {
+        boolean clicked = Gdx.input.isTouched();
 
-        if (drops.size() < maxDrops && MathUtils.random(ringChance) == 0) {
+        if ((drops.size() < maxDrops && MathUtils.random(ringChance) == 0) || clicked) {
             int numRings = MathUtils.random(1, maxRings);
             float ringRad = MathUtils.random(40, 150);
             float nextRing = MathUtils.random(8f, 20f);
@@ -36,6 +37,10 @@ public class DropAnim extends TitleAnimation {
             //could improve by not allowing overlapping rings (low priority, just playing)
             int x = MathUtils.random(0, Gdx.graphics.getWidth());
             int y = MathUtils.random(0, Gdx.graphics.getHeight());
+            if (clicked) {
+                x = Gdx.input.getX();
+                y = Gdx.graphics.getHeight()-Gdx.input.getY();
+            }
 
             drops.add(new Drop(x, y, numRings, ringRad, nextRing));
         }
