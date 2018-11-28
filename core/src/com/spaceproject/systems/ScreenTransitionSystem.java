@@ -104,18 +104,6 @@ public class ScreenTransitionSystem extends IteratingSystem {
             }
         }
 
-        // freeze movement during animation
-        //TODO: move this into control system, ignore action if ScreenTrans component present
-        //do same for other controls like dodge/shoot
-        TransformComponent transform = Mappers.transform.get(entity);
-        if (transform != null) {
-            transform.velocity.set(0, 0);
-            ControllableComponent control = entity.getComponent(ControllableComponent.class);
-            if (control != null) {
-                //control.* = false;
-                control.angleFacing = transform.rotation;
-            }
-        }
 
     }
 
@@ -138,9 +126,15 @@ public class ScreenTransitionSystem extends IteratingSystem {
         }
         */
 
+        // freeze movement during animation
+        TransformComponent transform = Mappers.transform.get(entity);
+        if (transform != null) {
+            transform.velocity.set(0, 0);
+        }
+
+
+
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
-
-
         float interp = screenTrans.animInterpolation.apply(1, 0, screenTrans.timer.ratio());
         sprite3D.renderable.scale.set(interp, interp, interp);
         //TODO: something is wrong with scaling/rendering. the interpolation numbers feel right, but often the entity often much larger than it should be

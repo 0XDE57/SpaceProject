@@ -94,8 +94,19 @@ public class ControlSystem extends IteratingSystem {
 	private void controlShip(Entity entity, VehicleComponent vehicle, ControllableComponent control, float delta) {
 		TransformComponent transform = Mappers.transform.get(entity);
 
+		DodgeComponent dodgeComp = Mappers.dodge.get(entity);
+		ScreenTransitionComponent screenTransComp = Mappers.screenTrans.get(entity);
+		boolean canAct = (dodgeComp == null && screenTransComp == null);
+
+
+		barrelRoll(entity, transform, dodgeComp);
+
+		if (!canAct) {
+			return;
+		}
+
 		//make vehicle face angle from mouse/joystick
-		transform.rotation = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f*delta);
+		transform.rotation = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f * delta);
 
 		if (control.moveForward) {
 			accelerate(delta, control, transform, vehicle);
@@ -114,9 +125,9 @@ public class ControlSystem extends IteratingSystem {
 		}
 
 		//debug force insta-stop(currently affects all vehicles)
-		if (Gdx.input.isKeyJustPressed(Keys.X)) transform.velocity.set(0,0);
+		if (Gdx.input.isKeyJustPressed(Keys.X)) transform.velocity.set(0, 0);
 
-		barrelRoll(entity, transform);
+
 
 		//fire cannon / attack
 		CannonComponent cannon = Mappers.cannon.get(entity);
@@ -124,6 +135,7 @@ public class ControlSystem extends IteratingSystem {
 		if (control.shoot) {
 			fireCannon(transform, cannon, entity);
 		}
+
 
 
 		//transition or take off from planet
@@ -207,8 +219,7 @@ public class ControlSystem extends IteratingSystem {
 		}
 	}
 
-	private void barrelRoll(Entity entity, TransformComponent transform) {
-		DodgeComponent dodgeComp = Mappers.dodge.get(entity);
+	private void barrelRoll(Entity entity, TransformComponent transform, DodgeComponent dodgeComp) {
 		if (dodgeComp != null) {
 			//TODO, this use of interpolation seems a little odd, do I need to track distance traveled?
 			float interp = dodgeComp.animInterpolation.apply(0, dodgeComp.distance, dodgeComp.animationTimer.ratio());

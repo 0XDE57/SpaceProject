@@ -408,7 +408,7 @@ public class EntityFactory {
 		Texture pixmapTex = TextureFactory.generateShip(seed, size);
 		//texture.texture = pixmapTex;// give texture component the generated pixmap texture
 		//texture.scale = SpaceProject.entitycfg.renderScale;
-		Texture shipBottom = TextureFactory.generateShipUnderSide(seed, size);
+		Texture shipBottom = TextureFactory.generateShipUnderSide(pixmapTex);
 		Sprite3DComponent sprite3DComp = new Sprite3DComponent();
 		sprite3DComp.renderable = new Sprite3D(pixmapTex, shipBottom);
 
