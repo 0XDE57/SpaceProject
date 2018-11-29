@@ -1,18 +1,23 @@
 package com.spaceproject.ui;
 
 import com.badlogic.ashley.core.Engine;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.systems.SpaceLoadingSystem;
+import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.SimpleTimer;
 
 public class MiniMap {
@@ -40,7 +45,7 @@ public class MiniMap {
         fontSmall = FontFactory.createFont(FontFactory.fontPressStart, 12);
     }
 
-    public void drawSpaceMap(Engine engine, ShapeRenderer shape, SpriteBatch batch) {
+    public void drawSpaceMap(Engine engine, ShapeRenderer shape, SpriteBatch batch, Entity player) {
         if (mapState == MapState.off)
             return;
 
@@ -125,20 +130,39 @@ public class MiniMap {
         shape.rect(mapBacking.width+mapBacking.x-borderWidth, mapBacking.y, borderWidth, mapBacking.height);//right
 
 
+        //draw velocity vector for intuitive navigation
+        if (player != null) {
+            TransformComponent t = Mappers.transform.get(player);
+
+            //calculate vector angle and length
+            float scale = 4; //how long to make vectors (higher number is longer line)
+            float length = (float)Math.log(t.velocity.len()) * scale;
+            float angle = t.velocity.angle() * MathUtils.degreesToRadians;
+            Vector2 vel = MyMath.Vector(angle, length).add(centerMapX, centerMapY);
+
+            //draw line to represent movement
+            shape.rectLine(centerMapX, centerMapY, vel.x, vel.y, 2, Color.MAGENTA, Color.RED);
+
+            Vector2 facing = MyMath.Vector(t.rotation, 10).add(centerMapX, centerMapY);
+            shape.rectLine(centerMapX, centerMapY, facing.x, facing.y, 2, Color.GRAY, Color.WHITE);
+        }
         shape.setColor(Color.WHITE);
-        shape.circle(centerMapX, centerMapY, 2);
+        shape.circle(centerMapX, centerMapY, 3);
+
 
         shape.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
 
-        batch.begin();
-        String mapString = (int) MyScreenAdapter.cam.position.x / chunkSize + ", " + (int) MyScreenAdapter.cam.position.y / chunkSize;
-        if (!drawScaleTimer.canDoEvent()) {
-            mapString += ": " + mapScale;
+        if (mapState == MapState.full) {
+            batch.begin();
+            String mapString = (int) MyScreenAdapter.cam.position.x / chunkSize + ", " + (int) MyScreenAdapter.cam.position.y / chunkSize;
+            if (!drawScaleTimer.canDoEvent()) {
+                mapString += ": " + mapScale;
+            }
+            fontSmall.draw(batch, mapString, mapBacking.x + 10, mapBacking.y + mapBacking.height - fontSmall.getLineHeight());
+            batch.end();
         }
-        fontSmall.draw(batch, mapString, mapBacking.x + 10, mapBacking.y + mapBacking.height - fontSmall.getLineHeight());
-        batch.end();
     }
 
 
