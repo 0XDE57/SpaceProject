@@ -18,14 +18,18 @@ import com.spaceproject.utility.MyMath;
 
 import java.util.Iterator;
 
+import static com.spaceproject.screens.MyScreenAdapter.shape;
+
 public class AsteroidAnim extends TitleAnimation {
 
     Vector2 bullet = null;
     float bulletAngle = 0;
     Array<Asteroid> asteriods = new Array<Asteroid>();
 
+    CustomShapeRenderer customShapeRenderer;
     public AsteroidAnim() {
-        asteriods.add(new Asteroid(200, 0, 0));
+        asteriods.add(new Asteroid(new Vector2(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2), 200, 0, 0));
+        customShapeRenderer = new CustomShapeRenderer(ShapeRenderer.ShapeType.Filled, shape.getRenderer());
     }
 
 
@@ -45,27 +49,42 @@ public class AsteroidAnim extends TitleAnimation {
 
 
 
-        //shape.setColor(Color.WHITE);
-        //shape.begin(ShapeRenderer.ShapeType.Filled);
-        CustomShapeRenderer test = new CustomShapeRenderer(ShapeRenderer.ShapeType.Filled, shape.getRenderer());
-        test.begin(ShapeRenderer.ShapeType.Filled);
-        for (Asteroid a : asteriods) {
-            a.renderBody(test);
-        }
-        test.end();
-        //shape.end();
 
-        shape.setColor(Color.BLACK);
+        customShapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        for (Asteroid a : asteriods) {
+            a.renderBody(customShapeRenderer);
+        }
+        customShapeRenderer.end();
+
+
         shape.begin(ShapeRenderer.ShapeType.Line);
-        for (Iterator<Asteroid> asteroidIterator = asteriods.iterator(); asteroidIterator.hasNext();) {
+        for (Iterator<Asteroid> asteroidIterator = new Array.ArrayIterator<Asteroid>(asteriods); asteroidIterator.hasNext();) {
             Asteroid a = asteroidIterator.next();
             a.render(shape, delta);
 
+
+            for (Asteroid b : new Array.ArrayIterator<Asteroid>(asteriods)) {
+                if (a.equals(b)) continue;
+                if (a.hullPoly.getBoundingRectangle().overlaps(b.hullPoly.getBoundingRectangle())) {
+                    a.angle -= 180 * MathUtils.degRad;
+                    b.angle -= 180 * MathUtils.degRad;
+                }
+            }
+
             if (bullet != null) {
                 if (a.hullPoly.contains(bullet)) {
-                    if (a.hullPoly.getBoundingRectangle().area() > 40) {
-                        asteriods.add(new Asteroid(a.size / 2, bulletAngle + (MathUtils.random(-45, 45) * MathUtils.degRad), 40));
-                        asteriods.add(new Asteroid(a.size / 2, bulletAngle + (MathUtils.random(-45, 45) * MathUtils.degRad), 40));
+                    if (a.hullPoly.area() > 600) {
+                        int size = (int)(a.size*0.65f);
+                        Asteroid asteroidA = new Asteroid(a.position.cpy(), size, bulletAngle + (MathUtils.random(0, 45) * MathUtils.degRad), MathUtils.random(20, 40));
+                        Asteroid asteroidB = new Asteroid(a.position.cpy(), size, bulletAngle - (MathUtils.random(0, 45) * MathUtils.degRad), MathUtils.random(20, 40));
+                        while (asteroidA.hullPoly.getBoundingRectangle().overlaps(asteroidB.hullPoly.getBoundingRectangle())) {
+                            asteroidA.position.sub(2, 0);
+                            asteroidB.position.add(2, 0);
+                            asteroidA.hullPoly.setPosition(asteroidA.position.x, asteroidA.position.y);
+                            asteroidB.hullPoly.setPosition(asteroidB.position.x, asteroidB.position.y);
+                        }
+                        asteriods.add(asteroidA);
+                        asteriods.add(asteroidB);
                     }
 
                     bullet = null;
@@ -96,10 +115,11 @@ public class AsteroidAnim extends TitleAnimation {
         int size;
 
 
-        public Asteroid(int size, float angle, float velocity) {
+        public Asteroid(Vector2 position ,int size, float angle, float velocity) {
             this.size = size;
             this.angle = angle;
             this.velocity = velocity;
+            this.position = position;
 
             FloatArray points = new FloatArray();
             int numPoints = 20;
@@ -115,7 +135,7 @@ public class AsteroidAnim extends TitleAnimation {
             hullPoly = new Polygon(hull);
             hullPoly.setOrigin(size/2,size/2);//should actually be center of mass//TODO: lookup center of mass for arbitrary poly
 
-            position = new Vector2(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+
         }
 
         public void render(ShapeRenderer shape, float delta) {
@@ -123,19 +143,19 @@ public class AsteroidAnim extends TitleAnimation {
             //position.add(MyMath.Vector(angle,10*delta));
 
             Rectangle bounds = hullPoly.getBoundingRectangle();
-            if (bounds.y < 0) {
-                //position.add(0, 2);
-                angle -= 180 * MathUtils.degRad;
-            } else if (bounds.y + bounds.height > Gdx.graphics.getHeight()) {
-                //position.sub(0, 10);
-                angle -= 180 * MathUtils.degRad;
+            if (bounds.y <= 0) {
+                position.add(0, 1);
+                angle = MathUtils.PI2 - angle;
+            } else if (bounds.y + bounds.height >= Gdx.graphics.getHeight()) {
+                position.sub(0, 1);
+                angle = MathUtils.PI2 - angle;
             }
-            if (bounds.x < 0) {
-                //position.add(2, 0);
-                angle -= 180 * MathUtils.degRad;
-            } else if (bounds.x + bounds.width > Gdx.graphics.getWidth()) {
-                //position.sub(2, 0);
-                angle -= 180 * MathUtils.degRad;
+            if (bounds.x <= 0) {
+                position.add(1, 0);
+                angle = MathUtils.PI - angle;
+            } else if (bounds.x + bounds.width >= Gdx.graphics.getWidth()) {
+                position.sub(1, 0);
+                angle = MathUtils.PI - angle;
             }
 
             position.add(MyMath.Vector(angle, velocity*delta));
@@ -143,9 +163,11 @@ public class AsteroidAnim extends TitleAnimation {
 
             hullPoly.rotate(10*delta);
             hullPoly.setPosition(position.x, position.y);
+            shape.setColor(Color.BLACK);
             shape.polyline(hullPoly.getTransformedVertices());
 
-            //shape.polygon(hullPoly.getBoundingRectangle());
+            //shape.setColor(Color.RED);
+            //shape.rect(bounds.x, bounds.y, bounds.width, bounds.height);
         }
 
         public void renderBody(CustomShapeRenderer shape) {

@@ -18,16 +18,17 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.FontFactory;
+import com.spaceproject.screens.animations.DelaunayAnim;
 import com.spaceproject.screens.animations.DropAnim;
+import com.spaceproject.screens.animations.NoiseAnim;
+import com.spaceproject.screens.animations.OrbitAnim;
+import com.spaceproject.screens.animations.TitleAnimation;
+import com.spaceproject.screens.animations.TreeAnim;
 import com.spaceproject.screens.debug.Test3DScreen;
 import com.spaceproject.screens.debug.TestNoiseScreen;
 import com.spaceproject.screens.debug.TestShipGenerationScreen;
+import com.spaceproject.screens.debug.TestSpiralGalaxy;
 import com.spaceproject.screens.debug.TestVoronoiScreen;
-import com.spaceproject.screens.animations.DelaunayAnim;
-import com.spaceproject.screens.animations.TitleAnimation;
-import com.spaceproject.screens.animations.NoiseAnim;
-import com.spaceproject.screens.animations.OrbitAnim;
-import com.spaceproject.screens.animations.TreeAnim;
 
 public class TitleScreen extends MyScreenAdapter {
 
@@ -39,19 +40,25 @@ public class TitleScreen extends MyScreenAdapter {
 
 	private TitleAnimation foregroundAnimation, backgroundAnimation;
 	enum ForegroundAnimation {
-		tree, delaunay, orbit, drop, crossNoise
+		tree, delaunay, orbit, drop, crossNoise;
+
+		private static ForegroundAnimation random()  {
+			return ForegroundAnimation.values()[MathUtils.random(ForegroundAnimation.values().length-1)];
+		}
 	}
+
 
 	public TitleScreen(SpaceProject spaceProject) {
 		this.game = spaceProject;
 
 		//init scene2d and VisUI
-		if (!VisUI.isLoaded())
-			VisUI.load(VisUI.SkinScale.X2);
+		if (VisUI.isLoaded())
+			VisUI.dispose(true);
+		VisUI.load(VisUI.SkinScale.X2);
 		stage = new Stage(new ScreenViewport());
 		Gdx.input.setInputProcessor(stage);
 
-		Table table = CreateMainMenu(true);
+		Table table = CreateMainMenu(false);
 		stage.addActor(table);
 		table.pack(); //force table to calculate size
 		int edgePad = SpaceProject.isMobile() ? 20 : 10;
@@ -106,6 +113,15 @@ public class TitleScreen extends MyScreenAdapter {
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F5)) {
 			initForegroundAnim();
+		}
+
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
+			Table table = CreateMainMenu(true);
+			table.pack(); //force table to calculate size
+			int edgePad = SpaceProject.isMobile() ? 20 : 10;
+			table.setPosition(edgePad,edgePad);
+			stage.clear();
+			stage.addActor(table);
 		}
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
@@ -175,6 +191,16 @@ public class TitleScreen extends MyScreenAdapter {
 			}
 		});
 
+		TextButton btnSpiral = new TextButton("Spiral Gen [DEBUG]", VisUI.getSkin());
+		btnSpiral.getLabel().setAlignment(Align.left);
+		btnSpiral.addListener(new ChangeListener() {
+			@Override
+			public void changed (ChangeEvent event, Actor actor) {
+				game.setScreen(new TestSpiralGalaxy());
+			}
+		});
+
+
 		TextButton btnLoad = new TextButton("load", VisUI.getSkin());
 		btnLoad.getLabel().setAlignment(Align.left);
 		btnLoad.addListener(new ChangeListener() {
@@ -211,6 +237,7 @@ public class TitleScreen extends MyScreenAdapter {
 			table.add(btnNoise).fillX().row();
 			table.add(btn3D).fillX().row();
 			table.add(btnShip).fillX().row();
+			table.add(btnSpiral).row();
 		}
 		table.add(btnLoad).left().fillX().row();
 		table.add(btnOption).fillX().row();
@@ -232,34 +259,37 @@ public class TitleScreen extends MyScreenAdapter {
 	}
 
 
-	private static ForegroundAnimation randomAnim()  {
-		return ForegroundAnimation.values()[MathUtils.random(ForegroundAnimation.values().length-1)];
-	}
-
 	private void initForegroundAnim() {
-		switch (randomAnim()) {
+		ForegroundAnimation anim = ForegroundAnimation.random();
+		switch (anim) {
 			case delaunay:
-				foregroundAnimation = new DelaunayAnim();
+				this.foregroundAnimation = new DelaunayAnim();
 				break;
 			case tree:
-				foregroundAnimation = new TreeAnim();
+				this.foregroundAnimation = new TreeAnim();
 				break;
 			case orbit:
-				foregroundAnimation = new OrbitAnim();
+				this.foregroundAnimation = new OrbitAnim();
 				break;
 			case drop:
-				foregroundAnimation = new DropAnim();
+				this.foregroundAnimation = new DropAnim();
 				break;
 			case crossNoise:
-				foregroundAnimation = new NoiseAnim(0, 0.01f, 3, 0.013f, true);
+				this.foregroundAnimation = new NoiseAnim(0, 0.01f, 3, 0.013f, true);
 				break;
+				/*
+			case asteroid:
+				this.foregroundAnimation = new AsteroidAnim();
+				break;
+				*/
 		}
+		System.out.println("Animation: " + anim);
 	}
 
 	public void dispose() {
 		batch.dispose();
 		shape.dispose();
-		VisUI.dispose();
+		VisUI.dispose(true);
 		stage.dispose();
 	}
 }

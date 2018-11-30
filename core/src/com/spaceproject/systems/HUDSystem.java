@@ -130,7 +130,7 @@ public class HUDSystem extends EntitySystem {
 
 
 		Entity p = player.size() > 0 ? player.first() : null;
-		miniMap.drawSpaceMap(getEngine(), shape, batch, p);
+		miniMap.drawSpaceMap(getEngine(), shape, batch, p, mapableObjects);
 	}
 
 	private void drawHUD() {

@@ -7,7 +7,10 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
@@ -24,7 +27,7 @@ public class Test3DScreen extends ScreenAdapter {
     OrthographicCamera orthographicCam;
     SpriteBatch batch = new SpriteBatch();
     ModelBatch modelBatch = new ModelBatch();
-
+    Environment environment;
 
     Sprite3D ship3d;
 
@@ -34,6 +37,10 @@ public class Test3DScreen extends ScreenAdapter {
     public Test3DScreen() {
 
         orthographicCam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        environment = new Environment();
+        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
+        environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -.4f, -.4f, -.4f));
 
         generateShip();
     }
@@ -105,7 +112,7 @@ public class Test3DScreen extends ScreenAdapter {
         */
 
         modelBatch.begin(orthographicCam);
-        modelBatch.render(ship3d);
+        modelBatch.render(ship3d);//, environment);
         modelBatch.end();
 
 

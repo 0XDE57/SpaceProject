@@ -2,6 +2,7 @@ package com.spaceproject.ui;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -12,6 +13,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.MapComponent;
+import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.screens.MyScreenAdapter;
@@ -45,13 +48,21 @@ public class MiniMap {
         fontSmall = FontFactory.createFont(FontFactory.fontPressStart, 12);
     }
 
-    public void drawSpaceMap(Engine engine, ShapeRenderer shape, SpriteBatch batch, Entity player) {
+    public void drawSpaceMap(Engine engine, ShapeRenderer shape, SpriteBatch batch, Entity player, ImmutableArray<Entity> mapables) {
         if (mapState == MapState.off)
             return;
 
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        /*
+        Rectangle scissors = new Rectangle();
+        Rectangle clipBounds = new Rectangle(mapBacking);
+        //clipBounds.setPosition( GameScreen.cam.position.x + mapBacking.x, clipBounds.y - GameScreen.cam.position.y);
+        ScissorStack.calculateScissors(GameScreen.cam, shape.getTransformMatrix(),clipBounds, scissors);
+        ScissorStack.pushScissors(scissors);
+        */
 
         shape.begin(ShapeRenderer.ShapeType.Filled);
 
@@ -69,12 +80,14 @@ public class MiniMap {
 
 
         //draw mouse pos
-        shape.setColor(1f, 0.2f, 0.2f, 1f);
-        int mX = Gdx.input.getX();
-        int mY = Gdx.graphics.getHeight()-Gdx.input.getY();
-        if (mapBacking.contains(mX, mY)) {
-            shape.line(mapBacking.x, mY, mapBacking.x+mapBacking.width, mY);//horizontal
-            shape.line(mX, mapBacking.y, mX, mapBacking.y+mapBacking.height);//vertical
+        if (mapState == MapState.full) {
+            shape.setColor(1f, 0.2f, 0.2f, 1f);
+            int mX = Gdx.input.getX();
+            int mY = Gdx.graphics.getHeight() - Gdx.input.getY();
+            if (mapBacking.contains(mX, mY)) {
+                shape.line(mapBacking.x, mY, mapBacking.x + mapBacking.width, mY);//horizontal
+                shape.line(mX, mapBacking.y, mX, mapBacking.y + mapBacking.height);//vertical
+            }
         }
 
 
@@ -121,6 +134,43 @@ public class MiniMap {
             }
         }
 
+        boolean drawOrbit = false;//mapScale > 100;
+        if (mapables != null) {
+            for (Entity mapable : mapables) {
+
+
+
+
+                MapComponent map = Mappers.map.get(mapable);
+                Vector2 screenPos = Mappers.transform.get(mapable).pos;
+
+                // n = relative pos / scale + mapPos
+                float x = ((screenPos.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
+                float y = ((screenPos.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
+
+                if (drawOrbit) {
+                    OrbitComponent orbit = Mappers.orbit.get(mapable);
+                    if (orbit != null && orbit.parent != null) {
+                        TransformComponent parentPos = Mappers.transform.get(orbit.parent);
+                        float xx = ((parentPos.pos.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
+                        float yy = ((parentPos.pos.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
+
+                        //if (mapBacking.contains(xx, yy) && mapBacking.contains(x, y)) {
+                            shape.setColor(0.5f, 0.5f, 0.5f, 0.5f);
+                            shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
+                            shape.line(xx, yy, x, y);//actual position
+                        //}
+                        //Vector2 test = new (Vector2.)
+                    }
+                }
+
+                if (mapBacking.contains(x, y)) {
+                    shape.setColor(map.color);
+                    shape.circle(x, y, 2);
+                }
+            }
+        }
+
 
         //draw border
         shape.setColor(0.6f,0.6f,0.6f,1f);
@@ -151,8 +201,9 @@ public class MiniMap {
 
 
         shape.end();
-        Gdx.gl.glDisable(GL20.GL_BLEND);
+        //ScissorStack.popScissors();
 
+        Gdx.gl.glDisable(GL20.GL_BLEND);
 
         if (mapState == MapState.full) {
             batch.begin();
@@ -163,6 +214,8 @@ public class MiniMap {
             fontSmall.draw(batch, mapString, mapBacking.x + 10, mapBacking.y + mapBacking.height - fontSmall.getLineHeight());
             batch.end();
         }
+
+
     }
 
 
@@ -220,7 +273,9 @@ public class MiniMap {
     }
 
     public void scrollMiniMap(int amount) {
-        mapScale += amount*20;
+        //TODO: make this some log function, small increment when zoom in and larger the further out
+        float changeLarge = 20, changeSmall = 2;
+        mapScale += amount * ((mapScale >= changeLarge) ? changeLarge : changeSmall);
         drawScaleTimer.reset();
         System.out.println("map scale: " + mapScale);
     }
