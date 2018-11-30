@@ -17,6 +17,7 @@ import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
+import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -40,6 +41,7 @@ public class Mappers {
 	public static final ComponentMapper<PlanetComponent> planet = ComponentMapper.getFor(PlanetComponent.class);
 	public static final ComponentMapper<ScreenTransitionComponent> screenTrans = ComponentMapper.getFor(ScreenTransitionComponent.class);
 	public static final ComponentMapper<SeedComponent> seed = ComponentMapper.getFor(SeedComponent.class);
+	public static final ComponentMapper<ShieldComponent> shield = ComponentMapper.getFor(ShieldComponent.class);
 	public static final ComponentMapper<Sprite3DComponent> sprite3D = ComponentMapper.getFor(Sprite3DComponent.class);
 	public static final ComponentMapper<TextureComponent> texture = ComponentMapper.getFor(TextureComponent.class);
 	public static final ComponentMapper<TransformComponent> transform = ComponentMapper.getFor(TransformComponent.class);

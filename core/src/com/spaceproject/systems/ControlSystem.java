@@ -25,6 +25,7 @@ import com.spaceproject.components.GrowCannonComponent;
 import com.spaceproject.components.MissileComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
+import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -98,17 +99,26 @@ public class ControlSystem extends IteratingSystem {
 	//region ship controls
 	private void controlShip(Entity entity, VehicleComponent vehicle, ControllableComponent control, float delta) {
 		TransformComponent transform = Mappers.transform.get(entity);
-
 		DodgeComponent dodgeComp = Mappers.dodge.get(entity);
 		ScreenTransitionComponent screenTransComp = Mappers.screenTrans.get(entity);
+		ShieldComponent shield = Mappers.shield.get(entity);
+
 		boolean canAct = (dodgeComp == null && screenTransComp == null);
+		//boolean canMove = dodgeComp == null && screenTransComp == null;
+		boolean canShoot = dodgeComp == null && shield == null;
+		boolean canDodge = shield == null;
 
 
 		barrelRoll(entity, transform, dodgeComp);
+		//manageShield(entity, transform, shield);
+
+		//debug force insta-stop(currently affects all vehicles)
+		if (Gdx.input.isKeyJustPressed(Keys.X)) transform.velocity.set(0, 0);
 
 		if (!canAct) {
 			return;
 		}
+
 
 		//make vehicle face angle from mouse/joystick
 		transform.rotation = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f * delta);
@@ -116,21 +126,21 @@ public class ControlSystem extends IteratingSystem {
 		if (control.moveForward) {
 			accelerate(delta, control, transform, vehicle);
 		}
-
-		if (control.moveLeft) {
-			dodgeLeft(entity, transform, control);
-		}
-
-		if (control.moveRight) {
-			dodgeRight(entity, transform, control);
-		}
-
 		if (control.moveBack) {
 			decelerate(delta, transform);
 		}
 
-		//debug force insta-stop(currently affects all vehicles)
-		if (Gdx.input.isKeyJustPressed(Keys.X)) transform.velocity.set(0, 0);
+		if (canDodge) {
+			if (control.moveLeft) {
+				dodgeLeft(entity, transform, control);
+			}
+
+			if (control.moveRight) {
+				dodgeRight(entity, transform, control);
+			}
+		}
+
+
 
 
 
@@ -138,12 +148,19 @@ public class ControlSystem extends IteratingSystem {
 		CannonComponent cannon = Mappers.cannon.get(entity);
 		if (cannon != null) {
 			refillAmmo(cannon);//TODO: ammo should refill on all entities regardless of player presence
-			if (control.shoot) {
+			if (control.attack && canShoot) {
 				fireCannon(transform, cannon, entity);
 			}
 		}
-		GrowCannonComponent growCannon = Mappers.growCannon.get(entity);
-		manageGrowCannon(entity, control, transform, growCannon);
+		if (canShoot) {
+			GrowCannonComponent growCannon = Mappers.growCannon.get(entity);
+			manageGrowCannon(entity, control, transform, growCannon);
+		}
+
+		//exit vehicle
+		if (control.changeVehicle) {
+			exitVehicle(entity, control);
+		}
 
 		//transition or take off from planet
 		if (GameScreen.inSpace) {
@@ -159,13 +176,9 @@ public class ControlSystem extends IteratingSystem {
 			}
 		}
 
-
-		//exit vehicle
-		if (control.changeVehicle) {
-			exitVehicle(entity, control);
-		}
-
 	}
+
+
 
 	private static void accelerate(float delta, ControllableComponent control, TransformComponent transform, VehicleComponent vehicle) {
 		//TODO: implement rest of engine behavior
@@ -233,51 +246,70 @@ public class ControlSystem extends IteratingSystem {
 	}
 
 	private void barrelRoll(Entity entity, TransformComponent transform, DodgeComponent dodgeComp) {
-		if (dodgeComp != null) {
-			//TODO, this use of interpolation seems a little odd, do I need to track distance traveled?
-			float interp = dodgeComp.animInterpolation.apply(0, dodgeComp.distance, dodgeComp.animationTimer.ratio());
-			float distance = interp - dodgeComp.traveled;
-			dodgeComp.traveled += distance;
-			transform.pos.add(MyMath.Vector(dodgeComp.direction, distance));
-			//System.out.println(dodgeComp.animationTimer.ratio() + ": " + interp + ": " + distance + ": " + dodgeComp.traveled + ": " + (dodgeComp.distance-interp));
-
-
-			Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
-			switch (dodgeComp.dir) {
-				case left:
-					sprite3D.renderable.angle = dodgeComp.animInterpolation.apply(MathUtils.PI2 * dodgeComp.revolutions, 0, dodgeComp.animationTimer.ratio());
-					break;
-				case right:
-					sprite3D.renderable.angle = dodgeComp.animInterpolation.apply(0, MathUtils.PI2 * dodgeComp.revolutions, dodgeComp.animationTimer.ratio());
-					break;
-			}
-
-			//ensure bounding box follows sprite, ship should be thinner/harder to hit when rolling
-			BoundsComponent bounds = Mappers.bounds.get(entity);
-			float scaleY = 1-(sprite3D.renderable.angle / MathUtils.PI);//TODO, this is wrong: need to find something that maps like below
-			//degrees, scale
-			//0   = 1 	-> top
-			//45  = 0.5
-			//90  = 0
-			//135 = 0.5
-			//180 = 1 	-> bottom
-			//225 = 0.5
-			//270 = 0
-			//315 = 0.5
-			//360 = 1	-> top
-			//System.out.println(sprite3D.renderable.angle + ", " + sy);
-			bounds.poly.setScale(1, scaleY);
-
-
-			if (dodgeComp.animationTimer.canDoEvent()) {
-				//reset
-				sprite3D.renderable.angle = 0;
-				bounds.poly.setScale(1,1);
-
-				//end anim
-				entity.remove(DodgeComponent.class);
-			}
+		if (dodgeComp == null) {
+			return;
 		}
+
+
+		//TODO, this use of interpolation seems a little odd, do I need to track distance traveled?
+		float interp = dodgeComp.animInterpolation.apply(0, dodgeComp.distance, dodgeComp.animationTimer.ratio());
+		float distance = interp - dodgeComp.traveled;
+		dodgeComp.traveled += distance;
+		transform.pos.add(MyMath.Vector(dodgeComp.direction, distance));
+		//System.out.println(dodgeComp.animationTimer.ratio() + ": " + interp + ": " + distance + ": " + dodgeComp.traveled + ": " + (dodgeComp.distance-interp));
+
+
+		Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
+		switch (dodgeComp.dir) {
+			case left:
+				sprite3D.renderable.angle = dodgeComp.animInterpolation.apply(MathUtils.PI2 * dodgeComp.revolutions, 0, dodgeComp.animationTimer.ratio());
+				break;
+			case right:
+				sprite3D.renderable.angle = dodgeComp.animInterpolation.apply(0, MathUtils.PI2 * dodgeComp.revolutions, dodgeComp.animationTimer.ratio());
+				break;
+		}
+
+		//ensure bounding box follows sprite, ship should be thinner/harder to hit when rolling
+		BoundsComponent bounds = Mappers.bounds.get(entity);
+		float scaleY = 1 - (sprite3D.renderable.angle / MathUtils.PI);//TODO, this is wrong: need to find something that maps like below
+		//degrees, scale
+		//0   = 1 	-> top
+		//45  = 0.5
+		//90  = 0
+		//135 = 0.5
+		//180 = 1 	-> bottom
+		//225 = 0.5
+		//270 = 0
+		//315 = 0.5
+		//360 = 1	-> top
+		//System.out.println(sprite3D.renderable.angle + ", " + sy);
+		bounds.poly.setScale(1, scaleY);
+
+
+		if (dodgeComp.animationTimer.canDoEvent()) {
+			//reset
+			sprite3D.renderable.angle = 0;
+			bounds.poly.setScale(1, 1);
+
+			//end anim
+			entity.remove(DodgeComponent.class);
+		}
+
+	}
+
+	private void manageShield(Entity entity, TransformComponent transform, ShieldComponent shield) {
+		if (shield == null) {
+			return;
+		}
+		//if (control.defend) {
+			if (shield == null) {
+				shield = new ShieldComponent();
+				shield.animTimer = new SimpleTimer(1000, true);
+				shield.defence = 100f;
+				entity.add(shield);
+			}
+		//}
+
 	}
 
 	private void enterVehicle(Entity characterEntity, ControllableComponent control) {
@@ -475,7 +507,7 @@ public class ControlSystem extends IteratingSystem {
 			}
 
 			//release
-			if (!control.shoot) {
+			if (!control.attack) {
 				Vector2 vec = MyMath.Vector(transform.rotation, growCannon.velocity).add(transform.velocity);
 				transformComponent.velocity.set(vec);
 				ExpireComponent expire = new ExpireComponent();
@@ -486,7 +518,7 @@ public class ControlSystem extends IteratingSystem {
 				growCannon.missle = null;
 			}
 		} else {
-			if (control.shoot) {
+			if (control.attack) {
 				CannonComponent test = new CannonComponent();
 				test.size = 1;
 				growCannon.missle = EntityFactory.createMissile(transform, new Vector2(), test, entity);

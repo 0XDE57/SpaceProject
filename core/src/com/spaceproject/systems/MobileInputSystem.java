@@ -74,7 +74,7 @@ public class MobileInputSystem extends EntitySystem {
 		Entity player = players.first();
 
 		ControllableComponent control = Mappers.controllable.get(player);
-		control.shoot = btnShoot.isTouched();
+		control.attack = btnShoot.isTouched();
 		control.changeVehicle = btnVehicle.isJustTouched();
 		control.transition = btnLand.isTouched();
 		btnLand.hidden = !control.canTransition;

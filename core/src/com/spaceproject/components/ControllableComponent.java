@@ -15,7 +15,8 @@ public class ControllableComponent implements Component {
 	public float angleFacing;
 	
 	//actions
-	public boolean shoot;
+	public boolean attack;
+	public boolean defend;
 	public boolean changeVehicle;
 	public boolean transition;
 	public boolean canTransition;

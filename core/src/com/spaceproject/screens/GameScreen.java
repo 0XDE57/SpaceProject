@@ -133,7 +133,6 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 		//===============SYSTEMS===============
 		//input
-
 		if (SpaceProject.isMobile()) {
 			engine.addSystem(new MobileInputSystem());
 		} else {

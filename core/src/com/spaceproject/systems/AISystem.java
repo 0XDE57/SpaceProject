@@ -78,7 +78,7 @@ public class AISystem extends IteratingSystem {
 						control.angleFacing = MyMath.angleTo(pPos, aiPos);
 						control.moveForward = true;
 						control.movementMultiplier = 0.3f;
-						control.shoot = true;
+						control.attack = true;
 					}
 
 				} else {
@@ -86,7 +86,7 @@ public class AISystem extends IteratingSystem {
 				}
 				break;
 			case dumbwander:
-				control.shoot = false;
+				control.attack = false;
 
 				//dumb wander
 				control.angleFacing += 1 * delta;

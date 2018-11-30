@@ -54,6 +54,10 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
 			handled = true;
 		}
 
+		if (keycode == SpaceProject.keycfg.defend) {
+			control.defend = keyDown;
+			handled = true;
+		}
 		if (keycode == SpaceProject.keycfg.changeVehicle) {
 			control.changeVehicle = keyDown;
 			handled = true;
@@ -131,7 +135,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		if (players.size() != 0) {
 			ControllableComponent control = Mappers.controllable.get(players.first());
-			control.shoot = true;
+			control.attack = true;
 			return true;
 		}
 		return false;
@@ -141,7 +145,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		if (players.size() != 0) {
 			ControllableComponent control = Mappers.controllable.get(players.first());
-			control.shoot = false;
+			control.attack = false;
 			return true;
 		}
 		return false;

@@ -9,7 +9,8 @@ public class KeyConfig extends Config {
 	public int right;
 	public int left;
 	public int back;
-	public int shoot;
+	public int attack;
+	public int defend;
 	public int changeVehicle;
 	public int land;
 	
@@ -45,7 +46,8 @@ public class KeyConfig extends Config {
 		right = Keys.D;
 		left = Keys.A;
 		back = Keys.S;
-		shoot = Keys.SPACE;
+		attack = Keys.SPACE;
+		defend = Keys.SHIFT_LEFT;
 		changeVehicle = Keys.G;
 		land = Keys.T;
 		
