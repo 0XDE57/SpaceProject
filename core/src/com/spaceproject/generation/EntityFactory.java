@@ -405,19 +405,17 @@ public class EntityFactory {
 			size = MathUtils.random(entitycfg.shipSizeMin, entitycfg.shipSizeMax);
 		} while (size % 2 == 1);
 
-		//TextureComponent texture = new TextureComponent();
-		Texture pixmapTex = TextureFactory.generateShip(seed, size);
-		//texture.texture = pixmapTex;// give texture component the generated pixmap texture
-		//texture.scale = SpaceProject.entitycfg.renderScale;
-		Texture shipBottom = TextureFactory.generateShipUnderSide(pixmapTex);
-		Sprite3DComponent sprite3DComp = new Sprite3DComponent();
-		sprite3DComp.renderable = new Sprite3D(pixmapTex, shipBottom);
 
-		
+		Texture shipTop = TextureFactory.generateShip(seed, size);
+		Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
+		Sprite3DComponent sprite3DComp = new Sprite3DComponent();
+		sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom);
+
+
 		//collision detection
-		BoundsComponent bounds = new BoundsComponent(); 
-		float width = pixmapTex.getWidth() * SpaceProject.entitycfg.renderScale;
-		float height = pixmapTex.getHeight() * SpaceProject.entitycfg.renderScale;
+		BoundsComponent bounds = new BoundsComponent();
+		float width = shipTop.getWidth() * SpaceProject.entitycfg.renderScale;
+		float height = shipTop.getHeight() * SpaceProject.entitycfg.renderScale;
 		bounds.poly = new Polygon(new float[]{0, 0,0, height,  width, height, width, 0});
 	    bounds.poly.setOrigin(width/2, height/2);
 	    

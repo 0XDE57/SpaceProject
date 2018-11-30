@@ -142,7 +142,8 @@
 	    [ ] weapons
 	    [ ] details: eg: lines, another layer on top for depth/windshield type thing, different stuff on underside of sprite
 	    [ ] generation styles and classes, perhaps come up with some kind of classes of ships (cargo, highspeed traveler, tank/war machine, passenger, personal, commercial...)
-
+        http://davebollinger.org/works/pixelspaceships/
+        https://www.reddit.com/r/gamedev/comments/2tavse/2d_procedural_spaceship_generator/
 
 [ ] game start
     [ ] birth/tutorial screen

@@ -200,6 +200,9 @@ public class ControlSystem extends IteratingSystem {
 		if (control.timerDodge.canDoEvent() &&  Mappers.dodge.get(entity) == null) {
 			control.timerDodge.reset();
 
+			//bypass lerp to make dodge feel better/more responsive
+			transform.rotation = control.angleFacing;
+
 			DodgeComponent d = new DodgeComponent();
 			d.animationTimer = new SimpleTimer(475, true);
 			d.animInterpolation = Interpolation.pow2;//new Interpolation.Pow(2);
@@ -214,6 +217,9 @@ public class ControlSystem extends IteratingSystem {
 	private static void dodgeLeft(Entity entity, TransformComponent transform, ControllableComponent control) {
 		if (control.timerDodge.canDoEvent() && Mappers.dodge.get(entity) == null) {
 			control.timerDodge.reset();
+
+			//bypass lerp to make dodge feel better/more responsive
+			transform.rotation = control.angleFacing;
 
 			DodgeComponent d = new DodgeComponent();
 			d.animationTimer = new SimpleTimer(475, true);
