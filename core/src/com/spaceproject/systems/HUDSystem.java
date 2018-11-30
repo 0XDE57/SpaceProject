@@ -128,7 +128,9 @@ public class HUDSystem extends EntitySystem {
 		stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
 		stage.draw();
 
-		miniMap.drawSpaceMap(getEngine(), shape, batch, player.first());
+
+		Entity p = player.size() > 0 ? player.first() : null;
+		miniMap.drawSpaceMap(getEngine(), shape, batch, p);
 	}
 
 	private void drawHUD() {

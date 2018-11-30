@@ -19,6 +19,7 @@ import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ExpireComponent;
+import com.spaceproject.components.GrowCannonComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.MissileComponent;
@@ -430,6 +431,7 @@ public class EntityFactory {
 		cannon.velocity = entitycfg.cannonVelocity; //higher is faster
 		cannon.acceleration = entitycfg.cannonAcceleration;
 		cannon.timerRechargeRate = new SimpleTimer(entitycfg.cannonRechargeRate);//lower is faster
+
 		
 		//engine data and marks entity as drive-able
 		VehicleComponent vehicle = new VehicleComponent();
@@ -467,7 +469,22 @@ public class EntityFactory {
 		entity.add(control);
 		return entity;
 	}
-	
+
+	public static Entity createShip3Test(float x, float y, long seed, Entity driver) {
+		Entity ship = createShip3(x, y, seed, driver);
+		ship.remove(CannonComponent.class);
+
+		GrowCannonComponent growCannon = new GrowCannonComponent();
+		growCannon.velocity = SpaceProject.entitycfg.cannonVelocity;
+		growCannon.maxSize = 6f;
+		growCannon.size = 1f;
+		growCannon.growRateTimer = new SimpleTimer(2000);
+		growCannon.baseDamage = 8f;
+		ship.add(growCannon);
+
+		return ship;
+	}
+
 	@Deprecated
 	public static Entity createShip2(int x, int y) {
 		MathUtils.random.setSeed((x + y) * SpaceProject.SEED);
@@ -564,13 +581,13 @@ public class EntityFactory {
 
 		//create texture
 		TextureComponent texture = new TextureComponent();
-		texture.texture = TextureFactory.generateProjectile(cannon.size);
-		texture.scale = SpaceProject.entitycfg.renderScale;
+		texture.texture = TextureFactory.generateProjectile();
+		texture.scale = SpaceProject.entitycfg.renderScale * cannon.size;
 
 		//bounding box
 		BoundsComponent bounds = new BoundsComponent();
-		float width = texture.texture.getWidth() * SpaceProject.entitycfg.renderScale;
-		float height = texture.texture.getHeight() * SpaceProject.entitycfg.renderScale;
+		float width = texture.texture.getWidth() * texture.scale;//SpaceProject.entitycfg.renderScale;
+		float height = texture.texture.getHeight() * texture.scale;// SpaceProject.entitycfg.renderScale;
 		bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
 		bounds.poly.setOrigin(width/2, height/2);
 

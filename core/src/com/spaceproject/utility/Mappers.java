@@ -9,6 +9,7 @@ import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DodgeComponent;
 import com.spaceproject.components.ExpireComponent;
+import com.spaceproject.components.GrowCannonComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.MissileComponent;
@@ -27,6 +28,7 @@ public class Mappers {
 	public static final ComponentMapper<AstronomicalComponent> astro = ComponentMapper.getFor(AstronomicalComponent.class);
 	public static final ComponentMapper<BoundsComponent> bounds = ComponentMapper.getFor(BoundsComponent.class);
 	public static final ComponentMapper<CannonComponent> cannon = ComponentMapper.getFor(CannonComponent.class);
+	public static final ComponentMapper<GrowCannonComponent> growCannon = ComponentMapper.getFor(GrowCannonComponent.class);
 	public static final ComponentMapper<CharacterComponent> character = ComponentMapper.getFor(CharacterComponent.class);
 	public static final ComponentMapper<ControllableComponent> controllable = ComponentMapper.getFor(ControllableComponent.class);
 	public static final ComponentMapper<DodgeComponent> dodge = ComponentMapper.getFor(DodgeComponent.class);

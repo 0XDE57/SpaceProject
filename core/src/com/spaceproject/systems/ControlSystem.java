@@ -9,6 +9,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
@@ -19,6 +20,9 @@ import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DodgeComponent;
+import com.spaceproject.components.ExpireComponent;
+import com.spaceproject.components.GrowCannonComponent;
+import com.spaceproject.components.MissileComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.Sprite3DComponent;
@@ -32,6 +36,7 @@ import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.SimpleTimer;
+
 
 public class ControlSystem extends IteratingSystem {
 
@@ -131,12 +136,14 @@ public class ControlSystem extends IteratingSystem {
 
 		//fire cannon / attack
 		CannonComponent cannon = Mappers.cannon.get(entity);
-		refillAmmo(cannon);//TODO: ammo should refill on all entities regardless of player presence
-		if (control.shoot) {
-			fireCannon(transform, cannon, entity);
+		if (cannon != null) {
+			refillAmmo(cannon);//TODO: ammo should refill on all entities regardless of player presence
+			if (control.shoot) {
+				fireCannon(transform, cannon, entity);
+			}
 		}
-
-
+		GrowCannonComponent growCannon = Mappers.growCannon.get(entity);
+		manageGrowCannon(entity, control, transform, growCannon);
 
 		//transition or take off from planet
 		if (GameScreen.inSpace) {
@@ -434,6 +441,62 @@ public class ControlSystem extends IteratingSystem {
 
 
 	//region combat
+	private void manageGrowCannon(Entity entity, ControllableComponent control, TransformComponent transform, GrowCannonComponent growCannon) {
+		//TODO: clean up
+		if (growCannon == null) {
+			return;
+		}
+
+		if (growCannon.isCharging) {
+			//update position to be in front of ship
+			Rectangle bounds = entity.getComponent(BoundsComponent.class).poly.getBoundingRectangle();
+			float offset = Math.max(bounds.getWidth(),bounds.getHeight()) + growCannon.maxSize;
+			TransformComponent transformComponent = growCannon.missle.getComponent(TransformComponent.class);
+			transformComponent.pos.set(MyMath.Vector(transform.rotation, offset).add(transform.pos));
+			transformComponent.rotation = transform.rotation;
+
+			//accumulate size
+			growCannon.size = growCannon.growRateTimer.ratio() * growCannon.maxSize;
+			growCannon.size = MathUtils.clamp(growCannon.size, 1, growCannon.maxSize);
+			growCannon.missle.getComponent(TextureComponent.class).scale = growCannon.size * SpaceProject.entitycfg.renderScale;
+			growCannon.missle.getComponent(BoundsComponent.class).poly.setScale(growCannon.size, growCannon.size);
+
+			//damage modifier
+			MissileComponent missileComponent = growCannon.missle.getComponent(MissileComponent.class);
+			missileComponent.damage = growCannon.size * growCannon.baseDamage;
+			if (growCannon.size == growCannon.maxSize) {
+				missileComponent.damage *= 1.5;//bonus damage for maxed out
+			}
+
+			//release
+			if (!control.shoot) {
+				Vector2 vec = MyMath.Vector(transform.rotation, growCannon.velocity).add(transform.velocity);
+				transformComponent.velocity.set(vec);
+				ExpireComponent expire = new ExpireComponent();
+				expire.time = 5;
+				growCannon.missle.add(expire);
+
+				growCannon.isCharging = false;
+				growCannon.missle = null;
+			}
+		} else {
+			if (control.shoot) {
+				CannonComponent test = new CannonComponent();
+				test.size = 1;
+				growCannon.missle = EntityFactory.createMissile(transform, new Vector2(), test, entity);
+				growCannon.missle.remove(ExpireComponent.class);
+				growCannon.missle.getComponent(MissileComponent.class).owner = entity;
+				growCannon.isCharging = true;
+				growCannon.growRateTimer.reset();
+
+				getEngine().addEntity(growCannon.missle);
+			}
+		}
+
+
+	}
+
+
 	private void fireCannon(TransformComponent transform, CannonComponent cannon, Entity owner) {
 		/*
 		 * Cheat for debug:

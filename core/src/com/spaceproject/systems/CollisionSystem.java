@@ -53,9 +53,13 @@ public class CollisionSystem extends EntitySystem {
 						
 						//remove character (kill)
 						if (health.health <= 0) {
-							character.getComponent(TextureComponent.class).texture.dispose();
+							TextureComponent textureComponent = character.getComponent(TextureComponent.class);
+							if (textureComponent != null) {
+								textureComponent.texture.dispose();
+							}
+							System.out.println("[" + character + "] killed by: [" + misl.owner + "]");
 							engine.removeEntity(character);
-							System.out.println("[" + Mappers.vehicle.get(character).id + "] killed by: [" + misl.owner + "]");
+
 						}
 						
 						
@@ -92,7 +96,10 @@ public class CollisionSystem extends EntitySystem {
 							
 							//remove ship (kill)
 							if (health.health <= 0) {
-								vehicle.getComponent(TextureComponent.class).texture.dispose();
+								TextureComponent textureComponent = vehicle.getComponent(TextureComponent.class);
+								if (textureComponent != null) {
+									textureComponent.texture.dispose();
+								}
 								engine.removeEntity(vehicle);
 								System.out.println("[" + vehicle + "] killed by: [" + misl.owner + "]");
 							}
