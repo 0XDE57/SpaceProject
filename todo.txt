@@ -97,7 +97,7 @@
           [X] moved into separate variable
           [ ] define proper heights for importance as current values are somewhat arbitrary
           [ ] this is now a bit more complex, as there is a mix of 2d sprites and 3d renderables, that are rendered in separate batches (2d then 3d overlaye).
-              to mix the z between them may require multiple batch passes, or migrating to 3d
+              to mix the z between them may require multiple batch passes, or migrating to 3d, also shaperenderer on top of that...
     [ ] should consider merging SpaceRenderingSystem & WorldRenderingSystem because they are basically duplicates which the difference of background tiles
         or at least have them share rendering functions as the drawEntities() & draw3DRenderables() are identical between them
 

@@ -10,11 +10,13 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceBackgroundTile;
+import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -30,6 +32,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 	private OrthographicCamera cam;
 	private SpriteBatch spriteBatch;
 	private ModelBatch modelBatch;
+	private ShapeRenderer shape;
 	
 	// array of entities to render
 	private Array<Entity> renderQueue = new Array<Entity>();
@@ -45,17 +48,18 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 	private Array<Entity> renderQueue3D = new Array<Entity>();
 	
 	public SpaceRenderingSystem() {
-		this(MyScreenAdapter.cam, MyScreenAdapter.batch);
+		this(MyScreenAdapter.cam, MyScreenAdapter.batch, MyScreenAdapter.shape);
 	}
 	
-	public SpaceRenderingSystem(OrthographicCamera camera, SpriteBatch spriteBatch) {
+	public SpaceRenderingSystem(OrthographicCamera camera, SpriteBatch spriteBatch, ShapeRenderer shape) {
 		super(Family.all(TransformComponent.class).one(TextureComponent.class, Sprite3DComponent.class).get());
 
 					
 		cam = camera;
 		this.spriteBatch = spriteBatch;
-
+		this.shape = shape;
 		modelBatch = new ModelBatch();
+
 	}
 	
 	@Override
@@ -83,7 +87,46 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 		draw3DRenderables(delta);
 		modelBatch.end();
 
-	
+
+		//hacky test shield render, should probably find a better way to do this
+		//enable transparency
+		Gdx.gl.glEnable(GL20.GL_BLEND);
+		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+
+		for (Entity entity : renderQueue3D) {
+			TransformComponent t = Mappers.transform.get(entity);
+			ShieldComponent shield = Mappers.shield.get(entity);
+			if (shield != null) {
+				Color c = shield.color;
+
+				//draw overlay
+				shape.begin(ShapeRenderer.ShapeType.Filled);
+				if (shield.active) {
+					shape.setColor(c.r, c.g, c.b, 0.25f);
+				} else {
+					shape.setColor(c.r, c.g, c.b, 0.15f);
+				}
+				shape.circle(t.pos.x, t. pos.y, shield.radius);
+				shape.end();
+
+				//draw outline
+				shape.begin(ShapeRenderer.ShapeType.Line);
+				if (shield.active) {
+					shape.setColor(Color.WHITE);
+				} else {
+					shape.setColor(c.r, c.g, c.b, 1f);
+				}
+				shape.circle(t.pos.x, t. pos.y, shield.radius);
+				shape.end();
+			}
+		}
+
+		Gdx.gl.glDisable(GL20.GL_BLEND);
+
+
+		renderQueue.clear();
+		renderQueue3D.clear();
 	}
 
 	private void drawEntities() {
@@ -112,7 +155,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 					   0, 0, (int)width, (int)height, false, false);
 		}
 		
-		renderQueue.clear();
+		//renderQueue.clear();
 	}
 	
 	private void drawParallaxTiles() {
@@ -178,7 +221,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 
 			modelBatch.render(sprite3D.renderable);
 		}
-		renderQueue3D.clear();
+		//renderQueue3D.clear();
 	}
 
 	/**

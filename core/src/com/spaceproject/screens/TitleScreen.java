@@ -27,7 +27,7 @@ import com.spaceproject.screens.animations.TreeAnim;
 import com.spaceproject.screens.debug.Test3DScreen;
 import com.spaceproject.screens.debug.TestNoiseScreen;
 import com.spaceproject.screens.debug.TestShipGenerationScreen;
-import com.spaceproject.screens.debug.TestSpiralGalaxy;
+//import com.spaceproject.screens.debug.TestSpiralGalaxy;
 import com.spaceproject.screens.debug.TestVoronoiScreen;
 
 public class TitleScreen extends MyScreenAdapter {
@@ -196,7 +196,7 @@ public class TitleScreen extends MyScreenAdapter {
 		btnSpiral.addListener(new ChangeListener() {
 			@Override
 			public void changed (ChangeEvent event, Actor actor) {
-				game.setScreen(new TestSpiralGalaxy());
+				//game.setScreen(new TestSpiralGalaxy());
 			}
 		});
 

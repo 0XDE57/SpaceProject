@@ -7,8 +7,10 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.SpaceProject;
@@ -36,6 +38,7 @@ import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
+import com.spaceproject.utility.PolygonUtil;
 import com.spaceproject.utility.SimpleTimer;
 
 
@@ -110,7 +113,7 @@ public class ControlSystem extends IteratingSystem {
 
 
 		barrelRoll(entity, transform, dodgeComp);
-		//manageShield(entity, transform, shield);
+		manageShield(entity, control, transform, shield);
 
 		//debug force insta-stop(currently affects all vehicles)
 		if (Gdx.input.isKeyJustPressed(Keys.X)) transform.velocity.set(0, 0);
@@ -297,18 +300,45 @@ public class ControlSystem extends IteratingSystem {
 
 	}
 
-	private void manageShield(Entity entity, TransformComponent transform, ShieldComponent shield) {
+	private void manageShield(Entity entity, ControllableComponent control, TransformComponent transform, ShieldComponent shield) {
 		if (shield == null) {
-			return;
-		}
-		//if (control.defend) {
-			if (shield == null) {
+			if (control.defend) {
+				//add
 				shield = new ShieldComponent();
-				shield.animTimer = new SimpleTimer(1000, true);
+				shield.animTimer = new SimpleTimer(400, true);
 				shield.defence = 100f;
+				Polygon poly = entity.getComponent(BoundsComponent.class).poly;
+				Rectangle rect = PolygonUtil.getBoundingRectangle(poly.getVertices());
+				float size = Math.min(rect.width, rect.height) * 1.3f;
+				shield.maxRadius = size;
+				shield.color = Color.BLUE;
+
 				entity.add(shield);
 			}
-		//}
+			return;
+		}
+
+
+		if (control.defend) {
+			shield.growing = true;
+			shield.radius = shield.maxRadius * shield.animTimer.ratio(); //charge
+			shield.active = shield.radius == shield.maxRadius; //activate
+		} else {
+			//release
+			shield.active = false;
+			if (shield.growing) {
+				shield.growing = false;
+				//shield.animTime
+			}
+			//TODO: hookup shrink process to timer
+			shield.radius -= 0.5f;
+			//shield.animTimer.getInterval();
+			//shield.radius = shield.maxRadius * 1-shield.animTimer.ratio();
+			if (shield.radius <= 0) {
+				entity.remove(ShieldComponent.class);
+			}
+		}
+
 
 	}
 

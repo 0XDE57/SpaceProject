@@ -26,6 +26,7 @@ import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
+import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.MapState;
@@ -240,6 +241,17 @@ public class HUDSystem extends EntitySystem {
 			shape.rect(playerBarX, playerHPBarY, barWidth, barHeight);
 			shape.setColor(1 - ratioHP, ratioHP, 0, SpaceProject.uicfg.entityHPbarOpacity);
 			shape.rect(playerBarX, playerHPBarY, barWidth * ratioHP, barHeight);
+		}
+
+		ShieldComponent shield = Mappers.shield.get(player.first());
+		if (shield != null) {
+			float ratioShield = shield.radius / shield.maxRadius;
+			if (shield.active) {
+				shape.setColor(shield.color);
+			} else {
+				shape.setColor(shield.color.r, shield.color.g, shield.color.b, 0.25f);
+			}
+			shape.rect(playerBarX, playerHPBarY, barWidth * ratioShield, barHeight);
 		}
 		
 		//draw ammo bar
