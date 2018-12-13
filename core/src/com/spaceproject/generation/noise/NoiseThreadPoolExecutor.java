@@ -1,5 +1,6 @@
 package com.spaceproject.generation.noise;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -16,7 +17,7 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
 
         listeners = new Array<NoiseGenListener>();
 
-        System.out.println("NoiseThreadPool with " + getMaximumPoolSize() + " threads");
+        Gdx.app.log(this.getClass().getSimpleName(), "NoiseThreadPool with " + getMaximumPoolSize() + " threads");
     }
 
 
@@ -36,7 +37,7 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
         if (t == null) {
             notifyListenersNoiseFinished((NoiseThread)r);
         } else {
-            System.out.println("Task failed:  " + t.getMessage());
+            Gdx.app.error(this.getClass().getSimpleName(), "Task failed", t);
         }
     }
 

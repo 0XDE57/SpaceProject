@@ -1,6 +1,7 @@
 package com.spaceproject.ui;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Event;
@@ -181,7 +182,7 @@ public class KeyConfigTab extends ConfigTab {
 
     @Override
     public void saveChanges() {
-        System.out.println("keyconfig save");
+        Gdx.app.log(this.getClass().getSimpleName(), "keyconfig save");
 
         for (Field f : localConfig.getClass().getFields()) {
             String fieldName = f.getName();
@@ -189,7 +190,7 @@ public class KeyConfigTab extends ConfigTab {
                 if (fieldName.equals(kvp.getKey())) {
                     try {
                         f.set(localConfig, Input.Keys.valueOf(kvp.getValue()));
-                        System.out.println("set " + f.getName() + " to " + kvp.getValue());
+                        Gdx.app.log(this.getClass().getSimpleName(), "set " + f.getName() + " to " + kvp.getValue());
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
                     }
@@ -203,7 +204,7 @@ public class KeyConfigTab extends ConfigTab {
 
     @Override
     public void discardChanges() {
-        System.out.println("keyconfig discard");
+        Gdx.app.log(this.getClass().getSimpleName(), "keyconfig discard");
         SnapshotArray<Actor> children = scrollContainer.getChildren();
         for (Map.Entry<String, String>  kvp: changes.entrySet()) {
             for (Actor child : children) {
@@ -213,7 +214,7 @@ public class KeyConfigTab extends ConfigTab {
                             Field field = localConfig.getClass().getField(kvp.getKey());
                             String key = Input.Keys.toString((Integer)field.get(localConfig));
                             ((VisSelectBox) child).setSelected(key);
-                            System.out.println("reset " + child.getName() + " with " + kvp.getValue());
+                            Gdx.app.log(this.getClass().getSimpleName(), "reset " + child.getName() + " with " + kvp.getValue());
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         } catch (NoSuchFieldException e) {
@@ -264,11 +265,11 @@ public class KeyConfigTab extends ConfigTab {
                     }
                 }
                 if (keyInUse){
-                    System.out.println("Key already in use by: " + usedBy);
+                    Gdx.app.log(this.getClass().getSimpleName(), "Key already in use by: " + usedBy);
                     //TODO: highlight control / notify used key X used by setting Y
                     event.cancel();
                 } else {
-                    System.out.println("Key is free to use");
+                    Gdx.app.log(this.getClass().getSimpleName(), "Key is free to use");
                     changes.put(actor.getName(), selected);
                     dirty();
                 }

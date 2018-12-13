@@ -1,6 +1,7 @@
 package com.spaceproject.ui;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -61,7 +62,7 @@ public abstract class ConfigTab extends Tab {
 
     @Override
     public void onHide() {
-        System.out.println("configtab hide");
+        Gdx.app.log(this.getClass().getSimpleName(), "configtab hide");
         if (isDirty()) {
             TabbedPane pane = getPane();
             if (pane != null) {

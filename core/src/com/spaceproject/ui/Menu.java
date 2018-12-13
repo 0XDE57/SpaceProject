@@ -67,7 +67,7 @@ public class Menu extends VisWindow {
         tabbedPane.addListener(new TabbedPaneAdapter() {
             @Override
             public void switchedTab (Tab tab) {
-                System.out.println("TabbedPaneAdapter switched tab");
+                //Gdx.app.log(this.getClass().getSimpleName(), "TabbedPaneAdapter switched tab: " + tab.getTabTitle());
                 container.clearChildren();
                 container.add(tab.getContentTable()).expand().fill();
             }
@@ -136,7 +136,7 @@ public class Menu extends VisWindow {
     }
 
     public void hide() {
-        System.out.println("menu hide");
+        Gdx.app.log(this.getClass().getSimpleName(), "menu hide");
         /*
         ConfigTab tab = checkTabChanges();
         if (tab != null) {
@@ -150,7 +150,7 @@ public class Menu extends VisWindow {
 
     @Override
     protected void close() {
-        System.out.println("menu close");
+        Gdx.app.log(this.getClass().getSimpleName(), "menu close");
         /*
         ConfigTab tab = checkTabChanges();
         if (tab != null) {

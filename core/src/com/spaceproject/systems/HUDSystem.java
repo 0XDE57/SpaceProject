@@ -166,11 +166,11 @@ public class HUDSystem extends EntitySystem {
 	private void CheckInput() {
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleHUD)) {
 			drawHud = !drawHud;
-			System.out.println("HUD: " + drawHud);
+            Gdx.app.log(this.getClass().getSimpleName(),"HUD: " + drawHud);
 		}
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleEdgeMap)) {
 			drawEdgeMap = !drawEdgeMap;
-			System.out.println("Edge mapState: " + drawEdgeMap);
+            Gdx.app.log(this.getClass().getSimpleName(),"Edge mapState: " + drawEdgeMap);
 		}
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleSpaceMap)) {
 			miniMap.cycleMapState();

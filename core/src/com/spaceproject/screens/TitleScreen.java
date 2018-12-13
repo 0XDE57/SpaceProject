@@ -206,7 +206,7 @@ public class TitleScreen extends MyScreenAdapter {
 		btnLoad.addListener(new ChangeListener() {
 			@Override
 			public void changed (ChangeEvent event, Actor actor) {
-				System.out.println("placeholder");
+				Gdx.app.log(this.getClass().getSimpleName(), "load placeholder");
 			}
 		});
 
@@ -215,7 +215,7 @@ public class TitleScreen extends MyScreenAdapter {
 		btnOption.addListener(new ChangeListener() {
 			@Override
 			public void changed (ChangeEvent event, Actor actor) {
-				System.out.println("placeholder");
+				Gdx.app.log(this.getClass().getSimpleName(), "options placeholder");
 			}
 		});
 
@@ -283,7 +283,7 @@ public class TitleScreen extends MyScreenAdapter {
 				break;
 				*/
 		}
-		System.out.println("Animation: " + anim);
+		Gdx.app.log(this.getClass().getSimpleName(), "Animation: " + anim);
 	}
 
 	public void dispose() {
