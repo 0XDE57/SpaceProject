@@ -49,7 +49,7 @@ public class Menu extends VisWindow {
     private boolean alwaysHideOnEscape = false;
 
     public Menu (boolean vertical, Engine engine) {
-        super(SpaceProject.TITLE);
+        super(SpaceProject.TITLE + "    (" + SpaceProject.VERSION + ")");
         getTitleLabel().setAlignment(Align.center);
 
         TableUtils.setSpacingDefaults(this);
