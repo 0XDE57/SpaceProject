@@ -30,6 +30,8 @@ public class CameraSystem extends IteratingSystem {
 		//set camera position to entity
 		cam.position.x = transform.pos.x;
 		cam.position.y = transform.pos.y;
+		cam.update();
+
 	}
 
 	/**

@@ -68,7 +68,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     @Override
     public void render(float delta) {
     	   	
-    	cam.update();   	
+    	//cam.update();
     	batch.setProjectionMatrix(cam.combined);
     	shape.setProjectionMatrix(cam.combined);
     	

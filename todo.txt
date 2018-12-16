@@ -76,21 +76,25 @@
 
 
 
+[...] fix player moving ahead of camera
+    [x] ship - fixed
+    [ ] player - still jumps ahead of camera
 
-
-[ ] fix player moving ahead of camera at high speed, seem to happen only when vsync is on...
 
 [ ] take care of some of the todo's
     there is so much to do, and I keep adding more...
+
 
 [ ] fixed time step (necessary for multiplayer?)
 	https://gafferongames.com/post/fix_your_timestep/
     http://gameprogrammingpatterns.com/game-loop.html
     http://www.koonsolo.com/news/dewitters-gameloop/
 
+
 [ ] fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
     https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
     https://www.youtube.com/watch?v=mXTxQko-JH0&t=4m18s
+
 
 [...] rendering system
     [...] fix render priority (z-order)
