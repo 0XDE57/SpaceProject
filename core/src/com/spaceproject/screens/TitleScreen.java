@@ -10,12 +10,14 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.util.dialog.Dialogs;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.screens.animations.DelaunayAnim;
@@ -27,15 +29,21 @@ import com.spaceproject.screens.animations.TreeAnim;
 import com.spaceproject.screens.debug.Test3DScreen;
 import com.spaceproject.screens.debug.TestNoiseScreen;
 import com.spaceproject.screens.debug.TestShipGenerationScreen;
-//import com.spaceproject.screens.debug.TestSpiralGalaxy;
 import com.spaceproject.screens.debug.TestVoronoiScreen;
+
+//import com.spaceproject.screens.debug.TestSpiralGalaxy;
 
 public class TitleScreen extends MyScreenAdapter {
 
 	private SpaceProject game;
 
+
 	private Stage stage;
+    private Table versionTable;
 	private BitmapFont fontComfortaaBold;
+    private int edgePad;
+
+
 	private Matrix4 projectionMatrix = new Matrix4();
 
 	private TitleAnimation foregroundAnimation, backgroundAnimation;
@@ -58,22 +66,31 @@ public class TitleScreen extends MyScreenAdapter {
 		stage = new Stage(new ScreenViewport());
 		Gdx.input.setInputProcessor(stage);
 
-		Table table = CreateMainMenu(false);
-		stage.addActor(table);
-		table.pack(); //force table to calculate size
-		int edgePad = SpaceProject.isMobile() ? 20 : 10;
-		table.setPosition(edgePad,edgePad);
+		edgePad = SpaceProject.isMobile() ? 20 : 10;
 
-
-		backgroundAnimation = new NoiseAnim();
-		initForegroundAnim();
-
-		// font
+		//title font
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 		parameter.size = 90;
 		parameter.borderColor = Color.DARK_GRAY;
 		parameter.borderWidth = 1;
 		fontComfortaaBold = FontFactory.createFont(FontFactory.fontComfortaaBold, parameter);
+
+		//menu
+		Table menuTable = CreateMainMenu(false);
+		stage.addActor(menuTable);
+		menuTable.pack();
+		menuTable.setPosition(edgePad, edgePad);
+
+		versionTable = new Table();
+		versionTable.add(new Label(SpaceProject.VERSION, VisUI.getSkin()));
+		stage.addActor(versionTable);
+		versionTable.pack();
+
+
+		//init animations
+		backgroundAnimation = new NoiseAnim();
+		initForegroundAnim();
+
 
 		Gdx.graphics.setVSync(true);
 	}
@@ -103,7 +120,8 @@ public class TitleScreen extends MyScreenAdapter {
 
 		//draw title
 		batch.begin();
-		fontComfortaaBold.draw(batch, SpaceProject.TITLE, 50, Gdx.graphics.getHeight() - 50);
+		int x = 50, y = Gdx.graphics.getHeight() - 50;
+		fontComfortaaBold.draw(batch, SpaceProject.TITLE, x, y);
 		batch.end();
 
 
@@ -117,9 +135,8 @@ public class TitleScreen extends MyScreenAdapter {
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
 			Table table = CreateMainMenu(true);
-			table.pack(); //force table to calculate size
-			int edgePad = SpaceProject.isMobile() ? 20 : 10;
-			table.setPosition(edgePad,edgePad);
+			table.pack();
+			table.setPosition(edgePad, edgePad);
 			stage.clear();
 			stage.addActor(table);
 		}
@@ -133,7 +150,10 @@ public class TitleScreen extends MyScreenAdapter {
 	@Override
 	public void resize(int width, int height){
 		super.resize(width, height);
+
 		stage.getViewport().update(width, height, true);
+        versionTable.setPosition(Gdx.graphics.getWidth() - versionTable.getWidth() - edgePad, edgePad);
+
 		foregroundAnimation.resize(width, height);
 		backgroundAnimation.resize(width, height);
 	}
@@ -206,7 +226,7 @@ public class TitleScreen extends MyScreenAdapter {
 		btnLoad.addListener(new ChangeListener() {
 			@Override
 			public void changed (ChangeEvent event, Actor actor) {
-				System.out.println("placeholder");
+				Dialogs.showOKDialog(stage, "load", "not implemented yet");
 			}
 		});
 
@@ -215,7 +235,17 @@ public class TitleScreen extends MyScreenAdapter {
 		btnOption.addListener(new ChangeListener() {
 			@Override
 			public void changed (ChangeEvent event, Actor actor) {
-				System.out.println("placeholder");
+				Dialogs.showOKDialog(stage, "options", "not implemented yet");
+			}
+		});
+
+		//about
+		TextButton btnAbout = new TextButton("about", VisUI.getSkin());
+		btnAbout.getLabel().setAlignment(Align.left);
+		btnAbout.addListener(new ChangeListener() {
+			@Override
+			public void changed (ChangeEvent event, Actor actor) {
+				Dialogs.showOKDialog(stage, "about", "a space game (WIP...)\nDeveloped by Whilow Schock");
 			}
 		});
 
@@ -239,8 +269,9 @@ public class TitleScreen extends MyScreenAdapter {
 			table.add(btnShip).fillX().row();
 			table.add(btnSpiral).row();
 		}
-		table.add(btnLoad).left().fillX().row();
+		table.add(btnLoad).fillX().row();
 		table.add(btnOption).fillX().row();
+		table.add(btnAbout).fillX().row();
 		table.add(btnExit).fillX().row();
 
 
@@ -283,7 +314,7 @@ public class TitleScreen extends MyScreenAdapter {
 				break;
 				*/
 		}
-		System.out.println("Animation: " + anim);
+		Gdx.app.log(this.getClass().getSimpleName(), "Animation: " + anim);
 	}
 
 	public void dispose() {

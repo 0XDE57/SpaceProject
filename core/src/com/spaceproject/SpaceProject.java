@@ -14,6 +14,8 @@ import com.spaceproject.screens.MyScreenAdapter;
 public class SpaceProject extends Game {
 
 	public static final String TITLE = "a space project";
+	public static final String VERSION = "pre-alpha";//<α
+
 	public static long SEED = 4; //test seed
 
 	private static boolean isMobile;
@@ -33,14 +35,8 @@ public class SpaceProject extends Game {
 
 		//load values for things like key mapping, settings, default values for generation
 		loadConfigs();
-				
-	
-		boolean inSpace = true;
-		//setScreen(new GameScreen(inSpace));
-		//setScreen(new Test3DScreen());
-		//setScreen(new TestShipGenerationScreen(this));
-		//setScreen(new TestNoiseScreen(this));
-		//setScreen(new TestVoronoiScreen());
+
+
 		setScreen(new TitleScreen(this));
 	}
 	

@@ -18,15 +18,15 @@ public abstract class Config {
 	public void saveToJson() {		
 		Json json = new Json();
 		json.setUsePrototypes(false);
-		
-		System.out.println(json.toJson(this));			
+
+		Gdx.app.log(this.getClass().getSimpleName(), json.toJson(this));
 		
 		FileHandle keyFile = Gdx.files.local(fileName);		
 		try {
 			keyFile.writeString(json.toJson(this), false);
-			System.out.println("Saved: " + fileName);
+			Gdx.app.log(this.getClass().getSimpleName(), "Saved: " + fileName);
 		} catch (GdxRuntimeException ex) {
-			System.out.println("Could not save file: " + fileName + "\n" + ex.getMessage());
+			Gdx.app.log(this.getClass().getSimpleName(), "Could not save file: " + fileName + "\n" + ex.getMessage());
 		}
 	}
 	
@@ -37,11 +37,11 @@ public abstract class Config {
 			json.setUsePrototypes(false);
 			
 			Config config = json.fromJson(this.getClass(), keyFile.readString());
-			System.out.println("Loaded "+ this.getClass().getSimpleName() +" from json.");
-			System.out.println(json.toJson(config));
+			Gdx.app.log(this.getClass().getSimpleName(), "Loaded "+ this.getClass().getSimpleName() +" from json.");
+			Gdx.app.log(this.getClass().getSimpleName(), json.toJson(config));
 			return config;			
 		} else {
-			System.out.println(fileName + " not found. Loading defaults.");
+			Gdx.app.log(this.getClass().getSimpleName(), fileName + " not found. Loading defaults.");
 			loadDefault();
 			saveToJson();
 			return this;

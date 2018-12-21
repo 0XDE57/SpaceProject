@@ -222,13 +222,13 @@ public class MiniMap {
     public void cycleMiniMapPosition() {
         miniMapPosition = miniMapPosition.next();
         updateMapPosition();
-        System.out.println(miniMapPosition);
+        Gdx.app.log(this.getClass().getSimpleName(), miniMapPosition.toString());
     }
 
     public void cycleMapState() {
         mapState = mapState.next();
         updateMapPosition();
-        System.out.println(mapState);
+        Gdx.app.log(this.getClass().getSimpleName(), mapState.toString());
     }
 
     public void updateMapPosition() {
@@ -277,7 +277,7 @@ public class MiniMap {
         float changeLarge = 20, changeSmall = 2;
         mapScale += amount * ((mapScale >= changeLarge) ? changeLarge : changeSmall);
         drawScaleTimer.reset();
-        System.out.println("map scale: " + mapScale);
+        Gdx.app.log(this.getClass().getSimpleName(), "map scale: " + mapScale);
     }
 
     public void resetMapScale() {

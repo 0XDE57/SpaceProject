@@ -92,9 +92,9 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		
 		boolean showInfo = false;
 		if (showInfo) {
-			System.out.println("\n------- sys info -------");
+			Gdx.app.log(this.getClass().getSimpleName(), "\n------- sys info -------");
 			System.getProperties().list(System.out);
-			System.out.println("-------------------------\n");
+			Gdx.app.log(this.getClass().getSimpleName(), "-------------------------\n");
 			
 			/*
 			System.out.println(String.format("%s %s", Gdx.graphics.getPpiX(), Gdx.graphics.getPpiY()));
@@ -175,7 +175,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		//toggle debug
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleDebug)) {
 			drawDebugUI = !drawDebugUI;
-			System.out.println("DEBUG UI: " + drawDebugUI);
+			Gdx.app.log(this.getClass().getSimpleName(), "DEBUG UI: " + drawDebugUI);
 		}
 		
 		//toggle pos
@@ -184,7 +184,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			if(drawComponentList) {
 				drawComponentList = false;
 			}
-			System.out.println("[debug] draw pos: " + drawPos);
+			Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw pos: " + drawPos);
 		}
 		
 		//toggle components
@@ -193,32 +193,32 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			if (drawPos) {
 				drawPos = false;
 			}
-			System.out.println("[debug] draw component list: " + drawComponentList);
+			Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw component list: " + drawComponentList);
 		}
 		
 		//toggle bounds		
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleBounds)) {
 			drawBounds = !drawBounds;
-			System.out.println("[debug] draw bounds: " + drawBounds);
+			Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw bounds: " + drawBounds);
 		}
 		
 		//toggle fps
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleFPS)) {
 			drawFPS = !drawFPS;
-			System.out.println("[debug] draw FPS: " + drawFPS);
+			Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw FPS: " + drawFPS);
 		}
 			
 		//toggle orbit circle
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleOrbit)) {
 			drawOrbitPath = !drawOrbitPath;
-			System.out.println("[debug] draw orbit path: " + drawOrbitPath);
+			Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw orbit path: " + drawOrbitPath);
 		}
 		
 		
 		//toggle vector
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleVector)) {
 			drawVectors = !drawVectors;
-			System.out.println("[debug] draw vectors: " + drawVectors);
+			Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw vectors: " + drawVectors);
 		}
 
 		/*

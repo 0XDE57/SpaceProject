@@ -1,6 +1,7 @@
 package com.spaceproject.generation;
 
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
@@ -147,8 +148,8 @@ public class EntityFactory {
 			}
 			entities.add(planet);
 		}
-		
-		System.out.println("Planetary System: (" + x + ", " + y + ") Objects: " + (numPlanets));
+
+		Gdx.app.log(EntityFactory.class.getSimpleName(), "Planetary System: (" + x + ", " + y + ") Objects: " + (numPlanets));
 		
 		return entities;
 		
@@ -205,7 +206,7 @@ public class EntityFactory {
 		entities.add(starB);
 
 
-		System.out.println("Binary System: (" + x + ", " + y + ")");
+		Gdx.app.log(EntityFactory.class.getSimpleName(), "Binary System: (" + x + ", " + y + ")");
 		return entities;
 
 	}
@@ -272,7 +273,7 @@ public class EntityFactory {
 		Array<Entity> entities = new Array<Entity>();
 		//entities.add(anchorEntity);
 		entities.add(planet);
-		System.out.println("Rougue Planet: (" + x + ", " + y + ")");
+		Gdx.app.log(EntityFactory.class.getSimpleName(), "Rougue Planet: (" + x + ", " + y + ")");
 		return entities;
 	}
 	public static Entity createPlanet(long seed, Entity parent, float radialDistance, boolean rotationDir) {

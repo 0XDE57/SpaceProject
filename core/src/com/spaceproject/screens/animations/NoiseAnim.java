@@ -53,11 +53,11 @@ public class NoiseAnim extends TitleAnimation {
 
         if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
             scale += 0.001f;
-            System.out.println(scale);
+            Gdx.app.log(this.getClass().getSimpleName(), scale + "");
         }
         if (Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
             scale -= 0.001f;
-            System.out.println(scale);
+            Gdx.app.log(this.getClass().getSimpleName(), scale + "");
         }
     }
 

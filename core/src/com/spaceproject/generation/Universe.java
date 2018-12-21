@@ -94,13 +94,13 @@ public class Universe implements NoiseGenListener {
         Json json = new Json();
         json.setUsePrototypes(false);
 
-        System.out.println(json.toJson(this));
+        Gdx.app.log(this.getClass().getSimpleName(), json.toJson(this));
 
         FileHandle keyFile = Gdx.files.local("save/" +  this.getClass().getSimpleName() + ".json");
         try {
             keyFile.writeString(json.toJson(this), false);
         } catch (GdxRuntimeException ex) {
-            System.out.println("Could not save file: " + ex.getMessage());
+            Gdx.app.error(this.getClass().getSimpleName(),"Could not save file", ex);
         }
     }
 
@@ -108,7 +108,7 @@ public class Universe implements NoiseGenListener {
     public void threadFinished(NoiseThread noiseThread) {
         NoiseBuffer noise = noiseThread.getNoise();
         loadedNoise.put(noise.seed, noise);
-        System.out.println("Saved noise for " + noise.seed + " to buffer");
+        Gdx.app.log(this.getClass().getSimpleName(), "Saved noise for " + noise.seed + " to buffer");
     }
 
     public NoiseBuffer getNoiseForSeed(long seed) {

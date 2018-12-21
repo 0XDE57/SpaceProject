@@ -87,7 +87,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 			//shader = new ShaderProgram(Gdx.files.internal("shaders/passthrough.vsh"), Gdx.files.internal("shaders/passthrough.fsh"));
 			shader = new ShaderProgram(Gdx.files.internal("shaders/invert.vsh"), Gdx.files.internal("shaders/invert.fsh"));
 			ShaderProgram.pedantic = false;
-			System.out.println("Shader compiled: " + shader.isCompiled() + ": " + shader.getLog());
+			Gdx.app.log(this.getClass().getSimpleName(), "Shader compiled: " + shader.isCompiled() + ": " + shader.getLog());
 			if (shader.isCompiled())
 				batch.setShader(shader);
 		}
@@ -100,7 +100,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 		if (!inSpace && planet == null) {
 			planet = EntityFactory.createPlanet(0, new Entity(), 0, false);
-			System.out.println("NULL PLANET: Debug world loaded");
+			Gdx.app.log(this.getClass().getSimpleName(), "NULL PLANET: Debug world loaded");
 			//int a = 1/0;// throw new Exception("");
 		}
 		
@@ -121,7 +121,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 	}
 
 	private void initSpace(Entity transitioningEntity) {
-		System.out.println("==========SPACE==========");
+		Gdx.app.log(this.getClass().getSimpleName(), "==========SPACE==========");
 		inSpace = true;
 		currentPlanet = null;
 		
@@ -210,7 +210,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 	
 	
 	private void initWorld(Entity transitioningEntity, Entity planet) {
-		System.out.println("==========WORLD==========");
+		Gdx.app.log(this.getClass().getSimpleName(), "==========WORLD==========");
 		inSpace = false;
 		currentPlanet = planet;
 
@@ -328,7 +328,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 				}
 
 				if (Mappers.AI.get(e) != null) {
-					System.out.println("REMOVING: " + Misc.myToString(e));
+					Gdx.app.log(this.getClass().getSimpleName(), "REMOVING: " + Misc.myToString(e));
 					engine.removeEntity(e);
 						/*//TODO: background stuff
 						if (Mappers.persist.get(e)) {
@@ -398,7 +398,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 	@Override
 	public void dispose() {
-		System.out.println("Disposing: " + this.getClass().getSimpleName());
+		Gdx.app.log(this.getClass().getSimpleName(), "Disposing: " + this.getClass().getSimpleName());
 
 		// clean up after self
 		// dispose of spritebatches and textures

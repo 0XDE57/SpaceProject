@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.TransformComponent;
@@ -29,6 +30,8 @@ public class CameraSystem extends IteratingSystem {
 		//set camera position to entity
 		cam.position.x = transform.pos.x;
 		cam.position.y = transform.pos.y;
+		cam.update();
+
 	}
 
 	/**
@@ -47,7 +50,7 @@ public class CameraSystem extends IteratingSystem {
 		for (Entity x : engine.getEntities()) {
 			if (x.getComponent(CameraFocusComponent.class) != null && x.getComponent(TransformComponent.class) != null) {
 				if (!engine.getEntitiesFor(Family.all(CameraFocusComponent.class, TransformComponent.class).get()).contains(x,true)) {
-					System.out.println("FOUND ENTITY IN ENGINE: FAMILY DID NOT PICK UP ENTITY!");
+					Gdx.app.log(this.getClass().getSimpleName(), "FOUND ENTITY IN ENGINE: FAMILY DID NOT PICK UP ENTITY!");
 					//throw new Exception("Family did not pick up entity in engine");
 				}
 			}

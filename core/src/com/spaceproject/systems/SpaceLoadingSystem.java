@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -73,12 +74,13 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 
 			//check noise map exists in universe file first, if so load into tileMap queue
 			if (noiseBuffer!= null) {
-				System.out.println("noise found, loading: " + seedComp.seed);
+				Gdx.app.log(this.getClass().getSimpleName(), "noise found, loading: " + seedComp.seed);
 				GameScreen.noiseBufferQueue.add(noiseBuffer);
 			} else {
+
 				//TODO: prevent multiple threads on same workload(seed)
 				// if (noiseThreadPool.getQueue().contains(seed))
-				System.out.println("no noise found, generating: " + seedComp.seed);
+				Gdx.app.log(this.getClass().getSimpleName(), "no noise found, generating: " + seedComp.seed);
 				GameScreen.noiseThreadPool.execute(new NoiseThread(seedComp, planet, Tile.defaultTiles));
 			}
 		}
@@ -124,7 +126,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 			try {
 				NoiseBuffer noise = GameScreen.noiseBufferQueue.take();
 				if (noise.pixelatedTileMap == null) {
-					System.out.println("ERROR, no map for: [" + noise.seed + "]");
+					Gdx.app.log(this.getClass().getSimpleName(), "ERROR, no map for: [" + noise.seed + "]");
 					return;
 				}
 
@@ -134,13 +136,13 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 						// create planet texture from tileMap, replace texture
 						Texture newTex = TextureFactory.generatePlanet(noise.pixelatedTileMap, Tile.defaultTiles);
 						p.getComponent(TextureComponent.class).texture = newTex;
-						System.out.println("Texture loaded: [" + noise.seed + "]");
+						Gdx.app.log(this.getClass().getSimpleName(), "Texture loaded: [" + noise.seed + "]");
 						return;
 					}
 				}
 
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Gdx.app.error(this.getClass().getSimpleName(), "error updating planet texture", e);
 			}
 		}
 	}
@@ -192,7 +194,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
             TransformComponent t = Mappers.transform.get(entity);
             if (Vector2.dst2(t.pos.x, t.pos.y, GameScreen.cam.position.x, GameScreen.cam.position.y) > loadDistance) {
                 getEngine().removeEntity(entity);
-                System.out.println("Removing Planetary System: " + entity.getComponent(TransformComponent.class).pos.toString());
+				Gdx.app.log(this.getClass().getSimpleName(), "Removing Planetary System: " + entity.getComponent(TransformComponent.class).pos.toString());
             }
         }
 	}

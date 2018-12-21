@@ -40,7 +40,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
 	protected InputMultiplexer inputMultiplexer;
 
     public MyScreenAdapter() {
-    	System.out.println("ScreenAdapter Reset.");	
+		Gdx.app.log(this.getClass().getSimpleName(), "ScreenAdapter Reset.");
     	
     	cam = new OrthographicCamera();
 		batch = new SpriteBatch();
@@ -68,7 +68,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     @Override
     public void render(float delta) {
     	   	
-    	cam.update();   	
+    	//cam.update();
     	batch.setProjectionMatrix(cam.combined);
     	shape.setProjectionMatrix(cam.combined);
     	
@@ -99,7 +99,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     @Override
     public void resize(int width, int height) {
     	viewport.update(width, height);
-    	Gdx.app.log("Graphics", width + ", " + height);
+		Gdx.app.log(this.getClass().getSimpleName(), "resize: " + width + ", " + height);
     }
     
     /**
@@ -109,7 +109,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
 		if (Gdx.graphics.isFullscreen()) {
 			//set window to previous window size
 			Gdx.graphics.setWindowedMode(prevWindowWidth, prevWindowHeight);
-			Gdx.app.log("Graphics", "Set to windowed.");
+			Gdx.app.log(MyScreenAdapter.class.getSimpleName(), "Set to windowed.");
 		} else {
 			//save window size
 			prevWindowWidth = Gdx.graphics.getWidth();
@@ -118,9 +118,9 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
 			//set to fullscreen
 			if (Gdx.graphics.supportsDisplayModeChange()) {
 				Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-				Gdx.app.log("Graphics", "Set to fullscreen.");
+				Gdx.app.log(MyScreenAdapter.class.getSimpleName(), "Set to fullscreen.");
 			} else {
-				Gdx.app.log("Graphics", "DisplayModeChange not supported.");
+				Gdx.app.log(MyScreenAdapter.class.getSimpleName(), "DisplayModeChange not supported.");
 			}
 		}
 	}
@@ -131,7 +131,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
 	public static void toggleVsync() {
 		vsync = !vsync;
 		Gdx.graphics.setVSync(vsync);
-		Gdx.app.log("Graphics", "vsync = " + vsync);
+		Gdx.app.log(MyScreenAdapter.class.getSimpleName(), "vsync = " + vsync);
 	}
 	
 	

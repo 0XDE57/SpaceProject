@@ -30,14 +30,15 @@ public class FontFactory {
 			generator.dispose();
 			return newFont;
 		} catch (GdxRuntimeException ex) {
-			System.err.println(ex.getMessage());
-			System.out.println("Font not found: " + Gdx.files.getLocalStoragePath() + font);
-			System.out.println("Make sure 'android/assets' is appended to run configuration.");
+			//Gdx.app.log(this.getClass().getSimpleName(),
+			String msg = "Font not found: " + Gdx.files.getLocalStoragePath() + font;
+			msg += ". Make sure 'android/assets' is appended to run configuration.";
+			Gdx.app.error(FontFactory.class.getSimpleName(), msg, ex);
 			//https://github.com/libgdx/libgdx/wiki/Gradle-and-Intellij-IDEA
 			//Set Working directory to <project_path>/android/assets/
 		}
 
-		System.out.println("Loaded default font.");
+		Gdx.app.log(FontFactory.class.getSimpleName(), "Loaded default font.");
 		return new BitmapFont();
 
 	}

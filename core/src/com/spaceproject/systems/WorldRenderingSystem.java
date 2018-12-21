@@ -91,14 +91,14 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 		}
 
 		if (noise == null) {
-			System.out.println("no map found for: " + seed);
+			Gdx.app.log(this.getClass().getSimpleName(), "no map found for: " + seed);
 			for (long k : GameScreen.universe.loadedNoise.keySet()) {
 				System.out.print(k);
 			}
 			System.out.println();
 			//print noise threads
 		} else {
-			System.out.println("map found for: " + seed);
+			Gdx.app.log(this.getClass().getSimpleName(), "map found for: " + seed);
 		}
 	}
 	

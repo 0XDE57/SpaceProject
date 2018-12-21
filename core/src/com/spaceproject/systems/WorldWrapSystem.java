@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
@@ -92,7 +93,7 @@ public class WorldWrapSystem extends EntitySystem {
 		}
 		
 		if (shifted) {
-			System.out.println("Wrap offset: " + offsetX + ", " + offsetY);
+			Gdx.app.log(this.getClass().getSimpleName(), "Wrap offset: " + offsetX + ", " + offsetY);
 		}
 	}
 

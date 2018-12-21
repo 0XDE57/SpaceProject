@@ -1,5 +1,6 @@
 package com.spaceproject.generation.noise;
 
+import com.badlogic.gdx.Gdx;
 import com.spaceproject.Tile;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.SeedComponent;
@@ -45,8 +46,8 @@ public class NoiseThread implements Runnable {
 	@Override
 	public void run() {
 		//try { Thread.sleep(15000); } catch (InterruptedException e) { }//debug delay to see loading effects
-		
-		System.out.println("Started: [" + toString());
+
+		Gdx.app.log(this.getClass().getSimpleName(), "Started: [" + toString());
 		long startTime = System.currentTimeMillis();
 
 		float[][] heightMap = new float[0][0];
@@ -75,9 +76,9 @@ public class NoiseThread implements Runnable {
 		//finish
 		long endTime = System.currentTimeMillis() - startTime;
 		if (stop) {
-			System.out.println(toString() + " killed. " + endTime + "ms");
+			Gdx.app.log(this.getClass().getSimpleName(), toString() + " killed. " + endTime + "ms");
 		} else {
-			System.out.println(toString() + " complete in : " + endTime + "ms.");
+			Gdx.app.log(this.getClass().getSimpleName(), toString() + " complete in : " + endTime + "ms.");
 		}
 	}
 
@@ -118,7 +119,7 @@ public class NoiseThread implements Runnable {
 
 	@Override
 	public String toString() {
-		return "NoiseGenerator: Seed[" + seed + "], size[" + mapSize+ "]";
+		return "Seed[" + seed + "], size[" + mapSize+ "]";
 	}
 
 

@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AstronomicalComponent;
@@ -41,7 +42,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
 
         if (screenTrans.landStage != null) {
             if (screenTrans.curLandStage == null || screenTrans.curLandStage != screenTrans.landStage) {
-                System.out.println("Animation Stage: " + screenTrans.landStage + " for " + Misc.myToString(entity));
+                Gdx.app.log(this.getClass().getSimpleName(), "Animation Stage: " + screenTrans.landStage + " for " + Misc.myToString(entity));
                 screenTrans.curLandStage = screenTrans.landStage;
             }
             switch (screenTrans.landStage) {
@@ -62,7 +63,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
                     break;
                 case end:
                     entity.remove(ScreenTransitionComponent.class);
-                    System.out.println("Animation complete. Removed ScreenTransitionComponent for " + Misc.myToString(entity));
+                    Gdx.app.log(this.getClass().getSimpleName(), "Animation complete. Removed ScreenTransitionComponent for " + Misc.myToString(entity));
                     break;
                 default:
                     try {
@@ -74,7 +75,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
             }
         } else if (screenTrans.takeOffStage != null) {
             if (screenTrans.curTakeOffStage == null || screenTrans.curTakeOffStage != screenTrans.takeOffStage) {
-                System.out.println(this.getClass().getSimpleName() + ": Animation Stage: " + screenTrans.takeOffStage + " for " + Misc.myToString(entity));
+                Gdx.app.log(this.getClass().getSimpleName(), ": Animation Stage: " + screenTrans.takeOffStage + " for " + Misc.myToString(entity));
                 screenTrans.curTakeOffStage = screenTrans.takeOffStage;
             }
             switch (screenTrans.takeOffStage) {
@@ -92,7 +93,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
                     break;
                 case end:
                     entity.remove(screenTrans.getClass());
-                    System.out.println("Animation complete. Removed ScreenTransitionComponent from " + Misc.myToString(entity));
+                    Gdx.app.log(this.getClass().getSimpleName(), "Animation complete. Removed ScreenTransitionComponent from " + Misc.myToString(entity));
                     break;
                 default:
                     try {
@@ -226,13 +227,13 @@ public class ScreenTransitionSystem extends IteratingSystem {
 
     private void syncLoadPosition(Entity entity, ScreenTransitionComponent screenTrans) {
         long desiredSeed = screenTrans.planet.getComponent(SeedComponent.class).seed;
-        System.out.println(Misc.myToString(entity) + " is waiting for " + desiredSeed);
+        Gdx.app.log(this.getClass().getSimpleName(), Misc.myToString(entity) + " is waiting for " + desiredSeed);
         for (Entity astroEnt : astroObjects) {
             if (Mappers.seed.get(astroEnt).seed == desiredSeed) {
                 Vector2 orbitPos = OrbitSystem.getSyncPos(astroEnt, GameScreen.gameTimeCurrent);
                 Mappers.transform.get(entity).pos.set(orbitPos);
                 screenTrans.takeOffStage = screenTrans.takeOffStage.next();
-                System.out.println("FOUND SEED "+ desiredSeed);
+                Gdx.app.log(this.getClass().getSimpleName(), "FOUND SEED "+ desiredSeed);
                 break;
             }
         }

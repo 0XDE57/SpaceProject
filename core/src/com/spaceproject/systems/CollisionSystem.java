@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
@@ -62,7 +63,7 @@ public class CollisionSystem extends EntitySystem {
 							if (textureComponent != null) {
 								textureComponent.texture.dispose();
 							}
-							System.out.println("[" + character + "] killed by: [" + misl.owner + "]");
+							Gdx.app.log(this.getClass().getSimpleName(), "[" + character + "] killed by: [" + misl.owner + "]");
 							engine.removeEntity(character);
 
 						}
@@ -72,7 +73,7 @@ public class CollisionSystem extends EntitySystem {
 						if (ai != null) {
 							ai.attackTarget = misl.owner;
 							ai.state = AIComponent.testState.attack;
-							System.out.println("AI attacked");
+							Gdx.app.log(this.getClass().getSimpleName(),"AI attacked");
 						}
 						
 						
@@ -123,7 +124,7 @@ public class CollisionSystem extends EntitySystem {
 								textureComponent.texture.dispose();
 							}
 							engine.removeEntity(vehicle);
-							System.out.println("[" + vehicle + "] killed by: [" + misl.owner + "]");
+							Gdx.app.log(this.getClass().getSimpleName(),"[" + vehicle + "] killed by: [" + misl.owner + "]");
 						}
 
 						//remove missile
