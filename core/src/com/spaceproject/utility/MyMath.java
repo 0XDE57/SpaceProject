@@ -1,5 +1,6 @@
 package com.spaceproject.utility;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.SpaceProject;
 
@@ -15,13 +16,12 @@ public class MyMath {
 	}
 
 
+	static Vector2 tmpVec = new Vector2();
 	public static Vector2 Vector(float direction, float magnitude) {
-		return new Vector2(magnitude,0).setAngleRad(direction);
-		/*
 		float dx = MathUtils.cos(direction) * magnitude;
 		float dy = MathUtils.sin(direction) * magnitude;
-		return new Vector2(dx, dy);
-		*/
+		return tmpVec.set(dx, dy);
+		//return new Vector2(magnitude,0).setAngleRad(direction);
 	}
 
 
