@@ -42,7 +42,6 @@ public class MiniMap {
     private SimpleTimer drawScaleTimer = new SimpleTimer(5000);
 
     private Rectangle mapBacking;
-    private Rectangle scissors, clipBounds;
     private boolean debugDisableClipping = false;
 
     private BitmapFont fontSmall;
@@ -52,8 +51,6 @@ public class MiniMap {
         updateMapPosition();
         resetMapScale();
 
-        scissors = new Rectangle();
-        clipBounds = new Rectangle();
 
         chunkSize = SpaceProject.uicfg.mapChunkSize;
 
@@ -70,14 +67,7 @@ public class MiniMap {
 
 
         if (!debugDisableClipping) {
-            //clipping to keep rendering within map
-            float x = GameScreen.cam.position.x - Gdx.graphics.getWidth()/2  + mapBacking.x;
-            float y = GameScreen.cam.position.y - Gdx.graphics.getHeight()/2 + mapBacking.y;
-            clipBounds.set(mapBacking).setPosition(x, y);
-
-            //TODO: zoom is messing up clipping. unproject?
-            ScissorStack.calculateScissors(GameScreen.cam, shape.getTransformMatrix(), clipBounds, scissors);
-            ScissorStack.pushScissors(scissors);
+            ScissorStack.pushScissors(mapBacking);
         }
 
 
