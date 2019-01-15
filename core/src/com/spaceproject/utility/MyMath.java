@@ -16,7 +16,7 @@ public class MyMath {
 	}
 
 
-	static Vector2 tmpVec = new Vector2();
+	static final Vector2 tmpVec = new Vector2();
 	public static Vector2 Vector(float direction, float magnitude) {
 		float dx = MathUtils.cos(direction) * magnitude;
 		float dy = MathUtils.sin(direction) * magnitude;

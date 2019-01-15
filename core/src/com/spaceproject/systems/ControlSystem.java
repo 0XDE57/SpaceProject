@@ -117,6 +117,7 @@ public class ControlSystem extends IteratingSystem {
 
 		//debug force insta-stop(currently affects all vehicles)
 		if (Gdx.input.isKeyJustPressed(Keys.X)) transform.velocity.set(0, 0);
+		if (Gdx.input.isKeyJustPressed(Keys.Z)) transform.velocity.add(transform.velocity);
 
 		if (!canAct) {
 			return;

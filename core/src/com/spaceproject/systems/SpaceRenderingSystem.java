@@ -94,6 +94,7 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
 
+		shape.setProjectionMatrix(cam.combined);
 		for (Entity entity : renderQueue3D) {
 			TransformComponent t = Mappers.transform.get(entity);
 			ShieldComponent shield = Mappers.shield.get(entity);

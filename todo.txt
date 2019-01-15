@@ -76,9 +76,7 @@
 
 
 
-[...] fix player moving ahead of camera
-    [x] ship - fixed
-    [ ] player - still jumps ahead of camera
+
 
 
 [ ] take care of some of the todo's
@@ -97,6 +95,10 @@
 
 
 [...] rendering system
+    [...] fix player moving ahead of camera
+        [x] ship - fixed
+        [ ] player - still jumps ahead of camera
+        [x] shaperenderer - shield moves ahead of camera
     [...] fix render priority (z-order)
           [X] moved into separate variable
           [ ] define proper heights for importance as current values are somewhat arbitrary
@@ -127,11 +129,11 @@
                 [ ] clean up: ensure proper disposal
                 [ ] lock facing orientation while rolling, looks funny
                 [ ] mobile/touch UI way of activating dodge, a swipe on the joystick may be intuitive
-        [ ] shield
+        [x] shield
         [ ] bullet come from gun rather than magically from ship
         [ ] weapon types
             [x] basic cannon
-            [ ] grow cannon shoot circles/rectangles with radius relative to damage "weight" of projectile (damage = size * velocity * typeMultiplier)?
+            [...] grow cannon shoot circles/rectangles with radius relative to damage "weight" of projectile (damage = size * velocity * typeMultiplier)?
             [ ] L cannon, touhou style multiple bullet cannon
             [ ] Laser cannon
     [ ] engine mode:
