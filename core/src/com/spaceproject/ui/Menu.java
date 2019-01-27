@@ -55,7 +55,7 @@ public class Menu extends VisWindow {
         TableUtils.setSpacingDefaults(this);
 
         setResizable(true);
-        setMovable(true);
+        //setMovable(true);
         setSize(Gdx.graphics.getWidth()-150, Gdx.graphics.getHeight()-150);
         centerWindow();
         addCloseButton();
@@ -135,6 +135,11 @@ public class Menu extends VisWindow {
         return getStage() != null;
     }
 
+    public void show(Stage stage) {
+        stage.addActor(this);
+        fadeIn();
+    }
+
     public void hide() {
         Gdx.app.log(this.getClass().getSimpleName(), "menu hide");
         /*
@@ -160,11 +165,6 @@ public class Menu extends VisWindow {
         */
 
         super.close();
-    }
-
-    public void show(Stage stage) {
-        stage.addActor(this);
-        fadeIn();
     }
 
     private ConfigTab checkTabChanges() {

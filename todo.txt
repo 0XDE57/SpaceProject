@@ -114,7 +114,7 @@
 
 ---GAMEPLAY & DESIGN---
 [...] SHIPS
-    [... ] COMBAT
+    [...] COMBAT
         [...] 3D roll animation for dodge / barrel roll
                 [x] fix 3D texture test
                 [x] integrate

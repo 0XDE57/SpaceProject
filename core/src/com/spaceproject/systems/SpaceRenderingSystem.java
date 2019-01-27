@@ -89,46 +89,13 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 
 
 		//hacky test shield render, should probably find a better way to do this
-		//enable transparency
-		Gdx.gl.glEnable(GL20.GL_BLEND);
-		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
-
-		shape.setProjectionMatrix(cam.combined);
-		for (Entity entity : renderQueue3D) {
-			TransformComponent t = Mappers.transform.get(entity);
-			ShieldComponent shield = Mappers.shield.get(entity);
-			if (shield != null) {
-				Color c = shield.color;
-
-				//draw overlay
-				shape.begin(ShapeRenderer.ShapeType.Filled);
-				if (shield.active) {
-					shape.setColor(c.r, c.g, c.b, 0.25f);
-				} else {
-					shape.setColor(c.r, c.g, c.b, 0.15f);
-				}
-				shape.circle(t.pos.x, t. pos.y, shield.radius);
-				shape.end();
-
-				//draw outline
-				shape.begin(ShapeRenderer.ShapeType.Line);
-				if (shield.active) {
-					shape.setColor(Color.WHITE);
-				} else {
-					shape.setColor(c.r, c.g, c.b, 1f);
-				}
-				shape.circle(t.pos.x, t. pos.y, shield.radius);
-				shape.end();
-			}
-		}
-
-		Gdx.gl.glDisable(GL20.GL_BLEND);
+		renderShields();
 
 
 		renderQueue.clear();
 		renderQueue3D.clear();
 	}
+
 
 	private void drawEntities() {
 		//sort render order of entities
@@ -224,6 +191,44 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 		}
 		//renderQueue3D.clear();
 	}
+
+	private void renderShields() {
+		//enable transparency
+		Gdx.gl.glEnable(GL20.GL_BLEND);
+		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+		shape.setProjectionMatrix(cam.combined);
+		for (Entity entity : renderQueue3D) {
+			TransformComponent t = Mappers.transform.get(entity);
+			ShieldComponent shield = Mappers.shield.get(entity);
+			if (shield != null) {
+				Color c = shield.color;
+
+				//draw overlay
+				shape.begin(ShapeRenderer.ShapeType.Filled);
+				if (shield.active) {
+					shape.setColor(c.r, c.g, c.b, 0.25f);
+				} else {
+					shape.setColor(c.r, c.g, c.b, 0.15f);
+				}
+				shape.circle(t.pos.x, t.pos.y, shield.radius);
+				shape.end();
+
+				//draw outline
+				shape.begin(ShapeRenderer.ShapeType.Line);
+				if (shield.active) {
+					shape.setColor(Color.WHITE);
+				} else {
+					shape.setColor(c.r, c.g, c.b, 1f);
+				}
+				shape.circle(t.pos.x, t.pos.y, shield.radius);
+				shape.end();
+			}
+		}
+
+		Gdx.gl.glDisable(GL20.GL_BLEND);
+	}
+
 
 	/**
 	 * Return color based on camera position

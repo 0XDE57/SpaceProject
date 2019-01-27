@@ -7,6 +7,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -20,10 +21,14 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ShortArray;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.OrbitComponent;
@@ -33,9 +38,11 @@ import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.ui.DebugEngineWindow;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
+import com.spaceproject.utility.TempText;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -44,6 +51,8 @@ import java.util.Set;
 public class DebugUISystem extends IteratingSystem implements Disposable {
 
 	private Engine engine;
+	private Stage stage;
+	private DebugEngineWindow engineView;
 	
 	//rendering
 	private static OrthographicCamera cam;
@@ -65,7 +74,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	//config
 	private boolean drawDebugUI = true;
 	//private boolean drawMenu = false;
-	public boolean drawFPS = true, drawExtraInfo = true;
+	public boolean drawFPS = true, drawExtraInfo = false;
 	public boolean drawComponentList = false;
 	public boolean drawPos = false;
 	public boolean drawBounds = false, drawBoundsPoly = false;
@@ -88,7 +97,9 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		fontSmall = FontFactory.createFont(FontFactory.fontBitstreamVM, 10);
 		fontLarge = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 20);
 		objects = new Array<Entity>();
-		
+
+
+		stage = new Stage(new ScreenViewport());
 		
 		boolean showInfo = false;
 		if (showInfo) {
@@ -110,12 +121,43 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	public void addedToEngine(Engine engine) {		
 		super.addedToEngine(engine);
 		this.engine = engine;
+
+
+		engineView = new DebugEngineWindow(engine);
+		stage.addListener(new InputListener() {
+			@Override
+			public boolean keyDown (InputEvent event, int keycode) {
+				super.keyDown(event, keycode);
+				engineView.keyDown(event, keycode);
+				return false;
+			}
+
+			@Override
+			public boolean keyUp(InputEvent event, int keycode) {
+				super.keyUp(event, keycode);
+				return false;
+			}
+
+			@Override
+			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+				super.touchDown(event, x, y, pointer, button);
+				return false;
+			}
+		});
+		stage.setDebugAll(true);
 	}
 
 	@Override
 	public void update(float delta) {
 		//check key presses
 		//updateKeyToggles();
+
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F9)) {
+			engineView.show(stage);
+		}
+		engineView.refreshNodes();
+		stage.act(Math.min(delta, 1 / 30f));
+		stage.draw();
 		
 		//don't update if we aren't drawing
 		if (!drawDebugUI) return;				
@@ -505,7 +547,11 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		}
 		tmpText.clear();
 	}
-	
+
+	public Stage getStage() {
+		return stage;
+	}
+
 	@Override 
 	public void processEntity(Entity entity, float deltaTime) {
 		objects.add(entity);
@@ -528,16 +574,4 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		 */
 	}
 
-	private static class TempText {
-		public String text;
-		public int x, y;
-
-		public TempText(String text, int x, int y) {
-			this.text = text;
-			this.x = x;
-			this.y = y;
-		}
-	}
 }
-
-
