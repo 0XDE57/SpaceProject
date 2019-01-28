@@ -153,7 +153,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		//updateKeyToggles();
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F9)) {
-			engineView.show(stage);
+			engineView.toggle(stage);
 		}
 		engineView.refreshNodes();
 		stage.act(Math.min(delta, 1 / 30f));
