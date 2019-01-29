@@ -144,7 +144,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 				return false;
 			}
 		});
-		stage.setDebugAll(true);
+		//stage.setDebugAll(true);
 	}
 
 	@Override

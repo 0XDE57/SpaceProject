@@ -30,7 +30,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     Node systemNodes, entityNodes;
     Skin skin;
 
-    SimpleTimer refreshRate = new SimpleTimer(2000, true);
+    SimpleTimer refreshRate = new SimpleTimer(1000, true);
 
     public DebugEngineWindow(Engine engine) {
         super("Debug Engine View");
@@ -77,8 +77,11 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
 
 
     public void refreshNodes() {
+        if (!isVisible()) {
+            return;
+        }
         if (refreshRate.tryEvent()) {
-            System.out.println("refreshNodes!");
+            //System.out.println("refreshNodes!");
 
             //Array test = new Array();//tree.getNodes();
             //tree.findExpandedObjects(test);
@@ -88,12 +91,11 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
             //systemNodes = new Node(new Label("Systems", skin));
             //systemNodes.removeAll();
             //systemNodes.remove();
-            for (EntitySystem sys : engine.getSystems()) {
-                int id = sys.hashCode();
+            for (EntitySystem system : engine.getSystems()) {
+                int id = system.hashCode();
                 if (!nodeExists(systemNodes, id)) {
-                    String sysName = Misc.myToString(sys);
+                    String sysName = Misc.myToString(system);
                     Node sysNode = new MyNode(new Label(sysName, skin), id);
-
 
                     systemNodes.add(sysNode);
                     //System.out.println("added:" + sysName);
@@ -107,8 +109,67 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
 
 
             //entityNodes.removeAll();
-            for (Entity ent : engine.getEntities()) {
-                addEntityNode(ent);
+            for (Entity entity : engine.getEntities()) {
+                MyNode entityNode = addEntityNode(entity);
+                MyNode emptyNode = getNode(entityNode, emptyNodeId);
+                if (entityNode.isExpanded()) {
+                    System.out.println("updating entity: " + entityNode.getId());
+
+                    //update components
+                    for (Component component : entity.getComponents()) {
+                        MyNode compNode = getNode(entityNode, component.hashCode());
+                        if (compNode == null) {
+                            compNode = new MyNode(new Label(Misc.myToString(component), skin), component.hashCode());
+                            entityNode.add(compNode);
+                        } else {
+                            compNode.removeAll();
+                        }
+
+                        //update fields
+                        for (Field f : component.getClass().getFields()) {
+                            try {
+                                String field = String.format("\t\t%-14s %s", f.getName(), f.get(component));
+                                Node fieldNode = new Node(new Label(field, skin));
+                                compNode.add(fieldNode);
+                            } catch (IllegalArgumentException e) {
+                                e.printStackTrace();
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                    }
+
+                    //clean dead components
+                    if (entity.getComponents().size() != entityNode.getChildren().size) {
+                        for (Node node : entityNode.getChildren()) {
+                            boolean foundNode = false;
+                            for (Component component : entity.getComponents()) {
+                                if (((MyNode) node).getId() == component.hashCode()) {
+                                    foundNode = true;
+                                    break;
+                                }
+                            }
+                            if (!foundNode) {
+                                node.remove();
+                            }
+                        }
+                    }
+
+
+                    if (emptyNode != null) {
+                        emptyNode.remove();
+                        entityNode.setExpanded(true);
+                    }
+
+                } else {
+
+                    if (emptyNode == null) {
+                        entityNode.removeAll();
+                        entityNode.add(new MyNode(new Label("temp node", skin), emptyNodeId));
+                        System.out.println("node reset will temp node: " + entityNode.getId());
+                    }
+                }
                 //String entName = Misc.myToString(ent);//.getClass().getSimpleName();
                 //Node entNode = new Node(new Label(entName, skin));
 
@@ -132,6 +193,41 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
 
 
             }
+/*
+            for (Node entNode : entityNodes.getChildren()) {
+                if (entNode.isExpanded()) {
+                    entNode.removeAll();
+
+                    for (Component comp : ent.getComponents()) {
+                        MyNode compNode = getNode(entityNode, comp.hashCode());
+                        if (compNode == null) {
+                            compNode = new MyNode(new Label(Misc.myToString(comp), skin), comp.hashCode());
+
+                            for (Field f : comp.getClass().getFields()) {
+                                try {
+                                    String field = String.format("\t\t%-14s %s", f.getName(), f.get(comp));
+                                    Node fieldNode = new Node(new Label(field, skin));
+                                    compNode.add(fieldNode);
+                                } catch (IllegalArgumentException e) {
+                                    e.printStackTrace();
+                                } catch (IllegalAccessException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            entityNode.add(compNode);
+                        }
+
+                    }
+
+                } else {
+                    MyNode emptyNode = getNode(entNode, emptyNodeId);
+                    if (emptyNode == null) {
+                        entNode.removeAll();
+                        entNode.add(new MyNode(new Label("temp node", skin), emptyNodeId));
+                    }
+                }
+            }*/
             //tree.add(entityNodes);
             //tree.restoreExpandedObjects(test);
             //tree.expandAll();
@@ -139,11 +235,15 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         }
     }
 
-    private void addEntityNode(Entity ent) {
+    private final int emptyNodeId = -1;
+
+    private MyNode addEntityNode(Entity ent) {
         MyNode node = getNode(entityNodes, ent.hashCode());
         if (node == null) {
-            MyNode entityNode = new MyNode(new Label(Misc.myToString(ent), skin), ent.hashCode());
+            node = new MyNode(new Label(Misc.myToString(ent), skin), ent.hashCode());
 
+            node.add(new MyNode(new Label("temp node", skin), emptyNodeId));
+            /*
             for (Component comp : ent.getComponents()) {
                 MyNode compNode = getNode(entityNode, comp.hashCode());
                 if (compNode == null) {
@@ -164,10 +264,12 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
                     entityNode.add(compNode);
                 }
 
-            }
-            
-            entityNodes.add(entityNode);
+            }*/
+
+            entityNodes.add(node);
         }
+
+        return node;
     }
 
     private boolean nodeExists(Node parentNode, long id) {
@@ -200,7 +302,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     }
 
     public void hide() {
-        //fadeOut();
+        fadeOut();
 
         engine.removeEntityListener(this);
         //tree.clearChildren();
