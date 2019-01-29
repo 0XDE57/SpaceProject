@@ -95,10 +95,11 @@
 
 
 [...] rendering system
-    [...] fix player moving ahead of camera
+    [...] fix stuff moving ahead of camera
         [x] ship - fixed
         [ ] player - still jumps ahead of camera
         [x] shaperenderer - shield moves ahead of camera
+        [ ] projectiles from ship - moves ahead of ship
     [...] fix render priority (z-order)
           [X] moved into separate variable
           [ ] define proper heights for importance as current values are somewhat arbitrary
@@ -127,7 +128,7 @@
                 [ ] clean up: should move values to config
                 [ ] clean up: optimize rendering -> ModelCache
                 [ ] clean up: ensure proper disposal
-                [ ] lock facing orientation while rolling, looks funny
+                [x] lock facing orientation while rolling, looks funny
                 [ ] mobile/touch UI way of activating dodge, a swipe on the joystick may be intuitive
         [x] shield
         [ ] bullet come from gun rather than magically from ship
@@ -187,9 +188,12 @@
 
 ---DEBUG---
     [ ] in game console
-    [ ] messages/info/log
-    [ ] commands
-    [ ] cleanup debug UI (component list)
+        [ ] commands
+    [...] engine viewer
+        [...] show entities and components and component values
+        [ ] clean up and bit of optimization (its pretty hacky at,
+        [ ] arrow navigation and menu expansion
+        [ ] watch window
     [ ] FPS,memory,entity graph
 
 
