@@ -190,9 +190,9 @@
     [ ] in game console
         [ ] commands
     [...] engine viewer
-        [...] show entities and components and component values
-        [ ] clean up and bit of optimization (its pretty hacky at,
-        [ ] arrow navigation and menu expansion
+        [x] show entities and components and component values
+        [ ] clean up and bit of optimization (its pretty hacky atm)
+        [x] arrow navigation and menu expansion
         [ ] watch window
     [ ] FPS,memory,entity graph
 

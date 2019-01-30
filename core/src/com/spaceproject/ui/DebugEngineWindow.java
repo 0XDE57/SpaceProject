@@ -14,6 +14,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree.Node;
+import com.badlogic.gdx.scenes.scene2d.utils.Selection;
+import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.TableUtils;
 import com.kotcrab.vis.ui.widget.VisWindow;
@@ -21,6 +23,8 @@ import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.SimpleTimer;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class DebugEngineWindow extends VisWindow implements EntityListener {
@@ -319,25 +323,81 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     }
 
     public void keyDown(InputEvent event, int keycode) {
+        Selection<Node> nodeSelection = tree.getSelection();
+        Node selectedNode = nodeSelection.first();
+        if (selectedNode == null) {
+            List<Integer> keys = Arrays.asList(Input.Keys.UP, Input.Keys.DOWN, Input.Keys.LEFT, Input.Keys.RIGHT);
+            if (keys.contains(keycode)) {
+                nodeSelection.choose(tree.getRootNodes().first());
+            }
+            return;
+        }
+
+        final Array<Node> siblingNodes;
+        Node parentNode = selectedNode.getParent();
+        if (parentNode == null) {
+           siblingNodes = tree.getRootNodes();
+        } else {
+            siblingNodes = parentNode.getChildren();
+        }
+        int index = siblingNodes.indexOf(selectedNode, false);
+
         switch (keycode) {
             case Input.Keys.UP:
-                //tree.getSelection().
-                //go to above node
-                //
+                if (index > 0) {
+                    Node upNode = siblingNodes.get(index - 1);
+                    if (upNode.isExpanded()) {
+                        Node nextNode = upNode.getChildren().get(upNode.getChildren().size-1);
+                        nodeSelection.choose(nextNode);
+                    } else {
+                        nodeSelection.choose(upNode);
+                    }
+                } else {
+                    if (parentNode != null) {
+                        nodeSelection.choose(parentNode);
+                    }
+                }
                 break;
             case Input.Keys.DOWN:
-                //go do below node
-                //if node has no siblings at same level, select next node of parent node
+                if (selectedNode.isExpanded()) {
+                    if (selectedNode.getChildren() != null && selectedNode.getChildren().size > 0) {
+                        Node firstChild = selectedNode.getChildren().first();
+                        if (firstChild != null) {
+                            nodeSelection.choose(firstChild);
+                        }
+                    }
+                } else {
+                    if (index < siblingNodes.size - 1) {
+                        Node downNode = siblingNodes.get(index + 1);
+                        nodeSelection.choose(downNode);
+                    } else if (index == siblingNodes.size - 1) {
+                        if (parentNode != null) {
+                            Node parentsParent = parentNode.getParent(); //(grandparents?)
+                            if (parentsParent != null) {
+                                final Array<Node> parentsSiblings = parentsParent.getChildren();//(aunts/uncles?)
+                                index = parentsParent.getChildren().indexOf(parentNode, false);
+                                if (index < parentsSiblings.size - 1) {
+                                    Node downNode = parentsSiblings.get(index + 1);
+                                    nodeSelection.choose(downNode);
+                                }
+                            }
+                        }
+                    }
+                }
                 break;
             case Input.Keys.LEFT:
-                //if node is expanded, collapse it
-
-                //if node is collaped && node has parent, select parent
-
-                //if node is parent, collapse
+                if (selectedNode.isExpanded()) {
+                    selectedNode.setExpanded(false);
+                } else {
+                    if (parentNode != null) {
+                        nodeSelection.choose(parentNode);
+                    }
+                }
                 break;
             case Input.Keys.RIGHT:
-                //if node has child, expand
+                if (!selectedNode.isExpanded()) {
+                    selectedNode.setExpanded(true);
+                }
                 break;
             case Input.Keys.SPACE:
                 refreshNodes();
