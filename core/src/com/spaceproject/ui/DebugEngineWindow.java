@@ -38,12 +38,12 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
 
     SimpleTimer refreshRate = new SimpleTimer(1000, true);
 
-    private final int emptyNodeId = -1;
 
     final int keyUP = Input.Keys.UP;
     final int keyDown = Input.Keys.DOWN;
     final int keyLeft = Input.Keys.LEFT;
     final int keyRight = Input.Keys.RIGHT;
+
 
     public DebugEngineWindow(Engine engine) {
         super("Debug Engine View");
@@ -87,30 +87,44 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         if (!isVisible()) {
             return;
         }
+        
         if (refreshRate.tryEvent()) {
-
-            for (EntitySystem system : engine.getSystems()) {
-                Node sysNode = systemNodes.findNode(system);
-                if (sysNode == null) {
-                    systemNodes.add(new ReflectionNode(system));
-                } else {
-                    ((ReflectionNode)sysNode).update();
-                }
-            }
-
-
-
-            for (Entity entity : engine.getEntities()) {
-                Node entNode = entityNodes.findNode(entity);
-                if (entNode == null) {
-                    entityNodes.add(new EntityNode(entity, skin));
-                } else {
-                    ((EntityNode)entNode).update();
-                }
+            updateSystems();
+            updateEntities();
+        }
+    }
+    
+    private void updateEntities() {
+        //update entities
+        for (Entity entity : engine.getEntities()) {
+            Node entNode = entityNodes.findNode(entity);
+            if (entNode == null) {
+                entityNodes.add(new EntityNode(entity, skin));
+            } else {
+                ((EntityNode)entNode).update();
             }
         }
     }
-
+    
+    private void updateSystems() {
+        //add nodes
+        for (EntitySystem system : engine.getSystems()) {
+            Node sysNode = systemNodes.findNode(system);
+            if (sysNode == null) {
+                systemNodes.add(new ReflectionNode(system));
+            }
+        }
+        
+        //update nodes, clean up dead nodes
+        for (Node node : systemNodes.getChildren()) {
+            if (!engine.getSystems().contains((EntitySystem) node.getObject(),false)) {
+                node.remove();
+            } else {
+                ((ReflectionNode)node).update();
+            }
+        }
+    }
+    
     //region menu controls
     public boolean isVisible() {
         return getStage() != null;
@@ -159,49 +173,23 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
             siblingNodes = parentNode.getChildren();
         }
         int index = siblingNodes.indexOf(selectedNode, false);
-
+        
+        Node chosen = null;
         switch (keycode) {
             case keyUP:
                 if (index > 0) {
-                    Node upNode = siblingNodes.get(index - 1);
-                    if (upNode.isExpanded()) {
-                        
-                        Node nextNode = upNode.getChildren().get(upNode.getChildren().size-1);
-                        nodeSelection.choose(nextNode);
-                    } else {
-                        nodeSelection.choose(upNode);
-                    }
+                    chosen = getNextNodeAbove(siblingNodes.get(index - 1));
                 } else {
                     if (parentNode != null) {
-                        nodeSelection.choose(parentNode);
+                        chosen = parentNode;
                     }
                 }
                 break;
             case keyDown:
-                if (selectedNode.isExpanded()) {
-                    if (selectedNode.getChildren() != null && selectedNode.getChildren().size > 0) {
-                        Node firstChild = selectedNode.getChildren().first();
-                        if (firstChild != null) {
-                            nodeSelection.choose(firstChild);
-                        }
-                    }
+                if (selectedNode.isExpanded() && (selectedNode.getChildren().size > 0)) {
+                    chosen = selectedNode.getChildren().first();
                 } else {
-                    if (index < siblingNodes.size - 1) {
-                        Node downNode = siblingNodes.get(index + 1);
-                        nodeSelection.choose(downNode);
-                    } else if (index == siblingNodes.size - 1) {
-                        if (parentNode != null) {
-                            Node parentsParent = parentNode.getParent(); //(grandparents?)
-                            if (parentsParent != null) {
-                                final Array<Node> parentsSiblings = parentsParent.getChildren();//(aunts/uncles?)
-                                index = parentsParent.getChildren().indexOf(parentNode, false);
-                                if (index < parentsSiblings.size - 1) {
-                                    Node downNode = parentsSiblings.get(index + 1);
-                                    nodeSelection.choose(downNode);
-                                }
-                            }
-                        }
-                    }
+                    chosen = getNextNodeBelow(siblingNodes, parentNode, index);
                 }
                 break;
             case keyLeft:
@@ -209,7 +197,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
                     selectedNode.setExpanded(false);
                 } else {
                     if (parentNode != null) {
-                        nodeSelection.choose(parentNode);
+                        chosen = parentNode;
                     }
                 }
                 break;
@@ -219,6 +207,40 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
                 }
                 break;
         }
+    
+        if (chosen != null) {
+            nodeSelection.choose(chosen);
+        }
+    }
+    
+    private Node getNextNodeAbove(Node current) {
+        if (current.isExpanded()) {
+            if (current.getChildren().size > 0) {
+                Node nextNode = current.getChildren().get(current.getChildren().size-1);
+                return getNextNodeAbove(nextNode);
+            }
+        }
+        
+        return current;
+    }
+    
+    private Node getNextNodeBelow(Array<Node> siblingNodes, Node parentNode, int index) {
+        if (index < siblingNodes.size - 1) {
+            return siblingNodes.get(index + 1);
+        } else if (index == siblingNodes.size - 1) {
+            if (parentNode != null) {
+                Node parentsParent = parentNode.getParent(); //(grandparents?)
+                final Array<Node> parentsSiblings; //(aunts/uncles?)
+                if (parentsParent == null) {
+                    parentsSiblings = tree.getRootNodes();
+                } else {
+                    parentsSiblings = parentsParent.getChildren();
+                }
+                index = parentsSiblings.indexOf(parentNode, false);
+                return getNextNodeBelow(parentsSiblings, parentsParent, index);
+            }
+        }
+        return null;
     }
     //endregion
 
@@ -251,7 +273,7 @@ class EntityNode extends UpdateNode {
         if (!isExpanded())
             return;
 
-        //update nodes
+        //add nodes
         ImmutableArray<Component> components = getEntity().getComponents();
         for (Component comp : components) {
             if (findNode(comp) == null) {
@@ -259,12 +281,13 @@ class EntityNode extends UpdateNode {
             }
         }
 
-        //clean up dead nodes
+        //update nodes, clean up dead nodes
         for (Node node : getChildren()) {
             if (!components.contains((Component)node.getObject(),false)) {
                 node.remove();
+            } else {
+                ((ReflectionNode) node).update();
             }
-            ((ReflectionNode)node).update();
         }
     }
     

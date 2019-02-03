@@ -191,13 +191,34 @@
         [ ] commands
     [...] engine viewer
         [x] show entities and components and component values
-        [ ] clean up and bit of optimization (its pretty hacky atm)
-        [x] arrow navigation and menu expansion
-        [ ] watch window
+        [x] clean up and bit of optimization (its pretty hacky atm)
+        [...] arrow navigation and menu expansion
+            [x] fix some edge cases on up and down and expansion of empty nodes
+            [ ] nothing select, re-select last selected / refocus
+            [ ] press and hold up & down
+        [ ] aesthetics and usability
+            [ ] on key navigation, if selection out of scrollpane view, scroll to make it visible
+            [ ] smaller font
+            [ ] fix scroll bar to show
+        [ ] options
+            [ ] poll rate
+            [ ] toggle history highlighting
+        [ ] history (like PE), if added, green for a second. if removed, red for a second
+        [ ] filter for components, bonus points for values (eg: all entities with a health component where component.health > x)
+        [ ] possibly a generic reflection object explorer
+        [ ] watch window (when node is highlighted, on key or watch button, copy node into its own focused window (including children)
+        [ ] field editing
+        [ ] add remove objects
     [ ] FPS,memory,entity graph
 
 
 ---INPUT---
+    [ ] keyboard navigation for menus
+        [...] debug menu
+        [...] main menu
+            [x] hotkeys
+            [ ] navigation and selection
+        [ ] title menu
     [ ] controller/gamepad input support
         https://github.com/libgdx/libgdx/wiki/Controllers
 	    https://gist.github.com/nhydock/dc0501f34f89686ddf34
