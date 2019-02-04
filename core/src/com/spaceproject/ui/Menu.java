@@ -55,7 +55,7 @@ public class Menu extends VisWindow {
         TableUtils.setSpacingDefaults(this);
 
         setResizable(true);
-        //setMovable(true);
+        setMovable(true);
         setSize(Gdx.graphics.getWidth()-150, Gdx.graphics.getHeight()-150);
         centerWindow();
         addCloseButton();

@@ -377,9 +377,18 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 	@Override
 	public void resize(int width, int height) {
 		super.resize(width, height);
+		
+		//todo: move responsibility of this out?
+		//approach a: for each system in engine, if implements resizable, fire resize
+		//approach b: subscribe to resize event
 		HUDSystem hud = engine.getSystem(HUDSystem.class);
 		if (hud != null) {
 			hud.resize(width, height);
+		}
+		
+		DebugUISystem debugUISystem = engine.getSystem(DebugUISystem.class);
+		if (debugUISystem != null) {
+			debugUISystem.resize(width, height);
 		}
 	}
 

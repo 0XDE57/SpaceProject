@@ -551,7 +551,11 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	public Stage getStage() {
 		return stage;
 	}
-
+	
+	public void resize(int width, int height) {
+		stage.getViewport().update(width, height, true);
+	}
+	
 	@Override 
 	public void processEntity(Entity entity, float deltaTime) {
 		objects.add(entity);
@@ -573,5 +577,6 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	 	C  [atio6axx.dll+0x3c4370]
 		 */
 	}
-
+	
+	
 }

@@ -40,7 +40,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     Skin skin;
 
     SimpleTimer refreshRate = new SimpleTimer(1000, true);
-
+    static boolean showHistory = false;
 
     final int keyUP = Input.Keys.UP;
     final int keyDown = Input.Keys.DOWN;
@@ -57,11 +57,13 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
 
         setResizable(true);
         setMovable(true);
-        setSize(Gdx.graphics.getWidth()-150, Gdx.graphics.getHeight()-150);
-        //setPosition(0,0, Align.topLeft);
-        centerWindow();
+        setSize(400, Gdx.graphics.getHeight()-20);
+        setPosition(10,10);
         addCloseButton();
+        
+        
 
+        //setKeepWithinParent(true);
 
         TableUtils.setSpacingDefaults(this);
         columnDefaults(0).left();
@@ -95,6 +97,9 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         }
         
         if (refreshRate.tryEvent()) {
+            if (showHistory) {
+                //clearGhosts(entityNodes.getChildren());
+            }
             updateSystems();
             updateEntities();
         }
@@ -107,7 +112,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
             if (entNode == null) {
                 entityNodes.add(new EntityNode(entity, skin));
             } else {
-                ((EntityNode)entNode).update();
+                ((UpdateNode)entNode).update();
             }
         }
     }
@@ -131,6 +136,17 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         }
     }
     
+    private void clearGhosts(Array<Node> nodes) {
+        for (Node child : nodes) {
+            if (child.getChildren().size > 0) {
+                clearGhosts(child.getChildren());
+            }
+            
+            if (child instanceof GhostNode) {
+                ((GhostNode) child).tryRemove();
+            }
+        }
+    }
     //region menu controls
     public boolean isVisible() {
         return getStage() != null;
@@ -139,7 +155,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     public void show(Stage stage) {
         stage.addActor(this);
         fadeIn();
-
+        
         engine.addEntityListener(this);
         refreshNodes();
     }
@@ -252,20 +268,39 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
 
     @Override
     public void entityAdded(Entity entity) {
-        entityNodes.add(new EntityNode(entity, skin));
+        entityNodes.add(new EntityNode(entity, skin, showHistory));
     }
 
     @Override
     public void entityRemoved(Entity entity) {
-        entityNodes.findNode(entity).remove();
+        Node node = entityNodes.findNode(entity);
+        if (showHistory) {
+            ((UpdateNode)node).removeAndCreateGhost();
+        } else {
+            node.remove();
+        }
+        //entityNodes.findNode(entity).remove();
     }
 
 }
 
 class EntityNode extends UpdateNode {
 
+    boolean isNew = false;
+    private SimpleTimer newTimer;
+    
     public EntityNode(Entity entity, Skin skin) {
         super(new Label("init", skin, DebugEngineWindow.smallFont, Color.WHITE), entity);
+    }
+    
+    public EntityNode(Entity entity, Skin skin, boolean markNew) {
+        this(entity, skin);
+
+        isNew = markNew;
+        if (isNew) {
+            newTimer = new SimpleTimer(1000, true);
+            getActor().setColor(Color.GREEN);
+        }
     }
 
     public Entity getEntity() {
@@ -274,25 +309,39 @@ class EntityNode extends UpdateNode {
     
     @Override
     public void update() {
+        if (isNew && newTimer.tryEvent()){
+            isNew = false;
+            newTimer = null;
+            getActor().setColor(Color.WHITE);
+        }
+        
         ((Label)getActor()).setText(toString());
         
         if (!isExpanded())
             return;
 
+        boolean showHistory = DebugEngineWindow.showHistory;
+        
         //add nodes
         ImmutableArray<Component> components = getEntity().getComponents();
         for (Component comp : components) {
             if (findNode(comp) == null) {
-                add(new ReflectionNode(comp));
+                add(new ReflectionNode(comp, showHistory));
             }
         }
 
         //update nodes, clean up dead nodes
         for (Node node : getChildren()) {
             if (!components.contains((Component)node.getObject(),false)) {
-                node.remove();
+                if (showHistory) {
+                    if (!(node instanceof GhostNode)) {
+                        ((UpdateNode) node).removeAndCreateGhost();
+                    }
+                } else {
+                    node.remove();
+                }
             } else {
-                ((ReflectionNode) node).update();
+                ((UpdateNode) node).update();
             }
         }
     }
@@ -304,10 +353,23 @@ class EntityNode extends UpdateNode {
 }
 
 class ReflectionNode extends UpdateNode {
-
+    
+    boolean isNew = false;
+    private SimpleTimer newTimer;
+    
     public ReflectionNode(Object object) {
         super(new Label(Misc.myToString(object), VisUI.getSkin(), DebugEngineWindow.smallFont, Color.WHITE), object);
         init();
+    }
+    
+    public ReflectionNode(Object object, boolean markNew) {
+        this(object);
+        
+        isNew = markNew;
+        if (isNew) {
+            newTimer = new SimpleTimer(1000, true);
+            getActor().setColor(Color.GREEN);
+        }
     }
     
     private void init() {
@@ -318,6 +380,12 @@ class ReflectionNode extends UpdateNode {
 
     @Override
     public void update() {
+        if (isNew && newTimer.tryEvent()){
+            isNew = false;
+            newTimer = null;
+            getActor().setColor(Color.WHITE);
+        }
+        
         if (!isExpanded())
             return;
         
@@ -364,6 +432,48 @@ class FieldNode extends UpdateNode {
     }
 }
 
+class GhostNode extends UpdateNode {
+    
+    private SimpleTimer removeTimer;
+    public GhostNode(UpdateNode nodeRemoved) {
+        super(nodeRemoved.getActor()/*.clone()???TODO*/, null);
+        
+        Node parent = nodeRemoved.getParent();
+        final Array<Node> parentsSiblings;
+        if (parent == null) {
+            parentsSiblings = nodeRemoved.getTree().getRootNodes();
+        } else {
+            parentsSiblings = parent.getChildren();
+        }
+        int index = parentsSiblings.indexOf(nodeRemoved, false);
+        
+        //parentsSiblings.insert(index, this);
+        //parent.add(this);
+        parent.insert(index, this);//TODO: when adding, node doesn't update until new node added
+        //parent.getTree().invalidateHierarchy();
+        
+        
+        
+        getActor().setColor(Color.RED);
+        
+        removeTimer = new SimpleTimer(1000, true);
+        
+        //getChildren() new GhostNode(child)
+        setExpanded(nodeRemoved.isExpanded());
+    }
+    
+    @Override
+    public void update() {
+        tryRemove();
+    }
+    
+    public void tryRemove() {
+        if (removeTimer.canDoEvent())
+            remove();
+    }
+    
+}
+
 abstract class UpdateNode extends Tree.Node {
 
     UpdateNode(Actor actor, Object obj) {
@@ -380,5 +490,14 @@ abstract class UpdateNode extends Tree.Node {
         update();
     }
 
-    public abstract void update();
+    public abstract void update();//update children?
+    
+    
+    public void removeAndCreateGhost() {
+        setObject(null);//remove reference for GC, TODO: revisit this
+        
+        new GhostNode(this);
+        
+        remove();
+    }
 }
