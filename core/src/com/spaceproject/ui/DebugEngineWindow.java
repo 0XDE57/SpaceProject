@@ -8,6 +8,8 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -21,6 +23,7 @@ import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.TableUtils;
 import com.kotcrab.vis.ui.widget.VisWindow;
+import com.spaceproject.generation.FontFactory;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.SimpleTimer;
 
@@ -43,7 +46,8 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     final int keyDown = Input.Keys.DOWN;
     final int keyLeft = Input.Keys.LEFT;
     final int keyRight = Input.Keys.RIGHT;
-
+    
+    static String smallFont = "smallFont";
 
     public DebugEngineWindow(Engine engine) {
         super("Debug Engine View");
@@ -62,12 +66,14 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         TableUtils.setSpacingDefaults(this);
         columnDefaults(0).left();
 
-
-
-        skin = VisUI.getSkin();
         
-        systemNodes = new Node(new Label("Systems", skin));
-        entityNodes = new Node(new Label("Entities", skin));
+        skin = VisUI.getSkin();
+        BitmapFont font = FontFactory.createFont(FontFactory.fontBitstreamVM, 12);
+        
+        skin.add(smallFont, font);
+        
+        systemNodes = new Node(new Label("Systems", skin, smallFont, Color.WHITE));
+        entityNodes = new Node(new Label("Entities", skin, smallFont, Color.WHITE));
         tree = new Tree(skin);
         tree.add(systemNodes);
         tree.add(entityNodes);
@@ -194,7 +200,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
                 break;
             case keyLeft:
                 if (selectedNode.isExpanded()) {
-                    selectedNode.setExpanded(false);
+                    selectedNode.collapseAll();
                 } else {
                     if (parentNode != null) {
                         chosen = parentNode;
@@ -259,7 +265,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
 class EntityNode extends UpdateNode {
 
     public EntityNode(Entity entity, Skin skin) {
-        super(new Label("init", skin), entity);
+        super(new Label("init", skin, DebugEngineWindow.smallFont, Color.WHITE), entity);
     }
 
     public Entity getEntity() {
@@ -300,13 +306,13 @@ class EntityNode extends UpdateNode {
 class ReflectionNode extends UpdateNode {
 
     public ReflectionNode(Object object) {
-        super(new Label(Misc.myToString(object), VisUI.getSkin()), object);
+        super(new Label(Misc.myToString(object), VisUI.getSkin(), DebugEngineWindow.smallFont, Color.WHITE), object);
         init();
     }
     
     private void init() {
         for (Field f : getObject().getClass().getFields()) {
-            add(new FieldNode(new Label("init", VisUI.getSkin()), getObject(), f));
+            add(new FieldNode(new Label("init", VisUI.getSkin(), DebugEngineWindow.smallFont, Color.WHITE), getObject(), f));
         }
     }
 
