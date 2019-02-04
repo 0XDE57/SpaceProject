@@ -40,7 +40,7 @@ public class TitleScreen extends MyScreenAdapter {
 
 	private Stage stage;
     private Table versionTable;
-	private BitmapFont fontComfortaaBold;
+	private Label titleLabel;
     private int edgePad;
 
 
@@ -68,24 +68,30 @@ public class TitleScreen extends MyScreenAdapter {
 
 		edgePad = SpaceProject.isMobile() ? 20 : 10;
 
-		//title font
-		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-		parameter.size = 90;
-		parameter.borderColor = Color.DARK_GRAY;
-		parameter.borderWidth = 1;
-		fontComfortaaBold = FontFactory.createFont(FontFactory.fontComfortaaBold, parameter);
-
+		//init fonts
+		String titleFont = "titleFontLarge";
+		initTitleFont(titleFont);
+		String menuFont = "menuFont";
+		initMenuFont(menuFont);
+		
+		titleLabel = new Label(SpaceProject.TITLE, VisUI.getSkin(), titleFont, Color.WHITE);
+		titleLabel.setPosition(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight(), Align.top);
+		stage.addActor(titleLabel);
+		
+		
 		//menu
 		Table menuTable = CreateMainMenu(false);
 		stage.addActor(menuTable);
 		menuTable.pack();
 		menuTable.setPosition(edgePad, edgePad);
 
+		
+		//version note
 		versionTable = new Table();
-		versionTable.add(new Label(SpaceProject.VERSION, VisUI.getSkin()));
+		versionTable.add(new Label(SpaceProject.VERSION, VisUI.getSkin(), menuFont, Color.WHITE));
 		stage.addActor(versionTable);
 		versionTable.pack();
-
+		
 
 		//init animations
 		backgroundAnimation = new NoiseAnim();
@@ -94,7 +100,7 @@ public class TitleScreen extends MyScreenAdapter {
 
 		Gdx.graphics.setVSync(true);
 	}
-
+	
 	public void render(float delta) {
 		super.render(delta);
 
@@ -117,17 +123,13 @@ public class TitleScreen extends MyScreenAdapter {
 		foregroundAnimation.render(delta, shape);
 
 		Gdx.gl.glDisable(GL20.GL_BLEND);
-
-		//draw title
-		batch.begin();
-		int x = 50, y = Gdx.graphics.getHeight() - 50;
-		fontComfortaaBold.draw(batch, SpaceProject.TITLE, x, y);
-		batch.end();
+		
 
 
 		stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
 		stage.draw();
 
+		
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F5)) {
 			initForegroundAnim();
@@ -153,11 +155,29 @@ public class TitleScreen extends MyScreenAdapter {
 
 		stage.getViewport().update(width, height, true);
         versionTable.setPosition(Gdx.graphics.getWidth() - versionTable.getWidth() - edgePad, edgePad);
+		titleLabel.setPosition(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight(), Align.top);
 
 		foregroundAnimation.resize(width, height);
 		backgroundAnimation.resize(width, height);
 	}
-
+	
+	private void initMenuFont(String menuFont) {
+		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+		parameter.size = 30;
+		parameter.borderColor = Color.DARK_GRAY;
+		parameter.borderWidth = 1;
+		BitmapFont fontComfortaaBold = FontFactory.createFont(FontFactory.fontComfortaaBold, parameter);
+		VisUI.getSkin().add(menuFont, fontComfortaaBold);
+	}
+	
+	private void initTitleFont(String titleFont) {
+		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+		parameter.size = 90;
+		parameter.borderColor = Color.DARK_GRAY;
+		parameter.borderWidth = 1;
+		BitmapFont fontComfortaaBold = FontFactory.createFont(FontFactory.fontComfortaaBold, parameter);
+		VisUI.getSkin().add(titleFont, fontComfortaaBold);
+	}
 
 	private Table CreateMainMenu(boolean showDebugScreens) {
 

@@ -198,7 +198,9 @@
             [ ] press and hold up & down
         [ ] aesthetics and usability
             [ ] on key navigation, if selection out of scrollpane view, scroll to make it visible
-            [ ] smaller font
+            [...] smaller font
+            [...] font coloring
+                https://github.com/libgdx/libgdx/blob/master/tests/gdx-tests/src/com/badlogic/gdx/tests/BitmapFontTest.java
             [ ] fix scroll bar to show
         [ ] options
             [ ] poll rate

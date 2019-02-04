@@ -2,10 +2,8 @@ package com.spaceproject.screens.animations;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.spaceproject.utility.MyMath;
 
 public class TreeAnim extends TitleAnimation {
 
@@ -16,6 +14,7 @@ public class TreeAnim extends TitleAnimation {
 	int iterations;
 	float rotSpeed;
 	float[] highlightAngles;
+	int mouseStartX, mouseStartY;
 
 	public TreeAnim() {
 		length = 15;
@@ -37,8 +36,11 @@ public class TreeAnim extends TitleAnimation {
 	@Override
 	public void render(float delta, ShapeRenderer shape) {
 		shape.begin(ShapeRenderer.ShapeType.Filled);
-		tiltAngle += rotSpeed * delta;
+		if (mouseStartX == -1) {
+			tiltAngle += rotSpeed * delta;
+		}
 		startAngle += rotSpeed * delta;
+		
 		shape.setColor(0,0,0,1f);
 		//if (startAngle in highlightAngles) { shape.setColor(Color.WHITE); }
 
@@ -60,7 +62,29 @@ public class TreeAnim extends TitleAnimation {
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
 			tiltAngle += rotSpeed*4 * delta;
 		}
-		//System.out.println(MyMath.round(tiltAngle,2));
+		
+		
+		if (Gdx.input.isTouched()) {
+			int mX = Gdx.input.getX();
+			int mY = Gdx.graphics.getHeight() - Gdx.input.getY();
+			if (mouseStartX == -1) {
+				mouseStartX = mX;
+				mouseStartY = mY;
+			} else {
+				float dX = mX - mouseStartX;
+				tiltAngle += dX/3;
+				mouseStartX += dX;
+				
+				/*
+				float dY = mY - mouseStartY;
+				iterations += (int)(dY / 20.0f);
+				mouseStartY += dY;
+				iterations = MathUtils.clamp(iterations, 1, 12);
+				*/
+			}
+		} else {
+			mouseStartX = -1;
+		}
 	}
 
 	@Override

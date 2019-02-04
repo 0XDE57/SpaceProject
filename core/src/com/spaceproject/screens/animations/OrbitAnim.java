@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Queue;
 import com.spaceproject.utility.MyMath;
 
 public class OrbitAnim extends TitleAnimation {
@@ -52,7 +51,6 @@ public class OrbitAnim extends TitleAnimation {
     private class OrbitObject {
         private OrbitObject parent;
         private Vector2 pos;
-        private Queue<Vector2> tail;
         private float angle, rotSpeed;
         private float distance;
         private int size;
@@ -70,8 +68,6 @@ public class OrbitAnim extends TitleAnimation {
                 size *= 3;
             }
 
-            tail = new Queue<Vector2>();
-
             if (parent != null)
                 pos = MyMath.Vector(angle, distance).add(parent.pos);
             else
@@ -82,25 +78,13 @@ public class OrbitAnim extends TitleAnimation {
             angle += rotSpeed * delta;
 
             if (parent != null) {
-                int tailSize = 30;
-                Vector2 newPos = MyMath.Vector(angle, distance).add(parent.pos);
-                if (!newPos.epsilonEquals(pos)) {
-                    tail.addFirst(pos);
-                    if (tail.size > tailSize) {
-                        tail.removeLast();
-                    }
-                }
-                pos = newPos;
+                pos = MyMath.Vector(angle, distance).add(parent.pos);
 
-                int tPos = 0;
-                for (Vector2 t : tail) {
-                    float ratio = (float) tPos++ / tail.size;
-                    shape.setColor(ratio, ratio, ratio, 1);
-                    shape.circle(t.x, t.y, size * (1 - ratio));
-                }
-
+                shape.setColor(Color.BLACK);
+                shape.circle(pos.x, pos.y, size);
             } else {
                 pos.set(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+                
                 shape.setColor(Color.BLACK);
                 shape.circle(pos.x, pos.y, size);
                 shape.setColor(Color.WHITE);
