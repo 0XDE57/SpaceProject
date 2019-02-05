@@ -203,16 +203,17 @@
             [x] font coloring
                 https://github.com/libgdx/libgdx/blob/master/tests/gdx-tests/src/com/badlogic/gdx/tests/BitmapFontTest.java
             [ ] fix scroll bar to show
+            [ ] focus on mouse over
         [ ] options
             [ ] poll rate
-            [ ] toggle history highlighting
+            [x] toggle history highlighting
             [ ] expand all collapse all
         [...] history (like PE), if added, green for a second. if removed, red for a second
         [ ] filter for components, bonus points for values (eg: all entities with a health component where component.health > x)
         [ ] possibly a generic reflection object explorer
         [ ] watch window (when node is highlighted, on key or watch button, copy node into its own focused window (including children)
         [ ] field editing
-        [ ] add remove objects
+        [ ] add / remove objects
     [ ] FPS,memory,entity graph
 
 
