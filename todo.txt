@@ -1,69 +1,29 @@
 ---ENGINE---
-[ ] voronoi, for destructible asteroids and world generation (can be used for tectonic plates / countries / biomes)
-    https://www.badlogicgames.com/forum/viewtopic.php?f=11&t=22784 (my old thread)
-    https://github.com/mjholtzem/Unity-2D-Destruction
-	http://www.alanzucconi.com/2015/02/24/to-voronoi-and-beyond/
-	https://stackoverflow.com/questions/20104779/libgdx-create-texture-from-overlay-using-pixmap
-	https://pvigier.github.io/2018/11/18/fortune-algorithm-details.html
-    http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/
-    https://leatherbee.org/index.php/2018/10/06/terrain-generation-3-voronoi-diagrams/
+[ ] Architecture
+    [ ] consider refactoring space and world view to be simply load and unload systems as needed instead of wiping out everything
+        load base systems, then load/unload world and space systems on the fly. use priority to keep order
+        it would probably fix some of the screen transition issues and simplify it.
+        - pros:
+            * eliminates duplicate code
+            * might make things simpler and cleaner and eliminate certain classes of bugs
+            * why wipe out listeners and such
+        - cons:
+            * may introduce another class off problems
+        look at transitions system flow:
+        from space:
+            add transition component
 
-
-[...] wrap planets properly (LOCAL COORDINATE SPACE?)
-    https://www.reddit.com/r/gamedev/comments/1gi6np/magic_carpet_style_infinite_wrapping_terrain/
-    https://simonschreibt.de/gat/1nsane-carpet-2-repetitive-worlds/
-
-
-[...] fix land/take-off
-    [ ] transition feels unreliable
-        [ ] bug: landed on planet which had finished generating, but did't load (no map found)
-            see: WorldRenderingSystem.loadMap() (also rendering shouldn't be responsible for loading...)
-        [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
-            see: ScreenTransitionSystem.syncLoadPosition()
-    [ ] bug: shrink sometimes doesn't scale properly or at all
-    [ ] pause stage is also now broken, need to reset timer
-    [ ] nested orbit: consider children of children eg: satellite->moon->planet->star
-    [ ] finish transistor animation, should have screen effect for polish and to hide loading/level change. goal feel a little more seamless
-        (fade to white/pixelate shader during landing, load map (can wait here for a second if not finished generating, when generations finished start white then fade normal, continue)
-    [...] genericize and make work land and take off work for AI, system doesn't supports non-player world switching
-        dumb loop where AI lands on planet, kept in some kind of background
-        processing state/alt engine, wait a second then take off to test all is working correctly
-        background engine meant to be low processing effort (eg: ultra dumbed down AI or simulations, no rendering, no physics, just states and events) to keep track of important entities
-        and states between space and worlds. eg: give entity important flag component to keep relevant, if dont have flag dont care and remove when switch
-        will be useful for persistence, AI and story type events.
-
-        eg:
-        Engine backgroundEngine.
-        if (player switch screen) {
-            //move persistent from main to background processing
-            for each entity in mainEngine {
-                if (entity has PersistenceComponent) {
-                    //eg: attacked an AI, AI gets TimedPersistenceComponent and will remain on planet for 5 minutes waiting for you
-                    backgroundEngine.Add(entity);
-                }
-            }
-            //move relevant entity from background processing to main
-            for each entity in backgroundEngine {
-                if (entity has PersistenceComponent) {
-                    if (is persistence relevant to new context) {
-                        //example relevance:
-                        //player in space, important entity on planet
-                        //if land on planet with important entity, load into actual engine
-                        mainEngine.Add(entity);
-                        //could be more nuanced, like perhaps entity is only loaded when event triggers it
-                        //or specific location on planet. dunno till start implementing.
-                        //possibly have multiple engines handling contexts?
-                    }
-                }
-            }
-        }
-        if (AI switch screen) {
-            //similar thing to above
-            //if relevant load it, else keep in background
-
-            //if not important, remove from engine, forget about existence
-        }
-
+    [ ] consider merging rendering system (SpaceRendering & World rendering)?
+        because they are basically duplicates which the difference of background tiles
+        or at least have them share rendering functions as the drawEntities() & draw3DRenderables() are identical between them
+        - pros:
+            * eliminates duplicate code
+            * might simplify some things
+        - cons:
+            * may introduce other issues
+            * more responsibilty for one class...
+        alternatively, split up renderiny type into difference systems? not sure yet
+        what happens in refactoring space and world will affect this. need to think more about it
 
 [...] fix texture / map loading
     [x] seed based load instead of position
@@ -74,25 +34,55 @@
     [ ] clean up
     [ ] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
 
+    [...] fix land/take-off
+        [ ] transition feels unreliable
+            [ ] bug: landed on planet which had finished generating, but did't load (no map found)
+                see: WorldRenderingSystem.loadMap() (also rendering shouldn't be responsible for loading...)
+            [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
+                see: ScreenTransitionSystem.syncLoadPosition()
+        [ ] bug: shrink sometimes doesn't scale properly or at all
+        [ ] pause stage is also now broken, need to reset timer
+        [ ] nested orbit: consider children of children eg: satellite->moon->planet->star
+        [ ] finish transistor animation, should have screen effect for polish and to hide loading/level change. goal feel a little more seamless
+            (fade to white/pixelate shader during landing, load map (can wait here for a second if not finished generating, when generations finished start white then fade normal, continue)
+        [...] genericize and make work land and take off work for AI, system doesn't supports non-player world switching
+            dumb loop where AI lands on planet, kept in some kind of background
+            processing state/alt engine, wait a second then take off to test all is working correctly
+            background engine meant to be low processing effort (eg: ultra dumbed down AI or simulations, no rendering, no physics, just states and events) to keep track of important entities
+            and states between space and worlds. eg: give entity important flag component to keep relevant, if dont have flag dont care and remove when switch
+            will be useful for persistence, AI and story type events.
 
+            eg:
+            Engine persistenceEngine.
+            if (player switch screen) {
+                //move persistent from main to background processing
+                for each entity in mainEngine {
+                    if (entity has PersistenceComponent) {
+                        //eg: attacked an AI, AI gets TimedPersistenceComponent and will remain on planet for 5 minutes waiting for you
+                        persistenceEngine.Add(entity);
+                    }
+                }
+                //move relevant entity from background processing to main
+                for each entity in persistenceEngine {
+                    if (entity has PersistenceComponent) {
+                        if (is persistence relevant to new context) {
+                            //example relevance:
+                            //player in space, important entity on planet
+                            //if land on planet with important entity, load into actual engine
+                            mainEngine.Add(entity);
+                            //could be more nuanced, like perhaps entity is only loaded when event triggers it
+                            //or specific location on planet. dunno till start implementing.
+                            //possibly have multiple engines handling contexts?
+                        }
+                    }
+                }
+            }
+            if (AI switch screen) {
+                //similar thing to above
+                //if relevant load it, else keep in background
 
-
-
-
-[ ] take care of some of the todo's
-    there is so much to do, and I keep adding more...
-
-
-[ ] fixed time step (necessary for multiplayer?)
-	https://gafferongames.com/post/fix_your_timestep/
-    http://gameprogrammingpatterns.com/game-loop.html
-    http://www.koonsolo.com/news/dewitters-gameloop/
-
-
-[ ] fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
-    https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
-    https://www.youtube.com/watch?v=mXTxQko-JH0&t=4m18s
-
+                //if not important, remove from engine, forget about existence
+            }
 
 [...] rendering system
     [...] fix stuff moving ahead of camera
@@ -109,8 +99,86 @@
         or at least have them share rendering functions as the drawEntities() & draw3DRenderables() are identical between them
 
 
-[ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
 
+
+
+[ ] rotation impulse
+    I can collide polygons, but they don't account for rotation and point of contact...
+    [ ] DIY?
+        http://www.randygaul.net/2013/03/27/game-physics-engine-part-1-impulse-resolution/
+        https://stackoverflow.com/questions/11654990/2d-physics-engine-collision-response-rotation-of-objects
+        https://books.google.ca/books?id=ZcFHDwAAQBAJ&pg=PA66&lpg=PA66&dq=libgdx+MinimumTranslationVector
+        public boolean overlaps(BaseActor other, boolean resolve)
+            {
+                Polygon poly1 = this.getBoundingPolygon();
+                Polygon poly2 = other.getBoundingPolygon();
+
+                if ( !poly1.getBoundingRectangle().overlaps(poly2.getBoundingRectangle()) )
+                    return false;
+
+                MinimumTranslationVector mtv = new MinimumTranslationVector();
+                boolean polyOverlap = Intersector.overlapConvexPolygons(poly1, poly2, mtv);
+                if (polyOverlap && resolve)
+                {
+                    this.moveBy( mtv.normal.x * mtv.depth, mtv.normal.y * mtv.depth );
+                }
+                float significant = 0.5f;
+                return (polyOverlap && (mtv.depth > significant));
+        }
+        above can be used to get closer, but doesn't give us point of contact needed for rotation?
+    [ ] move to box2d?
+        seems overkill and would involve a lot of re-writing... but it will likely be better than anything i can write myself
+        but i really dont want to rewrite a bunch of stuff...
+
+[ ] fixed time step (necessary for multiplayer?)
+	https://gafferongames.com/post/fix_your_timestep/
+    http://gameprogrammingpatterns.com/game-loop.html
+    http://www.koonsolo.com/news/dewitters-gameloop/
+
+
+[ ] voronoi, for destructible asteroids and world generation (can be used for tectonic plates / countries / biomes)
+    https://www.badlogicgames.com/forum/viewtopic.php?f=11&t=22784 (my old thread)
+    https://github.com/mjholtzem/Unity-2D-Destruction
+	http://www.alanzucconi.com/2015/02/24/to-voronoi-and-beyond/
+	https://stackoverflow.com/questions/20104779/libgdx-create-texture-from-overlay-using-pixmap
+	https://pvigier.github.io/2018/11/18/fortune-algorithm-details.html
+    http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/
+    https://leatherbee.org/index.php/2018/10/06/terrain-generation-3-voronoi-diagrams/
+
+
+[...] wrap planets properly (LOCAL COORDINATE SPACE?)
+    https://www.reddit.com/r/gamedev/comments/1gi6np/magic_carpet_style_infinite_wrapping_terrain/
+    https://simonschreibt.de/gat/1nsane-carpet-2-repetitive-worlds/
+
+
+
+[ ] take care of some of the todo's
+    there is so much to do, and I keep adding more...
+
+
+
+
+[ ] fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
+    https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
+    https://www.youtube.com/watch?v=mXTxQko-JH0&t=4m18s
+
+
+
+[ ] new DevPlay button on title screen
+    [ ] use Dev world as the one with hardcoded seed and forced test entities and forced close star system
+    [ ] current play button should give random seed, no hardcoded entities. entities should come from spawning systems instead
+        [ ] game start
+            [ ] birth/tutorial screen
+            [ ] death
+    [ ] cleanup GameScreen to facilitate this
+[ ] new CombatTest debug screen
+    [ ] one on one with an AI for protoyping combat and movement mechanics and feel
+    [ ] AI vs AI?
+
+
+
+[ ] optimization
+    [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
 
 
 ---GAMEPLAY & DESIGN---
@@ -152,9 +220,6 @@
         http://davebollinger.org/works/pixelspaceships/
         https://www.reddit.com/r/gamedev/comments/2tavse/2d_procedural_spaceship_generator/
 
-[ ] game start
-    [ ] birth/tutorial screen
-    [ ] death
 
 [...] planet generation
 	research planet attributes //size, temperature, pressure, atmosphere/elements(https://en.wikipedia.org/wiki/Astronomical_spectroscopy)...etc
@@ -209,6 +274,9 @@
             [x] toggle history highlighting
             [ ] expand all collapse all
         [...] history (like PE), if added, green for a second. if removed, red for a second
+            [ ] systems should get history too, currently only entities working
+            [ ] include children
+        [ ] add count to system and entities node eg: Entities (57), Systems (12)
         [ ] filter for components, bonus points for values (eg: all entities with a health component where component.health > x)
         [ ] possibly a generic reflection object explorer
         [ ] watch window (when node is highlighted, on key or watch button, copy node into its own focused window (including children)

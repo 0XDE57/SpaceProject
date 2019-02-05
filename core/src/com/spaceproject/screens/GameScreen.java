@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 
 public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
-	public Engine engine, backgroundEngine;
+	public Engine engine, persistenceEngine;
 	public static long gameTimeCurrent, gameTimeStart;
 
 
@@ -333,11 +333,11 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 				if (Mappers.AI.get(e) != null) {
 					Gdx.app.log(this.getClass().getSimpleName(), "REMOVING: " + Misc.myToString(e));
 					engine.removeEntity(e);
-						/*//TODO: background stuff
-						if (Mappers.persist.get(e)) {
-							System.out.println("MOVED to background engine: " + Misc.myToString(e));
-							backgroundEngine.addEntity(e);
-						}*/
+					/*//TODO: background stuff
+					if (Mappers.persist.get(e)) {
+						System.out.println("MOVED to background engine: " + Misc.myToString(e));
+						persistenceEngine.addEntity(e);
+					}*/
 				}
 
 				if (inSpace) {
