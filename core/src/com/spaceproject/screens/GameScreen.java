@@ -255,7 +255,9 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		HUDSystem hudSystem = new HUDSystem();
 		inputMultiplexer.addProcessor(0, hudSystem.getStage());
 		engine.addSystem(hudSystem);
-		engine.addSystem(new DebugUISystem());
+		DebugUISystem debugUISystem = new DebugUISystem();
+		inputMultiplexer.addProcessor(0, debugUISystem.getStage());
+		engine.addSystem(debugUISystem);
 
 
 
@@ -348,9 +350,10 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 
 		if (transition) {
+			//engine.removeEntityListener();
 			engine.removeAllEntities();//to fix family references when entities added to new engine
 			transitioningEntities = null;
-			//engine.removeAllSystems();?
+			
 
 			inputMultiplexer.clear();
 			if (inSpace) {

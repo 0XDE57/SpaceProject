@@ -155,6 +155,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F9)) {
 			engineView.toggle(stage);
 		}
+		//stage.setDebugAll(true);
 		engineView.refreshNodes();
 		stage.act(Math.min(delta, 1 / 30f));
 		stage.draw();
@@ -568,6 +569,9 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		texCompSeparator.dispose();
 		fontSmall.dispose();
 		fontLarge.dispose();
+		
+		engine.removeEntityListener(engineView);
+		stage.dispose();
 		//font.dispose();
 		//batch.dispose();
 		//shape.dispose(); //crashes: 

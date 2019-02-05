@@ -1,11 +1,9 @@
 package com.spaceproject.ui;
 
-import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.EntitySystem;
-import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
@@ -13,21 +11,21 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree.Node;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Selection;
 import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
-import com.kotcrab.vis.ui.util.TableUtils;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import com.spaceproject.generation.FontFactory;
-import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.SimpleTimer;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,9 +36,13 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     Tree tree;
     Node systemNodes, entityNodes;
     Skin skin;
-
-    SimpleTimer refreshRate = new SimpleTimer(1000, true);
-    static boolean showHistory = false;
+    
+    static int refreshRate = 1000;
+    static int newTime = 1000;
+    static int removeTime = 1000;
+    static boolean showHistory = true;
+    static boolean includeChildren = false;
+    SimpleTimer refreshTimer;
 
     final int keyUP = Input.Keys.UP;
     final int keyDown = Input.Keys.DOWN;
@@ -53,6 +55,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         super("Debug Engine View");
 
         this.engine = engine;
+        refreshTimer = new SimpleTimer(refreshRate, true);
 
 
         setResizable(true);
@@ -60,18 +63,10 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         setSize(400, Gdx.graphics.getHeight()-20);
         setPosition(10,10);
         addCloseButton();
-        
-        
-
-        //setKeepWithinParent(true);
-
-        TableUtils.setSpacingDefaults(this);
-        columnDefaults(0).left();
 
         
         skin = VisUI.getSkin();
         BitmapFont font = FontFactory.createFont(FontFactory.fontBitstreamVM, 12);
-        
         skin.add(smallFont, font);
         
         systemNodes = new Node(new Label("Systems", skin, smallFont, Color.WHITE));
@@ -80,15 +75,33 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         tree.add(systemNodes);
         tree.add(entityNodes);
         refreshNodes();
-
-
-        ScrollPane scrollPane = new ScrollPane(tree);
+    
+        final Table contents = new Table();
+    
+        final Table options = new Table();
+        final CheckBox showHistoryCheck = new CheckBox("show history", VisUI.getSkin());
+        showHistoryCheck.setChecked(showHistory);
+        showHistoryCheck.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                showHistory = showHistoryCheck.isChecked();
+            }
+        });
+        options.add(showHistoryCheck);
+        contents.add(options);
+        contents.row();
+        
+        
+        final ScrollPane scrollPane = new ScrollPane(tree);
         //scrollPane.setFlickScroll(false);
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollbarsOnTop(true);
         //scrollPane.scrol
-        add(scrollPane).expand().fill();
+        contents.add(scrollPane).expand().fill();
+        add(contents).expand().fill();
 
+        
+        
     }
 
     public void refreshNodes() {
@@ -96,9 +109,9 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
             return;
         }
         
-        if (refreshRate.tryEvent()) {
+        if (refreshTimer.tryEvent()) {
             if (showHistory) {
-                //clearGhosts(entityNodes.getChildren());
+                clearGhosts(entityNodes.getChildren());
             }
             updateSystems();
             updateEntities();
@@ -147,6 +160,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
             }
         }
     }
+    
     //region menu controls
     public boolean isVisible() {
         return getStage() != null;
@@ -275,229 +289,10 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     public void entityRemoved(Entity entity) {
         Node node = entityNodes.findNode(entity);
         if (showHistory) {
-            ((UpdateNode)node).removeAndCreateGhost();
+            ((UpdateNode)node).removeAndCreateGhost(includeChildren);
         } else {
             node.remove();
         }
-        //entityNodes.findNode(entity).remove();
     }
 
-}
-
-class EntityNode extends UpdateNode {
-
-    boolean isNew = false;
-    private SimpleTimer newTimer;
-    
-    public EntityNode(Entity entity, Skin skin) {
-        super(new Label("init", skin, DebugEngineWindow.smallFont, Color.WHITE), entity);
-    }
-    
-    public EntityNode(Entity entity, Skin skin, boolean markNew) {
-        this(entity, skin);
-
-        isNew = markNew;
-        if (isNew) {
-            newTimer = new SimpleTimer(1000, true);
-            getActor().setColor(Color.GREEN);
-        }
-    }
-
-    public Entity getEntity() {
-        return (Entity) getObject();
-    }
-    
-    @Override
-    public void update() {
-        if (isNew && newTimer.tryEvent()){
-            isNew = false;
-            newTimer = null;
-            getActor().setColor(Color.WHITE);
-        }
-        
-        ((Label)getActor()).setText(toString());
-        
-        if (!isExpanded())
-            return;
-
-        boolean showHistory = DebugEngineWindow.showHistory;
-        
-        //add nodes
-        ImmutableArray<Component> components = getEntity().getComponents();
-        for (Component comp : components) {
-            if (findNode(comp) == null) {
-                add(new ReflectionNode(comp, showHistory));
-            }
-        }
-
-        //update nodes, clean up dead nodes
-        for (Node node : getChildren()) {
-            if (!components.contains((Component)node.getObject(),false)) {
-                if (showHistory) {
-                    if (!(node instanceof GhostNode)) {
-                        ((UpdateNode) node).removeAndCreateGhost();
-                    }
-                } else {
-                    node.remove();
-                }
-            } else {
-                ((UpdateNode) node).update();
-            }
-        }
-    }
-    
-    @Override
-    public String toString() {
-        return Misc.myToString(getEntity()) + " [" + getEntity().getComponents().size() + "]";
-    }
-}
-
-class ReflectionNode extends UpdateNode {
-    
-    boolean isNew = false;
-    private SimpleTimer newTimer;
-    
-    public ReflectionNode(Object object) {
-        super(new Label(Misc.myToString(object), VisUI.getSkin(), DebugEngineWindow.smallFont, Color.WHITE), object);
-        init();
-    }
-    
-    public ReflectionNode(Object object, boolean markNew) {
-        this(object);
-        
-        isNew = markNew;
-        if (isNew) {
-            newTimer = new SimpleTimer(1000, true);
-            getActor().setColor(Color.GREEN);
-        }
-    }
-    
-    private void init() {
-        for (Field f : getObject().getClass().getFields()) {
-            add(new FieldNode(new Label("init", VisUI.getSkin(), DebugEngineWindow.smallFont, Color.WHITE), getObject(), f));
-        }
-    }
-
-    @Override
-    public void update() {
-        if (isNew && newTimer.tryEvent()){
-            isNew = false;
-            newTimer = null;
-            getActor().setColor(Color.WHITE);
-        }
-        
-        if (!isExpanded())
-            return;
-        
-        for (Node node : getChildren())
-            ((FieldNode) node).update();
-        
-    }
-    
-    @Override
-    public String toString() {
-        return Misc.myToString(getObject());
-    }
-}
-
-class FieldNode extends UpdateNode {
-
-    private Object obj;
-    public FieldNode(Actor actor, Object obj, Field field) {
-        super(actor, field);
-        this.obj = obj;
-        update();
-    }
-    
-    private Object getObj() {
-        return obj;
-    }
-
-    @Override
-    public void update() {
-        ((Label)getActor()).setText(toString());
-    }
-    
-    @Override
-    public String toString() {
-        try {
-            return String.format("\t\t%-14s %s", ((Field) getObject()).getName(), ((Field) getObject()).get(getObj()));
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-            return e.getMessage();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            return e.getMessage();
-        }
-    }
-}
-
-class GhostNode extends UpdateNode {
-    
-    private SimpleTimer removeTimer;
-    public GhostNode(UpdateNode nodeRemoved) {
-        super(nodeRemoved.getActor()/*.clone()???TODO*/, null);
-        
-        Node parent = nodeRemoved.getParent();
-        final Array<Node> parentsSiblings;
-        if (parent == null) {
-            parentsSiblings = nodeRemoved.getTree().getRootNodes();
-        } else {
-            parentsSiblings = parent.getChildren();
-        }
-        int index = parentsSiblings.indexOf(nodeRemoved, false);
-        
-        //parentsSiblings.insert(index, this);
-        //parent.add(this);
-        parent.insert(index, this);//TODO: when adding, node doesn't update until new node added
-        //parent.getTree().invalidateHierarchy();
-        
-        
-        
-        getActor().setColor(Color.RED);
-        
-        removeTimer = new SimpleTimer(1000, true);
-        
-        //getChildren() new GhostNode(child)
-        setExpanded(nodeRemoved.isExpanded());
-    }
-    
-    @Override
-    public void update() {
-        tryRemove();
-    }
-    
-    public void tryRemove() {
-        if (removeTimer.canDoEvent())
-            remove();
-    }
-    
-}
-
-abstract class UpdateNode extends Tree.Node {
-
-    UpdateNode(Actor actor, Object obj) {
-        super(actor);
-        this.setObject(obj);
-    }
-
-    @Override
-    public void setExpanded(boolean expanded) {
-        if (expanded == isExpanded())
-            return;
-
-        super.setExpanded(expanded);
-        update();
-    }
-
-    public abstract void update();//update children?
-    
-    
-    public void removeAndCreateGhost() {
-        setObject(null);//remove reference for GC, TODO: revisit this
-        
-        new GhostNode(this);
-        
-        remove();
-    }
 }
