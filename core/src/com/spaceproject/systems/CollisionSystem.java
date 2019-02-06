@@ -8,6 +8,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.BoundsComponent;
@@ -16,6 +17,7 @@ import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MissileComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TextureComponent;
+import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.PolygonUtil;
@@ -27,6 +29,7 @@ public class CollisionSystem extends EntitySystem {
 	private ImmutableArray<Entity> missiles;
 	private ImmutableArray<Entity> vehicles;
 	private ImmutableArray<Entity> characters;
+	private ImmutableArray<Entity> collidables;
 	
 	@Override
 	public void addedToEngine(Engine engine) {
@@ -35,10 +38,31 @@ public class CollisionSystem extends EntitySystem {
 		missiles = engine.getEntitiesFor(Family.all(MissileComponent.class, BoundsComponent.class).get());
 		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class, BoundsComponent.class).get());
 		characters = engine.getEntitiesFor(Family.all(CharacterComponent.class, BoundsComponent.class).get());
+
+		//collidables = engine.getEntitiesFor(Family.all(BoundsComponent.class).get());
 	}
+
+
 	
 	@Override
-	public void update(float delta) {		
+	public void update(float delta) {
+		/*
+		for (Entity eA : collidables) {
+			for (Entity eB : collidables) {
+				if (eA.equals(eB)) continue;
+
+				BoundsComponent boundsA = Mappers.bounds.get(eA);
+				BoundsComponent boundsB = Mappers.bounds.get(eB);
+				if (overlaps(boundsA.poly, boundsB.poly)) {
+					//if missile & character: damage character, remove missile
+					//if missile & ship: damage ship
+					//if character & ship: resolve
+					//if ship & ship: resolve
+				}
+
+			}
+		}*/
+
 		
 		for (Entity missle : missiles) {
 			BoundsComponent missBounds = Mappers.bounds.get(missle);
@@ -135,6 +159,19 @@ public class CollisionSystem extends EntitySystem {
 			}
 
 		}
+	}
+
+	public boolean overlaps(Polygon polyA, Polygon polyB) {
+
+		if (!polyA.getBoundingRectangle().overlaps(polyB.getBoundingRectangle()))
+			return false;
+
+		Intersector.MinimumTranslationVector mtv = new Intersector.MinimumTranslationVector();
+		boolean overlap = Intersector.overlapConvexPolygons(polyA, polyB, mtv);
+		//if (overlap) {
+		//transform.pos.add( mtv.normal.x * mtv.depth, mtv.normal.y * mtv.depth );
+		//}
+		return overlap;
 	}
 	
 }
