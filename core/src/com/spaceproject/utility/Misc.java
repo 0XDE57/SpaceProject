@@ -46,7 +46,7 @@ public class Misc {
 	}
 
 
-	public static String myToString(Object e) {
+	public static String objString(Object e) {
 		//a shorter version to getSimpleName() and hashcode
 		return e.getClass().getSimpleName() + "@" + Integer.toHexString(e.hashCode());
 	}

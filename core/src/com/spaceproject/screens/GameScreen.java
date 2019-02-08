@@ -331,11 +331,11 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 				}
 
 				if (Mappers.AI.get(e) != null) {
-					Gdx.app.log(this.getClass().getSimpleName(), "REMOVING: " + Misc.myToString(e));
+					Gdx.app.log(this.getClass().getSimpleName(), "REMOVING: " + Misc.objString(e));
 					engine.removeEntity(e);
 					/*//TODO: background stuff
 					if (Mappers.persist.get(e)) {
-						System.out.println("MOVED to background engine: " + Misc.myToString(e));
+						System.out.println("MOVED to background engine: " + Misc.objString(e));
 						persistenceEngine.addEntity(e);
 					}*/
 				}

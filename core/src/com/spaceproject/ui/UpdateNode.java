@@ -22,7 +22,7 @@ public abstract class UpdateNode extends Tree.Node {
         super(actor);
         this.setObject(obj);
         if (obj != null) {
-            getActor().setName(Misc.myToString(obj));
+            getActor().setName(Misc.objString(obj));
         }
     }
     
@@ -53,7 +53,7 @@ class EntityNode extends UpdateNode {
     private SimpleTimer newTimer;
     
     public EntityNode(Entity entity, Skin skin) {
-        super(new Label(Misc.myToString(entity), skin, DebugEngineWindow.smallFont, Color.WHITE), entity);
+        super(new Label(Misc.objString(entity), skin, DebugEngineWindow.smallFont, Color.WHITE), entity);
     }
     
     public EntityNode(Entity entity, Skin skin, boolean markNew) {
@@ -118,7 +118,7 @@ class EntityNode extends UpdateNode {
         if (getObject() == null)
             return super.toString();
         
-        return Misc.myToString(getEntity()) + " [" + getEntity().getComponents().size() + "]";
+        return Misc.objString(getEntity()) + " [" + getEntity().getComponents().size() + "]";
     }
 }
 
@@ -128,7 +128,7 @@ class ReflectionNode extends UpdateNode {
     private SimpleTimer newTimer;
     
     public ReflectionNode(Object object) {
-        super(new Label(Misc.myToString(object), VisUI.getSkin(), DebugEngineWindow.smallFont, Color.WHITE), object);
+        super(new Label(Misc.objString(object), VisUI.getSkin(), DebugEngineWindow.smallFont, Color.WHITE), object);
         init();
     }
     
@@ -169,7 +169,7 @@ class ReflectionNode extends UpdateNode {
         if (getObject() == null)
             return super.toString();
         
-        return Misc.myToString(getObject());
+        return Misc.objString(getObject());
     }
 }
 

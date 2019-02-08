@@ -371,20 +371,20 @@ public class ControlSystem extends IteratingSystem {
 				// set focus to vehicle
 				if (characterEntity.getComponent(CameraFocusComponent.class) != null) {
 					vehicle.add(characterEntity.remove(CameraFocusComponent.class));
-					Gdx.app.log(this.getClass().getSimpleName(), "[CameraFocus] " + Misc.myToString(characterEntity) + " -> " + Misc.myToString(vehicle));
+					Gdx.app.log(this.getClass().getSimpleName(), "[CameraFocus] " + Misc.objString(characterEntity) + " -> " + Misc.objString(vehicle));
 				}
 				if (characterEntity.getComponent(ControllableComponent.class) != null) {
 					vehicle.add(characterEntity.remove(ControllableComponent.class));
-					Gdx.app.log(this.getClass().getSimpleName(), "[Controllable] " + Misc.myToString(characterEntity) + " -> " + Misc.myToString(vehicle));
+					Gdx.app.log(this.getClass().getSimpleName(), "[Controllable] " + Misc.objString(characterEntity) + " -> " + Misc.objString(vehicle));
 				}
 				// move control to vehicle (AI/player)
 				if (characterEntity.getComponent(AIComponent.class) != null) {
 					vehicle.add(characterEntity.remove(AIComponent.class));
-					Gdx.app.log(this.getClass().getSimpleName(), "[AI] " + Misc.myToString(characterEntity) + " -> " + Misc.myToString(vehicle));
+					Gdx.app.log(this.getClass().getSimpleName(), "[AI] " + Misc.objString(characterEntity) + " -> " + Misc.objString(vehicle));
 				}
 				if (characterEntity.getComponent(ControlFocusComponent.class) != null) {
 					vehicle.add(characterEntity.remove(ControlFocusComponent.class));
-					Gdx.app.log(this.getClass().getSimpleName(), "[ControlFocus] " + Misc.myToString(characterEntity) + " -> " + Misc.myToString(vehicle));
+					Gdx.app.log(this.getClass().getSimpleName(), "[ControlFocus] " + Misc.objString(characterEntity) + " -> " + Misc.objString(vehicle));
 				}
 
 
@@ -421,21 +421,21 @@ public class ControlSystem extends IteratingSystem {
 		//set focus to character
 		if (vehicleEntity.getComponent(CameraFocusComponent.class) != null) {
 			characterEntity.add(vehicleEntity.remove(CameraFocusComponent.class));
-			Gdx.app.log(this.getClass().getSimpleName(), "[CameraFocus] " + Misc.myToString(vehicleEntity) + " -> " + Misc.myToString(characterEntity));
+			Gdx.app.log(this.getClass().getSimpleName(), "[CameraFocus] " + Misc.objString(vehicleEntity) + " -> " + Misc.objString(characterEntity));
 		}
 		if (vehicleEntity.getComponent(ControlFocusComponent.class) != null) {
 			characterEntity.add(vehicleEntity.remove(ControlFocusComponent.class));
-			Gdx.app.log(this.getClass().getSimpleName(), "[ControlFocus] " + Misc.myToString(vehicleEntity) + " -> " + Misc.myToString(characterEntity));
+			Gdx.app.log(this.getClass().getSimpleName(), "[ControlFocus] " + Misc.objString(vehicleEntity) + " -> " + Misc.objString(characterEntity));
 		}
 
 		//move control to character (AI/player)
 		if (vehicleEntity.getComponent(AIComponent.class) != null) {
 			characterEntity.add(vehicleEntity.remove(AIComponent.class));
-			Gdx.app.log(this.getClass().getSimpleName(), "[AI] " + Misc.myToString(vehicleEntity) + " -> " + Misc.myToString(characterEntity));
+			Gdx.app.log(this.getClass().getSimpleName(), "[AI] " + Misc.objString(vehicleEntity) + " -> " + Misc.objString(characterEntity));
 		}
 		if (vehicleEntity.getComponent(ControllableComponent.class) != null) {
 			characterEntity.add(vehicleEntity.remove(ControllableComponent.class));
-			Gdx.app.log(this.getClass().getSimpleName(), "[Controllable] " + Misc.myToString(vehicleEntity) + " -> " + Misc.myToString(characterEntity));
+			Gdx.app.log(this.getClass().getSimpleName(), "[Controllable] " + Misc.objString(vehicleEntity) + " -> " + Misc.objString(characterEntity));
 		}
 
 		// remove references
@@ -465,7 +465,7 @@ public class ControlSystem extends IteratingSystem {
 		screenTrans.animInterpolation = Interpolation.pow2;
 		entity.add(screenTrans);
 
-		Gdx.app.log(this.getClass().getSimpleName(), "takeOffPlanet: " + Misc.myToString(entity));
+		Gdx.app.log(this.getClass().getSimpleName(), "takeOffPlanet: " + Misc.objString(entity));
 		//Misc.printEntity(entity);
 	}
 
@@ -487,7 +487,7 @@ public class ControlSystem extends IteratingSystem {
 				screenTrans.animInterpolation = Interpolation.sineIn;
 				entity.add(screenTrans);
 
-				Gdx.app.log(this.getClass().getSimpleName(), "landOnPlanet: " +  Misc.myToString(entity));
+				Gdx.app.log(this.getClass().getSimpleName(), "landOnPlanet: " +  Misc.objString(entity));
 				//Misc.printObjectFields(entity);
 				return;
 			}
