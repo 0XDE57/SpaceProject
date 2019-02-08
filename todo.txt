@@ -30,13 +30,14 @@
     [ ] clean up star save/load
     [x] fix thread generation to be limited (probably by core count) threadpool?
     [x] planets load from cache
-    [ ] prevent generating duplicate seed when one is in process of being created but not yet created (multiple threads trying to make the same data)
+    [?] prevent generating duplicate seed when one is in process of being created but not yet created (multiple threads trying to make the same data): !(o instanceof NoiseThread)
     [ ] clean up
-    [ ] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
+    [!] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
+        ! actually for now this is a convenient bug for testing
 
     [...] fix land/take-off
         [ ] transition feels unreliable
-            [ ] bug: landed on planet which had finished generating, but did't load (no map found)
+            [?] bug: landed on planet which had finished generating, but did't load (no map found): !(o instanceof NoiseThread)
                 see: WorldRenderingSystem.loadMap() (also rendering shouldn't be responsible for loading...)
             [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
                 see: ScreenTransitionSystem.syncLoadPosition()
@@ -102,30 +103,12 @@
 
 
 
-[ ] rotation impulse
+[...] rotation impulse
     I can collide polygons, but they don't account for rotation and point of contact...
-    [ ] DIY?
+    [...] DIY?
         http://www.randygaul.net/2013/03/27/game-physics-engine-part-1-impulse-resolution/
         https://stackoverflow.com/questions/11654990/2d-physics-engine-collision-response-rotation-of-objects
-        https://books.google.ca/books?id=ZcFHDwAAQBAJ&pg=PA66&lpg=PA66&dq=libgdx+MinimumTranslationVector
-        public boolean overlaps(BaseActor other, boolean resolve)
-            {
-                Polygon poly1 = this.getBoundingPolygon();
-                Polygon poly2 = other.getBoundingPolygon();
 
-                if ( !poly1.getBoundingRectangle().overlaps(poly2.getBoundingRectangle()) )
-                    return false;
-
-                MinimumTranslationVector mtv = new MinimumTranslationVector();
-                boolean polyOverlap = Intersector.overlapConvexPolygons(poly1, poly2, mtv);
-                if (polyOverlap && resolve)
-                {
-                    this.moveBy( mtv.normal.x * mtv.depth, mtv.normal.y * mtv.depth );
-                }
-                float significant = 0.5f;
-                return (polyOverlap && (mtv.depth > significant));
-        }
-        above can be used to get closer, but doesn't give us point of contact needed for rotation?
     [ ] move to box2d?
         seems overkill and would involve a lot of re-writing... but it will likely be better than anything i can write myself
         but i really dont want to rewrite a bunch of stuff...

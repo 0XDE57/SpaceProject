@@ -50,6 +50,10 @@ public class Misc {
 		//a shorter version to getSimpleName() and hashcode
 		return e.getClass().getSimpleName() + "@" + Integer.toHexString(e.hashCode());
 	}
+	
+	public static String vecString(Vector2 vec, int decimal) {
+		return MyMath.round(vec.x, decimal) + ", " + MyMath.round(vec.y, decimal);
+	}
 
 	public static void printObjectFields(Object o) {
 		if (o == null) {
@@ -120,5 +124,6 @@ public class Misc {
 				String.valueOf(seconds));
 		return b.toString();
 	}
-
+ 
+ 
 }

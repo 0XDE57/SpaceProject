@@ -8,6 +8,4 @@ public class BoundsComponent implements Component {
 	//The bounding box for collision detection. Hitbox.	
 	public Polygon poly;
 
-	public float density;
-
 }

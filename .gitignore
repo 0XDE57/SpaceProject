@@ -72,3 +72,4 @@ save/stars.txt
 local.properties
 android/debug/output.json
 android/debug/android-debug.apk
+*.java___jb_tmp___

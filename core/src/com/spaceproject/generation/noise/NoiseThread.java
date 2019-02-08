@@ -105,7 +105,7 @@ public class NoiseThread implements Runnable {
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof NoiseThread)) {
+		if (o instanceof NoiseThread) {
 			return ((NoiseThread)o).getSeed() == this.getSeed();
 		}
 

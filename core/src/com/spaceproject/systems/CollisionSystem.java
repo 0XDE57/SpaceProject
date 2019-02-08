@@ -6,172 +6,239 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.BoundsComponent;
-import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MissileComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.PolygonUtil;
 
+//based off of:
+//https://gamedevelopment.tutsplus.com/series/how-to-create-a-custom-physics-engine--gamedev-12715
 public class CollisionSystem extends EntitySystem {
 
 	private Engine engine;
 	
-	private ImmutableArray<Entity> missiles;
-	private ImmutableArray<Entity> vehicles;
-	private ImmutableArray<Entity> characters;
 	private ImmutableArray<Entity> collidables;
+	
+	Array<CollisionPair> collisionPairs = new Array<CollisionPair>();
+	CollisionPair collsionCache = new CollisionPair();
+	
+	private final Vector2 normal = new Vector2();
+	private final Vector2 impulse = new Vector2();
 	
 	@Override
 	public void addedToEngine(Engine engine) {
 		this.engine = engine;
-		
-		missiles = engine.getEntitiesFor(Family.all(MissileComponent.class, BoundsComponent.class).get());
-		vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class, BoundsComponent.class).get());
-		characters = engine.getEntitiesFor(Family.all(CharacterComponent.class, BoundsComponent.class).get());
 
-		//collidables = engine.getEntitiesFor(Family.all(BoundsComponent.class).get());
+		collidables = engine.getEntitiesFor(Family.all(BoundsComponent.class, TransformComponent.class).get());
 	}
-
-
 	
+
 	@Override
 	public void update(float delta) {
-		/*
-		for (Entity eA : collidables) {
-			for (Entity eB : collidables) {
-				if (eA.equals(eB)) continue;
+		collisionPairs.clear();
+		
+		for (int indexA = 0; indexA < collidables.size(); indexA++) {
+			for (int indexB = 0; indexB < collidables.size(); indexB++) {
+				if (indexA == indexB) continue; //don't compare against self
+				
+				//don't duplicate compares
+				collsionCache.a = indexA;
+				collsionCache.b = indexB;
+				if (collisionPairs.contains(collsionCache, false))
+					continue;
+				collisionPairs.add(new CollisionPair(collsionCache));
+				
 
+				Entity eA = collidables.get(indexA);
+				Entity eB = collidables.get(indexB);
 				BoundsComponent boundsA = Mappers.bounds.get(eA);
 				BoundsComponent boundsB = Mappers.bounds.get(eB);
-				if (overlaps(boundsA.poly, boundsB.poly)) {
-					//if missile & character: damage character, remove missile
-					//if missile & ship: damage ship
-					//if character & ship: resolve
-					//if ship & ship: resolve
-				}
+				
+				Intersector.MinimumTranslationVector mtv = overlaps(boundsA, boundsB);
+				if (mtv != null) {
+					onCollision(eA, eB);
 
+					/*
+					TransformComponent transformA = Mappers.transform.get(eA);
+					TransformComponent transformB = Mappers.transform.get(eB);
+					resolveCollision(transformA, transformB, mtv);
+					*/
+				}
+				
+			}
+		}
+		
+	}
+	
+	private void onCollision(Entity a, Entity b) {
+		//TODO: this should just fire an event for other systems to care about
+		//if missile & character: damage character, remove missile
+		//if missile & ship: damage ship, remove missile
+		//if AI: mark attacked
+		//if character & ship: resolve (do nothing here)
+		//if ship & ship: resolve (do nothing here)
+
+		MissileComponent mA = Mappers.missile.get(a);
+		MissileComponent mB = Mappers.missile.get(b);
+		HealthComponent hA = Mappers.health.get(a);
+		HealthComponent hB = Mappers.health.get(b);
+		
+		if (mA != null && hB != null) {
+			onAttacked(a, b, mA, hB);
+		}
+		if (mB != null && hA != null) {
+			onAttacked(b, a, mB, hA);
+		}
+		
+		/*
+		if (vehicles.contains(a, false)) {
+			if (missiles.contains(b, false)) {
+			
 			}
 		}*/
 
-		
-		for (Entity missle : missiles) {
-			BoundsComponent missBounds = Mappers.bounds.get(missle);
-			
-			//check for bullet collision against characters
-			for (Entity character : characters) {
-
-				BoundsComponent charBounds = Mappers.bounds.get(character);
-				if (missBounds.poly.getBoundingRectangle().overlaps(charBounds.poly.getBoundingRectangle())) {
-					if (Intersector.overlapConvexPolygons(missBounds.poly, missBounds.poly)) {						
-						
-						//do damage
-						HealthComponent health = Mappers.health.get(character);
-						MissileComponent misl = Mappers.missile.get(missle);
-						
-						//double chance = MathUtils.random(-misl.damage/10, misl.damage/10); // damage +/- 10%
-						health.health -= misl.damage;// + chance;
-						
-						//remove character (kill)
-						if (health.health <= 0) {
-							TextureComponent textureComponent = character.getComponent(TextureComponent.class);
-							if (textureComponent != null) {
-								textureComponent.texture.dispose();
-							}
-							Gdx.app.log(this.getClass().getSimpleName(), "[" + character + "] killed by: [" + misl.owner + "]");
-							engine.removeEntity(character);
-
-						}
-						
-						
-						AIComponent ai = Mappers.AI.get(character);
-						if (ai != null) {
-							ai.attackTarget = misl.owner;
-							ai.state = AIComponent.testState.attack;
-							Gdx.app.log(this.getClass().getSimpleName(),"AI attacked");
-						}
-						
-						
-						//remove missile
-						missle.getComponent(TextureComponent.class).texture.dispose();
-						engine.removeEntity(missle);
-					}
-				}
-			}
-			
-			
-			//check for bullet collision against ships
-			for (Entity vehicle : vehicles) {
-				//if missile not from self (don't shoot self)
-				if (Mappers.missile.get(missle).owner == vehicle) {
-					continue;
-				}
-
-				//check for shield
-				ShieldComponent shieldComp = Mappers.shield.get(vehicle);
-				if (shieldComp != null) {
-					if (shieldComp.active) {
-						Vector2 pos = Mappers.transform.get(vehicle).pos;
-						Circle c = new Circle(pos, shieldComp.radius);
-						if (PolygonUtil.overlaps(missBounds.poly, c)) {
-							vehicle.remove(ShieldComponent.class);
-							engine.removeEntity(missle);
-							continue;
-						}
-					}
-				}
-
-				BoundsComponent vehBounds = Mappers.bounds.get(vehicle);
-				if (missBounds.poly.getBoundingRectangle().overlaps(vehBounds.poly.getBoundingRectangle())) {
-					if (Intersector.overlapConvexPolygons(missBounds.poly, vehBounds.poly)) {
-
-						//do damage
-						HealthComponent health = Mappers.health.get(vehicle);
-						MissileComponent misl = Mappers.missile.get(missle);
-
-						//double chance = MathUtils.random(-misl.damage/10, misl.damage/10); // damage +/- 10%
-						health.health -= misl.damage;// + chance;
-
-						//remove ship (kill)
-						if (health.health <= 0) {
-							TextureComponent textureComponent = vehicle.getComponent(TextureComponent.class);
-							if (textureComponent != null) {
-								textureComponent.texture.dispose();
-							}
-							engine.removeEntity(vehicle);
-							Gdx.app.log(this.getClass().getSimpleName(),"[" + vehicle + "] killed by: [" + misl.owner + "]");
-						}
-
-						//remove missile
-						missle.getComponent(TextureComponent.class).texture.dispose();
-						engine.removeEntity(missle);
-					}
-				}
-			}
-
-		}
-	}
-
-	public boolean overlaps(Polygon polyA, Polygon polyB) {
-
-		if (!polyA.getBoundingRectangle().overlaps(polyB.getBoundingRectangle()))
-			return false;
-
-		Intersector.MinimumTranslationVector mtv = new Intersector.MinimumTranslationVector();
-		boolean overlap = Intersector.overlapConvexPolygons(polyA, polyB, mtv);
-		//if (overlap) {
-		//transform.pos.add( mtv.normal.x * mtv.depth, mtv.normal.y * mtv.depth );
-		//}
-		return overlap;
 	}
 	
+	
+	private void onAttacked(Entity missleEntity, Entity attackedEntity, MissileComponent missileComponent, HealthComponent healthComponent) {
+		//TODO: move this. collision/physics doesnt care about damage. a combat system should subscribe to this event.
+		if (missileComponent.owner == attackedEntity) {
+			return;
+		}
+		
+		//check for AI
+		AIComponent ai = Mappers.AI.get(attackedEntity);
+		if (ai != null) {
+			ai.attackTarget = missileComponent.owner;
+			ai.state = AIComponent.testState.attack;
+			Gdx.app.log(this.getClass().getSimpleName(),"AI [" + attackedEntity + "] attacked by: [" + missileComponent.owner + "]");
+		}
+		
+		
+		//check for shield
+		ShieldComponent shieldComp = Mappers.shield.get(attackedEntity);
+		if (shieldComp != null) {
+			if (shieldComp.active) {
+				Vector2 pos = Mappers.transform.get(attackedEntity).pos;
+				Circle c = new Circle(pos, shieldComp.radius);
+				BoundsComponent boundsComponent = Mappers.bounds.get(attackedEntity);
+				if (PolygonUtil.overlaps(boundsComponent.poly, c)) {
+					attackedEntity.remove(ShieldComponent.class);
+					engine.removeEntity(missleEntity);
+					return;
+				}
+			}
+		}
+		
+		
+		
+		//do damage
+		HealthComponent health = Mappers.health.get(attackedEntity);
+		health.health -= missileComponent.damage;
+		
+		//remove entity (kill)
+		if (health.health <= 0) {
+			TextureComponent textureComponent = attackedEntity.getComponent(TextureComponent.class);
+			if (textureComponent != null) {
+				textureComponent.texture.dispose();//TODO: this shouldn't care about textures: let an entity removed event clean this up
+			}
+			engine.removeEntity(attackedEntity);
+			Gdx.app.log(this.getClass().getSimpleName(),"[" + attackedEntity + "] killed by: [" + missileComponent.owner + "]");
+		}
+		
+		//remove missile
+		missleEntity.getComponent(TextureComponent.class).texture.dispose();
+		engine.removeEntity(missleEntity);
+	}
+	
+	
+	private void resolveCollision(TransformComponent transformA, TransformComponent transformB, Intersector.MinimumTranslationVector mtv) {
+		//normal = b - a
+		normal.set(transformA.velocity).sub(transformB.velocity);
+		float relativeVelocity = normal.dot(mtv.normal);
+		
+		//don't resolve if velocities are separating (object moving away from each other)
+		if (relativeVelocity > 0) return;
+		DebugUISystem.addTempVec(transformA.pos, mtv.normal, Color.WHITE);
+		//DebugUISystem.addTempText(Misc.vecString(normal, 1), transformA.pos.x, transformB.pos.y, true);
+		
+		//calculate impulse
+		
+		//inverse mass, avoid division of 0 mass
+		float invMassA = transformA.mass == 0 ? 0 : 1 / transformA.mass;
+		float invMassB = transformB.mass == 0 ? 0 : 1 / transformB.mass;
+		
+		float restitution = Math.min(transformA.restitution, transformB.restitution);
+		
+		float impulseScalar = -(1 + restitution) * relativeVelocity;
+		impulseScalar /= invMassA + invMassB;
+		
+		
+		//apply impulse
+		impulse.set(invMassA * impulseScalar, invMassB * impulseScalar);
+		
+		
+		transformA.velocity.add(invMassA * impulse.x, invMassA * impulse.y);
+		transformB.velocity.sub(invMassB * impulse.x, invMassB * impulse.y);
+		
+		DebugUISystem.addTempVec(transformA.pos, new Vector2(invMassA * impulse.x, invMassA * impulse.y), Color.BLUE);
+		DebugUISystem.addTempVec(transformB.pos, new Vector2(invMassB * impulse.x, invMassB * impulse.y), Color.RED);
+		
+		//transformA.pos.add( mtv.normal.x * mtv.depth, mtv.normal.y * mtv.depth);
+		//transformB.pos.sub( mtv.normal.x * mtv.depth, mtv.normal.y * mtv.depth);
+		
+		//keep objects outside of each other
+		float percent = 0.2f; // usually 20% to 80%
+		float slop = 0.01f; // usually 0.01 to 0.1
+		Vector2 c = mtv.normal.scl(Math.max(mtv.depth - slop, 0) / (invMassA + invMassB) * percent);
+		DebugUISystem.addTempVec(transformA.pos, new Vector2(invMassA * c.x, invMassA * c.y), Color.YELLOW);
+		DebugUISystem.addTempVec(transformB.pos, new Vector2(invMassB * c.x, invMassB * c.y), Color.GREEN);
+		transformA.pos.add(invMassA * c.x, invMassA * c.y);
+		transformB.pos.sub(invMassB * c.x, invMassB * c.y);
+		
+	}
+	
+	public Intersector.MinimumTranslationVector overlaps(BoundsComponent boundsA, BoundsComponent boundsB) {
+		Polygon polyA = boundsA.poly;
+		Polygon polyB = boundsB.poly;
+		
+		if (!polyA.getBoundingRectangle().overlaps(polyB.getBoundingRectangle()))
+			return null;
+
+		Intersector.MinimumTranslationVector mtv = new Intersector.MinimumTranslationVector();
+		if (Intersector.overlapConvexPolygons(polyA, polyB, mtv))
+			return  mtv;
+		
+		return null;
+	}
+	
+}
+
+class CollisionPair {
+	public int a;
+	public int b;
+	
+	CollisionPair() {}
+	
+	CollisionPair(CollisionPair copy) {
+		this.a = copy.a;
+		this.b = copy.b;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		CollisionPair other = (CollisionPair)o;
+		return (this.a == other.a && this.b == other.b) || (this.a == other.b && this.b == other.a);
+	}
 }

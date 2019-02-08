@@ -70,6 +70,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	DelaunayTriangulator tri = new DelaunayTriangulator();
 
 	public static ArrayList<TempText> tmpText = new ArrayList<TempText>();
+	public static ArrayList<DebugVec> tmpVec = new ArrayList<DebugVec>();
 	
 	//config
 	private boolean drawDebugUI = true;
@@ -182,6 +183,8 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		if (drawBounds) drawBounds(drawBoundsPoly);
 		
 		if (drawMousePos) drawMouseLine();
+		
+		drawTempVectors();
 		
 		shape.end();
 		
@@ -528,7 +531,26 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		shape.line(worldPos.x+crossHairSize, worldPos.y, worldPos.x-crossHairSize, worldPos.y);
 	}
 
-
+	public static void addTempVec(Vector2 pos, Vector2 vec, Color color) {
+		tmpVec.add(new DebugVec(pos, vec, color));
+	}
+	
+	private void drawTempVectors() {
+		for (DebugVec debugVec : tmpVec) {
+			
+			//calculate vector angle and length
+			float scale = 20; //how long to make vectors (higher number is longer line)
+			float length = (float) Math.log(debugVec.vec.len()) * scale;
+			float angle = debugVec.vec.angle() * MathUtils.degreesToRadians;
+			float pointX = debugVec.pos.x + (length * MathUtils.cos(angle));
+			float pointY = debugVec.pos.y + (length * MathUtils.sin(angle));
+			
+			//draw line to represent movement
+			shape.line(debugVec.pos.x, debugVec.pos.y, pointX, pointY, debugVec.color, debugVec.color);
+		}
+		tmpVec.clear();
+	}
+	
 	public static void addTempText(String text, float x, float y, boolean project) {
 		addTempText(text, (int)x, (int)y, project);
 	}
@@ -583,4 +605,16 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	}
 	
 	
+}
+
+class DebugVec {
+	Vector2 pos;
+	Vector2 vec;
+	Color color;
+	
+	DebugVec(Vector2 pos, Vector2 vec, Color color) {
+		this.pos = pos;
+		this.vec = vec;
+		this.color = color;
+	}
 }
