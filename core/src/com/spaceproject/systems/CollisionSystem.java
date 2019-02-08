@@ -143,8 +143,10 @@ public class CollisionSystem extends EntitySystem {
 		if (healthComponent.health <= 0) {
 			TextureComponent textureComponent = attackedEntity.getComponent(TextureComponent.class);
 			if (textureComponent != null) {
-				textureComponent.texture.dispose();//TODO: this shouldn't care about textures: let an entity removed event clean this up
+				textureComponent.texture.dispose();//TODO: this shouldn't care about textures: let an entity removed event clean this up, this also forgets about model batch
 			}
+			
+			//TODO: maybe add RemoveComponent which will signal that it is marked for removal, which will be done at the end of an engine step
 			engine.removeEntity(attackedEntity);
 			Gdx.app.log(this.getClass().getSimpleName(),"[" + Misc.objString(attackedEntity) + "] killed by: [" + Misc.objString(damageComponent.source) + "]");
 		}
@@ -156,6 +158,8 @@ public class CollisionSystem extends EntitySystem {
 	
 	
 	private void resolveCollision(TransformComponent transformA, TransformComponent transformB, Intersector.MinimumTranslationVector mtv) {
+		//TODO: this is very broken and primitive
+		
 		//normal = b - a
 		normal.set(transformA.velocity).sub(transformB.velocity);
 		float relativeVelocity = normal.dot(mtv.normal);
