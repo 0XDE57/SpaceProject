@@ -15,7 +15,7 @@ import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.BoundsComponent;
 import com.spaceproject.components.HealthComponent;
-import com.spaceproject.components.MissileComponent;
+import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -90,8 +90,8 @@ public class CollisionSystem extends EntitySystem {
 		//if character & ship: resolve (do nothing here)
 		//if ship & ship: resolve (do nothing here)
 
-		MissileComponent mA = Mappers.missile.get(a);
-		MissileComponent mB = Mappers.missile.get(b);
+		DamageComponent mA = Mappers.missile.get(a);
+		DamageComponent mB = Mappers.missile.get(b);
 		HealthComponent hA = Mappers.health.get(a);
 		HealthComponent hB = Mappers.health.get(b);
 		
@@ -101,29 +101,22 @@ public class CollisionSystem extends EntitySystem {
 		if (mB != null && hA != null) {
 			onAttacked(b, a, mB, hA);
 		}
-		
-		/*
-		if (vehicles.contains(a, false)) {
-			if (missiles.contains(b, false)) {
-			
-			}
-		}*/
 
 	}
 	
 	
-	private void onAttacked(Entity missleEntity, Entity attackedEntity, MissileComponent missileComponent, HealthComponent healthComponent) {
+	private void onAttacked(Entity damageEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent healthComponent) {
 		//TODO: move this. collision/physics doesnt care about damage. a combat system should subscribe to this event.
-		if (missileComponent.owner == attackedEntity) {
+		if (damageComponent.source == attackedEntity) {
 			return;
 		}
 		
 		//check for AI
 		AIComponent ai = Mappers.AI.get(attackedEntity);
 		if (ai != null) {
-			ai.attackTarget = missileComponent.owner;
+			ai.attackTarget = damageComponent.source;
 			ai.state = AIComponent.testState.attack;
-			Gdx.app.log(this.getClass().getSimpleName(),"AI [" + Misc.objString(attackedEntity) + "] attacked by: [" + Misc.objString(missileComponent.owner) + "]");
+			Gdx.app.log(this.getClass().getSimpleName(),"AI [" + Misc.objString(attackedEntity) + "] attacked by: [" + Misc.objString(damageComponent.source) + "]");
 		}
 		
 		
@@ -136,31 +129,29 @@ public class CollisionSystem extends EntitySystem {
 				BoundsComponent boundsComponent = Mappers.bounds.get(attackedEntity);
 				if (PolygonUtil.overlaps(boundsComponent.poly, c)) {
 					attackedEntity.remove(ShieldComponent.class);
-					engine.removeEntity(missleEntity);
+					engine.removeEntity(damageEntity);
 					return;
 				}
 			}
 		}
 		
 		
-		
 		//do damage
-		HealthComponent health = Mappers.health.get(attackedEntity);
-		health.health -= missileComponent.damage;
+		healthComponent.health -= damageComponent.damage;
 		
 		//remove entity (kill)
-		if (health.health <= 0) {
+		if (healthComponent.health <= 0) {
 			TextureComponent textureComponent = attackedEntity.getComponent(TextureComponent.class);
 			if (textureComponent != null) {
 				textureComponent.texture.dispose();//TODO: this shouldn't care about textures: let an entity removed event clean this up
 			}
 			engine.removeEntity(attackedEntity);
-			Gdx.app.log(this.getClass().getSimpleName(),"[" + Misc.objString(attackedEntity) + "] killed by: [" + Misc.objString(missileComponent.owner) + "]");
+			Gdx.app.log(this.getClass().getSimpleName(),"[" + Misc.objString(attackedEntity) + "] killed by: [" + Misc.objString(damageComponent.source) + "]");
 		}
 		
 		//remove missile
-		missleEntity.getComponent(TextureComponent.class).texture.dispose();
-		engine.removeEntity(missleEntity);
+		damageEntity.getComponent(TextureComponent.class).texture.dispose();
+		engine.removeEntity(damageEntity);
 	}
 	
 	

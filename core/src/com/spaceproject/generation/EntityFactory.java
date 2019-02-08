@@ -23,7 +23,7 @@ import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.GrowCannonComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
-import com.spaceproject.components.MissileComponent;
+import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.SeedComponent;
@@ -603,9 +603,9 @@ public class EntityFactory {
 		expire.time = 5;//in seconds ~approx
 
 		//missile damage
-		MissileComponent missile = new MissileComponent();
+		DamageComponent missile = new DamageComponent();
 		missile.damage = cannon.damage;
-		missile.owner = owner;
+		missile.source = owner;
 
 
 		entity.add(missile);

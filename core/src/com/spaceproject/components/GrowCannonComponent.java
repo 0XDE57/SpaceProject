@@ -7,7 +7,7 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class GrowCannonComponent implements Component {
 
-    public Entity missle;
+    public Entity projectile;
 
     public float baseDamage;
 

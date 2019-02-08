@@ -24,7 +24,7 @@ import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DodgeComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.GrowCannonComponent;
-import com.spaceproject.components.MissileComponent;
+import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.ShieldComponent;
@@ -520,21 +520,21 @@ public class ControlSystem extends IteratingSystem {
 			//update position to be in front of ship
 			Rectangle bounds = entity.getComponent(BoundsComponent.class).poly.getBoundingRectangle();
 			float offset = Math.max(bounds.getWidth(),bounds.getHeight()) + growCannon.maxSize;
-			TransformComponent transformComponent = growCannon.missle.getComponent(TransformComponent.class);
+			TransformComponent transformComponent = growCannon.projectile.getComponent(TransformComponent.class);
 			transformComponent.pos.set(MyMath.Vector(transform.rotation, offset).add(transform.pos));
 			transformComponent.rotation = transform.rotation;
 
 			//accumulate size
 			growCannon.size = growCannon.growRateTimer.ratio() * growCannon.maxSize;
 			growCannon.size = MathUtils.clamp(growCannon.size, 1, growCannon.maxSize);
-			growCannon.missle.getComponent(TextureComponent.class).scale = growCannon.size * SpaceProject.entitycfg.renderScale;
-			growCannon.missle.getComponent(BoundsComponent.class).poly.setScale(growCannon.size, growCannon.size);
+			growCannon.projectile.getComponent(TextureComponent.class).scale = growCannon.size * SpaceProject.entitycfg.renderScale;
+			growCannon.projectile.getComponent(BoundsComponent.class).poly.setScale(growCannon.size, growCannon.size);
 
 			//damage modifier
-			MissileComponent missileComponent = growCannon.missle.getComponent(MissileComponent.class);
-			missileComponent.damage = growCannon.size * growCannon.baseDamage;
+			DamageComponent damageComponent = growCannon.projectile.getComponent(DamageComponent.class);
+			damageComponent.damage = growCannon.size * growCannon.baseDamage;
 			if (growCannon.size == growCannon.maxSize) {
-				missileComponent.damage *= 1.5;//bonus damage for maxed out
+				damageComponent.damage *= 1.5;//bonus damage for maxed out
 			}
 
 			//release
@@ -543,22 +543,22 @@ public class ControlSystem extends IteratingSystem {
 				transformComponent.velocity.set(vec);
 				ExpireComponent expire = new ExpireComponent();
 				expire.time = 5;
-				growCannon.missle.add(expire);
+				growCannon.projectile.add(expire);
 
 				growCannon.isCharging = false;
-				growCannon.missle = null;
+				growCannon.projectile = null;
 			}
 		} else {
 			if (control.attack) {
 				CannonComponent test = new CannonComponent();
 				test.size = 1;
-				growCannon.missle = EntityFactory.createMissile(transform, new Vector2(), test, entity);
-				growCannon.missle.remove(ExpireComponent.class);
-				growCannon.missle.getComponent(MissileComponent.class).owner = entity;
+				growCannon.projectile = EntityFactory.createMissile(transform, new Vector2(), test, entity);
+				growCannon.projectile.remove(ExpireComponent.class);
+				growCannon.projectile.getComponent(DamageComponent.class).source = entity;
 				growCannon.isCharging = true;
 				growCannon.growRateTimer.reset();
 
-				getEngine().addEntity(growCannon.missle);
+				getEngine().addEntity(growCannon.projectile);
 			}
 		}
 

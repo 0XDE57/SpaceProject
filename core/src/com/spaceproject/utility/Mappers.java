@@ -12,7 +12,7 @@ import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.GrowCannonComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
-import com.spaceproject.components.MissileComponent;
+import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
@@ -36,7 +36,7 @@ public class Mappers {
 	public static final ComponentMapper<ExpireComponent> expire = ComponentMapper.getFor(ExpireComponent.class);
 	public static final ComponentMapper<HealthComponent> health = ComponentMapper.getFor(HealthComponent.class);
 	public static final ComponentMapper<MapComponent> map = ComponentMapper.getFor(MapComponent.class);
-	public static final ComponentMapper<MissileComponent> missile = ComponentMapper.getFor(MissileComponent.class);
+	public static final ComponentMapper<DamageComponent> missile = ComponentMapper.getFor(DamageComponent.class);
 	public static final ComponentMapper<OrbitComponent> orbit = ComponentMapper.getFor(OrbitComponent.class);
 	public static final ComponentMapper<PlanetComponent> planet = ComponentMapper.getFor(PlanetComponent.class);
 	public static final ComponentMapper<ScreenTransitionComponent> screenTrans = ComponentMapper.getFor(ScreenTransitionComponent.class);
