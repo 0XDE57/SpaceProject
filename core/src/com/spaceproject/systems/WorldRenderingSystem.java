@@ -13,7 +13,6 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
 import com.spaceproject.components.SeedComponent;
@@ -29,7 +28,7 @@ import com.spaceproject.utility.Mappers;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class WorldRenderingSystem extends IteratingSystem implements Disposable {
+public class WorldRenderingSystem extends IteratingSystem {
 		
 	// rendering
 	private OrthographicCamera cam;
@@ -244,16 +243,6 @@ public class WorldRenderingSystem extends IteratingSystem implements Disposable 
 			renderQueue.add(entity);
 		} else {
 			renderQueue3D.add(entity);
-		}
-	}
-
-	@Override
-	public void dispose() {
-		//dispose of all textures
-		for (Entity entity : renderQueue) {
-			TextureComponent tex = Mappers.texture.get(entity);	
-			if (tex.texture != null)
-				tex.texture.dispose();
 		}
 	}
 

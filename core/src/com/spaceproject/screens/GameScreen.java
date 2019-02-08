@@ -16,6 +16,7 @@ import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
+import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
@@ -414,27 +415,31 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		Gdx.app.log(this.getClass().getSimpleName(), "Disposing: " + this.getClass().getSimpleName());
 
 		// clean up after self
-		// dispose of spritebatches and textures
 		for (EntitySystem sys : engine.getSystems()) {
 			if (sys instanceof Disposable)
 				((Disposable) sys).dispose();
 		}
 
-		for (Entity ents : engine.getEntitiesFor(Family.all(TextureComponent.class).get())) {
+		for (Entity ents : engine.getEntities()) {
 			TextureComponent tex = ents.getComponent(TextureComponent.class);
-			if (tex != null)
+			if (tex != null) {
 				tex.texture.dispose();
+			}
+			
+			Sprite3DComponent s3d = Mappers.sprite3D.get(ents);
+			if (s3d != null) {
+				s3d.renderable.dispose();
+			}
 		}
 
 		engine.removeAllEntities();
 		engine = null;
-
-		//super.dispose();
+		
 	}
 
 	@Override
 	public void hide() {
-		// dispose();
+		dispose();
 	}
 
 	@Override

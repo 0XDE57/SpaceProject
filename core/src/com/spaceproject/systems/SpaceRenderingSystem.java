@@ -14,7 +14,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceBackgroundTile;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.Sprite3DComponent;
@@ -26,7 +25,7 @@ import com.spaceproject.utility.Mappers;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class SpaceRenderingSystem extends IteratingSystem implements Disposable {
+public class SpaceRenderingSystem extends IteratingSystem  {
 
 	//rendering
 	private OrthographicCamera cam;
@@ -267,33 +266,6 @@ public class SpaceRenderingSystem extends IteratingSystem implements Disposable 
 			renderQueue3D.add(entity);
 		}
 
-	}
-	
-	@Override
-	public void dispose() {
-		
-		//dispose of all textures
-		for (Entity entity : renderQueue) {
-			TextureComponent tex = Mappers.texture.get(entity);	
-			if (tex.texture != null)
-				tex.texture.dispose();
-
-			Sprite3DComponent s3d = Mappers.sprite3D.get(entity);
-			if (s3d != null) {
-				s3d.renderable.dispose();
-			}
-		}
-		
-		for (SpaceBackgroundTile tile : SpaceParallaxSystem.getTiles()) {
-			tile.tex.dispose();
-		}
-		
-		//batch.dispose();
-		/*
-		 * EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x0000000054554370,
-		 * pid=5604, tid=2364 
-		 * Problematic frame: C [atio6axx.dll+0x3c4370]
-		 */
 	}
 
 }
