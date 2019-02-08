@@ -20,6 +20,7 @@ import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.PolygonUtil;
 
 //based off of:
@@ -69,11 +70,11 @@ public class CollisionSystem extends EntitySystem {
 				if (mtv != null) {
 					onCollision(eA, eB);
 
-					/*
+					
 					TransformComponent transformA = Mappers.transform.get(eA);
 					TransformComponent transformB = Mappers.transform.get(eB);
 					resolveCollision(transformA, transformB, mtv);
-					*/
+					
 				}
 				
 			}
@@ -122,7 +123,7 @@ public class CollisionSystem extends EntitySystem {
 		if (ai != null) {
 			ai.attackTarget = missileComponent.owner;
 			ai.state = AIComponent.testState.attack;
-			Gdx.app.log(this.getClass().getSimpleName(),"AI [" + attackedEntity + "] attacked by: [" + missileComponent.owner + "]");
+			Gdx.app.log(this.getClass().getSimpleName(),"AI [" + Misc.objString(attackedEntity) + "] attacked by: [" + Misc.objString(missileComponent.owner) + "]");
 		}
 		
 		
@@ -154,7 +155,7 @@ public class CollisionSystem extends EntitySystem {
 				textureComponent.texture.dispose();//TODO: this shouldn't care about textures: let an entity removed event clean this up
 			}
 			engine.removeEntity(attackedEntity);
-			Gdx.app.log(this.getClass().getSimpleName(),"[" + attackedEntity + "] killed by: [" + missileComponent.owner + "]");
+			Gdx.app.log(this.getClass().getSimpleName(),"[" + Misc.objString(attackedEntity) + "] killed by: [" + Misc.objString(missileComponent.owner) + "]");
 		}
 		
 		//remove missile
