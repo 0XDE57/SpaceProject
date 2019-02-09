@@ -16,8 +16,10 @@ import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AstronomicalComponent;
 import com.spaceproject.components.BarycenterComponent;
 import com.spaceproject.components.BoundsComponent;
+import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
+import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.GrowCannonComponent;
@@ -80,12 +82,22 @@ public class EntityFactory {
 
 		return entity;
 	}
+	
+	public static Entity createPlayerShip(int x, int y) {
+		Entity player = createCharacter(x, y);
+		Entity playerShip = createShip3(x, y, 0, player);
+		playerShip.add(new CameraFocusComponent());
+		playerShip.add(new ControlFocusComponent());
+		return playerShip;
+	}
 
 	public static Entity createCharacterAI(float x, float y) {
 		Entity character = createCharacter(x, y);
 		character.add(new AIComponent());
 		return character;
 	}
+	
+	//public static Entity
 	//endregion
 
 

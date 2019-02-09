@@ -1,6 +1,6 @@
 ---ENGINE---
-[ ] Architecture
-    [ ] consider refactoring space and world view to be simply load and unload systems as needed instead of wiping out everything
+[...] Architecture
+    [...] consider refactoring space and world view to be simply load and unload systems as needed instead of wiping out everything
         load base systems, then load/unload world and space systems on the fly. use priority to keep order
         it would probably fix some of the screen transition issues and simplify it.
         - pros:
@@ -21,23 +21,29 @@
             * might simplify some things
         - cons:
             * may introduce other issues
-            * more responsibilty for one class...
-        alternatively, split up renderiny type into difference systems? not sure yet
+            * more responsibility for one class...
+        alternatively, split up rendering type into difference systems? not sure yet
         what happens in refactoring space and world will affect this. need to think more about it
+
+[ ] physics and movement arch
+    [ ] combine BoundsSystem & CollisionSystem (doesn't make sense to be separate)
+    [ ] extract physics out of CollisionSystem (collision should notify, physics should apply impulse)
+    [ ] extract damage out of CollisionSystem (collision should notify, a CombatSystem(?) will pickup)
+    [ ] combine physics into MovementSystem (listen for collide event)
 
 [...] fix texture / map loading
     [x] seed based load instead of position
     [ ] clean up star save/load
     [x] fix thread generation to be limited (probably by core count) threadpool?
     [x] planets load from cache
-    [?] prevent generating duplicate seed when one is in process of being created but not yet created (multiple threads trying to make the same data): !(o instanceof NoiseThread)
+    [ ] prevent generating duplicate seed when one is in process of being created but not yet created (multiple threads trying to make the same data)
     [ ] clean up
     [!] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
         ! actually for now this is a convenient bug for testing
 
     [...] fix land/take-off
         [ ] transition feels unreliable
-            [?] bug: landed on planet which had finished generating, but did't load (no map found): !(o instanceof NoiseThread)
+            [ ] bug: landed on planet which had finished generating, but did't load (no map found)
                 see: WorldRenderingSystem.loadMap() (also rendering shouldn't be responsible for loading...)
             [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
                 see: ScreenTransitionSystem.syncLoadPosition()
@@ -88,7 +94,7 @@
 [...] rendering system
     [...] fix stuff moving ahead of camera
         [x] ship - fixed
-        [ ] player - still jumps ahead of camera
+        [ ] player - still jumps ahead of camera. (this may be caused by adding directly to pos instead of vel/accel?)
         [x] shaperenderer - shield moves ahead of camera
         [ ] projectiles from ship - moves ahead of ship
     [...] fix render priority (z-order)

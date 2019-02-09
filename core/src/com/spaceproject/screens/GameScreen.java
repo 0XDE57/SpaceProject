@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
-import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
@@ -19,6 +18,7 @@ import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.config.SystemPriorityConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.Universe;
 import com.spaceproject.generation.noise.NoiseBuffer;
@@ -56,7 +56,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 	public static long gameTimeCurrent, gameTimeStart;
 
 
-	public static boolean inSpace;
+	public static boolean inSpace;//todo private, getter for external access
 	private static Entity currentPlanet = null;
 	private ImmutableArray<Entity> transitioningEntities;
 
@@ -96,7 +96,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 
 		// load test default values
-		Entity playerTESTSHIP = createPlayerShip();
+		Entity playerTESTSHIP = EntityFactory.createPlayerShip(0, 0);
 		Entity planet = null;
 
 		if (!inSpace && planet == null) {
@@ -113,13 +113,113 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 	}
 
-	private Entity createPlayerShip() {
-		Entity player = EntityFactory.createCharacter(0, 0);
-		Entity playerTESTSHIP = EntityFactory.createShip3(0, 0, 0, player);
-		playerTESTSHIP.add(new CameraFocusComponent());
-		playerTESTSHIP.add(new ControlFocusComponent());
-		return playerTESTSHIP;
+	//region system loading
+	private void loadBaseSystems() {
+		//systems that are common between space and world
+		//eg: input and movement
+		
+		SystemPriorityConfig cfg = SpaceProject.priorityConfig;
+		//or something like this?
+		//Config() { "DesktopInputSystem" = 1; "MovementSystem" = 5; }
+		//
+		//add systems normally
+		//for each system: system.priority = config.get(system.getClass().getSimpleName())
+		
+		if (SpaceProject.isMobile()) {
+			MobileInputSystem mobileInputSystem = new MobileInputSystem();
+			mobileInputSystem.priority = cfg.mobileInputSystem;
+			engine.addSystem(mobileInputSystem);
+		} else {
+			DesktopInputSystem desktopInputSystem = new DesktopInputSystem();
+			desktopInputSystem.priority = cfg.desktopInputSystem;
+			inputMultiplexer.addProcessor(desktopInputSystem);
+			engine.addSystem(desktopInputSystem);
+		}
+		
+		AISystem aiSystem = new AISystem();
+		aiSystem.priority = cfg.aiSystem;
+		engine.addSystem(aiSystem);
+		
+		
+		ControlSystem controlSystem = new ControlSystem();
+		controlSystem.priority = cfg.controlSystem;
+		engine.addSystem(controlSystem);
+		
+		//movement
+		MovementSystem movementSystem = new MovementSystem();
+		movementSystem.priority = cfg.movementSystem;
+		engine.addSystem(movementSystem);
+		
+		BoundsSystem boundsSystem = new BoundsSystem();
+		boundsSystem.priority = cfg.boundsSystem;
+		engine.addSystem(boundsSystem);
+		
+		CollisionSystem collisionSystem = new CollisionSystem();
+		collisionSystem.priority = cfg.collisionSystem;
+		engine.addSystem(collisionSystem);
+		
+		
+		//rendering
+		CameraSystem cameraSystem = new CameraSystem();
+		cameraSystem.priority = cfg.cameraSystem;
+		engine.addSystem(cameraSystem);
+		
+		HUDSystem hudSystem = new HUDSystem();
+		hudSystem.priority = cfg.hudSystem;
+		inputMultiplexer.addProcessor(0, hudSystem.getStage());
+		engine.addSystem(hudSystem);
+		
+		ExpireSystem expireSystem = new ExpireSystem(1);
+		expireSystem.priority = cfg.expireSystem;
+		engine.addSystem(expireSystem);
+		
+		ScreenTransitionSystem screenTransitionSystem = new ScreenTransitionSystem();
+		screenTransitionSystem.priority = cfg.screenTransitionSystem;
+		engine.addSystem(screenTransitionSystem);
+		
+		
+		DebugUISystem debugUISystem = new DebugUISystem();
+		debugUISystem.priority = cfg.debugUISystem;
+		inputMultiplexer.addProcessor(0, debugUISystem.getStage());
+		engine.addSystem(debugUISystem);
 	}
+	
+	private void loadSpaceSystems() {
+		//systems that are specific to space
+		//eg: space renderer and orbit
+		
+		SystemPriorityConfig cfg = SpaceProject.priorityConfig;
+		
+		OrbitSystem orbitSystem = new OrbitSystem();
+		orbitSystem.priority = cfg.orbitSystem;
+		engine.addSystem(orbitSystem);
+		
+		SpaceRenderingSystem spaceRenderingSystem = new SpaceRenderingSystem();
+		spaceRenderingSystem.priority = cfg.spaceRenderingSystem;
+		engine.addSystem(spaceRenderingSystem);
+		
+		SpaceLoadingSystem spaceLoadingSystem = new SpaceLoadingSystem();
+		spaceLoadingSystem.priority = cfg.spaceRenderingSystem;
+		engine.addSystem(spaceLoadingSystem);
+		SpaceParallaxSystem spaceParallaxSystem = new SpaceParallaxSystem();
+		spaceParallaxSystem.priority = cfg.spaceParallaxSystem;
+		engine.addSystem(spaceParallaxSystem);
+	}
+	
+	private void loadWorldSystems(Entity planet) {
+		//systems that are specific to world
+		//eg world renderer and wrapping
+		
+		Gdx.app.log(this.getClass().getSimpleName(), "==========WORLD==========");
+		inSpace = false;
+		currentPlanet = planet;
+		
+		int mapSize = planet.getComponent(PlanetComponent.class).mapSize;
+		engine.addSystem(new WorldWrapSystem(mapSize));
+		
+		engine.addSystem(new WorldRenderingSystem(planet));
+	}
+	
 
 	private void initSpace(Entity transitioningEntity) {
 		Gdx.app.log(this.getClass().getSimpleName(), "==========SPACE==========");
@@ -209,6 +309,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		engine.addEntity(test3DEntity);
 		*/
 	}
+	//endregion
 	
 	
 	private void initWorld(Entity transitioningEntity, Entity planet) {

@@ -88,7 +88,7 @@ public class ControlSystem extends IteratingSystem {
 		
 		if (control.moveForward) {
 			float walkSpeed = character.walkSpeed * control.movementMultiplier * delta;
-			transform.pos.add(MyMath.Vector(transform.rotation, walkSpeed));
+			transform.pos.add(MyMath.Vector(transform.rotation, walkSpeed));//TODO: should use accel/vel with friction instead of pos directly
 		}
 		
 		if (control.changeVehicle) {			
@@ -417,6 +417,7 @@ public class ControlSystem extends IteratingSystem {
 		Vector2 vehiclePosition = Mappers.transform.get(vehicleEntity).pos;
 		Vector2 offset = MyMath.Vector(MathUtils.random(360) * MathUtils.degRad, 50);//set player next to vehicle
 		Mappers.transform.get(characterEntity).pos.set(vehiclePosition).add(offset);
+		Mappers.transform.get(characterEntity).velocity.set(0, 0);
 
 		//set focus to character
 		if (vehicleEntity.getComponent(CameraFocusComponent.class) != null) {

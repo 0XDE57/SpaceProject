@@ -10,6 +10,7 @@ import com.spaceproject.utility.Mappers;
 
 public class BoundsSystem extends IteratingSystem {
 	
+	//TODO: probably combine this with collision system, why is this separate, its part of the same thing
 	public BoundsSystem() {
 		super(Family.all(BoundsComponent.class, TransformComponent.class).get());
 		

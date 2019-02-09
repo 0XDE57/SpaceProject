@@ -39,10 +39,11 @@ import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.DebugEngineWindow;
+import com.spaceproject.utility.DebugText;
+import com.spaceproject.utility.DebugVec;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.TempText;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	private Array<Entity> objects;
 	DelaunayTriangulator tri = new DelaunayTriangulator();
 
-	public static ArrayList<TempText> tmpText = new ArrayList<TempText>();
+	public static ArrayList<DebugText> debugTexts = new ArrayList<DebugText>();
 	public static ArrayList<DebugVec> tmpVec = new ArrayList<DebugVec>();
 	
 	//config
@@ -208,7 +209,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		//draw components on entity
 		if (drawComponentList) drawComponentList();
 
-		drawTempText(batch);
+		drawDebugText(batch);
 
 		batch.end();	
 		
@@ -218,6 +219,8 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 
 
 	private void updateKeyToggles() {
+		//todo: kill this off and / or make relevant ui options
+		
 		//toggle debug
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleDebug)) {
 			drawDebugUI = !drawDebugUI;
@@ -290,6 +293,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			
 			//draw line to represent movement
 			shape.line(t.pos.x, t.pos.y, pointX, pointY, Color.RED, Color.MAGENTA);
+			//todo: forward this to debug vec
 		}
 	}
 	
@@ -367,6 +371,8 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 
 	/** Draw frames, entity count, position and memory info. */
 	private void drawFPS(boolean drawExtaInfo) {
+		//todo: forward this to debug text
+		
 		int x = 15;
 		int y = Gdx.graphics.getHeight() - 15;
 		fontLarge.setColor(1,1,1,1);
@@ -434,6 +440,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		int i = 0;
 		for (Entity entity : engine.getEntities()) {
 			fontSmall.draw(batch, Integer.toHexString(entity.hashCode()), x, y+fontHeight*i++);
+			//todo: forward this to debug text
 		}
 	}
 	
@@ -508,6 +515,9 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			Vector3 screenPos = cam.project(new Vector3(t.pos.cpy(),2));
 			fontSmall.draw(batch, Integer.toHexString(entity.hashCode()) , screenPos.x, screenPos.y-15);
 			fontSmall.draw(batch, info, screenPos.x, screenPos.y);
+			
+			//todo split this into pos and hashcode, i want a show hashcode only option
+			//todo: aslo forward this to debug text
 		}
 	}
 	
@@ -517,6 +527,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		
 		Vector3 worldPos = cam.unproject(new Vector3(x,y,0));
 		String localPos =  x + "," + y;
+		//todo: forward this to debug text
 		fontSmall.draw(batch, localPos, x, Gdx.graphics.getHeight()-y);
 		fontSmall.draw(batch, (int)worldPos.x + "," + (int)worldPos.y, x, Gdx.graphics.getHeight()-y+fontSmall.getLineHeight());
 	}
@@ -561,14 +572,14 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			x = (int)screenPos.x;
 			y = (int)screenPos.y;
 		}
-		tmpText.add(new TempText(text, x, y));
+		debugTexts.add(new DebugText(text, x, y));
 	}
 
-	private void drawTempText(SpriteBatch batch) {
-		for (TempText t : tmpText) {
+	private void drawDebugText(SpriteBatch batch) {
+		for (DebugText t : debugTexts) {
 			fontSmall.draw(batch, t.text, t.x, t.y);
 		}
-		tmpText.clear();
+		debugTexts.clear();
 	}
 
 	public Stage getStage() {
@@ -594,27 +605,6 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		
 		engine.removeEntityListener(engineView);
 		stage.dispose();
-		//font.dispose();
-		//batch.dispose();
-		//shape.dispose(); //crashes: 
-		/*
-		EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x0000000054554370, pid=5604, tid=2364
-		Problematic frame:
-	 	C  [atio6axx.dll+0x3c4370]
-		 */
 	}
 	
-	
-}
-
-class DebugVec {
-	Vector2 pos;
-	Vector2 vec;
-	Color color;
-	
-	DebugVec(Vector2 pos, Vector2 vec, Color color) {
-		this.pos = pos;
-		this.vec = vec;
-		this.color = color;
-	}
 }

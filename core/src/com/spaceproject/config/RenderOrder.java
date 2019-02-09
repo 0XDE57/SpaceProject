@@ -1,4 +1,4 @@
-package com.spaceproject.utility;
+package com.spaceproject.config;
 
 public enum RenderOrder {
     player, //always topMost
