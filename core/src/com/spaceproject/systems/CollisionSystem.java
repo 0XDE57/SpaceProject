@@ -90,8 +90,8 @@ public class CollisionSystem extends EntitySystem {
 		//if character & ship: resolve (do nothing here)
 		//if ship & ship: resolve (do nothing here)
 
-		DamageComponent mA = Mappers.missile.get(a);
-		DamageComponent mB = Mappers.missile.get(b);
+		DamageComponent mA = Mappers.damage.get(a);
+		DamageComponent mB = Mappers.damage.get(b);
 		HealthComponent hA = Mappers.health.get(a);
 		HealthComponent hB = Mappers.health.get(b);
 		
