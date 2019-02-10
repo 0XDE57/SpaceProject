@@ -143,7 +143,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
         /*
         TransformComponent trans = Mappers.transform.get(entity);
         String text = MyMath.round(sprite3D.renderable.scale.x, 3) + ", " + MyMath.round(sprite3D.renderable.scale.y, 3);
-        DebugUISystem.addTempText(text, trans.pos.x, trans.pos.y, true);
+        DebugUISystem.addDebugText(text, trans.pos.x, trans.pos.y, true);
         //System.out.println(text);
         */
 

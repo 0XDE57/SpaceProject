@@ -56,7 +56,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 	public static long gameTimeCurrent, gameTimeStart;
 
 
-	public static boolean inSpace;//todo private, getter for external access
+	private static boolean inSpace;
 	private static Entity currentPlanet = null;
 	private ImmutableArray<Entity> transitioningEntities;
 
@@ -111,19 +111,21 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 			initWorld(playerTESTSHIP, planet);
 		}
 
+		
+		//cleanup unmanaged resources
+		//new ResourceDisposer(engine);//TODO: this is causing org.lwjgl.opengl.OpenGLException: Cannot use offsets when Array Buffer Object is disabled
 	}
-
+	
+	public static boolean inSpace() {
+		return inSpace;
+	}
+	
 	//region system loading
 	private void loadBaseSystems() {
 		//systems that are common between space and world
 		//eg: input and movement
 		
 		SystemPriorityConfig cfg = SpaceProject.priorityConfig;
-		//or something like this?
-		//Config() { "DesktopInputSystem" = 1; "MovementSystem" = 5; }
-		//
-		//add systems normally
-		//for each system: system.priority = config.get(system.getClass().getSimpleName())
 		
 		if (SpaceProject.isMobile()) {
 			MobileInputSystem mobileInputSystem = new MobileInputSystem();
@@ -398,7 +400,9 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		super.render(delta);
 
 		// update engine
-		gameTimeCurrent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - gameTimeStart);
+		if (!isPaused) {
+			gameTimeCurrent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - gameTimeStart);
+		}
 		engine.update(delta);
 
 
@@ -408,7 +412,15 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 			//debug
 			Misc.printEntities(engine);
 		}
-
+		
+		if (Gdx.input.isKeyJustPressed(Keys.GRAVE)) {//tilda
+			if (isPaused) {
+				resume();
+			} else {
+				pause();
+			}
+		}
+		
 	}
 
 
@@ -521,6 +533,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 				((Disposable) sys).dispose();
 		}
 
+		
 		for (Entity ents : engine.getEntities()) {
 			TextureComponent tex = ents.getComponent(TextureComponent.class);
 			if (tex != null) {
@@ -545,11 +558,27 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 	@Override
 	public void pause() {
+		setSystemProcessing(true);
 	}
-
+	
 	@Override
 	public void resume() {
+		setSystemProcessing(false);
+	}
+	
+	private void setSystemProcessing(boolean pause) {
+		this.isPaused = pause;
+		engine.getSystem(ControlSystem.class).setProcessing(isPaused);
+		engine.getSystem(MovementSystem.class).setProcessing(isPaused);
+		engine.getSystem(CollisionSystem.class).setProcessing(isPaused);
+		engine.getSystem(AISystem.class).setProcessing(isPaused);
+		engine.getSystem(ExpireSystem.class).setProcessing(isPaused);
+		
+		OrbitSystem oSys = engine.getSystem(OrbitSystem.class);
+		if (oSys != null) oSys.setProcessing(isPaused);
 	}
 
+	
 
 }
+

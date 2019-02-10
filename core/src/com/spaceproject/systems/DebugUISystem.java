@@ -16,7 +16,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.DelaunayTriangulator;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -71,12 +70,12 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	DelaunayTriangulator tri = new DelaunayTriangulator();
 
 	public static ArrayList<DebugText> debugTexts = new ArrayList<DebugText>();
-	public static ArrayList<DebugVec> tmpVec = new ArrayList<DebugVec>();
+	public static ArrayList<DebugVec> debugVecs = new ArrayList<DebugVec>();
 	
 	//config
 	private boolean drawDebugUI = true;
 	//private boolean drawMenu = false;
-	public boolean drawFPS = true, drawExtraInfo = false;
+	public boolean drawFPS = true, drawExtraInfo = true;
 	public boolean drawComponentList = false;
 	public boolean drawPos = false;
 	public boolean drawBounds = false, drawBoundsPoly = false;
@@ -152,7 +151,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	@Override
 	public void update(float delta) {
 		//check key presses
-		//updateKeyToggles();
+		updateKeyToggles();
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F9)) {
 			engineView.toggle(stage);
@@ -170,12 +169,13 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());		
 		batch.setProjectionMatrix(projectionMatrix);
 		shape.setProjectionMatrix(cam.combined);
-
 		
-		shape.begin(ShapeType.Line);
 		
 		//draw vector to visualize speed and direction
 		if (drawVectors) drawVelocityVectors();
+		
+		
+		shape.begin(ShapeType.Line);
 		
 		// draw ring to visualize orbit path
 		if (drawOrbitPath) drawOrbitPath(true);
@@ -185,31 +185,33 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		
 		if (drawMousePos) drawMouseLine();
 		
-		drawTempVectors();
+		drawDebugVectors();
 		
 		shape.end();
 		
 		
-		batch.begin();
-		
-		//print debug menu
-		//if (drawMenu)  drawDebugMenu();
-			
 		//draw frames per second and entity count
 		if (drawFPS) drawFPS(drawExtraInfo);
 		
 		//draw entity position
 		if (drawPos) drawPos();
 		
-		
 		if (drawMousePos) drawMousePos();
 		
 		if (drawEntityList) drawEntityList();
 		
+		batch.begin();
+		
+		//print debug menu
+		//if (drawMenu)  drawDebugMenu();
+			
+		
+		
 		//draw components on entity
 		if (drawComponentList) drawComponentList();
 
-		drawDebugText(batch);
+		
+		drawDebugTexts(batch);
 
 		batch.end();	
 		
@@ -277,23 +279,19 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		}*/
 	}
 
-
+	
+	
 	/** Draw lines to represent speed and direction of entity */
 	private void drawVelocityVectors() {
 		for (Entity entity : objects) {
 			//get entities position and list of components
 			TransformComponent t = Mappers.transform.get(entity);
-
-			//calculate vector angle and length
+			
 			float scale = 20; //how long to make vectors (higher number is longer line)
-			float length = (float)Math.log(t.velocity.len()) * scale;
-			float angle = t.velocity.angle() * MathUtils.degreesToRadians;
-			float pointX = t.pos.x + (length * MathUtils.cos(angle));
-			float pointY = t.pos.y + (length * MathUtils.sin(angle));
+			Vector2 end = MyMath.LogVec(t.velocity, scale).add(t.pos);
 			
 			//draw line to represent movement
-			shape.line(t.pos.x, t.pos.y, pointX, pointY, Color.RED, Color.MAGENTA);
-			//todo: forward this to debug vec
+			debugVecs.add(new DebugVec(t.pos, end, Color.RED, Color.MAGENTA));
 		}
 	}
 	
@@ -375,11 +373,11 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		
 		int x = 15;
 		int y = Gdx.graphics.getHeight() - 15;
-		fontLarge.setColor(1,1,1,1);
 
 		//fps
-		String frames = Integer.toString(Gdx.graphics.getFramesPerSecond());
-		fontLarge.draw(batch, frames, x, y);
+		int fps = Gdx.graphics.getFramesPerSecond();
+		debugTexts.add(new DebugText(Integer.toString(fps), x, y,
+				fps > 45 ? Color.WHITE : fps > 30 ? Color.YELLOW : Color.RED, fontLarge));
 
 		if (drawExtaInfo) {
 			//camera position
@@ -392,16 +390,17 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			long nativeHeap = Gdx.app.getNativeHeap();
 			String memory = "Mem: " + MyMath.formatBytes(used);
 			//all 3 values seem to agree
-			// + ", java heap: " + MyMath.formatBytes(javaHeap) + ", native heap: " + MyMath.formatBytes(nativeHeap);
+			//memory += ", java heap: " + MyMath.formatBytes(javaHeap) + ", native heap: " + MyMath.formatBytes(nativeHeap);
 
 
 			//entity/component count
-			int entityCount = engine.getEntities().size();
-			int componentCount = 0;
+			int entities = engine.getEntities().size();
+			int components = 0;
 			for (Entity ent : engine.getEntities()) {
-				componentCount += ent.getComponents().size();
+				components += ent.getComponents().size();
 			}
-			String count = "   E: " + entityCount + " - C: " + componentCount;
+			int systems = engine.getSystems().size();
+			String count = "E: " + entities + " C: " + components + " S: " + systems;
 
 			//threads
 			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
@@ -409,12 +408,12 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 
 			int linePos = 1;
 			float lineHeight = fontLarge.getLineHeight();
-			fontLarge.draw(batch, frames + count, x, y);
-			fontLarge.draw(batch, memory + threads, x, y - (lineHeight * linePos++));
-			fontLarge.draw(batch, camera, x, y - (lineHeight * linePos++));
-			fontLarge.draw(batch,
-					"time: " + GameScreen.gameTimeCurrent + " (" + Misc.formatDuration(GameScreen.gameTimeCurrent) + ")",
-					500, Gdx.graphics.getHeight() - 10);
+			debugTexts.add(new DebugText(count, x, y - (lineHeight * linePos++), fontLarge));
+			debugTexts.add(new DebugText(memory + threads, x, y - (lineHeight * linePos++), fontLarge));
+			debugTexts.add(new DebugText(camera, x, y - (lineHeight * linePos++), fontLarge));
+			debugTexts.add(new DebugText(
+					"time: " + Misc.formatDuration(GameScreen.gameTimeCurrent) + " (" +  GameScreen.gameTimeCurrent + ")",
+					500, Gdx.graphics.getHeight() - 10, fontLarge));
 
 
 			//view threads
@@ -422,11 +421,11 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 					+ ", completed:" + GameScreen.noiseThreadPool.getCompletedTaskCount()
 					+ ", task count:" + GameScreen.noiseThreadPool.getTaskCount()
 					+ ", pool size:" + GameScreen.noiseThreadPool.getCorePoolSize();
-
-			fontSmall.draw(batch, noisePool, x, y - (lineHeight * linePos++));
+			
+			debugTexts.add(new DebugText(noisePool, x, y - (lineHeight * linePos++)));
 
 			for (Thread t : threadSet) {
-				fontSmall.draw(batch, t.toString(), x, y - (lineHeight * linePos++));
+				debugTexts.add(new DebugText(t.toString(), x, y - (lineHeight * linePos++)));
 			}
 		}
 	}
@@ -435,12 +434,9 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		float fontHeight = fontSmall.getLineHeight();
 		int x = 30;
 		int y = 30;
-		fontSmall.setColor(1, 1, 1, 1);
-		
 		int i = 0;
 		for (Entity entity : engine.getEntities()) {
-			fontSmall.draw(batch, Integer.toHexString(entity.hashCode()), x, y+fontHeight*i++);
-			//todo: forward this to debug text
+			debugTexts.add(new DebugText(Integer.toHexString(entity.hashCode()), x,y + (fontHeight * i++)));
 		}
 	}
 	
@@ -449,7 +445,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		float fontHeight = fontSmall.getLineHeight();
 		int backWidth = 400;//width of background
 		
-		fontSmall.setColor(1, 1, 1, 1);
+		//fontSmall.setColor(1, 1, 1, 1);
 		
 		for (Entity entity : objects) {
 			//get entities position and list of components
@@ -513,11 +509,8 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			String info = Math.round(t.pos.x) + "," + Math.round(t.pos.y) + vel;
 
 			Vector3 screenPos = cam.project(new Vector3(t.pos.cpy(),2));
-			fontSmall.draw(batch, Integer.toHexString(entity.hashCode()) , screenPos.x, screenPos.y-15);
-			fontSmall.draw(batch, info, screenPos.x, screenPos.y);
-			
-			//todo split this into pos and hashcode, i want a show hashcode only option
-			//todo: aslo forward this to debug text
+			debugTexts.add(new DebugText(Integer.toHexString(entity.hashCode()) , screenPos.x, screenPos.y));
+			//debugTexts.add(new DebugText(info, screenPos.x, screenPos.y));
 		}
 	}
 	
@@ -527,9 +520,8 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		
 		Vector3 worldPos = cam.unproject(new Vector3(x,y,0));
 		String localPos =  x + "," + y;
-		//todo: forward this to debug text
-		fontSmall.draw(batch, localPos, x, Gdx.graphics.getHeight()-y);
-		fontSmall.draw(batch, (int)worldPos.x + "," + (int)worldPos.y, x, Gdx.graphics.getHeight()-y+fontSmall.getLineHeight());
+		debugTexts.add(new DebugText(localPos, x, Gdx.graphics.getHeight()-y));
+		debugTexts.add(new DebugText((int)worldPos.x + "," + (int)worldPos.y, x, Gdx.graphics.getHeight()-y+fontSmall.getLineHeight()));
 	}
 	
 	private void drawMouseLine() {
@@ -542,31 +534,24 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		shape.line(worldPos.x+crossHairSize, worldPos.y, worldPos.x-crossHairSize, worldPos.y);
 	}
 
-	public static void addTempVec(Vector2 pos, Vector2 vec, Color color) {
-		tmpVec.add(new DebugVec(pos, vec, color));
+	public static void addDebugVec(Vector2 pos, Vector2 vec, Color color) {
+		float scale = 20; //how long to make vectors (higher number is longer line)
+		Vector2 end = MyMath.LogVec(vec, scale).add(pos);
+		debugVecs.add(new DebugVec(pos, end, color));
 	}
 	
-	private void drawTempVectors() {
-		for (DebugVec debugVec : tmpVec) {
-			
-			//calculate vector angle and length
-			float scale = 20; //how long to make vectors (higher number is longer line)
-			float length = (float) Math.log(debugVec.vec.len()) * scale;
-			float angle = debugVec.vec.angle() * MathUtils.degreesToRadians;
-			float pointX = debugVec.pos.x + (length * MathUtils.cos(angle));
-			float pointY = debugVec.pos.y + (length * MathUtils.sin(angle));
-			
-			//draw line to represent movement
-			shape.line(debugVec.pos.x, debugVec.pos.y, pointX, pointY, debugVec.color, debugVec.color);
+	private void drawDebugVectors() {
+		for (DebugVec debugVec : debugVecs) {
+			shape.line(debugVec.vecA.x, debugVec.vecA.y, debugVec.vecB.x, debugVec.vecB.y, debugVec.colorA, debugVec.colorB);
 		}
-		tmpVec.clear();
+		debugVecs.clear();
 	}
 	
-	public static void addTempText(String text, float x, float y, boolean project) {
-		addTempText(text, (int)x, (int)y, project);
+	public static void addDebugText(String text, float x, float y, boolean project) {
+		addDebugText(text, (int)x, (int)y, project);
 	}
 
-	public static void addTempText(String text, int x, int y, boolean project) {
+	public static void addDebugText(String text, int x, int y, boolean project) {
 		if (project) {
 			Vector3 screenPos = cam.project(new Vector3(x, y, 0));
 			x = (int)screenPos.x;
@@ -575,9 +560,15 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		debugTexts.add(new DebugText(text, x, y));
 	}
 
-	private void drawDebugText(SpriteBatch batch) {
+	private void drawDebugTexts(SpriteBatch batch) {
 		for (DebugText t : debugTexts) {
-			fontSmall.draw(batch, t.text, t.x, t.y);
+			fontSmall.setColor(t.color);
+			if (t.font == null) {
+				fontSmall.draw(batch, t.text, t.x, t.y);
+			} else {
+				t.font.setColor(t.color);
+				t.font.draw(batch, t.text, t.x, t.y);
+			}
 		}
 		debugTexts.clear();
 	}

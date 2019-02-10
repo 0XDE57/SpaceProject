@@ -120,6 +120,7 @@
         but i really dont want to rewrite a bunch of stuff...
 
 [ ] fixed time step (necessary for multiplayer?)
+    https://github.com/libgdx/ashley/pull/216
 	https://gafferongames.com/post/fix_your_timestep/
     http://gameprogrammingpatterns.com/game-loop.html
     http://www.koonsolo.com/news/dewitters-gameloop/
@@ -168,6 +169,38 @@
 
 [ ] optimization
     [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
+
+
+[ ] config and loading
+    //Config() { "DesktopInputSystem" = 1; "MovementSystem" = 5; }
+    //
+    //add systems normally
+    //for each system: system.priority = config.get(system.getClass().getSimpleName())
+    //
+    //same for pause, a haltSystemOnPause property
+    //and maybe even an input processor property with priority as well?
+    //Config() { "MovementSystem": processingPriority = 5, haltOnPause = true,  }
+
+    //on pause, for each system, if haltOnPause, pause
+    System	                    Priority	HaltOnPause	    Input Processor	    Space only      World only
+    DesktopInputSystem	        1	        maybe
+    MobileInputSystem	        2
+    AISystem	                3	        TRUE
+    ControlSystem	            4	        TRUE
+    MovementSystem	            5	        TRUE
+    BoundsSystem	            6	        TRUE
+    CollisionSystem	            7	        TRUE
+    OrbitSystem	                8	        TRUE	        	                TRUE
+    WorldWrapSystem	            9	        maybe	        	                	            TRUE
+    CameraSystem	            10
+    SpaceRenderingSystem        11	        		                            TRUE
+    WorldRenderingSystem    	12	        		                            	            TRUE
+    HUDSystem	                13
+    ExpireSystem	            14	        TRUE
+    SpaceLoadingSystem	        15	        		                            TRUE
+    SpaceParallaxSystem	        16	        		                            TRUE
+    ScreenTransitionSystem	    17	        TRUE
+    DebugUISystem	            18
 
 
 ---GAMEPLAY & DESIGN---
@@ -272,6 +305,7 @@
         [ ] field editing
         [ ] add / remove objects
     [ ] FPS,memory,entity graph
+        [ ] profiler: https://github.com/libgdx/ashley/pull/215
 
 
 ---INPUT---

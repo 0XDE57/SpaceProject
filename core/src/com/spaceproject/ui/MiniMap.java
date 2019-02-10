@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
@@ -220,12 +219,12 @@ public class MiniMap {
 
             //calculate vector angle and length
             float scale = 4; //how long to make vectors (higher number is longer line)
-            float length = (float)Math.log(t.velocity.len()) * scale;
-            float angle = t.velocity.angle() * MathUtils.degreesToRadians;
-            Vector2 vel = MyMath.Vector(angle, length).add(centerMapX, centerMapY);
+            Vector2 vel = MyMath.LogVec(t.velocity, scale).add(centerMapX, centerMapY);
+            Vector2 accel = MyMath.LogVec(t.accel, scale).add(centerMapX, centerMapY);
 
             //draw line to represent movement
             shape.rectLine(centerMapX, centerMapY, vel.x, vel.y, 2, Color.MAGENTA, Color.RED);
+            shape.rectLine(centerMapX, centerMapY, accel.x, accel.y, 2, Color.GREEN, Color.BLUE);
 
             Vector2 facing = MyMath.Vector(t.rotation, 10).add(centerMapX, centerMapY);
             shape.rectLine(centerMapX, centerMapY, facing.x, facing.y, 2, Color.GRAY, Color.WHITE);

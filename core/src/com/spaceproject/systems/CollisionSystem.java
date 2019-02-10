@@ -31,9 +31,9 @@ public class CollisionSystem extends EntitySystem {
 	
 	private ImmutableArray<Entity> collidables;
 	
-	Array<CollisionPair> collisionPairs = new Array<CollisionPair>();
-	CollisionPair collsionCache = new CollisionPair();
+	private Array<CollisionPair> collisionPairs = new Array<CollisionPair>();
 	
+	private final CollisionPair collisionPair = new CollisionPair();
 	private final Vector2 normal = new Vector2();
 	private final Vector2 impulse = new Vector2();
 	
@@ -54,11 +54,11 @@ public class CollisionSystem extends EntitySystem {
 				if (indexA == indexB) continue; //don't compare against self
 				
 				//don't duplicate compares
-				collsionCache.a = indexA;
-				collsionCache.b = indexB;
-				if (collisionPairs.contains(collsionCache, false))
+				collisionPair.a = indexA;
+				collisionPair.b = indexB;
+				if (collisionPairs.contains(collisionPair, false))
 					continue;
-				collisionPairs.add(new CollisionPair(collsionCache));
+				collisionPairs.add(new CollisionPair(collisionPair));
 				
 
 				Entity eA = collidables.get(indexA);
@@ -141,11 +141,6 @@ public class CollisionSystem extends EntitySystem {
 		
 		//remove entity (kill)
 		if (healthComponent.health <= 0) {
-			TextureComponent textureComponent = attackedEntity.getComponent(TextureComponent.class);
-			if (textureComponent != null) {
-				textureComponent.texture.dispose();//TODO: this shouldn't care about textures: let an entity removed event clean this up, this also forgets about model batch
-			}
-			
 			//TODO: maybe add RemoveComponent which will signal that it is marked for removal, which will be done at the end of an engine step
 			engine.removeEntity(attackedEntity);
 			Gdx.app.log(this.getClass().getSimpleName(),"[" + Misc.objString(attackedEntity) + "] killed by: [" + Misc.objString(damageComponent.source) + "]");
@@ -164,10 +159,12 @@ public class CollisionSystem extends EntitySystem {
 		normal.set(transformA.velocity).sub(transformB.velocity);
 		float relativeVelocity = normal.dot(mtv.normal);
 		
+		DebugUISystem.addDebugVec(transformA.pos, mtv.normal.cpy().add(transformA.pos), Color.WHITE);
+		
 		//don't resolve if velocities are separating (object moving away from each other)
 		if (relativeVelocity > 0) return;
-		DebugUISystem.addTempVec(transformA.pos, mtv.normal, Color.WHITE);
-		//DebugUISystem.addTempText(Misc.vecString(normal, 1), transformA.pos.x, transformB.pos.y, true);
+		
+		//DebugUISystem.addDebugText(Misc.vecString(normal, 1), transformA.pos.x, transformB.pos.y, true);
 		
 		//calculate impulse
 		
@@ -188,8 +185,8 @@ public class CollisionSystem extends EntitySystem {
 		transformA.velocity.add(invMassA * impulse.x, invMassA * impulse.y);
 		transformB.velocity.sub(invMassB * impulse.x, invMassB * impulse.y);
 		
-		DebugUISystem.addTempVec(transformA.pos, new Vector2(invMassA * impulse.x, invMassA * impulse.y), Color.BLUE);
-		DebugUISystem.addTempVec(transformB.pos, new Vector2(invMassB * impulse.x, invMassB * impulse.y), Color.RED);
+		DebugUISystem.addDebugVec(transformA.pos, new Vector2(invMassA * impulse.x, invMassA * impulse.y), Color.BLUE);
+		DebugUISystem.addDebugVec(transformB.pos, new Vector2(invMassB * impulse.x, invMassB * impulse.y), Color.RED);
 		
 		//transformA.pos.add( mtv.normal.x * mtv.depth, mtv.normal.y * mtv.depth);
 		//transformB.pos.sub( mtv.normal.x * mtv.depth, mtv.normal.y * mtv.depth);
@@ -198,8 +195,8 @@ public class CollisionSystem extends EntitySystem {
 		float percent = 0.2f; // usually 20% to 80%
 		float slop = 0.01f; // usually 0.01 to 0.1
 		Vector2 c = mtv.normal.scl(Math.max(mtv.depth - slop, 0) / (invMassA + invMassB) * percent);
-		DebugUISystem.addTempVec(transformA.pos, new Vector2(invMassA * c.x, invMassA * c.y), Color.YELLOW);
-		DebugUISystem.addTempVec(transformB.pos, new Vector2(invMassB * c.x, invMassB * c.y), Color.GREEN);
+		DebugUISystem.addDebugVec(transformA.pos, new Vector2(invMassA * c.x, invMassA * c.y), Color.YELLOW);
+		DebugUISystem.addDebugVec(transformB.pos, new Vector2(invMassB * c.x, invMassB * c.y), Color.GREEN);
 		transformA.pos.add(invMassA * c.x, invMassA * c.y);
 		transformB.pos.sub(invMassB * c.x, invMassB * c.y);
 		

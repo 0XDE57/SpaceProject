@@ -33,6 +33,8 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
   	
 	private static boolean vsync = true;
 	
+	boolean isPaused = false;
+	
 	private static float zoomTarget = 1;
 	private static float zoomSpeed = 3;
 	//private static float panSpeed/panTarget(lerp to entity)

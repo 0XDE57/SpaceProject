@@ -80,12 +80,11 @@ public class TextureFactory {
 		pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
 		
 		int numStars = 300;
-		pixmap.setColor(Color.WHITE);
 		for (int i = 0; i < numStars; ++i){					
 			
 			int newX = MathUtils.random(tileSize);
 			int newY = MathUtils.random(tileSize);
-			
+			pixmap.setColor(1, 1, 1, MathUtils.random(0.1f, 1f));
 			pixmap.drawPixel(newX, newY);
 			//pixmap.drawPixel(newX, newY, Color.rgba8888(MathUtils.random(1), MathUtils.random(1), MathUtils.random(1), 1));
 		}

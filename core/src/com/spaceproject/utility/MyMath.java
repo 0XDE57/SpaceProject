@@ -24,6 +24,15 @@ public class MyMath {
 		//return new Vector2(magnitude,0).setAngleRad(direction);
 	}
 
+	
+	public static Vector2 LogVec(Vector2 vec, float scale) {
+		float length = (float)Math.log(vec.len()) * scale;
+		float angle = vec.angle() * MathUtils.degreesToRadians;
+		float dX = length * MathUtils.cos(angle);
+		float dY = length * MathUtils.sin(angle);
+		return new Vector2(dX, dY);
+	}
+	
 
 	public static float distance(float x1, float y1, float x2, float y2) {
 		return (float) Math.hypot(x2 - x1, y2 - y1);
