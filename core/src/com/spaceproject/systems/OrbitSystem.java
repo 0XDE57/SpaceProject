@@ -26,7 +26,7 @@ public class OrbitSystem extends IteratingSystem {
 		//TODO: time sync planet rotation/spin just like orbit
 		position.rotation += orbit.rotateClockwise ? orbit.rotSpeed * delta : -orbit.rotSpeed * delta;
 
-		orbit.angle = getTimeSyncAngle(orbit, GameScreen.gameTimeCurrent);
+		orbit.angle = getTimeSyncAngle(orbit, GameScreen.getGameTimeCurrent());
 
 		if (orbit.parent != null) {
 			//apply tangential velocity
@@ -34,7 +34,7 @@ public class OrbitSystem extends IteratingSystem {
 
 
 			// calculate exact orbit position
-			Vector2 orbitPos = getSyncPos(entity, GameScreen.gameTimeCurrent);
+			Vector2 orbitPos = getSyncPos(entity, GameScreen.getGameTimeCurrent());
 			//ensure object is not too far from synced location
 			if (!position.pos.epsilonEquals(orbitPos, 10)) {
 				position.pos.set(orbitPos);

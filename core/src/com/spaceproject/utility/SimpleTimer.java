@@ -1,11 +1,12 @@
 package com.spaceproject.utility;
 
+import com.spaceproject.screens.GameScreen;
+
 public class SimpleTimer {
 
     private long interval;
     private long lastEvent;
-
-    //TODO: will break on game pause, time will still be considered passed, use gametime (game time will have to stop on pause too)
+    
     public SimpleTimer(long time) {
         this(time, false);
     }
@@ -13,7 +14,7 @@ public class SimpleTimer {
     public SimpleTimer(long time, boolean setLastEventTime) {
         interval = time;
         if (setLastEventTime)
-            lastEvent = System.currentTimeMillis();
+            reset();
     }
 
     public boolean tryEvent() {
@@ -29,11 +30,11 @@ public class SimpleTimer {
     }
 
     public void reset() {
-        lastEvent = System.currentTimeMillis();
+        lastEvent = GameScreen.getGameTimeCurrent();
     }
 
     public long getInterval() {
-        return  interval;
+        return interval;
     }
 
     public void setInterval(long interval, boolean reset) {
@@ -47,18 +48,13 @@ public class SimpleTimer {
     }
 
     public long timeSinceLastEvent() {
-        return System.currentTimeMillis() - lastEvent;
+        return GameScreen.getGameTimeCurrent() - lastEvent;
     }
 
     public float ratio() {
         return Math.min((float)timeSinceLastEvent()/(float)interval, 1.0f);
     }
-
-    public static void unpause(){
-        //lastEvent--;
-        //lastEvent + timePaused; ...
-    }
-
+    
     @Override
     public String toString() {
         return timeSinceLastEvent() + " (" + ratio() + ")";

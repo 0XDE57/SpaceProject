@@ -230,7 +230,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
         Gdx.app.log(this.getClass().getSimpleName(), Misc.objString(entity) + " is waiting for " + desiredSeed);
         for (Entity astroEnt : astroObjects) {
             if (Mappers.seed.get(astroEnt).seed == desiredSeed) {
-                Vector2 orbitPos = OrbitSystem.getSyncPos(astroEnt, GameScreen.gameTimeCurrent);
+                Vector2 orbitPos = OrbitSystem.getSyncPos(astroEnt, GameScreen.getGameTimeCurrent());
                 Mappers.transform.get(entity).pos.set(orbitPos);
                 screenTrans.takeOffStage = screenTrans.takeOffStage.next();
                 Gdx.app.log(this.getClass().getSimpleName(), "FOUND SEED "+ desiredSeed);

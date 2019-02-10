@@ -169,7 +169,9 @@
 
 [ ] optimization
     [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
-
+    [ ] look at pooled engine
+    [ ] model batch
+    [ ] planets are rendered offscreen nedlessly -> cull
 
 [ ] config and loading
     //Config() { "DesktopInputSystem" = 1; "MovementSystem" = 5; }
@@ -332,7 +334,7 @@
     [...] map
         needs more details, select planets and get info, set way points
     [...] menu menu
-        [ ] pause / freeze game
+        [x] pause / freeze game
         [...] settings and config
     [ ] player manager/inventory/shipbuilder thingy
     [ ] career event timeline stats

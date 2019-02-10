@@ -75,7 +75,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	//config
 	private boolean drawDebugUI = true;
 	//private boolean drawMenu = false;
-	public boolean drawFPS = true, drawExtraInfo = true;
+	public boolean drawFPS = true, drawExtraInfo = false;
 	public boolean drawComponentList = false;
 	public boolean drawPos = false;
 	public boolean drawBounds = false, drawBoundsPoly = false;
@@ -308,7 +308,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 					TransformComponent parentPos = Mappers.transform.get(orbit.parent);
 
 					if (showSyncedPos) {
-						Vector2 orbitPos = OrbitSystem.getSyncPos(entity, GameScreen.gameTimeCurrent);
+						Vector2 orbitPos = OrbitSystem.getSyncPos(entity, GameScreen.getGameTimeCurrent());
 						shape.setColor(1, 0, 0, 1);
 						shape.line(parentPos.pos.x, parentPos.pos.y, orbitPos.x, orbitPos.y);//synced orbit position (where the object should be)
 					}
@@ -412,7 +412,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			debugTexts.add(new DebugText(memory + threads, x, y - (lineHeight * linePos++), fontLarge));
 			debugTexts.add(new DebugText(camera, x, y - (lineHeight * linePos++), fontLarge));
 			debugTexts.add(new DebugText(
-					"time: " + Misc.formatDuration(GameScreen.gameTimeCurrent) + " (" +  GameScreen.gameTimeCurrent + ")",
+					"time: " + Misc.formatDuration(GameScreen.getGameTimeCurrent()) + " (" + GameScreen.getGameTimeCurrent() + ")",
 					500, Gdx.graphics.getHeight() - 10, fontLarge));
 
 

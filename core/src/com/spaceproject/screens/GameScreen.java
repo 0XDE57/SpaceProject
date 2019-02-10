@@ -53,8 +53,8 @@ import java.util.concurrent.TimeUnit;
 public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 	public Engine engine, persistenceEngine;
-	public static long gameTimeCurrent, gameTimeStart;
-
+	
+	private static long gameTimeCurrent, gameTimeStart, timePaused;
 
 	private static boolean inSpace;
 	private static Entity currentPlanet = null;
@@ -490,7 +490,11 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 			//Misc.printSystems(engine);
 		}
 	}
-
+	
+	public static long getGameTimeCurrent() {
+		return gameTimeCurrent;
+	}
+	
 	@Override
 	public void resize(int width, int height) {
 		super.resize(width, height);
@@ -566,16 +570,28 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		setSystemProcessing(false);
 	}
 	
+	
 	private void setSystemProcessing(boolean pause) {
 		this.isPaused = pause;
-		engine.getSystem(ControlSystem.class).setProcessing(isPaused);
-		engine.getSystem(MovementSystem.class).setProcessing(isPaused);
-		engine.getSystem(CollisionSystem.class).setProcessing(isPaused);
-		engine.getSystem(AISystem.class).setProcessing(isPaused);
-		engine.getSystem(ExpireSystem.class).setProcessing(isPaused);
+		if (isPaused) {
+			timePaused = gameTimeCurrent;
+		} else {
+			gameTimeStart -= timePaused;
+		}
+		Gdx.app.log(this.getClass().getSimpleName(),"paused: " + pause);
+		
+		engine.getSystem(ControlSystem.class).setProcessing(!isPaused);
+		engine.getSystem(MovementSystem.class).setProcessing(!isPaused);
+		engine.getSystem(BoundsSystem.class).setProcessing(!isPaused);
+		engine.getSystem(CollisionSystem.class).setProcessing(!isPaused);
+		engine.getSystem(AISystem.class).setProcessing(!isPaused);
+		engine.getSystem(ExpireSystem.class).setProcessing(!isPaused);
+		engine.getSystem(ScreenTransitionSystem.class).setProcessing(!isPaused);
 		
 		OrbitSystem oSys = engine.getSystem(OrbitSystem.class);
-		if (oSys != null) oSys.setProcessing(isPaused);
+		if (oSys != null) oSys.setProcessing(!isPaused);
+		
+		
 	}
 
 	
