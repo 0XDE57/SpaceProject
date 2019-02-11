@@ -107,6 +107,9 @@
 
 
 
+[ ] GameScreen is responsible for too much.. when transition is fixed up, come back and clean up
+    [ ] entity creation should happen in an entity loading system (with maybe exception to the player)
+    [ ] universe and noise pool stuff should happen elsewhere (like probably in universe)
 
 
 [...] rotation impulse
@@ -116,7 +119,7 @@
         https://stackoverflow.com/questions/11654990/2d-physics-engine-collision-response-rotation-of-objects
 
     [ ] move to box2d?
-        seems overkill and would involve a lot of re-writing... but it will likely be better than anything i can write myself
+        seems overkill and would involve a lot of re-writing... but it will be better than anything i can write myself
         but i really dont want to rewrite a bunch of stuff...
 
 [ ] fixed time step (necessary for multiplayer?)
@@ -162,7 +165,7 @@
             [ ] death
     [ ] cleanup GameScreen to facilitate this
 [ ] new CombatTest debug screen
-    [ ] one on one with an AI for protoyping combat and movement mechanics and feel
+    [ ] one on one with an AI for prototyping combat and movement mechanics and feel
     [ ] AI vs AI?
 
 
@@ -171,9 +174,11 @@
     [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
     [ ] look at pooled engine
     [ ] model batch
-    [ ] planets are rendered offscreen nedlessly -> cull
+    [ ] planets are rendered offscreen needlessly -> cull frustum
+    [ ] something is funny with the memory, it climbs then resets in a cyclical fashion
 
-[ ] config and loading
+
+[...] config and loading
     //Config() { "DesktopInputSystem" = 1; "MovementSystem" = 5; }
     //
     //add systems normally

@@ -14,8 +14,8 @@ public class ExpireSystem extends IntervalSystem {
 	private ImmutableArray<Entity> entities;
 	private Engine engine;
 	
-	public ExpireSystem(float interval) {
-		super(interval);
+	public ExpireSystem() {
+		super(1);
 
 	}
 

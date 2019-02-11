@@ -6,7 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.EntityConfig;
 import com.spaceproject.config.KeyConfig;
-import com.spaceproject.config.SystemPriorityConfig;
+import com.spaceproject.config.SystemsConfig;
 import com.spaceproject.config.UIConfig;
 import com.spaceproject.config.WorldConfig;
 import com.spaceproject.screens.TitleScreen;
@@ -21,7 +21,7 @@ public class SpaceProject extends Game {
 
 	private static boolean isMobile;
 
-	public static SystemPriorityConfig priorityConfig;
+	public static SystemsConfig systemsConfig;
 	public static EntityConfig entitycfg;
 	public static CelestialConfig celestcfg;
 	public static WorldConfig worldcfg;
@@ -43,8 +43,9 @@ public class SpaceProject extends Game {
 	}
 	
 	private static void loadConfigs() {
-		priorityConfig = new SystemPriorityConfig();
-		priorityConfig.loadDefault();
+		systemsConfig = new SystemsConfig();
+		systemsConfig.loadDefault();
+		systemsConfig.saveToJson();
 		
 		
 		entitycfg = new EntityConfig();

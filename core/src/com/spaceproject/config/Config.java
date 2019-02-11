@@ -15,15 +15,27 @@ public abstract class Config {
 	
 	public abstract void loadDefault();
 	
-	public void saveToJson() {		
+	public void saveToJson() {
+		saveToJson(true);
+	}
+	
+	public void saveToJson(boolean prettyPrint) {
 		Json json = new Json();
 		json.setUsePrototypes(false);
 
-		Gdx.app.log(this.getClass().getSimpleName(), json.toJson(this));
+		if (prettyPrint) {
+			Gdx.app.debug(this.getClass().getSimpleName(), json.prettyPrint(json.toJson(this)));
+		} else {
+			Gdx.app.debug(this.getClass().getSimpleName(), json.toJson(this));
+		}
 		
 		FileHandle keyFile = Gdx.files.local(fileName);		
 		try {
-			keyFile.writeString(json.toJson(this), false);
+			if (prettyPrint) {
+				keyFile.writeString(json.prettyPrint(json.toJson(this)), false);
+			} else {
+				keyFile.writeString(json.toJson(this), false);
+			}
 			Gdx.app.log(this.getClass().getSimpleName(), "Saved: " + fileName);
 		} catch (GdxRuntimeException ex) {
 			Gdx.app.log(this.getClass().getSimpleName(), "Could not save file: " + fileName + "\n" + ex.getMessage());
