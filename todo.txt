@@ -1,6 +1,6 @@
 ---ENGINE---
 [...] Architecture
-    [...] consider refactoring space and world view to be simply load and unload systems as needed instead of wiping out everything
+    [x] consider refactoring space and world view to be simply load and unload systems as needed instead of wiping out everything
         load base systems, then load/unload world and space systems on the fly. use priority to keep order
         it would probably fix some of the screen transition issues and simplify it.
         - pros:
@@ -9,9 +9,8 @@
             * why wipe out listeners and such
         - cons:
             * may introduce another class off problems
-        look at transitions system flow:
-        from space:
-            add transition component
+    [ ] refactor screen transition
+
 
     [ ] consider merging rendering system (SpaceRendering & World rendering)?
         because they are basically duplicates which the difference of background tiles
@@ -110,6 +109,7 @@
 [ ] GameScreen is responsible for too much.. when transition is fixed up, come back and clean up
     [ ] entity creation should happen in an entity loading system (with maybe exception to the player)
     [ ] universe and noise pool stuff should happen elsewhere (like probably in universe)
+    [ ] why is everything static...
 
 
 [...] rotation impulse
@@ -176,38 +176,40 @@
     [ ] model batch
     [ ] planets are rendered offscreen needlessly -> cull frustum
     [ ] something is funny with the memory, it climbs then resets in a cyclical fashion
+    http://t-machine.org/index.php/2014/03/08/data-structures-for-entity-systems-contiguous-memory/
+    http://unseen-academy.de/snippet_component_system.html
+    https://github.com/junkdog/entity-system-benchmarks#entity-system-benchmarks
 
 
-[...] config and loading
-    //Config() { "DesktopInputSystem" = 1; "MovementSystem" = 5; }
-    //
-    //add systems normally
-    //for each system: system.priority = config.get(system.getClass().getSimpleName())
-    //
-    //same for pause, a haltSystemOnPause property
-    //and maybe even an input processor property with priority as well?
-    //Config() { "MovementSystem": processingPriority = 5, haltOnPause = true,  }
+[ ] investigate possible bug in ashley.
+    Found 2 weird cases related to families / listeners.
+    I would expect all references to a system/family membership to be when a system is removed from the engine.
+    This may be intended behavior and I am using ashley wrong, need to reproduce these in a new project to confirm...
+    In the context of this game, both occurrences where triggered when going transitioning between space/world which involves loading and unloading specific systems.
+    [A] scenario A:
+        1. create engine.
+        2. add a new instance of system (SystemA) to engine that subscribes to a family
+        3. create a new engine (re-instantiate the original)
+        4. add a new instance of system (SystemA) to engine that subscribes to a family.
+        5. this new system will not pick up those entities in the family, where it should
+        * solution: engine.removeAllEntities(); before re-instantiating engine and system. this resolves the issue.
+    [B] scenario B:
+        1. create engine
+        2. add a new instance of a system that is an entity listener
+        3. remove that system
+        4. add a new instance of that system
+        5. remove again = crash on System.entityRemoved() when Engine.removeAllEntities():
+            Exception in thread "LWJGL Application" java.lang.NullPointerException
+            	at com.spaceproject.systems.SpaceLoadingSystem.entityRemoved(SpaceLoadingSystem.java:91)
+            	at com.badlogic.ashley.core.FamilyManager.updateFamilyMembership(FamilyManager.java:117)
+            	at com.badlogic.ashley.core.Engine.removeEntityInternal(Engine.java:223)
+            	at com.badlogic.ashley.core.Engine$EngineEntityListener.entityRemoved(Engine.java:257)
+            	at com.badlogic.ashley.core.EntityManager.removeEntityInternal(EntityManager.java:110)
+            	at com.badlogic.ashley.core.EntityManager.removeEntity(EntityManager.java:53)
+            	at com.badlogic.ashley.core.EntityManager.removeAllEntities(EntityManager.java:72)
+            	at com.badlogic.ashley.core.Engine.removeAllEntities(Engine.java:98)
+        * Solution: engine.removeEntityListener(the system) when removing system
 
-    //on pause, for each system, if haltOnPause, pause
-    System	                    Priority	HaltOnPause	    Input Processor	    Space only      World only
-    DesktopInputSystem	        1	        maybe
-    MobileInputSystem	        2
-    AISystem	                3	        TRUE
-    ControlSystem	            4	        TRUE
-    MovementSystem	            5	        TRUE
-    BoundsSystem	            6	        TRUE
-    CollisionSystem	            7	        TRUE
-    OrbitSystem	                8	        TRUE	        	                TRUE
-    WorldWrapSystem	            9	        maybe	        	                	            TRUE
-    CameraSystem	            10
-    SpaceRenderingSystem        11	        		                            TRUE
-    WorldRenderingSystem    	12	        		                            	            TRUE
-    HUDSystem	                13
-    ExpireSystem	            14	        TRUE
-    SpaceLoadingSystem	        15	        		                            TRUE
-    SpaceParallaxSystem	        16	        		                            TRUE
-    ScreenTransitionSystem	    17	        TRUE
-    DebugUISystem	            18
 
 
 ---GAMEPLAY & DESIGN---
@@ -357,10 +359,6 @@
 http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
 
 
-//Optimization/performance:
-http://t-machine.org/index.php/2014/03/08/data-structures-for-entity-systems-contiguous-memory/
-http://unseen-academy.de/snippet_component_system.html
-consider switch out ashley for artemis-odb? https://github.com/junkdog/entity-system-benchmarks#entity-system-benchmarks
 
 //fonts
 http://www.fontsquirrel.com/

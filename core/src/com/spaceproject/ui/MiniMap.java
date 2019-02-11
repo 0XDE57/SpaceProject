@@ -288,7 +288,7 @@ public class MiniMap {
     public void updateMapPosition() {
         mapBacking = getMiniMapRectangle();
         drawScaleTimer.reset();
-        Gdx.app.log(this.getClass().getSimpleName(), mapState.toString() + ", " + miniMapPosition.toString() + ", " + mapBacking.toString());
+        //Gdx.app.log(this.getClass().getSimpleName(), mapState.toString() + ", " + miniMapPosition.toString() + ", " + mapBacking.toString());
     }
 
     private Rectangle getMiniMapRectangle() {

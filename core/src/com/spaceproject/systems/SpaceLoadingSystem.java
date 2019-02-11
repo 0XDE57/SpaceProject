@@ -73,7 +73,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 			NoiseBuffer noiseBuffer = GameScreen.universe.getNoiseForSeed(seedComp.seed);
 
 			//check noise map exists in universe file first, if so load into tileMap queue
-			if (noiseBuffer!= null) {
+			if (noiseBuffer != null) {
 				Gdx.app.log(this.getClass().getSimpleName(), "noise found, loading: " + seedComp.seed);
 				GameScreen.noiseBufferQueue.add(noiseBuffer);
 			} else {
@@ -88,10 +88,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 
 	@Override
 	public void entityRemoved(Entity entity) {
-		//TODO: if has texture, dispose
-
-
-		for (Entity e : getEngine().getEntitiesFor(Family.all(OrbitComponent.class).get())){
+		for (Entity e : getEngine().getEntitiesFor(Family.all(OrbitComponent.class).get())) {
 			OrbitComponent orbit = Mappers.orbit.get(e);
 			if (orbit.parent != null) {
 				if (orbit.parent == entity) {
@@ -149,8 +146,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 
 
 	private void updateStars() {
-		if (checkStarsTimer.canDoEvent()){
-			checkStarsTimer.reset();
+		if (checkStarsTimer.tryEvent()) {
 			
 			//distance to check when to load planets
 			int loadDistance = (int) SpaceProject.celestcfg.loadSystemDistance;

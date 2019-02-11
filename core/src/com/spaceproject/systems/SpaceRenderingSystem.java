@@ -19,7 +19,7 @@ import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
 import java.util.ArrayList;
@@ -46,19 +46,14 @@ public class SpaceRenderingSystem extends IteratingSystem  {
 
 	private Array<Entity> renderQueue3D = new Array<Entity>();
 	
-	public SpaceRenderingSystem() {
-		this(MyScreenAdapter.cam, MyScreenAdapter.batch, MyScreenAdapter.shape);
-	}
 	
-	public SpaceRenderingSystem(OrthographicCamera camera, SpriteBatch spriteBatch, ShapeRenderer shape) {
+	public SpaceRenderingSystem() {
 		super(Family.all(TransformComponent.class).one(TextureComponent.class, Sprite3DComponent.class).get());
-
-					
-		cam = camera;
-		this.spriteBatch = spriteBatch;
-		this.shape = shape;
+		
+		this.cam = GameScreen.cam;
+		this.spriteBatch = GameScreen.batch;
+		this.shape = GameScreen.shape;
 		modelBatch = new ModelBatch();
-
 	}
 	
 	@Override

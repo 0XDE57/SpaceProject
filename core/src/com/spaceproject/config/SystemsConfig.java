@@ -39,7 +39,7 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG("com.spaceproject.systems.ScreenTransitionSystem",
                 17, true, true, true, true, true));
         systems.add(new SysCFG("com.spaceproject.systems.SpaceLoadingSystem",
-                15, false, true, true, true, true));
+                15, false, true, false, true, true));
         systems.add(new SysCFG("com.spaceproject.systems.SpaceParallaxSystem",
                 16, true, true, false, true, true));
         systems.add(new SysCFG("com.spaceproject.systems.SpaceRenderingSystem",

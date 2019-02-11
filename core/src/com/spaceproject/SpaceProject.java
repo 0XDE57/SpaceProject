@@ -45,7 +45,7 @@ public class SpaceProject extends Game {
 	private static void loadConfigs() {
 		systemsConfig = new SystemsConfig();
 		systemsConfig.loadDefault();
-		systemsConfig.saveToJson();
+		//systemsConfig.saveToJson();
 		
 		
 		entitycfg = new EntityConfig();

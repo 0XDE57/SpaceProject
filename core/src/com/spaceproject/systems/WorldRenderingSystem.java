@@ -22,13 +22,12 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class WorldRenderingSystem extends IteratingSystem {
+public class WorldRenderingSystem extends IteratingSystem implements RequireGameContext {
 		
 	// rendering
 	private OrthographicCamera cam;
@@ -56,27 +55,25 @@ public class WorldRenderingSystem extends IteratingSystem {
 	private int surround; //how many tiles to draw around the camera
 
 	private Texture tileTex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));
+
 	
-	public WorldRenderingSystem(Entity planetEntity) {
-		this(planetEntity, MyScreenAdapter.cam, MyScreenAdapter.batch);
-	}
-	
-	public WorldRenderingSystem(Entity planetEntity, OrthographicCamera camera, SpriteBatch spriteBatch) {
+	public WorldRenderingSystem() {
 		super(Family.all(TransformComponent.class).one(TextureComponent.class, Sprite3DComponent.class).get());
 		
-		cam = camera;
-		this.spriteBatch = spriteBatch;
+		this.cam = GameScreen.cam;
+		this.spriteBatch = GameScreen.batch;
 		modelBatch = new ModelBatch();
 
 		surround = 30;//TODO: split into surrondX/Y, change to be calculated by tileSize and window height/width
-
-		SeedComponent seedComp = planetEntity.getComponent(SeedComponent.class);
-
-		seed = seedComp.seed;
-		loadMap();
-
 	}
-
+	
+	@Override
+	public void initContext(GameScreen gameScreen) {
+		SeedComponent seedComp = gameScreen.getCurrentPlanet().getComponent(SeedComponent.class);
+		
+		seed = seedComp.seed;
+	}
+	
 	private void loadMap() {
 		//use cached noise
 		//TODO: if not cached and if not in process of being generated, only then generate, but this should probably never happen

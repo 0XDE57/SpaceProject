@@ -1,5 +1,6 @@
 package com.spaceproject.systems;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
@@ -8,11 +9,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.utility.Mappers;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.utility.Mappers;
 
-public class WorldWrapSystem extends EntitySystem {
+public class WorldWrapSystem extends EntitySystem implements RequireGameContext {
 	/** TODO: fix world wrapping
 	 *
 	 * The world/tiles are simply wrapped using techniques described here:
@@ -43,12 +46,14 @@ public class WorldWrapSystem extends EntitySystem {
 	
 	ImmutableArray<Entity> entities;
 	
-	public WorldWrapSystem(int mapSize) {
+	@Override
+	public void initContext(GameScreen gameScreen) {
+		int mapSize = gameScreen.getCurrentPlanet().getComponent(PlanetComponent.class).mapSize;
 		wrap = SpaceProject.worldcfg.tileSize * mapSize;
 	}
 	
 	@Override
-	public void addedToEngine(com.badlogic.ashley.core.Engine engine) {
+	public void addedToEngine(Engine engine) {
 		entities = engine.getEntitiesFor(Family.all(TransformComponent.class).get());
 	}
 
@@ -96,5 +101,5 @@ public class WorldWrapSystem extends EntitySystem {
 			Gdx.app.log(this.getClass().getSimpleName(), "Wrap offset: " + offsetX + ", " + offsetY);
 		}
 	}
-
+	
 }

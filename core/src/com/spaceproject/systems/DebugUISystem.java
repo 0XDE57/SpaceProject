@@ -36,7 +36,6 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.DebugEngineWindow;
 import com.spaceproject.utility.DebugText;
 import com.spaceproject.utility.DebugVec;
@@ -84,17 +83,13 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 	public boolean drawMousePos = false;
 	public boolean drawEntityList = false;
 	
-	
+
 	public DebugUISystem() {
-		this(MyScreenAdapter.cam, MyScreenAdapter.batch, MyScreenAdapter.shape);
-	}
-	
-	public DebugUISystem(OrthographicCamera camera, SpriteBatch spriteBatch, ShapeRenderer shapeRenderer) {
 		super(Family.all(TransformComponent.class).get());
 		
-		cam = camera;
-		batch = spriteBatch;
-		shape = shapeRenderer;
+		cam = GameScreen.cam;
+		batch = GameScreen.batch;
+		shape = GameScreen.shape;
 		fontSmall = FontFactory.createFont(FontFactory.fontBitstreamVM, 10);
 		fontLarge = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 20);
 		objects = new Array<Entity>();
@@ -117,6 +112,7 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			*/
 		}
 	}
+	
 	
 	@Override
 	public void addedToEngine(Engine engine) {		

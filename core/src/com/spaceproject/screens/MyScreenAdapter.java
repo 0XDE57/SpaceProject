@@ -64,7 +64,6 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
 		//
     }
 
-
     
     @Override
     public void render(float delta) {
@@ -95,6 +94,10 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     	}
     	
     }
+    
+    public InputMultiplexer getInputMultiplexer() {
+    	return inputMultiplexer;
+	}
     
    
     @Override

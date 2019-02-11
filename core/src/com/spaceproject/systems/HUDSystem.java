@@ -28,6 +28,7 @@ import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.MapState;
 import com.spaceproject.ui.Menu;
@@ -36,7 +37,7 @@ import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 
 
-public class HUDSystem extends EntitySystem {
+public class HUDSystem extends EntitySystem implements RequireGameContext {
 
 	private Stage stage;
 	private Menu menu;
@@ -57,16 +58,12 @@ public class HUDSystem extends EntitySystem {
 	
 	private boolean drawHud = true;
 	private boolean drawEdgeMap = true;
-
+	
 	
 	public HUDSystem() {
-		this(MyScreenAdapter.cam, MyScreenAdapter.shape, MyScreenAdapter.batch);
-	}
-	
-	public HUDSystem(OrthographicCamera camera, ShapeRenderer shapeRenderer, SpriteBatch spriteBatch) {
-		cam = camera;
-		shape = shapeRenderer;
-		batch = spriteBatch;
+		cam = MyScreenAdapter.cam;
+		shape = MyScreenAdapter.shape;
+		batch = MyScreenAdapter.batch;
 
 		//init scene2d/VisUI
 		if (VisUI.isLoaded())
@@ -75,14 +72,15 @@ public class HUDSystem extends EntitySystem {
 		stage = new Stage(new ScreenViewport());
 
 	}
-
-	public void resize(int width, int height) {
-		menu.setSize(Gdx.graphics.getWidth()-150, Gdx.graphics.getHeight()-150);
-		stage.getViewport().update(width, height, true);
-
-		miniMap.updateMapPosition();
+	
+	@Override
+	public void initContext(GameScreen gameScreen) {
+		gameScreen.getInputMultiplexer().addProcessor(0, getStage());
 	}
 
+	
+	
+	
 	@Override
 	public void addedToEngine(Engine engine) {
 		mapableObjects = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
@@ -91,6 +89,8 @@ public class HUDSystem extends EntitySystem {
 
 
 		menu = new Menu(false, engine);
+		//stage.addListener((InputListener)this);
+		
 		stage.addListener(new InputListener() {
 			@Override
 			public boolean keyDown (InputEvent event, int keycode) {
@@ -414,5 +414,12 @@ public class HUDSystem extends EntitySystem {
 
 	public Menu getMenu() {
 		return menu;
+	}
+	
+	public void resize(int width, int height) {
+		menu.setSize(Gdx.graphics.getWidth()-150, Gdx.graphics.getHeight()-150);
+		stage.getViewport().update(width, height, true);
+		
+		miniMap.updateMapPosition();
 	}
 }

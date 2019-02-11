@@ -232,6 +232,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
             if (Mappers.seed.get(astroEnt).seed == desiredSeed) {
                 Vector2 orbitPos = OrbitSystem.getSyncPos(astroEnt, GameScreen.getGameTimeCurrent());
                 Mappers.transform.get(entity).pos.set(orbitPos);
+                //Mappers.transform.get(entity).velocity.set(Mappers.transform.get(astroEnt).velocity);//TODO: match planet vel
                 screenTrans.takeOffStage = screenTrans.takeOffStage.next();
                 Gdx.app.log(this.getClass().getSimpleName(), "FOUND SEED "+ desiredSeed);
                 break;

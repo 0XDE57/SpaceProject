@@ -2,6 +2,7 @@ package com.spaceproject.screens;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
@@ -26,24 +27,9 @@ import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.generation.noise.NoiseGenListener;
 import com.spaceproject.generation.noise.NoiseThread;
 import com.spaceproject.generation.noise.NoiseThreadPoolExecutor;
-import com.spaceproject.systems.AISystem;
-import com.spaceproject.systems.BoundsSystem;
-import com.spaceproject.systems.CameraSystem;
-import com.spaceproject.systems.CollisionSystem;
-import com.spaceproject.systems.ControlSystem;
 import com.spaceproject.systems.DebugUISystem;
-import com.spaceproject.systems.DesktopInputSystem;
-import com.spaceproject.systems.ExpireSystem;
 import com.spaceproject.systems.HUDSystem;
-import com.spaceproject.systems.MobileInputSystem;
-import com.spaceproject.systems.MovementSystem;
-import com.spaceproject.systems.OrbitSystem;
-import com.spaceproject.systems.ScreenTransitionSystem;
-import com.spaceproject.systems.SpaceLoadingSystem;
-import com.spaceproject.systems.SpaceParallaxSystem;
-import com.spaceproject.systems.SpaceRenderingSystem;
-import com.spaceproject.systems.WorldRenderingSystem;
-import com.spaceproject.systems.WorldWrapSystem;
+import com.spaceproject.systems.RequireGameContext;
 import com.spaceproject.ui.MapState;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
@@ -58,10 +44,11 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 	private static long gameTimeCurrent, gameTimeStart, timePaused;
 	boolean isPaused = false;
 	
-	private static boolean inSpace;
-	private static Entity currentPlanet = null;
 	private ImmutableArray<Entity> transitioningEntities;
-
+	
+	private static boolean inSpace;
+	private Entity currentPlanet = null;
+	
 	public static Universe universe;
 	public static LinkedBlockingQueue<NoiseBuffer> noiseBufferQueue;
 	public static NoiseThreadPoolExecutor noiseThreadPool;
@@ -107,16 +94,20 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 			//int a = 1/0;// throw new Exception("");
 		}
 		
-		
+		engine = new Engine();
+		/*//todo: rapid switch and dup test ensure proper loading
+		loadSystems(engine);
+		loadSystems(engine);
+		GameScreen.inSpace = false;
+		loadSystems(engine);
+		*/
 		if (inSpace) {
 			initSpace(playerTESTSHIP);
 		} else {
 			initWorld(playerTESTSHIP, planet);
 		}
 		
-		
-		//engine = new Engine();
-		//loadSystems(engine);//testing
+
 		
 		//cleanup unmanaged resources
 		//new ResourceDisposer(engine);//TODO: this is causing org.lwjgl.opengl.OpenGLException: Cannot use offsets when Array Buffer Object is disabled
@@ -129,104 +120,63 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 	//region system loading
 	@SuppressWarnings("unchecked")
 	public void loadSystems(Engine engine) {
-		//TODO: finish. this is scaffolding
+		Gdx.app.log(this.getClass().getSimpleName(),
+				inSpace() ? "==========SPACE==========" : "==========WORLD==========");
+		
 		SystemsConfig cfg = SpaceProject.systemsConfig;
 		for (SysCFG sysCFG : cfg.getSystems()) {
+			boolean correctPlatform = (SpaceProject.isMobile() && sysCFG.isLoadOnMobile()) || (!SpaceProject.isMobile() && sysCFG.isLoadOnDesktop());
+			if (!correctPlatform) {
+				Gdx.app.log(this.getClass().getSimpleName(), "Skip loading: " + sysCFG.getClassName());
+				continue;
+			}
+			boolean shouldBeLoaded = (inSpace() && sysCFG.isLoadInSpace()) || (!inSpace() && sysCFG.isLoadInWorld());
+			
 			try {
-				boolean correctPlatform = (SpaceProject.isMobile() && sysCFG.isLoadOnMobile()) || (!SpaceProject.isMobile() && sysCFG.isLoadOnDesktop());
-				if (!correctPlatform) {
-					Gdx.app.log(this.getClass().getSimpleName(), "Skip loading: " + sysCFG.getClassName());
-					continue;
-				}
-				boolean shouldBeLoaded = (inSpace() && sysCFG.isLoadInSpace()) || (!inSpace() && sysCFG.isLoadInWorld());
-				
 				Class<? extends EntitySystem> loadMe = (Class<? extends EntitySystem>) Class.forName(sysCFG.getClassName());
-				//Object loadMe = getObject(sysCFG.getClassName(), EntitySystem.class);
-				//EntitySystem systemToLoad = null;// getObject(sysCFG.getClassName(), EntitySystem.class);
 				EntitySystem systemInEngine = engine.getSystem(loadMe);
-				boolean isLoaded = systemInEngine != null;
 				
+				boolean isLoaded = systemInEngine != null;
 				if (shouldBeLoaded) {
 					if (!isLoaded) {
 						EntitySystem systemToLoad = loadMe.newInstance();
 						systemToLoad.priority = sysCFG.getPriority();
 						
+						if (systemToLoad instanceof RequireGameContext) {
+							((RequireGameContext)systemToLoad).initContext(this);
+						}
 						
 						engine.addSystem(systemToLoad);
 						Gdx.app.log(this.getClass().getSimpleName(), "Loaded: " + systemToLoad.getClass().getName());
 					}
 				} else {
 					if (isLoaded) {
+						if (systemInEngine instanceof EntityListener) {
+							//listener must be removed, other wise a reference is kept in engine (i think)
+							//when system is re-added / re-removed down the line, the families/listeners are broken
+							engine.removeEntityListener((EntityListener) systemInEngine);
+						}
 						engine.removeSystem(systemInEngine);
 						Gdx.app.log(this.getClass().getSimpleName(), "Unloaded: " + systemInEngine.getClass().getName());
 					}
 				}
 			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
 				Gdx.app.error(this.getClass().getSimpleName(), "Could not find " + sysCFG.getClassName(), e);
+			} catch (InstantiationException e) {
+				Gdx.app.error(this.getClass().getSimpleName(), "Could not instantiate " + sysCFG.getClassName(), e);
 			} catch (Exception e) {
-				e.printStackTrace();
-				Gdx.app.error(this.getClass().getSimpleName(), "Could not find " + sysCFG.getClassName(), e);
+				Gdx.app.error(this.getClass().getSimpleName(), "Could not load " + sysCFG.getClassName(), e);
 			}
 		}
 	}
 	
-	public <T> T instantiateObject(String name, Class<T> cls) throws Exception {
-		return (T) Class.forName(name).newInstance();
-	}
-	
-	public <T> T getObject(String name, Class<T> cls) throws Exception {
-		return (T) Class.forName(name);
-	}
 	
 	private void initSpace(Entity transitioningEntity) {
-		Gdx.app.log(this.getClass().getSimpleName(), "==========SPACE==========");
 		inSpace = true;
 		currentPlanet = null;
 		
-		
+		loadSystems(engine);
 		// engine to handle all entities and components
-		engine = new Engine();
-
-
-
-		//===============SYSTEMS===============
-		//input
-		if (SpaceProject.isMobile()) {
-			engine.addSystem(new MobileInputSystem());
-		} else {
-			DesktopInputSystem desktopInputSystem = new DesktopInputSystem();
-			inputMultiplexer.addProcessor(desktopInputSystem);
-			engine.addSystem(desktopInputSystem);
-		}
-		engine.addSystem(new AISystem());
-
-		//loading
-		//TODO: SpaceParallaxSystem & SpaceLoadingSystem are a source of jitter/jumping while moving, caused by loading/unloading textures.
-		engine.addSystem(new SpaceLoadingSystem());
-		engine.addSystem(new SpaceParallaxSystem());
-
-		//logic
-		engine.addSystem(new ScreenTransitionSystem());
-		engine.addSystem(new ControlSystem());
-		engine.addSystem(new ExpireSystem());
-		engine.addSystem(new OrbitSystem());
-		engine.addSystem(new MovementSystem());
-		engine.addSystem(new BoundsSystem());
-		engine.addSystem(new CollisionSystem());
-
-
-		//rendering
-		engine.addSystem(new CameraSystem());
-		engine.addSystem(new SpaceRenderingSystem());
-		HUDSystem hudSystem = new HUDSystem();
-		inputMultiplexer.addProcessor(0, hudSystem.getStage());
-		engine.addSystem(hudSystem);
-		DebugUISystem debugUISystem = new DebugUISystem();
-		inputMultiplexer.addProcessor(0, debugUISystem.getStage());
-		engine.addSystem(debugUISystem);
-
-
 
 
 
@@ -267,63 +217,26 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		engine.addEntity(test3DEntity);
 		*/
 	}
-	//endregion
 	
 	
 	private void initWorld(Entity transitioningEntity, Entity planet) {
-		Gdx.app.log(this.getClass().getSimpleName(), "==========WORLD==========");
 		inSpace = false;
 		currentPlanet = planet;
-
-		int mapSize = planet.getComponent(PlanetComponent.class).mapSize;
+		
 
 		Misc.printObjectFields(planet.getComponent(SeedComponent.class));
 		Misc.printObjectFields(planet.getComponent(PlanetComponent.class));
 		//Misc.printEntity(transitionComponent.transitioningEntity);
+		
+		loadSystems(engine);
 
-
-
-		// engine to handle all entities and components
-		engine = new Engine();
-
-
-		// ===============SYSTEMS===============
-		// input
-		if (SpaceProject.isMobile()) {
-			engine.addSystem(new MobileInputSystem());
-		} else {
-			DesktopInputSystem desktopInputSystem = new DesktopInputSystem();
-			inputMultiplexer.addProcessor(desktopInputSystem);
-			engine.addSystem(desktopInputSystem);
-		}
-		engine.addSystem(new AISystem());
-
-		// loading
-
-		// logic
-		engine.addSystem(new ScreenTransitionSystem());
-		engine.addSystem(new ControlSystem());
-		engine.addSystem(new ExpireSystem());
-		engine.addSystem(new MovementSystem());
-		engine.addSystem(new WorldWrapSystem(mapSize));
-		engine.addSystem(new BoundsSystem());
-		engine.addSystem(new CollisionSystem());
-
-		// rendering
-		engine.addSystem(new CameraSystem());
-		engine.addSystem(new WorldRenderingSystem(planet));
-		HUDSystem hudSystem = new HUDSystem();
-		inputMultiplexer.addProcessor(0, hudSystem.getStage());
-		engine.addSystem(hudSystem);
-		DebugUISystem debugUISystem = new DebugUISystem();
-		inputMultiplexer.addProcessor(0, debugUISystem.getStage());
-		engine.addSystem(debugUISystem);
-
+		
 
 
 		// ===============ENTITIES===============
 		// add player
 		Entity ship = transitioningEntity;
+		int mapSize = planet.getComponent(PlanetComponent.class).mapSize;
 		int position = mapSize * SpaceProject.worldcfg.tileSize / 2;//set  position to middle of planet
 		ship.getComponent(TransformComponent.class).pos.set(position, position);
 		engine.addEntity(ship);
@@ -345,6 +258,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		*/
 
 	}
+	//endregion
 
 	@Override
 	public void threadFinished(NoiseThread noise) {
@@ -427,7 +341,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 			transitioningEntities = null;
 			
 
-			inputMultiplexer.clear();
+			//inputMultiplexer.clear();
 			if (inSpace) {
 				initWorld(transEntity, Mappers.screenTrans.get(transEntity).planet);
 			} else {
@@ -435,7 +349,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 				initSpace(transEntity);
 
 			}
-			inputMultiplexer.addProcessor(0,this);
+			//inputMultiplexer.addProcessor(0,this);
 
 			/*
 			//TODO: background stuff
@@ -451,6 +365,10 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 	
 	public static long getGameTimeCurrent() {
 		return gameTimeCurrent;
+	}
+	
+	public Entity getCurrentPlanet() {
+		return currentPlanet;
 	}
 	
 	@Override
@@ -543,31 +461,16 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 			gameTimeStart += delta;
 		}
 		Gdx.app.log(this.getClass().getSimpleName(),"paused [" + pause + "]");
+
 		
-		
-		engine.getSystem(ControlSystem.class).setProcessing(!isPaused);
-		engine.getSystem(MovementSystem.class).setProcessing(!isPaused);
-		engine.getSystem(BoundsSystem.class).setProcessing(!isPaused);
-		engine.getSystem(CollisionSystem.class).setProcessing(!isPaused);
-		engine.getSystem(AISystem.class).setProcessing(!isPaused);
-		engine.getSystem(ExpireSystem.class).setProcessing(!isPaused);
-		engine.getSystem(ScreenTransitionSystem.class).setProcessing(!isPaused);
-		
-		OrbitSystem oSys = engine.getSystem(OrbitSystem.class);
-		if (oSys != null) oSys.setProcessing(!isPaused);
-		
-		
-		/*scaffolding
 		SystemsConfig systemsConfig = SpaceProject.systemsConfig;
 		for (EntitySystem system : engine.getSystems()) {
-			SysCFG sysCFG = systemsConfig.getConfig(system.getClass().getSimpleName());
+			SysCFG sysCFG = systemsConfig.getConfig(system.getClass().getName());
 			if (sysCFG.isHaltOnGamePause()) {
 				system.setProcessing(!isPaused);
 			}
-		}*/
+		}
 	}
-
 	
-
 }
 

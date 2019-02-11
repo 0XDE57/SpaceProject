@@ -9,18 +9,25 @@ import com.badlogic.gdx.InputProcessor;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 
-public class DesktopInputSystem extends EntitySystem implements InputProcessor {
+public class DesktopInputSystem extends EntitySystem implements InputProcessor, RequireGameContext {
 
 	private ImmutableArray<Entity> players;
 	
 	@Override
+	public void initContext(GameScreen gameScreen) {
+		gameScreen.getInputMultiplexer().addProcessor(this);
+	}
+	
+	@Override
 	public void addedToEngine(com.badlogic.ashley.core.Engine engine) {
 		players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
-	}	
+	}
+	
 	
 	@Override
 	public void update(float delta) {	
@@ -165,4 +172,6 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
 	public boolean scrolled(int amount) {
 		return false;
 	}
+	
+	
 }
