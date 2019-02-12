@@ -8,8 +8,10 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
+import com.kotcrab.vis.ui.VisUI;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.ControlFocusComponent;
@@ -22,6 +24,7 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.SysCFG;
 import com.spaceproject.config.SystemsConfig;
 import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.Universe;
 import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.generation.noise.NoiseGenListener;
@@ -55,11 +58,19 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 
 	ShaderProgram shader = null;
-
-
+	public static String smallFont = "smallFont";
+	
+	
 	public GameScreen(boolean inSpace) {
 		GameScreen.inSpace = inSpace;
-
+		
+		//init scene2d/VisUI
+		if (VisUI.isLoaded())
+			VisUI.dispose(true);
+		VisUI.load(SpaceProject.isMobile() ? VisUI.SkinScale.X2 : VisUI.SkinScale.X1);
+		BitmapFont font = FontFactory.createFont(FontFactory.fontBitstreamVM, 12);
+		VisUI.getSkin().add(smallFont, font);
+		
 		gameTimeStart = System.nanoTime();
 
 		universe = new Universe();
@@ -82,6 +93,8 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 				batch.setShader(shader);
 		}
 
+		
+		
 
 
 		// load test default values
@@ -116,6 +129,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 	public static boolean inSpace() {
 		return inSpace;
 	}
+
 	
 	//region system loading
 	@SuppressWarnings("unchecked")
@@ -370,6 +384,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 	public Entity getCurrentPlanet() {
 		return currentPlanet;
 	}
+	
 	
 	@Override
 	public void resize(int width, int height) {

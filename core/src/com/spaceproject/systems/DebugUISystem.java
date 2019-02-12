@@ -47,7 +47,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class DebugUISystem extends IteratingSystem implements Disposable {
+public class DebugUISystem extends IteratingSystem implements RequireGameContext, Disposable {
 
 	private Engine engine;
 	private Stage stage;
@@ -113,6 +113,10 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 		}
 	}
 	
+	@Override
+	public void initContext(GameScreen gameScreen) {
+		gameScreen.getInputMultiplexer().addProcessor(0, getStage());
+	}
 	
 	@Override
 	public void addedToEngine(Engine engine) {		
@@ -402,6 +406,8 @@ public class DebugUISystem extends IteratingSystem implements Disposable {
 			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
 			String threads = "  Threads: " + threadSet.size();
 
+			int sbCalls = GameScreen.batch.renderCalls;
+			
 			int linePos = 1;
 			float lineHeight = fontLarge.getLineHeight();
 			debugTexts.add(new DebugText(count, x, y - (lineHeight * linePos++), fontLarge));

@@ -19,7 +19,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.kotcrab.vis.ui.VisUI;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
@@ -64,11 +63,7 @@ public class HUDSystem extends EntitySystem implements RequireGameContext {
 		cam = MyScreenAdapter.cam;
 		shape = MyScreenAdapter.shape;
 		batch = MyScreenAdapter.batch;
-
-		//init scene2d/VisUI
-		if (VisUI.isLoaded())
-			VisUI.dispose(true);
-		VisUI.load(SpaceProject.isMobile() ? VisUI.SkinScale.X2 : VisUI.SkinScale.X1);
+		
 		stage = new Stage(new ScreenViewport());
 
 	}
@@ -77,8 +72,6 @@ public class HUDSystem extends EntitySystem implements RequireGameContext {
 	public void initContext(GameScreen gameScreen) {
 		gameScreen.getInputMultiplexer().addProcessor(0, getStage());
 	}
-
-	
 	
 	
 	@Override

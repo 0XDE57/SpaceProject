@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.SerializationException;
 
 public abstract class Config {
 
@@ -44,19 +45,26 @@ public abstract class Config {
 	
 	public Config loadFromJson() {
 		FileHandle keyFile = Gdx.files.local(fileName);
-		if (keyFile.exists()) {
-			Json json = new Json();
-			json.setUsePrototypes(false);
-			
-			Config config = json.fromJson(this.getClass(), keyFile.readString());
-			Gdx.app.log(this.getClass().getSimpleName(), "Loaded "+ this.getClass().getSimpleName() +" from json.");
-			Gdx.app.log(this.getClass().getSimpleName(), json.toJson(config));
-			return config;			
-		} else {
-			Gdx.app.log(this.getClass().getSimpleName(), fileName + " not found. Loading defaults.");
-			loadDefault();
-			saveToJson();
-			return this;
+		String logSource = this.getClass().getSimpleName();
+		try {
+			if (keyFile.exists()) {
+				Json json = new Json();
+				json.setUsePrototypes(false);
+				
+				Config config = json.fromJson(this.getClass(), keyFile.readString());
+				Gdx.app.log(logSource, "Loaded " + logSource + " from json.");
+				Gdx.app.log(logSource, json.toJson(config));
+				return config;
+			}
+		} catch (SerializationException e) {
+			Gdx.app.error(logSource, "Could not load: " + fileName, e);
+		}  catch (Exception e) {
+			Gdx.app.error(logSource, "Could not load: " + fileName, e);
 		}
+		
+		Gdx.app.log(logSource, "Loading defaults.");
+		loadDefault();
+		//saveToJson();
+		return this;
 	}
 }

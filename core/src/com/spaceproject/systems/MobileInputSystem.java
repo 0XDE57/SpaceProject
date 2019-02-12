@@ -34,8 +34,8 @@ public class MobileInputSystem extends EntitySystem {
 	TouchButtonRound btnShoot = new TouchButtonRound(Gdx.graphics.getWidth() - 80, 100, 70, white, blue);
 	TouchButtonRound btnVehicle = new TouchButtonRound(Gdx.graphics.getWidth() - 80, 300, 50, white, blue);
 	TouchButtonRectangle btnLand = new TouchButtonRectangle(Gdx.graphics.getWidth()/2-60, Gdx.graphics.getHeight() - 60 - 20, 120, 60, white, blue);
-	TouchButtonRectangle btnMap = new TouchButtonRectangle(Gdx.graphics.getWidth()-120-20, Gdx.graphics.getHeight() - 60 - 20, 120, 60, white, blue);
-	TouchButtonRectangle btnMenu = new TouchButtonRectangle(20, Gdx.graphics.getHeight() - 60 - 20, 120, 60, white, blue);
+	TouchButtonRectangle btnMap = new TouchButtonRectangle(20, Gdx.graphics.getHeight() - 60 - 20, 120, 60, white, blue);
+	TouchButtonRectangle btnMenu = new TouchButtonRectangle(Gdx.graphics.getWidth()-120-20, Gdx.graphics.getHeight() - 60 - 20, 120, 60, white, blue);
 	TouchJoyStick joyMovement = new TouchJoyStick(230, 230, 200, white, blue);
 
 	private ImmutableArray<Entity> players;

@@ -7,14 +7,12 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree.Node;
@@ -23,11 +21,12 @@ import com.badlogic.gdx.scenes.scene2d.utils.Selection;
 import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisWindow;
-import com.spaceproject.generation.FontFactory;
 import com.spaceproject.utility.SimpleTimer;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static com.spaceproject.screens.GameScreen.smallFont;
 
 
 public class DebugEngineWindow extends VisWindow implements EntityListener {
@@ -35,7 +34,6 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     Engine engine;
     Tree tree;
     Node systemNodes, entityNodes;
-    Skin skin;
     
     static int refreshRate = 1000;
     static int newTime = 1000;
@@ -49,8 +47,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     final int keyLeft = Input.Keys.LEFT;
     final int keyRight = Input.Keys.RIGHT;
     
-    static String smallFont = "smallFont";
-
+    
     public DebugEngineWindow(Engine engine) {
         super("Debug Engine View");
 
@@ -63,15 +60,11 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         setSize(400, Gdx.graphics.getHeight()-20);
         setPosition(10,10);
         addCloseButton();
-
         
-        skin = VisUI.getSkin();
-        BitmapFont font = FontFactory.createFont(FontFactory.fontBitstreamVM, 12);
-        skin.add(smallFont, font);
         
-        systemNodes = new Node(new Label("Systems", skin, smallFont, Color.WHITE));
-        entityNodes = new Node(new Label("Entities", skin, smallFont, Color.WHITE));
-        tree = new Tree(skin);
+        systemNodes = new Node(new Label("Systems", VisUI.getSkin(), smallFont, Color.WHITE));
+        entityNodes = new Node(new Label("Entities", VisUI.getSkin(), smallFont, Color.WHITE));
+        tree = new Tree(VisUI.getSkin());
         tree.add(systemNodes);
         tree.add(entityNodes);
         refreshNodes();
@@ -99,8 +92,6 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         //scrollPane.scrol
         contents.add(scrollPane).expand().fill();
         add(contents).expand().fill();
-
-        
         
     }
 
@@ -123,7 +114,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         for (Entity entity : engine.getEntities()) {
             Node entNode = entityNodes.findNode(entity);
             if (entNode == null) {
-                entityNodes.add(new EntityNode(entity, skin));
+                entityNodes.add(new EntityNode(entity, VisUI.getSkin()));
             } else {
                 ((UpdateNode)entNode).update();
             }
@@ -282,7 +273,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
 
     @Override
     public void entityAdded(Entity entity) {
-        entityNodes.add(new EntityNode(entity, skin, showHistory));
+        entityNodes.add(new EntityNode(entity, VisUI.getSkin(), showHistory));
     }
 
     @Override

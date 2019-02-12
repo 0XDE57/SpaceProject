@@ -4,6 +4,7 @@ package com.spaceproject.ui;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
@@ -111,6 +112,13 @@ public class Menu extends VisWindow {
         tabbedPane.add(placeholderATab);
 
         placeholderBTab = new HotKeyTab("placeholder", Input.Keys.NUM_2);
+        //test rainbow text
+        BitmapFont font = VisUI.getSkin().get("default-font", BitmapFont.class);
+        font.getData().markupEnabled = true;
+        Label testRainbowLabel = new Label("<<[BLUE]M[RED]u[YELLOW]l[GREEN]t[OLIVE]ic[]o[]l[]o[]r[]*[MAROON]Label[][] [Unknown Color]>>", VisUI.getSkin());
+        placeholderBTab.getContentTable().add(testRainbowLabel);
+        placeholderBTab.getContentTable().row();
+        placeholderBTab.getContentTable().add(new Label("[RED]This[BLUE] is a [GREEN]test!", VisUI.getSkin()));
         tabbedPane.add(placeholderBTab);
 
 

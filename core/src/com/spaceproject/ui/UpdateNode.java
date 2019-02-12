@@ -15,6 +15,8 @@ import com.spaceproject.utility.SimpleTimer;
 
 import java.lang.reflect.Field;
 
+import static com.spaceproject.screens.GameScreen.smallFont;
+
 
 public abstract class UpdateNode extends Tree.Node {
     
@@ -53,7 +55,7 @@ class EntityNode extends UpdateNode {
     private SimpleTimer newTimer;
     
     public EntityNode(Entity entity, Skin skin) {
-        super(new Label(Misc.objString(entity), skin, DebugEngineWindow.smallFont, Color.WHITE), entity);
+        super(new Label(Misc.objString(entity), skin, smallFont, Color.WHITE), entity);
     }
     
     public EntityNode(Entity entity, Skin skin, boolean markNew) {
@@ -128,7 +130,7 @@ class ReflectionNode extends UpdateNode {
     private SimpleTimer newTimer;
     
     public ReflectionNode(Object object) {
-        super(new Label(Misc.objString(object), VisUI.getSkin(), DebugEngineWindow.smallFont, Color.WHITE), object);
+        super(new Label(Misc.objString(object), VisUI.getSkin(), smallFont, Color.WHITE), object);
         init();
     }
     
@@ -144,7 +146,7 @@ class ReflectionNode extends UpdateNode {
     
     private void init() {
         for (Field f : getObject().getClass().getFields()) {
-            add(new FieldNode(new Label("init", VisUI.getSkin(), DebugEngineWindow.smallFont, Color.WHITE), getObject(), f));
+            add(new FieldNode(new Label("init", VisUI.getSkin(), smallFont, Color.WHITE), getObject(), f));
         }
     }
     
@@ -214,7 +216,7 @@ class GhostNode extends UpdateNode {
     
     private SimpleTimer removeTimer;
     public GhostNode(UpdateNode nodeRemoved, boolean includeChildren) {
-        super(new Label(nodeRemoved.getActor().getName(), VisUI.getSkin(), DebugEngineWindow.smallFont, Color.RED), null);
+        super(new Label(nodeRemoved.getActor().getName(), VisUI.getSkin(), smallFont, Color.RED), null);
         
         Tree.Node parent = nodeRemoved.getParent();
         final Array<Tree.Node> parentsSiblings;
@@ -240,7 +242,7 @@ class GhostNode extends UpdateNode {
         for (Tree.Node child : children) {
             addChildren(child.getChildren(), root);
             
-            add(new Tree.Node(new Label(child.getActor().getName(), VisUI.getSkin(), DebugEngineWindow.smallFont, Color.RED)));
+            add(new Tree.Node(new Label(child.getActor().getName(), VisUI.getSkin(), smallFont, Color.RED)));
         }
     }
     

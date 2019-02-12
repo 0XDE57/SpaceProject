@@ -54,9 +54,9 @@ public class MiniMap {
     private Color debugLoadDistColor = new Color(1, 0, 0, 1);
 
     public MiniMap() {
-        //mapState = SpaceProject.isMobile() ? MapState.off : MapState.mini;
-        //if (mobile) miniMapPosition = middleRight?//TODO: make minimap location for mobile that doesnt interfere/overlap controls
-
+        if (SpaceProject.isMobile()) {
+            miniMapPosition = MiniMapPosition.topLeft;
+        }
 
         updateMapPosition();
         resetMapScale();

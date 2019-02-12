@@ -74,8 +74,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     	
     	//adjust zoom
     	zoomCamera(delta);
-
-
+    	
 
 		//fullscreen toggle
 		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.fullscreen)) {
@@ -94,16 +93,16 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     	}
     	
     }
-    
-    public InputMultiplexer getInputMultiplexer() {
-    	return inputMultiplexer;
+
+	public InputMultiplexer getInputMultiplexer() {
+		return inputMultiplexer;
 	}
     
    
     @Override
     public void resize(int width, int height) {
     	viewport.update(width, height);
-		Gdx.app.log(this.getClass().getSimpleName(), "resize: " + width + ", " + height);
+		//Gdx.app.log(this.getClass().getSimpleName(), "resize: " + width + ", " + height);
     }
     
     /**

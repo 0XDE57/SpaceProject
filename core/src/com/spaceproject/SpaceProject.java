@@ -45,13 +45,14 @@ public class SpaceProject extends Game {
 	private static void loadConfigs() {
 		systemsConfig = new SystemsConfig();
 		systemsConfig.loadDefault();
+		//systemsConfig = (SystemsConfig) new SystemsConfig().loadFromJson();
 		//systemsConfig.saveToJson();
 		
 		
 		entitycfg = new EntityConfig();
 		entitycfg.loadDefault();
-
-
+		
+		
 		//keycfg = (KeyConfig) new KeyConfig().loadFromJson();
 		keycfg = new KeyConfig();
 		keycfg.loadDefault();
