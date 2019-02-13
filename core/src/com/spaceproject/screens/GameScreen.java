@@ -18,8 +18,6 @@ import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
-import com.spaceproject.components.Sprite3DComponent;
-import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.SysCFG;
 import com.spaceproject.config.SystemsConfig;
@@ -28,6 +26,7 @@ import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.Universe;
 import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.generation.noise.NoiseGenListener;
+import com.spaceproject.generation.noise.NoiseManager;
 import com.spaceproject.generation.noise.NoiseThread;
 import com.spaceproject.generation.noise.NoiseThreadPoolExecutor;
 import com.spaceproject.systems.DebugUISystem;
@@ -54,8 +53,10 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 	private Entity currentPlanet = null;
 	
 	public static Universe universe;
-	public static LinkedBlockingQueue<NoiseBuffer> noiseBufferQueue;
-	public static NoiseThreadPoolExecutor noiseThreadPool;
+	
+	public static NoiseManager noiseManager;//TODO: move this into manager
+	public static LinkedBlockingQueue<NoiseBuffer> noiseBufferQueue;//TODO: move this into manager
+	public static NoiseThreadPoolExecutor noiseThreadPool;//TODO: move this into manager
 
 
 	ShaderProgram shader = null;
@@ -130,7 +131,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 	
 	//region system loading
 	@SuppressWarnings("unchecked")
-	public void loadSystems(Engine engine) {
+	public void loadSystems(Engine engine) {//TODO: move this out of here -> util/SystemLoader.java
 		Gdx.app.log(this.getClass().getSimpleName(),
 				inSpace() ? "==========SPACE==========" : "==========WORLD==========");
 		
@@ -318,6 +319,9 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		}
 
 		for (Entity e : transitioningEntities) {
+			//todo: what happens (in terms of persistence) to an entity in process of transitioning?
+			//if important -> persist
+			//if same world (even if not important) -> persist (land on planet at same time as AI=where is AI)
 			ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(e);
 			if (screenTrans.doTransition) {
 				screenTrans.doTransition = false;
@@ -331,7 +335,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 					Gdx.app.log(this.getClass().getSimpleName(), "REMOVING: " + Misc.objString(e));
 					ResourceDisposer.dispose(e);
 					engine.removeEntity(e);
-					/*//TODO: background stuff
+					/*//TODO: persist
 					if (Mappers.persist.get(e)) {
 						System.out.println("MOVED to background engine: " + Misc.objString(e));
 						persistenceEngine.addEntity(e);
@@ -348,30 +352,24 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 
 		if (transition) {
-			ResourceDisposer.disposeAll(engine.getEntities(), transEntity);
+			ResourceDisposer.disposeAllExcept(engine.getEntities(), transitioningEntities);
 			engine.removeAllEntities();//to fix family references when entities added to new engine
 			transitioningEntities = null;
 			
-
-			//inputMultiplexer.clear();
+			
 			if (inSpace) {
 				initWorld(transEntity, Mappers.screenTrans.get(transEntity).planet);
 			} else {
 				Mappers.screenTrans.get(transEntity).planet = currentPlanet;
 				initSpace(transEntity);
-
 			}
-			//inputMultiplexer.addProcessor(0,this);
 
 			/*
-			//TODO: background stuff
+			//TODO: persist
 			for (Entity relevantEntity : backgroundEngine.getEntities()) {
 				//if landing on planet, and relevantEntity is on planet, add to engine, remove from backgroundEngine
 				//if going to space, and relevantEntity in space, add to engine, remove from backgroundEngine
 			}*/
-
-			//Misc.printEntities(engine);
-			//Misc.printSystems(engine);
 		}
 	}
 	
@@ -388,9 +386,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 	public void resize(int width, int height) {
 		super.resize(width, height);
 		
-		//todo: move responsibility of this out?
-		//approach a: for each system in engine, if implements resizable, fire resize
-		//approach b: subscribe to resize event
+		//todo: fire resize event for systems to subscribe to
 		HUDSystem hud = engine.getSystem(HUDSystem.class);
 		if (hud != null) {
 			hud.resize(width, height);
@@ -408,6 +404,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		HUDSystem hud = engine.getSystem(HUDSystem.class);
 		if (hud != null) {
 			if (hud.getMiniMap().mapState == MapState.full) {
+				//todo: minimap should zoom only on mouse over / focus
 				hud.getMiniMap().scrollMiniMap(amount);
 				return false;
 			}
@@ -416,39 +413,8 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		return super.scrolled(amount);
 	}
 
-	@Override
-	public void dispose() {
-		Gdx.app.log(this.getClass().getSimpleName(), "Disposing: " + this.getClass().getSimpleName());
-
-		// clean up after self
-		for (EntitySystem sys : engine.getSystems()) {
-			if (sys instanceof Disposable)
-				((Disposable) sys).dispose();
-		}
-
-		
-		for (Entity ents : engine.getEntities()) {
-			TextureComponent tex = ents.getComponent(TextureComponent.class);
-			if (tex != null) {
-				tex.texture.dispose();
-			}
-			
-			Sprite3DComponent s3d = Mappers.sprite3D.get(ents);
-			if (s3d != null) {
-				s3d.renderable.dispose();
-			}
-		}
-
-		engine.removeAllEntities();
-		engine = null;
-		
-	}
-
-	@Override
-	public void hide() {
-		dispose();
-	}
-
+	
+	//region pause/resume
 	@Override
 	public void pause() {
 		//this is called from on lose focus
@@ -463,7 +429,6 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		//if pauseOnLoseFocus, resume
 		//setSystemProcessing(false);
 	}
-	
 	
 	private void setSystemProcessing(boolean pause) {
 		this.isPaused = pause;
@@ -483,6 +448,29 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 				system.setProcessing(!isPaused);
 			}
 		}
+	}
+	//endregion
+	
+	@Override
+	public void hide() {
+		dispose();
+	}
+	
+	@Override
+	public void dispose() {
+		Gdx.app.log(this.getClass().getSimpleName(), "Disposing: " + this.getClass().getSimpleName());
+		
+		// clean up after self
+		for (EntitySystem sys : engine.getSystems()) {
+			if (sys instanceof Disposable)
+				((Disposable) sys).dispose();
+		}
+		
+		ResourceDisposer.disposeAll(engine.getEntities());
+		
+		engine.removeAllEntities();
+		engine = null;
+		
 	}
 	
 }

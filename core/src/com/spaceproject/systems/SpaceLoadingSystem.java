@@ -33,15 +33,10 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 
 	//private Universe universe;
 	private ImmutableArray<Entity> loadedAstronomicalBodies;
-	//private LinkedBlockingQueue<NoiseBuffer> noiseBufferQueue;
-	//NoiseThreadPoolExecutor noiseThreadPool;
+
 
 	SimpleTimer checkStarsTimer;//this system might make sense as an interval system instead of timer
 
-	/*
-	public SpaceLoadingSystem(NoiseThreadPoolExecutor noiseThreadPool) {
-		noiseThreadPool.addListener(this);
-	}*/
 
 	@Override
 	public void addedToEngine(Engine engine) {
@@ -57,12 +52,8 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 		// load space things (asteroids, wormhole, black hole, etc)
 		// load ai/mobs
 
-		//noiseBufferQueue = new LinkedBlockingQueue<NoiseBuffer>();
-		//noiseThreadPool = new NoiseThreadPoolExecutor(SpaceProject.celestcfg.maxGenThreads);
-		//noiseThreadPool.addListener(this);
-		//noiseThreadPool.addListener(universe);
-
 		checkStarsTimer = new SimpleTimer(4000);
+		checkStarsTimer.setCanDoEvent();
 	}
 
 
@@ -100,14 +91,6 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 		}
 	}
 
-
-	/*
-	@Override
-	public void threadFinished(NoiseThread noise) {
-		//TODO: save in universe file for caching and loading instantly when transition to world
-		GameScreen.noiseBufferQueue.add(noise.getNoise());
-	}
-	*/
 	
 	@Override
 	public void update(float delta) {
@@ -122,6 +105,8 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 	private void updatePlanetTextures() {
 		//check queue for tilemaps / pixmaps to load into textures
 		if (!GameScreen.noiseBufferQueue.isEmpty()) {
+			//todo: should be the event instead of the queue (as long as it remains separate threads)
+			//todo: if not, this should be asking manager
 			try {
 				NoiseBuffer noise = GameScreen.noiseBufferQueue.take();
 				if (noise.pixelatedTileMap == null) {
@@ -130,8 +115,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 				}
 
 				for (Entity p : getEngine().getEntitiesFor(Family.all(PlanetComponent.class).get())) {
-					if (p.getComponent(SeedComponent.class).seed == noise.seed) {//base on seed instead of ID, but what if duplicate seed? shouldn't happen..
-					//if (p.getComponent(PlanetComponent.class).tempGenID == noise.ID) {
+					if (p.getComponent(SeedComponent.class).seed == noise.seed) {
 						// create planet texture from tileMap, replace texture
 						Texture newTex = TextureFactory.generatePlanet(noise.pixelatedTileMap, Tile.defaultTiles);
 						p.getComponent(TextureComponent.class).texture = newTex;
@@ -149,7 +133,6 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 
 	private void updateStars() {
 		if (checkStarsTimer.tryEvent()) {
-			
 			//distance to check when to load planets
 			int loadDistance = (int) SpaceProject.celestcfg.loadSystemDistance;
 			loadDistance *= loadDistance;//square for dst2

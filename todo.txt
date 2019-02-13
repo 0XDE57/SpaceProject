@@ -212,7 +212,10 @@
             	at com.badlogic.ashley.core.Engine.removeAllEntities(Engine.java:98)
         * Solution: engine.removeEntityListener(the system) when removing system
 
-
+[ ] QA / unit tests
+    [ ] system loading on screen switch
+    [ ] noise generation (ensure no duplicates, noise is properly returned...)
+    [ ] ensure seeds created are all unique
 
 ---GAMEPLAY & DESIGN---
 [...] SHIPS
