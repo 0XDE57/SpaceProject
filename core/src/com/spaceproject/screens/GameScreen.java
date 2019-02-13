@@ -36,6 +36,7 @@ import com.spaceproject.systems.RequireGameContext;
 import com.spaceproject.ui.MapState;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
+import com.spaceproject.utility.ResourceDisposer;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -120,10 +121,6 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 			initWorld(playerTESTSHIP, planet);
 		}
 		
-
-		
-		//cleanup unmanaged resources
-		//new ResourceDisposer(engine);//TODO: this is causing org.lwjgl.opengl.OpenGLException: Cannot use offsets when Array Buffer Object is disabled
 	}
 	
 	public static boolean inSpace() {
@@ -312,7 +309,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 	private void checkTransition() {
 		//TODO: still a bit too much transitions logic in here, should move more to transition system
-		//maybe a separete component DoTransitionComp added when stage hits transition, in order to move
+		//maybe a separate component DoTransitionComp added when stage hits transition, in order to move
 		//animation next stage call to system with other similar calls and logic?
 		boolean transition = false;
 		Entity transEntity = null;
@@ -332,6 +329,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 				if (Mappers.AI.get(e) != null) {
 					Gdx.app.log(this.getClass().getSimpleName(), "REMOVING: " + Misc.objString(e));
+					ResourceDisposer.dispose(e);
 					engine.removeEntity(e);
 					/*//TODO: background stuff
 					if (Mappers.persist.get(e)) {
@@ -350,7 +348,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 
 		if (transition) {
-			//engine.removeEntityListener();
+			ResourceDisposer.disposeAll(engine.getEntities(), transEntity);
 			engine.removeAllEntities();//to fix family references when entities added to new engine
 			transitioningEntities = null;
 			

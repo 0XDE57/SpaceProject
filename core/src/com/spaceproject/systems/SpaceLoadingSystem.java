@@ -25,6 +25,7 @@ import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.generation.noise.NoiseThread;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.ResourceDisposer;
 import com.spaceproject.utility.SimpleTimer;
 
 
@@ -92,6 +93,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 			OrbitComponent orbit = Mappers.orbit.get(e);
 			if (orbit.parent != null) {
 				if (orbit.parent == entity) {
+					ResourceDisposer.dispose(e);
 					getEngine().removeEntity(e);
 				}
 			}
@@ -189,6 +191,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 		for (Entity entity : loadedAstronomicalBodies) {
             TransformComponent t = Mappers.transform.get(entity);
             if (Vector2.dst2(t.pos.x, t.pos.y, GameScreen.cam.position.x, GameScreen.cam.position.y) > loadDistance) {
+				ResourceDisposer.dispose(entity);
                 getEngine().removeEntity(entity);
 				Gdx.app.log(this.getClass().getSimpleName(), "Removing Planetary System: " + entity.getComponent(TransformComponent.class).pos.toString());
             }

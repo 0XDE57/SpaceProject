@@ -176,17 +176,20 @@ public class DebugUISystem extends IteratingSystem implements RequireGameContext
 		
 		
 		shape.begin(ShapeType.Line);
-		
-		// draw ring to visualize orbit path
-		if (drawOrbitPath) drawOrbitPath(true);
-		
-		//draw the bounding box (collision detection) for collidables
-		if (drawBounds) drawBounds(drawBoundsPoly);
-		
-		if (drawMousePos) drawMouseLine();
-		
-		drawDebugVectors();
-		
+		{
+			// draw ring to visualize orbit path
+			if (drawOrbitPath)
+				drawOrbitPath(true);
+			
+			//draw the bounding box (collision detection) for collidables
+			if (drawBounds)
+				drawBounds(drawBoundsPoly);
+			
+			if (drawMousePos)
+				drawMouseLine();
+			
+			drawDebugVectors();
+		}
 		shape.end();
 		
 		
@@ -201,18 +204,18 @@ public class DebugUISystem extends IteratingSystem implements RequireGameContext
 		if (drawEntityList) drawEntityList();
 		
 		batch.begin();
-		
-		//print debug menu
-		//if (drawMenu)  drawDebugMenu();
+		{
+			//print debug menu
+			//if (drawMenu)  drawDebugMenu();
 			
-		
-		
-		//draw components on entity
-		if (drawComponentList) drawComponentList();
-
-		
-		drawDebugTexts(batch);
-
+			
+			//draw components on entity
+			if (drawComponentList)
+				drawComponentList();
+			
+			
+			drawDebugTexts(batch);
+		}
 		batch.end();	
 		
 		
@@ -369,8 +372,6 @@ public class DebugUISystem extends IteratingSystem implements RequireGameContext
 
 	/** Draw frames, entity count, position and memory info. */
 	private void drawFPS(boolean drawExtaInfo) {
-		//todo: forward this to debug text
-		
 		int x = 15;
 		int y = Gdx.graphics.getHeight() - 15;
 
@@ -564,8 +565,8 @@ public class DebugUISystem extends IteratingSystem implements RequireGameContext
 
 	private void drawDebugTexts(SpriteBatch batch) {
 		for (DebugText t : debugTexts) {
-			fontSmall.setColor(t.color);
 			if (t.font == null) {
+				fontSmall.setColor(t.color);
 				fontSmall.draw(batch, t.text, t.x, t.y);
 			} else {
 				t.font.setColor(t.color);

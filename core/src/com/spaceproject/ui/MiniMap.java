@@ -70,177 +70,177 @@ public class MiniMap {
     public void drawSpaceMap(Engine engine, ShapeRenderer shape, SpriteBatch batch, Entity player, ImmutableArray<Entity> mapables) {
         if (mapState == MapState.off)
             return;
-
+    
         if (!debugDisableClipping) {
             ScissorStack.pushScissors(mapBacking);
         }
-
+    
+        if (mapScale < 1)
+            mapScale = 1;
+    
+        float centerMapX = mapBacking.x + mapBacking.width / 2;
+        float centerMapY = mapBacking.y + mapBacking.height / 2;
+        
+        float loadDist = SpaceProject.celestcfg.loadSystemDistance;
+    
+        
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
+    
+        
         shape.begin(ShapeRenderer.ShapeType.Filled);
+        {
+            //draw backing
+            shape.setColor(backingColor);
+            shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, mapBacking.height);
+    
+    
+            //draw mouse pos
+            if (mapState == MapState.full) {
+                shape.setColor(mouseColor);
+                int mX = Gdx.input.getX();
+                int mY = Gdx.graphics.getHeight() - Gdx.input.getY();
+                if (mapBacking.contains(mX, mY)) {
+                    shape.line(mapBacking.x, mY, mapBacking.x + mapBacking.width, mY);//horizontal
+                    shape.line(mX, mapBacking.y, mX, mapBacking.y + mapBacking.height);//vertical
+                }
+            }
 
-
-        //draw backing
-        shape.setColor(backingColor);
-        shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, mapBacking.height);
-
-
-        //draw mouse pos
-        if (mapState == MapState.full) {
-            shape.setColor(mouseColor);
-            int mX = Gdx.input.getX();
-            int mY = Gdx.graphics.getHeight() - Gdx.input.getY();
-            if (mapBacking.contains(mX, mY)) {
-                shape.line(mapBacking.x, mY, mapBacking.x + mapBacking.width, mY);//horizontal
-                shape.line(mX, mapBacking.y, mX, mapBacking.y + mapBacking.height);//vertical
+    
+            //draw grid X
+            shape.setColor(gridColor);
+            int halfWidth = (int) (((mapBacking.width / 2)));
+            int startX = (int) ((-halfWidth * mapScale) + MyScreenAdapter.cam.position.x) / chunkSize;
+            int endX = (int) ((halfWidth * mapScale) + MyScreenAdapter.cam.position.x) / chunkSize;
+            for (int i = startX; i < endX + 1; i++) {
+                float finalX = (((i * chunkSize) - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
+                shape.rect(finalX, mapBacking.y, 1, mapBacking.height);
+            }
+    
+            // draw grid Y
+            int halfHeight = (int) (((mapBacking.height / 2)));
+            int startY = (int) ((-halfHeight * mapScale) + MyScreenAdapter.cam.position.y) / chunkSize;
+            int endY = (int) ((halfHeight * mapScale) + MyScreenAdapter.cam.position.y) / chunkSize;
+            for (int i = startY; i < endY + 1; i++) {
+                float finalY = (((i * chunkSize) - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
+                shape.rect(mapBacking.x, finalY, mapBacking.width, 1);
             }
         }
-
-
-        if (mapScale < 1)
-            mapScale = 1;
-
-        float centerMapX = mapBacking.x + mapBacking.width / 2;
-        float centerMapY = mapBacking.y + mapBacking.height / 2;
-
-
-        //draw grid X
-        shape.setColor(gridColor);
-        int halfWidth = (int)(((mapBacking.width / 2)));
-        int startX = (int)((-halfWidth * mapScale) + MyScreenAdapter.cam.position.x)/chunkSize;
-        int endX = (int)((halfWidth * mapScale) + MyScreenAdapter.cam.position.x)/chunkSize;
-        for (int i = startX; i < endX+1; i++) {
-            float finalX = (((i*chunkSize) - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
-            shape.rect(finalX, mapBacking.y, 1, mapBacking.height);
-        }
-
-        // draw grid Y
-        int halfHeight = (int)(((mapBacking.height / 2)));
-        int startY = (int)((-halfHeight * mapScale) + MyScreenAdapter.cam.position.y) / chunkSize;
-        int endY = (int)((halfHeight * mapScale) + MyScreenAdapter.cam.position.y) / chunkSize;
-        for (int i = startY; i < endY+1; i++) {
-            float finalY = (((i*chunkSize) - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
-            shape.rect(mapBacking.x, finalY, mapBacking.width, 1);
-        }
-
         shape.end();
-
+    
+        
         shape.begin(ShapeRenderer.ShapeType.Line);
-
-
-        boolean drawOrbit = mapScale <= lodRenderOrbitPathScale;
-        if (drawOrbit) {
-            if (mapables != null) {
-                shape.setColor(orbitPath);
-                for (Entity mapable : mapables) {
-
-                    Vector2 screenPos = Mappers.transform.get(mapable).pos;
-
-                    // n = relative pos / scale + mapPos
-                    float x = ((screenPos.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
-                    float y = ((screenPos.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
-
-                    OrbitComponent orbit = Mappers.orbit.get(mapable);
-                    if (orbit != null && orbit.parent != null) {
-                        TransformComponent parentPos = Mappers.transform.get(orbit.parent);
-                        float xx = ((parentPos.pos.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
-                        float yy = ((parentPos.pos.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
-
-                        shape.circle(xx, yy, orbit.radialDistance / mapScale);
-                        shape.line(xx, yy, x, y);
+        {
+            boolean drawOrbit = mapScale <= lodRenderOrbitPathScale;
+            if (drawOrbit) {
+                if (mapables != null) {
+                    shape.setColor(orbitPath);
+                    for (Entity mapable : mapables) {
+                
+                        Vector2 screenPos = Mappers.transform.get(mapable).pos;
+                
+                        // n = relative pos / scale + mapPos
+                        float x = ((screenPos.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
+                        float y = ((screenPos.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
+                
+                        OrbitComponent orbit = Mappers.orbit.get(mapable);
+                        if (orbit != null && orbit.parent != null) {
+                            TransformComponent parentPos = Mappers.transform.get(orbit.parent);
+                            float xx = ((parentPos.pos.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
+                            float yy = ((parentPos.pos.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
+                    
+                            shape.circle(xx, yy, orbit.radialDistance / mapScale);
+                            shape.line(xx, yy, x, y);
+                        }
+                    }
+                }
+            }
+            
+            //debug
+            if (debugDrawLoadDist) {
+                shape.setColor(debugLoadDistColor);
+                SpaceLoadingSystem spaceLoader = engine.getSystem(SpaceLoadingSystem.class);
+                if (spaceLoader != null) {
+                    for (Vector2 p : spaceLoader.getPoints()) {
+                        // n = relative pos / scale + mapPos
+                        float x = ((p.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
+                        float y = ((p.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
+                
+                        shape.circle(x, y, loadDist / mapScale);
                     }
                 }
             }
         }
-
-
-        float loadDist = SpaceProject.celestcfg.loadSystemDistance;
-        //debug
-        if (debugDrawLoadDist) {
-
-            shape.setColor(debugLoadDistColor);
+        shape.end();
+    
+        
+        shape.begin(ShapeRenderer.ShapeType.Filled);
+        {
+            //draw all celestial bodies
             SpaceLoadingSystem spaceLoader = engine.getSystem(SpaceLoadingSystem.class);
             if (spaceLoader != null) {
                 for (Vector2 p : spaceLoader.getPoints()) {
+                    if (p.dst2(MyScreenAdapter.cam.position.x, MyScreenAdapter.cam.position.y) < (loadDist * loadDist)) {
+                        continue;
+                    }
+            
                     // n = relative pos / scale + mapPos
                     float x = ((p.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
                     float y = ((p.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
-
-                    shape.circle(x, y, loadDist / mapScale);
+            
+                    if (mapBacking.contains(x, y)) {
+                        shape.setColor(1, 1, 1, 1);//TODO: dynamic color based on celestial body type
+                        shape.circle(x, y, celestialMarkerSize);
+                    }
                 }
             }
-        }
-        shape.end();
-
-        shape.begin(ShapeRenderer.ShapeType.Filled);
-
-        //draw all celestial bodies
-        SpaceLoadingSystem spaceLoader = engine.getSystem(SpaceLoadingSystem.class);
-        if (spaceLoader != null) {
-            for (Vector2 p : spaceLoader.getPoints()) {
-                if (p.dst2(MyScreenAdapter.cam.position.x, MyScreenAdapter.cam.position.y) < (loadDist * loadDist)) {
-                    continue;
-                }
-
-                // n = relative pos / scale + mapPos
-                float x = ((p.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
-                float y = ((p.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
-
-                if (mapBacking.contains(x, y)) {
-                    shape.setColor(1, 1, 1, 1);//TODO: dynamic color based on celestial body type
-                    shape.circle(x, y, celestialMarkerSize);
+    
+            //draw loaded celestial bodies
+            if (mapables != null) {
+                for (Entity mapable : mapables) {
+                    MapComponent map = Mappers.map.get(mapable);
+                    Vector2 screenPos = Mappers.transform.get(mapable).pos;
+            
+                    // n = relative pos / scale + mapPos
+                    float x = ((screenPos.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
+                    float y = ((screenPos.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
+            
+                    if (mapBacking.contains(x, y)) {
+                        shape.setColor(map.color);
+                        shape.circle(x, y, 2);//TODO: dynamic size based on celestial size
+                    }
                 }
             }
-        }
-
-        //draw loaded celestial bodies
-        if (mapables != null) {
-            for (Entity mapable : mapables) {
-                MapComponent map = Mappers.map.get(mapable);
-                Vector2 screenPos = Mappers.transform.get(mapable).pos;
-
-                // n = relative pos / scale + mapPos
-                float x = ((screenPos.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
-                float y = ((screenPos.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
-
-                if (mapBacking.contains(x, y)) {
-                    shape.setColor(map.color);
-                    shape.circle(x, y, 2);//TODO: dynamic size based on celestial size
-                }
+    
+    
+            //draw velocity vector for intuitive navigation
+            if (player != null) {
+                TransformComponent t = Mappers.transform.get(player);
+        
+                //calculate vector angle and length
+                float scale = 4; //how long to make vectors (higher number is longer line)
+                Vector2 vel = MyMath.LogVec(t.velocity, scale).add(centerMapX, centerMapY);
+                Vector2 accel = MyMath.LogVec(t.accel, scale).add(centerMapX, centerMapY);
+        
+                //draw line to represent movement
+                shape.rectLine(centerMapX, centerMapY, vel.x, vel.y, 2, Color.MAGENTA, Color.RED);
+                shape.rectLine(centerMapX, centerMapY, accel.x, accel.y, 2, Color.GREEN, Color.BLUE);
+        
+                Vector2 facing = MyMath.Vector(t.rotation, 10).add(centerMapX, centerMapY);
+                shape.rectLine(centerMapX, centerMapY, facing.x, facing.y, 2, Color.GRAY, Color.WHITE);
             }
+            shape.setColor(Color.WHITE);
+            shape.circle(centerMapX, centerMapY, 3);
+    
+    
+            //draw border
+            shape.setColor(borderColor);
+            shape.rect(mapBacking.x, mapBacking.height + mapBacking.y - borderWidth, mapBacking.width, borderWidth);//top
+            shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, borderWidth);//bottom
+            shape.rect(mapBacking.x, mapBacking.y, borderWidth, mapBacking.height);//left
+            shape.rect(mapBacking.width + mapBacking.x - borderWidth, mapBacking.y, borderWidth, mapBacking.height);//right
         }
-
-
-        //draw velocity vector for intuitive navigation
-        if (player != null) {
-            TransformComponent t = Mappers.transform.get(player);
-
-            //calculate vector angle and length
-            float scale = 4; //how long to make vectors (higher number is longer line)
-            Vector2 vel = MyMath.LogVec(t.velocity, scale).add(centerMapX, centerMapY);
-            Vector2 accel = MyMath.LogVec(t.accel, scale).add(centerMapX, centerMapY);
-
-            //draw line to represent movement
-            shape.rectLine(centerMapX, centerMapY, vel.x, vel.y, 2, Color.MAGENTA, Color.RED);
-            shape.rectLine(centerMapX, centerMapY, accel.x, accel.y, 2, Color.GREEN, Color.BLUE);
-
-            Vector2 facing = MyMath.Vector(t.rotation, 10).add(centerMapX, centerMapY);
-            shape.rectLine(centerMapX, centerMapY, facing.x, facing.y, 2, Color.GRAY, Color.WHITE);
-        }
-        shape.setColor(Color.WHITE);
-        shape.circle(centerMapX, centerMapY, 3);
-
-
-        //draw border
-        shape.setColor(borderColor);
-        shape.rect(mapBacking.x, mapBacking.height+mapBacking.y-borderWidth, mapBacking.width, borderWidth);//top
-        shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, borderWidth);//bottom
-        shape.rect(mapBacking.x, mapBacking.y, borderWidth, mapBacking.height);//left
-        shape.rect(mapBacking.width+mapBacking.x-borderWidth, mapBacking.y, borderWidth, mapBacking.height);//right
-
-
         shape.end();
 
         Gdx.gl.glDisable(GL20.GL_BLEND);
@@ -251,24 +251,24 @@ public class MiniMap {
 
 
         batch.begin();
-        float textPosX = mapBacking.x + 10;
-        float textPosY = mapBacking.y + mapBacking.height;
-        float lineHeight = fontSmall.getLineHeight() + 2;
-
-        String mapString = (int)MyScreenAdapter.cam.position.x + ", " + (int)MyScreenAdapter.cam.position.y;
-        if (player != null) {
-            TransformComponent t = Mappers.transform.get(player);
-            String playerInfo = ": " + (int)t.velocity.len() + "";
-            mapString += playerInfo;
+        {
+            float textPosX = mapBacking.x + 10;
+            float textPosY = mapBacking.y + mapBacking.height;
+            float lineHeight = fontSmall.getLineHeight() + 2;
+    
+            String mapString = (int) MyScreenAdapter.cam.position.x + ", " + (int) MyScreenAdapter.cam.position.y;
+            if (player != null) {
+                TransformComponent t = Mappers.transform.get(player);
+                String playerInfo = ": " + (int) t.velocity.len() + "";
+                mapString += playerInfo;
+            }
+            fontSmall.draw(batch, mapString, textPosX, textPosY - lineHeight);
+    
+    
+            if (mapState == MapState.full && !drawScaleTimer.canDoEvent()) {
+                fontSmall.draw(batch, "scale: " + mapScale, centerMapX, textPosY - lineHeight);
+            }
         }
-        fontSmall.draw(batch, mapString, textPosX, textPosY - lineHeight);
-
-
-
-        if (mapState == MapState.full && !drawScaleTimer.canDoEvent()) {
-            fontSmall.draw(batch, "scale: " + mapScale, centerMapX, textPosY - lineHeight);
-        }
-
         batch.end();
 
 

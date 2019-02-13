@@ -14,14 +14,14 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.BoundsComponent;
-import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.DamageComponent;
+import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.PolygonUtil;
+import com.spaceproject.utility.ResourceDisposer;
 
 //based off of:
 //https://gamedevelopment.tutsplus.com/series/how-to-create-a-custom-physics-engine--gamedev-12715
@@ -129,6 +129,7 @@ public class CollisionSystem extends EntitySystem {
 				BoundsComponent boundsComponent = Mappers.bounds.get(attackedEntity);
 				if (PolygonUtil.overlaps(boundsComponent.poly, c)) {
 					attackedEntity.remove(ShieldComponent.class);
+					ResourceDisposer.dispose(damageEntity);
 					engine.removeEntity(damageEntity);
 					return;
 				}
@@ -141,13 +142,13 @@ public class CollisionSystem extends EntitySystem {
 		
 		//remove entity (kill)
 		if (healthComponent.health <= 0) {
-			//TODO: maybe add RemoveComponent which will signal that it is marked for removal, which will be done at the end of an engine step
+			ResourceDisposer.dispose(attackedEntity);
 			engine.removeEntity(attackedEntity);
 			Gdx.app.log(this.getClass().getSimpleName(),"[" + Misc.objString(attackedEntity) + "] killed by: [" + Misc.objString(damageComponent.source) + "]");
 		}
 		
 		//remove missile
-		damageEntity.getComponent(TextureComponent.class).texture.dispose();
+		ResourceDisposer.dispose(damageEntity);
 		engine.removeEntity(damageEntity);
 	}
 	
