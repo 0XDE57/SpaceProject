@@ -42,6 +42,7 @@ import com.spaceproject.utility.DebugVec;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
+import com.spaceproject.utility.RequireGameContext;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -420,11 +421,7 @@ public class DebugUISystem extends IteratingSystem implements RequireGameContext
 
 
 			//view threads
-			String noisePool = "active:" + GameScreen.noiseThreadPool.getActiveCount()
-					+ ", completed:" + GameScreen.noiseThreadPool.getCompletedTaskCount()
-					+ ", task count:" + GameScreen.noiseThreadPool.getTaskCount()
-					+ ", pool size:" + GameScreen.noiseThreadPool.getCorePoolSize();
-			
+			String noisePool = GameScreen.noiseManager.getNoiseThreadPool().toString();
 			debugTexts.add(new DebugText(noisePool, x, y - (lineHeight * linePos++)));
 
 			for (Thread t : threadSet) {

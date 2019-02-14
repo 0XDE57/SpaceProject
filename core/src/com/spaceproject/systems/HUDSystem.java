@@ -34,6 +34,7 @@ import com.spaceproject.ui.Menu;
 import com.spaceproject.ui.MiniMap;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
+import com.spaceproject.utility.RequireGameContext;
 
 
 public class HUDSystem extends EntitySystem implements RequireGameContext {

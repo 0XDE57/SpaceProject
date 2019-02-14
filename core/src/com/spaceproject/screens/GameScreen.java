@@ -2,7 +2,6 @@ package com.spaceproject.screens;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
@@ -24,23 +23,18 @@ import com.spaceproject.config.SystemsConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.Universe;
-import com.spaceproject.generation.noise.NoiseBuffer;
-import com.spaceproject.generation.noise.NoiseGenListener;
 import com.spaceproject.generation.noise.NoiseManager;
-import com.spaceproject.generation.noise.NoiseThread;
-import com.spaceproject.generation.noise.NoiseThreadPoolExecutor;
 import com.spaceproject.systems.DebugUISystem;
 import com.spaceproject.systems.HUDSystem;
-import com.spaceproject.systems.RequireGameContext;
 import com.spaceproject.ui.MapState;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.ResourceDisposer;
+import com.spaceproject.utility.SystemLoader;
 
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
+public class GameScreen extends MyScreenAdapter {
 
 	public Engine engine, persistenceEngine;
 	
@@ -53,11 +47,8 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 	private Entity currentPlanet = null;
 	
 	public static Universe universe;
+	public static NoiseManager noiseManager;
 	
-	public static NoiseManager noiseManager;//TODO: move this into manager
-	public static LinkedBlockingQueue<NoiseBuffer> noiseBufferQueue;//TODO: move this into manager
-	public static NoiseThreadPoolExecutor noiseThreadPool;//TODO: move this into manager
-
 
 	ShaderProgram shader = null;
 	public static String smallFont = "smallFont";
@@ -76,12 +67,8 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		gameTimeStart = System.nanoTime();
 
 		universe = new Universe();
-		noiseBufferQueue = new LinkedBlockingQueue<NoiseBuffer>();
-		noiseThreadPool = new NoiseThreadPoolExecutor(SpaceProject.celestcfg.maxGenThreads);
-		noiseThreadPool.addListener(universe);
-		noiseThreadPool.addListener(this);
-
-
+		noiseManager = new NoiseManager(SpaceProject.celestcfg.maxGenThreads);
+		
 
 		//playing with shaders
 		boolean useShader = false;
@@ -96,8 +83,6 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		}
 
 		
-		
-
 
 		// load test default values
 		Entity playerTESTSHIP = EntityFactory.createPlayerShip(0, 0);
@@ -110,12 +95,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		}
 		
 		engine = new Engine();
-		/*//todo: rapid switch and dup test ensure proper loading
-		loadSystems(engine);
-		loadSystems(engine);
-		GameScreen.inSpace = false;
-		loadSystems(engine);
-		*/
+
 		if (inSpace) {
 			initSpace(playerTESTSHIP);
 		} else {
@@ -124,72 +104,18 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		
 	}
 	
+	
 	public static boolean inSpace() {
 		return inSpace;
 	}
 
 	
 	//region system loading
-	@SuppressWarnings("unchecked")
-	public void loadSystems(Engine engine) {//TODO: move this out of here -> util/SystemLoader.java
-		Gdx.app.log(this.getClass().getSimpleName(),
-				inSpace() ? "==========SPACE==========" : "==========WORLD==========");
-		
-		SystemsConfig cfg = SpaceProject.systemsConfig;
-		for (SysCFG sysCFG : cfg.getSystems()) {
-			boolean correctPlatform = (SpaceProject.isMobile() && sysCFG.isLoadOnMobile()) || (!SpaceProject.isMobile() && sysCFG.isLoadOnDesktop());
-			if (!correctPlatform) {
-				Gdx.app.log(this.getClass().getSimpleName(), "Skip loading: " + sysCFG.getClassName());
-				continue;
-			}
-			boolean shouldBeLoaded = (inSpace() && sysCFG.isLoadInSpace()) || (!inSpace() && sysCFG.isLoadInWorld());
-			
-			try {
-				Class<? extends EntitySystem> loadMe = (Class<? extends EntitySystem>) Class.forName(sysCFG.getClassName());
-				EntitySystem systemInEngine = engine.getSystem(loadMe);
-				
-				boolean isLoaded = systemInEngine != null;
-				if (shouldBeLoaded) {
-					if (!isLoaded) {
-						EntitySystem systemToLoad = loadMe.newInstance();
-						systemToLoad.priority = sysCFG.getPriority();
-						
-						if (systemToLoad instanceof RequireGameContext) {
-							((RequireGameContext)systemToLoad).initContext(this);
-						}
-						
-						engine.addSystem(systemToLoad);
-						Gdx.app.log(this.getClass().getSimpleName(), "Loaded: " + systemToLoad.getClass().getName());
-					}
-				} else {
-					if (isLoaded) {
-						if (systemInEngine instanceof EntityListener) {
-							//listener must be removed, other wise a reference is kept in engine (i think)
-							//when system is re-added / re-removed down the line, the families/listeners are broken
-							engine.removeEntityListener((EntityListener) systemInEngine);
-						}
-						engine.removeSystem(systemInEngine);
-						Gdx.app.log(this.getClass().getSimpleName(), "Unloaded: " + systemInEngine.getClass().getName());
-					}
-				}
-			} catch (ClassNotFoundException e) {
-				Gdx.app.error(this.getClass().getSimpleName(), "Could not find " + sysCFG.getClassName(), e);
-			} catch (InstantiationException e) {
-				Gdx.app.error(this.getClass().getSimpleName(), "Could not instantiate " + sysCFG.getClassName(), e);
-			} catch (Exception e) {
-				Gdx.app.error(this.getClass().getSimpleName(), "Could not load " + sysCFG.getClassName(), e);
-			}
-		}
-	}
-	
-	
 	private void initSpace(Entity transitioningEntity) {
 		inSpace = true;
 		currentPlanet = null;
 		
-		loadSystems(engine);
-		// engine to handle all entities and components
-
+		SystemLoader.loadSystems(this, engine, inSpace, SpaceProject.systemsConfig);
 
 
 		//===============ENTITIES===============
@@ -240,7 +166,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 		Misc.printObjectFields(planet.getComponent(PlanetComponent.class));
 		//Misc.printEntity(transitionComponent.transitioningEntity);
 		
-		loadSystems(engine);
+		SystemLoader.loadSystems(this, engine, inSpace, SpaceProject.systemsConfig);
 
 		
 
@@ -271,11 +197,7 @@ public class GameScreen extends MyScreenAdapter implements NoiseGenListener {
 
 	}
 	//endregion
-
-	@Override
-	public void threadFinished(NoiseThread noise) {
-		noiseBufferQueue.add(noise.getNoise());
-	}
+	
 
 	@Override
 	public void render(float delta) {

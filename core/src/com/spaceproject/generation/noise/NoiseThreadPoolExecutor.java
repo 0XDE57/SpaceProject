@@ -40,6 +40,13 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
             Gdx.app.error(this.getClass().getSimpleName(), "Task failed", t);
         }
     }
-
-
+    
+    
+    @Override
+    public String toString() {
+        return  "active:" + getActiveCount()
+                + ", completed:" + getCompletedTaskCount()
+                + ", task count:" + getTaskCount()
+                + ", pool size:" + getCorePoolSize();
+    }
 }

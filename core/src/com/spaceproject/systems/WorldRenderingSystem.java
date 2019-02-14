@@ -23,6 +23,7 @@ import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.RequireGameContext;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -78,21 +79,18 @@ public class WorldRenderingSystem extends IteratingSystem implements RequireGame
 		//use cached noise
 		//TODO: if not cached and if not in process of being generated, only then generate, but this should probably never happen
 		//TODO: bug, this is unreliable -> sometimes map doesn't load
-		//TODO: architecture, rendering system shouldn't be responsible for loading map
 
-		NoiseBuffer newNoise = GameScreen.universe.getNoiseForSeed(seed);
+		NoiseBuffer newNoise = GameScreen.noiseManager.getNoiseForSeed(seed);
 		if (newNoise != null) {
 			noise = newNoise;
-			//mapSize = newNoise.heightMap.length * SpaceProject.worldcfg.tileSize;
 		}
 
 		if (noise == null) {
 			Gdx.app.log(this.getClass().getSimpleName(), "no map found for: " + seed);
-			for (long k : GameScreen.universe.loadedNoise.keySet()) {
+			for (long k : GameScreen.noiseManager.getLoadedNoise().keySet()) {
 				System.out.print(k);
 			}
 			System.out.println();
-			//print noise threads
 		} else {
 			Gdx.app.log(this.getClass().getSimpleName(), "map found for: " + seed);
 		}

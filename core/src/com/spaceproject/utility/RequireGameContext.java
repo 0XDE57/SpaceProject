@@ -1,4 +1,4 @@
-package com.spaceproject.systems;
+package com.spaceproject.utility;
 
 
 import com.spaceproject.screens.GameScreen;

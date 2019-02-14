@@ -9,7 +9,6 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.Tile;
 import com.spaceproject.components.BarycenterComponent;
@@ -22,7 +21,6 @@ import com.spaceproject.generation.AstroBody;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.generation.noise.NoiseBuffer;
-import com.spaceproject.generation.noise.NoiseThread;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.ResourceDisposer;
@@ -45,9 +43,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 		loadedAstronomicalBodies = engine.getEntitiesFor(Family.all(BarycenterComponent.class, TransformComponent.class).get());
 
 		engine.addEntityListener(Family.one(PlanetComponent.class, BarycenterComponent.class).get(),this);
-
-		// generate universe
-		//universe = new Universe();
+		
 
 		// load space things (asteroids, wormhole, black hole, etc)
 		// load ai/mobs
@@ -61,19 +57,20 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 	public void entityAdded(Entity entity) {
 		PlanetComponent planet = Mappers.planet.get(entity);
 		if (planet != null) {
-			SeedComponent seedComp = Mappers.seed.get(entity);
-			NoiseBuffer noiseBuffer = GameScreen.universe.getNoiseForSeed(seedComp.seed);
+			long seed =  Mappers.seed.get(entity).seed;
+			
+			NoiseBuffer noiseBuffer = GameScreen.noiseManager.getNoiseForSeed(seed);
 
 			//check noise map exists in universe file first, if so load into tileMap queue
 			if (noiseBuffer != null) {
-				Gdx.app.log(this.getClass().getSimpleName(), "noise found, loading: " + seedComp.seed);
-				GameScreen.noiseBufferQueue.add(noiseBuffer);
+				Gdx.app.log(this.getClass().getSimpleName(), "noise found, loading: " + seed);
+				GameScreen.noiseManager.getNoiseBufferQueue().add(noiseBuffer);
 			} else {
 
 				//TODO: prevent multiple threads on same workload(seed)
 				// if (noiseThreadPool.getQueue().contains(seed))
-				Gdx.app.log(this.getClass().getSimpleName(), "no noise found, generating: " + seedComp.seed);
-				GameScreen.noiseThreadPool.execute(new NoiseThread(seedComp, planet, Tile.defaultTiles));
+				Gdx.app.log(this.getClass().getSimpleName(), "no noise found, generating: " + seed);
+				GameScreen.noiseManager.generate(seed, planet);
 			}
 		}
 	}
@@ -104,11 +101,11 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 
 	private void updatePlanetTextures() {
 		//check queue for tilemaps / pixmaps to load into textures
-		if (!GameScreen.noiseBufferQueue.isEmpty()) {
+		if (!GameScreen.noiseManager.getNoiseBufferQueue().isEmpty()) {
 			//todo: should be the event instead of the queue (as long as it remains separate threads)
 			//todo: if not, this should be asking manager
 			try {
-				NoiseBuffer noise = GameScreen.noiseBufferQueue.take();
+				NoiseBuffer noise = GameScreen.noiseManager.getNoiseBufferQueue().take();
 				if (noise.pixelatedTileMap == null) {
 					Gdx.app.log(this.getClass().getSimpleName(), "ERROR, no map for: [" + noise.seed + "]");
 					return;
@@ -180,10 +177,5 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
             }
         }
 	}
-
-	public Array<Vector2> getPoints() {
-		return GameScreen.universe.points;
-	}
-
-
+	
 }

@@ -8,19 +8,12 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.generation.noise.NoiseBuffer;
-import com.spaceproject.generation.noise.NoiseGenListener;
-import com.spaceproject.generation.noise.NoiseThread;
-
-import java.util.HashMap;
 
 
-
-public class Universe implements NoiseGenListener {
+public class Universe {
 
     public Array<Vector2> points;
     public Array<AstroBody> objects = new Array<AstroBody>();
-    public HashMap<Long, NoiseBuffer> loadedNoise = new HashMap<Long, NoiseBuffer>();
 
     public Universe() {
         this(generatePoints());
@@ -103,18 +96,5 @@ public class Universe implements NoiseGenListener {
             Gdx.app.error(this.getClass().getSimpleName(),"Could not save file", ex);
         }
     }
-
-    @Override
-    public void threadFinished(NoiseThread noiseThread) {
-        NoiseBuffer noise = noiseThread.getNoise();
-        loadedNoise.put(noise.seed, noise);
-        Gdx.app.log(this.getClass().getSimpleName(), "Saved noise for " + noise.seed + " to buffer");
-    }
-
-    public NoiseBuffer getNoiseForSeed(long seed) {
-        if (loadedNoise.containsKey(seed)) {
-            return loadedNoise.get(seed);
-        }
-        return null;
-    }
+    
 }

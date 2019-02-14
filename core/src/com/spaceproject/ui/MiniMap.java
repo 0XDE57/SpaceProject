@@ -17,8 +17,8 @@ import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.FontFactory;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
-import com.spaceproject.systems.SpaceLoadingSystem;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.SimpleTimer;
@@ -31,7 +31,7 @@ public class MiniMap {
 
     private Rectangle mapBacking;
     private boolean debugDisableClipping = false;
-    private boolean debugDrawLoadDist = false;
+    private boolean debugDrawLoadDist = true;
 
     private BitmapFont fontSmall;
 
@@ -160,9 +160,8 @@ public class MiniMap {
             //debug
             if (debugDrawLoadDist) {
                 shape.setColor(debugLoadDistColor);
-                SpaceLoadingSystem spaceLoader = engine.getSystem(SpaceLoadingSystem.class);
-                if (spaceLoader != null) {
-                    for (Vector2 p : spaceLoader.getPoints()) {
+                if (GameScreen.inSpace()) {
+                    for (Vector2 p : GameScreen.universe.points) {
                         // n = relative pos / scale + mapPos
                         float x = ((p.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
                         float y = ((p.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
@@ -178,9 +177,8 @@ public class MiniMap {
         shape.begin(ShapeRenderer.ShapeType.Filled);
         {
             //draw all celestial bodies
-            SpaceLoadingSystem spaceLoader = engine.getSystem(SpaceLoadingSystem.class);
-            if (spaceLoader != null) {
-                for (Vector2 p : spaceLoader.getPoints()) {
+            if (GameScreen.inSpace()) {
+                for (Vector2 p : GameScreen.universe.points) {
                     if (p.dst2(MyScreenAdapter.cam.position.x, MyScreenAdapter.cam.position.y) < (loadDist * loadDist)) {
                         continue;
                     }
@@ -333,7 +331,7 @@ public class MiniMap {
         float changeLarge = 20, changeSmall = 2;
         mapScale += amount * ((mapScale >= changeLarge) ? changeLarge : changeSmall);
         drawScaleTimer.reset();
-        Gdx.app.log(this.getClass().getSimpleName(), "map scale: " + mapScale);
+        //Gdx.app.log(this.getClass().getSimpleName(), "map scale: " + mapScale);
     }
 
     public void resetMapScale() {
