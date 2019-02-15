@@ -1,6 +1,8 @@
 package com.spaceproject.config;
 
 
+import com.badlogic.ashley.core.EntitySystem;
+
 public class SysCFG {
     private String className;
     private int priority;
@@ -9,16 +11,11 @@ public class SysCFG {
     private boolean loadInWorld;
     private boolean loadOnDesktop;
     private boolean loadOnMobile;
-    //how to handle subscription events?
-    //how would combat system subscribe to on collide
-    //how would world subscribe to finished loading, space subscribe to planetsync?
-    //private final boolean notifyResize;?
-    //private final int inputProcessorPriority;?
-    //probably not here. make each one implement a listener for that
-    //input eg: for each loaded system, if class instanceOf InputProcessor: inputMultiplexor.addprocessor(class)
-    //private final Config systemSpecificConfig? pass this into system itself to load its specific settings? should be separate from this?
-    //eg minimapConfig { thiscolor, thatcolor, showthis, showThat }
-    public SysCFG() {
+    
+    public SysCFG() {}
+    
+    SysCFG(Class<? extends EntitySystem> systemClass, int priority, boolean haltOnGamePause, boolean loadInSpace, boolean loadInWorld, boolean loadOnDesktop, boolean loadOnMobile) {
+        this(systemClass.getName(), priority, haltOnGamePause, loadInSpace, loadInWorld, loadOnDesktop, loadOnMobile);
     }
     
     SysCFG(String className, int priority, boolean haltOnGamePause, boolean loadInSpace, boolean loadInWorld, boolean loadOnDesktop, boolean loadOnMobile) {

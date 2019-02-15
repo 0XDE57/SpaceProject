@@ -2,6 +2,7 @@ package com.spaceproject.config;
 
 
 import com.badlogic.gdx.Gdx;
+import com.spaceproject.systems.*;
 
 import java.util.ArrayList;
 
@@ -11,43 +12,26 @@ public class SystemsConfig extends Config {
     
     @Override
     public void loadDefault() {
-        systems = new ArrayList<SysCFG>();
-        systems.add(new SysCFG("com.spaceproject.systems.AISystem",
-                3, true, true, true, true, true));
-        systems.add(new SysCFG("com.spaceproject.systems.BoundsSystem",
-                6, true, true, true, true, true));
-        systems.add(new SysCFG("com.spaceproject.systems.CameraSystem",
-                10, false, true, true, true, true));
-        systems.add(new SysCFG("com.spaceproject.systems.CollisionSystem",
-                7, true, true, true, true, true));
-        systems.add(new SysCFG("com.spaceproject.systems.ControlSystem",
-                4, true, true, true, true, true));
-        systems.add(new SysCFG("com.spaceproject.systems.DebugUISystem",
-                18, false, true, true, true, true));
-        systems.add(new SysCFG("com.spaceproject.systems.DesktopInputSystem",
-                1, true, true, true, true, false));
-        systems.add(new SysCFG("com.spaceproject.systems.ExpireSystem",
-                14, true, true, true, true, true));
-        systems.add(new SysCFG("com.spaceproject.systems.HUDSystem",
-                13, false, true, true, true, true));
-        systems.add(new SysCFG("com.spaceproject.systems.MobileInputSystem",
-                2, true, true, true, false, true));
-        systems.add(new SysCFG("com.spaceproject.systems.MovementSystem",
-                5, true, true, true, true, true));
-        systems.add(new SysCFG("com.spaceproject.systems.OrbitSystem",
-                8, true, true, false, true, true));
-        systems.add(new SysCFG("com.spaceproject.systems.ScreenTransitionSystem",
-                17, true, true, true, true, true));
-        systems.add(new SysCFG("com.spaceproject.systems.SpaceLoadingSystem",
-                15, false, true, false, true, true));
-        systems.add(new SysCFG("com.spaceproject.systems.SpaceParallaxSystem",
-                16, true, true, false, true, true));
-        systems.add(new SysCFG("com.spaceproject.systems.SpaceRenderingSystem",
-                11, false, true, false, true, true));
-        systems.add(new SysCFG("com.spaceproject.systems.WorldRenderingSystem",
-                12, false, false, true, true, true));
-        systems.add(new SysCFG("com.spaceproject.systems.WorldWrapSystem",
-                9, true, false, true, true, true));
+        systems = new ArrayList<>();
+        
+        systems.add(new SysCFG(AISystem.class, 3, true, true, true, true, true));
+        systems.add(new SysCFG(BoundsSystem.class, 6, true, true, true, true, true));
+        systems.add(new SysCFG(CameraSystem.class, 10, false, true, true, true, true));
+        systems.add(new SysCFG(CollisionSystem.class, 7, true, true, true, true, true));
+        systems.add(new SysCFG(ControlSystem.class, 4, true, true, true, true, true));
+        systems.add(new SysCFG(DebugUISystem.class, 18, false, true, true, true, true));
+        systems.add(new SysCFG(DesktopInputSystem.class, 1, true, true, true, true, false));
+        systems.add(new SysCFG(ExpireSystem.class, 14, true, true, true, true, true));
+        systems.add(new SysCFG(HUDSystem.class, 13, false, true, true, true, true));
+        systems.add(new SysCFG(MobileInputSystem.class, 2, true, true, true, false, true));
+        systems.add(new SysCFG(MovementSystem.class, 5, true, true, true, true, true));
+        systems.add(new SysCFG(OrbitSystem.class, 8, true, true, false, true, true));
+        systems.add(new SysCFG(ScreenTransitionSystem.class, 17, true, true, true, true, true));
+        systems.add(new SysCFG(SpaceLoadingSystem.class, 15, false, true, false, true, true));
+        systems.add(new SysCFG(SpaceParallaxSystem.class, 16, true, true, false, true, true));
+        systems.add(new SysCFG(SpaceRenderingSystem.class, 11, false, true, false, true, true));
+        systems.add(new SysCFG(WorldRenderingSystem.class, 12, false, false, true, true, true));
+        systems.add(new SysCFG(WorldWrapSystem.class, 9, true, false, true, true, true));
     }
     
     public ArrayList<SysCFG> getSystems() {

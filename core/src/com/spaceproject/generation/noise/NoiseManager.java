@@ -32,6 +32,7 @@ public class NoiseManager implements NoiseGenListener {
     
     @Override
     public void threadFinished(NoiseThread noiseThread) {
+        //TODO: why are we storing it twice?
         NoiseBuffer noise = noiseThread.getNoise();
         loadedNoise.put(noise.seed, noise);
         noiseBufferQueue.add(noise);
