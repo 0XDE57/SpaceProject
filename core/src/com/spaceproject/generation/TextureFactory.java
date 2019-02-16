@@ -26,7 +26,7 @@ public class TextureFactory {
 		return tex;
 	}
 
-	public static Texture createTestTile(){
+	public static Texture createTestTile() {
 		pixmap = new Pixmap(4,4,Format.RGB888);
 		pixmap.drawPixel(0,0, Color.RED.toIntBits());
 		pixmap.drawPixel(0,1, Color.YELLOW.toIntBits());
@@ -80,7 +80,7 @@ public class TextureFactory {
 		pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
 		
 		int numStars = 300;
-		for (int i = 0; i < numStars; ++i){					
+		for (int i = 0; i < numStars; ++i) {
 			
 			int newX = MathUtils.random(tileSize);
 			int newY = MathUtils.random(tileSize);
@@ -445,7 +445,7 @@ public class TextureFactory {
 					double nx = x/scale, ny = y/scale;
 					double i = noise.eval(nx, ny, 0);
 					i = (i * 0.5) + 0.5; //convert from range [-1:1] to [0:1]
-					if (i > 0.5f){
+					if (i > 0.5f) {
 						pixmap.setColor(new Color(1, 1, 0, (float)i));
 					} else {
 						pixmap.setColor(new Color(1, 0, 0, (float)(1-i)));

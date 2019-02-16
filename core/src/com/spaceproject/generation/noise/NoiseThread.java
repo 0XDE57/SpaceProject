@@ -8,7 +8,7 @@ import com.spaceproject.components.SeedComponent;
 import java.util.ArrayList;
 
 public class NoiseThread implements Runnable {
-
+	
 	private volatile boolean isDone = false;
 	private volatile boolean stop = false;
 
@@ -17,14 +17,12 @@ public class NoiseThread implements Runnable {
 	private ArrayList<Tile> tiles;
 	
 	//features
-	private long seed;
-	private float scale;
-	private int octaves;
-	private float persistence;
-	private float lacunarity;
-	private int mapSize;
-
-	//TODO: move features directly into buffer or directly reference planetcomponent?
+	private final long seed;
+	private final float scale;
+	private final int octaves;
+	private final float persistence;
+	private final float lacunarity;
+	private final int mapSize;
 
 	NoiseBuffer noise;
 
@@ -40,36 +38,28 @@ public class NoiseThread implements Runnable {
 		this.seed = seed;
 		this.mapSize = mapSize;
 		this.tiles = tiles;
-
 	}
 
 	@Override
 	public void run() {
-		//try { Thread.sleep(15000); } catch (InterruptedException e) { }//debug delay to see loading effects
-
+		//try { Thread.sleep(150000); } catch (InterruptedException e) { }//debug delay to see loading effects
 		Gdx.app.log(this.getClass().getSimpleName(), "Started: [" + toString());
 		long startTime = System.currentTimeMillis();
-
-		float[][] heightMap = new float[0][0];
-		int[][] tileMap = new int[0][0];
-		int[][] pixelatedTileMap = new int[0][0];
+		
+		noise = new NoiseBuffer();
+		noise.seed = seed;
 
 		//do work
 		if (!stop) {
-			heightMap = NoiseGen.generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity);
+			noise.heightMap = NoiseGen.generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity);
 		}
-		if (!stop) { 
-			tileMap = NoiseGen.createTileMap(heightMap, tiles);
+		if (!stop) {
+			noise.tileMap = NoiseGen.createTileMap(noise.heightMap, tiles);
 		}
-		if (!stop) { 
-			pixelatedTileMap = NoiseGen.createPixelatedTileMap(tileMap, tiles);
+		if (!stop) {
+			noise.pixelatedTileMap = NoiseGen.createPixelatedTileMap(noise.tileMap, tiles);
 		}
-
-		noise = new NoiseBuffer();
-		noise.seed = seed;
-		noise.heightMap = heightMap;
-		noise.tileMap = tileMap;
-		noise.pixelatedTileMap = pixelatedTileMap;
+		
 		isDone = true;
 
 
@@ -114,12 +104,12 @@ public class NoiseThread implements Runnable {
 
 	@Override
 	public int hashCode() {
-		return super.hashCode();
+		return (int) ((seed >> 32) ^ seed); //q/4045063
 	}
 
 	@Override
 	public String toString() {
-		return "Seed[" + seed + "], size[" + mapSize+ "]";
+		return "Seed[" + seed + "], size[" + mapSize + "]";
 	}
 
 

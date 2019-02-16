@@ -75,7 +75,7 @@ public class OrbitSystem extends IteratingSystem {
 		timeSyncAngle += orbit.startAngle;
 
 		//keep angle within 0 to 2PI radians
-		if (timeSyncAngle > MathUtils.PI2){
+		if (timeSyncAngle > MathUtils.PI2) {
 			timeSyncAngle -= MathUtils.PI2;
 		} else if (timeSyncAngle < 0) {
 			timeSyncAngle += MathUtils.PI2;

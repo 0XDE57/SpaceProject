@@ -49,8 +49,7 @@ public class WorldRenderingSystem extends IteratingSystem implements RequireGame
 	private Array<Entity> renderQueue3D = new Array<Entity>();
 	
 	private ArrayList<Tile> tiles = Tile.defaultTiles;
-
-	private long seed;
+	
 	private NoiseBuffer noise;
 
 	private int surround; //how many tiles to draw around the camera
@@ -72,33 +71,25 @@ public class WorldRenderingSystem extends IteratingSystem implements RequireGame
 	public void initContext(GameScreen gameScreen) {
 		SeedComponent seedComp = gameScreen.getCurrentPlanet().getComponent(SeedComponent.class);
 		
-		seed = seedComp.seed;
+		loadMap(seedComp.seed);
 	}
 	
-	private void loadMap() {
-		//use cached noise
-		//TODO: if not cached and if not in process of being generated, only then generate, but this should probably never happen
-		//TODO: bug, this is unreliable -> sometimes map doesn't load
-
-		NoiseBuffer newNoise = GameScreen.noiseManager.getNoiseForSeed(seed);
-		if (newNoise != null) {
-			noise = newNoise;
-		}
-
-		if (noise == null) {
-			Gdx.app.log(this.getClass().getSimpleName(), "no map found for: " + seed);
-			for (long k : GameScreen.noiseManager.getLoadedNoise().keySet()) {
-				System.out.print(k);
+	private void loadMap(long seed) {
+		//TODO: rendering system should not be responsible for loading map, create world loading system.
+		long time = System.currentTimeMillis();
+		long timeout = 10000;
+		
+		do {
+			noise = GameScreen.noiseManager.getNoiseForSeed(seed);
+			
+			if ((System.currentTimeMillis() - time) > timeout){
+				Gdx.app.log(this.getClass().getSimpleName(), "could not find seed for noise" + seed);
+				//TODO: if not cached and if not in process of being generated, only then generate. but this should probably never happen?
+				//GameScreen.noiseManager.loadOrCreateNoiseFor(seed, PlanetComponent);
 			}
-			System.out.println();
-		} else {
-			Gdx.app.log(this.getClass().getSimpleName(), "map found for: " + seed);
-		}
+		} while (noise == null);
 	}
 	
-	
-
-
 	@Override
 	public void update(float delta) {
 		super.update(delta); //adds entities to render queue
@@ -110,12 +101,10 @@ public class WorldRenderingSystem extends IteratingSystem implements RequireGame
 		
 		spriteBatch.begin();
 
-		if (noise == null) {
-			loadMap();
-		} else {
-			//render background tiles
-			drawTiles();
-		}
+		
+		//render background tiles
+		drawTiles();
+		
 
 		//draw game objects
 		drawEntities();

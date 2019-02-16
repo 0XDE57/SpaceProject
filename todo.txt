@@ -35,18 +35,19 @@
     [ ] clean up star save/load
     [x] fix thread generation to be limited (probably by core count) threadpool?
     [x] planets load from cache
-    [ ] prevent generating duplicate seed when one is in process of being created but not yet created (multiple threads trying to make the same data)
-    [ ] clean up
+    [x] prevent generating duplicate seed when one is in process of being created but not yet created (multiple threads trying to make the same data)
+    [... clean up
     [!] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
         ! actually for now this is a convenient bug for testing
 
     [...] fix land/take-off
-        [ ] transition feels unreliable
+        [...] transition feels unreliable
             [ ] bug: landed on planet which had finished generating, but did't load (no map found)
                 see: WorldRenderingSystem.loadMap() (also rendering shouldn't be responsible for loading...)
             [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
                 see: ScreenTransitionSystem.syncLoadPosition()
         [ ] bug: shrink sometimes doesn't scale properly or at all
+        [ ] bug: velocity when leave planet should be match planet
         [ ] pause stage is also now broken, need to reset timer
         [ ] nested orbit: consider children of children eg: satellite->moon->planet->star
         [ ] finish transistor animation, should have screen effect for polish and to hide loading/level change. goal feel a little more seamless
@@ -96,6 +97,7 @@
         [ ] player - still jumps ahead of camera. (this may be caused by adding directly to pos instead of vel/accel?)
         [x] shaperenderer - shield moves ahead of camera
         [ ] projectiles from ship - moves ahead of ship
+        [ ] when moving around, entities seem to sway relative to the camera
     [...] fix render priority (z-order)
           [X] moved into separate variable
           [ ] define proper heights for importance as current values are somewhat arbitrary
@@ -108,8 +110,8 @@
 
 [ ] GameScreen is responsible for too much.. when transition is fixed up, come back and clean up
     [ ] entity creation should happen in an entity loading system (with maybe exception to the player)
-    [ ] universe and noise pool stuff should happen elsewhere (like probably in universe)
-    [ ] why is everything static...
+    [x] universe and noise pool stuff should happen elsewhere (like probably in universe)
+    [...] why is everything static...
 
 
 [...] rotation impulse
@@ -142,12 +144,6 @@
 [...] wrap planets properly (LOCAL COORDINATE SPACE?)
     https://www.reddit.com/r/gamedev/comments/1gi6np/magic_carpet_style_infinite_wrapping_terrain/
     https://simonschreibt.de/gat/1nsane-carpet-2-repetitive-worlds/
-
-
-
-[ ] take care of some of the todo's
-    there is so much to do, and I keep adding more...
-
 
 
 

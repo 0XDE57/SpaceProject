@@ -58,20 +58,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 		PlanetComponent planet = Mappers.planet.get(entity);
 		if (planet != null) {
 			long seed =  Mappers.seed.get(entity).seed;
-			
-			NoiseBuffer noiseBuffer = GameScreen.noiseManager.getNoiseForSeed(seed);
-
-			//check noise map exists in universe file first, if so load into tileMap queue
-			if (noiseBuffer != null) {
-				Gdx.app.log(this.getClass().getSimpleName(), "noise found, loading: " + seed);
-				GameScreen.noiseManager.getNoiseBufferQueue().add(noiseBuffer);
-			} else {
-
-				//TODO: prevent multiple threads on same workload(seed)
-				// if (noiseThreadPool.getQueue().contains(seed))
-				Gdx.app.log(this.getClass().getSimpleName(), "no noise found, generating: " + seed);
-				GameScreen.noiseManager.generate(seed, planet);
-			}
+			GameScreen.noiseManager.loadOrCreateNoiseFor(seed, planet);
 		}
 	}
 

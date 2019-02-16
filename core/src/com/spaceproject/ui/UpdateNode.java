@@ -78,7 +78,7 @@ class EntityNode extends UpdateNode {
             return;
         }
         
-        if (isNew && newTimer.tryEvent()){
+        if (isNew && newTimer.tryEvent()) {
             isNew = false;
             newTimer = null;
             getActor().setColor(Color.WHITE);
@@ -152,7 +152,7 @@ class ReflectionNode extends UpdateNode {
     
     @Override
     public void update() {
-        if (isNew && newTimer.tryEvent()){
+        if (isNew && newTimer.tryEvent()) {
             isNew = false;
             newTimer = null;
             getActor().setColor(Color.WHITE);

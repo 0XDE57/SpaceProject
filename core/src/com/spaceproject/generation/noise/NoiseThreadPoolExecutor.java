@@ -3,25 +3,30 @@ package com.spaceproject.generation.noise;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
-
+    
+    final List<Runnable> activeTasks;
     private Array<NoiseGenListener> listeners;
 
-    public NoiseThreadPoolExecutor(int numThreads) {
+    NoiseThreadPoolExecutor(int numThreads) {
         super(numThreads, numThreads, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
         allowCoreThreadTimeOut(true);
 
-        listeners = new Array<NoiseGenListener>();
-
+        listeners = new Array<>();
+        activeTasks = Collections.synchronizedList(new ArrayList<Runnable>());
+    
         Gdx.app.log(this.getClass().getSimpleName(), "NoiseThreadPool with " + getMaximumPoolSize() + " threads");
     }
 
 
-    public void addListener(NoiseGenListener listener) {
+    void addListener(NoiseGenListener listener) {
         listeners.add(listener);
     }
 
@@ -30,10 +35,23 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
             listeners.get(i).threadFinished(noise);
         }
     }
-
+    
+    @Override
+    public void execute(Runnable runnable) {
+        if (activeTasks.contains(runnable)) {
+            Gdx.app.log(this.getClass().getSimpleName(),"Seed already exists: " + runnable.toString() + ". Ignoring.");
+            return;
+        }
+        
+        activeTasks.add(runnable);
+        super.execute(runnable);
+    }
+    
     @Override
     protected void afterExecute(Runnable r, Throwable t) {
         super.afterExecute(r, t);
+        activeTasks.remove(r);
+        
         if (t == null) {
             notifyListenersNoiseFinished((NoiseThread)r);
         } else {
@@ -44,9 +62,10 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
     
     @Override
     public String toString() {
-        return  "active:" + getActiveCount()
-                + ", completed:" + getCompletedTaskCount()
-                + ", task count:" + getTaskCount()
-                + ", pool size:" + getCorePoolSize();
+        return  "active: [" + getActiveCount() + "/" + getCorePoolSize()
+                + "] completed: [" + getCompletedTaskCount()  + "/" + getTaskCount()
+                + "]" /*+ "\nQ:" + getQueue()*/ + "\nActive: " + activeTasks;
     }
+    
 }
+

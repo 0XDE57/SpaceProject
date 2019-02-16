@@ -264,7 +264,7 @@ public class KeyConfigTab extends ConfigTab {
                         }
                     }
                 }
-                if (keyInUse){
+                if (keyInUse) {
                     Gdx.app.log(this.getClass().getSimpleName(), "Key already in use by: " + usedBy);
                     //TODO: highlight control / notify used key X used by setting Y
                     event.cancel();

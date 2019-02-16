@@ -150,12 +150,12 @@ public class TestNoiseScreen extends MyScreenAdapter {
 		
 
 		if (scale.update() || octave.update() 
-				|| persistence.update() || lacunarity.update()){
+				|| persistence.update() || lacunarity.update()) {
 			change = true;
 		}
 
 		//TODO: make UI sliders for these values
-		if (Gdx.input.isKeyJustPressed(Keys.SPACE)){
+		if (Gdx.input.isKeyJustPressed(Keys.SPACE)) {
 			seed = MathUtils.random(Long.MAX_VALUE);
 			change = true;
 		}

@@ -45,7 +45,7 @@ public class AISystem extends IteratingSystem {
 		Vector2 aiPos = Mappers.transform.get(entity).pos;
 		
 		//aiPos.y += 100 * delta;
-		if (ai.state == null){
+		if (ai.state == null) {
 			ai.state = AIComponent.testState.dumbwander;
 			//ai.state = AIComponent.testState.landOnPlanet;
 		}

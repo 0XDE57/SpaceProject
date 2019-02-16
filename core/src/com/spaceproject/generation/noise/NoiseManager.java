@@ -1,5 +1,6 @@
 package com.spaceproject.generation.noise;
 
+import com.badlogic.gdx.Gdx;
 import com.spaceproject.Tile;
 import com.spaceproject.components.PlanetComponent;
 
@@ -19,7 +20,12 @@ public class NoiseManager implements NoiseGenListener {
         loadedNoise = new HashMap<>();
     }
     
-    public void generate(long seed, PlanetComponent planet){
+    public void generate(long seed, PlanetComponent planet) {
+        if (loadedNoise.containsKey(seed)) {
+            Gdx.app.log(this.getClass().getSimpleName(), "noise for seed [" + seed + "] already exists. Ignoring.");
+            return;
+        }
+        
         noiseThreadPool.execute(new NoiseThread(planet.scale, planet.octaves, planet.persistence, planet.lacunarity, seed, planet.mapSize, Tile.defaultTiles));
     }
     
@@ -30,21 +36,36 @@ public class NoiseManager implements NoiseGenListener {
         return null;
     }
     
+    public void loadOrCreateNoiseFor(long seed, PlanetComponent planet) {
+        NoiseBuffer noiseBuffer = getNoiseForSeed(seed);
+    
+        if (noiseBuffer == null) {
+            //Gdx.app.log(this.getClass().getSimpleName(), "no noise found, generating: " + seed);
+            generate(seed, planet);
+        } else {
+            //push to queue for pickup by SpaceLoadingSystem
+            Gdx.app.log(this.getClass().getSimpleName(), "noise found, loading: " + seed);
+            noiseBufferQueue.add(noiseBuffer);
+        }
+    }
+    
     @Override
     public void threadFinished(NoiseThread noiseThread) {
-        //TODO: why are we storing it twice?
         NoiseBuffer noise = noiseThread.getNoise();
         loadedNoise.put(noise.seed, noise);
         noiseBufferQueue.add(noise);
     }
     
+    
     public NoiseThreadPoolExecutor getNoiseThreadPool() {
         return noiseThreadPool;
     }
     
+    
     public LinkedBlockingQueue<NoiseBuffer> getNoiseBufferQueue() {
         return noiseBufferQueue;
     }
+    
     
     public HashMap<Long, NoiseBuffer> getLoadedNoise() {
         return loadedNoise;

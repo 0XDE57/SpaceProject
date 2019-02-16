@@ -122,7 +122,7 @@ public class SpaceRenderingSystem extends IteratingSystem  {
 	
 	private void drawParallaxTiles() {
 		ArrayList<SpaceBackgroundTile> tiles = SpaceParallaxSystem.getTiles();
-		if (tiles == null){
+		if (tiles == null) {
 			return;
 		}
 
