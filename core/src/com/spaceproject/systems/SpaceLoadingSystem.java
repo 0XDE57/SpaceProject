@@ -47,6 +47,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 
 		// load space things (asteroids, wormhole, black hole, etc)
 		// load ai/mobs
+		//GameScreen.noiseManager.getNoiseThreadPool().addListener(this);
 
 		checkStarsTimer = new SimpleTimer(4000);
 		checkStarsTimer.setCanDoEvent();
@@ -88,29 +89,26 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 
 	private void updatePlanetTextures() {
 		//check queue for tilemaps / pixmaps to load into textures
-		if (!GameScreen.noiseManager.getNoiseBufferQueue().isEmpty()) {
+		if (!GameScreen.noiseManager.isNoiseAvailable()) {
 			//todo: should be the event instead of the queue (as long as it remains separate threads)
-			//todo: if not, this should be asking manager
-			try {
-				NoiseBuffer noise = GameScreen.noiseManager.getNoiseBufferQueue().take();
-				if (noise.pixelatedTileMap == null) {
-					Gdx.app.log(this.getClass().getSimpleName(), "ERROR, no map for: [" + noise.seed + "]");
+			
+			NoiseBuffer noise = GameScreen.noiseManager.getNoiseFromQueue();
+			if (noise.pixelatedTileMap == null) {
+				Gdx.app.log(this.getClass().getSimpleName(), "ERROR, no map for: [" + noise.seed + "]");
+				return;
+			}
+			
+			for (Entity p : getEngine().getEntitiesFor(Family.all(PlanetComponent.class).get())) {
+				if (p.getComponent(SeedComponent.class).seed == noise.seed) {
+					// create planet texture from tileMap, replace texture
+					Texture newTex = TextureFactory.generatePlanet(noise.pixelatedTileMap, Tile.defaultTiles);
+					p.getComponent(TextureComponent.class).texture = newTex;
+					Gdx.app.log(this.getClass().getSimpleName(), "Texture loaded: [" + noise.seed + "]");
 					return;
 				}
-
-				for (Entity p : getEngine().getEntitiesFor(Family.all(PlanetComponent.class).get())) {
-					if (p.getComponent(SeedComponent.class).seed == noise.seed) {
-						// create planet texture from tileMap, replace texture
-						Texture newTex = TextureFactory.generatePlanet(noise.pixelatedTileMap, Tile.defaultTiles);
-						p.getComponent(TextureComponent.class).texture = newTex;
-						Gdx.app.log(this.getClass().getSimpleName(), "Texture loaded: [" + noise.seed + "]");
-						return;
-					}
-				}
-
-			} catch (InterruptedException e) {
-				Gdx.app.error(this.getClass().getSimpleName(), "error updating planet texture", e);
 			}
+
+			
 		}
 	}
 
@@ -164,5 +162,5 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
             }
         }
 	}
-	
+
 }

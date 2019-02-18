@@ -12,9 +12,9 @@ import java.util.concurrent.TimeUnit;
 
 public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
     
-    final List<Runnable> activeTasks;
+    private final List<Runnable> activeTasks;
     private Array<NoiseGenListener> listeners;
-
+    
     NoiseThreadPoolExecutor(int numThreads) {
         super(numThreads, numThreads, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
         allowCoreThreadTimeOut(true);
@@ -26,7 +26,7 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
     }
 
 
-    void addListener(NoiseGenListener listener) {
+    public void addListener(NoiseGenListener listener) {
         listeners.add(listener);
     }
 
@@ -64,7 +64,7 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
     public String toString() {
         return  "active: [" + getActiveCount() + "/" + getCorePoolSize()
                 + "] completed: [" + getCompletedTaskCount()  + "/" + getTaskCount()
-                + "]" /*+ "\nQ:" + getQueue()*/ + "\nActive: " + activeTasks;
+                + "]" /*+ "\nQ:" + getQueue()*/ + "\nactive: " + activeTasks;
     }
     
 }

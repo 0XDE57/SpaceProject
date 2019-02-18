@@ -2,8 +2,6 @@ package com.spaceproject.generation.noise;
 
 import com.badlogic.gdx.Gdx;
 import com.spaceproject.Tile;
-import com.spaceproject.components.PlanetComponent;
-import com.spaceproject.components.SeedComponent;
 
 import java.util.ArrayList;
 
@@ -11,7 +9,7 @@ public class NoiseThread implements Runnable {
 	
 	private volatile boolean isDone = false;
 	private volatile boolean stop = false;
-
+	
 	
 	//color/height
 	private ArrayList<Tile> tiles;
@@ -24,11 +22,8 @@ public class NoiseThread implements Runnable {
 	private final float lacunarity;
 	private final int mapSize;
 
-	NoiseBuffer noise;
-
-	public NoiseThread(SeedComponent seed, PlanetComponent planet, ArrayList<Tile> tiles) {
-		this(planet.scale, planet.octaves, planet.persistence, planet.lacunarity, seed.seed, planet.mapSize, tiles);
-	}
+	private NoiseBuffer noise;
+	
 	
 	public NoiseThread(float s, int o, float p, float l, long seed, int mapSize, ArrayList<Tile> tiles) {
 		this.scale = s;
@@ -51,13 +46,19 @@ public class NoiseThread implements Runnable {
 
 		//do work
 		if (!stop) {
-			noise.heightMap = NoiseGen.generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity);
+			//long heightTime = System.currentTimeMillis();
+			noise.heightMap = NoiseGen.generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity);//this call consumes most(all) the time
+			//Gdx.app.log(this.getClass().getSimpleName(), toString() + "heightMap complete in : " + (System.currentTimeMillis() - heightTime) + "ms.");
 		}
 		if (!stop) {
+			//long tileTime = System.currentTimeMillis();
 			noise.tileMap = NoiseGen.createTileMap(noise.heightMap, tiles);
+			//Gdx.app.log(this.getClass().getSimpleName(), toString() + "tileMap complete in : " + (System.currentTimeMillis() - tileTime) + "ms.");
 		}
 		if (!stop) {
+			//long pixelTime = System.currentTimeMillis();
 			noise.pixelatedTileMap = NoiseGen.createPixelatedTileMap(noise.tileMap, tiles);
+			//Gdx.app.log(this.getClass().getSimpleName(), toString() + "pixelated complete in : " + (System.currentTimeMillis() - pixelTime) + "ms.");
 		}
 		
 		isDone = true;
@@ -109,7 +110,7 @@ public class NoiseThread implements Runnable {
 
 	@Override
 	public String toString() {
-		return "Seed[" + seed + "], size[" + mapSize + "]";
+		return "[Seed:" + seed + "," + mapSize + "]";
 	}
 
 

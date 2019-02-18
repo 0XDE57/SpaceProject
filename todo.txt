@@ -36,7 +36,7 @@
     [x] fix thread generation to be limited (probably by core count) threadpool?
     [x] planets load from cache
     [x] prevent generating duplicate seed when one is in process of being created but not yet created (multiple threads trying to make the same data)
-    [... clean up
+    [...] clean up
     [!] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
         ! actually for now this is a convenient bug for testing
 

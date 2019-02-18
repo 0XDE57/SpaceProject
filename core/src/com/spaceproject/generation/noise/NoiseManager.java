@@ -51,6 +51,10 @@ public class NoiseManager implements NoiseGenListener {
     
     @Override
     public void threadFinished(NoiseThread noiseThread) {
+        //pass in noise buffer queue from executor?
+        //take() here?
+        //add to loadednoise
+        //let otheres poll loaded noise, or fire another event from here?
         NoiseBuffer noise = noiseThread.getNoise();
         loadedNoise.put(noise.seed, noise);
         noiseBufferQueue.add(noise);
@@ -71,4 +75,17 @@ public class NoiseManager implements NoiseGenListener {
         return loadedNoise;
     }
     
+    public boolean isNoiseAvailable() {
+        return noiseBufferQueue.isEmpty();
+    }
+    
+    public NoiseBuffer getNoiseFromQueue() {
+        try {
+            return noiseBufferQueue.take();
+        } catch (InterruptedException e) {
+            Gdx.app.error(this.getClass().getSimpleName(), "error retrieving noise from queue", e);
+        }
+        
+        return null;
+    }
 }
