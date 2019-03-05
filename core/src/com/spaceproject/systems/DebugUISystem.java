@@ -42,13 +42,13 @@ import com.spaceproject.utility.DebugVec;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.RequireGameContext;
+import com.spaceproject.utility.IRequireGameContext;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class DebugUISystem extends IteratingSystem implements RequireGameContext, Disposable {
+public class DebugUISystem extends IteratingSystem implements IRequireGameContext, Disposable {
 
 	private Engine engine;
 	private Stage stage;

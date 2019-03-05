@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
     
     private final List<Runnable> activeTasks;
-    private Array<NoiseGenListener> listeners;
+    private Array<INoiseGenListener> listeners;
     
     NoiseThreadPoolExecutor(int numThreads) {
         super(numThreads, numThreads, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -26,7 +26,7 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
     }
 
 
-    public void addListener(NoiseGenListener listener) {
+    public void addListener(INoiseGenListener listener) {
         listeners.add(listener);
     }
 

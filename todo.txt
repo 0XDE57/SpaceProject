@@ -24,11 +24,12 @@
         alternatively, split up rendering type into difference systems? not sure yet
         what happens in refactoring space and world will affect this. need to think more about it
 
-[ ] physics and movement arch
+[ ] physics and movement & message arch
     [ ] combine BoundsSystem & CollisionSystem (doesn't make sense to be separate)
     [ ] extract physics out of CollisionSystem (collision should notify, physics should apply impulse)
     [ ] extract damage out of CollisionSystem (collision should notify, a CombatSystem(?) will pickup)
     [ ] combine physics into MovementSystem (listen for collide event)
+    https://gamedev.stackexchange.com/questions/23834/how-to-properly-implement-message-handling-in-a-component-based-entity-system
 
 [...] fix texture / map loading
     [x] seed based load instead of position
@@ -113,6 +114,7 @@
     [x] universe and noise pool stuff should happen elsewhere (like probably in universe)
     [...] why is everything static...
 
+[ ] bug: AI enter/exit vehicle is affecting camera. camera zoom should be for player only
 
 [...] rotation impulse
     I can collide polygons, but they don't account for rotation and point of contact...

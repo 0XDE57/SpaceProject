@@ -42,8 +42,8 @@ public abstract class SystemLoader {
                     EntitySystem systemToLoad = loadMe.newInstance();
                     systemToLoad.priority = sysCFG.getPriority();
                     
-                    if (systemToLoad instanceof RequireGameContext) {
-                        ((RequireGameContext)systemToLoad).initContext(game);
+                    if (systemToLoad instanceof IRequireGameContext) {
+                        ((IRequireGameContext)systemToLoad).initContext(game);
                     }
                     
                     engine.addSystem(systemToLoad);

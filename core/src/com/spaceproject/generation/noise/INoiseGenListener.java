@@ -1,5 +1,5 @@
 package com.spaceproject.generation.noise;
 
-public interface NoiseGenListener {
+public interface INoiseGenListener {
     void threadFinished(NoiseThread noise);
 }

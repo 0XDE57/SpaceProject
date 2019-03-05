@@ -14,9 +14,9 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.RequireGameContext;
+import com.spaceproject.utility.IRequireGameContext;
 
-public class WorldWrapSystem extends EntitySystem implements RequireGameContext {
+public class WorldWrapSystem extends EntitySystem implements IRequireGameContext {
 	/** TODO: fix world wrapping
 	 *
 	 * The world/tiles are simply wrapped using techniques described here:

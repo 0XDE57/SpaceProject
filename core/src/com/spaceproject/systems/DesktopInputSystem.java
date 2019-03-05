@@ -13,9 +13,9 @@ import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.RequireGameContext;
+import com.spaceproject.utility.IRequireGameContext;
 
-public class DesktopInputSystem extends EntitySystem implements InputProcessor, RequireGameContext {
+public class DesktopInputSystem extends EntitySystem implements InputProcessor, IRequireGameContext {
 
 	private ImmutableArray<Entity> players;
 	

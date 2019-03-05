@@ -7,7 +7,7 @@ import com.spaceproject.components.PlanetComponent;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class NoiseManager implements NoiseGenListener {
+public class NoiseManager implements INoiseGenListener {
 
     private NoiseThreadPoolExecutor noiseThreadPool;
     private LinkedBlockingQueue<NoiseBuffer> noiseBufferQueue;

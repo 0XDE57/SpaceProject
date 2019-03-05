@@ -3,7 +3,7 @@ package com.spaceproject.utility;
 
 import com.spaceproject.screens.GameScreen;
 
-public interface RequireGameContext {
+public interface IRequireGameContext {
    
     void initContext(GameScreen gameScreen);
 }

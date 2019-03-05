@@ -34,10 +34,10 @@ import com.spaceproject.ui.Menu;
 import com.spaceproject.ui.MiniMap;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.RequireGameContext;
+import com.spaceproject.utility.IRequireGameContext;
 
 
-public class HUDSystem extends EntitySystem implements RequireGameContext {
+public class HUDSystem extends EntitySystem implements IRequireGameContext {
 
 	private Stage stage;
 	private Menu menu;

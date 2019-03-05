@@ -23,12 +23,12 @@ import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.RequireGameContext;
+import com.spaceproject.utility.IRequireGameContext;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class WorldRenderingSystem extends IteratingSystem implements RequireGameContext {
+public class WorldRenderingSystem extends IteratingSystem implements IRequireGameContext {
 		
 	// rendering
 	private OrthographicCamera cam;
