@@ -13,7 +13,7 @@ public class SystemsConfig extends Config {
     @Override
     public void loadDefault() {
         systems = new ArrayList<>();
-        
+        //SysCFG(entitySystem, priority, haltOnGamePause, loadInSpace, loadInWorld, loadOnDesktop, loadOnMobile)
         systems.add(new SysCFG(AISystem.class, 3, true, true, true, true, true));
         systems.add(new SysCFG(BoundsSystem.class, 6, true, true, true, true, true));
         systems.add(new SysCFG(CameraSystem.class, 10, false, true, true, true, true));
@@ -30,6 +30,7 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(SpaceLoadingSystem.class, 15, false, true, false, true, true));
         systems.add(new SysCFG(SpaceParallaxSystem.class, 16, true, true, false, true, true));
         systems.add(new SysCFG(SpaceRenderingSystem.class, 11, false, true, false, true, true));
+        systems.add(new SysCFG(WorldLoadingSystem.class, 15, true, false, true, true, true));
         systems.add(new SysCFG(WorldRenderingSystem.class, 12, false, false, true, true, true));
         systems.add(new SysCFG(WorldWrapSystem.class, 9, true, false, true, true, true));
     }

@@ -110,7 +110,7 @@
 
 
 [ ] GameScreen is responsible for too much.. when transition is fixed up, come back and clean up
-    [ ] entity creation should happen in an entity loading system (with maybe exception to the player)
+    [x] entity creation should happen in an entity loading system (with maybe exception to the player)
     [x] universe and noise pool stuff should happen elsewhere (like probably in universe)
     [...] why is everything static...
 
@@ -123,7 +123,7 @@
         https://stackoverflow.com/questions/11654990/2d-physics-engine-collision-response-rotation-of-objects
 
     [ ] move to box2d?
-        seems overkill and would involve a lot of re-writing... but it will be better than anything i can write myself
+        seems overkill and would involve a lot of re-writing?... but it will be better than anything i can write myself
         but i really dont want to rewrite a bunch of stuff...
 
 [ ] fixed time step (necessary for multiplayer?)
