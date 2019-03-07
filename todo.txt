@@ -114,7 +114,7 @@
     [x] universe and noise pool stuff should happen elsewhere (like probably in universe)
     [...] why is everything static...
 
-[ ] bug: AI enter/exit vehicle is affecting camera. camera zoom should be for player only
+[x] bug: AI enter/exit vehicle is affecting camera. camera zoom should be for player only
 
 [...] rotation impulse
     I can collide polygons, but they don't account for rotation and point of contact...
