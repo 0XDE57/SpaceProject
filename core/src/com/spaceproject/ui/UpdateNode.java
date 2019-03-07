@@ -84,7 +84,7 @@ class EntityNode extends UpdateNode {
             getActor().setColor(Color.WHITE);
         }
         
-        ((Label)getActor()).setText(toString());
+        ((Label) getActor()).setText(toString());
         
         if (!isExpanded())
             return;
@@ -101,7 +101,7 @@ class EntityNode extends UpdateNode {
         
         //update nodes, clean up dead nodes
         for (Tree.Node node : getChildren()) {
-            if (!components.contains((Component)node.getObject(),false)) {
+            if (!components.contains((Component) node.getObject(), false)) {
                 if (showHistory) {
                     if (!(node instanceof GhostNode)) {
                         ((UpdateNode) node).removeAndCreateGhost(DebugEngineWindow.includeChildren);
@@ -215,6 +215,7 @@ class FieldNode extends UpdateNode {
 class GhostNode extends UpdateNode {
     
     private SimpleTimer removeTimer;
+    
     public GhostNode(UpdateNode nodeRemoved, boolean includeChildren) {
         super(new Label(nodeRemoved.getActor().getName(), VisUI.getSkin(), smallFont, Color.RED), null);
         

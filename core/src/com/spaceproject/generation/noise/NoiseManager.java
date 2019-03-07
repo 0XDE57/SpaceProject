@@ -1,14 +1,14 @@
 package com.spaceproject.generation.noise;
 
 import com.badlogic.gdx.Gdx;
-import com.spaceproject.Tile;
+import com.spaceproject.ui.Tile;
 import com.spaceproject.components.PlanetComponent;
 
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class NoiseManager implements INoiseGenListener {
-
+    
     private NoiseThreadPoolExecutor noiseThreadPool;
     private LinkedBlockingQueue<NoiseBuffer> noiseBufferQueue;
     private HashMap<Long, NoiseBuffer> loadedNoise;
@@ -38,7 +38,7 @@ public class NoiseManager implements INoiseGenListener {
     
     public void loadOrCreateNoiseFor(long seed, PlanetComponent planet) {
         NoiseBuffer noiseBuffer = getNoiseForSeed(seed);
-    
+        
         if (noiseBuffer == null) {
             //Gdx.app.log(this.getClass().getSimpleName(), "no noise found, generating: " + seed);
             generate(seed, planet);

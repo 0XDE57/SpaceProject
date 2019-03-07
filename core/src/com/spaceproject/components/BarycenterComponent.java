@@ -8,8 +8,9 @@ import com.badlogic.ashley.core.Component;
  * act as the anchor for other entities to orbit around
  */
 public class BarycenterComponent implements Component {
-
+    
     public AstronomicalBodyType bodyType;
+    
     public enum AstronomicalBodyType {
         uniStellar,
         multiStellar,

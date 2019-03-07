@@ -10,29 +10,29 @@ public class HotKeyTab extends Tab {
     private String title;
     private Table content;
     private int hotKey;
-
+    
     HotKeyTab(String title, int hotKey) {
         super(false, false);
         this.hotKey = hotKey;
         this.title = title + " [" + Input.Keys.toString(hotKey) + "]";
-
+        
         content = new VisTable();
         content.setFillParent(true);
-
+        
     }
-
+    
     int getHotKey() {
         return hotKey;
     }
-
+    
     @Override
-    public String getTabTitle () {
+    public String getTabTitle() {
         return title;
     }
-
+    
     @Override
-    public Table getContentTable () {
+    public Table getContentTable() {
         return content;
     }
-
+    
 }

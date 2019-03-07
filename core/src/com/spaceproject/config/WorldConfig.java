@@ -27,13 +27,13 @@ public class WorldConfig extends Config {
 	public final int solarRadii  = 695700;//km
 	public final int solarTemp = 5700;//K
 	*/
-	
-	public int tileSize;
-	public int chunkSize;
-	
-	@Override
-	public void loadDefault() {
-		tileSize = 32;
-		chunkSize = 8;
-	}
+    
+    public int tileSize;
+    public int chunkSize;
+    
+    @Override
+    public void loadDefault() {
+        tileSize = 32;
+        chunkSize = 8;
+    }
 }

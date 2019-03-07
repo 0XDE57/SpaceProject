@@ -6,18 +6,18 @@ import com.spaceproject.utility.SimpleTimer;
 
 
 public class GrowCannonComponent implements Component {
-
+    
     public Entity projectile;
-
+    
     public float baseDamage;
-
+    
     public float velocity;
-
+    
     public float size;
-
+    
     public float maxSize;
-
+    
     public SimpleTimer growRateTimer;
-
+    
     public boolean isCharging;
 }

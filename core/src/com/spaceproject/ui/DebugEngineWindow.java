@@ -30,7 +30,7 @@ import static com.spaceproject.screens.GameScreen.smallFont;
 
 
 public class DebugEngineWindow extends VisWindow implements EntityListener {
-
+    
     Engine engine;
     Tree tree;
     Node systemNodes, entityNodes;
@@ -41,7 +41,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     static boolean showHistory = true;
     static boolean includeChildren = false;
     SimpleTimer refreshTimer;
-
+    
     final int keyUP = Input.Keys.UP;
     final int keyDown = Input.Keys.DOWN;
     final int keyLeft = Input.Keys.LEFT;
@@ -50,15 +50,15 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     
     public DebugEngineWindow(Engine engine) {
         super("Debug Engine View");
-
+        
         this.engine = engine;
         refreshTimer = new SimpleTimer(refreshRate, true);
-
-
+        
+        
         setResizable(true);
         setMovable(true);
-        setSize(400, Gdx.graphics.getHeight()-20);
-        setPosition(10,10);
+        setSize(400, Gdx.graphics.getHeight() - 20);
+        setPosition(10, 10);
         addCloseButton();
         
         
@@ -68,9 +68,9 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         tree.add(systemNodes);
         tree.add(entityNodes);
         refreshNodes();
-    
+        
         final Table contents = new Table();
-    
+        
         final Table options = new Table();
         final CheckBox showHistoryCheck = new CheckBox("show history", VisUI.getSkin());
         showHistoryCheck.setChecked(showHistory);
@@ -94,7 +94,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         add(contents).expand().fill();
         
     }
-
+    
     public void refreshNodes() {
         if (!isVisible()) {
             return;
@@ -116,7 +116,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
             if (entNode == null) {
                 entityNodes.add(new EntityNode(entity, VisUI.getSkin()));
             } else {
-                ((UpdateNode)entNode).update();
+                ((UpdateNode) entNode).update();
             }
         }
     }
@@ -132,10 +132,10 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         
         //update nodes, clean up dead nodes
         for (Node node : systemNodes.getChildren()) {
-            if (!engine.getSystems().contains((EntitySystem) node.getObject(),false)) {
+            if (!engine.getSystems().contains((EntitySystem) node.getObject(), false)) {
                 node.remove();
             } else {
-                ((ReflectionNode)node).update();
+                ((ReflectionNode) node).update();
             }
         }
     }
@@ -156,7 +156,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     public boolean isVisible() {
         return getStage() != null;
     }
-
+    
     public void show(Stage stage) {
         stage.addActor(this);
         fadeIn();
@@ -164,15 +164,15 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         engine.addEntityListener(this);
         refreshNodes();
     }
-
+    
     public void hide() {
         fadeOut();
-
+        
         engine.removeEntityListener(this);
         systemNodes.removeAll();
         entityNodes.removeAll();
     }
-
+    
     public void toggle(Stage stage) {
         if (isVisible()) {
             hide();
@@ -180,7 +180,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
             show(stage);
         }
     }
-
+    
     public void keyDown(InputEvent event, int keycode) {
         Selection<Node> nodeSelection = tree.getSelection();
         Node selectedNode = nodeSelection.first();
@@ -191,7 +191,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
             }
             return;
         }
-
+        
         final Array<Node> siblingNodes;
         Node parentNode = selectedNode.getParent();
         if (parentNode == null) {
@@ -234,7 +234,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
                 }
                 break;
         }
-    
+        
         if (chosen != null) {
             nodeSelection.choose(chosen);
         }
@@ -243,7 +243,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     private Node getNextNodeAbove(Node current) {
         if (current.isExpanded()) {
             if (current.getChildren().size > 0) {
-                Node nextNode = current.getChildren().get(current.getChildren().size-1);
+                Node nextNode = current.getChildren().get(current.getChildren().size - 1);
                 return getNextNodeAbove(nextNode);
             }
         }
@@ -270,20 +270,20 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         return null;
     }
     //endregion
-
+    
     @Override
     public void entityAdded(Entity entity) {
         entityNodes.add(new EntityNode(entity, VisUI.getSkin(), showHistory));
     }
-
+    
     @Override
     public void entityRemoved(Entity entity) {
         Node node = entityNodes.findNode(entity);
         if (showHistory) {
-            ((UpdateNode)node).removeAndCreateGhost(includeChildren);
+            ((UpdateNode) node).removeAndCreateGhost(includeChildren);
         } else {
             node.remove();
         }
     }
-
+    
 }

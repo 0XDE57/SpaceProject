@@ -16,35 +16,35 @@ public abstract class ConfigTab extends Tab {
     private String title;
     private Table content;
     VisTable scrollContainer;
-
+    
     Config localConfig;
     int padSize = 2;
-
+    
     public ConfigTab(String title, Config config) {
         super(true, true);
         this.title = title;
         this.localConfig = config;
-
+        
         content = new VisTable();
         content.setFillParent(true);
-
+        
         scrollContainer = new VisTable();
         scrollContainer.left().top();
         buildTab(localConfig);
-        final VisScrollPane scrollPane = new VisScrollPane (scrollContainer);
+        final VisScrollPane scrollPane = new VisScrollPane(scrollContainer);
         scrollPane.addListener(autoFocusScroll(scrollPane));
         scrollPane.setFlickScroll(false);
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(false, false);
-
+        
         getContentTable().add(scrollPane).left().top().expand().fill();
-
+        
         getContentTable().row();
         //getContentTable().add(new Separator()).fillX().row();
         //getContentTable().add(new TextButton("save", VisUI.getSkin()));
         //getContentTable().add(new TextButton("reset", VisUI.getSkin()));
     }
-
+    
     private EventListener autoFocusScroll(final VisScrollPane scrollPane) {
         return new EventListener() {
             //auto focus scroll on mouse enter
@@ -57,9 +57,9 @@ public abstract class ConfigTab extends Tab {
             }
         };
     }
-
+    
     public abstract void buildTab(Object config);
-
+    
     @Override
     public void onHide() {
         Gdx.app.log(this.getClass().getSimpleName(), "configtab hide");
@@ -67,7 +67,7 @@ public abstract class ConfigTab extends Tab {
             TabbedPane pane = getPane();
             if (pane != null) {
                 pane.switchTab(this);//keep focus on this
-                pane.remove(this,false);//trigger save changes dialog
+                pane.remove(this, false);//trigger save changes dialog
             } else {
                 discardChanges();
             }
@@ -75,25 +75,25 @@ public abstract class ConfigTab extends Tab {
             super.onHide();
         }
     }
-
+    
     @Override
-    public String getTabTitle () {
+    public String getTabTitle() {
         return title;
     }
-
+    
     @Override
-    public Table getContentTable () {
+    public Table getContentTable() {
         return content;
     }
-
+    
     @Override
     public boolean save() {
         saveChanges();
         return super.save();
     }
-
+    
     public abstract void saveChanges();
-
+    
     public abstract void discardChanges();
-
+    
 }

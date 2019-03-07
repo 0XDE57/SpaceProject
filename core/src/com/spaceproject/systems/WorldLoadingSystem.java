@@ -18,7 +18,7 @@ public class WorldLoadingSystem extends EntitySystem implements IRequireGameCont
     
     @Override
     public void addedToEngine(Engine engine) {
-         initMobs(engine);
+        initMobs(engine);
     }
     
     @Override
@@ -34,7 +34,7 @@ public class WorldLoadingSystem extends EntitySystem implements IRequireGameCont
         
         engine.addEntity(EntityFactory.createShip3(position + 100, position + 600));
         engine.addEntity(EntityFactory.createShip3(position - 100, position + 600));
-    
+        
         Entity aiTest = EntityFactory.createCharacterAI(position, position + 50);
         Mappers.AI.get(aiTest).state = AIComponent.testState.dumbwander;
         engine.addEntity(aiTest);

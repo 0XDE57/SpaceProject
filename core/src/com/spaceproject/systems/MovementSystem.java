@@ -8,24 +8,24 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
 
 public class MovementSystem extends IteratingSystem {
-	
-	//temporary 
-	private Vector2 tmp = new Vector2(); 
-	
-	public MovementSystem() {
-		super(Family.all(TransformComponent.class).get());
-	}
-
-	@Override
-	public void processEntity(Entity entity, float deltaTime) {
-		TransformComponent position = Mappers.transform.get(entity);
-		
-		//set velocity
-		tmp.set(position.accel).scl(deltaTime);
-		position.velocity.add(tmp);
-		
-		//add velocity to position
-		tmp.set(position.velocity).scl(deltaTime);
-		position.pos.add(tmp.x, tmp.y);
-	}
+    
+    //temporary
+    private Vector2 tmp = new Vector2();
+    
+    public MovementSystem() {
+        super(Family.all(TransformComponent.class).get());
+    }
+    
+    @Override
+    public void processEntity(Entity entity, float deltaTime) {
+        TransformComponent position = Mappers.transform.get(entity);
+        
+        //set velocity
+        tmp.set(position.accel).scl(deltaTime);
+        position.velocity.add(tmp);
+        
+        //add velocity to position
+        tmp.set(position.velocity).scl(deltaTime);
+        position.pos.add(tmp.x, tmp.y);
+    }
 }

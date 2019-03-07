@@ -18,18 +18,18 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
     NoiseThreadPoolExecutor(int numThreads) {
         super(numThreads, numThreads, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
         allowCoreThreadTimeOut(true);
-
+        
         listeners = new Array<>();
         activeTasks = Collections.synchronizedList(new ArrayList<Runnable>());
-    
+        
         Gdx.app.log(this.getClass().getSimpleName(), "NoiseThreadPool with " + getMaximumPoolSize() + " threads");
     }
-
-
+    
+    
     public void addListener(INoiseGenListener listener) {
         listeners.add(listener);
     }
-
+    
     private void notifyListenersNoiseFinished(NoiseThread noise) {
         for (int i = 0; i < listeners.size; i++) {
             listeners.get(i).threadFinished(noise);
@@ -39,7 +39,7 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
     @Override
     public void execute(Runnable runnable) {
         if (activeTasks.contains(runnable)) {
-            Gdx.app.log(this.getClass().getSimpleName(),"Seed already exists: " + runnable.toString() + ". Ignoring.");
+            Gdx.app.log(this.getClass().getSimpleName(), "Seed already exists: " + runnable.toString() + ". Ignoring.");
             return;
         }
         
@@ -53,7 +53,7 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
         activeTasks.remove(r);
         
         if (t == null) {
-            notifyListenersNoiseFinished((NoiseThread)r);
+            notifyListenersNoiseFinished((NoiseThread) r);
         } else {
             Gdx.app.error(this.getClass().getSimpleName(), "Task failed", t);
         }
@@ -62,8 +62,8 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
     
     @Override
     public String toString() {
-        return  "active: [" + getActiveCount() + "/" + getCorePoolSize()
-                + "] completed: [" + getCompletedTaskCount()  + "/" + getTaskCount()
+        return "active: [" + getActiveCount() + "/" + getCorePoolSize()
+                + "] completed: [" + getCompletedTaskCount() + "/" + getTaskCount()
                 + "]" /*+ "\nQ:" + getQueue()*/ + "\nactive: " + activeTasks;
     }
     

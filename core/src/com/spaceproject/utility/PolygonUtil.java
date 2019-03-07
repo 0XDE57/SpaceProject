@@ -7,11 +7,11 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 public class PolygonUtil {
-
+    
     static final Vector2 center = new Vector2();
     static final Vector2 vec1 = new Vector2();
     static final Vector2 vec2 = new Vector2();
-
+    
     /***
      * https://stackoverflow.com/a/48542735
      */
@@ -31,15 +31,15 @@ public class PolygonUtil {
         }
         return polygon.contains(circle.x, circle.y);
     }
-
-
-    public static Rectangle getBoundingRectangle (float[] vertices) {
-
+    
+    
+    public static Rectangle getBoundingRectangle(float[] vertices) {
+        
         float minX = vertices[0];
         float minY = vertices[1];
         float maxX = vertices[0];
         float maxY = vertices[1];
-
+        
         final int numFloats = vertices.length;
         for (int i = 2; i < numFloats; i += 2) {
             minX = minX > vertices[i] ? vertices[i] : minX;
@@ -47,13 +47,13 @@ public class PolygonUtil {
             maxX = maxX < vertices[i] ? vertices[i] : maxX;
             maxY = maxY < vertices[i + 1] ? vertices[i + 1] : maxY;
         }
-
+        
         Rectangle bounds = new Rectangle();
         bounds.x = minX;
         bounds.y = minY;
         bounds.width = maxX - minX;
         bounds.height = maxY - minY;
-
+        
         return bounds;
     }
 }

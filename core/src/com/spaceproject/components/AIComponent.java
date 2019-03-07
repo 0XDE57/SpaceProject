@@ -4,26 +4,27 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
 
 public class AIComponent implements Component {
-
-	public Entity attackTarget;//short index...
-	//public Array<Entity> attackTargets;
-	
-	public Entity followTarget;//short index...
-	//public Array<Entity> followTargets;
-
-	public Entity planetTarget; //test land
-
-	public enum testState {
-		dumbwander,
-		attack,
-		landOnPlanet,
-		takeOffPlanet,
-		idle,
-		follow
-	}
-	public testState state;
-
-	//statemachine?
+    
+    public Entity attackTarget;//short index...
+    //public Array<Entity> attackTargets;
+    
+    public Entity followTarget;//short index...
+    //public Array<Entity> followTargets;
+    
+    public Entity planetTarget; //test land
+    
+    public enum testState {
+        dumbwander,
+        attack,
+        landOnPlanet,
+        takeOffPlanet,
+        idle,
+        follow
+    }
+    
+    public testState state;
+    
+    //statemachine?
 	/*
 	state {
 		follow,

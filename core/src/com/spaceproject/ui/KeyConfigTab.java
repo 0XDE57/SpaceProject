@@ -22,26 +22,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class KeyConfigTab extends ConfigTab {
-
+    
     static ObjectIntMap<String> keyNames;
     private Map<String, String> changes;
-
+    
     public KeyConfigTab(String title, Config config) {
         super(title, config);
         changes = new HashMap<String, String>();
     }
-
+    
     @Override
     public void buildTab(Object config) {
         buildKeyMap();
         Array<String> keys = keyNames.keys().toArray();
-
+        
         try {
             for (Field f : config.getClass().getFields()) {
-                final String key = Input.Keys.toString((Integer)f.get(config));
+                final String key = Input.Keys.toString((Integer) f.get(config));
                 Label keyLabel = new Label(f.getName(), VisUI.getSkin());
                 keyLabel.setAlignment(Align.right);
-
+                
                 final VisSelectBox<String> testKeys = new VisSelectBox<String>();
                 testKeys.setName(f.getName());
                     /*//TODO: set selected index/highlight key that was pressed when drop down activated
@@ -56,14 +56,13 @@ public class KeyConfigTab extends ConfigTab {
                         }
                     });*/
                 testKeys.getScrollPane().addListener(autoFocusScroll(testKeys));
-
-
-
+                
+                
                 testKeys.setItems(keys);
                 testKeys.setSelected(key);
-
+                
                 testKeys.addListener(keyChanged(testKeys));
-
+                
                 scrollContainer.add(keyLabel).expand().pad(padSize).fill();
                 scrollContainer.add(testKeys).expand().pad(padSize).fill();
                 scrollContainer.row();
@@ -76,13 +75,13 @@ public class KeyConfigTab extends ConfigTab {
             scrollContainer.add(new Label("Failed to reflect field: " + e.getMessage(), VisUI.getSkin()));
         }
     }
-
+    
     private void buildKeyMap() {
         Array<Integer> allowed = new Array<Integer>();
         //allowed.add(Input.Buttons.LEFT);
         //allowed.add(Input.Buttons.RIGHT);
         //allowed.add(Input.Buttons.MIDDLE);
-
+        
         allowed.add(Input.Keys.A);
         allowed.add(Input.Keys.B);
         allowed.add(Input.Keys.C);
@@ -109,12 +108,12 @@ public class KeyConfigTab extends ConfigTab {
         allowed.add(Input.Keys.X);
         allowed.add(Input.Keys.Y);
         allowed.add(Input.Keys.Z);
-
+        
         allowed.add(Input.Keys.UP);
         allowed.add(Input.Keys.DOWN);
         allowed.add(Input.Keys.LEFT);
         allowed.add(Input.Keys.RIGHT);
-
+        
         allowed.add(Input.Keys.ALT_LEFT);
         allowed.add(Input.Keys.ALT_RIGHT);
         allowed.add(Input.Keys.CONTROL_LEFT);
@@ -122,7 +121,7 @@ public class KeyConfigTab extends ConfigTab {
         allowed.add(Input.Keys.SHIFT_LEFT);
         allowed.add(Input.Keys.SHIFT_RIGHT);
         allowed.add(Input.Keys.SPACE);
-
+        
         allowed.add(Input.Keys.PLUS);
         allowed.add(Input.Keys.MINUS);
         allowed.add(Input.Keys.BACKSPACE);
@@ -133,7 +132,7 @@ public class KeyConfigTab extends ConfigTab {
         allowed.add(Input.Keys.COMMA);
         allowed.add(Input.Keys.PERIOD);
         allowed.add(Input.Keys.SLASH);
-
+        
         allowed.add(Input.Keys.NUM_0);
         allowed.add(Input.Keys.NUM_1);
         allowed.add(Input.Keys.NUM_2);
@@ -144,7 +143,7 @@ public class KeyConfigTab extends ConfigTab {
         allowed.add(Input.Keys.NUM_7);
         allowed.add(Input.Keys.NUM_8);
         allowed.add(Input.Keys.NUM_9);
-
+        
         allowed.add(Input.Keys.NUMPAD_0);
         allowed.add(Input.Keys.NUMPAD_1);
         allowed.add(Input.Keys.NUMPAD_2);
@@ -155,7 +154,7 @@ public class KeyConfigTab extends ConfigTab {
         allowed.add(Input.Keys.NUMPAD_7);
         allowed.add(Input.Keys.NUMPAD_8);
         allowed.add(Input.Keys.NUMPAD_9);
-
+        
         allowed.add(Input.Keys.F1);
         allowed.add(Input.Keys.F2);
         allowed.add(Input.Keys.F3);
@@ -168,8 +167,8 @@ public class KeyConfigTab extends ConfigTab {
         allowed.add(Input.Keys.F10);
         allowed.add(Input.Keys.F11);
         allowed.add(Input.Keys.F12);
-
-
+        
+        
         if (keyNames == null) {
             keyNames = new ObjectIntMap<String>();
             //for (int i : allowed) {
@@ -179,11 +178,11 @@ public class KeyConfigTab extends ConfigTab {
             }
         }
     }
-
+    
     @Override
     public void saveChanges() {
         Gdx.app.log(this.getClass().getSimpleName(), "keyconfig save");
-
+        
         for (Field f : localConfig.getClass().getFields()) {
             String fieldName = f.getName();
             for (Map.Entry<String, String> kvp : changes.entrySet()) {
@@ -194,25 +193,25 @@ public class KeyConfigTab extends ConfigTab {
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
                     }
-
+                    
                 }
             }
         }
         changes.clear();
         setDirty(false);
     }
-
+    
     @Override
     public void discardChanges() {
         Gdx.app.log(this.getClass().getSimpleName(), "keyconfig discard");
         SnapshotArray<Actor> children = scrollContainer.getChildren();
-        for (Map.Entry<String, String>  kvp: changes.entrySet()) {
+        for (Map.Entry<String, String> kvp : changes.entrySet()) {
             for (Actor child : children) {
                 if (child instanceof VisSelectBox) {
                     if (child.getName().equals(kvp.getKey())) {
                         try {
                             Field field = localConfig.getClass().getField(kvp.getKey());
-                            String key = Input.Keys.toString((Integer)field.get(localConfig));
+                            String key = Input.Keys.toString((Integer) field.get(localConfig));
                             ((VisSelectBox) child).setSelected(key);
                             Gdx.app.log(this.getClass().getSimpleName(), "reset " + child.getName() + " with " + kvp.getValue());
                         } catch (IllegalAccessException e) {
@@ -225,11 +224,11 @@ public class KeyConfigTab extends ConfigTab {
                 }
             }
         }
-
+        
         changes.clear();
         setDirty(false);
     }
-
+    
     private EventListener autoFocusScroll(final VisSelectBox<String> testKeys) {
         return new EventListener() {
             //auto focus scroll on mouse enter
@@ -244,7 +243,7 @@ public class KeyConfigTab extends ConfigTab {
             }
         };
     }
-
+    
     private ChangeListener keyChanged(final VisSelectBox<String> testKeys) {
         return new ChangeListener() {
             @Override
@@ -252,11 +251,11 @@ public class KeyConfigTab extends ConfigTab {
                 //check if key already assigned to another action
                 boolean keyInUse = false;
                 String usedBy = "null";
-                String selected = (String)((VisSelectBox)actor).getSelected();
+                String selected = (String) ((VisSelectBox) actor).getSelected();
                 for (Actor other : scrollContainer.getChildren()) {
                     if (other instanceof VisSelectBox) {
                         if (!other.equals(testKeys)) {
-                            if ((((VisSelectBox)other).getSelected()).equals(selected)) {
+                            if ((((VisSelectBox) other).getSelected()).equals(selected)) {
                                 usedBy = other.getName();
                                 keyInUse = true;
                                 break;

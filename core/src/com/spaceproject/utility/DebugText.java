@@ -15,7 +15,7 @@ public class DebugText {
     }
     
     public DebugText(String text, float x, float y, BitmapFont font) {
-        this(text, (int)x, (int)y, Color.WHITE, font);
+        this(text, (int) x, (int) y, Color.WHITE, font);
     }
     
     public DebugText(String text, int x, int y, Color color, BitmapFont font) {

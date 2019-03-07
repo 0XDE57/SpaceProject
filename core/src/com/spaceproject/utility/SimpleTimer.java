@@ -5,20 +5,20 @@ import com.spaceproject.screens.GameScreen;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class SimpleTimer {
-
+    
     private long interval;
     private long lastEvent;
     
     public SimpleTimer(long time) {
         this(time, false);
     }
-
+    
     public SimpleTimer(long time, boolean setLastEventTime) {
         interval = time;
         if (setLastEventTime)
             reset();
     }
-
+    
     public boolean tryEvent() {
         if (canDoEvent()) {
             reset();
@@ -26,32 +26,32 @@ public class SimpleTimer {
         }
         return false;
     }
-
+    
     public boolean canDoEvent() {
         return timeSinceLastEvent() >= interval;
     }
-
+    
     public void reset() {
         lastEvent = GameScreen.getGameTimeCurrent();
     }
-
+    
     public long getInterval() {
         return interval;
     }
-
+    
     public void setInterval(long interval, boolean reset) {
         this.interval = interval;
         if (reset)
             reset();
     }
-
+    
     public void setLastEvent(long time) {
         lastEvent = time;
     }
     
     public void setCanDoEvent() {
         //ensures event can be done right now
-        setLastEvent(timeSinceLastEvent()-getInterval());
+        setLastEvent(timeSinceLastEvent() - getInterval());
     }
     
     public void pause() {
@@ -65,9 +65,9 @@ public class SimpleTimer {
     public long timeSinceLastEvent() {
         return GameScreen.getGameTimeCurrent() - lastEvent;
     }
-
+    
     public float ratio() {
-        return Math.min((float)timeSinceLastEvent()/(float)interval, 1.0f);
+        return Math.min((float) timeSinceLastEvent() / (float) interval, 1.0f);
     }
     
     @Override

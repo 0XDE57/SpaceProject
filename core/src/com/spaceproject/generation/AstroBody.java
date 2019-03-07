@@ -9,7 +9,7 @@ public class AstroBody {
     public long seed;
 
 //BarycenterComponent.AstronomicalBodyType type;
-
+    
     public AstroBody(Vector2 location) {
         x = (int) location.x;
         y = (int) location.y;

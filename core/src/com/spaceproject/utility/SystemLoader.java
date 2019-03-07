@@ -16,7 +16,7 @@ public abstract class SystemLoader {
     public static void loadSystems(GameScreen game, Engine engine, boolean inSpace, SystemsConfig cfg) {
         String tag = "SystemLoader";
         Gdx.app.log(tag, inSpace ? "==========SPACE==========" : "==========WORLD==========");
-
+        
         for (SysCFG sysCFG : cfg.getSystems()) {
             LoadSystem(game, engine, inSpace, tag, sysCFG);
         }
@@ -43,7 +43,7 @@ public abstract class SystemLoader {
                     systemToLoad.priority = sysCFG.getPriority();
                     
                     if (systemToLoad instanceof IRequireGameContext) {
-                        ((IRequireGameContext)systemToLoad).initContext(game);
+                        ((IRequireGameContext) systemToLoad).initContext(game);
                     }
                     
                     engine.addSystem(systemToLoad);
