@@ -1,6 +1,5 @@
 package com.spaceproject.systems;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -16,24 +15,22 @@ import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 
 
-public class ScreenTransitionSystem extends IteratingSystem {
+public class ScreenTransitionSystem extends IteratingSystem implements IRequireGameContext {
     
-    private ImmutableArray<Entity> astroObjects;
+    private GameScreen gameScreen;
     
     public ScreenTransitionSystem() {
         super(Family.all(ScreenTransitionComponent.class, TransformComponent.class).get());
     }
     
     @Override
-    public void addedToEngine(Engine engine) {
-        Family astro = Family.all(AstronomicalComponent.class, SeedComponent.class).get();
-        astroObjects = engine.getEntitiesFor(astro);
-        
-        super.addedToEngine(engine);
+    public void initContext(GameScreen gameScreen) {
+        this.gameScreen = gameScreen;
     }
     
     @Override
@@ -53,7 +50,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
                     zoomIn(screenTrans);
                     break;
                 case transition:
-                    landOnPlanet(entity, screenTrans);
+                    landOnPlanet(gameScreen, entity, screenTrans);
                     return;
                 case pause:
                     pause(screenTrans);
@@ -80,7 +77,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
             }
             switch (screenTrans.takeOffStage) {
                 case transition:
-                    takeOff(entity, screenTrans);
+                    takeOff(gameScreen, entity, screenTrans);
                     break;
                 case sync:
                     syncLoadPosition(entity, screenTrans);
@@ -131,6 +128,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
         TransformComponent transform = Mappers.transform.get(entity);
         if (transform != null) {
             transform.velocity.set(0, 0);
+            transform.accel.set(0, 0);
         }
         
         
@@ -150,7 +148,8 @@ public class ScreenTransitionSystem extends IteratingSystem {
         if (screenTrans.timer.tryEvent()) {
             sprite3D.renderable.scale.set(0, 0, 0);
             if (entity.getComponent(AIComponent.class) != null) {
-                screenTrans.doTransition = true;
+                //screenTrans.doTransition = true;
+                screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.transition;
             } else {
                 screenTrans.landStage = screenTrans.landStage.next();
             }
@@ -169,6 +168,7 @@ public class ScreenTransitionSystem extends IteratingSystem {
                 screenTrans.takeOffStage = screenTrans.takeOffStage.next();
             }
         }*/
+        
         
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         
@@ -190,13 +190,13 @@ public class ScreenTransitionSystem extends IteratingSystem {
     
     private static void zoomOut(ScreenTransitionComponent screenTrans) {
         MyScreenAdapter.setZoomTarget(1);
-        if (MyScreenAdapter.cam.zoom == 1) {
+        if (MyScreenAdapter.cam.zoom >= 1) {
             screenTrans.takeOffStage = screenTrans.takeOffStage.next();
         }
     }
     
     
-    private static void landOnPlanet(Entity entity, ScreenTransitionComponent screenTrans) {
+    private static void landOnPlanet(GameScreen gameContext, Entity entity, ScreenTransitionComponent screenTrans) {
         /*
         //reset size to normal
         TextureComponent tex = Mappers.texture.get(entity);
@@ -207,10 +207,10 @@ public class ScreenTransitionSystem extends IteratingSystem {
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         sprite3D.renderable.scale.set(1, 1, 1);
         
-        screenTrans.doTransition = true;
+        gameContext.switchScreen(entity, screenTrans.planet);
     }
     
-    private void takeOff(Entity entity, ScreenTransitionComponent screenTrans) {
+    private void takeOff(GameScreen gameContext, Entity entity, ScreenTransitionComponent screenTrans) {
         //set size to 0 so texture can grow
         /*
         TextureComponent tex = Mappers.texture.get(entity);
@@ -220,13 +220,19 @@ public class ScreenTransitionSystem extends IteratingSystem {
         
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         sprite3D.renderable.scale.set(0, 0, 0);
+    
+        MyScreenAdapter.setZoomTarget(0);
+        MyScreenAdapter.cam.zoom = 0;
         
-        screenTrans.doTransition = true;
+        gameContext.switchScreen(entity, null);
     }
     
     private void syncLoadPosition(Entity entity, ScreenTransitionComponent screenTrans) {
         long desiredSeed = screenTrans.planet.getComponent(SeedComponent.class).seed;
         Gdx.app.log(this.getClass().getSimpleName(), Misc.objString(entity) + " is waiting for " + desiredSeed);
+        
+        Family astro = Family.all(AstronomicalComponent.class, SeedComponent.class).get();
+        ImmutableArray<Entity> astroObjects = getEngine().getEntitiesFor(astro);
         for (Entity astroEnt : astroObjects) {
             if (Mappers.seed.get(astroEnt).seed == desiredSeed) {
                 Vector2 orbitPos = OrbitSystem.getSyncPos(astroEnt, GameScreen.getGameTimeCurrent());
@@ -254,4 +260,5 @@ public class ScreenTransitionSystem extends IteratingSystem {
             }
         }
     }
+    
 }

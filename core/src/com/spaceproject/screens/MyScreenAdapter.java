@@ -59,9 +59,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
         Gdx.input.setInputProcessor(inputMultiplexer);
         
         //debug
-        
         toggleVsync();
-        //
     }
     
     
@@ -144,6 +142,9 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
      * @param delta
      */
     private static void zoomCamera(float delta) {
+        //todo: move cam zoom behavior to @CameraSystem
+        //animate settings in CameraFocusComponent?
+        //eg: pan / zoom speed, pan / zoom interpolation curve
         if (cam.zoom != zoomTarget) {
             //zoom in/out
             float scaleSpeed = zoomSpeed * delta;

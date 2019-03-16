@@ -46,8 +46,6 @@ public class ScreenTransitionComponent implements Component {
     
     public Entity planet;
     
-    public boolean doTransition;
-    
     public SimpleTimer timer;
     public Interpolation animInterpolation;
 }

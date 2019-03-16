@@ -20,6 +20,9 @@ public class FontFactory {
     public static final String fontBitstreamVMBold = "fonts/bitstream/VeraMono-Bold.ttf";
     public static final String fontBitstreamVMItalic = "fonts/bitstream/VeraMono-italic.ttf";
     
+    //skin resource/style name
+    public static final String skinSmallFont = "smallFont";
+    
     public static BitmapFont createFont(String font, FreeTypeFontParameter parameter) {
         FreeTypeFontGenerator generator;
         BitmapFont newFont;

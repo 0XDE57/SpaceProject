@@ -33,13 +33,13 @@ public abstract class SystemLoader {
         boolean shouldBeLoaded = (inSpace && sysCFG.isLoadInSpace()) || (!inSpace && sysCFG.isLoadInWorld());
         
         try {
-            Class<? extends EntitySystem> loadMe = (Class<? extends EntitySystem>) Class.forName(sysCFG.getClassName());
-            EntitySystem systemInEngine = engine.getSystem(loadMe);
+            Class<? extends EntitySystem> systemClass = (Class<? extends EntitySystem>) Class.forName(sysCFG.getClassName());
+            EntitySystem systemInEngine = engine.getSystem(systemClass);
             
             boolean isLoaded = systemInEngine != null;
             if (shouldBeLoaded) {
                 if (!isLoaded) {
-                    EntitySystem systemToLoad = loadMe.newInstance();
+                    EntitySystem systemToLoad = systemClass.newInstance();
                     systemToLoad.priority = sysCFG.getPriority();
                     
                     if (systemToLoad instanceof IRequireGameContext) {

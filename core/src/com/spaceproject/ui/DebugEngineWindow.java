@@ -26,7 +26,7 @@ import com.spaceproject.utility.SimpleTimer;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.spaceproject.screens.GameScreen.smallFont;
+import static com.spaceproject.generation.FontFactory.skinSmallFont;
 
 
 public class DebugEngineWindow extends VisWindow implements EntityListener {
@@ -62,8 +62,8 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         addCloseButton();
         
         
-        systemNodes = new Node(new Label("Systems", VisUI.getSkin(), smallFont, Color.WHITE));
-        entityNodes = new Node(new Label("Entities", VisUI.getSkin(), smallFont, Color.WHITE));
+        systemNodes = new Node(new Label("Systems", VisUI.getSkin(), skinSmallFont, Color.WHITE));
+        entityNodes = new Node(new Label("Entities", VisUI.getSkin(), skinSmallFont, Color.WHITE));
         tree = new Tree(VisUI.getSkin());
         tree.add(systemNodes);
         tree.add(entityNodes);

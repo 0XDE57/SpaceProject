@@ -9,7 +9,7 @@
             * why wipe out listeners and such
         - cons:
             * may introduce another class off problems
-    [ ] refactor screen transition
+    [...] refactor screen transition
 
 
     [ ] consider merging rendering system (SpaceRendering & World rendering)?

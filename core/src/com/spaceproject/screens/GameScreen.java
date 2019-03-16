@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
 import com.kotcrab.vis.ui.VisUI;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
@@ -35,12 +34,10 @@ import java.util.concurrent.TimeUnit;
 
 public class GameScreen extends MyScreenAdapter {
     
-    public Engine engine, persistenceEngine;
+    public Engine engine;//, persistenceEngine;
     
     private static long gameTimeCurrent, gameTimeStart, timePaused;
-    boolean isPaused = false;
-    
-    private ImmutableArray<Entity> transitioningEntities;
+    private boolean isPaused = false;
     
     private static boolean inSpace;
     private Entity currentPlanet = null;
@@ -48,9 +45,7 @@ public class GameScreen extends MyScreenAdapter {
     public static Universe universe;
     public static NoiseManager noiseManager;
     
-    
-    ShaderProgram shader = null;
-    public static String smallFont = "smallFont";
+    private ShaderProgram shader = null;
     
     
     public GameScreen(boolean inSpace) {
@@ -61,12 +56,7 @@ public class GameScreen extends MyScreenAdapter {
             VisUI.dispose(true);
         VisUI.load(SpaceProject.isMobile() ? VisUI.SkinScale.X2 : VisUI.SkinScale.X1);
         BitmapFont font = FontFactory.createFont(FontFactory.fontBitstreamVM, 12);
-        VisUI.getSkin().add(smallFont, font);
-        
-        gameTimeStart = System.nanoTime();
-        
-        universe = new Universe();
-        noiseManager = new NoiseManager(SpaceProject.celestcfg.maxGenThreads);
+        VisUI.getSkin().add(FontFactory.skinSmallFont, font);
         
         
         //playing with shaders
@@ -80,26 +70,25 @@ public class GameScreen extends MyScreenAdapter {
             if (shader.isCompiled())
                 batch.setShader(shader);
         }
+    
         
+        engine = new Engine();
+        universe = new Universe();
+        noiseManager = new NoiseManager(SpaceProject.celestcfg.maxGenThreads);
         
         // load test default values
         Entity playerTESTSHIP = EntityFactory.createPlayerShip(0, 0);
-        Entity planet = null;
-        
-        if (!inSpace && planet == null) {
-            planet = EntityFactory.createPlanet(0, new Entity(), 0, false);
-            Gdx.app.log(this.getClass().getSimpleName(), "NULL PLANET: Debug world loaded");
-            //int a = 1/0;// throw new Exception("");
-        }
-        
-        engine = new Engine();
         
         if (inSpace) {
             initSpace(playerTESTSHIP);
         } else {
+            Entity planet = EntityFactory.createPlanet(0, new Entity(), 0, false);
+            Gdx.app.log(this.getClass().getSimpleName(), "DEBUG PLANET LOADED");
+            
             initWorld(playerTESTSHIP, planet);
         }
         
+        gameTimeStart = System.nanoTime();
     }
     
     
@@ -134,7 +123,7 @@ public class GameScreen extends MyScreenAdapter {
         // add player
         Entity ship = transitioningEntity;
         int mapSize = planet.getComponent(PlanetComponent.class).mapSize;
-        int position = mapSize * SpaceProject.worldcfg.tileSize / 2;//set  position to middle of planet
+        int position = mapSize * SpaceProject.worldcfg.tileSize / 2;//set position to middle of planet
         ship.getComponent(TransformComponent.class).pos.set(position, position);
         engine.addEntity(ship);
     }
@@ -152,7 +141,6 @@ public class GameScreen extends MyScreenAdapter {
         engine.update(delta);
         
         
-        checkTransition();
         
         if (Gdx.input.isKeyJustPressed(Keys.F1)) {
             //debug
@@ -171,71 +159,45 @@ public class GameScreen extends MyScreenAdapter {
         
     }
     
-    
-    private void checkTransition() {
-        //TODO: still a bit too much transitions logic in here, should move more to transition system
-        //maybe a separate component DoTransitionComp added when stage hits transition, in order to move
-        //animation next stage call to system with other similar calls and logic?
-        boolean transition = false;
-        Entity transEntity = null;
-        if (transitioningEntities == null) {
-            transitioningEntities = engine.getEntitiesFor(Family.all(ScreenTransitionComponent.class).get());
-        }
-        
-        for (Entity e : transitioningEntities) {
-            //todo: what happens (in terms of persistence) to an entity in process of transitioning?
+    public void switchScreen(Entity transEntity, Entity planet) {
+        if (Mappers.AI.get(transEntity) != null) {
+            Gdx.app.log(this.getClass().getSimpleName(), "REMOVING: " + Misc.objString(transEntity));
+            ResourceDisposer.dispose(transEntity);
+            engine.removeEntity(transEntity);
+			/*//TODO: persist
+			// what happens (in terms of persistence) to an entity in process of transitioning?
             //if important -> persist
             //if same world (even if not important) -> persist (land on planet at same time as AI=where is AI)
-            ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(e);
-            if (screenTrans.doTransition) {
-                screenTrans.doTransition = false;
-                
-                if (e.getComponent(ControlFocusComponent.class) != null) {
-                    transition = true;
-                    transEntity = e;
-                }
-                
-                if (Mappers.AI.get(e) != null) {
-                    Gdx.app.log(this.getClass().getSimpleName(), "REMOVING: " + Misc.objString(e));
-                    ResourceDisposer.dispose(e);
-                    engine.removeEntity(e);
-					/*//TODO: persist
-					if (Mappers.persist.get(e)) {
-						System.out.println("MOVED to background engine: " + Misc.objString(e));
-						persistenceEngine.addEntity(e);
-					}*/
-                }
-                
-                if (inSpace) {
-                    screenTrans.landStage = screenTrans.landStage.next();
-                } else {
-                    screenTrans.takeOffStage = screenTrans.takeOffStage.next();
-                }
-            }
-        }
-        
-        
-        if (transition) {
-            ResourceDisposer.disposeAllExcept(engine.getEntities(), transitioningEntities);
-            engine.removeAllEntities();//to fix family references when entities added to new engine
-            transitioningEntities = null;
-            
-            
-            if (inSpace) {
-                initWorld(transEntity, Mappers.screenTrans.get(transEntity).planet);
-            } else {
-                Mappers.screenTrans.get(transEntity).planet = currentPlanet;
-                initSpace(transEntity);
-            }
-
-			/*
-			//TODO: persist
-			for (Entity relevantEntity : backgroundEngine.getEntities()) {
-				//if landing on planet, and relevantEntity is on planet, add to engine, remove from backgroundEngine
-				//if going to space, and relevantEntity in space, add to engine, remove from backgroundEngine
+			if (Mappers.persist.get(e)) {
+				System.out.println("MOVED to background engine: " + Misc.objString(e));
+				persistenceEngine.addEntity(e);
 			}*/
+			return;
         }
+        
+        ImmutableArray<Entity> transitioningEntities = engine.getEntitiesFor(Family.all(ScreenTransitionComponent.class).get());
+        ResourceDisposer.disposeAllExcept(engine.getEntities(), transitioningEntities);
+        engine.removeAllEntities();//to fix family references when entities added to new engine
+    
+        ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(transEntity);
+        if (inSpace) {
+            initWorld(transEntity, planet);
+            
+            screenTrans.landStage = screenTrans.landStage.next();//todo: wait for load/sync here?
+        } else {
+            Mappers.screenTrans.get(transEntity).planet = currentPlanet;//save for sync?
+            initSpace(transEntity);
+    
+            screenTrans.takeOffStage = screenTrans.takeOffStage.next();//todo: wait for load/sync here?
+        }
+    
+        /*TODO: persist
+        for (Entity relevantEntity : backgroundEngine.getEntities()) {
+            //if landing on planet, and relevantEntity is on planet, add to engine, remove from backgroundEngine
+            //if going to space, and relevantEntity in space, add to engine, remove from backgroundEngine
+        }*/
     }
+    
     
     public static long getGameTimeCurrent() {
         return gameTimeCurrent;
