@@ -32,6 +32,7 @@ import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.MapState;
 import com.spaceproject.ui.Menu;
 import com.spaceproject.ui.MiniMap;
+import com.spaceproject.ui.TransitionOverlay;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.IRequireGameContext;
@@ -54,19 +55,21 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext {
     private ImmutableArray<Entity> player;
     private ImmutableArray<Entity> killables;
     
-    private MiniMap miniMap = new MiniMap();
+    private MiniMap miniMap;
     
     private boolean drawHud = true;
     private boolean drawEdgeMap = true;
     
+    private TransitionOverlay transitionOverlay;
     
     public HUDSystem() {
         cam = MyScreenAdapter.cam;
         shape = MyScreenAdapter.shape;
         batch = MyScreenAdapter.batch;
-        
         stage = new Stage(new ScreenViewport());
         
+        miniMap = new MiniMap();
+        transitionOverlay = new TransitionOverlay();
     }
     
     @Override
@@ -83,7 +86,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext {
         
         
         menu = new Menu(false, engine);
-        //stage.addListener((InputListener)this);
         
         stage.addListener(new InputListener() {
             @Override
@@ -118,6 +120,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext {
         CheckInput();
         
         drawHUD();
+    
+        transitionOverlay.render();
         
         //draw menu
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
@@ -408,6 +412,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext {
     
     public Menu getMenu() {
         return menu;
+    }
+    
+    public TransitionOverlay getTransitionOverlay() {
+        return transitionOverlay;
     }
     
     public void resize(int width, int height) {

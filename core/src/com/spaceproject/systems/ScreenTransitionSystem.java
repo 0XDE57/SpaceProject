@@ -15,6 +15,7 @@ import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.ui.TransitionOverlay;
 import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
@@ -49,9 +50,15 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
                 case zoomIn:
                     zoomIn(screenTrans);
                     break;
+                case screenEffectFadeIn:
+                    fadeIn(screenTrans);
+                    break;
                 case transition:
                     landOnPlanet(gameScreen, entity, screenTrans);
                     return;
+                case screenEffectFadeOut:
+                    fadeOut(screenTrans);
+                    break;
                 case pause:
                     pause(screenTrans);
                     break;
@@ -76,11 +83,17 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
                 screenTrans.curTakeOffStage = screenTrans.takeOffStage;
             }
             switch (screenTrans.takeOffStage) {
+                case screenEffectFadeIn:
+                    fadeIn(screenTrans);
+                    break;
                 case transition:
                     takeOff(gameScreen, entity, screenTrans);
                     break;
                 case sync:
                     syncLoadPosition(entity, screenTrans);
+                    break;
+                case screenEffectFadeOut:
+                    fadeOut(screenTrans);
                     break;
                 case zoomOut:
                     zoomOut(screenTrans);
@@ -148,7 +161,6 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         if (screenTrans.timer.tryEvent()) {
             sprite3D.renderable.scale.set(0, 0, 0);
             if (entity.getComponent(AIComponent.class) != null) {
-                //screenTrans.doTransition = true;
                 screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.transition;
             } else {
                 screenTrans.landStage = screenTrans.landStage.next();
@@ -182,8 +194,8 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     }
     
     private static void zoomIn(ScreenTransitionComponent screenTrans) {
-        MyScreenAdapter.setZoomTarget(0);
-        if (MyScreenAdapter.cam.zoom <= 0.01f) {
+        MyScreenAdapter.setZoomTarget(0.05f);
+        if (MyScreenAdapter.cam.zoom <= 0.05f) {
             screenTrans.landStage = screenTrans.landStage.next();
         }
     }
@@ -195,6 +207,42 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         }
     }
     
+    private void fadeIn(ScreenTransitionComponent screenTrans) {
+        HUDSystem hud = getEngine().getSystem(HUDSystem.class);
+        TransitionOverlay overlay = hud.getTransitionOverlay();
+        
+        switch (overlay.getFadeState()) {
+            case off: overlay.fadeIn(); break;
+            case on:
+                if (screenTrans.landStage != null) {
+                    screenTrans.landStage = screenTrans.landStage.next();
+                }
+                if (screenTrans.takeOffStage != null) {
+                    screenTrans.takeOffStage = screenTrans.takeOffStage.next();
+                }
+                break;
+        }
+        
+    }
+    
+    private void fadeOut(ScreenTransitionComponent screenTrans) {
+        HUDSystem hud = getEngine().getSystem(HUDSystem.class);
+        TransitionOverlay overlay = hud.getTransitionOverlay();
+        
+        switch (overlay.getFadeState()) {
+            case off:
+                if (screenTrans.landStage != null) {
+                    screenTrans.landStage = screenTrans.landStage.next();
+                }
+                if (screenTrans.takeOffStage != null) {
+                    screenTrans.takeOffStage = screenTrans.takeOffStage.next();
+                }
+                break;
+            case on:
+                overlay.fadeOut();
+                break;
+        }
+    }
     
     private static void landOnPlanet(GameScreen gameContext, Entity entity, ScreenTransitionComponent screenTrans) {
         /*

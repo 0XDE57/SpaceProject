@@ -8,10 +8,10 @@ import com.spaceproject.utility.SimpleTimer;
 public class ScreenTransitionComponent implements Component {
     
     public enum TakeOffAnimStage {
-        //fly/hover animation,
-        //screenfEffect.
+        screenEffectFadeIn,
         transition,
         sync,
+        screenEffectFadeOut,
         zoomOut,
         grow,
         end;
@@ -26,8 +26,9 @@ public class ScreenTransitionComponent implements Component {
     public enum LandAnimStage {
         shrink,
         zoomIn,
-        //screenfEffect
+        screenEffectFadeIn,
         transition,
+        screenEffectFadeOut,
         pause,
         exit,
         end;

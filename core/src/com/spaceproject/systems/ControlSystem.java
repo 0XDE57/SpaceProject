@@ -452,7 +452,7 @@ public class ControlSystem extends IteratingSystem {
             return;
         
         ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
-        screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.transition;
+        screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.screenEffectFadeIn;
         screenTrans.timer = new SimpleTimer(SpaceProject.entitycfg.shrinkGrowAnimTime, true);
         screenTrans.animInterpolation = Interpolation.pow2;
         entity.add(screenTrans);

@@ -64,7 +64,8 @@ public class GameScreen extends MyScreenAdapter {
         if (useShader) {
             //shader = new ShaderProgram(Gdx.files.internal("shaders/quadRotation.vsh"), Gdx.files.internal("shaders/quadRotation.fsh"));
             //shader = new ShaderProgram(Gdx.files.internal("shaders/passthrough.vsh"), Gdx.files.internal("shaders/passthrough.fsh"));
-            shader = new ShaderProgram(Gdx.files.internal("shaders/invert.vsh"), Gdx.files.internal("shaders/invert.fsh"));
+            //shader = new ShaderProgram(Gdx.files.internal("shaders/invert.vsh"), Gdx.files.internal("shaders/invert.fsh"));
+            shader = new ShaderProgram(Gdx.files.internal("shaders/grayscale.vsh"), Gdx.files.internal("shaders/grayscale.fsh"));
             ShaderProgram.pedantic = false;
             Gdx.app.log(this.getClass().getSimpleName(), "Shader compiled: " + shader.isCompiled() + ": " + shader.getLog());
             if (shader.isCompiled())
@@ -196,6 +197,9 @@ public class GameScreen extends MyScreenAdapter {
             //if landing on planet, and relevantEntity is on planet, add to engine, remove from backgroundEngine
             //if going to space, and relevantEntity in space, add to engine, remove from backgroundEngine
         }*/
+    
+        cam.zoom = 1;
+        setZoomTarget(1);
     }
     
     

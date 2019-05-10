@@ -14,12 +14,12 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.spaceproject.ui.SpaceBackgroundTile;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.ui.SpaceBackgroundTile;
 import com.spaceproject.utility.Mappers;
 
 import java.util.ArrayList;
@@ -130,7 +130,6 @@ public class SpaceRenderingSystem extends IteratingSystem {
             //draw = (tile position + (cam position - center of tile)) * depth
             float drawX = tile.x + (cam.position.x - (tile.size / 2)) * tile.depth;
             float drawY = tile.y + (cam.position.y - (tile.size / 2)) * tile.depth;
-            //batch.draw(tile.tex, drawX, drawY);
             
             //draw texture
             float width = tile.tex.getWidth();
@@ -183,7 +182,6 @@ public class SpaceRenderingSystem extends IteratingSystem {
             
             modelBatch.render(sprite3D.renderable);
         }
-        //renderQueue3D.clear();
     }
     
     private void renderShields() {

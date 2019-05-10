@@ -1,15 +1,51 @@
 ---ENGINE---
-[...] Architecture
-    [x] consider refactoring space and world view to be simply load and unload systems as needed instead of wiping out everything
-        load base systems, then load/unload world and space systems on the fly. use priority to keep order
-        it would probably fix some of the screen transition issues and simplify it.
-        - pros:
-            * eliminates duplicate code
-            * might make things simpler and cleaner and eliminate certain classes of bugs
-            * why wipe out listeners and such
-        - cons:
-            * may introduce another class off problems
-    [...] refactor screen transition
+[...] refactor screen transition
+    [ ] ready / sync / load state. should all be in transition system?
+        [...] finish transition animation, should have screen effect for polish and to hide loading/level change. goal feel a little more seamless
+            (fade to white/pixelate shader during landing, load map (can wait here for a second if not finished generating, when generations finished start white then fade normal, continue)
+        [ ] WorldRenderingSystem shouldn't be responsible for loading map: loadMap(). should be where?
+        [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
+            see: ScreenTransitionSystem.syncLoadPosition()
+    [ ] bug: shrink sometimes doesn't scale properly or at all
+    [ ] bug: velocity when leave planet should match planet
+    [...] genericize and make work land and take off work for AI, system doesn't supports non-player world switching
+          dumb loop where AI lands on planet, kept in some kind of background
+          processing state/alt engine, wait a second then take off to test all is working correctly
+          background engine meant to be low processing effort (eg: ultra dumbed down AI or simulations, no rendering, no physics, just states and events) to keep track of important entities
+          and states between space and worlds. eg: give entity important flag component to keep relevant, if dont have flag dont care and remove when switch
+          will be useful for persistence, AI and story type events.
+
+          eg:
+          Engine persistenceEngine.
+          if (player switch screen) {
+              //move persistent from main to background processing
+              for each entity in mainEngine {
+                  if (entity has PersistenceComponent) {
+                      //eg: attacked an AI, AI gets TimedPersistenceComponent and will remain on planet for 5 minutes waiting for you
+                      persistenceEngine.Add(entity);
+                  }
+              }
+              //move relevant entity from background processing to main
+              for each entity in persistenceEngine {
+                  if (entity has PersistenceComponent) {
+                      if (is persistence relevant to new context) {
+                          //example relevance:
+                          //player in space, important entity on planet
+                          //if land on planet with important entity, load into actual engine
+                          mainEngine.Add(entity);
+                          //could be more nuanced, like perhaps entity is only loaded when event triggers it
+                          //or specific location on planet. dunno till start implementing.
+                          //possibly have multiple engines handling contexts?
+                      }
+                  }
+              }
+          }
+          if (AI switch screen) {
+              //similar thing to above
+              //if relevant load it, else keep in background
+
+              //if not important, remove from engine, forget about existence
+          }
 
 
     [ ] consider merging rendering system (SpaceRendering & World rendering)?
@@ -25,6 +61,15 @@
         what happens in refactoring space and world will affect this. need to think more about it
 
 [ ] physics and movement & message arch
+    [...] rotation impulse
+        I can collide polygons, but they don't account for rotation and point of contact...
+        [...] DIY?
+            http://www.randygaul.net/2013/03/27/game-physics-engine-part-1-impulse-resolution/
+            https://stackoverflow.com/questions/11654990/2d-physics-engine-collision-response-rotation-of-objects
+
+        [ ] move to box2d?
+            seems overkill and would involve a lot of re-writing?... but it will be better than anything i can write myself
+            but i really dont want to rewrite a bunch of stuff...
     [ ] combine BoundsSystem & CollisionSystem (doesn't make sense to be separate)
     [ ] extract physics out of CollisionSystem (collision should notify, physics should apply impulse)
     [ ] extract damage out of CollisionSystem (collision should notify, a CombatSystem(?) will pickup)
@@ -32,99 +77,28 @@
     https://gamedev.stackexchange.com/questions/23834/how-to-properly-implement-message-handling-in-a-component-based-entity-system
 
 [...] fix texture / map loading
-    [x] seed based load instead of position
     [ ] clean up star save/load
-    [x] fix thread generation to be limited (probably by core count) threadpool?
-    [x] planets load from cache
-    [x] prevent generating duplicate seed when one is in process of being created but not yet created (multiple threads trying to make the same data)
-    [...] clean up
     [!] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
         ! actually for now this is a convenient bug for testing
+    [ ] nested orbit: consider children of children eg: satellite->moon->planet->star
 
-    [...] fix land/take-off
-        [...] transition feels unreliable
-            [ ] bug: landed on planet which had finished generating, but did't load (no map found)
-                see: WorldRenderingSystem.loadMap() (also rendering shouldn't be responsible for loading...)
-            [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
-                see: ScreenTransitionSystem.syncLoadPosition()
-        [ ] bug: shrink sometimes doesn't scale properly or at all
-        [ ] bug: velocity when leave planet should be match planet
-        [ ] pause stage is also now broken, need to reset timer
-        [ ] nested orbit: consider children of children eg: satellite->moon->planet->star
-        [ ] finish transistor animation, should have screen effect for polish and to hide loading/level change. goal feel a little more seamless
-            (fade to white/pixelate shader during landing, load map (can wait here for a second if not finished generating, when generations finished start white then fade normal, continue)
-        [...] genericize and make work land and take off work for AI, system doesn't supports non-player world switching
-            dumb loop where AI lands on planet, kept in some kind of background
-            processing state/alt engine, wait a second then take off to test all is working correctly
-            background engine meant to be low processing effort (eg: ultra dumbed down AI or simulations, no rendering, no physics, just states and events) to keep track of important entities
-            and states between space and worlds. eg: give entity important flag component to keep relevant, if dont have flag dont care and remove when switch
-            will be useful for persistence, AI and story type events.
-
-            eg:
-            Engine persistenceEngine.
-            if (player switch screen) {
-                //move persistent from main to background processing
-                for each entity in mainEngine {
-                    if (entity has PersistenceComponent) {
-                        //eg: attacked an AI, AI gets TimedPersistenceComponent and will remain on planet for 5 minutes waiting for you
-                        persistenceEngine.Add(entity);
-                    }
-                }
-                //move relevant entity from background processing to main
-                for each entity in persistenceEngine {
-                    if (entity has PersistenceComponent) {
-                        if (is persistence relevant to new context) {
-                            //example relevance:
-                            //player in space, important entity on planet
-                            //if land on planet with important entity, load into actual engine
-                            mainEngine.Add(entity);
-                            //could be more nuanced, like perhaps entity is only loaded when event triggers it
-                            //or specific location on planet. dunno till start implementing.
-                            //possibly have multiple engines handling contexts?
-                        }
-                    }
-                }
-            }
-            if (AI switch screen) {
-                //similar thing to above
-                //if relevant load it, else keep in background
-
-                //if not important, remove from engine, forget about existence
-            }
 
 [...] rendering system
     [...] fix stuff moving ahead of camera
+        [ ] when moving around, entities seem to sway relative to the camera
         [x] ship - fixed
         [ ] player - still jumps ahead of camera. (this may be caused by adding directly to pos instead of vel/accel?)
         [x] shaperenderer - shield moves ahead of camera
         [ ] projectiles from ship - moves ahead of ship
-        [ ] when moving around, entities seem to sway relative to the camera
+
     [...] fix render priority (z-order)
           [X] moved into separate variable
           [ ] define proper heights for importance as current values are somewhat arbitrary
-          [ ] this is now a bit more complex, as there is a mix of 2d sprites and 3d renderables, that are rendered in separate batches (2d then 3d overlaye).
+          [ ] this is now a bit more complex, as there is a mix of 2d sprites and 3d renderables, that are rendered in separate batches (2d then 3d overlay).
               to mix the z between them may require multiple batch passes, or migrating to 3d, also shaperenderer on top of that...
-    [ ] should consider merging SpaceRenderingSystem & WorldRenderingSystem because they are basically duplicates which the difference of background tiles
-        or at least have them share rendering functions as the drawEntities() & draw3DRenderables() are identical between them
 
 
 
-[ ] GameScreen is responsible for too much.. when transition is fixed up, come back and clean up
-    [x] entity creation should happen in an entity loading system (with maybe exception to the player)
-    [x] universe and noise pool stuff should happen elsewhere (like probably in universe)
-    [...] why is everything static...
-
-[x] bug: AI enter/exit vehicle is affecting camera. camera zoom should be for player only
-
-[...] rotation impulse
-    I can collide polygons, but they don't account for rotation and point of contact...
-    [...] DIY?
-        http://www.randygaul.net/2013/03/27/game-physics-engine-part-1-impulse-resolution/
-        https://stackoverflow.com/questions/11654990/2d-physics-engine-collision-response-rotation-of-objects
-
-    [ ] move to box2d?
-        seems overkill and would involve a lot of re-writing?... but it will be better than anything i can write myself
-        but i really dont want to rewrite a bunch of stuff...
 
 [ ] fixed time step (necessary for multiplayer?)
     https://github.com/libgdx/ashley/pull/216
@@ -219,21 +193,14 @@
 [...] SHIPS
     [...] COMBAT
         [...] 3D roll animation for dodge / barrel roll
-                [x] fix 3D texture test
-                [x] integrate
-                [ ] lock orientation and changes to velocity
                 [...] scale bounding box during rotation
-                [...] fix take off and landing shrink/grow animation
-                    [x] fix crash
-                    [...] sometimes model doesn't shrink, and never grows
-                [ ] should use native texture size then scale the model instead?
+                [ ] adjust feel, it doesn't quite feel very dodgy, maybe try lagging the camera behind the roll
                 [ ] clean up: should move values to config
                 [ ] clean up: optimize rendering -> ModelCache
-                [ ] clean up: ensure proper disposal
-                [x] lock facing orientation while rolling, looks funny
                 [ ] mobile/touch UI way of activating dodge, a swipe on the joystick may be intuitive
         [x] shield
-        [ ] bullet come from gun rather than magically from ship
+            [ ] bug: during cooldown, re-activating starts from full instead of current size
+        [ ] bullets should come from a gun rather than magically from ship
         [ ] weapon types
             [x] basic cannon
             [...] grow cannon shoot circles/rectangles with radius relative to damage "weight" of projectile (damage = size * velocity * typeMultiplier)?

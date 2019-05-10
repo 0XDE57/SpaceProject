@@ -12,8 +12,7 @@ public class SysCFG {
     private boolean loadOnDesktop;
     private boolean loadOnMobile;
     
-    public SysCFG() {
-    }
+    public SysCFG() { }
     
     SysCFG(Class<? extends EntitySystem> systemClass, int priority, boolean haltOnGamePause, boolean loadInSpace, boolean loadInWorld, boolean loadOnDesktop, boolean loadOnMobile) {
         this(systemClass.getName(), priority, haltOnGamePause, loadInSpace, loadInWorld, loadOnDesktop, loadOnMobile);
