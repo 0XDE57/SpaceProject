@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AstronomicalComponent;
@@ -15,6 +16,7 @@ import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.ui.State;
 import com.spaceproject.ui.TransitionOverlay;
 import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.Mappers;
@@ -79,7 +81,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
             }
         } else if (screenTrans.takeOffStage != null) {
             if (screenTrans.curTakeOffStage == null || screenTrans.curTakeOffStage != screenTrans.takeOffStage) {
-                Gdx.app.log(this.getClass().getSimpleName(), ": Animation Stage: " + screenTrans.takeOffStage + " for " + Misc.objString(entity));
+                Gdx.app.log(this.getClass().getSimpleName(), "Animation Stage: " + screenTrans.takeOffStage + " for " + Misc.objString(entity));
                 screenTrans.curTakeOffStage = screenTrans.takeOffStage;
             }
             switch (screenTrans.takeOffStage) {
@@ -114,73 +116,59 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
                     break;
             }
         }
-        
-        
+    }
+    
+    public static void nextStage(ScreenTransitionComponent screenTrans) {
+        if (screenTrans.landStage != null) {
+            screenTrans.landStage = screenTrans.landStage.next();
+        }
+        if (screenTrans.takeOffStage != null) {
+            screenTrans.takeOffStage = screenTrans.takeOffStage.next();
+        }
     }
     
     private static void shrink(Entity entity, ScreenTransitionComponent screenTrans) {
-        /*
-        TextureComponent tex = Mappers.texture.get(entity);
-        if (tex != null) {
-
-            //shrink texture
-            tex.scale -= 3f * delta;
-            if (tex.scale <= 0.1f) {
-                tex.scale = 0;
-
-                if (entity.getComponent(AIComponent.class) != null) {
-                    screenTrans.doTransition = true;
-                } else {
-                    screenTrans.landStage = screenTrans.landStage.next();
-                }
-            }
-        }
-        */
         
-        // freeze movement during animation
+        
         TransformComponent transform = Mappers.transform.get(entity);
         if (transform != null) {
+            // freeze movement during animation
             transform.velocity.set(0, 0);
             transform.accel.set(0, 0);
+            
+            if (screenTrans.rotation == 0.0f) {
+                screenTrans.rotation = MathUtils.random(0.01f, -0.01f);
+            }
+            transform.rotation += screenTrans.rotation;
         }
         
         
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         float interp = screenTrans.animInterpolation.apply(1, 0, screenTrans.timer.ratio());
         sprite3D.renderable.scale.set(interp, interp, interp);
-        //TODO: something is wrong with scaling/rendering. the interpolation numbers feel right, but often the entity often much larger than it should be
-        //also the entity scale should be down to 0 by the end but the sprite sometimes only partially scales or seemingly doesn't scale at all.
-        /*
-        TransformComponent trans = Mappers.transform.get(entity);
-        String text = MyMath.round(sprite3D.renderable.scale.x, 3) + ", " + MyMath.round(sprite3D.renderable.scale.y, 3);
-        DebugUISystem.addDebugText(text, trans.pos.x, trans.pos.y, true);
-        //System.out.println(text);
-        */
-        
         
         if (screenTrans.timer.tryEvent()) {
             sprite3D.renderable.scale.set(0, 0, 0);
             if (entity.getComponent(AIComponent.class) != null) {
                 screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.transition;
             } else {
-                screenTrans.landStage = screenTrans.landStage.next();
+                nextStage(screenTrans);
             }
         }
     }
     
     private static void grow(Entity entity, ScreenTransitionComponent screenTrans) {
-        /*
-        TextureComponent tex = Mappers.texture.get(entity);
-        if (tex != null) {
-            //grow texture
-            tex.scale += 3f * delta;
-            if (tex.scale >= SpaceProject.entitycfg.renderScale) {
-                tex.scale = SpaceProject.entitycfg.renderScale;
-
-                screenTrans.takeOffStage = screenTrans.takeOffStage.next();
+    
+        TransformComponent transform = Mappers.transform.get(entity);
+        if (transform != null) {
+            //match planet vel
+            transform.velocity.set(screenTrans.planet.getComponent(TransformComponent.class).velocity);
+            
+            if (screenTrans.rotation == 0.0f) {
+                screenTrans.rotation = MathUtils.random(0.01f, -0.01f);
             }
-        }*/
-        
+            transform.rotation += screenTrans.rotation;
+        }
         
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         
@@ -189,21 +177,30 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         
         if (screenTrans.timer.canDoEvent()) {
             sprite3D.renderable.scale.set(1, 1, 1);
-            screenTrans.takeOffStage = screenTrans.takeOffStage.next();
+            nextStage(screenTrans);
         }
     }
     
-    private static void zoomIn(ScreenTransitionComponent screenTrans) {
+    private void zoomIn(ScreenTransitionComponent screenTrans) {
         MyScreenAdapter.setZoomTarget(0.05f);
         if (MyScreenAdapter.cam.zoom <= 0.05f) {
-            screenTrans.landStage = screenTrans.landStage.next();
+            nextStage(screenTrans);
+        }
+    
+        //begin fade while also zoom
+        //TODO: would probably look better to sync camera zoom with fade amount
+        HUDSystem hud = getEngine().getSystem(HUDSystem.class);
+        TransitionOverlay overlay = hud.getTransitionOverlay();
+        if (overlay.getFadeState() == State.off) {
+            overlay.fadeIn();
         }
     }
     
     private static void zoomOut(ScreenTransitionComponent screenTrans) {
         MyScreenAdapter.setZoomTarget(1);
         if (MyScreenAdapter.cam.zoom >= 1) {
-            screenTrans.takeOffStage = screenTrans.takeOffStage.next();
+            screenTrans.timer.reset();
+            nextStage(screenTrans);
         }
     }
     
@@ -212,14 +209,11 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         TransitionOverlay overlay = hud.getTransitionOverlay();
         
         switch (overlay.getFadeState()) {
-            case off: overlay.fadeIn(); break;
+            case off:
+                overlay.fadeIn();
+                break;
             case on:
-                if (screenTrans.landStage != null) {
-                    screenTrans.landStage = screenTrans.landStage.next();
-                }
-                if (screenTrans.takeOffStage != null) {
-                    screenTrans.takeOffStage = screenTrans.takeOffStage.next();
-                }
+                nextStage(screenTrans);
                 break;
         }
         
@@ -231,12 +225,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         
         switch (overlay.getFadeState()) {
             case off:
-                if (screenTrans.landStage != null) {
-                    screenTrans.landStage = screenTrans.landStage.next();
-                }
-                if (screenTrans.takeOffStage != null) {
-                    screenTrans.takeOffStage = screenTrans.takeOffStage.next();
-                }
+                nextStage(screenTrans);
                 break;
             case on:
                 overlay.fadeOut();
@@ -285,8 +274,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
             if (Mappers.seed.get(astroEnt).seed == desiredSeed) {
                 Vector2 orbitPos = OrbitSystem.getSyncPos(astroEnt, GameScreen.getGameTimeCurrent());
                 Mappers.transform.get(entity).pos.set(orbitPos);
-                //Mappers.transform.get(entity).velocity.set(Mappers.transform.get(astroEnt).velocity);//TODO: match planet vel
-                screenTrans.takeOffStage = screenTrans.takeOffStage.next();
+                nextStage(screenTrans);
                 Gdx.app.log(this.getClass().getSimpleName(), "FOUND SEED " + desiredSeed);
                 break;
             }
@@ -295,7 +283,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     
     private static void pause(ScreenTransitionComponent screenTrans) {
         if (screenTrans.timer.tryEvent()) {
-            screenTrans.landStage = screenTrans.landStage.next();
+            nextStage(screenTrans);
         }
     }
     
@@ -304,7 +292,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
             ControllableComponent control = Mappers.controllable.get(entity);
             if (control != null) {
                 control.changeVehicle = true;
-                screenTrans.landStage = screenTrans.landStage.next();
+                nextStage(screenTrans);
             }
         }
     }

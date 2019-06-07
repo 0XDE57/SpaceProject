@@ -6,7 +6,6 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
@@ -160,7 +159,7 @@ public class CollisionSystem extends EntitySystem {
         normal.set(transformA.velocity).sub(transformB.velocity);
         float relativeVelocity = normal.dot(mtv.normal);
         
-        DebugUISystem.addDebugVec(transformA.pos, mtv.normal.cpy().add(transformA.pos), Color.WHITE);
+        //DebugUISystem.addDebugVec(transformA.pos, mtv.normal.cpy().add(transformA.pos), Color.WHITE);
         
         //don't resolve if velocities are separating (object moving away from each other)
         if (relativeVelocity > 0) return;
@@ -186,8 +185,8 @@ public class CollisionSystem extends EntitySystem {
         transformA.velocity.add(invMassA * impulse.x, invMassA * impulse.y);
         transformB.velocity.sub(invMassB * impulse.x, invMassB * impulse.y);
         
-        DebugUISystem.addDebugVec(transformA.pos, new Vector2(invMassA * impulse.x, invMassA * impulse.y), Color.BLUE);
-        DebugUISystem.addDebugVec(transformB.pos, new Vector2(invMassB * impulse.x, invMassB * impulse.y), Color.RED);
+        //DebugUISystem.addDebugVec(transformA.pos, new Vector2(invMassA * impulse.x, invMassA * impulse.y), Color.BLUE);
+        //DebugUISystem.addDebugVec(transformB.pos, new Vector2(invMassB * impulse.x, invMassB * impulse.y), Color.RED);
         
         //transformA.pos.add( mtv.normal.x * mtv.depth, mtv.normal.y * mtv.depth);
         //transformB.pos.sub( mtv.normal.x * mtv.depth, mtv.normal.y * mtv.depth);
@@ -196,8 +195,8 @@ public class CollisionSystem extends EntitySystem {
         float percent = 0.2f; // usually 20% to 80%
         float slop = 0.01f; // usually 0.01 to 0.1
         Vector2 c = mtv.normal.scl(Math.max(mtv.depth - slop, 0) / (invMassA + invMassB) * percent);
-        DebugUISystem.addDebugVec(transformA.pos, new Vector2(invMassA * c.x, invMassA * c.y), Color.YELLOW);
-        DebugUISystem.addDebugVec(transformB.pos, new Vector2(invMassB * c.x, invMassB * c.y), Color.GREEN);
+        //DebugUISystem.addDebugVec(transformA.pos, new Vector2(invMassA * c.x, invMassA * c.y), Color.YELLOW);
+        //DebugUISystem.addDebugVec(transformB.pos, new Vector2(invMassB * c.x, invMassB * c.y), Color.GREEN);
         transformA.pos.add(invMassA * c.x, invMassA * c.y);
         transformB.pos.sub(invMassB * c.x, invMassB * c.y);
         

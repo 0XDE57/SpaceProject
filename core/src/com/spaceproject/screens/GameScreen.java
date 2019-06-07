@@ -24,6 +24,7 @@ import com.spaceproject.generation.Universe;
 import com.spaceproject.generation.noise.NoiseManager;
 import com.spaceproject.systems.DebugUISystem;
 import com.spaceproject.systems.HUDSystem;
+import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.ui.MapState;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
@@ -150,12 +151,6 @@ public class GameScreen extends MyScreenAdapter {
         
         if (Gdx.input.isKeyJustPressed(Keys.GRAVE)) {//tilda
             setSystemProcessing(!isPaused);
-			/*
-			if (isPaused) {
-				resume();
-			} else {
-				pause();
-			}*/
         }
         
     }
@@ -184,12 +179,12 @@ public class GameScreen extends MyScreenAdapter {
         if (inSpace) {
             initWorld(transEntity, planet);
             
-            screenTrans.landStage = screenTrans.landStage.next();//todo: wait for load/sync here?
+            ScreenTransitionSystem.nextStage(screenTrans);
         } else {
-            Mappers.screenTrans.get(transEntity).planet = currentPlanet;//save for sync?
+            Mappers.screenTrans.get(transEntity).planet = currentPlanet;
             initSpace(transEntity);
     
-            screenTrans.takeOffStage = screenTrans.takeOffStage.next();//todo: wait for load/sync here?
+            ScreenTransitionSystem.nextStage(screenTrans);
         }
     
         /*TODO: persist

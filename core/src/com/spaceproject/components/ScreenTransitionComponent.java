@@ -10,7 +10,7 @@ public class ScreenTransitionComponent implements Component {
     public enum TakeOffAnimStage {
         screenEffectFadeIn,
         transition,
-        sync,
+        sync,//load
         screenEffectFadeOut,
         zoomOut,
         grow,
@@ -28,6 +28,7 @@ public class ScreenTransitionComponent implements Component {
         zoomIn,
         screenEffectFadeIn,
         transition,
+        //load,
         screenEffectFadeOut,
         pause,
         exit,
@@ -49,4 +50,6 @@ public class ScreenTransitionComponent implements Component {
     
     public SimpleTimer timer;
     public Interpolation animInterpolation;
+    
+    public float rotation;
 }

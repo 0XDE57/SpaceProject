@@ -213,7 +213,7 @@ public class WorldRenderingSystem extends IteratingSystem implements IRequireGam
             sprite3D.renderable.worldTransform.setToRotation(Vector3.Z, MathUtils.radDeg * t.rotation);
             sprite3D.renderable.worldTransform.rotate(Vector3.X, MathUtils.radDeg * sprite3D.renderable.angle);
             sprite3D.renderable.worldTransform.setTranslation(t.pos.x, t.pos.y, -50);
-            sprite3D.renderable.worldTransform.scl(sprite3D.renderable.scale);
+            sprite3D.renderable.worldTransform.scale(sprite3D.renderable.scale.x, sprite3D.renderable.scale.y, sprite3D.renderable.scale.z);
             
             modelBatch.render(sprite3D.renderable);
         }

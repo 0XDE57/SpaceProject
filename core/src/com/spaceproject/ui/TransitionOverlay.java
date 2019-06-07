@@ -1,7 +1,6 @@
 package com.spaceproject.ui;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -33,12 +32,8 @@ public class TransitionOverlay {
     public State getFadeState() {
         return fadeState;
     }
-
-    
     
     public void render() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) fadeIn();
-        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) fadeOut();
         if (fadeState == State.off) return;
     
         //enable transparency
