@@ -101,6 +101,7 @@ public class ControlSystem extends IteratingSystem {
     //region ship controls
     private void controlShip(Entity entity, VehicleComponent vehicle, ControllableComponent control, float delta) {
         TransformComponent transform = Mappers.transform.get(entity);
+        BoundsComponent boundsComponent = Mappers.bounds.get(entity);
         DodgeComponent dodgeComp = Mappers.dodge.get(entity);
         ScreenTransitionComponent screenTransComp = Mappers.screenTrans.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
@@ -124,10 +125,13 @@ public class ControlSystem extends IteratingSystem {
         
         
         //make vehicle face angle from mouse/joystick
-        transform.rotation = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f * delta);
+        //transform.rotation = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f * delta);
+        float angle = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f * delta);
+        boundsComponent.body.setTransform(boundsComponent.body.getPosition(), angle);//TODO: apply a rotational torque? instead of direct setting
+        boundsComponent.body.setAwake(true);
         
         if (control.moveForward) {
-            accelerate(delta, control, transform, vehicle);
+            accelerate(delta, control, transform, boundsComponent, vehicle);
         }
         if (control.moveBack) {
             decelerate(delta, transform);
@@ -179,13 +183,14 @@ public class ControlSystem extends IteratingSystem {
     }
     
     
-    private static void accelerate(float delta, ControllableComponent control, TransformComponent transform, VehicleComponent vehicle) {
+    private static void accelerate(float delta, ControllableComponent control, TransformComponent transform, BoundsComponent bounds, VehicleComponent vehicle) {
         //TODO: implement rest of engine behavior
         //float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go
         
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
-        transform.velocity.add(MyMath.Vector(transform.rotation, thrust));
-        
+        //transform.velocity.add(MyMath.Vector(transform.rotation, thrust));
+        bounds.body.applyForceToCenter(MyMath.Vector(transform.rotation, 300000), true);
+
         //transform.accel.add(dx,dy);//????
         
         //cap speed at max. if maxSpeed set to -1 it's infinite(no cap)

@@ -45,7 +45,7 @@ public class SystemsConfig extends Config {
                 return sys;
         }
         
-        Gdx.app.log(this.getClass().getSimpleName(), "Could not find config for: " + className);
+        Gdx.app.error(this.getClass().getSimpleName(), "Could not find config for: " + className);
         return null;
     }
 }

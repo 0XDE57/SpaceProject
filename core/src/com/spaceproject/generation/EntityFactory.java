@@ -9,9 +9,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.ui.Sprite3D;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AstronomicalComponent;
 import com.spaceproject.components.BarycenterComponent;
@@ -21,11 +25,11 @@ import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.GrowCannonComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
-import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.SeedComponent;
@@ -33,6 +37,8 @@ import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.screens.GameScreen;
+import com.spaceproject.ui.Sprite3D;
 import com.spaceproject.utility.IDGen;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.SimpleTimer;
@@ -60,6 +66,7 @@ public class EntityFactory {
         float height = texture.texture.getHeight() * SpaceProject.entitycfg.renderScale;
         bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
         bounds.poly.setOrigin(width / 2, height / 2);
+        bounds.body = createRect(x, y, width, height);
         
         CharacterComponent character = new CharacterComponent();
         character.walkSpeed = entitycfg.characterWalkSpeed;
@@ -434,6 +441,7 @@ public class EntityFactory {
         float height = shipTop.getHeight() * SpaceProject.entitycfg.renderScale;
         bounds.poly = new Polygon(new float[]{0, 0, 0, height, width, height, width, 0});
         bounds.poly.setOrigin(width / 2, height / 2);
+        bounds.body = createRect(x, y, width, height);
         
         //weapon
         CannonComponent cannon = new CannonComponent();
@@ -538,6 +546,7 @@ public class EntityFactory {
         float height = texture.texture.getHeight() * SpaceProject.entitycfg.renderScale;
         bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
         bounds.poly.setOrigin(width / 2, height / 2);
+        bounds.body = createRect(x, y, width, height);
         
         entity.add(bounds);
         entity.add(texture);
@@ -578,6 +587,7 @@ public class EntityFactory {
         float height = texture.texture.getHeight() * SpaceProject.entitycfg.renderScale;
         bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
         bounds.poly.setOrigin(width / 2, height / 2);
+        bounds.body = createRect(x, y, width, height);
         
         
         entity.add(bounds);
@@ -604,6 +614,7 @@ public class EntityFactory {
         float height = texture.texture.getHeight() * texture.scale;// SpaceProject.entitycfg.renderScale;
         bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
         bounds.poly.setOrigin(width / 2, height / 2);
+        bounds.body = createRect(source.pos.x, source.pos.y, width, height);
         
         //set position, orientation, velocity and acceleration
         TransformComponent transform = new TransformComponent();
@@ -632,5 +643,51 @@ public class EntityFactory {
         return entity;
     }
     
+    public static Body createCircle(float x, float y, float radius) {
+        Body body;
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set(x, y);
+        body = GameScreen.world.createBody(bodyDef);
+        
+        CircleShape circle = new CircleShape();
+        circle.setRadius(radius);
+        // Create a fixture definition to apply our shape to
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = circle;
+        fixtureDef.density = 0.5f;
+        fixtureDef.friction = 0.4f;
+        fixtureDef.restitution = 0.6f; // Make it bounce a little bit
+        // Create our fixture and attach it to the body
+        body.createFixture(fixtureDef);
+        // Remember to dispose of any shapes after you're done with them!
+        // BodyDef and FixtureDef don't need disposing, but shapes do.
+        circle.dispose();
+        return body;
+    }
+    
+    public static Body createRect(float x, float y, float width, float height) {
+        Body body;
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set(x, y);
+        body = GameScreen.world.createBody(bodyDef);
+        
+        PolygonShape poly = new PolygonShape();
+        //poly.set(new float[]{0, 0, width, 0, width, height, 0, height});
+        poly.setAsBox(width/2, height/2);
+        // Create a fixture definition to apply our shape to
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = poly;
+        fixtureDef.density = 0.5f;
+        fixtureDef.friction = 0.4f;
+        fixtureDef.restitution = 0.6f; // Make it bounce a little bit
+        // Create our fixture and attach it to the body
+        body.createFixture(fixtureDef);
+        // Remember to dispose of any shapes after you're done with them!
+        // BodyDef and FixtureDef don't need disposing, but shapes do.
+        poly.dispose();
+        return body;
+    }
     
 }
