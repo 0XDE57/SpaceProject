@@ -3,7 +3,7 @@ package com.spaceproject.utility;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AstronomicalComponent;
-import com.spaceproject.components.BoundsComponent;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.ControllableComponent;
@@ -27,7 +27,7 @@ public class Mappers {
     
     public static final ComponentMapper<AIComponent> AI = ComponentMapper.getFor(AIComponent.class);
     public static final ComponentMapper<AstronomicalComponent> astro = ComponentMapper.getFor(AstronomicalComponent.class);
-    public static final ComponentMapper<BoundsComponent> bounds = ComponentMapper.getFor(BoundsComponent.class);
+    public static final ComponentMapper<PhysicsComponent> physics = ComponentMapper.getFor(PhysicsComponent.class);
     public static final ComponentMapper<CannonComponent> cannon = ComponentMapper.getFor(CannonComponent.class);
     public static final ComponentMapper<GrowCannonComponent> growCannon = ComponentMapper.getFor(GrowCannonComponent.class);
     public static final ComponentMapper<CharacterComponent> character = ComponentMapper.getFor(CharacterComponent.class);

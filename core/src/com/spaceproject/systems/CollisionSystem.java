@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.AIComponent;
-import com.spaceproject.components.BoundsComponent;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.ShieldComponent;
@@ -24,6 +24,7 @@ import com.spaceproject.utility.ResourceDisposer;
 
 //based off of:
 //https://gamedevelopment.tutsplus.com/series/how-to-create-a-custom-physics-engine--gamedev-12715
+@Deprecated
 public class CollisionSystem extends EntitySystem {
     
     private Engine engine;
@@ -40,7 +41,7 @@ public class CollisionSystem extends EntitySystem {
     public void addedToEngine(Engine engine) {
         this.engine = engine;
         
-        collidables = engine.getEntitiesFor(Family.all(BoundsComponent.class, TransformComponent.class).get());
+        collidables = engine.getEntitiesFor(Family.all(PhysicsComponent.class, TransformComponent.class).get());
     }
     
     
@@ -62,8 +63,8 @@ public class CollisionSystem extends EntitySystem {
                 
                 Entity eA = collidables.get(indexA);
                 Entity eB = collidables.get(indexB);
-                BoundsComponent boundsA = Mappers.bounds.get(eA);
-                BoundsComponent boundsB = Mappers.bounds.get(eB);
+                PhysicsComponent boundsA = Mappers.physics.get(eA);
+                PhysicsComponent boundsB = Mappers.physics.get(eB);
                 
                 Intersector.MinimumTranslationVector mtv = overlaps(boundsA, boundsB);
                 if (mtv != null) {
@@ -125,8 +126,8 @@ public class CollisionSystem extends EntitySystem {
             if (shieldComp.active) {
                 Vector2 pos = Mappers.transform.get(attackedEntity).pos;
                 Circle c = new Circle(pos, shieldComp.radius);
-                BoundsComponent boundsComponent = Mappers.bounds.get(attackedEntity);
-                if (PolygonUtil.overlaps(boundsComponent.poly, c)) {
+                PhysicsComponent physicsComponent = Mappers.physics.get(attackedEntity);
+                if (PolygonUtil.overlaps(physicsComponent.poly, c)) {
                     attackedEntity.remove(ShieldComponent.class);
                     ResourceDisposer.dispose(damageEntity);
                     engine.removeEntity(damageEntity);
@@ -202,7 +203,7 @@ public class CollisionSystem extends EntitySystem {
         
     }
     
-    public Intersector.MinimumTranslationVector overlaps(BoundsComponent boundsA, BoundsComponent boundsB) {
+    public Intersector.MinimumTranslationVector overlaps(PhysicsComponent boundsA, PhysicsComponent boundsB) {
         Polygon polyA = boundsA.poly;
         Polygon polyB = boundsB.poly;
         
@@ -218,6 +219,7 @@ public class CollisionSystem extends EntitySystem {
     
 }
 
+@Deprecated
 class CollisionPair {
     public int a;
     public int b;

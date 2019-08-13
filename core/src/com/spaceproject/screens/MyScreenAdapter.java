@@ -22,7 +22,8 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     public static ExtendViewport viewport;
     
     // rendering resolution
-    private final static float SCALE = 1f;
+    private final static float VIRTUAL_HEIGHT  = 40f;//meters
+    public final static float SCALE = 40f;
     private final static float INV_SCALE = 1.f / SCALE;
     private final static float VIEWPORT_WIDTH = 1280 * INV_SCALE;
     private final static float VIEWPORT_HEIGHT = 720 * INV_SCALE;

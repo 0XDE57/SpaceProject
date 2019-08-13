@@ -29,7 +29,7 @@ import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ShortArray;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.BoundsComponent;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -75,12 +75,12 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
     //config
     private boolean drawDebugUI = true;
     //private boolean drawMenu = false;
-    public boolean drawFPS = true, drawExtraInfo = false;
+    public boolean drawFPS = true, drawExtraInfo = true;
     public boolean drawComponentList = false;
-    public boolean drawPos = false;
+    public boolean drawPos = true;
     public boolean drawBounds = false, drawBoundsPoly = false;
-    public boolean drawOrbitPath = false;
-    public boolean drawVectors = false;
+    public boolean drawOrbitPath = true;
+    public boolean drawVectors = true;
     public boolean drawMousePos = false;
     public boolean drawEntityList = false;
     
@@ -292,7 +292,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
             //get entities position and list of components
             TransformComponent t = Mappers.transform.get(entity);
             
-            float scale = 20; //how long to make vectors (higher number is longer line)
+            float scale = 2.0f; //how long to make vectors (higher number is longer line)
             Vector2 end = MyMath.LogVec(t.velocity, scale).add(t.pos);
             
             //draw line to represent movement
@@ -343,7 +343,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
     private void drawBounds(boolean polyTriangles) {
         
         for (Entity entity : objects) {
-            BoundsComponent bounds = Mappers.bounds.get(entity);
+            PhysicsComponent bounds = Mappers.physics.get(entity);
             TransformComponent t = Mappers.transform.get(entity);
             
             if (bounds != null) {

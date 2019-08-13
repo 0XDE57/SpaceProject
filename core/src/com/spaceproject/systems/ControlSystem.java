@@ -15,7 +15,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
-import com.spaceproject.components.BoundsComponent;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
@@ -101,7 +101,7 @@ public class ControlSystem extends IteratingSystem {
     //region ship controls
     private void controlShip(Entity entity, VehicleComponent vehicle, ControllableComponent control, float delta) {
         TransformComponent transform = Mappers.transform.get(entity);
-        BoundsComponent boundsComponent = Mappers.bounds.get(entity);
+        PhysicsComponent physicsComponent = Mappers.physics.get(entity);
         DodgeComponent dodgeComp = Mappers.dodge.get(entity);
         ScreenTransitionComponent screenTransComp = Mappers.screenTrans.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
@@ -116,8 +116,8 @@ public class ControlSystem extends IteratingSystem {
         manageShield(entity, control, transform, shield);
         
         //debug force insta-stop(currently affects all vehicles)
-        if (Gdx.input.isKeyJustPressed(Keys.X)) transform.velocity.set(0, 0);
-        if (Gdx.input.isKeyJustPressed(Keys.Z)) transform.velocity.add(transform.velocity);
+        if (Gdx.input.isKeyJustPressed(Keys.X)) physicsComponent.body.setLinearVelocity(0,0);//transform.velocity.set(0, 0);
+        //if (Gdx.input.isKeyJustPressed(Keys.Z)) transform.velocity.add(transform.velocity);
         
         if (!canAct) {
             return;
@@ -127,11 +127,11 @@ public class ControlSystem extends IteratingSystem {
         //make vehicle face angle from mouse/joystick
         //transform.rotation = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f * delta);
         float angle = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f * delta);
-        boundsComponent.body.setTransform(boundsComponent.body.getPosition(), angle);//TODO: apply a rotational torque? instead of direct setting
-        boundsComponent.body.setAwake(true);
+        physicsComponent.body.setTransform(physicsComponent.body.getPosition(), angle);//TODO: apply a rotational torque? instead of direct setting
+        physicsComponent.body.setAwake(true);
         
         if (control.moveForward) {
-            accelerate(delta, control, transform, boundsComponent, vehicle);
+            accelerate(delta, control, transform, physicsComponent, vehicle);
         }
         if (control.moveBack) {
             decelerate(delta, transform);
@@ -153,7 +153,7 @@ public class ControlSystem extends IteratingSystem {
         if (cannon != null) {
             refillAmmo(cannon);//TODO: ammo should refill on all entities regardless of player presence
             if (control.attack && canShoot) {
-                fireCannon(transform, cannon, entity);
+                fireCannon(transform, physicsComponent, cannon, entity);
             }
         }
         if (canShoot) {
@@ -183,13 +183,13 @@ public class ControlSystem extends IteratingSystem {
     }
     
     
-    private static void accelerate(float delta, ControllableComponent control, TransformComponent transform, BoundsComponent bounds, VehicleComponent vehicle) {
+    private static void accelerate(float delta, ControllableComponent control, TransformComponent transform, PhysicsComponent body, VehicleComponent vehicle) {
         //TODO: implement rest of engine behavior
         //float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go
         
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
         //transform.velocity.add(MyMath.Vector(transform.rotation, thrust));
-        bounds.body.applyForceToCenter(MyMath.Vector(transform.rotation, 300000), true);
+        body.body.applyForceToCenter(MyMath.Vector(transform.rotation, 30), true);
 
         //transform.accel.add(dx,dy);//????
         
@@ -274,7 +274,7 @@ public class ControlSystem extends IteratingSystem {
         }
         
         //ensure bounding box follows sprite, ship should be thinner/harder to hit when rolling
-        BoundsComponent bounds = Mappers.bounds.get(entity);
+        PhysicsComponent bounds = Mappers.physics.get(entity);
         float scaleY = 1 - (sprite3D.renderable.angle / MathUtils.PI);//TODO, this is wrong: need to find something that maps like below
         //degrees, scale
         //0   = 1 	-> top
@@ -308,7 +308,7 @@ public class ControlSystem extends IteratingSystem {
                 shield = new ShieldComponent();
                 shield.animTimer = new SimpleTimer(400, true);
                 shield.defence = 100f;
-                Polygon poly = entity.getComponent(BoundsComponent.class).poly;
+                Polygon poly = entity.getComponent(PhysicsComponent.class).poly;
                 Rectangle rect = PolygonUtil.getBoundingRectangle(poly.getVertices());
                 float size = Math.min(rect.width, rect.height) * 1.3f;
                 shield.maxRadius = size;
@@ -351,7 +351,7 @@ public class ControlSystem extends IteratingSystem {
         control.changeVehicle = false;
         
         //get all vehicles and check if player is close to one(bounds overlap)
-        BoundsComponent playerBounds = Mappers.bounds.get(characterEntity);
+        PhysicsComponent playerBounds = Mappers.physics.get(characterEntity);
         for (Entity vehicle : vehicles) {
             
             //skip vehicle is occupied
@@ -361,7 +361,7 @@ public class ControlSystem extends IteratingSystem {
             }
             
             //check if character is near a vehicle
-            BoundsComponent vehicleBounds = Mappers.bounds.get(vehicle);
+            PhysicsComponent vehicleBounds = Mappers.physics.get(vehicle);
             if (playerBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {
                 
                 //set references
@@ -514,7 +514,7 @@ public class ControlSystem extends IteratingSystem {
         
         if (growCannon.isCharging) {
             //update position to be in front of ship
-            Rectangle bounds = entity.getComponent(BoundsComponent.class).poly.getBoundingRectangle();
+            Rectangle bounds = entity.getComponent(PhysicsComponent.class).poly.getBoundingRectangle();
             float offset = Math.max(bounds.getWidth(), bounds.getHeight()) + growCannon.maxSize;
             TransformComponent transformComponent = growCannon.projectile.getComponent(TransformComponent.class);
             transformComponent.pos.set(MyMath.Vector(transform.rotation, offset).add(transform.pos));
@@ -524,7 +524,7 @@ public class ControlSystem extends IteratingSystem {
             growCannon.size = growCannon.growRateTimer.ratio() * growCannon.maxSize;
             growCannon.size = MathUtils.clamp(growCannon.size, 1, growCannon.maxSize);
             growCannon.projectile.getComponent(TextureComponent.class).scale = growCannon.size * SpaceProject.entitycfg.renderScale;
-            growCannon.projectile.getComponent(BoundsComponent.class).poly.setScale(growCannon.size, growCannon.size);
+            growCannon.projectile.getComponent(PhysicsComponent.class).poly.setScale(growCannon.size, growCannon.size);
             
             //damage modifier
             DamageComponent damageComponent = growCannon.projectile.getComponent(DamageComponent.class);
@@ -562,15 +562,15 @@ public class ControlSystem extends IteratingSystem {
     }
     
     
-    private void fireCannon(TransformComponent transform, CannonComponent cannon, Entity owner) {
+    private void fireCannon(TransformComponent transform, PhysicsComponent body, CannonComponent cannon, Entity owner) {
         /*
          * Cheat for debug:
          * fast firing and infinite ammo
          */
-        boolean cheat = false;
+        boolean cheat = true;
         if (cheat) {
             cannon.curAmmo = cannon.maxAmmo;
-            cannon.timerFireRate.setLastEvent(0);
+            //cannon.timerFireRate.setLastEvent(0);
         }
         
         //check if can fire before shooting
@@ -584,7 +584,7 @@ public class ControlSystem extends IteratingSystem {
         }
         
         //create missile
-        Vector2 vec = MyMath.Vector(transform.rotation, cannon.velocity).add(transform.velocity);
+        Vector2 vec = MyMath.Vector(transform.rotation, cannon.velocity);//.add(body.body.getLinearVelocity());
         getEngine().addEntity(EntityFactory.createMissile(transform, vec, cannon, owner));
         
         

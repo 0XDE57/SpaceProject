@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
 
+@Deprecated
 public class MovementSystem extends IteratingSystem {
     
     //temporary

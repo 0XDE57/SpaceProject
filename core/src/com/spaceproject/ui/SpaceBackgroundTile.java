@@ -2,6 +2,7 @@ package com.spaceproject.ui;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.screens.MyScreenAdapter;
 
 public class SpaceBackgroundTile {
     public final float x;
@@ -30,7 +31,7 @@ public class SpaceBackgroundTile {
         switch (type) {
             case Stars:
                 tex = TextureFactory.generateSpaceBackgroundStars(tileX, tileY, tileSize, renderDepth);
-                scale = 1;
+                scale = 1/ MyScreenAdapter.SCALE;
                 break;
             case Dust:
                 scale = 4;

@@ -19,7 +19,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AstronomicalComponent;
 import com.spaceproject.components.BarycenterComponent;
-import com.spaceproject.components.BoundsComponent;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
@@ -61,12 +61,12 @@ public class EntityFactory {
         texture.texture = TextureFactory.generateCharacter();
         texture.scale = SpaceProject.entitycfg.renderScale;
         
-        BoundsComponent bounds = new BoundsComponent();
+        PhysicsComponent physics = new PhysicsComponent();
         float width = texture.texture.getWidth() * SpaceProject.entitycfg.renderScale;
         float height = texture.texture.getHeight() * SpaceProject.entitycfg.renderScale;
-        bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
-        bounds.poly.setOrigin(width / 2, height / 2);
-        bounds.body = createRect(x, y, width, height);
+        physics.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
+        physics.poly.setOrigin(width / 2, height / 2);
+        physics.body = createRect(x, y, width, height);
         
         CharacterComponent character = new CharacterComponent();
         character.walkSpeed = entitycfg.characterWalkSpeed;
@@ -82,7 +82,7 @@ public class EntityFactory {
         
         entity.add(health);
         entity.add(control);
-        entity.add(bounds);
+        entity.add(physics);
         entity.add(transform);
         entity.add(texture);
         entity.add(character);
@@ -433,15 +433,15 @@ public class EntityFactory {
         Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
         Sprite3DComponent sprite3DComp = new Sprite3DComponent();
         sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom);
-        
+        sprite3DComp.renderable.scale.set(0.1f,0.1f,0.1f);
         
         //collision detection
-        BoundsComponent bounds = new BoundsComponent();
+        PhysicsComponent physics = new PhysicsComponent();
         float width = shipTop.getWidth() * SpaceProject.entitycfg.renderScale;
         float height = shipTop.getHeight() * SpaceProject.entitycfg.renderScale;
-        bounds.poly = new Polygon(new float[]{0, 0, 0, height, width, height, width, 0});
-        bounds.poly.setOrigin(width / 2, height / 2);
-        bounds.body = createRect(x, y, width, height);
+        physics.poly = new Polygon(new float[]{0, 0, 0, height, width, height, width, 0});
+        physics.poly.setOrigin(width / 2, height / 2);
+        physics.body = createRect(x, y, 3, 1);
         
         //weapon
         CannonComponent cannon = new CannonComponent();
@@ -482,7 +482,7 @@ public class EntityFactory {
         //add components to entity
         entity.add(health);
         entity.add(cannon);
-        entity.add(bounds);
+        entity.add(physics);
         //entity.add(texture);
         entity.add(sprite3DComp);
         entity.add(transform);
@@ -541,14 +541,14 @@ public class EntityFactory {
         texture.texture = pixmapTex;// give texture component the generated pixmapTexture
         texture.scale = SpaceProject.entitycfg.renderScale;
         
-        BoundsComponent bounds = new BoundsComponent();
+        PhysicsComponent physics = new PhysicsComponent();
         float width = texture.texture.getWidth() * SpaceProject.entitycfg.renderScale;
         float height = texture.texture.getHeight() * SpaceProject.entitycfg.renderScale;
-        bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
-        bounds.poly.setOrigin(width / 2, height / 2);
-        bounds.body = createRect(x, y, width, height);
+        physics.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
+        physics.poly.setOrigin(width / 2, height / 2);
+        physics.body = createRect(x, y, width, height);
         
-        entity.add(bounds);
+        entity.add(physics);
         entity.add(texture);
         entity.add(transform);
         entity.add(new VehicleComponent());
@@ -582,15 +582,15 @@ public class EntityFactory {
         texture.texture = pixmapTex;// give texture component the generated pixmapTexture
         texture.scale = SpaceProject.entitycfg.renderScale;
         
-        BoundsComponent bounds = new BoundsComponent();
+        PhysicsComponent physics = new PhysicsComponent();
         float width = texture.texture.getWidth() * SpaceProject.entitycfg.renderScale;
         float height = texture.texture.getHeight() * SpaceProject.entitycfg.renderScale;
-        bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
-        bounds.poly.setOrigin(width / 2, height / 2);
-        bounds.body = createRect(x, y, width, height);
+        physics.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
+        physics.poly.setOrigin(width / 2, height / 2);
+        physics.body = createRect(x, y, width, height);
         
         
-        entity.add(bounds);
+        entity.add(physics);
         entity.add(texture);
         entity.add(transform);
         entity.add(new VehicleComponent());
@@ -609,19 +609,21 @@ public class EntityFactory {
         texture.scale = SpaceProject.entitycfg.renderScale * cannon.size;
         
         //bounding box
-        BoundsComponent bounds = new BoundsComponent();
+        PhysicsComponent physics = new PhysicsComponent();
         float width = texture.texture.getWidth() * texture.scale;//SpaceProject.entitycfg.renderScale;
         float height = texture.texture.getHeight() * texture.scale;// SpaceProject.entitycfg.renderScale;
-        bounds.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
-        bounds.poly.setOrigin(width / 2, height / 2);
-        bounds.body = createRect(source.pos.x, source.pos.y, width, height);
+        physics.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
+        physics.poly.setOrigin(width / 2, height / 2);
+        physics.body = createRect(source.pos.x, source.pos.y, width, height);
+        physics.body.setTransform(source.pos, source.rotation);
+        physics.body.setLinearVelocity(velocity.cpy());
         
         //set position, orientation, velocity and acceleration
         TransformComponent transform = new TransformComponent();
-        transform.pos.set(source.pos);
-        transform.rotation = source.rotation;
-        transform.velocity.add(velocity);
-        transform.accel.add(velocity.cpy().setLength(cannon.acceleration));//speed up over time
+        //transform.pos.set(source.pos);
+        //transform.rotation = source.rotation;
+        //transform.velocity.add(velocity);
+        //transform.accel.add(velocity.cpy().setLength(cannon.acceleration));//speed up over time
         transform.zOrder = -9;//in front of background objects(eg: planets, tiles), behind collide-able objects (eg: players, vehicles)
         
         //set expire time
@@ -637,7 +639,7 @@ public class EntityFactory {
         entity.add(missile);
         entity.add(expire);
         entity.add(texture);
-        entity.add(bounds);
+        entity.add(physics);
         entity.add(transform);
         
         return entity;
@@ -680,7 +682,7 @@ public class EntityFactory {
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = poly;
         fixtureDef.density = 0.5f;
-        fixtureDef.friction = 0.4f;
+        fixtureDef.friction = 0.0f;
         fixtureDef.restitution = 0.6f; // Make it bounce a little bit
         // Create our fixture and attach it to the body
         body.createFixture(fixtureDef);

@@ -6,7 +6,7 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.physics.box2d.World;
-import com.spaceproject.components.BoundsComponent;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.IRequireGameContext;
@@ -19,9 +19,12 @@ public class FixedPhysicsSystem extends EntitySystem implements IRequireGameCont
     
     private static final int velocityIterations = 6;
     private static final int positionIterations = 2;
-    private static final int updatesPerSecond = 60;
-    private static final float timeStep = 1 / (float)updatesPerSecond;
+    private static final int stepPerFrame = 60;
+    private static final float timeStep = 1 / (float) stepPerFrame;
     private static float accumulator = 0f;
+    
+    //movement limit = 2 * units per step
+    //eg step of 60: 60 * 2 = 120,  max vel = 120
     
     private World world;
     
@@ -34,7 +37,7 @@ public class FixedPhysicsSystem extends EntitySystem implements IRequireGameCont
     
     @Override
     public void addedToEngine(Engine engine) {
-        Family family = Family.all(BoundsComponent.class, TransformComponent.class).get();
+        Family family = Family.all(PhysicsComponent.class, TransformComponent.class).get();
         entities = engine.getEntitiesFor(family);
     }
     
@@ -54,7 +57,7 @@ public class FixedPhysicsSystem extends EntitySystem implements IRequireGameCont
     
     private void updateTransform() {
         for (Entity entity : entities) {
-            BoundsComponent physics = Mappers.bounds.get(entity);
+            PhysicsComponent physics = Mappers.physics.get(entity);
             
             if (!physics.body.isActive()) {
                 return;
@@ -63,11 +66,17 @@ public class FixedPhysicsSystem extends EntitySystem implements IRequireGameCont
             TransformComponent transform = Mappers.transform.get(entity);
             transform.pos.set(physics.body.getPosition());
             transform.rotation = physics.body.getAngle();
+            transform.velocity.set(physics.body.getLinearVelocity());
         }
     }
     
     private void interpolate(float deltaTime, float accumulator) {
-    
+        /*
+        if (physics.body.isActive()) {
+            transform.position.x = physics.body.getPosition().x * alpha + old.position.x * (1.0f - alpha);
+            transform.position.y = physics.body.getPosition().y * alpha + old.position.y * (1.0f - alpha);
+            transform.angle = physics.body.getAngle() * MathUtils.radiansToDegrees * alpha + old.angle * (1.0f - alpha);
+        }*/
     }
     
 }

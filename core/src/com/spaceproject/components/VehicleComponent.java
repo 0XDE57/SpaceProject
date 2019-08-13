@@ -28,8 +28,10 @@ public class VehicleComponent implements Component {
     // how fast to accelerate
     public float thrust;
     
-    // maximum speed vehicle can achieve
+    // maximum speed vehicle can
+    @Deprecated
     public float maxSpeed;
+    @Deprecated
     public static final int NOLIMIT = -1;//no max speed/infinite
     
 }
