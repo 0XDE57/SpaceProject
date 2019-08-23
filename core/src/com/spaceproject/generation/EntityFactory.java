@@ -427,13 +427,13 @@ public class EntityFactory {
             //generate even size
             size = MathUtils.random(entitycfg.shipSizeMin, entitycfg.shipSizeMax);
         } while (size % 2 == 1);
-        
-        
+    
+        float scale = 0.1f;
         Texture shipTop = TextureFactory.generateShip(seed, size);
         Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
         Sprite3DComponent sprite3DComp = new Sprite3DComponent();
         sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom);
-        sprite3DComp.renderable.scale.set(0.1f,0.1f,0.1f);
+        sprite3DComp.renderable.scale.set(scale, scale, scale);
         
         //collision detection
         PhysicsComponent physics = new PhysicsComponent();
@@ -441,7 +441,7 @@ public class EntityFactory {
         float height = shipTop.getHeight() * SpaceProject.entitycfg.renderScale;
         physics.poly = new Polygon(new float[]{0, 0, 0, height, width, height, width, 0});
         physics.poly.setOrigin(width / 2, height / 2);
-        physics.body = createRect(x, y, 3, 1);
+        physics.body = createRect(x, y, width*scale, height*scale);
         
         //weapon
         CannonComponent cannon = new CannonComponent();
@@ -606,17 +606,19 @@ public class EntityFactory {
         //create texture
         TextureComponent texture = new TextureComponent();
         texture.texture = TextureFactory.generateProjectile();
-        texture.scale = SpaceProject.entitycfg.renderScale * cannon.size;
+        float scale = 0.1f;
+        texture.scale = 0.4f;//0.5f;//SpaceProject.entitycfg.renderScale * cannon.size;
         
         //bounding box
         PhysicsComponent physics = new PhysicsComponent();
-        float width = texture.texture.getWidth() * texture.scale;//SpaceProject.entitycfg.renderScale;
-        float height = texture.texture.getHeight() * texture.scale;// SpaceProject.entitycfg.renderScale;
+        float width = texture.texture.getWidth() * SpaceProject.entitycfg.renderScale;
+        float height = texture.texture.getHeight() * SpaceProject.entitycfg.renderScale;
         physics.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
         physics.poly.setOrigin(width / 2, height / 2);
-        physics.body = createRect(source.pos.x, source.pos.y, width, height);
+        
+        physics.body = createRect(source.pos.x, source.pos.y, width*scale, height*scale);
         physics.body.setTransform(source.pos, source.rotation);
-        physics.body.setLinearVelocity(velocity.cpy());
+        physics.body.setLinearVelocity(velocity.setLength(1).cpy());
         
         //set position, orientation, velocity and acceleration
         TransformComponent transform = new TransformComponent();

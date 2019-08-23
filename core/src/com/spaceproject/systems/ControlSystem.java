@@ -189,7 +189,7 @@ public class ControlSystem extends IteratingSystem {
         
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
         //transform.velocity.add(MyMath.Vector(transform.rotation, thrust));
-        body.body.applyForceToCenter(MyMath.Vector(transform.rotation, 30), true);
+        body.body.applyForceToCenter(MyMath.Vector(transform.rotation, 100), true);
 
         //transform.accel.add(dx,dy);//????
         
@@ -585,7 +585,8 @@ public class ControlSystem extends IteratingSystem {
         
         //create missile
         Vector2 vec = MyMath.Vector(transform.rotation, cannon.velocity);//.add(body.body.getLinearVelocity());
-        getEngine().addEntity(EntityFactory.createMissile(transform, vec, cannon, owner));
+        Entity missile = EntityFactory.createMissile(transform, vec, cannon, owner);
+        getEngine().addEntity(missile);
         
         
         //subtract ammo
