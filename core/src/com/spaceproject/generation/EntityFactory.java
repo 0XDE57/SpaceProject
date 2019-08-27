@@ -66,7 +66,7 @@ public class EntityFactory {
         float height = texture.texture.getHeight() * SpaceProject.entitycfg.renderScale;
         physics.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
         physics.poly.setOrigin(width / 2, height / 2);
-        physics.body = createRect(x, y, width, height);
+        physics.body = createRect(x, y, 0.4f, 0.4f);
         
         CharacterComponent character = new CharacterComponent();
         character.walkSpeed = entitycfg.characterWalkSpeed;
@@ -428,20 +428,22 @@ public class EntityFactory {
             size = MathUtils.random(entitycfg.shipSizeMin, entitycfg.shipSizeMax);
         } while (size % 2 == 1);
     
-        float scale = 0.1f;
+       
         Texture shipTop = TextureFactory.generateShip(seed, size);
         Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
         Sprite3DComponent sprite3DComp = new Sprite3DComponent();
         sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom);
-        sprite3DComp.renderable.scale.set(scale, scale, scale);
+        float s = 0.025f;
+        sprite3DComp.renderable.scale.set(s, s, s);
         
         //collision detection
         PhysicsComponent physics = new PhysicsComponent();
-        float width = shipTop.getWidth() * SpaceProject.entitycfg.renderScale;
-        float height = shipTop.getHeight() * SpaceProject.entitycfg.renderScale;
+        float scale = 0.1f;
+        float width = shipTop.getWidth() * scale;// SpaceProject.entitycfg.renderScale;
+        float height = shipTop.getHeight() * scale;//SpaceProject.entitycfg.renderScale;
         physics.poly = new Polygon(new float[]{0, 0, 0, height, width, height, width, 0});
         physics.poly.setOrigin(width / 2, height / 2);
-        physics.body = createRect(x, y, width*scale, height*scale);
+        physics.body = createRect(x, y, width, height);
         
         //weapon
         CannonComponent cannon = new CannonComponent();
@@ -600,25 +602,28 @@ public class EntityFactory {
     //endregion
     
     
-    public static Entity createMissile(TransformComponent source, Vector2 velocity, CannonComponent cannon, Entity owner) {
+    public static Entity createMissile(TransformComponent source, CannonComponent cannon, Entity owner) {
+        int unit = 1;
         Entity entity = new Entity();
         
         //create texture
         TextureComponent texture = new TextureComponent();
         texture.texture = TextureFactory.generateProjectile();
         float scale = 0.1f;
-        texture.scale = 0.4f;//0.5f;//SpaceProject.entitycfg.renderScale * cannon.size;
+        texture.scale = 0.1f;//0.5f;//SpaceProject.entitycfg.renderScale * cannon.size;
         
         //bounding box
         PhysicsComponent physics = new PhysicsComponent();
-        float width = texture.texture.getWidth() * SpaceProject.entitycfg.renderScale;
-        float height = texture.texture.getHeight() * SpaceProject.entitycfg.renderScale;
-        physics.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
-        physics.poly.setOrigin(width / 2, height / 2);
-        
-        physics.body = createRect(source.pos.x, source.pos.y, width*scale, height*scale);
+        float width = 0.1f;// texture.texture.getWidth() * SpaceProject.entitycfg.renderScale;
+        float height = 0.1f;// texture.texture.getHeight() * SpaceProject.entitycfg.renderScale;
+        //physics.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
+        //physics.poly.setOrigin(width / 2, height / 2);
+        Body sourceBody = owner.getComponent(PhysicsComponent.class).body;
+        Vector2 ownerVel = sourceBody.getLinearVelocity();
+        Vector2 velocity = MyMath.Vector(sourceBody.getAngle(), 40).add(ownerVel);
+        physics.body = createRect(source.pos.x, source.pos.y, width, height);
         physics.body.setTransform(source.pos, source.rotation);
-        physics.body.setLinearVelocity(velocity.setLength(1).cpy());
+        physics.body.setLinearVelocity(velocity);
         
         //set position, orientation, velocity and acceleration
         TransformComponent transform = new TransformComponent();

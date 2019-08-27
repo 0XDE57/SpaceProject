@@ -189,7 +189,7 @@ public class ControlSystem extends IteratingSystem {
         
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
         //transform.velocity.add(MyMath.Vector(transform.rotation, thrust));
-        body.body.applyForceToCenter(MyMath.Vector(transform.rotation, 100), true);
+        body.body.applyForceToCenter(MyMath.Vector(transform.rotation, 1f), true);
 
         //transform.accel.add(dx,dy);//????
         
@@ -548,7 +548,7 @@ public class ControlSystem extends IteratingSystem {
             if (control.attack) {
                 CannonComponent test = new CannonComponent();
                 test.size = 1;
-                growCannon.projectile = EntityFactory.createMissile(transform, new Vector2(), test, entity);
+                growCannon.projectile = EntityFactory.createMissile(transform, test, entity);
                 growCannon.projectile.remove(ExpireComponent.class);
                 growCannon.projectile.getComponent(DamageComponent.class).source = entity;
                 growCannon.isCharging = true;
@@ -584,8 +584,8 @@ public class ControlSystem extends IteratingSystem {
         }
         
         //create missile
-        Vector2 vec = MyMath.Vector(transform.rotation, cannon.velocity);//.add(body.body.getLinearVelocity());
-        Entity missile = EntityFactory.createMissile(transform, vec, cannon, owner);
+        //Vector2 vec = MyMath.Vector(transform.rotation, cannon.velocity);//.add(body.body.getLinearVelocity());
+        Entity missile = EntityFactory.createMissile(transform, cannon, owner);
         getEngine().addEntity(missile);
         
         

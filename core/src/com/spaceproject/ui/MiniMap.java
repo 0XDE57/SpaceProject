@@ -26,12 +26,12 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class MiniMap {
     
-    public MapState mapState = MapState.off;
+    public MapState mapState = MapState.mini;
     private MiniMapPosition miniMapPosition = MiniMapPosition.bottomRight;
     
     private Rectangle mapBacking;
     private boolean debugDisableClipping = false;
-    private boolean debugDrawLoadDist = true;
+    private boolean debugDrawLoadDist = false;
     
     private BitmapFont fontSmall;
     
