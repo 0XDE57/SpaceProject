@@ -82,13 +82,15 @@ public class ControlSystem extends IteratingSystem {
     private void controlCharacter(Entity entity, CharacterComponent character, ControllableComponent control, float delta) {
         //players position
         TransformComponent transform = Mappers.transform.get(entity);
+        PhysicsComponent physicsComp = Mappers.physics.get(entity);
         
         //make character face mouse/joystick
-        transform.rotation = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f * delta);
+        float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleFacing, 8f * delta);
+        physicsComp.body.setTransform(physicsComp.body.getPosition(), angle);
         
         if (control.moveForward) {
             float walkSpeed = character.walkSpeed * control.movementMultiplier * delta;
-            transform.pos.add(MyMath.Vector(transform.rotation, walkSpeed));//TODO: should use accel/vel with friction instead of pos directly
+            physicsComp.body.applyForceToCenter(MyMath.Vector(transform.rotation, walkSpeed), true);
         }
         
         if (control.changeVehicle) {
@@ -101,7 +103,7 @@ public class ControlSystem extends IteratingSystem {
     //region ship controls
     private void controlShip(Entity entity, VehicleComponent vehicle, ControllableComponent control, float delta) {
         TransformComponent transform = Mappers.transform.get(entity);
-        PhysicsComponent physicsComponent = Mappers.physics.get(entity);
+        PhysicsComponent physicsComp = Mappers.physics.get(entity);
         DodgeComponent dodgeComp = Mappers.dodge.get(entity);
         ScreenTransitionComponent screenTransComp = Mappers.screenTrans.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
@@ -116,8 +118,8 @@ public class ControlSystem extends IteratingSystem {
         manageShield(entity, control, transform, shield);
         
         //debug force insta-stop(currently affects all vehicles)
-        if (Gdx.input.isKeyJustPressed(Keys.X)) physicsComponent.body.setLinearVelocity(0,0);//transform.velocity.set(0, 0);
-        //if (Gdx.input.isKeyJustPressed(Keys.Z)) transform.velocity.add(transform.velocity);
+        if (Gdx.input.isKeyJustPressed(Keys.X)) physicsComp.body.setLinearVelocity(0,0);
+        if (Gdx.input.isKeyJustPressed(Keys.Z)) physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(physicsComp.body.getLinearVelocity()));
         
         if (!canAct) {
             return;
@@ -125,13 +127,12 @@ public class ControlSystem extends IteratingSystem {
         
         
         //make vehicle face angle from mouse/joystick
-        //transform.rotation = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f * delta);
-        float angle = MathUtils.lerpAngle(transform.rotation, control.angleFacing, 8f * delta);
-        physicsComponent.body.setTransform(physicsComponent.body.getPosition(), angle);//TODO: apply a rotational torque? instead of direct setting
-        physicsComponent.body.setAwake(true);
+        float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleFacing, 8f * delta);
+        physicsComp.body.setTransform(physicsComp.body.getPosition(), angle);//TODO: apply a rotational torque? instead of direct setting
+        physicsComp.body.setAwake(true);
         
         if (control.moveForward) {
-            accelerate(delta, control, transform, physicsComponent, vehicle);
+            accelerate(delta, control, transform, physicsComp, vehicle);
         }
         if (control.moveBack) {
             decelerate(delta, transform);
@@ -153,7 +154,7 @@ public class ControlSystem extends IteratingSystem {
         if (cannon != null) {
             refillAmmo(cannon);//TODO: ammo should refill on all entities regardless of player presence
             if (control.attack && canShoot) {
-                fireCannon(transform, physicsComponent, cannon, entity);
+                fireCannon(transform, physicsComp, cannon, entity);
             }
         }
         if (canShoot) {

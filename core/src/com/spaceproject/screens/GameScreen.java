@@ -10,7 +10,6 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.kotcrab.vis.ui.VisUI;
@@ -53,7 +52,6 @@ public class GameScreen extends MyScreenAdapter {
     
     private ShaderProgram shader = null;
     
-    private Box2DDebugRenderer debugRenderer;
     
     public GameScreen(boolean inSpace) {
         GameScreen.inSpace = inSpace;
@@ -84,7 +82,6 @@ public class GameScreen extends MyScreenAdapter {
         world = new World(new Vector2(), true);
         universe = new Universe();
         noiseManager = new NoiseManager(SpaceProject.celestcfg.maxGenThreads);
-        debugRenderer = new Box2DDebugRenderer();
         
         // load test default values
         Entity playerTESTSHIP = EntityFactory.createPlayerShip(0, 0);
@@ -153,8 +150,6 @@ public class GameScreen extends MyScreenAdapter {
             gameTimeCurrent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - gameTimeStart);
         }
         engine.update(delta);
-    
-        debugRenderer.render(world, GameScreen.cam.combined);
         
         if (Gdx.input.isKeyJustPressed(Keys.F1)) {
             //debug

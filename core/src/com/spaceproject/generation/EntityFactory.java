@@ -59,7 +59,7 @@ public class EntityFactory {
         
         TextureComponent texture = new TextureComponent();
         texture.texture = TextureFactory.generateCharacter();
-        texture.scale = SpaceProject.entitycfg.renderScale;
+        texture.scale = 0.1f;//SpaceProject.entitycfg.renderScale;
         
         PhysicsComponent physics = new PhysicsComponent();
         float width = texture.texture.getWidth() * SpaceProject.entitycfg.renderScale;
@@ -620,10 +620,11 @@ public class EntityFactory {
         //physics.poly.setOrigin(width / 2, height / 2);
         Body sourceBody = owner.getComponent(PhysicsComponent.class).body;
         Vector2 ownerVel = sourceBody.getLinearVelocity();
-        Vector2 velocity = MyMath.Vector(sourceBody.getAngle(), 40).add(ownerVel);
+        Vector2 velocity = MyMath.Vector(sourceBody.getAngle(), 60).add(ownerVel);
         physics.body = createRect(source.pos.x, source.pos.y, width, height);
         physics.body.setTransform(source.pos, source.rotation);
         physics.body.setLinearVelocity(velocity);
+        physics.body.setBullet(true);//turn on CCD
         
         //set position, orientation, velocity and acceleration
         TransformComponent transform = new TransformComponent();

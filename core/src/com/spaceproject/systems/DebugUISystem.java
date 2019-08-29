@@ -20,6 +20,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -29,8 +30,8 @@ import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ShortArray;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.OrbitComponent;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.FontFactory;
@@ -39,10 +40,10 @@ import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.DebugEngineWindow;
 import com.spaceproject.utility.DebugText;
 import com.spaceproject.utility.DebugVec;
+import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.IRequireGameContext;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
     private Engine engine;
     private Stage stage;
     private DebugEngineWindow engineView;
+    private Box2DDebugRenderer debugRenderer;
     
     //rendering
     private static OrthographicCamera cam;
@@ -78,7 +80,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
     public boolean drawFPS = true, drawExtraInfo = true;
     public boolean drawComponentList = false;
     public boolean drawPos = true;
-    public boolean drawBounds = false, drawBoundsPoly = false;
+    public boolean drawBounds = true, drawBoundsPoly = false;
     public boolean drawOrbitPath = true;
     public boolean drawVectors = true;
     public boolean drawMousePos = false;
@@ -94,7 +96,8 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
         fontSmall = FontFactory.createFont(FontFactory.fontBitstreamVM, 10);
         fontLarge = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 20);
         objects = new Array<Entity>();
-        
+    
+        debugRenderer = new Box2DDebugRenderer();
         
         stage = new Stage(new ScreenViewport());
         
@@ -183,8 +186,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
                 drawOrbitPath(true);
             
             //draw the bounding box (collision detection) for collidables
-            if (drawBounds)
-                drawBounds(drawBoundsPoly);
+            //if (drawBounds) drawBounds(drawBoundsPoly);
             
             if (drawMousePos)
                 drawMouseLine();
@@ -206,9 +208,6 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
         
         batch.begin();
         {
-            //print debug menu
-            //if (drawMenu)  drawDebugMenu();
-            
             
             //draw components on entity
             if (drawComponentList)
@@ -218,6 +217,9 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
             drawDebugTexts(batch);
         }
         batch.end();
+    
+        if (drawBounds)
+            debugRenderer.render(GameScreen.world, GameScreen.cam.combined);
         
         
         objects.clear();
@@ -276,11 +278,6 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
             Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw vectors: " + drawVectors);
         }
 
-		/*
-		//toggle menu
-		if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleMenu)) {
-			drawMenu = !drawMenu;
-		}*/
     }
     
     
@@ -340,6 +337,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
     /**
      * Draw bounding boxes (hitbox/collision detection)
      */
+    @Deprecated
     private void drawBounds(boolean polyTriangles) {
         
         for (Entity entity : objects) {
