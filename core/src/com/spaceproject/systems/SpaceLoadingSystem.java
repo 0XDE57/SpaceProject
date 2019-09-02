@@ -10,11 +10,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.ui.Tile;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.BarycenterComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PlanetComponent;
+import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -23,8 +23,8 @@ import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.ui.Tile;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.ResourceDisposer;
 import com.spaceproject.utility.SimpleTimer;
 
 
@@ -70,8 +70,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
             OrbitComponent orbit = Mappers.orbit.get(e);
             if (orbit.parent != null) {
                 if (orbit.parent == entity) {
-                    ResourceDisposer.dispose(e);
-                    getEngine().removeEntity(e);
+                    e.add(new RemoveComponent());
                 }
             }
         }
@@ -192,8 +191,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         for (Entity entity : loadedAstronomicalBodies) {
             TransformComponent t = Mappers.transform.get(entity);
             if (Vector2.dst2(t.pos.x, t.pos.y, GameScreen.cam.position.x, GameScreen.cam.position.y) > loadDistance) {
-                ResourceDisposer.dispose(entity);
-                getEngine().removeEntity(entity);
+                entity.add(new RemoveComponent());
                 Gdx.app.log(this.getClass().getSimpleName(), "Removing Planetary System: " + entity.getComponent(TransformComponent.class).pos.toString());
             }
         }

@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.kotcrab.vis.ui.VisUI;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.PlanetComponent;
+import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.TransformComponent;
@@ -25,7 +26,6 @@ import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.Universe;
 import com.spaceproject.generation.noise.NoiseManager;
 import com.spaceproject.systems.DebugUISystem;
-import com.spaceproject.systems.FixedPhysicsSystem;
 import com.spaceproject.systems.HUDSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.ui.MapState;
@@ -110,10 +110,7 @@ public class GameScreen extends MyScreenAdapter {
         currentPlanet = null;
         
         SystemLoader.loadSystems(this, engine, inSpace, SpaceProject.systemsConfig);
-    
-        FixedPhysicsSystem fixedPhysicsSystem = new FixedPhysicsSystem();
-        fixedPhysicsSystem.initContext(this);
-        engine.addSystem(fixedPhysicsSystem);
+        
         
         //add player
         engine.addEntity(transitioningEntity);
@@ -165,8 +162,7 @@ public class GameScreen extends MyScreenAdapter {
     public void switchScreen(Entity transEntity, Entity planet) {
         if (Mappers.AI.get(transEntity) != null) {
             Gdx.app.log(this.getClass().getSimpleName(), "REMOVING: " + Misc.objString(transEntity));
-            ResourceDisposer.dispose(transEntity);
-            engine.removeEntity(transEntity);
+            transEntity.add(new RemoveComponent());
 			/*//TODO: persist
 			// what happens (in terms of persistence) to an entity in process of transitioning?
             //if important -> persist

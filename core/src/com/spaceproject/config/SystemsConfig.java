@@ -15,17 +15,16 @@ public class SystemsConfig extends Config {
         systems = new ArrayList<>();
         //SysCFG(entitySystem, priority, haltOnGamePause, loadInSpace, loadInWorld, loadOnDesktop, loadOnMobile)
         systems.add(new SysCFG(AISystem.class, 3, true, true, true, true, true));
-        //systems.add(new SysCFG(BoundsSystem.class, 6, true, true, true, true, true));
         systems.add(new SysCFG(CameraSystem.class, 10, false, true, true, true, true));
-        //systems.add(new SysCFG(CollisionSystem.class, 7, true, true, true, true, true));
         systems.add(new SysCFG(ControlSystem.class, 4, true, true, true, true, true));
         systems.add(new SysCFG(DebugUISystem.class, 18, false, true, true, true, true));
         systems.add(new SysCFG(DesktopInputSystem.class, 1, true, true, true, true, false));
         systems.add(new SysCFG(ExpireSystem.class, 14, true, true, true, true, true));
+        systems.add(new SysCFG(FixedPhysicsSystem.class, 5, true, true, true, true, true));
         systems.add(new SysCFG(HUDSystem.class, 13, false, true, true, true, true));
         systems.add(new SysCFG(MobileInputSystem.class, 2, true, true, true, false, true));
-        //systems.add(new SysCFG(MovementSystem.class, 5, true, true, true, true, true));
         systems.add(new SysCFG(OrbitSystem.class, 8, true, true, false, true, true));
+        systems.add(new SysCFG(RemovalSystem.class, 20, false, true, true, true, true));
         systems.add(new SysCFG(ScreenTransitionSystem.class, 17, true, true, true, true, true));
         systems.add(new SysCFG(SpaceLoadingSystem.class, 15, false, true, false, true, true));
         systems.add(new SysCFG(SpaceParallaxSystem.class, 16, true, true, false, true, true));

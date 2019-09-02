@@ -67,6 +67,8 @@ public class EntityFactory {
         physics.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
         physics.poly.setOrigin(width / 2, height / 2);
         physics.body = createRect(x, y, 0.4f, 0.4f);
+        physics.body.setLinearDamping(10f);
+        physics.body.setUserData(entity);
         
         CharacterComponent character = new CharacterComponent();
         character.walkSpeed = entitycfg.characterWalkSpeed;
@@ -103,8 +105,6 @@ public class EntityFactory {
         character.add(new AIComponent());
         return character;
     }
-    
-    //public static Entity
     //endregion
     
     
@@ -444,6 +444,7 @@ public class EntityFactory {
         physics.poly = new Polygon(new float[]{0, 0, 0, height, width, height, width, 0});
         physics.poly.setOrigin(width / 2, height / 2);
         physics.body = createRect(x, y, width, height);
+        physics.body.setUserData(entity);
         
         //weapon
         CannonComponent cannon = new CannonComponent();
@@ -625,6 +626,7 @@ public class EntityFactory {
         physics.body.setTransform(source.pos, source.rotation);
         physics.body.setLinearVelocity(velocity);
         physics.body.setBullet(true);//turn on CCD
+        physics.body.setUserData(entity);
         
         //set position, orientation, velocity and acceleration
         TransformComponent transform = new TransformComponent();

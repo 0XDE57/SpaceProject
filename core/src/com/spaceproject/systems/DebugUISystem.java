@@ -76,7 +76,6 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
     
     //config
     private boolean drawDebugUI = true;
-    //private boolean drawMenu = false;
     public boolean drawFPS = true, drawExtraInfo = true;
     public boolean drawComponentList = false;
     public boolean drawPos = true;
@@ -101,26 +100,14 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
         
         stage = new Stage(new ScreenViewport());
         
-        boolean showInfo = false;
-        if (showInfo) {
-            Gdx.app.log(this.getClass().getSimpleName(), "\n------- sys info -------");
-            System.getProperties().list(System.out);
-            Gdx.app.log(this.getClass().getSimpleName(), "-------------------------\n");
-			
-			/*
-			System.out.println(String.format("%s %s", Gdx.graphics.getPpiX(), Gdx.graphics.getPpiY()));
-			for (DisplayMode mode : Gdx.graphics.getDisplayModes()) {
-				System.out.println(String.format("%s %s %s %s", mode.width, mode.height, mode.bitsPerPixel, mode.refreshRate));
-			}
-			System.out.println("-------------------------\n");
-			*/
-        }
     }
+    
     
     @Override
     public void initContext(GameScreen gameScreen) {
         gameScreen.getInputMultiplexer().addProcessor(0, getStage());
     }
+    
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -149,8 +136,8 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
                 return false;
             }
         });
-        //stage.setDebugAll(true);
     }
+    
     
     @Override
     public void update(float delta) {
@@ -160,7 +147,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
         if (Gdx.input.isKeyJustPressed(Input.Keys.F9)) {
             engineView.toggle(stage);
         }
-        //stage.setDebugAll(true);
+        
         engineView.refreshNodes();
         stage.act(Math.min(delta, 1 / 30f));
         stage.draw();
@@ -184,9 +171,6 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
             // draw ring to visualize orbit path
             if (drawOrbitPath)
                 drawOrbitPath(true);
-            
-            //draw the bounding box (collision detection) for collidables
-            //if (drawBounds) drawBounds(drawBoundsPoly);
             
             if (drawMousePos)
                 drawMouseLine();
@@ -270,7 +254,6 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
             drawOrbitPath = !drawOrbitPath;
             Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw orbit path: " + drawOrbitPath);
         }
-        
         
         //toggle vector
         if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleVector)) {
@@ -377,7 +360,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
     /**
      * Draw frames, entity count, position and memory info.
      */
-    private void drawFPS(boolean drawExtaInfo) {
+    private void drawFPS(boolean drawExtraInfo) {
         int x = 15;
         int y = Gdx.graphics.getHeight() - 15;
         
@@ -386,7 +369,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
         debugTexts.add(new DebugText(Integer.toString(fps), x, y,
                 fps > 45 ? Color.WHITE : fps > 30 ? Color.YELLOW : Color.RED, fontLarge));
         
-        if (drawExtaInfo) {
+        if (drawExtraInfo) {
             //camera position
             String camera = String.format("Pos: %s %s  Zoom:%3$.2f", (int) cam.position.x, (int) cam.position.y, cam.zoom);
             

@@ -33,7 +33,7 @@ public class EntityConfig extends Config {
         renderScale = 4.0f;
         
         characterHealth = 100;
-        characterWalkSpeed = 300;//70f
+        characterWalkSpeed = 200f;
         
         controlTimerVehicle = 1000;
         controlTimerDodge = 500;

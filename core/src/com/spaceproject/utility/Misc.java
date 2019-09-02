@@ -5,6 +5,8 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.math.Vector2;
 
 import java.lang.reflect.Field;
@@ -48,9 +50,13 @@ public class Misc {
     }
     
     
-    public static String objString(Object e) {
+    public static String objString(Object o) {
+        if (o == null) {
+            return "null";
+        }
+        
         //a shorter version to getSimpleName() and hashcode
-        return e.getClass().getSimpleName() + "@" + Integer.toHexString(e.hashCode());
+        return o.getClass().getSimpleName() + "@" + Integer.toHexString(o.hashCode());
     }
     
     public static String vecString(Vector2 vec, int decimal) {
@@ -102,9 +108,7 @@ public class Misc {
     public static void printSystems(Engine eng) {
         for (EntitySystem sys : eng.getSystems()) {
             System.out.println(sys + " (" + sys.priority + ")");
-            
         }
-        
     }
     
     /**
@@ -116,16 +120,25 @@ public class Misc {
         long hours = millis / (1000 * 60 * 60);
         
         StringBuilder b = new StringBuilder();
-        b.append(hours == 0 ? "00" : hours < 10 ? String.valueOf("0" + hours) :
-                String.valueOf(hours));
+        b.append(hours == 0 ? "00" : hours < 10 ? "0" + hours : hours);
         b.append(":");
-        b.append(minutes == 0 ? "00" : minutes < 10 ? String.valueOf("0" + minutes) :
-                String.valueOf(minutes));
+        b.append(minutes == 0 ? "00" : minutes < 10 ? "0" + minutes : minutes);
         b.append(":");
-        b.append(seconds == 0 ? "00" : seconds < 10 ? String.valueOf("0" + seconds) :
-                String.valueOf(seconds));
+        b.append(seconds == 0 ? "00" : seconds < 10 ? "0" + seconds : seconds);
         return b.toString();
     }
     
     
+    public static void printSystemProperties() {
+        System.getProperties().list(System.out);
+    }
+    
+    
+    public static void printDisplayModes() {
+        System.out.println(String.format("%s %s", Gdx.graphics.getPpiX(), Gdx.graphics.getPpiY()));
+        for (Graphics.DisplayMode mode : Gdx.graphics.getDisplayModes()) {
+            System.out.println(String.format("%s %s %s %s", mode.width, mode.height, mode.bitsPerPixel, mode.refreshRate));
+        }
+        System.out.println("-------------------------\n");
+    }
 }
