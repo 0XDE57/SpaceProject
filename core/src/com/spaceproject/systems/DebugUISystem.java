@@ -269,7 +269,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
             TransformComponent t = Mappers.transform.get(entity);
             
             float scale = 2.0f; //how long to make vectors (higher number is longer line)
-            Vector2 end = MyMath.LogVec(t.velocity, scale).add(t.pos);
+            Vector2 end = MyMath.logVec(t.velocity, scale).add(t.pos);
             
             //draw line to represent movement
             debugVecs.add(new DebugVec(t.pos, end, Color.RED, Color.MAGENTA));
@@ -304,7 +304,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
                 TextureComponent tex = Mappers.texture.get(entity);
                 if (tex != null) {
                     int radius = (int) (tex.texture.getWidth() / 2 * tex.scale);
-                    Vector2 orientation = MyMath.Vector(entityPos.rotation, radius).add(entityPos.pos);
+                    Vector2 orientation = MyMath.vector(entityPos.rotation, radius).add(entityPos.pos);
                     shape.line(entityPos.pos.x, entityPos.pos.y, orientation.x, orientation.y);
                     shape.circle(entityPos.pos.x, entityPos.pos.y, radius);
                 }
@@ -525,7 +525,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
     
     public static void addDebugVec(Vector2 pos, Vector2 vec, Color color) {
         float scale = 20; //how long to make vectors (higher number is longer line)
-        Vector2 end = MyMath.LogVec(vec, scale).add(pos);
+        Vector2 end = MyMath.logVec(vec, scale).add(pos);
         debugVecs.add(new DebugVec(pos, end, color));
     }
     

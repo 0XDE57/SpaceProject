@@ -34,7 +34,6 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Sprite3D;
-import com.spaceproject.utility.IDGen;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.SimpleTimer;
 
@@ -454,7 +453,6 @@ public class EntityFactory {
         vehicle.driver = driver;
         vehicle.thrust = entitycfg.engineThrust;//higher is faster
         vehicle.maxSpeed = vehicle.NOLIMIT;
-        vehicle.id = IDGen.get();
         
         
         //health
@@ -477,7 +475,6 @@ public class EntityFactory {
         entity.add(health);
         entity.add(cannon);
         entity.add(physics);
-        //entity.add(texture);
         entity.add(sprite3DComp);
         entity.add(transform);
         entity.add(vehicle);
@@ -608,7 +605,7 @@ public class EntityFactory {
         float height = 0.1f;
         Body sourceBody = owner.getComponent(PhysicsComponent.class).body;
         Vector2 ownerVel = sourceBody.getLinearVelocity();
-        Vector2 velocity = MyMath.Vector(sourceBody.getAngle(), 60).add(ownerVel);
+        Vector2 velocity = MyMath.vector(sourceBody.getAngle(), 60).add(ownerVel);
         physics.body = BodyFactory.createRect(source.pos.x, source.pos.y, width, height);
         physics.body.setTransform(source.pos, source.rotation);
         physics.body.setLinearVelocity(velocity);

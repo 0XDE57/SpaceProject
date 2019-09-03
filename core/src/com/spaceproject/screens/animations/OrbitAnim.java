@@ -69,7 +69,7 @@ public class OrbitAnim extends TitleAnimation {
             }
             
             if (parent != null)
-                pos = MyMath.Vector(angle, distance).add(parent.pos);
+                pos = MyMath.vector(angle, distance).add(parent.pos);
             else
                 pos = new Vector2(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
         }
@@ -78,7 +78,7 @@ public class OrbitAnim extends TitleAnimation {
             angle += rotSpeed * delta;
             
             if (parent != null) {
-                pos = MyMath.Vector(angle, distance).add(parent.pos);
+                pos = MyMath.vector(angle, distance).add(parent.pos);
                 
                 shape.setColor(Color.BLACK);
                 shape.circle(pos.x, pos.y, size);

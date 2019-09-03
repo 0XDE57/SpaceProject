@@ -54,6 +54,7 @@ public class GameScreen extends MyScreenAdapter {
     
     
     public GameScreen(boolean inSpace) {
+        //inSpace = false;
         GameScreen.inSpace = inSpace;
         
         //init scene2d/VisUI
@@ -76,7 +77,7 @@ public class GameScreen extends MyScreenAdapter {
             if (shader.isCompiled())
                 batch.setShader(shader);
         }
-    
+        
         
         engine = new Engine();
         world = new World(new Vector2(), true);
@@ -298,6 +299,8 @@ public class GameScreen extends MyScreenAdapter {
         
         engine.removeAllEntities();
         engine = null;
+        
+        world.dispose();
         
     }
     

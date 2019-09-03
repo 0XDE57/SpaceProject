@@ -95,7 +95,7 @@ public class AsteroidAnim extends TitleAnimation {
         
         shape.begin(ShapeRenderer.ShapeType.Filled);
         if (bullet != null) {
-            bullet.add(MyMath.Vector(bulletAngle, 300 * delta));
+            bullet.add(MyMath.vector(bulletAngle, 300 * delta));
             shape.circle(bullet.x, bullet.y, 10);
         }
         shape.end();
@@ -139,7 +139,7 @@ public class AsteroidAnim extends TitleAnimation {
         
         public void render(ShapeRenderer shape, float delta) {
             //float angle = MyMath.angleTo(new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight()-Gdx.input.getY()), position);
-            //position.add(MyMath.Vector(angle,10*delta));
+            //position.add(MyMath.vector(angle,10*delta));
             
             Rectangle bounds = hullPoly.getBoundingRectangle();
             if (bounds.y <= 0) {
@@ -157,7 +157,7 @@ public class AsteroidAnim extends TitleAnimation {
                 angle = MathUtils.PI - angle;
             }
             
-            position.add(MyMath.Vector(angle, velocity * delta));
+            position.add(MyMath.vector(angle, velocity * delta));
             
             
             hullPoly.rotate(10 * delta);

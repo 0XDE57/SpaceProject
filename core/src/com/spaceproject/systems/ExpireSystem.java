@@ -16,7 +16,6 @@ public class ExpireSystem extends IntervalSystem {
     
     public ExpireSystem() {
         super(1);
-        
     }
     
     @Override

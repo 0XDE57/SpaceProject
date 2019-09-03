@@ -9,7 +9,7 @@ import com.spaceproject.components.TextureComponent;
 
 public class ResourceDisposer {
     
-    static boolean logDispose = false;
+    static boolean logDispose = true;
     
     public static void dispose(Entity entity) {
         TextureComponent tex = Mappers.texture.get(entity);

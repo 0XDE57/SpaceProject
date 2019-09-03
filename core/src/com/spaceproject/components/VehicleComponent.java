@@ -5,13 +5,7 @@ import com.badlogic.ashley.core.Entity;
 
 public class VehicleComponent implements Component {
     
-    //TODO: should consider breaking into a DrivableComponent (to account for land vehicles) and engine/ship component for further properties.
-    
     public Entity driver;
-    
-    // tempGenID to identify one vehicle from another
-    @Deprecated
-    public int id;//TODO: i dont think this should be used anymore -> seed? entity hashcode? IDComp?
     
     //TODO: implement engine state behavior
     enum EngineState {
@@ -29,9 +23,7 @@ public class VehicleComponent implements Component {
     public float thrust;
     
     // maximum speed vehicle can
-    @Deprecated
-    public float maxSpeed;
-    @Deprecated
+    public float maxSpeed = 60;
     public static final int NOLIMIT = -1;//no max speed/infinite
     
 }

@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AstronomicalComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.Sprite3DComponent;
@@ -129,22 +130,23 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     
     private static void shrink(Entity entity, ScreenTransitionComponent screenTrans) {
         
-        
-        TransformComponent transform = Mappers.transform.get(entity);
-        if (transform != null) {
+        PhysicsComponent physics = Mappers.physics.get(entity);
+        if (physics != null) {
             // freeze movement during animation
-            transform.velocity.set(0, 0);
-            transform.accel.set(0, 0);
+            physics.body.setLinearVelocity(0, 0);
             
             if (screenTrans.rotation == 0.0f) {
                 screenTrans.rotation = MathUtils.random(0.01f, -0.01f);
             }
-            transform.rotation += screenTrans.rotation;
+            physics.body.setTransform(physics.body.getPosition(), physics.body.getAngle() + screenTrans.rotation);
         }
         
         
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
-        float interp = screenTrans.animInterpolation.apply(1, 0, screenTrans.timer.ratio());
+        if (screenTrans.initialScale == 0) {
+            screenTrans.initialScale = sprite3D.renderable.scale.x;
+        }
+        float interp = screenTrans.animInterpolation.apply(screenTrans.initialScale, 0, screenTrans.timer.ratio());
         sprite3D.renderable.scale.set(interp, interp, interp);
         
         if (screenTrans.timer.tryEvent()) {
@@ -159,24 +161,23 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     
     private static void grow(Entity entity, ScreenTransitionComponent screenTrans) {
     
-        TransformComponent transform = Mappers.transform.get(entity);
-        if (transform != null) {
+        PhysicsComponent physics = Mappers.physics.get(entity);
+        if (physics != null) {
             //match planet vel
-            transform.velocity.set(screenTrans.planet.getComponent(TransformComponent.class).velocity);
+            //transform.velocity.set(screenTrans.planet.getComponent(TransformComponent.class).velocity);
             
             if (screenTrans.rotation == 0.0f) {
                 screenTrans.rotation = MathUtils.random(0.01f, -0.01f);
             }
-            transform.rotation += screenTrans.rotation;
+            physics.body.setTransform(physics.body.getPosition(), physics.body.getAngle() + screenTrans.rotation);
         }
         
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
-        
-        float interp = screenTrans.animInterpolation.apply(0, 1, screenTrans.timer.ratio());
+        float interp = screenTrans.animInterpolation.apply(0, screenTrans.initialScale, screenTrans.timer.ratio());
         sprite3D.renderable.scale.set(interp, interp, interp);
         
         if (screenTrans.timer.canDoEvent()) {
-            sprite3D.renderable.scale.set(1, 1, 1);
+            sprite3D.renderable.scale.set(screenTrans.initialScale, screenTrans.initialScale, screenTrans.initialScale);
             nextStage(screenTrans);
         }
     }
@@ -234,27 +235,15 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     }
     
     private static void landOnPlanet(GameScreen gameContext, Entity entity, ScreenTransitionComponent screenTrans) {
-        /*
         //reset size to normal
-        TextureComponent tex = Mappers.texture.get(entity);
-        if (tex != null) {
-            tex.scale = SpaceProject.entitycfg.renderScale;
-        }*/
-        
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
-        sprite3D.renderable.scale.set(1, 1, 1);
+        sprite3D.renderable.scale.set(screenTrans.initialScale, screenTrans.initialScale, screenTrans.initialScale);
         
         gameContext.switchScreen(entity, screenTrans.planet);
     }
     
     private void takeOff(GameScreen gameContext, Entity entity, ScreenTransitionComponent screenTrans) {
         //set size to 0 so texture can grow
-        /*
-        TextureComponent tex = Mappers.texture.get(entity);
-        if (tex != null) {
-            tex.scale = 0;
-        }*/
-        
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         sprite3D.renderable.scale.set(0, 0, 0);
     

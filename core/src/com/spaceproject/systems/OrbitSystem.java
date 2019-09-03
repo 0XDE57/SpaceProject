@@ -56,7 +56,7 @@ public class OrbitSystem extends IteratingSystem {
     public static Vector2 getSyncPos(Entity entity, long time) {
         OrbitComponent orbit = Mappers.orbit.get(entity);
         TransformComponent parentPosition = Mappers.transform.get(orbit.parent);
-        return MyMath.Vector(getTimeSyncAngle(orbit, time), orbit.radialDistance).add(parentPosition.pos);
+        return MyMath.vector(getTimeSyncAngle(orbit, time), orbit.radialDistance).add(parentPosition.pos);
     }
     
     

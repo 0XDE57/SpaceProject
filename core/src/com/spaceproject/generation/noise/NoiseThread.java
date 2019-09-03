@@ -38,7 +38,7 @@ public class NoiseThread implements Runnable {
     @Override
     public void run() {
         //try { Thread.sleep(150000); } catch (InterruptedException e) { }//debug delay to see loading effects
-        Gdx.app.log(this.getClass().getSimpleName(), "Started: [" + toString());
+        Gdx.app.log(this.getClass().getSimpleName(), "Started: " + toString());
         long startTime = System.currentTimeMillis();
         
         noise = new NoiseBuffer();

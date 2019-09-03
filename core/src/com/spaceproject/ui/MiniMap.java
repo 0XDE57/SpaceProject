@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.MapComponent;
@@ -214,18 +215,16 @@ public class MiniMap {
             
             //draw velocity vector for intuitive navigation
             if (player != null) {
-                TransformComponent t = Mappers.transform.get(player);
+                Body body = Mappers.physics.get(player).body;
                 
                 //calculate vector angle and length
-                float scale = 4; //how long to make vectors (higher number is longer line)
-                Vector2 vel = MyMath.LogVec(t.velocity, scale).add(centerMapX, centerMapY);
-                Vector2 accel = MyMath.LogVec(t.accel, scale).add(centerMapX, centerMapY);
+                float scale = 5; //how long to make vectors (higher number is longer line)
+                Vector2 vel = MyMath.logVec(body.getLinearVelocity(), scale).add(centerMapX, centerMapY);
                 
                 //draw line to represent movement
                 shape.rectLine(centerMapX, centerMapY, vel.x, vel.y, 2, Color.MAGENTA, Color.RED);
-                shape.rectLine(centerMapX, centerMapY, accel.x, accel.y, 2, Color.GREEN, Color.BLUE);
                 
-                Vector2 facing = MyMath.Vector(t.rotation, 10).add(centerMapX, centerMapY);
+                Vector2 facing = MyMath.vector(body.getAngle(), 10).add(centerMapX, centerMapY);
                 shape.rectLine(centerMapX, centerMapY, facing.x, facing.y, 2, Color.GRAY, Color.WHITE);
             }
             shape.setColor(Color.WHITE);

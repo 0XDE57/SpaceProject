@@ -90,7 +90,7 @@ public class ControlSystem extends IteratingSystem {
         
         if (control.moveForward) {
             float walkSpeed = character.walkSpeed * control.movementMultiplier * delta;
-            physicsComp.body.applyForceToCenter(MyMath.Vector(transform.rotation, walkSpeed), true);
+            physicsComp.body.applyForceToCenter(MyMath.vector(transform.rotation, walkSpeed), true);
         }
         
         if (control.changeVehicle) {
@@ -188,9 +188,8 @@ public class ControlSystem extends IteratingSystem {
         //TODO: implement rest of engine behavior
         //float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go
         
-        float thrust = vehicle.thrust * control.movementMultiplier * delta;
-        //transform.velocity.add(MyMath.Vector(transform.rotation, thrust));
-        body.body.applyForceToCenter(MyMath.Vector(transform.rotation, 2f), true);
+        float thrust = vehicle.thrust * control.movementMultiplier;
+        body.body.applyForceToCenter(MyMath.vector(transform.rotation, thrust), true);
 
         //transform.accel.add(dx,dy);//????
         
@@ -210,7 +209,7 @@ public class ControlSystem extends IteratingSystem {
             //add thrust opposite direction of velocity to slow down ship
             float thrust = transform.velocity.len();//.clamp(minBreakingThrust, maxBreakingThrust);
             float angle = transform.velocity.angle();
-            transform.velocity.add(MyMath.Vector(angle, thrust * delta));
+            transform.velocity.add(MyMath.vector(angle, thrust * delta));
         }
     }
     
@@ -260,7 +259,7 @@ public class ControlSystem extends IteratingSystem {
         float interp = dodgeComp.animInterpolation.apply(0, dodgeComp.distance, dodgeComp.animationTimer.ratio());
         float distance = interp - dodgeComp.traveled;
         dodgeComp.traveled += distance;
-        transform.pos.add(MyMath.Vector(dodgeComp.direction, distance));
+        transform.pos.add(MyMath.vector(dodgeComp.direction, distance));
         //System.out.println(dodgeComp.animationTimer.ratio() + ": " + interp + ": " + distance + ": " + dodgeComp.traveled + ": " + (dodgeComp.distance-interp));
         
         
@@ -420,7 +419,7 @@ public class ControlSystem extends IteratingSystem {
         Body body = BodyFactory.createPlayerBody(0, 0, characterEntity);
        
         
-        Vector2 offset = MyMath.Vector(MathUtils.random(360) * MathUtils.degRad, offsetDist);//set player next to vehicle
+        Vector2 offset = MyMath.vector(MathUtils.random(360) * MathUtils.degRad, offsetDist);//set player next to vehicle
         
         body.setTransform(vehiclePosition.add(offset), body.getAngle());
         body.setLinearVelocity(0, 0);
@@ -528,7 +527,7 @@ public class ControlSystem extends IteratingSystem {
             //Rectangle bounds = entity.getComponent(PhysicsComponent.class).poly.getBoundingRectangle();
             float offset = 2;//Math.max(bounds.getWidth(), bounds.getHeight()) + growCannon.maxSize;
             TransformComponent transformComponent = growCannon.projectile.getComponent(TransformComponent.class);
-            transformComponent.pos.set(MyMath.Vector(transform.rotation, offset).add(transform.pos));
+            transformComponent.pos.set(MyMath.vector(transform.rotation, offset).add(transform.pos));
             transformComponent.rotation = transform.rotation;
             
             //accumulate size
@@ -546,7 +545,7 @@ public class ControlSystem extends IteratingSystem {
             
             //release
             if (!control.attack) {
-                Vector2 vec = MyMath.Vector(transform.rotation, growCannon.velocity).add(transform.velocity);
+                Vector2 vec = MyMath.vector(transform.rotation, growCannon.velocity).add(transform.velocity);
                 transformComponent.velocity.set(vec);
                 ExpireComponent expire = new ExpireComponent();
                 expire.time = 5;
@@ -595,7 +594,7 @@ public class ControlSystem extends IteratingSystem {
         }
         
         //create missile
-        //Vector2 vec = MyMath.Vector(transform.rotation, cannon.velocity);//.add(body.body.getLinearVelocity());
+        //Vector2 vec = MyMath.vector(transform.rotation, cannon.velocity);//.add(body.body.getLinearVelocity());
         Entity missile = EntityFactory.createMissile(transform, cannon, owner);
         getEngine().addEntity(missile);
         

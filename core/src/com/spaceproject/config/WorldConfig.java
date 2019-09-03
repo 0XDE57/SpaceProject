@@ -33,7 +33,7 @@ public class WorldConfig extends Config {
     
     @Override
     public void loadDefault() {
-        tileSize = 32;
+        tileSize = 2;
         chunkSize = 8;
     }
 }

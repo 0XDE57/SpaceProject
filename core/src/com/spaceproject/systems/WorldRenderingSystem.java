@@ -83,7 +83,7 @@ public class WorldRenderingSystem extends IteratingSystem implements IRequireGam
             noise = GameScreen.noiseManager.getNoiseForSeed(seed);
             
             if ((System.currentTimeMillis() - time) > timeout) {
-                Gdx.app.log(this.getClass().getSimpleName(), "could not find seed for noise" + seed);
+                Gdx.app.log(this.getClass().getSimpleName(), "could not find seed for noise: " + seed);
                 //TODO: if not cached and if not in process of being generated, only then generate. but this should probably never happen?
                 //GameScreen.noiseManager.loadOrCreateNoiseFor(seed, PlanetComponent);
             }

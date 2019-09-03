@@ -52,4 +52,6 @@ public class ScreenTransitionComponent implements Component {
     public Interpolation animInterpolation;
     
     public float rotation;
+    
+    public float initialScale;
 }
