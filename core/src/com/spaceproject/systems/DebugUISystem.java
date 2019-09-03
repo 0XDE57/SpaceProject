@@ -17,7 +17,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
@@ -26,12 +25,9 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.FloatArray;
-import com.badlogic.gdx.utils.ShortArray;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.OrbitComponent;
-import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.FontFactory;
@@ -81,7 +77,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
     public boolean drawPos = true;
     public boolean drawBounds = true, drawBoundsPoly = false;
     public boolean drawOrbitPath = true;
-    public boolean drawVectors = true;
+    public boolean drawVectors = false;
     public boolean drawMousePos = false;
     public boolean drawEntityList = false;
     
@@ -96,7 +92,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
         fontLarge = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 20);
         objects = new Array<Entity>();
     
-        debugRenderer = new Box2DDebugRenderer();
+        debugRenderer = new Box2DDebugRenderer(true, true, true, true, true, true);
         
         stage = new Stage(new ScreenViewport());
         
@@ -319,7 +315,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
     
     /**
      * Draw bounding boxes (hitbox/collision detection)
-     */
+     *
     @Deprecated
     private void drawBounds(boolean polyTriangles) {
         
@@ -355,6 +351,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
             }
         }
     }
+    */
     
     
     /**

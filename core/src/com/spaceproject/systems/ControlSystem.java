@@ -10,21 +10,20 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Polygon;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
-import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.DodgeComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.GrowCannonComponent;
-import com.spaceproject.components.DamageComponent;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.ShieldComponent;
@@ -32,13 +31,13 @@ import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.generation.BodyFactory;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.PolygonUtil;
 import com.spaceproject.utility.SimpleTimer;
 
 
@@ -47,6 +46,7 @@ public class ControlSystem extends IteratingSystem {
     private ImmutableArray<Entity> vehicles;
     private ImmutableArray<Entity> planets;
     
+    private float offsetDist = 1.5f;//TODO: dynamic based on ship size
     
     public ControlSystem() {
         super(Family.all(ControllableComponent.class, TransformComponent.class).one(CharacterComponent.class, VehicleComponent.class).get());
@@ -190,7 +190,7 @@ public class ControlSystem extends IteratingSystem {
         
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
         //transform.velocity.add(MyMath.Vector(transform.rotation, thrust));
-        body.body.applyForceToCenter(MyMath.Vector(transform.rotation, 1f), true);
+        body.body.applyForceToCenter(MyMath.Vector(transform.rotation, 2f), true);
 
         //transform.accel.add(dx,dy);//????
         
@@ -275,7 +275,7 @@ public class ControlSystem extends IteratingSystem {
         }
         
         //ensure bounding box follows sprite, ship should be thinner/harder to hit when rolling
-        PhysicsComponent bounds = Mappers.physics.get(entity);
+        PhysicsComponent physicsComponent = Mappers.physics.get(entity);
         float scaleY = 1 - (sprite3D.renderable.angle / MathUtils.PI);//TODO, this is wrong: need to find something that maps like below
         //degrees, scale
         //0   = 1 	-> top
@@ -288,13 +288,13 @@ public class ControlSystem extends IteratingSystem {
         //315 = 0.5
         //360 = 1	-> top
         //System.out.println(sprite3D.renderable.angle + ", " + sy);
-        bounds.poly.setScale(1, scaleY);
+        //physicsComponent.poly.setScale(1, scaleY);
         
         
         if (dodgeComp.animationTimer.canDoEvent()) {
             //reset
             sprite3D.renderable.angle = 0;
-            bounds.poly.setScale(1, 1);
+            //physicsComponent.poly.setScale(1, 1);
             
             //end anim
             entity.remove(DodgeComponent.class);
@@ -309,9 +309,10 @@ public class ControlSystem extends IteratingSystem {
                 shield = new ShieldComponent();
                 shield.animTimer = new SimpleTimer(400, true);
                 shield.defence = 100f;
-                Polygon poly = entity.getComponent(PhysicsComponent.class).poly;
-                Rectangle rect = PolygonUtil.getBoundingRectangle(poly.getVertices());
-                float size = Math.min(rect.width, rect.height) * 1.3f;
+                //Polygon poly = entity.getComponent(PhysicsComponent.class).poly;
+                //Rectangle rect = PolygonUtil.getBoundingRectangle(poly.getVertices());
+                //float size = Math.min(rect.width, rect.height) * 1.3f;
+                float size = entity.getComponent(PhysicsComponent.class).body.getFixtureList().first().getShape().getRadius() * 1.3f;
                 shield.maxRadius = size;
                 shield.color = Color.BLUE;
                 
@@ -352,18 +353,18 @@ public class ControlSystem extends IteratingSystem {
         control.changeVehicle = false;
         
         //get all vehicles and check if player is close to one(bounds overlap)
-        PhysicsComponent playerBounds = Mappers.physics.get(characterEntity);
+        PhysicsComponent playerPhysics = Mappers.physics.get(characterEntity);
         for (Entity vehicle : vehicles) {
             
             //skip vehicle is occupied
             if (Mappers.vehicle.get(vehicle).driver != null) {
-                Gdx.app.log(this.getClass().getSimpleName(), "Vehicle already has a driver!");
+                Gdx.app.log(this.getClass().getSimpleName(), "Vehicle [" + Misc.objString(vehicle) + "] already has a driver [" + Misc.objString(Mappers.vehicle.get(vehicle).driver) + "]!");
                 continue;
             }
             
             //check if character is near a vehicle
-            PhysicsComponent vehicleBounds = Mappers.physics.get(vehicle);
-            if (playerBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {
+            PhysicsComponent vehiclePhysics = Mappers.physics.get(vehicle);
+            if (playerPhysics.body.getPosition().dst(vehiclePhysics.body.getPosition()) < offsetDist) {
                 
                 //set references
                 Mappers.character.get(characterEntity).vehicle = vehicle;
@@ -393,6 +394,8 @@ public class ControlSystem extends IteratingSystem {
                 
                 // remove character
                 getEngine().removeEntity(characterEntity);
+                GameScreen.world.destroyBody(characterEntity.getComponent(PhysicsComponent.class).body);
+                characterEntity.getComponent(PhysicsComponent.class).body = null;
                 
                 control.timerVehicle.reset();
                 
@@ -406,16 +409,23 @@ public class ControlSystem extends IteratingSystem {
         //action timer
         if (!control.timerVehicle.canDoEvent())
             return;
-        
+        control.timerVehicle.reset();
         control.changeVehicle = false;
+        
         
         Entity characterEntity = Mappers.vehicle.get(vehicleEntity).driver;
         
         // set the player at the position of vehicle
         Vector2 vehiclePosition = Mappers.transform.get(vehicleEntity).pos;
-        Vector2 offset = MyMath.Vector(MathUtils.random(360) * MathUtils.degRad, 50);//set player next to vehicle
-        Mappers.transform.get(characterEntity).pos.set(vehiclePosition).add(offset);
-        Mappers.transform.get(characterEntity).velocity.set(0, 0);
+        Body body = BodyFactory.createPlayerBody(0, 0, characterEntity);
+       
+        
+        Vector2 offset = MyMath.Vector(MathUtils.random(360) * MathUtils.degRad, offsetDist);//set player next to vehicle
+        
+        body.setTransform(vehiclePosition.add(offset), body.getAngle());
+        body.setLinearVelocity(0, 0);
+        Mappers.physics.get(characterEntity).body = body;
+        
         
         //set focus to character
         if (vehicleEntity.getComponent(CameraFocusComponent.class) != null) {
@@ -447,7 +457,7 @@ public class ControlSystem extends IteratingSystem {
         getEngine().addEntity(characterEntity);
         
         
-        control.timerVehicle.reset();
+        
     }
     //endregion
     
@@ -515,8 +525,8 @@ public class ControlSystem extends IteratingSystem {
         
         if (growCannon.isCharging) {
             //update position to be in front of ship
-            Rectangle bounds = entity.getComponent(PhysicsComponent.class).poly.getBoundingRectangle();
-            float offset = Math.max(bounds.getWidth(), bounds.getHeight()) + growCannon.maxSize;
+            //Rectangle bounds = entity.getComponent(PhysicsComponent.class).poly.getBoundingRectangle();
+            float offset = 2;//Math.max(bounds.getWidth(), bounds.getHeight()) + growCannon.maxSize;
             TransformComponent transformComponent = growCannon.projectile.getComponent(TransformComponent.class);
             transformComponent.pos.set(MyMath.Vector(transform.rotation, offset).add(transform.pos));
             transformComponent.rotation = transform.rotation;
@@ -525,7 +535,7 @@ public class ControlSystem extends IteratingSystem {
             growCannon.size = growCannon.growRateTimer.ratio() * growCannon.maxSize;
             growCannon.size = MathUtils.clamp(growCannon.size, 1, growCannon.maxSize);
             growCannon.projectile.getComponent(TextureComponent.class).scale = growCannon.size * SpaceProject.entitycfg.renderScale;
-            growCannon.projectile.getComponent(PhysicsComponent.class).poly.setScale(growCannon.size, growCannon.size);
+            //growCannon.projectile.getComponent(PhysicsComponent.class).poly.setScale(growCannon.size, growCannon.size);
             
             //damage modifier
             DamageComponent damageComponent = growCannon.projectile.getComponent(DamageComponent.class);

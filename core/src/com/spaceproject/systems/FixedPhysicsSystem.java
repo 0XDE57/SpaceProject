@@ -24,8 +24,6 @@ import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
-import com.spaceproject.utility.PolygonUtil;
-import com.spaceproject.utility.ResourceDisposer;
 
 // based off:
 // http://gafferongames.com/game-physics/fix-your-timestep/
@@ -177,11 +175,11 @@ class Listener implements ContactListener {
                 Vector2 pos = Mappers.transform.get(attackedEntity).pos;
                 Circle c = new Circle(pos, shieldComp.radius);
                 PhysicsComponent physicsComponent = Mappers.physics.get(attackedEntity);
-                if (PolygonUtil.overlaps(physicsComponent.poly, c)) {
+                //if (PolygonUtil.overlaps(physicsComponent.poly, c)) {
                     attackedEntity.remove(ShieldComponent.class);
                     damageEntity.add(new RemoveComponent());
                     return;
-                }
+                //}
             }
         }
         

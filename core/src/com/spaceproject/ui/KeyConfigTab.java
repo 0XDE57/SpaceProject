@@ -23,12 +23,12 @@ import java.util.Map;
 
 public class KeyConfigTab extends ConfigTab {
     
-    static ObjectIntMap<String> keyNames;
+    private static ObjectIntMap<String> keyNames;
     private Map<String, String> changes;
     
     public KeyConfigTab(String title, Config config) {
         super(title, config);
-        changes = new HashMap<String, String>();
+        changes = new HashMap<>();
     }
     
     @Override
@@ -42,7 +42,7 @@ public class KeyConfigTab extends ConfigTab {
                 Label keyLabel = new Label(f.getName(), VisUI.getSkin());
                 keyLabel.setAlignment(Align.right);
                 
-                final VisSelectBox<String> testKeys = new VisSelectBox<String>();
+                final VisSelectBox<String> testKeys = new VisSelectBox<>();
                 testKeys.setName(f.getName());
                     /*//TODO: set selected index/highlight key that was pressed when drop down activated
                     testKeys.addListener(new InputListener() {
@@ -77,7 +77,7 @@ public class KeyConfigTab extends ConfigTab {
     }
     
     private void buildKeyMap() {
-        Array<Integer> allowed = new Array<Integer>();
+        Array<Integer> allowed = new Array<>();
         //allowed.add(Input.Buttons.LEFT);
         //allowed.add(Input.Buttons.RIGHT);
         //allowed.add(Input.Buttons.MIDDLE);
@@ -170,7 +170,7 @@ public class KeyConfigTab extends ConfigTab {
         
         
         if (keyNames == null) {
-            keyNames = new ObjectIntMap<String>();
+            keyNames = new ObjectIntMap<>();
             //for (int i : allowed) {
             for (int i = 0; i < 256; i++) {
                 String keyName = Input.Keys.toString(i);

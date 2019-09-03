@@ -80,23 +80,24 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     public void initMobs(Engine engine) {
         //a placeholder to add dummy objects for now
         
-        engine.addEntity(EntityFactory.createShip3(-200, 400));
-        engine.addEntity(EntityFactory.createShip3(-300, 400));
-        engine.addEntity(EntityFactory.createShip3(-400, 400));
-        engine.addEntity(EntityFactory.createShip3(-600, 400));
+        engine.addEntity(EntityFactory.createShip3(-20, 40));
+        engine.addEntity(EntityFactory.createShip3(-30, 40));
+        engine.addEntity(EntityFactory.createShip3(-40, 40));
+        engine.addEntity(EntityFactory.createShip3(-60, 40));
         
         
-        Entity aiTest = EntityFactory.createCharacterAI(0, 400);
+        Entity aiTest = EntityFactory.createCharacterAI(0, 40);
         Mappers.AI.get(aiTest).state = AIComponent.testState.dumbwander;
-        //aiTest.add(ship.remove(CameraFocusComponent.class));//test cam focus on AI
+        //aiTest.add(new CameraFocusComponent());//test cam focus on AI
         engine.addEntity(aiTest);
         
-        Entity aiTest2 = EntityFactory.createCharacterAI(0, 600);
+        Entity aiTest2 = EntityFactory.createCharacterAI(0, 60);
         Mappers.AI.get(aiTest2).state = AIComponent.testState.idle;
         engine.addEntity(aiTest2);
         
-        Entity aiTest3 = EntityFactory.createCharacterAI(0, 800);
+        Entity aiTest3 = EntityFactory.createCharacterAI(0, 80);
         Mappers.AI.get(aiTest3).state = AIComponent.testState.landOnPlanet;
+        //aiTest3.add(new CameraFocusComponent());
         engine.addEntity(aiTest3);
 
 

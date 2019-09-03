@@ -61,14 +61,14 @@ public class AISystem extends IteratingSystem {
                             control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
                             control.moveForward = true;
                             control.movementMultiplier = 1f;
-                            PhysicsComponent aiBounds = Mappers.physics.get(entity);
+                            PhysicsComponent aiPhysics = Mappers.physics.get(entity);
                             for (Entity v : vehicles) {
                                 //skip vehicle is occupied
                                 if (Mappers.vehicle.get(v).driver != null) continue;
                                 
                                 //check if character is near a vehicle
-                                PhysicsComponent vehicleBounds = Mappers.physics.get(v);
-                                if (aiBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {
+                                PhysicsComponent vehiclePhysics = Mappers.physics.get(v);
+                                if (aiPhysics.body.getPosition().dst(vehiclePhysics.body.getPosition()) < 1.5) {
                                     control.changeVehicle = true;
                                 }
                             }
@@ -108,14 +108,14 @@ public class AISystem extends IteratingSystem {
                         control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
                         control.moveForward = true;
                         control.movementMultiplier = 0.5f;
-                        PhysicsComponent aiBounds = Mappers.physics.get(entity);
+                        PhysicsComponent aiPhysics = Mappers.physics.get(entity);
                         for (Entity v : vehicles) {
                             //skip vehicle is occupied
                             if (Mappers.vehicle.get(v).driver != null) continue;
                             
                             //check if character is near a vehicle
-                            PhysicsComponent vehicleBounds = Mappers.physics.get(v);
-                            if (aiBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {
+                            PhysicsComponent vehiclePhysics = Mappers.physics.get(v);
+                            if (aiPhysics.body.getPosition().dst(vehiclePhysics.body.getPosition()) < 1.5) {
                                 control.changeVehicle = true;
                             }
                         }
@@ -170,14 +170,14 @@ public class AISystem extends IteratingSystem {
                         control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
                     }
                     
-                    PhysicsComponent playerBounds = Mappers.physics.get(entity);
+                    PhysicsComponent playerPhysics = Mappers.physics.get(entity);
                     for (Entity v : vehicles) {
                         //skip vehicle is occupied
                         if (Mappers.vehicle.get(v).driver != null) continue;
                         
                         //check if character is near a vehicle
-                        PhysicsComponent vehicleBounds = Mappers.physics.get(v);
-                        if (playerBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {
+                        PhysicsComponent vehiclePhysics = Mappers.physics.get(v);
+                        if (vehiclePhysics.body.getPosition().dst(vehiclePhysics.body.getPosition()) < 1.5) {
                             control.changeVehicle = true;
                         }
                     }
@@ -194,14 +194,14 @@ public class AISystem extends IteratingSystem {
                         control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
                         control.moveForward = false;
                         control.movementMultiplier = 0.01f;
-                        PhysicsComponent aiBounds = Mappers.physics.get(entity);
+                        PhysicsComponent aiPhysics = Mappers.physics.get(entity);
                         for (Entity v : vehicles) {
                             //skip vehicle is occupied
                             if (Mappers.vehicle.get(v).driver != null) continue;
                             
                             //check if character is near a vehicle
-                            PhysicsComponent vehicleBounds = Mappers.physics.get(v);
-                            if (aiBounds.poly.getBoundingRectangle().overlaps(vehicleBounds.poly.getBoundingRectangle())) {
+                            PhysicsComponent vehiclePhysics = Mappers.physics.get(v);
+                            if (vehiclePhysics.body.getPosition().dst(vehiclePhysics.body.getPosition()) < 1.5) {
                                 control.changeVehicle = true;
                             }
                         }

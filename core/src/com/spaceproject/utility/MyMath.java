@@ -1,7 +1,10 @@
 package com.spaceproject.utility;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.spaceproject.SpaceProject;
 
 public class MyMath {
@@ -87,6 +90,24 @@ public class MyMath {
         if (bytes < 1024) return bytes + " B";
         int z = (63 - Long.numberOfLeadingZeros(bytes)) / 10;
         return String.format("%.2f%sB", (double) bytes / (1L << (z * 10)), " KMGTPE".charAt(z));
+    }
+    
+    public static float getAABB(Body body) {
+        //Rectangle aabb = new Rectangle();// = fixture.;
+        
+        for (Fixture f: body.getFixtureList()) {
+            //f.GetAABB()?
+            //combine
+            //f.getShape().getRadius()?
+            return f.getShape().getRadius();
+        }
+        
+        return -1;
+        //return aabb;
+    }
+    
+    public static float getFixtureSize(Rectangle aabb) {
+        return Math.max(aabb.width, aabb.height);
     }
     
 }

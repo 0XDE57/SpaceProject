@@ -1,11 +1,22 @@
 ---ENGINE---
-[...] physics and movement & message arch
+[...] physics and movement
     [...] move to box2d
         [...] move logic to new physics
+            [x] movement
+            [x] collision
+            [ ] land take off scale
+            [ ] land/take off broken
+            [ ] planet tile scale too big
+            [ ] orbit broken
+            [ ] shield broken
+            [ ] dodge broken
         [...] figure out scales and values that make sense and work with the b2d engine (consider scale of space)
-        [ ] remove old physics stuff and clean up
+            [ ] create unit/body scale helper
+        [...] remove old physics stuff and clean up
+        [ ] test mobile
     https://gamedev.stackexchange.com/questions/23834/how-to-properly-implement-message-handling-in-a-component-based-entity-system
-    [...] fixed time step (necessary for multiplayer?)
+    [x] fixed time step (necessary for multiplayer?)
+        [ ] interpolation
         https://github.com/libgdx/ashley/pull/216
         https://gafferongames.com/post/fix_your_timestep/
         http://gameprogrammingpatterns.com/game-loop.html
@@ -111,7 +122,9 @@
 	https://pvigier.github.io/2018/11/18/fortune-algorithm-details.html
     http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/
     https://leatherbee.org/index.php/2018/10/06/terrain-generation-3-voronoi-diagrams/
-
+    texture and create child bodies from parent:
+        https://www.emanueleferonato.com/2012/01/17/create-real-explosions-with-box2d-adding-textures/
+        https://www.emanueleferonato.com/2012/03/05/breaking-objects-with-box2d-the-realistic-way/
 
 [...] wrap planets properly (LOCAL COORDINATE SPACE?)
     https://www.reddit.com/r/gamedev/comments/1gi6np/magic_carpet_style_infinite_wrapping_terrain/
@@ -321,6 +334,7 @@
 	http://www.alanzucconi.com/2015/07/01/vertex-and-fragment-shaders-in-unity3d/
 	http://www.alanzucconi.com/2016/01/27/arrays-shaders-heatmaps-in-unity3d/
 	http://wwwtyro.net/2016/10/22/2D-space-scene-procgen.html
+    http://www.allpiper.com/2d-selection-outline-shader-in-libgdx/
 
 http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
 

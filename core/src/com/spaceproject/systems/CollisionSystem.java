@@ -8,18 +8,16 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.AIComponent;
-import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.HealthComponent;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
-import com.spaceproject.utility.PolygonUtil;
 import com.spaceproject.utility.ResourceDisposer;
 
 //based off of:
@@ -127,12 +125,12 @@ public class CollisionSystem extends EntitySystem {
                 Vector2 pos = Mappers.transform.get(attackedEntity).pos;
                 Circle c = new Circle(pos, shieldComp.radius);
                 PhysicsComponent physicsComponent = Mappers.physics.get(attackedEntity);
-                if (PolygonUtil.overlaps(physicsComponent.poly, c)) {
+                //if (PolygonUtil.overlaps(physicsComponent.poly, c)) {
                     attackedEntity.remove(ShieldComponent.class);
                     ResourceDisposer.dispose(damageEntity);
                     engine.removeEntity(damageEntity);
                     return;
-                }
+                //}
             }
         }
         
@@ -204,6 +202,7 @@ public class CollisionSystem extends EntitySystem {
     }
     
     public Intersector.MinimumTranslationVector overlaps(PhysicsComponent boundsA, PhysicsComponent boundsB) {
+        /*
         Polygon polyA = boundsA.poly;
         Polygon polyB = boundsB.poly;
         
@@ -213,7 +212,7 @@ public class CollisionSystem extends EntitySystem {
         Intersector.MinimumTranslationVector mtv = new Intersector.MinimumTranslationVector();
         if (Intersector.overlapConvexPolygons(polyA, polyB, mtv))
             return mtv;
-        
+        */
         return null;
     }
     
