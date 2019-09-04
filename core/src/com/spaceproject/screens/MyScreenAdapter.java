@@ -175,7 +175,8 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     
     @Override
     public boolean scrolled(int amount) {
-        setZoomTarget(cam.zoom += amount / 2f);
+        float scrollAmount = amount * cam.zoom / 2;
+        setZoomTarget(cam.zoom += scrollAmount);
         return false;
     }
     
