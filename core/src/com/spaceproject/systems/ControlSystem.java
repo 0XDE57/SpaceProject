@@ -86,7 +86,8 @@ public class ControlSystem extends IteratingSystem {
         
         //make character face mouse/joystick
         float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleFacing, 8f * delta);
-        physicsComp.body.setTransform(physicsComp.body.getPosition(), angle);
+        float impulse = MyMath.getAngularImpule(physicsComp.body, angle, delta);
+        physicsComp.body.applyAngularImpulse(impulse, true);
         
         if (control.moveForward) {
             float walkSpeed = character.walkSpeed * control.movementMultiplier * delta;
@@ -117,7 +118,7 @@ public class ControlSystem extends IteratingSystem {
         barrelRoll(entity, transform, dodgeComp);
         manageShield(entity, control, transform, shield);
         
-        //debug force insta-stop(currently affects all vehicles)
+        //debug force insta-stop
         if (Gdx.input.isKeyJustPressed(Keys.X)) physicsComp.body.setLinearVelocity(0,0);
         if (Gdx.input.isKeyJustPressed(Keys.Z)) physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(physicsComp.body.getLinearVelocity()));
         
@@ -128,14 +129,15 @@ public class ControlSystem extends IteratingSystem {
         
         //make vehicle face angle from mouse/joystick
         float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleFacing, 8f * delta);
-        physicsComp.body.setTransform(physicsComp.body.getPosition(), angle);//TODO: apply a rotational torque? instead of direct setting
-        physicsComp.body.setAwake(true);
+        float impulse = MyMath.getAngularImpule(physicsComp.body, angle, delta);
+        physicsComp.body.applyAngularImpulse(impulse, true);
         
+
         if (control.moveForward) {
-            accelerate(delta, control, transform, physicsComp, vehicle);
+            accelerate(control, physicsComp.body, vehicle, delta);
         }
         if (control.moveBack) {
-            decelerate(delta, transform);
+            decelerate(physicsComp.body, delta);
         }
         
         if (canDodge) {
@@ -159,7 +161,7 @@ public class ControlSystem extends IteratingSystem {
         }
         if (canShoot) {
             GrowCannonComponent growCannon = Mappers.growCannon.get(entity);
-            manageGrowCannon(entity, control, transform, growCannon);
+            manageGrowCannon(entity, control, transform, growCannon, physicsComp.body);
         }
         
         //exit vehicle
@@ -184,32 +186,24 @@ public class ControlSystem extends IteratingSystem {
     }
     
     
-    private static void accelerate(float delta, ControllableComponent control, TransformComponent transform, PhysicsComponent body, VehicleComponent vehicle) {
-        //TODO: implement rest of engine behavior
-        //float maxSpeedMultiplier? on android touch controls make maxSpeed be relative to finger distance so that finger distance determines how fast to go
-        
-        float thrust = vehicle.thrust * control.movementMultiplier;
-        body.body.applyForceToCenter(MyMath.vector(transform.rotation, thrust), true);
-
-        //transform.accel.add(dx,dy);//????
-        
-        //cap speed at max. if maxSpeed set to -1 it's infinite(no cap)
-        if (vehicle.maxSpeed != VehicleComponent.NOLIMIT)
-            transform.velocity.clamp(0, vehicle.maxSpeed);
+    private static void accelerate(ControllableComponent control, Body body, VehicleComponent vehicle, float delta) {
+        float thrust = vehicle.thrust * control.movementMultiplier * delta;
+        body.applyForceToCenter(MyMath.vector(body.getAngle(), thrust), true);
     }
     
-    private static void decelerate(float delta, TransformComponent transform) {
-        int stopThreshold = 20;
+    private static void decelerate(Body body, float delta) {
+        float stopThreshold = 0.2f;
         int minBreakingThrust = 10;
         int maxBreakingThrust = 1500;
-        if (transform.velocity.len() <= stopThreshold) {
+        
+        if (body.getLinearVelocity().len() <= stopThreshold) {
             //completely stop if moving really slowly
-            transform.velocity.set(0, 0);
+            body.setLinearVelocity(0, 0);
         } else {
             //add thrust opposite direction of velocity to slow down ship
-            float thrust = transform.velocity.len();//.clamp(minBreakingThrust, maxBreakingThrust);
-            float angle = transform.velocity.angle();
-            transform.velocity.add(MyMath.vector(angle, thrust * delta));
+            float thrust = body.getLinearVelocity().len() * 20 * delta;//.clamp(minBreakingThrust, maxBreakingThrust);
+            float angle = body.getLinearVelocity().angle();
+            body.applyForceToCenter(MyMath.vector(angle, thrust), true);
         }
     }
     
@@ -516,7 +510,7 @@ public class ControlSystem extends IteratingSystem {
     
     
     //region combat
-    private void manageGrowCannon(Entity entity, ControllableComponent control, TransformComponent transform, GrowCannonComponent growCannon) {
+    private void manageGrowCannon(Entity entity, ControllableComponent control, TransformComponent transform, GrowCannonComponent growCannon, Body body) {
         //TODO: clean up
         if (growCannon == null) {
             return;
@@ -545,8 +539,8 @@ public class ControlSystem extends IteratingSystem {
             
             //release
             if (!control.attack) {
-                Vector2 vec = MyMath.vector(transform.rotation, growCannon.velocity).add(transform.velocity);
-                transformComponent.velocity.set(vec);
+                Vector2 vec = MyMath.vector(transform.rotation, growCannon.velocity).add(body.getLinearVelocity());
+                body.setLinearVelocity(vec);
                 ExpireComponent expire = new ExpireComponent();
                 expire.time = 5;
                 growCannon.projectile.add(expire);

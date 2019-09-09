@@ -90,6 +90,12 @@ public class EntityFactory {
         Entity playerShip = createShip3(x, y, 0, player);
         playerShip.add(new CameraFocusComponent());
         playerShip.add(new ControlFocusComponent());
+        ControllableComponent controllable = new ControllableComponent();
+        controllable.timerVehicle = new SimpleTimer(entitycfg.controlTimerVehicle);
+        controllable.timerDodge = new SimpleTimer(entitycfg.controlTimerDodge);
+        playerShip.add(controllable);
+        
+        
         return playerShip;
     }
     
@@ -466,11 +472,6 @@ public class EntityFactory {
         map.distance = 3000;
         
         
-        ControllableComponent control = new ControllableComponent();
-        control.timerVehicle = new SimpleTimer(entitycfg.controlTimerVehicle);
-        control.timerDodge = new SimpleTimer(entitycfg.controlTimerDodge);
-        
-        
         //add components to entity
         entity.add(health);
         entity.add(cannon);
@@ -479,7 +480,6 @@ public class EntityFactory {
         entity.add(transform);
         entity.add(vehicle);
         entity.add(map);
-        entity.add(control);
         return entity;
     }
     

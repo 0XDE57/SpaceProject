@@ -7,10 +7,6 @@ public class TransformComponent implements Component {
     /* position in world x, y */
     public final Vector2 pos = new Vector2();
     
-    /* velocity is rate of change in x and y */
-    @Deprecated
-    public final Vector2 velocity = new Vector2();
-    
     /* Orientation in radians */
     public float rotation = 0.0f;
     

@@ -255,8 +255,8 @@ public class MiniMap {
             
             String mapString = (int) MyScreenAdapter.cam.position.x + ", " + (int) MyScreenAdapter.cam.position.y;
             if (player != null) {
-                TransformComponent t = Mappers.transform.get(player);
-                String playerInfo = ": " + (int) t.velocity.len() + "";
+                Body body = Mappers.physics.get(player).body;
+                String playerInfo = ": " + MyMath.round(body.getLinearVelocity().len(),1);
                 mapString += playerInfo;
             }
             fontSmall.draw(batch, mapString, textPosX, textPosY - lineHeight);

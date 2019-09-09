@@ -7,15 +7,16 @@
             [x] land take off scale
             [...] take off broken
             [x] planet tile scale too big
-            [ ] orbit broken (sync is fine, not smooth)
+            [x] orbit broken (sync is fine, not smooth)
             [ ] shield broken
             [ ] dodge broken
             [ ] space tile scale bad and tile loading broken
             [ ] fix edge map scaling / icon show hide when near
                 [ ] account for camera zoom
-            [ ] rotation
-                [ ] entity rotation (angleFacing) should probably use angular impulse instead of direct transform manipulation
-                [ ] collision with objects seems to offset body angle from angleFacing? (might be related to above)
+            [x] rotation
+                [x] entity rotation (angleFacing) should probably use angular impulse instead of direct transform manipulation
+                [x] collision with objects seems to offset body angle from angleFacing? (might be related to above)
+                [x] empty vehicles don't seem to rotate freely when contact on a corner? stuck trying to look at angle 0?
         [...] figure out scales and values that make sense and work with the b2d engine (consider scale of space)
             [ ] create unit/body scale helper
         [...] remove old physics stuff and clean up

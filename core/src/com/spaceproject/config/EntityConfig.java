@@ -41,7 +41,7 @@ public class EntityConfig extends Config {
         shipSizeMin = 10;
         shipSizeMax = 36;
         shipHealth = 200;
-        engineThrust = 2;
+        engineThrust = 200;
         cannonSize = 1;
         cannonAmmo = 5;
         cannonDamage = 15;

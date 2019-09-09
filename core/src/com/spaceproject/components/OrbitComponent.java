@@ -2,10 +2,13 @@ package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.math.Vector2;
 
 public class OrbitComponent implements Component {
     //the entity to orbit
     public Entity parent;
+    
+    public final Vector2 velocity = new Vector2();
     
     //angle from parent in radians
     public float angle, startAngle;

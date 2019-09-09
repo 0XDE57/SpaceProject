@@ -28,6 +28,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.OrbitComponent;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.FontFactory;
@@ -266,13 +267,14 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
     private void drawVelocityVectors() {
         for (Entity entity : objects) {
             //get entities position and list of components
-            TransformComponent t = Mappers.transform.get(entity);
-            
-            float scale = 2.0f; //how long to make vectors (higher number is longer line)
-            Vector2 end = MyMath.logVec(t.velocity, scale).add(t.pos);
-            
-            //draw line to represent movement
-            debugVecs.add(new DebugVec(t.pos, end, Color.RED, Color.MAGENTA));
+            PhysicsComponent t = Mappers.physics.get(entity);
+            if (t != null && t.body != null) {
+                float scale = 2.0f; //how long to make vectors (higher number is longer line)
+                Vector2 end = MyMath.logVec(t.body.getLinearVelocity(), scale).add(t.body.getPosition());
+    
+                //draw line to represent movement
+                debugVecs.add(new DebugVec(t.body.getPosition(), end, Color.RED, Color.MAGENTA));
+            }
         }
     }
     
@@ -494,12 +496,12 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
         for (Entity entity : objects) {
             TransformComponent t = Mappers.transform.get(entity);
             
-            String vel = " ~ " + MyMath.round(t.velocity.len(), 1);
-            String info = Math.round(t.pos.x) + "," + Math.round(t.pos.y) + vel;
+            //String vel = " ~ " + MyMath.round(t.velocity.len(), 1);
+            String info = Math.round(t.pos.x) + "," + Math.round(t.pos.y);
             
             Vector3 screenPos = cam.project(new Vector3(t.pos.cpy(), 2));
             debugTexts.add(new DebugText(Integer.toHexString(entity.hashCode()), screenPos.x, screenPos.y));
-            //debugTexts.add(new DebugText(info, screenPos.x, screenPos.y));
+            debugTexts.add(new DebugText(info, screenPos.x, screenPos.y-10));
         }
     }
     

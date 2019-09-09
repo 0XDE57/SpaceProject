@@ -82,7 +82,6 @@ public class FixedPhysicsSystem extends EntitySystem implements IRequireGameCont
             TransformComponent transform = Mappers.transform.get(entity);
             transform.pos.set(physics.body.getPosition());
             transform.rotation = physics.body.getAngle();
-            transform.velocity.set(physics.body.getLinearVelocity());
         }
     }
     

@@ -109,5 +109,18 @@ public class MyMath {
     public static float getFixtureSize(Rectangle aabb) {
         return Math.max(aabb.width, aabb.height);
     }
+ 
     
+    public static float getAngularImpule(Body body, float targetAngle, float delta) {
+        //https://www.iforce2d.net/b2dtut/rotate-to-angle
+        float nextAngle = body.getAngle() + body.getAngularVelocity() * delta;
+        float totalRotation = targetAngle - nextAngle;
+        while (totalRotation < -180 * MathUtils.degRad) totalRotation += 360 * MathUtils.degRad;
+        while (totalRotation >  180 * MathUtils.degRad) totalRotation -= 360 * MathUtils.degRad;
+        float desiredAngularVelocity = totalRotation * 60;
+        float change = 50 * MathUtils.degRad; //max degrees of rotation per time step
+        desiredAngularVelocity = Math.min(change, Math.max(-change, desiredAngularVelocity));
+        float impulse = body.getInertia() * desiredAngularVelocity;
+        return impulse;
+    }
 }

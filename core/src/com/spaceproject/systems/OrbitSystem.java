@@ -13,6 +13,9 @@ import com.spaceproject.utility.MyMath;
 
 public class OrbitSystem extends IteratingSystem {
     
+    private final int syncPosThreshold = 10;
+    private Vector2 tmp = new Vector2();
+    
     public OrbitSystem() {
         super(Family.all(OrbitComponent.class, TransformComponent.class).get());
     }
@@ -30,13 +33,12 @@ public class OrbitSystem extends IteratingSystem {
         
         if (orbit.parent != null) {
             //apply tangential velocity
-            position.velocity.set(orbit.tangentialSpeed, 0).rotateRad(orbit.angle).rotate90(orbit.rotateClockwise ? 1 : -1);
-            
+            orbit.velocity.set(orbit.tangentialSpeed, 0).rotateRad(orbit.angle).rotate90(orbit.rotateClockwise ? 1 : -1);
             
             // calculate exact orbit position
             Vector2 orbitPos = getSyncPos(entity, GameScreen.getGameTimeCurrent());
             //ensure object is not too far from synced location
-            if (!position.pos.epsilonEquals(orbitPos, 10)) {
+            if (!position.pos.epsilonEquals(orbitPos, syncPosThreshold)) {
                 position.pos.set(orbitPos);
             }
             
@@ -48,10 +50,15 @@ public class OrbitSystem extends IteratingSystem {
 						+ ", Parent's Parent is: " + Mappers.astro.get(parentOrbit.parent).classification);
 				*/
                 //TODO: make recursive for sake of child of moon: eg satellite, or more generally infinite nesting
-                position.velocity.add(Mappers.transform.get(orbit.parent).velocity);
+                orbit.velocity.add(Mappers.orbit.get(orbit.parent).velocity);
             }
         }
+    
+        //add velocity to position
+        tmp.set(orbit.velocity).scl(delta);
+        position.pos.add(tmp.x, tmp.y);
     }
+    
     
     public static Vector2 getSyncPos(Entity entity, long time) {
         OrbitComponent orbit = Mappers.orbit.get(entity);
