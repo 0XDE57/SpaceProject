@@ -111,7 +111,7 @@ public class MyMath {
     }
  
     
-    public static float getAngularImpule(Body body, float targetAngle, float delta) {
+    public static float getAngularImpulse(Body body, float targetAngle, float delta) {
         //https://www.iforce2d.net/b2dtut/rotate-to-angle
         float nextAngle = body.getAngle() + body.getAngularVelocity() * delta;
         float totalRotation = targetAngle - nextAngle;

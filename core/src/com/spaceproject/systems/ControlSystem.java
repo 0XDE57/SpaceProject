@@ -86,7 +86,7 @@ public class ControlSystem extends IteratingSystem {
         
         //make character face mouse/joystick
         float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleFacing, 8f * delta);
-        float impulse = MyMath.getAngularImpule(physicsComp.body, angle, delta);
+        float impulse = MyMath.getAngularImpulse(physicsComp.body, angle, delta);
         physicsComp.body.applyAngularImpulse(impulse, true);
         
         if (control.moveForward) {
@@ -129,7 +129,7 @@ public class ControlSystem extends IteratingSystem {
         
         //make vehicle face angle from mouse/joystick
         float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleFacing, 8f * delta);
-        float impulse = MyMath.getAngularImpule(physicsComp.body, angle, delta);
+        float impulse = MyMath.getAngularImpulse(physicsComp.body, angle, delta);
         physicsComp.body.applyAngularImpulse(impulse, true);
         
 
