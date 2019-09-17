@@ -359,8 +359,7 @@ public class ControlSystem extends IteratingSystem {
             PhysicsComponent vehiclePhysics = Mappers.physics.get(vehicle);
             if (playerPhysics.body.getPosition().dst(vehiclePhysics.body.getPosition()) < offsetDist) {
                 
-                //set references
-                Mappers.character.get(characterEntity).vehicle = vehicle;
+                //set reference
                 Mappers.vehicle.get(vehicle).driver = characterEntity;
                 
                 // set focus to vehicle
@@ -442,8 +441,7 @@ public class ControlSystem extends IteratingSystem {
             Gdx.app.log(this.getClass().getSimpleName(), "[Controllable] " + Misc.objString(vehicleEntity) + " -> " + Misc.objString(characterEntity));
         }
         
-        // remove references
-        Mappers.character.get(characterEntity).vehicle = null;
+        // remove reference
         Mappers.vehicle.get(vehicleEntity).driver = null;
         
         // add player back into world

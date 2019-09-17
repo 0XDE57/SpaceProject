@@ -5,7 +5,7 @@
             [x] movement
             [x] collision
             [x] land take off scale
-            [...] take off broken
+            [x] take off broken
             [x] planet tile scale too big
             [x] orbit broken (sync is fine, not smooth)
             [ ] shield broken
@@ -38,8 +38,6 @@
         [ ] WorldRenderingSystem shouldn't be responsible for loading map: loadMap(). should be where?
         [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
             see: ScreenTransitionSystem.syncLoadPosition()
-    [x] bug: shrink sometimes doesn't scale properly or at all
-    [x] bug: velocity when leave planet should match planet
     [...] genericize and make work land and take off work for AI, system doesn't supports non-player world switching
           dumb loop where AI lands on planet, kept in some kind of background
           processing state/alt engine, wait a second then take off to test all is working correctly
@@ -60,8 +58,7 @@
               //move relevant entity from background processing to main
               for each entity in persistenceEngine {
                   if (entity has PersistenceComponent) {
-                      if (
-                      is persistence relevant to new context) {
+                      if (nis persistence relevant to new context) {
                           //example relevance:
                           //player in space, important entity on planet
                           //if land on planet with important entity, load into actual engine

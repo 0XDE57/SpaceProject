@@ -10,15 +10,16 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.kotcrab.vis.ui.VisUI;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
-import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.SysCFG;
 import com.spaceproject.config.SystemsConfig;
 import com.spaceproject.generation.EntityFactory;
@@ -133,7 +134,8 @@ public class GameScreen extends MyScreenAdapter {
         Entity ship = transitioningEntity;
         int mapSize = planet.getComponent(PlanetComponent.class).mapSize;
         int position = mapSize * SpaceProject.worldcfg.tileSize / 2;//set position to middle of planet
-        ship.getComponent(TransformComponent.class).pos.set(position, position);
+        Body body = ship.getComponent(PhysicsComponent.class).body;
+        body.setTransform(position, position, body.getAngle());
         engine.addEntity(ship);
     }
     //endregion

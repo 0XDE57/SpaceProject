@@ -7,9 +7,11 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AstronomicalComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
@@ -133,7 +135,12 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         PhysicsComponent physics = Mappers.physics.get(entity);
         if (physics != null) {
             // freeze movement during animation
-            physics.body.setLinearVelocity(0, 0);
+            OrbitComponent orbit = Mappers.orbit.get(screenTrans.planet);
+            if (orbit != null) {
+                physics.body.setLinearVelocity(orbit.velocity);
+            } else {
+                physics.body.setLinearVelocity(0, 0);
+            }
             
             if (screenTrans.rotation == 0.0f) {
                 screenTrans.rotation = MathUtils.random(0.01f, -0.01f);
@@ -164,7 +171,10 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         PhysicsComponent physics = Mappers.physics.get(entity);
         if (physics != null) {
             //match planet vel
-            //transform.velocity.set(screenTrans.planet.getComponent(TransformComponent.class).velocity);
+            OrbitComponent orbit = Mappers.orbit.get(screenTrans.planet);
+            if (orbit != null) {
+                physics.body.setLinearVelocity(orbit.velocity);
+            }
             
             if (screenTrans.rotation == 0.0f) {
                 screenTrans.rotation = MathUtils.random(0.01f, -0.01f);
@@ -239,12 +249,15 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         sprite3D.renderable.scale.set(screenTrans.initialScale, screenTrans.initialScale, screenTrans.initialScale);
         
+        Mappers.physics.get(entity).body.setLinearVelocity(0, 0);
+        
         gameContext.switchScreen(entity, screenTrans.planet);
     }
     
     private void takeOff(GameScreen gameContext, Entity entity, ScreenTransitionComponent screenTrans) {
         //set size to 0 so texture can grow
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
+        screenTrans.initialScale = sprite3D.renderable.scale.x;
         sprite3D.renderable.scale.set(0, 0, 0);
     
         MyScreenAdapter.setZoomTarget(0);
@@ -262,7 +275,13 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         for (Entity astroEnt : astroObjects) {
             if (Mappers.seed.get(astroEnt).seed == desiredSeed) {
                 Vector2 orbitPos = OrbitSystem.getSyncPos(astroEnt, GameScreen.getGameTimeCurrent());
-                Mappers.transform.get(entity).pos.set(orbitPos);
+                Body body = Mappers.physics.get(entity).body;
+                body.setTransform(orbitPos, body.getAngle());
+                OrbitComponent orbit = Mappers.orbit.get(entity);
+                if (orbit != null) {
+                    body.setLinearVelocity(orbit.velocity);
+                }
+                
                 nextStage(screenTrans);
                 Gdx.app.log(this.getClass().getSimpleName(), "FOUND SEED " + desiredSeed);
                 break;
