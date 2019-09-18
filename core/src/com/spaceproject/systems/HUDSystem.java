@@ -33,9 +33,9 @@ import com.spaceproject.ui.MapState;
 import com.spaceproject.ui.Menu;
 import com.spaceproject.ui.MiniMap;
 import com.spaceproject.ui.TransitionOverlay;
+import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.IRequireGameContext;
 
 
 public class HUDSystem extends EntitySystem implements IRequireGameContext {
@@ -302,14 +302,16 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext {
      * TODO: load star mapState markers based on point list instead of star entity for stars that aren't loaded yet
      */
     private void drawEdgeMap() {
+        //TODO: marker size should not be linear, probably log?
         //TODO: move these values into MapComponent or a config file
         float markerSmall = 3.5f; //min marker size
         float markerLarge = 8; //max marker size
-        float distSmall = 8000; //distance when marker is small
-        float distLarge = 2000; //distance when marker is large
-        //gain and offset for transfer function: mapState [3.5 - 8] to [8000 - 2000]
+        float distSmall = 800; //distance when marker is small
+        float distLarge = 2; //distance when marker is large
+        //gain and offset for transfer function: mapState [3.5 - 8] to [800 - 2]
         double gain = (markerSmall - markerLarge) / (distSmall - distLarge);
         double offset = markerSmall - gain * distSmall;
+        
         
         int padding = (int) (markerLarge + 4); //how close to draw from edge of screen (in pixels)
         int width = Gdx.graphics.getWidth();
@@ -327,7 +329,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext {
             shape.line(padding, padding, width - padding, padding);//bottom
             shape.line(padding, height - padding, width - padding, height - padding);//top
         }
-        
+    
+        Vector3 topLeft = cam.unproject(new Vector3(0, 0, 0));
+        Vector3 bottomRight = cam.unproject(new Vector3(width, height, 0));
+
         for (Entity mapable : mapableObjects) {
             MapComponent map = Mappers.map.get(mapable);
             Vector3 screenPos = new Vector3(Mappers.transform.get(mapable).pos.cpy(), 0);
@@ -336,17 +341,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext {
                 continue;
             }
             
+            if (screenPos.x > topLeft.x && screenPos.x < bottomRight.x
+                    && screenPos.y < topLeft.y && screenPos.y > bottomRight.y) {
+                continue;
+            }
+            
             //set entity co'ords relative to center of screen
             screenPos.x -= MyScreenAdapter.cam.position.x;
             screenPos.y -= MyScreenAdapter.cam.position.y;
             
-            //skip on screen entities
-            //TODO: take camera zoom into account, calculate viewport coords
-            int z = 100; //how close to edge of screen to ignore
-            if (screenPos.x + z > -centerX && screenPos.x - z < centerX
-                    && screenPos.y + z > -centerY && screenPos.y - z < centerY) {
-                continue;
-            }
             
             //position to draw marker
             float markerX, markerY;

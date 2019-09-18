@@ -193,15 +193,13 @@ public class ControlSystem extends IteratingSystem {
     
     private static void decelerate(Body body, float delta) {
         float stopThreshold = 0.2f;
-        int minBreakingThrust = 10;
-        int maxBreakingThrust = 1500;
         
         if (body.getLinearVelocity().len() <= stopThreshold) {
             //completely stop if moving really slowly
             body.setLinearVelocity(0, 0);
         } else {
             //add thrust opposite direction of velocity to slow down ship
-            float thrust = body.getLinearVelocity().len() * 20 * delta;//.clamp(minBreakingThrust, maxBreakingThrust);
+            float thrust = body.getLinearVelocity().len() * 20 * delta;
             float angle = body.getLinearVelocity().angle();
             body.applyForceToCenter(MyMath.vector(angle, thrust), true);
         }
