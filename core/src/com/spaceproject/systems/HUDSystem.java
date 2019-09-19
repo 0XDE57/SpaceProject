@@ -13,7 +13,10 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -26,6 +29,7 @@ import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.ShieldComponent;
+import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
@@ -300,18 +304,14 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext {
     /**
      * Mark off-screen objects on edge of screen for navigation.
      * TODO: load star mapState markers based on point list instead of star entity for stars that aren't loaded yet
+     * TODO: move these values into MapComponent or a config file
+     * TODO: give map components their own interp? eg : star lerp grows faster than small objects
      */
     private void drawEdgeMap() {
-        //TODO: marker size should not be linear, probably log?
-        //TODO: move these values into MapComponent or a config file
         float markerSmall = 3.5f; //min marker size
         float markerLarge = 8; //max marker size
-        float distSmall = 800; //distance when marker is small
-        float distLarge = 2; //distance when marker is large
-        //gain and offset for transfer function: mapState [3.5 - 8] to [800 - 2]
-        double gain = (markerSmall - markerLarge) / (distSmall - distLarge);
-        double offset = markerSmall - gain * distSmall;
-        
+        float distSmall = 600; //distance when marker is small
+        float distLarge = 150; //distance when marker is large
         
         int padding = (int) (markerLarge + 4); //how close to draw from edge of screen (in pixels)
         int width = Gdx.graphics.getWidth();
@@ -335,14 +335,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext {
 
         for (Entity mapable : mapableObjects) {
             MapComponent map = Mappers.map.get(mapable);
-            Vector3 screenPos = new Vector3(Mappers.transform.get(mapable).pos.cpy(), 0);
+            Vector2 pos = Mappers.transform.get(mapable).pos.cpy();
+            Vector3 screenPos = new Vector3(pos, 0);
             
             if (screenPos.dst(MyScreenAdapter.cam.position) > map.distance) {
                 continue;
             }
             
-            if (screenPos.x > topLeft.x && screenPos.x < bottomRight.x
-                    && screenPos.y < topLeft.y && screenPos.y > bottomRight.y) {
+            if (pos.x > topLeft.x && pos.x < bottomRight.x
+                    && pos.y < topLeft.y && pos.y > bottomRight.y) {
                 continue;
             }
             
@@ -383,14 +384,18 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext {
             markerY += centerY;
             
             //calculate size of marker based on distance
-            float dist = MyMath.distance(screenPos.x, screenPos.y, centerX, centerY);
-            double size = gain * dist + offset;
-            if (size < markerSmall) size = markerSmall;
-            if (size > markerLarge) size = markerLarge;
+            TextureComponent tex = Mappers.texture.get(mapable);
+            float dist = MyMath.distance(pos.x, pos.y, cam.position.x, cam.position.y);
+            if (tex != null) {
+                dist -= Math.max(tex.texture.getWidth(), tex.texture.getHeight()) / 2.0f * tex.scale;
+            }
+            float distClamp = MathUtils.clamp((dist-distLarge)/(distSmall-distLarge), 0, 1);
+            float sizeInterp = Interpolation.pow3In.apply(1-distClamp);
+            float size = MathUtils.clamp((sizeInterp * (markerLarge-markerSmall)) + markerSmall, markerSmall, markerLarge);
             
             //draw marker
             shape.setColor(map.color);
-            shape.circle(markerX, markerY, (float) size);
+            shape.circle(markerX, markerY, size);
 			
 			/*
 			switch(mapState.shape) {

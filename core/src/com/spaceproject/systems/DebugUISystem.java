@@ -208,7 +208,6 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
     
     
     private void updateKeyToggles() {
-        //todo: kill this off and / or make relevant ui options
         
         //toggle debug
         if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleDebug)) {

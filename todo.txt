@@ -6,7 +6,7 @@
             [ ] shield broken
             [ ] dodge broken
             [ ] space tile scale bad and tile loading broken
-            [...] fix edge map scaling / icon show hide when near
+            [x] fix edge map scaling / icon show hide when near
                 [x] account for camera zoom
         [...] figure out scales and values that make sense and work with the b2d engine (consider scale of space)
             [ ] create unit/body scale helper
