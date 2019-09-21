@@ -38,11 +38,12 @@ import com.spaceproject.ui.Menu;
 import com.spaceproject.ui.MiniMap;
 import com.spaceproject.ui.TransitionOverlay;
 import com.spaceproject.utility.IRequireGameContext;
+import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 
 
-public class HUDSystem extends EntitySystem implements IRequireGameContext {
+public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener {
     
     private Stage stage;
     private Menu menu;
@@ -305,7 +306,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext {
      * Mark off-screen objects on edge of screen for navigation.
      * TODO: load star mapState markers based on point list instead of star entity for stars that aren't loaded yet
      * TODO: move these values into MapComponent or a config file
-     * TODO: give map components their own interp? eg : star lerp grows faster than small objects
      */
     private void drawEdgeMap() {
         float markerSmall = 3.5f; //min marker size
@@ -426,10 +426,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext {
         return transitionOverlay;
     }
     
+    @Override
     public void resize(int width, int height) {
         menu.setSize(Gdx.graphics.getWidth() - 150, Gdx.graphics.getHeight() - 150);
         stage.getViewport().update(width, height, true);
         
         miniMap.updateMapPosition();
     }
+    
 }

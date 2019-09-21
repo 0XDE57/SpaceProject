@@ -39,7 +39,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     private static float zoomSpeed = 3;
     //private static float panSpeed/panTarget(lerp to entity)
     
-    protected InputMultiplexer inputMultiplexer;
+    private InputMultiplexer inputMultiplexer;
     
     public MyScreenAdapter() {
         Gdx.app.log(this.getClass().getSimpleName(), "ScreenAdapter Reset.");
@@ -165,6 +165,11 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
      */
     public static void setZoomTarget(float zoom) {
         zoomTarget = zoom;
+    }
+    
+    public static void resetCamera() {
+        cam.zoom = 1;
+        setZoomTarget(1);
     }
     
     @Override

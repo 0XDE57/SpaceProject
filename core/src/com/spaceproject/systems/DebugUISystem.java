@@ -38,6 +38,7 @@ import com.spaceproject.ui.DebugEngineWindow;
 import com.spaceproject.utility.DebugText;
 import com.spaceproject.utility.DebugVec;
 import com.spaceproject.utility.IRequireGameContext;
+import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
@@ -46,7 +47,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class DebugUISystem extends IteratingSystem implements IRequireGameContext, Disposable {
+public class DebugUISystem extends IteratingSystem implements IRequireGameContext, IScreenResizeListener, Disposable {
     
     private Engine engine;
     private Stage stage;
@@ -567,6 +568,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
         return stage;
     }
     
+    @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }

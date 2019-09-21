@@ -26,10 +26,10 @@ import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.Universe;
 import com.spaceproject.generation.noise.NoiseManager;
-import com.spaceproject.systems.DebugUISystem;
 import com.spaceproject.systems.HUDSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.ui.MapState;
+import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.ResourceDisposer;
@@ -52,6 +52,7 @@ public class GameScreen extends MyScreenAdapter {
     public static NoiseManager noiseManager;
     
     private ShaderProgram shader = null;
+    
     
     
     public GameScreen(boolean inSpace) {
@@ -131,12 +132,13 @@ public class GameScreen extends MyScreenAdapter {
         
         
         // add player
-        Entity ship = transitioningEntity;
         int mapSize = planet.getComponent(PlanetComponent.class).mapSize;
         int position = mapSize * SpaceProject.worldcfg.tileSize / 2;//set position to middle of planet
-        Body body = ship.getComponent(PhysicsComponent.class).body;
+        Body body = transitioningEntity.getComponent(PhysicsComponent.class).body;
         body.setTransform(position, position, body.getAngle());
-        engine.addEntity(ship);
+        //body.setAngularDamping(30);
+        //body.setLinearDamping(45);
+        engine.addEntity(transitioningEntity);
     }
     //endregion
     
@@ -199,8 +201,7 @@ public class GameScreen extends MyScreenAdapter {
             //if going to space, and relevantEntity in space, add to engine, remove from backgroundEngine
         }*/
     
-        cam.zoom = 1;
-        setZoomTarget(1);
+        resetCamera();
     }
     
     
@@ -217,15 +218,10 @@ public class GameScreen extends MyScreenAdapter {
     public void resize(int width, int height) {
         super.resize(width, height);
         
-        //todo: fire resize event for systems to subscribe to
-        HUDSystem hud = engine.getSystem(HUDSystem.class);
-        if (hud != null) {
-            hud.resize(width, height);
-        }
-        
-        DebugUISystem debugUISystem = engine.getSystem(DebugUISystem.class);
-        if (debugUISystem != null) {
-            debugUISystem.resize(width, height);
+        for (EntitySystem system : engine.getSystems()) {
+            if (system instanceof IScreenResizeListener) {
+                ((IScreenResizeListener) system).resize(width, height);
+            }
         }
     }
     
