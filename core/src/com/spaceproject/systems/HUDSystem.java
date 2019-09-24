@@ -91,7 +91,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         killableEntities = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(ControlFocusComponent.class).get());
         
         
-        menu = new Menu(false, engine);
+        menu = new Menu(false);
         
         stage.addListener(new InputListener() {
             @Override

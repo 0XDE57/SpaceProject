@@ -30,6 +30,8 @@ import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.config.DebugConfig;
+import com.spaceproject.config.KeyConfig;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.GameScreen;
@@ -48,6 +50,7 @@ import java.util.Set;
 
 public class DebugSystem extends IteratingSystem implements IRequireGameContext, IScreenResizeListener, Disposable {
     
+    private DebugConfig debugCFG;
     private Engine engine;
     private Stage stage;
     private DebugEngineWindow engineView;
@@ -70,27 +73,10 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
     public static ArrayList<DebugText> debugTexts = new ArrayList<DebugText>();
     public static ArrayList<DebugVec> debugVecs = new ArrayList<DebugVec>();
     
-    //config
-    private boolean drawDebugUI = true;
-    public boolean drawFPS = true, drawExtraInfo = true;
-    public boolean drawComponentList = false;
-    public boolean drawPos = false;
-    public boolean box2DDebugRender = true;
-    public boolean drawBodies = true;
-    public boolean drawJoints = true;
-    public boolean drawAABBs = true;
-    public boolean drawInactiveBodies = true;
-    public boolean drawVelocities = true;
-    public boolean drawContacts = true;
-    public boolean drawOrbitPath = false;
-    public boolean drawVectors = false;
-    public boolean drawMousePos = false;
-    public boolean drawEntityList = false;
-    
     
     public DebugSystem() {
         super(Family.all(TransformComponent.class).get());
-        
+        debugCFG = SpaceProject.debugCFG;
         cam = GameScreen.cam;
         batch = GameScreen.batch;
         shape = GameScreen.shape;
@@ -98,7 +84,7 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         fontLarge = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 20);
         objects = new Array<>();
     
-        debugRenderer = new Box2DDebugRenderer(drawBodies, drawJoints, drawAABBs, drawInactiveBodies, drawVelocities,  drawContacts);
+        debugRenderer = new Box2DDebugRenderer(debugCFG.drawBodies, debugCFG.drawJoints, debugCFG.drawAABBs, debugCFG.drawInactiveBodies, debugCFG.drawVelocities, debugCFG.drawContacts);
         
         stage = new Stage(new ScreenViewport());
     }
@@ -154,7 +140,7 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         stage.draw();
         
         //don't update if we aren't drawing
-        if (!drawDebugUI) return;
+        if (!debugCFG.drawDebugUI) return;
         super.update(delta);
         
         //set projection matrix so things render using correct coordinates
@@ -164,16 +150,16 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         
         
         //draw vector to visualize speed and direction
-        if (drawVectors) drawVelocityVectors();
+        //if (debugCFG.drawVectors) drawVelocityVectors();
         
         
         shape.begin(ShapeType.Line);
         {
             // draw ring to visualize orbit path
-            if (drawOrbitPath)
+            if (debugCFG.drawOrbitPath)
                 drawOrbitPath(true);
             
-            if (drawMousePos)
+            if (debugCFG.drawMousePos)
                 drawMouseLine();
             
             drawDebugVectors();
@@ -182,20 +168,20 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         
         
         //draw frames per second and entity count
-        if (drawFPS) drawFPS(drawExtraInfo);
+        if (debugCFG.drawFPS) drawFPS(debugCFG.drawExtraInfo);
         
         //draw entity position
-        if (drawPos) drawPos();
+        if (debugCFG.drawPos) drawPos();
         
-        if (drawMousePos) drawMousePos();
+        if (debugCFG.drawMousePos) drawMousePos();
         
-        if (drawEntityList) drawEntityList();
+        if (debugCFG.drawEntityList) drawEntityList();
         
         batch.begin();
         {
             
             //draw components on entity
-            if (drawComponentList)
+            if (debugCFG.drawComponentList)
                 drawComponentList();
             
             
@@ -203,7 +189,7 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         }
         batch.end();
     
-        if (box2DDebugRender)
+        if (debugCFG.box2DDebugRender)
             debugRenderer.render(GameScreen.world, GameScreen.cam.combined);
         
         
@@ -212,55 +198,64 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
     
     
     private void updateKeyToggles() {
+        KeyConfig keyCFG = SpaceProject.keyCFG;
         
         //toggle debug
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleDebug)) {
-            drawDebugUI = !drawDebugUI;
-            Gdx.app.log(this.getClass().getSimpleName(), "DEBUG UI: " + drawDebugUI);
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleDebug)) {
+            debugCFG.drawDebugUI = !debugCFG.drawDebugUI;
+            Gdx.app.log(this.getClass().getSimpleName(), "DEBUG UI: " + debugCFG.drawDebugUI);
         }
         
         //toggle pos
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.togglePos)) {
-            drawPos = !drawPos;
-            if (drawComponentList) {
-                drawComponentList = false;
+        if (Gdx.input.isKeyJustPressed(keyCFG.togglePos)) {
+            debugCFG.drawPos = !debugCFG.drawPos;
+            if (debugCFG.drawComponentList) {
+                debugCFG.drawComponentList = false;
             }
-            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw pos: " + drawPos);
+            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw pos: " + debugCFG.drawPos);
         }
         
         //toggle components
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleComponents)) {
-            drawComponentList = !drawComponentList;
-            if (drawPos) {
-                drawPos = false;
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleComponents)) {
+            debugCFG.drawComponentList = !debugCFG.drawComponentList;
+            if (debugCFG.drawPos) {
+                debugCFG.drawPos = false;
             }
-            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw component list: " + drawComponentList);
+            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw component list: " + debugCFG.drawComponentList);
         }
         
         //toggle bounds
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleBounds)) {
-            box2DDebugRender = !box2DDebugRender;
-            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw bounds: " + box2DDebugRender);
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleBounds)) {
+            debugCFG.box2DDebugRender = !debugCFG.box2DDebugRender;
+            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw bounds: " + debugCFG.box2DDebugRender);
         }
         
         //toggle fps
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleFPS)) {
-            drawFPS = !drawFPS;
-            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw FPS: " + drawFPS);
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleFPS)) {
+            debugCFG.drawFPS = !debugCFG.drawFPS;
+            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw FPS: " + debugCFG.drawFPS);
         }
         
         //toggle orbit circle
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleOrbit)) {
-            drawOrbitPath = !drawOrbitPath;
-            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw orbit path: " + drawOrbitPath);
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleOrbit)) {
+            debugCFG.drawOrbitPath = !debugCFG.drawOrbitPath;
+            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw orbit path: " + debugCFG.drawOrbitPath);
         }
         
         //toggle vector
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleVector)) {
-            drawVectors = !drawVectors;
-            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw vectors: " + drawVectors);
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleVector)) {
+            debugCFG.drawVelocities = !debugCFG.drawVelocities;
+            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw vectors: " + debugCFG.drawVelocities);
         }
-
+        
+        
+        debugRenderer.setDrawVelocities(debugCFG.drawVelocities);
+        debugRenderer.setDrawBodies(debugCFG.drawBodies);
+        debugRenderer.setDrawJoints(debugCFG.drawJoints);
+        debugRenderer.setDrawAABBs(debugCFG.drawAABBs);
+        debugRenderer.setDrawInactiveBodies(debugCFG.drawInactiveBodies);
+        debugRenderer.setDrawVelocities(debugCFG.drawVelocities);
+        debugRenderer.setDrawContacts(debugCFG.drawContacts);
     }
     
     
@@ -285,6 +280,8 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
      * Draw orbit path, a ring to visualize objects orbit
      */
     private void drawOrbitPath(boolean showSyncedPos) {
+        Color orbitSyncPosColor = new Color(1, 0, 0, 1);
+        Color orbitObjectColor = new Color(1, 1, 1, 1);
         
         for (Entity entity : objects) {
             
@@ -296,14 +293,16 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
                     TransformComponent parentPos = Mappers.transform.get(orbit.parent);
                     
                     if (showSyncedPos) {
+                        //synced orbit position (where the object should be)
                         Vector2 orbitPos = OrbitSystem.getSyncPos(entity, GameScreen.getGameTimeCurrent());
-                        shape.setColor(1, 0, 0, 1);
-                        shape.line(parentPos.pos.x, parentPos.pos.y, orbitPos.x, orbitPos.y);//synced orbit position (where the object should be)
+                        shape.setColor(orbitSyncPosColor);
+                        shape.line(parentPos.pos.x, parentPos.pos.y, orbitPos.x, orbitPos.y);
                     }
                     
-                    shape.setColor(1f, 1f, 1, 1);
+                    //actual position
+                    shape.setColor(orbitObjectColor);
                     shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
-                    shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);//actual position
+                    shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
                 }
                 
                 TextureComponent tex = Mappers.texture.get(entity);
@@ -329,7 +328,7 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         //fps
         int fps = Gdx.graphics.getFramesPerSecond();
         debugTexts.add(new DebugText(Integer.toString(fps), x, y,
-                fps > 45 ? Color.WHITE : fps > 30 ? Color.YELLOW : Color.RED, fontLarge));
+                fps > 60 ? Color.SKY : fps > 45 ? Color.WHITE : fps > 30 ? Color.YELLOW : Color.RED, fontLarge));
         
         if (drawExtraInfo) {
             //camera position
@@ -462,7 +461,7 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
             //String vel = " ~ " + MyMath.round(t.velocity.len(), 1);
             String info = Math.round(t.pos.x) + "," + Math.round(t.pos.y);
             
-            Vector3 screenPos = cam.project(new Vector3(t.pos.cpy(), 2));
+            Vector3 screenPos = cam.project(new Vector3(t.pos.cpy(), 0));
             debugTexts.add(new DebugText(Integer.toHexString(entity.hashCode()), screenPos.x, screenPos.y));
             debugTexts.add(new DebugText(info, screenPos.x, screenPos.y-10));
         }
@@ -480,10 +479,12 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
     
     private void drawMouseLine() {
         int crossHairSize = 32;
+        Color mouseLineColor = Color.BLACK;
+        
         int x = Gdx.input.getX();
         int y = Gdx.input.getY();
         Vector3 worldPos = cam.unproject(new Vector3(x, y, 0));
-        shape.setColor(Color.BLACK);
+        shape.setColor(mouseLineColor);
         shape.line(worldPos.x, worldPos.y + crossHairSize, worldPos.x, worldPos.y - crossHairSize);
         shape.line(worldPos.x + crossHairSize, worldPos.y, worldPos.x - crossHairSize, worldPos.y);
     }

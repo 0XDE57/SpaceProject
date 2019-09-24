@@ -4,6 +4,7 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.spaceproject.config.CelestialConfig;
+import com.spaceproject.config.DebugConfig;
 import com.spaceproject.config.EntityConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.config.MiniMapConfig;
@@ -29,6 +30,7 @@ public class SpaceProject extends Game {
     public static UIConfig uiCFG;
     public static KeyConfig keyCFG;
     public static MiniMapConfig miniMapCFG;
+    public static DebugConfig debugCFG;
     
     
     @Override
@@ -37,44 +39,38 @@ public class SpaceProject extends Game {
         
         isMobile = Gdx.app.getType() != Application.ApplicationType.Desktop;
         
-        //load values for things like key mapping, settings, default values for generation
         loadConfigs();
-        
         
         setScreen(new TitleScreen(this));
     }
     
+    
     private static void loadConfigs() {
         systemsCFG = new SystemsConfig();
         systemsCFG.loadDefault();
-        //systemsConfig = (SystemsConfig) new SystemsConfig().loadFromJson();
-        //systemsConfig.saveToJson();
-        
         
         entityCFG = new EntityConfig();
         entityCFG.loadDefault();
         
-        
-        //keycfg = (KeyConfig) new KeyConfig().loadFromJson();
         keyCFG = new KeyConfig();
         keyCFG.loadDefault();
         
-        
-        //celestcfg = (CelestialConfig) new CelestialConfig().loadFromJson();
         celestCFG = new CelestialConfig();
         celestCFG.loadDefault();
-        
         
         worldCFG = new WorldConfig();
         worldCFG.loadDefault();
         
-        
         uiCFG = new UIConfig();
         uiCFG.loadDefault();
         
+        miniMapCFG = new MiniMapConfig();
+        miniMapCFG.loadDefault();
         
-        miniMapCFG = (MiniMapConfig)new MiniMapConfig().loadFromJson();
+        debugCFG = new DebugConfig();
+        debugCFG.loadDefault();
     }
+    
     
     public static boolean isMobile() {
         return isMobile;

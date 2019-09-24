@@ -1,7 +1,6 @@
 package com.spaceproject.ui;
 
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -32,8 +31,8 @@ import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPane;
 import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPaneAdapter;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.Config;
+import com.spaceproject.config.DebugConfig;
 import com.spaceproject.screens.TitleScreen;
-import com.spaceproject.systems.DebugSystem;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -49,7 +48,8 @@ public class Menu extends VisWindow {
     
     private boolean alwaysHideOnEscape = false;
     
-    public Menu(boolean vertical, Engine engine) {
+    
+    public Menu(boolean vertical) {
         super(SpaceProject.TITLE + "    (" + SpaceProject.VERSION + ")");
         getTitleLabel().setAlignment(Align.center);
         
@@ -121,7 +121,7 @@ public class Menu extends VisWindow {
         tabbedPane.add(placeholderBTab);
         
         
-        debugMenuTab = createDebugMenu(engine);
+        debugMenuTab = createDebugMenu();
         tabbedPane.add(debugMenuTab);
         
         
@@ -275,18 +275,15 @@ public class Menu extends VisWindow {
         return test;
     }
     
-    private HotKeyTab createDebugMenu(final Engine engine) {
+    private HotKeyTab createDebugMenu() {
         HotKeyTab debugTab = new HotKeyTab("Debug", Input.Keys.F4);
-        
+        final DebugConfig debugCFG = SpaceProject.debugCFG;
         
         final CheckBox toggleComponentList = new CheckBox("show components", VisUI.getSkin());
         toggleComponentList.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugSystem debug = engine.getSystem(DebugSystem.class);
-                if (debug != null) {
-                    debug.drawComponentList = toggleComponentList.isChecked();
-                }
+                debugCFG.drawComponentList = toggleComponentList.isChecked();
             }
         });
         
@@ -295,10 +292,7 @@ public class Menu extends VisWindow {
         togglePos.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugSystem debug = engine.getSystem(DebugSystem.class);
-                if (debug != null) {
-                    debug.drawPos = togglePos.isChecked();
-                }
+                debugCFG.drawPos = togglePos.isChecked();
             }
         });
         
@@ -307,10 +301,7 @@ public class Menu extends VisWindow {
         toggleBounds.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugSystem debug = engine.getSystem(DebugSystem.class);
-                if (debug != null) {
-                    debug.box2DDebugRender = toggleBounds.isChecked();
-                }
+                debugCFG.box2DDebugRender = toggleBounds.isChecked();
             }
         });
         
@@ -318,10 +309,7 @@ public class Menu extends VisWindow {
         toggleOrbitPath.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugSystem debug = engine.getSystem(DebugSystem.class);
-                if (debug != null) {
-                    debug.drawOrbitPath = toggleOrbitPath.isChecked();
-                }
+                debugCFG.drawOrbitPath = toggleOrbitPath.isChecked();
             }
         });
         
@@ -330,10 +318,7 @@ public class Menu extends VisWindow {
         toggleVectors.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugSystem debug = engine.getSystem(DebugSystem.class);
-                if (debug != null) {
-                    debug.drawVectors = toggleVectors.isChecked();
-                }
+                debugCFG.drawVelocities = toggleVectors.isChecked();
             }
         });
         
@@ -342,10 +327,7 @@ public class Menu extends VisWindow {
         toggleMousePos.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugSystem debug = engine.getSystem(DebugSystem.class);
-                if (debug != null) {
-                    debug.drawMousePos = toggleMousePos.isChecked();
-                }
+                debugCFG.drawMousePos = toggleMousePos.isChecked();
             }
         });
         
@@ -354,10 +336,7 @@ public class Menu extends VisWindow {
         toggleFPS.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugSystem debug = engine.getSystem(DebugSystem.class);
-                if (debug != null) {
-                    debug.drawFPS = toggleFPS.isChecked();
-                }
+                debugCFG.drawFPS = toggleFPS.isChecked();
             }
         });
         
@@ -365,10 +344,7 @@ public class Menu extends VisWindow {
         toggleExtraInfo.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugSystem debug = engine.getSystem(DebugSystem.class);
-                if (debug != null) {
-                    debug.drawExtraInfo = toggleExtraInfo.isChecked();
-                }
+                debugCFG.drawExtraInfo = toggleExtraInfo.isChecked();
             }
         });
         
@@ -376,10 +352,7 @@ public class Menu extends VisWindow {
         toggleEntityList.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugSystem debug = engine.getSystem(DebugSystem.class);
-                if (debug != null) {
-                    debug.drawEntityList = toggleEntityList.isChecked();
-                }
+                debugCFG.drawEntityList = toggleEntityList.isChecked();
             }
         });
         
