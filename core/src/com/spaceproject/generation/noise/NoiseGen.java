@@ -106,7 +106,7 @@ public class NoiseGen {
     
     public static int[][] createPixelatedTileMap(int[][] tileMap, ArrayList<Tile> tiles) {
         
-        int chunkSize = SpaceProject.worldcfg.chunkSize;
+        int chunkSize = SpaceProject.worldCFG.chunkSize;
         int chunks = tileMap.length / chunkSize;
         int[][] pixelatedMap = new int[chunks][chunks];
         

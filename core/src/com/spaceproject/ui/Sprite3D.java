@@ -44,8 +44,8 @@ public class Sprite3D extends Renderable implements Disposable {
                 //,FloatAttribute.createAlphaTest(0.5f)
         );
         
-        float scaledWidth = front.getWidth() * SpaceProject.entitycfg.renderScale;
-        float scaledHeight = front.getHeight() * SpaceProject.entitycfg.renderScale;
+        float scaledWidth = front.getWidth() * SpaceProject.entityCFG.renderScale;
+        float scaledHeight = front.getHeight() * SpaceProject.entityCFG.renderScale;
         front.setSize(scaledWidth, scaledHeight);
         back.setSize(scaledWidth, scaledHeight);
         

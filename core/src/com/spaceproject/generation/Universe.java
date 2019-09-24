@@ -34,11 +34,11 @@ public class Universe {
         Array<Vector2> points = new Array<Vector2>();
         
         // how many stars TRY to create(does not guarantee this many points will actually be generated)
-        int numStars = SpaceProject.celestcfg.numPoints;
+        int numStars = SpaceProject.celestCFG.numPoints;
         // range from origin(0,0) to create points
-        int genRange = SpaceProject.celestcfg.pointGenRange;
+        int genRange = SpaceProject.celestCFG.pointGenRange;
         // minimum distance between points
-        float dist = SpaceProject.celestcfg.minPointDistance;
+        float dist = SpaceProject.celestCFG.minPointDistance;
         dist *= dist;//squared for dst2
         
         // generate points

@@ -45,32 +45,32 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor, 
         
         //movement
         control.movementMultiplier = 1; // set multiplier to full power because a key switch is on or off
-        if (keycode == SpaceProject.keycfg.forward) {
+        if (keycode == SpaceProject.keyCFG.forward) {
             control.moveForward = keyDown;
             handled = true;
         }
-        if (keycode == SpaceProject.keycfg.right) {
+        if (keycode == SpaceProject.keyCFG.right) {
             control.moveRight = keyDown;
             handled = true;
         }
-        if (keycode == SpaceProject.keycfg.left) {
+        if (keycode == SpaceProject.keyCFG.left) {
             control.moveLeft = keyDown;
             handled = true;
         }
-        if (keycode == SpaceProject.keycfg.back) {
+        if (keycode == SpaceProject.keyCFG.back) {
             control.moveBack = keyDown;
             handled = true;
         }
         
-        if (keycode == SpaceProject.keycfg.defend) {
+        if (keycode == SpaceProject.keyCFG.defend) {
             control.defend = keyDown;
             handled = true;
         }
-        if (keycode == SpaceProject.keycfg.changeVehicle) {
+        if (keycode == SpaceProject.keyCFG.changeVehicle) {
             control.changeVehicle = keyDown;
             handled = true;
         }
-        if (keycode == SpaceProject.keycfg.land) {
+        if (keycode == SpaceProject.keyCFG.land) {
             control.transition = keyDown;
             handled = true;
         }
@@ -93,29 +93,29 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor, 
     
     private static void cameraControls(float delta) {
         //zoom test
-        if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomSpace)) {
+        if (Gdx.input.isKeyPressed(SpaceProject.keyCFG.zoomSpace)) {
             if (MyScreenAdapter.cam.zoom >= 10f) {
                 MyScreenAdapter.setZoomTarget(60);
             } else {
                 MyScreenAdapter.setZoomTarget(10);
             }
         }
-        if (Gdx.input.isKeyPressed(SpaceProject.keycfg.resetZoom)) {
+        if (Gdx.input.isKeyPressed(SpaceProject.keyCFG.resetZoom)) {
             MyScreenAdapter.setZoomTarget(1);
         }
-        if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomCharacter)) {
+        if (Gdx.input.isKeyPressed(SpaceProject.keyCFG.zoomCharacter)) {
             MyScreenAdapter.setZoomTarget(0.1f);
         }
-        if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomOut)) {
+        if (Gdx.input.isKeyPressed(SpaceProject.keyCFG.zoomOut)) {
             MyScreenAdapter.setZoomTarget(MyScreenAdapter.cam.zoom + 0.001f);
         }
-        if (Gdx.input.isKeyPressed(SpaceProject.keycfg.zoomIn)) {
+        if (Gdx.input.isKeyPressed(SpaceProject.keyCFG.zoomIn)) {
             MyScreenAdapter.setZoomTarget(MyScreenAdapter.cam.zoom - 0.001f);
         }
-        if (Gdx.input.isKeyPressed(SpaceProject.keycfg.rotateRight)) {
+        if (Gdx.input.isKeyPressed(SpaceProject.keyCFG.rotateRight)) {
             MyScreenAdapter.cam.rotate(5f * delta);
         }
-        if (Gdx.input.isKeyPressed(SpaceProject.keycfg.rotateLeft)) {
+        if (Gdx.input.isKeyPressed(SpaceProject.keyCFG.rotateLeft)) {
             MyScreenAdapter.cam.rotate(-5f * delta);
         }
         

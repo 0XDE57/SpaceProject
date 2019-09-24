@@ -8,6 +8,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.spaceproject.SpaceProject;
 
@@ -76,12 +77,12 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
         
         
         //fullscreen toggle
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.fullscreen)) {
+        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.fullscreen)) {
             MyScreenAdapter.toggleFullscreen();
         }
         
         //vsync toggle
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.vsync)) {
+        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.vsync)) {
             MyScreenAdapter.toggleVsync();
         }
         
@@ -155,7 +156,9 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
             if (Math.abs(cam.zoom - zoomTarget) < 0.2) {
                 cam.zoom = zoomTarget;
             }
+            
         }
+        cam.zoom = MathUtils.clamp(cam.zoom, 0.001f, 100000);
     }
     
     /**

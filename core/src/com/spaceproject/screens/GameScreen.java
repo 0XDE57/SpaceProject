@@ -28,7 +28,6 @@ import com.spaceproject.generation.Universe;
 import com.spaceproject.generation.noise.NoiseManager;
 import com.spaceproject.systems.HUDSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
-import com.spaceproject.ui.MapState;
 import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
@@ -84,7 +83,7 @@ public class GameScreen extends MyScreenAdapter {
         engine = new Engine();
         world = new World(new Vector2(), true);
         universe = new Universe();
-        noiseManager = new NoiseManager(SpaceProject.celestcfg.maxGenThreads);
+        noiseManager = new NoiseManager(SpaceProject.celestCFG.maxGenThreads);
         
         // load test default values
         Entity playerTESTSHIP = EntityFactory.createPlayerShip(0, 0);
@@ -112,7 +111,7 @@ public class GameScreen extends MyScreenAdapter {
         inSpace = true;
         currentPlanet = null;
         
-        SystemLoader.loadSystems(this, engine, inSpace, SpaceProject.systemsConfig);
+        SystemLoader.loadSystems(this, engine, inSpace, SpaceProject.systemsCFG);
         
         
         //add player
@@ -128,12 +127,12 @@ public class GameScreen extends MyScreenAdapter {
         Misc.printObjectFields(planet.getComponent(PlanetComponent.class));
         //Misc.printEntity(transitionComponent.transitioningEntity);
         
-        SystemLoader.loadSystems(this, engine, inSpace, SpaceProject.systemsConfig);
+        SystemLoader.loadSystems(this, engine, inSpace, SpaceProject.systemsCFG);
         
         
         // add player
         int mapSize = planet.getComponent(PlanetComponent.class).mapSize;
-        int position = mapSize * SpaceProject.worldcfg.tileSize / 2;//set position to middle of planet
+        int position = mapSize * SpaceProject.worldCFG.tileSize / 2;//set position to middle of planet
         Body body = transitioningEntity.getComponent(PhysicsComponent.class).body;
         body.setTransform(position, position, body.getAngle());
         //body.setAngularDamping(30);
@@ -230,10 +229,8 @@ public class GameScreen extends MyScreenAdapter {
         //TODO: move into hud, hud as input processor
         HUDSystem hud = engine.getSystem(HUDSystem.class);
         if (hud != null) {
-            if (hud.getMiniMap().mapState == MapState.full) {
-                //todo: minimap should zoom only on mouse over / focus
-                hud.getMiniMap().scrollMiniMap(amount);
-                return false;
+            if (hud.getMiniMap().scrolled(amount)) {
+                return true;
             }
         }
         
@@ -268,7 +265,7 @@ public class GameScreen extends MyScreenAdapter {
         Gdx.app.log(this.getClass().getSimpleName(), "paused [" + pause + "]");
         
         
-        SystemsConfig systemsConfig = SpaceProject.systemsConfig;
+        SystemsConfig systemsConfig = SpaceProject.systemsCFG;
         for (EntitySystem system : engine.getSystems()) {
             SysCFG sysCFG = systemsConfig.getConfig(system.getClass().getName());
             if (sysCFG.isHaltOnGamePause()) {

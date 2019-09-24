@@ -152,7 +152,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     private void updateStars() {
         if (checkStarsTimer.tryEvent()) {
             //distance to check when to load planets
-            int loadDistance = (int) SpaceProject.celestcfg.loadSystemDistance;
+            int loadDistance = (int) SpaceProject.celestCFG.loadSystemDistance;
             loadDistance *= loadDistance;//square for dst2
             
             // remove stars from engine that are too far

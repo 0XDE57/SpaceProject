@@ -30,7 +30,7 @@ public class WorldLoadingSystem extends EntitySystem implements IRequireGameCont
         //a placeholder to add dummy objects for now
         
         // test ships
-        int position = mapSize * SpaceProject.worldcfg.tileSize / 2;//set  position to middle of planet
+        int position = mapSize * SpaceProject.worldCFG.tileSize / 2;//set  position to middle of planet
         
         engine.addEntity(EntityFactory.createShip3(position + 10, position + 10));
         engine.addEntity(EntityFactory.createShip3(position - 10, position + 10));

@@ -33,7 +33,7 @@ import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPaneAdapter;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.Config;
 import com.spaceproject.screens.TitleScreen;
-import com.spaceproject.systems.DebugUISystem;
+import com.spaceproject.systems.DebugSystem;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -125,10 +125,10 @@ public class Menu extends VisWindow {
         tabbedPane.add(debugMenuTab);
         
         
-        testConfigTab = createConfigTab(SpaceProject.celestcfg);
+        testConfigTab = createConfigTab(SpaceProject.celestCFG);
         tabbedPane.add(testConfigTab);
         
-        keyConfigTab = new KeyConfigTab("Input Settings", SpaceProject.keycfg);
+        keyConfigTab = new KeyConfigTab("Input Settings", SpaceProject.keyCFG);
         //tabbedPane.add(keyConfigTab);
         
         //tabbedPane.add(createConfigTab(new TestConfig()));
@@ -283,7 +283,7 @@ public class Menu extends VisWindow {
         toggleComponentList.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugUISystem debug = engine.getSystem(DebugUISystem.class);
+                DebugSystem debug = engine.getSystem(DebugSystem.class);
                 if (debug != null) {
                     debug.drawComponentList = toggleComponentList.isChecked();
                 }
@@ -295,7 +295,7 @@ public class Menu extends VisWindow {
         togglePos.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugUISystem debug = engine.getSystem(DebugUISystem.class);
+                DebugSystem debug = engine.getSystem(DebugSystem.class);
                 if (debug != null) {
                     debug.drawPos = togglePos.isChecked();
                 }
@@ -303,13 +303,13 @@ public class Menu extends VisWindow {
         });
         
         
-        final CheckBox toggleBounds = new CheckBox("show bounds", VisUI.getSkin());
+        final CheckBox toggleBounds = new CheckBox("show box2d debug", VisUI.getSkin());
         toggleBounds.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugUISystem debug = engine.getSystem(DebugUISystem.class);
+                DebugSystem debug = engine.getSystem(DebugSystem.class);
                 if (debug != null) {
-                    debug.drawBounds = toggleBounds.isChecked();
+                    debug.box2DDebugRender = toggleBounds.isChecked();
                 }
             }
         });
@@ -318,7 +318,7 @@ public class Menu extends VisWindow {
         toggleOrbitPath.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugUISystem debug = engine.getSystem(DebugUISystem.class);
+                DebugSystem debug = engine.getSystem(DebugSystem.class);
                 if (debug != null) {
                     debug.drawOrbitPath = toggleOrbitPath.isChecked();
                 }
@@ -330,7 +330,7 @@ public class Menu extends VisWindow {
         toggleVectors.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugUISystem debug = engine.getSystem(DebugUISystem.class);
+                DebugSystem debug = engine.getSystem(DebugSystem.class);
                 if (debug != null) {
                     debug.drawVectors = toggleVectors.isChecked();
                 }
@@ -342,7 +342,7 @@ public class Menu extends VisWindow {
         toggleMousePos.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugUISystem debug = engine.getSystem(DebugUISystem.class);
+                DebugSystem debug = engine.getSystem(DebugSystem.class);
                 if (debug != null) {
                     debug.drawMousePos = toggleMousePos.isChecked();
                 }
@@ -354,7 +354,7 @@ public class Menu extends VisWindow {
         toggleFPS.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugUISystem debug = engine.getSystem(DebugUISystem.class);
+                DebugSystem debug = engine.getSystem(DebugSystem.class);
                 if (debug != null) {
                     debug.drawFPS = toggleFPS.isChecked();
                 }
@@ -365,20 +365,9 @@ public class Menu extends VisWindow {
         toggleExtraInfo.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugUISystem debug = engine.getSystem(DebugUISystem.class);
+                DebugSystem debug = engine.getSystem(DebugSystem.class);
                 if (debug != null) {
                     debug.drawExtraInfo = toggleExtraInfo.isChecked();
-                }
-            }
-        });
-        
-        final CheckBox toggleBoundsPoly = new CheckBox("show bounds poly", VisUI.getSkin());
-        toggleBoundsPoly.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                DebugUISystem debug = engine.getSystem(DebugUISystem.class);
-                if (debug != null) {
-                    debug.drawBoundsPoly = toggleBoundsPoly.isChecked();
                 }
             }
         });
@@ -387,7 +376,7 @@ public class Menu extends VisWindow {
         toggleEntityList.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                DebugUISystem debug = engine.getSystem(DebugUISystem.class);
+                DebugSystem debug = engine.getSystem(DebugSystem.class);
                 if (debug != null) {
                     debug.drawEntityList = toggleEntityList.isChecked();
                 }
@@ -401,8 +390,7 @@ public class Menu extends VisWindow {
         table.add(toggleEntityList).left().row();
         table.add(togglePos).left();
         table.add(toggleComponentList).left().row();
-        table.add(toggleBounds).left();
-        table.add(toggleBoundsPoly).left().row();
+        table.add(toggleBounds).left().row();
         table.add(toggleVectors).left().row();
         table.add(toggleOrbitPath).left().row();
         

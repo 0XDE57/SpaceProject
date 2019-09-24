@@ -51,7 +51,7 @@ public class WorldWrapSystem extends EntitySystem implements IRequireGameContext
     @Override
     public void initContext(GameScreen gameScreen) {
         int mapSize = gameScreen.getCurrentPlanet().getComponent(PlanetComponent.class).mapSize;
-        wrap = SpaceProject.worldcfg.tileSize * mapSize;
+        wrap = SpaceProject.worldCFG.tileSize * mapSize;
     }
     
     @Override

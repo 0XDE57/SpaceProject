@@ -15,7 +15,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -47,7 +46,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class DebugUISystem extends IteratingSystem implements IRequireGameContext, IScreenResizeListener, Disposable {
+public class DebugSystem extends IteratingSystem implements IRequireGameContext, IScreenResizeListener, Disposable {
     
     private Engine engine;
     private Stage stage;
@@ -67,7 +66,6 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
     
     //entity storage
     private Array<Entity> objects;
-    DelaunayTriangulator tri = new DelaunayTriangulator();
     
     public static ArrayList<DebugText> debugTexts = new ArrayList<DebugText>();
     public static ArrayList<DebugVec> debugVecs = new ArrayList<DebugVec>();
@@ -76,15 +74,21 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
     private boolean drawDebugUI = true;
     public boolean drawFPS = true, drawExtraInfo = true;
     public boolean drawComponentList = false;
-    public boolean drawPos = true;
-    public boolean drawBounds = true, drawBoundsPoly = false;
-    public boolean drawOrbitPath = true;
+    public boolean drawPos = false;
+    public boolean box2DDebugRender = true;
+    public boolean drawBodies = true;
+    public boolean drawJoints = true;
+    public boolean drawAABBs = true;
+    public boolean drawInactiveBodies = true;
+    public boolean drawVelocities = true;
+    public boolean drawContacts = true;
+    public boolean drawOrbitPath = false;
     public boolean drawVectors = false;
     public boolean drawMousePos = false;
     public boolean drawEntityList = false;
     
     
-    public DebugUISystem() {
+    public DebugSystem() {
         super(Family.all(TransformComponent.class).get());
         
         cam = GameScreen.cam;
@@ -92,12 +96,11 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
         shape = GameScreen.shape;
         fontSmall = FontFactory.createFont(FontFactory.fontBitstreamVM, 10);
         fontLarge = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 20);
-        objects = new Array<Entity>();
+        objects = new Array<>();
     
-        debugRenderer = new Box2DDebugRenderer(true, true, true, true, true, true);
+        debugRenderer = new Box2DDebugRenderer(drawBodies, drawJoints, drawAABBs, drawInactiveBodies, drawVelocities,  drawContacts);
         
         stage = new Stage(new ScreenViewport());
-        
     }
     
     
@@ -200,7 +203,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
         }
         batch.end();
     
-        if (drawBounds)
+        if (box2DDebugRender)
             debugRenderer.render(GameScreen.world, GameScreen.cam.combined);
         
         
@@ -211,13 +214,13 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
     private void updateKeyToggles() {
         
         //toggle debug
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleDebug)) {
+        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleDebug)) {
             drawDebugUI = !drawDebugUI;
             Gdx.app.log(this.getClass().getSimpleName(), "DEBUG UI: " + drawDebugUI);
         }
         
         //toggle pos
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.togglePos)) {
+        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.togglePos)) {
             drawPos = !drawPos;
             if (drawComponentList) {
                 drawComponentList = false;
@@ -226,7 +229,7 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
         }
         
         //toggle components
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleComponents)) {
+        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleComponents)) {
             drawComponentList = !drawComponentList;
             if (drawPos) {
                 drawPos = false;
@@ -235,25 +238,25 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
         }
         
         //toggle bounds
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleBounds)) {
-            drawBounds = !drawBounds;
-            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw bounds: " + drawBounds);
+        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleBounds)) {
+            box2DDebugRender = !box2DDebugRender;
+            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw bounds: " + box2DDebugRender);
         }
         
         //toggle fps
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleFPS)) {
+        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleFPS)) {
             drawFPS = !drawFPS;
             Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw FPS: " + drawFPS);
         }
         
         //toggle orbit circle
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleOrbit)) {
+        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleOrbit)) {
             drawOrbitPath = !drawOrbitPath;
             Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw orbit path: " + drawOrbitPath);
         }
         
         //toggle vector
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleVector)) {
+        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleVector)) {
             drawVectors = !drawVectors;
             Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw vectors: " + drawVectors);
         }
@@ -314,46 +317,6 @@ public class DebugUISystem extends IteratingSystem implements IRequireGameContex
             
         }
     }
-    
-    /**
-     * Draw bounding boxes (hitbox/collision detection)
-     *
-    @Deprecated
-    private void drawBounds(boolean polyTriangles) {
-        
-        for (Entity entity : objects) {
-            PhysicsComponent bounds = Mappers.physics.get(entity);
-            TransformComponent t = Mappers.transform.get(entity);
-            
-            if (bounds != null) {
-                //draw Axis-Aligned bounding box
-                Rectangle rect = bounds.poly.getBoundingRectangle();
-                shape.setColor(1, 1, 0, 1);
-                shape.rect(t.pos.x - rect.width / 2, t.pos.y - rect.height / 2, rect.width, rect.height);
-                
-                //draw Orientated bounding box
-                shape.setColor(1, 0, 0, 1);
-                shape.polygon(bounds.poly.getTransformedVertices());
-                
-                if (polyTriangles) {
-                    // draw triangles
-                    shape.setColor(Color.BLUE);
-                    FloatArray points = new FloatArray(bounds.poly.getTransformedVertices());
-                    ShortArray triangles = tri.computeTriangles(points, false);
-                    for (int i = 0; i < triangles.size; i += 3) {
-                        int p1 = triangles.get(i) * 2;
-                        int p2 = triangles.get(i + 1) * 2;
-                        int p3 = triangles.get(i + 2) * 2;
-                        shape.triangle(
-                                points.get(p1), points.get(p1 + 1),
-                                points.get(p2), points.get(p2 + 1),
-                                points.get(p3), points.get(p3 + 1));
-                    }
-                }
-            }
-        }
-    }
-    */
     
     
     /**

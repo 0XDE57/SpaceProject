@@ -25,6 +25,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
+import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
@@ -56,9 +57,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     
     //entity storage
-    private ImmutableArray<Entity> mapableObjects;
+    private ImmutableArray<Entity> mapableEntities;
     private ImmutableArray<Entity> player;
-    private ImmutableArray<Entity> killables;
+    private ImmutableArray<Entity> killableEntities;
     
     private MiniMap miniMap;
     
@@ -73,7 +74,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         batch = MyScreenAdapter.batch;
         stage = new Stage(new ScreenViewport());
         
-        miniMap = new MiniMap();
+        miniMap = new MiniMap(SpaceProject.miniMapCFG);
         transitionOverlay = new TransitionOverlay();
     }
     
@@ -85,9 +86,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     @Override
     public void addedToEngine(Engine engine) {
-        mapableObjects = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
+        mapableEntities = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
         player = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
-        killables = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(CameraFocusComponent.class).get());
+        killableEntities = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(ControlFocusComponent.class).get());
         
         
         menu = new Menu(false, engine);
@@ -134,7 +135,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         
         
         Entity p = player.size() > 0 ? player.first() : null;
-        miniMap.drawSpaceMap(getEngine(), shape, batch, p, mapableObjects);
+        miniMap.drawSpaceMap(shape, batch, p, mapableEntities);
     }
     
     private void drawHUD() {
@@ -167,15 +168,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     private void CheckInput() {
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleHUD)) {
+        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleHUD)) {
             drawHud = !drawHud;
             Gdx.app.log(this.getClass().getSimpleName(), "HUD: " + drawHud);
         }
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleEdgeMap)) {
+        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleEdgeMap)) {
             drawEdgeMap = !drawEdgeMap;
             Gdx.app.log(this.getClass().getSimpleName(), "Edge mapState: " + drawEdgeMap);
         }
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keycfg.toggleSpaceMap)) {
+        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleSpaceMap)) {
             miniMap.cycleMapState();
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
@@ -198,27 +199,27 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
      */
     private void drawHealthBars() {
         //bar dimensions
-        int barLength = SpaceProject.uicfg.entityHPbarLength;
-        int barWidth = SpaceProject.uicfg.entityHPbarWidth;
-        int yOffset = SpaceProject.uicfg.entityHPbarYOffset;
+        int barLength = SpaceProject.uiCFG.entityHPbarLength;
+        int barWidth = SpaceProject.uiCFG.entityHPbarWidth;
+        int yOffset = SpaceProject.uiCFG.entityHPbarYOffset;
         
-        for (Entity entity : killables) {
+        for (Entity entity : killableEntities) {
             Vector3 pos = cam.project(new Vector3(Mappers.transform.get(entity).pos.cpy(), 0));
             HealthComponent health = Mappers.health.get(entity);
             
             
             //ignore full health
-            if (!SpaceProject.uicfg.renderFullHealth && health.health == health.maxHealth) {
+            if (!SpaceProject.uiCFG.renderFullHealth && health.health == health.maxHealth) {
                 continue;
             }
             
             //background
-            shape.setColor(SpaceProject.uicfg.entityHPbarBackground);
+            shape.setColor(SpaceProject.uiCFG.entityHPbarBackground);
             shape.rect(pos.x - barLength / 2, pos.y + yOffset, barLength, barWidth);
             
             //health
             float ratio = health.health / health.maxHealth;
-            shape.setColor(1 - ratio, ratio, 0, SpaceProject.uicfg.entityHPbarOpacity); //creates color between red and green
+            shape.setColor(1 - ratio, ratio, 0, SpaceProject.uiCFG.entityHPbarOpacity); //creates color between red and green
             shape.rect(pos.x - barLength / 2, pos.y + yOffset, barLength * ratio, barWidth);
         }
         
@@ -228,10 +229,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
      * Draw the players health and ammo bar.
      */
     private void drawPlayerStatus() {
-        int barWidth = SpaceProject.uicfg.playerHPBarWidth;
-        int barHeight = SpaceProject.uicfg.playerHPBarHeight;
+        int barWidth = SpaceProject.uiCFG.playerHPBarWidth;
+        int barHeight = SpaceProject.uiCFG.playerHPBarHeight;
         int playerBarX = Gdx.graphics.getWidth() / 2 - barWidth / 2;
-        int playerHPBarY = SpaceProject.uicfg.playerHPBarY;
+        int playerHPBarY = SpaceProject.uiCFG.playerHPBarY;
         int playerAmmoBarY = playerHPBarY - barHeight - 1;
         
         if (player == null || player.size() == 0) return;
@@ -240,9 +241,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         HealthComponent health = Mappers.health.get(player.first());
         if (health != null) {
             float ratioHP = health.health / health.maxHealth;
-            shape.setColor(SpaceProject.uicfg.entityHPbarBackground);
+            shape.setColor(SpaceProject.uiCFG.entityHPbarBackground);
             shape.rect(playerBarX, playerHPBarY, barWidth, barHeight);
-            shape.setColor(1 - ratioHP, ratioHP, 0, SpaceProject.uicfg.entityHPbarOpacity);
+            shape.setColor(1 - ratioHP, ratioHP, 0, SpaceProject.uiCFG.entityHPbarOpacity);
             shape.rect(playerBarX, playerHPBarY, barWidth * ratioHP, barHeight);
         }
         
@@ -261,9 +262,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         CannonComponent cannon = Mappers.cannon.get(player.first());
         if (cannon != null) {
             float ratioAmmo = (float) cannon.curAmmo / (float) cannon.maxAmmo;
-            shape.setColor(SpaceProject.uicfg.entityHPbarBackground);
+            shape.setColor(SpaceProject.uiCFG.entityHPbarBackground);
             shape.rect(playerBarX, playerAmmoBarY, barWidth, barHeight);
-            shape.setColor(SpaceProject.uicfg.playerAmmoBarColor);
+            shape.setColor(SpaceProject.uiCFG.playerAmmoBarColor);
             shape.rect(playerBarX, playerAmmoBarY, barWidth * ratioAmmo, barHeight);
             
             
@@ -271,7 +272,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 int x = playerBarX + (i * barWidth / cannon.maxAmmo);
                 //draw recharge bar
                 if (i == cannon.curAmmo) {
-                    shape.setColor(SpaceProject.uicfg.playerAmmoBarRechargeColor);
+                    shape.setColor(SpaceProject.uiCFG.playerAmmoBarRechargeColor);
                     shape.rect(x, playerAmmoBarY, barWidth / cannon.maxAmmo * cannon.timerRechargeRate.ratio(), barHeight);
                 }
                 //draw divisions to mark individual ammo
@@ -333,7 +334,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         Vector3 topLeft = cam.unproject(new Vector3(0, 0, 0));
         Vector3 bottomRight = cam.unproject(new Vector3(width, height, 0));
 
-        for (Entity mapable : mapableObjects) {
+        for (Entity mapable : mapableEntities) {
             MapComponent map = Mappers.map.get(mapable);
             Vector2 pos = Mappers.transform.get(mapable).pos.cpy();
             Vector3 screenPos = new Vector3(pos, 0);

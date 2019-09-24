@@ -148,7 +148,7 @@ public class WorldRenderingSystem extends IteratingSystem implements IRequireGam
     private void drawTiles() {
         
         // calculate tile that the camera is in
-        int tileSize = SpaceProject.worldcfg.tileSize;
+        int tileSize = SpaceProject.worldCFG.tileSize;
         int centerX = (int) (cam.position.x / tileSize);
         int centerY = (int) (cam.position.y / tileSize);
         

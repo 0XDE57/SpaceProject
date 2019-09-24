@@ -370,7 +370,7 @@ public class TextureFactory {
 		Pixmap pixmap = new Pixmap(pixelatedTileMap.length, pixelatedTileMap.length, Format.RGBA4444);
 		 */
         
-        int size = mapSize / SpaceProject.worldcfg.chunkSize;//SIZE = chunks = tileMap.length/chunkSize
+        int size = mapSize / SpaceProject.worldCFG.chunkSize;//SIZE = chunks = tileMap.length/chunkSize
         Pixmap pixmap = new Pixmap(size, size, Format.RGBA4444);
         
         // draw circle for planet
@@ -504,8 +504,8 @@ public class TextureFactory {
     
     public static Texture generateProjectile() {
         pixmap = new Pixmap(1, 1, Format.RGB565);// new Pixmap(size, size/2 == 0 ? 1 : size/2, Format.RGB565);
-        //pixmap.setColor(1, 1, 1, 1);
-        pixmap.setColor(1, 0, 0, 1);
+        pixmap.setColor(1, 1, 1, 1);
+        //pixmap.setColor(1, 0, 0, 1);
         //pixmap.drawCircle(1,1,3);
         pixmap.fill();
         

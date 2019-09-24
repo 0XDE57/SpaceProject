@@ -140,7 +140,7 @@ public class Test3DScreen extends ScreenAdapter {
         float height = tex.getHeight();
         float originX = width * 0.5f; //center
         float originY = height * 0.5f; //center
-        float scale = SpaceProject.entitycfg.renderScale;
+        float scale = SpaceProject.entityCFG.renderScale;
         
         //draw texture
         batch.draw(tex, (x - originX), (y - originY),

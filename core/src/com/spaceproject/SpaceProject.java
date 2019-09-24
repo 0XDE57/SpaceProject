@@ -6,11 +6,12 @@ import com.badlogic.gdx.Gdx;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.EntityConfig;
 import com.spaceproject.config.KeyConfig;
+import com.spaceproject.config.MiniMapConfig;
 import com.spaceproject.config.SystemsConfig;
 import com.spaceproject.config.UIConfig;
 import com.spaceproject.config.WorldConfig;
-import com.spaceproject.screens.TitleScreen;
 import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.screens.TitleScreen;
 
 public class SpaceProject extends Game {
     
@@ -21,12 +22,13 @@ public class SpaceProject extends Game {
     
     private static boolean isMobile;
     
-    public static SystemsConfig systemsConfig;
-    public static EntityConfig entitycfg;
-    public static CelestialConfig celestcfg;
-    public static WorldConfig worldcfg;
-    public static UIConfig uicfg;
-    public static KeyConfig keycfg;
+    public static SystemsConfig systemsCFG;
+    public static EntityConfig entityCFG;
+    public static CelestialConfig celestCFG;
+    public static WorldConfig worldCFG;
+    public static UIConfig uiCFG;
+    public static KeyConfig keyCFG;
+    public static MiniMapConfig miniMapCFG;
     
     
     @Override
@@ -43,32 +45,35 @@ public class SpaceProject extends Game {
     }
     
     private static void loadConfigs() {
-        systemsConfig = new SystemsConfig();
-        systemsConfig.loadDefault();
+        systemsCFG = new SystemsConfig();
+        systemsCFG.loadDefault();
         //systemsConfig = (SystemsConfig) new SystemsConfig().loadFromJson();
         //systemsConfig.saveToJson();
         
         
-        entitycfg = new EntityConfig();
-        entitycfg.loadDefault();
+        entityCFG = new EntityConfig();
+        entityCFG.loadDefault();
         
         
         //keycfg = (KeyConfig) new KeyConfig().loadFromJson();
-        keycfg = new KeyConfig();
-        keycfg.loadDefault();
+        keyCFG = new KeyConfig();
+        keyCFG.loadDefault();
         
         
         //celestcfg = (CelestialConfig) new CelestialConfig().loadFromJson();
-        celestcfg = new CelestialConfig();
-        celestcfg.loadDefault();
+        celestCFG = new CelestialConfig();
+        celestCFG.loadDefault();
         
         
-        worldcfg = new WorldConfig();
-        worldcfg.loadDefault();
+        worldCFG = new WorldConfig();
+        worldCFG.loadDefault();
         
         
-        uicfg = new UIConfig();
-        uicfg.loadDefault();
+        uiCFG = new UIConfig();
+        uiCFG.loadDefault();
+        
+        
+        miniMapCFG = (MiniMapConfig)new MiniMapConfig().loadFromJson();
     }
     
     public static boolean isMobile() {

@@ -52,7 +52,7 @@ public abstract class Config {
                 json.setUsePrototypes(false);
                 
                 Config config = json.fromJson(this.getClass(), keyFile.readString());
-                Gdx.app.log(logSource, "Loaded " + logSource + " from json.");
+                Gdx.app.log(logSource, "Loaded " + logSource + " from " + keyFile.path());
                 Gdx.app.log(logSource, json.toJson(config));
                 return config;
             }
