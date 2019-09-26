@@ -35,7 +35,7 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.map.MapState;
-import com.spaceproject.ui.menu.Menu;
+import com.spaceproject.ui.menu.GameMenu;
 import com.spaceproject.ui.map.MiniMap;
 import com.spaceproject.ui.ScreenTransitionOverlay;
 import com.spaceproject.utility.IRequireGameContext;
@@ -47,7 +47,7 @@ import com.spaceproject.utility.MyMath;
 public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener {
     
     private Stage stage;
-    private Menu menu;
+    private GameMenu gameMenu;
     
     //rendering
     private OrthographicCamera cam;
@@ -91,30 +91,30 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         killableEntities = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(ControlFocusComponent.class).get());
         
         
-        menu = new Menu(false);
+        gameMenu = new GameMenu(false);
         
         stage.addListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
-                if (menu.switchTabForKey(keycode)) {
-                    if (!menu.isVisible()) {
-                        menu.show(stage);
+                if (gameMenu.switchTabForKey(keycode)) {
+                    if (!gameMenu.isVisible()) {
+                        gameMenu.show(stage);
                     }
                     return true;
                 }
-                return menu.isVisible();
+                return gameMenu.isVisible();
             }
             
             @Override
             public boolean keyUp(InputEvent event, int keycode) {
                 super.keyUp(event, keycode);
-                return menu.isVisible();
+                return gameMenu.isVisible();
             }
             
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 super.touchDown(event, x, y, pointer, button);
-                return menu.isVisible();
+                return gameMenu.isVisible();
             }
         });
     }
@@ -132,7 +132,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         
         screenTransitionOverlay.render();
         
-        //draw menu
+        //draw gameMenu
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }
@@ -418,8 +418,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         return stage;
     }
     
-    public Menu getMenu() {
-        return menu;
+    public GameMenu getGameMenu() {
+        return gameMenu;
     }
     
     public ScreenTransitionOverlay getScreenTransitionOverlay() {
@@ -428,7 +428,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     @Override
     public void resize(int width, int height) {
-        menu.setSize(Gdx.graphics.getWidth() - 150, Gdx.graphics.getHeight() - 150);
+        gameMenu.setSize(Gdx.graphics.getWidth() - 150, Gdx.graphics.getHeight() - 150);
         stage.getViewport().update(width, height, true);
         
         miniMap.updateMapPosition();

@@ -13,7 +13,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.ui.menu.Menu;
+import com.spaceproject.ui.menu.GameMenu;
 import com.spaceproject.ui.custom.TouchButtonRectangle;
 import com.spaceproject.ui.custom.TouchButtonRound;
 import com.spaceproject.ui.custom.TouchJoyStick;
@@ -52,15 +52,15 @@ public class MobileInputSystem extends EntitySystem {
         
         if (btnMenu.isJustTouched()) {
             if (hud != null) {
-                Menu menu = hud.getMenu();
-                if (menu.isVisible()) {
-                    menu.hide();
+                GameMenu gameMenu = hud.getGameMenu();
+                if (gameMenu.isVisible()) {
+                    gameMenu.hide();
                 } else {
-                    menu.show(hud.getStage());
+                    gameMenu.show(hud.getStage());
                 }
             }
         }
-        if (hud.getMenu().isVisible())
+        if (hud.getGameMenu().isVisible())
             return;
         
         if (btnMap.isJustTouched()) {

@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.SnapshotArray;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisSelectBox;
 import com.spaceproject.config.Config;
+import com.spaceproject.ui.menu.GameMenu;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -26,8 +27,8 @@ public class KeyConfigTab extends ConfigTab {
     private static ObjectIntMap<String> keyNames;
     private Map<String, String> changes;
     
-    public KeyConfigTab(String title, Config config) {
-        super(title, config);
+    public KeyConfigTab(GameMenu gameMenu, String title, Config config) {
+        super(gameMenu, title, config);
         changes = new HashMap<>();
     }
     
