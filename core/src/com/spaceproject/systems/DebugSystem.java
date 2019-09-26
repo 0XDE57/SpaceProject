@@ -37,6 +37,7 @@ import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.DebugEngineWindow;
 import com.spaceproject.utility.DebugText;
+import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.DebugVec;
 import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.IScreenResizeListener;
@@ -128,6 +129,9 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
     
     @Override
     public void update(float delta) {
+        int diagnosticX = 15;
+        int diagnosticY = Gdx.graphics.getHeight() - 15;
+        
         //check key presses
         updateKeyToggles();
         
@@ -149,10 +153,6 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         shape.setProjectionMatrix(cam.combined);
         
         
-        //draw vector to visualize speed and direction
-        //if (debugCFG.drawVectors) drawVelocityVectors();
-        
-        
         shape.begin(ShapeType.Line);
         {
             // draw ring to visualize orbit path
@@ -167,8 +167,10 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         shape.end();
         
         
-        //draw frames per second and entity count
-        if (debugCFG.drawFPS) drawFPS(debugCFG.drawExtraInfo);
+        //draw diagnostic info
+        if (debugCFG.drawFPS)  drawFPS(diagnosticX, diagnosticY);
+        
+        if (debugCFG.drawDiagnosticInfo) drawDiagnosticInfo(diagnosticX, diagnosticY);
         
         //draw entity position
         if (debugCFG.drawPos) drawPos();
@@ -280,8 +282,8 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
      * Draw orbit path, a ring to visualize objects orbit
      */
     private void drawOrbitPath(boolean showSyncedPos) {
-        Color orbitSyncPosColor = new Color(1, 0, 0, 1);
         Color orbitObjectColor = new Color(1, 1, 1, 1);
+        Color orbitSyncPosColor = new Color(1, 0, 0, 1);
         
         for (Entity entity : objects) {
             
@@ -307,7 +309,7 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
                 
                 TextureComponent tex = Mappers.texture.get(entity);
                 if (tex != null) {
-                    int radius = (int) (tex.texture.getWidth() / 2 * tex.scale);
+                    float radius = tex.texture.getWidth() * 0.5f * tex.scale;
                     Vector2 orientation = MyMath.vector(entityPos.rotation, radius).add(entityPos.pos);
                     shape.line(entityPos.pos.x, entityPos.pos.y, orientation.x, orientation.y);
                     shape.circle(entityPos.pos.x, entityPos.pos.y, radius);
@@ -318,65 +320,48 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
     }
     
     
-    /**
-     * Draw frames, entity count, position and memory info.
-     */
-    private void drawFPS(boolean drawExtraInfo) {
-        int x = 15;
-        int y = Gdx.graphics.getHeight() - 15;
+    private void drawDiagnosticInfo(int x, int y) {
+        //DebugUtil.
         
-        //fps
-        int fps = Gdx.graphics.getFramesPerSecond();
-        debugTexts.add(new DebugText(Integer.toString(fps), x, y,
-                fps > 60 ? Color.SKY : fps > 45 ? Color.WHITE : fps > 30 ? Color.YELLOW : Color.RED, fontLarge));
+        //camera position
+        String camera = String.format("Pos: %s %s  Zoom:%3$.2f", (int) cam.position.x, (int) cam.position.y, cam.zoom);
         
-        if (drawExtraInfo) {
-            //camera position
-            String camera = String.format("Pos: %s %s  Zoom:%3$.2f", (int) cam.position.x, (int) cam.position.y, cam.zoom);
-            
-            //memory
-            Runtime runtime = Runtime.getRuntime();
-            long used = runtime.totalMemory() - runtime.freeMemory();
-            long javaHeap = Gdx.app.getJavaHeap();
-            long nativeHeap = Gdx.app.getNativeHeap();
-            String memory = "Mem: " + MyMath.formatBytes(used);
-            //all 3 values seem to agree
-            //memory += ", java heap: " + MyMath.formatBytes(javaHeap) + ", native heap: " + MyMath.formatBytes(nativeHeap);
-            
-            
-            //entity/component count
-            int entities = engine.getEntities().size();
-            int components = 0;
-            for (Entity ent : engine.getEntities()) {
-                components += ent.getComponents().size();
-            }
-            int systems = engine.getSystems().size();
-            String count = "E: " + entities + " C: " + components + " S: " + systems;
-            
-            //threads
-            Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-            String threads = "  Threads: " + threadSet.size();
-            
-            int sbCalls = GameScreen.batch.renderCalls;
-            
-            int linePos = 1;
-            float lineHeight = fontLarge.getLineHeight();
-            debugTexts.add(new DebugText(count, x, y - (lineHeight * linePos++), fontLarge));
-            debugTexts.add(new DebugText(memory + threads, x, y - (lineHeight * linePos++), fontLarge));
-            debugTexts.add(new DebugText(camera, x, y - (lineHeight * linePos++), fontLarge));
-            debugTexts.add(new DebugText(
-                    "time: " + Misc.formatDuration(GameScreen.getGameTimeCurrent()) + " (" + GameScreen.getGameTimeCurrent() + ")",
-                    500, Gdx.graphics.getHeight() - 10, fontLarge));
-            
-            
-            //view threads
-            String noisePool = GameScreen.noiseManager.getNoiseThreadPool().toString();
-            debugTexts.add(new DebugText(noisePool, x, y - (lineHeight * linePos++)));
-            
-            for (Thread t : threadSet) {
-                debugTexts.add(new DebugText(t.toString(), x, y - (lineHeight * linePos++)));
-            }
+        //memory
+        String memory = DebugUtil.getMemory();
+        
+        //entity/component count
+        String count = DebugUtil.getECSString(engine);
+        
+        //threads
+        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+        String threads = "  Threads: " + threadSet.size();
+        
+        int sbCalls = GameScreen.batch.renderCalls;
+        
+        int linePos = 1;
+        float lineHeight = fontLarge.getLineHeight();
+        debugTexts.add(new DebugText(count, x, y - (lineHeight * linePos++), fontLarge));
+        debugTexts.add(new DebugText(memory + threads, x, y - (lineHeight * linePos++), fontLarge));
+        debugTexts.add(new DebugText(camera, x, y - (lineHeight * linePos++), fontLarge));
+        debugTexts.add(new DebugText(
+                "time: " + Misc.formatDuration(GameScreen.getGameTimeCurrent()) + " (" + GameScreen.getGameTimeCurrent() + ")",
+                500, Gdx.graphics.getHeight() - 10, fontLarge));
+        
+        
+        //view threads
+        String noisePool = GameScreen.noiseManager.getNoiseThreadPool().toString();
+        debugTexts.add(new DebugText(noisePool, x, y - (lineHeight * linePos++)));
+        
+        for (Thread t : threadSet) {
+            debugTexts.add(new DebugText(t.toString(), x, y - (lineHeight * linePos++)));
         }
+    }
+
+    
+    private void drawFPS(int x, int y) {
+        int fps = Gdx.graphics.getFramesPerSecond();
+        Color fpsColor = fps >= 120 ? Color.SKY : fps > 45 ? Color.WHITE : fps > 30 ? Color.YELLOW : Color.RED;
+        debugTexts.add(new DebugText(Integer.toString(fps), x, y, fpsColor, fontLarge));
     }
     
     private void drawEntityList() {

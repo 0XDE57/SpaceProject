@@ -4,7 +4,7 @@ public class DebugConfig extends Config {
     
     public boolean drawDebugUI;
     public boolean drawFPS;
-    public boolean drawExtraInfo;
+    public boolean drawDiagnosticInfo;
     public boolean drawComponentList;
     public boolean drawPos;
     public boolean box2DDebugRender;
@@ -23,7 +23,7 @@ public class DebugConfig extends Config {
     public void loadDefault() {
         drawDebugUI = true;
         drawFPS = true;
-        drawExtraInfo = true;
+        drawDiagnosticInfo = true;
         drawComponentList = false;
         drawPos = false;
         box2DDebugRender = true;

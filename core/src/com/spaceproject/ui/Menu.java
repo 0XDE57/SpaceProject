@@ -340,11 +340,11 @@ public class Menu extends VisWindow {
             }
         });
         
-        final CheckBox toggleExtraInfo = new CheckBox("show extra info", VisUI.getSkin());
+        final CheckBox toggleExtraInfo = new CheckBox("show diagnostic info", VisUI.getSkin());
         toggleExtraInfo.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                debugCFG.drawExtraInfo = toggleExtraInfo.isChecked();
+                debugCFG.drawDiagnosticInfo = toggleExtraInfo.isChecked();
             }
         });
         
