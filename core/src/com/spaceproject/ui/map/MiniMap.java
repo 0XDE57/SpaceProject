@@ -1,4 +1,4 @@
-package com.spaceproject.ui;
+package com.spaceproject.ui.map;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.utils.ImmutableArray;

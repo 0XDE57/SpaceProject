@@ -34,10 +34,10 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
-import com.spaceproject.ui.MapState;
-import com.spaceproject.ui.Menu;
-import com.spaceproject.ui.MiniMap;
-import com.spaceproject.ui.TransitionOverlay;
+import com.spaceproject.ui.map.MapState;
+import com.spaceproject.ui.menu.Menu;
+import com.spaceproject.ui.map.MiniMap;
+import com.spaceproject.ui.ScreenTransitionOverlay;
 import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
@@ -66,7 +66,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private boolean drawHud = true;
     private boolean drawEdgeMap = true;
     
-    private TransitionOverlay transitionOverlay;
+    private ScreenTransitionOverlay screenTransitionOverlay;
     
     public HUDSystem() {
         cam = MyScreenAdapter.cam;
@@ -75,7 +75,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         stage = new Stage(new ScreenViewport());
         
         miniMap = new MiniMap(SpaceProject.miniMapCFG);
-        transitionOverlay = new TransitionOverlay();
+        screenTransitionOverlay = new ScreenTransitionOverlay();
     }
     
     @Override
@@ -126,16 +126,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         CheckInput();
         
         drawHUD();
-    
-        transitionOverlay.render();
+        
+        Entity p = player.size() > 0 ? player.first() : null;
+        miniMap.drawSpaceMap(shape, batch, p, mapableEntities);
+        
+        screenTransitionOverlay.render();
         
         //draw menu
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
-        
-        
-        Entity p = player.size() > 0 ? player.first() : null;
-        miniMap.drawSpaceMap(shape, batch, p, mapableEntities);
     }
     
     private void drawHUD() {
@@ -423,8 +422,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         return menu;
     }
     
-    public TransitionOverlay getTransitionOverlay() {
-        return transitionOverlay;
+    public ScreenTransitionOverlay getScreenTransitionOverlay() {
+        return screenTransitionOverlay;
     }
     
     @Override

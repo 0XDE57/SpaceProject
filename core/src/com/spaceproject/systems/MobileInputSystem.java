@@ -13,10 +13,10 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.ui.Menu;
-import com.spaceproject.ui.TouchButtonRectangle;
-import com.spaceproject.ui.TouchButtonRound;
-import com.spaceproject.ui.TouchJoyStick;
+import com.spaceproject.ui.menu.Menu;
+import com.spaceproject.ui.custom.TouchButtonRectangle;
+import com.spaceproject.ui.custom.TouchButtonRound;
+import com.spaceproject.ui.custom.TouchJoyStick;
 import com.spaceproject.utility.Mappers;
 
 /*TODO: test multiple screen sizes

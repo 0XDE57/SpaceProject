@@ -1,4 +1,4 @@
-package com.spaceproject.ui;
+package com.spaceproject.ui.custom;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;

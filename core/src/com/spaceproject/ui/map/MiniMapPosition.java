@@ -1,4 +1,4 @@
-package com.spaceproject.ui;
+package com.spaceproject.ui.map;
 
 public enum MiniMapPosition {
     topLeft,

@@ -1,4 +1,4 @@
-package com.spaceproject.ui;
+package com.spaceproject.ui.menu;
 
 
 import com.badlogic.gdx.Gdx;
@@ -33,6 +33,10 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.config.Config;
 import com.spaceproject.config.DebugConfig;
 import com.spaceproject.screens.TitleScreen;
+import com.spaceproject.ui.menu.tabs.ConfigTab;
+import com.spaceproject.ui.menu.tabs.HotKeyTab;
+import com.spaceproject.ui.menu.tabs.KeyConfigTab;
+import com.spaceproject.ui.TestShapeRenderActor;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;

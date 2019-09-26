@@ -6,35 +6,35 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.spaceproject.utility.SimpleTimer;
 
-public class TransitionOverlay {
+public class ScreenTransitionOverlay {
     
     private SimpleTimer fadeTimer;
-    private State fadeState;
+    private FadeState fadeState;
     private int fadeTime = 2000;
     private Color fadeColor = new Color(1, 1, 1, 1);
     private ShapeRenderer shape = new ShapeRenderer();
     
-    public TransitionOverlay() {
-        fadeState = State.off;
+    public ScreenTransitionOverlay() {
+        fadeState = FadeState.off;
         fadeTimer = new SimpleTimer(fadeTime, false);
     }
     
     public void fadeIn() {
-        fadeState = State.fadeIn;
+        fadeState = FadeState.fadeIn;
         fadeTimer.reset();
     }
     
     public void fadeOut() {
-        fadeState = State.fadeOut;
+        fadeState = FadeState.fadeOut;
         fadeTimer.reset();
     }
     
-    public State getFadeState() {
+    public FadeState getFadeState() {
         return fadeState;
     }
     
     public void render() {
-        if (fadeState == State.off) return;
+        if (fadeState == FadeState.off) return;
     
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -61,8 +61,8 @@ public class TransitionOverlay {
         
         if (fadeTimer.tryEvent()) {
             switch (fadeState) {
-                case fadeIn: fadeState = State.on; break;
-                case fadeOut: fadeState = State.off; break;
+                case fadeIn: fadeState = FadeState.on; break;
+                case fadeOut: fadeState = FadeState.off; break;
             }
         }
     }

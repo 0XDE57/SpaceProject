@@ -35,7 +35,7 @@ import com.spaceproject.config.KeyConfig;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.ui.DebugEngineWindow;
+import com.spaceproject.ui.menu.debug.DebugEngineWindow;
 import com.spaceproject.utility.DebugText;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.DebugVec;

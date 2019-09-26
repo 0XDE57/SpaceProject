@@ -1,4 +1,4 @@
-package com.spaceproject.ui;
+package com.spaceproject.ui.menu.tabs;
 
 
 import com.badlogic.gdx.Gdx;

@@ -1,4 +1,4 @@
-package com.spaceproject.ui;
+package com.spaceproject.ui.menu.debug;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -21,6 +21,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.Selection;
 import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisWindow;
+import com.spaceproject.ui.menu.debug.nodes.EntityNode;
+import com.spaceproject.ui.menu.debug.nodes.GhostNode;
+import com.spaceproject.ui.menu.debug.nodes.ReflectionNode;
+import com.spaceproject.ui.menu.debug.nodes.UpdateNode;
 import com.spaceproject.utility.SimpleTimer;
 
 import java.util.Arrays;
@@ -31,21 +35,21 @@ import static com.spaceproject.generation.FontFactory.skinSmallFont;
 
 public class DebugEngineWindow extends VisWindow implements EntityListener {
     
-    Engine engine;
-    Tree tree;
-    Node systemNodes, entityNodes;
+    private Engine engine;
+    private Tree tree;
+    private Node systemNodes, entityNodes;
     
-    static int refreshRate = 1000;
-    static int newTime = 1000;
-    static int removeTime = 1000;
-    static boolean showHistory = true;
-    static boolean includeChildren = false;
-    SimpleTimer refreshTimer;
+    private static int refreshRate = 1000;
+    public static int newTime = 1000;
+    public static int removeTime = 1000;
+    public static boolean showHistory = true;
+    public static boolean includeChildren = false;
+    private SimpleTimer refreshTimer;
     
-    final int keyUP = Input.Keys.UP;
-    final int keyDown = Input.Keys.DOWN;
-    final int keyLeft = Input.Keys.LEFT;
-    final int keyRight = Input.Keys.RIGHT;
+    private final int keyUP = Input.Keys.UP;
+    private final int keyDown = Input.Keys.DOWN;
+    private final int keyLeft = Input.Keys.LEFT;
+    private final int keyRight = Input.Keys.RIGHT;
     
     
     public DebugEngineWindow(Engine engine) {

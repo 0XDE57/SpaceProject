@@ -1,4 +1,4 @@
-package com.spaceproject.ui;
+package com.spaceproject.ui.menu.tabs;
 
 
 import com.badlogic.gdx.Input;
@@ -11,7 +11,7 @@ public class HotKeyTab extends Tab {
     private Table content;
     private int hotKey;
     
-    HotKeyTab(String title, int hotKey) {
+    public HotKeyTab(String title, int hotKey) {
         super(false, false);
         this.hotKey = hotKey;
         this.title = title + " [" + Input.Keys.toString(hotKey) + "]";
@@ -21,7 +21,7 @@ public class HotKeyTab extends Tab {
         
     }
     
-    int getHotKey() {
+    public int getHotKey() {
         return hotKey;
     }
     

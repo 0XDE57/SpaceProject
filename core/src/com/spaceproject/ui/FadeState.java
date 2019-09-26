@@ -1,6 +1,6 @@
 package com.spaceproject.ui;
 
-public enum State {
+public enum FadeState {
     off,
     fadeIn,
     fadeOut,

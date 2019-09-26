@@ -14,8 +14,8 @@ import com.spaceproject.ui.Tile;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
-import com.spaceproject.ui.ColorProfile;
-import com.spaceproject.ui.Slider;
+import com.spaceproject.ui.custom.ColorProfile;
+import com.spaceproject.ui.custom.Slider;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.generation.noise.NoiseGen;
 

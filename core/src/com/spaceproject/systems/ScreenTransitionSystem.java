@@ -19,8 +19,8 @@ import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
-import com.spaceproject.ui.State;
-import com.spaceproject.ui.TransitionOverlay;
+import com.spaceproject.ui.FadeState;
+import com.spaceproject.ui.ScreenTransitionOverlay;
 import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
@@ -201,8 +201,8 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         //begin fade while also zoom
         //TODO: would probably look better to sync camera zoom with fade amount
         HUDSystem hud = getEngine().getSystem(HUDSystem.class);
-        TransitionOverlay overlay = hud.getTransitionOverlay();
-        if (overlay.getFadeState() == State.off) {
+        ScreenTransitionOverlay overlay = hud.getScreenTransitionOverlay();
+        if (overlay.getFadeState() == FadeState.off) {
             overlay.fadeIn();
         }
     }
@@ -217,7 +217,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     
     private void fadeIn(ScreenTransitionComponent screenTrans) {
         HUDSystem hud = getEngine().getSystem(HUDSystem.class);
-        TransitionOverlay overlay = hud.getTransitionOverlay();
+        ScreenTransitionOverlay overlay = hud.getScreenTransitionOverlay();
         
         switch (overlay.getFadeState()) {
             case off:
@@ -232,7 +232,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     
     private void fadeOut(ScreenTransitionComponent screenTrans) {
         HUDSystem hud = getEngine().getSystem(HUDSystem.class);
-        TransitionOverlay overlay = hud.getTransitionOverlay();
+        ScreenTransitionOverlay overlay = hud.getScreenTransitionOverlay();
         
         switch (overlay.getFadeState()) {
             case off:
