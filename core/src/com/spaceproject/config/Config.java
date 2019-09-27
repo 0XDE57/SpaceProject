@@ -9,10 +9,6 @@ import com.badlogic.gdx.utils.SerializationException;
 public abstract class Config {
     
     private final String fileName = "config/" + this.getClass().getSimpleName() + ".json";
-
-	/*public Config() {
-		loadDefault();
-	}*/
     
     public abstract void loadDefault();
     
@@ -62,9 +58,6 @@ public abstract class Config {
             Gdx.app.error(logSource, "Could not load: " + fileName, e);
         }
         
-        Gdx.app.log(logSource, "Loading defaults.");
-        loadDefault();
-        //saveToJson();
-        return this;
+        return null;
     }
 }

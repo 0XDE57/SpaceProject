@@ -13,7 +13,7 @@ public class DebugTab extends HotKeyTab {
     
     public DebugTab(GameMenu gameMenu) {
         super("Debug", Input.Keys.F4);
-        final DebugConfig debugCFG = SpaceProject.debugCFG;
+        final DebugConfig debugCFG = SpaceProject.configManager.getConfig(DebugConfig.class);
         
         final CheckBox toggleComponentList = new CheckBox("show components", VisUI.getSkin());
         toggleComponentList.addListener(new ChangeListener() {

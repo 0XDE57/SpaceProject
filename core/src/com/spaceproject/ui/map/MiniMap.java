@@ -31,20 +31,16 @@ public class MiniMap {
     
     private MiniMapConfig cfg;
     public MapState mapState = MapState.mini;
-    private MiniMapPosition miniMapPosition = MiniMapPosition.bottomRight;
+    private MiniMapPosition miniMapPosition = MiniMapPosition.bottomRight; //todo: save cfg preference?
     
     private Rectangle mapBacking;
-    private boolean debugDisableClipping = false;
-    private boolean debugDrawLoadDist = false;
+    private boolean debugDisableClipping = false;//TODO: move to cfg
+    private boolean debugDrawLoadDist = false;//todo cfg!
+    int fontSize = 12; //todo cfg
     
-    private BitmapFont fontSmall;
-    
+    private BitmapFont font;
     private SimpleTimer drawScaleTimer;
-    
-    
     private float mapScale;
-    private int chunkSize;
-
     
     public MiniMap(MiniMapConfig config) {
         cfg = config;
@@ -57,10 +53,7 @@ public class MiniMap {
         updateMapPosition();
         resetMapScale();
         
-        
-        chunkSize = SpaceProject.uiCFG.mapChunkSize;
-        
-        fontSmall = FontFactory.createFont(FontFactory.fontPressStart, 12);
+        font = FontFactory.createFont(FontFactory.fontPressStart, fontSize);
     }
     
     public void drawSpaceMap(ShapeRenderer shape, SpriteBatch batch, Entity player, ImmutableArray<Entity> entities) {
@@ -104,19 +97,19 @@ public class MiniMap {
             //draw grid X
             shape.setColor(cfg.gridColor);
             int halfWidth = (int) (((mapBacking.width / 2)));
-            int startX = (int) ((-halfWidth * mapScale) + MyScreenAdapter.cam.position.x) / chunkSize;
-            int endX = (int) ((halfWidth * mapScale) + MyScreenAdapter.cam.position.x) / chunkSize;
+            int startX = (int) ((-halfWidth * mapScale) + MyScreenAdapter.cam.position.x) / cfg.gridSize;
+            int endX = (int) ((halfWidth * mapScale) + MyScreenAdapter.cam.position.x) / cfg.gridSize;
             for (int i = startX; i < endX + 1; i++) {
-                float finalX = (((i * chunkSize) - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
+                float finalX = (((i * cfg.gridSize) - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
                 shape.rect(finalX, mapBacking.y, 1, mapBacking.height);
             }
             
             // draw grid Y
             int halfHeight = (int) (((mapBacking.height / 2)));
-            int startY = (int) ((-halfHeight * mapScale) + MyScreenAdapter.cam.position.y) / chunkSize;
-            int endY = (int) ((halfHeight * mapScale) + MyScreenAdapter.cam.position.y) / chunkSize;
+            int startY = (int) ((-halfHeight * mapScale) + MyScreenAdapter.cam.position.y) / cfg.gridSize;
+            int endY = (int) ((halfHeight * mapScale) + MyScreenAdapter.cam.position.y) / cfg.gridSize;
             for (int i = startY; i < endY + 1; i++) {
-                float finalY = (((i * chunkSize) - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
+                float finalY = (((i * cfg.gridSize) - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
                 shape.rect(mapBacking.x, finalY, mapBacking.width, 1);
             }
         }
@@ -211,6 +204,7 @@ public class MiniMap {
             
             
             //draw velocity vector for intuitive navigation
+            //todo: move values to cfg
             if (player != null) {
                 Body body = Mappers.physics.get(player).body;
                 
@@ -248,7 +242,7 @@ public class MiniMap {
         {
             float textPosX = mapBacking.x + 10;
             float textPosY = mapBacking.y + mapBacking.height;
-            float lineHeight = fontSmall.getLineHeight() + 2;
+            float lineHeight = font.getLineHeight() + 2;
             
             String mapString = (int) MyScreenAdapter.cam.position.x + ", " + (int) MyScreenAdapter.cam.position.y;
             if (player != null) {
@@ -256,11 +250,11 @@ public class MiniMap {
                 String playerInfo = ": " + MyMath.round(body.getLinearVelocity().len(), 1);
                 mapString += playerInfo;
             }
-            fontSmall.draw(batch, mapString, textPosX, textPosY - lineHeight);
+            font.draw(batch, mapString, textPosX, textPosY - lineHeight);
             
             
             if (mapState == MapState.full && !drawScaleTimer.canDoEvent()) {
-                fontSmall.draw(batch, "scale: " + mapScale, centerMapX, textPosY - lineHeight);
+                font.draw(batch, "scale: " + mapScale, centerMapX, textPosY - lineHeight);
             }
         }
         batch.end();
@@ -334,7 +328,7 @@ public class MiniMap {
     
     
     public void resetMapScale() {
-        mapScale = SpaceProject.uiCFG.mapScale;
+        mapScale = cfg.mapScale;
         drawScaleTimer.reset();
     }
     

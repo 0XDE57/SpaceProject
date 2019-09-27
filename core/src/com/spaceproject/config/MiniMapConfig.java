@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.Color;
 
 public class MiniMapConfig extends Config {
     
+    public float mapScale;
+    public int gridSize;
     public int borderWidth;
     public int celestialMarkerSize;
     public int lodRenderOrbitPathScale;
@@ -25,6 +27,8 @@ public class MiniMapConfig extends Config {
     public Color debugLoadDistColor;
     
     public void loadDefault() {
+        mapScale = 500;
+        gridSize = (int) Math.pow(2, 17 - 1);
         borderWidth = 3;
         celestialMarkerSize = 6;
         lodRenderOrbitPathScale = 500;

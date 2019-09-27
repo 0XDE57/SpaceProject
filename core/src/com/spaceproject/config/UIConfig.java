@@ -4,9 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 
 public class UIConfig extends Config {
     
-    public float mapScale;
-    public int mapChunkSize;
-    
     public int playerHPBarY;
     public int playerHPBarWidth;
     public int playerHPBarHeight;
@@ -22,9 +19,6 @@ public class UIConfig extends Config {
     
     @Override
     public void loadDefault() {
-        mapScale = 500;
-        mapChunkSize = (int) Math.pow(2, 17 - 1);
-        
         playerHPBarY = 55;
         playerHPBarWidth = 200;
         playerHPBarHeight = 12;

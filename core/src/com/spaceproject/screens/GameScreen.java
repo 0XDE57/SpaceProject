@@ -20,6 +20,7 @@ import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
+import com.spaceproject.config.ConfigManager;
 import com.spaceproject.config.SysCFG;
 import com.spaceproject.config.SystemsConfig;
 import com.spaceproject.generation.EntityFactory;
@@ -46,6 +47,7 @@ public class GameScreen extends MyScreenAdapter {
     private static boolean inSpace;
     private Entity currentPlanet = null;
     
+    
     public static World world;
     public static Universe universe;
     public static NoiseManager noiseManager;
@@ -54,8 +56,8 @@ public class GameScreen extends MyScreenAdapter {
     
     
     
+    
     public GameScreen(boolean inSpace) {
-        //inSpace = false;
         GameScreen.inSpace = inSpace;
         
         //init scene2d/VisUI

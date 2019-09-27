@@ -77,7 +77,7 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
     
     public DebugSystem() {
         super(Family.all(TransformComponent.class).get());
-        debugCFG = SpaceProject.debugCFG;
+        debugCFG = SpaceProject.configManager.getConfig(DebugConfig.class);
         cam = GameScreen.cam;
         batch = GameScreen.batch;
         shape = GameScreen.shape;

@@ -4,12 +4,10 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.spaceproject.config.CelestialConfig;
-import com.spaceproject.config.DebugConfig;
+import com.spaceproject.config.ConfigManager;
 import com.spaceproject.config.EntityConfig;
 import com.spaceproject.config.KeyConfig;
-import com.spaceproject.config.MiniMapConfig;
 import com.spaceproject.config.SystemsConfig;
-import com.spaceproject.config.UIConfig;
 import com.spaceproject.config.WorldConfig;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
@@ -23,14 +21,15 @@ public class SpaceProject extends Game {
     
     private static boolean isMobile;
     
+    public static ConfigManager configManager;
     public static SystemsConfig systemsCFG;
     public static EntityConfig entityCFG;
     public static CelestialConfig celestCFG;
     public static WorldConfig worldCFG;
-    public static UIConfig uiCFG;
+    //public static UIConfig uiCFG;
     public static KeyConfig keyCFG;
-    public static MiniMapConfig miniMapCFG;
-    public static DebugConfig debugCFG;
+    //public static MiniMapConfig miniMapCFG;
+    //public static DebugConfig debugCFG;
     
     
     @Override
@@ -46,6 +45,9 @@ public class SpaceProject extends Game {
     
     
     private static void loadConfigs() {
+        configManager = new ConfigManager();
+        configManager.init();
+        
         systemsCFG = new SystemsConfig();
         systemsCFG.loadDefault();
         
@@ -61,14 +63,14 @@ public class SpaceProject extends Game {
         worldCFG = new WorldConfig();
         worldCFG.loadDefault();
         
-        uiCFG = new UIConfig();
-        uiCFG.loadDefault();
+        //uiCFG = new UIConfig();
+        //uiCFG.loadDefault();
         
-        miniMapCFG = new MiniMapConfig();
-        miniMapCFG.loadDefault();
+        //miniMapCFG = new MiniMapConfig();
+        //miniMapCFG.loadDefault();
         
-        debugCFG = new DebugConfig();
-        debugCFG.loadDefault();
+        //debugCFG = new DebugConfig();
+        //debugCFG.loadDefault();
     }
     
     
