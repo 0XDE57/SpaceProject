@@ -5,9 +5,9 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
-import com.spaceproject.SpaceProject;
-import com.spaceproject.ui.Tile;
 import com.spaceproject.generation.noise.OpenSimplexNoise;
+import com.spaceproject.screens.GameScreen;
+import com.spaceproject.ui.Tile;
 import com.spaceproject.utility.MyMath;
 
 import java.util.ArrayList;
@@ -37,9 +37,9 @@ public class TextureFactory {
         return tex;
     }
     
-    static OpenSimplexNoise opacityGen = new OpenSimplexNoise(SpaceProject.SEED);
-    static OpenSimplexNoise redGen = new OpenSimplexNoise(SpaceProject.SEED + 1);
-    static OpenSimplexNoise blueGen = new OpenSimplexNoise(SpaceProject.SEED + 2);
+    static OpenSimplexNoise opacityGen = new OpenSimplexNoise(GameScreen.SEED);
+    static OpenSimplexNoise redGen = new OpenSimplexNoise(GameScreen.SEED + 1);
+    static OpenSimplexNoise blueGen = new OpenSimplexNoise(GameScreen.SEED + 2);
     
     public static Texture generateSpaceBackgroundDust(int tX, int tY, int tileSize) {
         pixmap = new Pixmap(tileSize, tileSize, Format.RGBA8888);
@@ -347,7 +347,7 @@ public class TextureFactory {
         return t;
     }
     
-    public static Texture generatePlanet(int mapSize) {
+    public static Texture generatePlanet(int mapSize, int chunkSize) {
 		/*
 		float scale = 100; //scale of noise = 40;
 		int octaves = 4;
@@ -370,7 +370,7 @@ public class TextureFactory {
 		Pixmap pixmap = new Pixmap(pixelatedTileMap.length, pixelatedTileMap.length, Format.RGBA4444);
 		 */
         
-        int size = mapSize / SpaceProject.worldCFG.chunkSize;//SIZE = chunks = tileMap.length/chunkSize
+        int size = mapSize / chunkSize;//SIZE = chunks = tileMap.length/chunkSize
         Pixmap pixmap = new Pixmap(size, size, Format.RGBA4444);
         
         // draw circle for planet

@@ -14,10 +14,11 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.ui.Sprite3D;
+import com.spaceproject.config.EntityConfig;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
+import com.spaceproject.ui.Sprite3D;
 import com.spaceproject.utility.MyMath;
 
 
@@ -29,13 +30,14 @@ public class Test3DScreen extends ScreenAdapter {
     ModelBatch modelBatch = new ModelBatch();
     Environment environment;
     
+    EntityConfig entityCFG;
     Sprite3D ship3d;
     
     int playerX, playerY;
     float rotX = 0, rotY = 0, rotZ = 0;
     
     public Test3DScreen() {
-        
+        entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
         orthographicCam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         
         environment = new Environment();
@@ -52,7 +54,7 @@ public class Test3DScreen extends ScreenAdapter {
         Texture shipTop = TextureFactory.combineShip(body, wing);
         Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
         
-        ship3d = new Sprite3D(shipTop, shipBottom);
+        ship3d = new Sprite3D(shipTop, shipBottom, entityCFG.renderScale);
     }
     
     
@@ -140,7 +142,7 @@ public class Test3DScreen extends ScreenAdapter {
         float height = tex.getHeight();
         float originX = width * 0.5f; //center
         float originY = height * 0.5f; //center
-        float scale = SpaceProject.entityCFG.renderScale;
+        float scale = entityCFG.renderScale;
         
         //draw texture
         batch.draw(tex, (x - originX), (y - originY),

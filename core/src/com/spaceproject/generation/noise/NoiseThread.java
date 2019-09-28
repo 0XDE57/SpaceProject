@@ -21,19 +21,22 @@ public class NoiseThread implements Runnable {
     private final float persistence;
     private final float lacunarity;
     private final int mapSize;
+    private final int chunkSize;
     
     private NoiseBuffer noise;
     
     
-    public NoiseThread(float s, int o, float p, float l, long seed, int mapSize, ArrayList<Tile> tiles) {
+    public NoiseThread(float s, int o, float p, float l, long seed, int mapSize, int chunkSize, ArrayList<Tile> tiles) {
         this.scale = s;
         this.octaves = o;
         this.persistence = p;
         this.lacunarity = l;
         this.seed = seed;
         this.mapSize = mapSize;
+        this.chunkSize = chunkSize;
         this.tiles = tiles;
     }
+    
     
     @Override
     public void run() {
@@ -57,7 +60,7 @@ public class NoiseThread implements Runnable {
         }
         if (!stop) {
             //long pixelTime = System.currentTimeMillis();
-            noise.pixelatedTileMap = NoiseGen.createPixelatedTileMap(noise.tileMap, tiles);
+            noise.pixelatedTileMap = NoiseGen.createPixelatedTileMap(noise.tileMap, tiles, chunkSize);
             //Gdx.app.log(this.getClass().getSimpleName(), toString() + "pixelated complete in : " + (System.currentTimeMillis() - pixelTime) + "ms.");
         }
         

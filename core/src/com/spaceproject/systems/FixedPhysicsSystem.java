@@ -33,7 +33,7 @@ public class FixedPhysicsSystem extends EntitySystem implements IRequireGameCont
     
     @Override
     public void initContext(GameScreen gameScreen) {
-        this.world = gameScreen.world;
+        this.world = gameScreen.box2dWorld;
     }
     
     @Override

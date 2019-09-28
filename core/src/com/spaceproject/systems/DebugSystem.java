@@ -192,7 +192,7 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         batch.end();
     
         if (debugCFG.box2DDebugRender)
-            debugRenderer.render(GameScreen.world, GameScreen.cam.combined);
+            debugRenderer.render(GameScreen.box2dWorld, GameScreen.cam.combined);
         
         
         objects.clear();
@@ -200,7 +200,7 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
     
     
     private void updateKeyToggles() {
-        KeyConfig keyCFG = SpaceProject.keyCFG;
+        KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);;
         
         //toggle debug
         if (Gdx.input.isKeyJustPressed(keyCFG.toggleDebug)) {

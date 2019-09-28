@@ -18,6 +18,7 @@ import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.MiniMapConfig;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.screens.GameScreen;
@@ -29,7 +30,8 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class MiniMap {
     
-    private MiniMapConfig cfg;
+    private MiniMapConfig miniMapCFG;
+    private CelestialConfig celestCFG;
     public MapState mapState = MapState.mini;
     private MiniMapPosition miniMapPosition = MiniMapPosition.bottomRight; //todo: save cfg preference?
     
@@ -42,13 +44,14 @@ public class MiniMap {
     private SimpleTimer drawScaleTimer;
     private float mapScale;
     
-    public MiniMap(MiniMapConfig config) {
-        cfg = config;
+    public MiniMap(MiniMapConfig miniMapConfig, CelestialConfig celestialConfig) {
+        miniMapCFG = miniMapConfig;
+        celestCFG = celestialConfig;
         
         if (SpaceProject.isMobile()) {
             miniMapPosition = MiniMapPosition.topLeft;
         }
-        drawScaleTimer = new SimpleTimer(cfg.drawScaleTimer);
+        drawScaleTimer = new SimpleTimer(miniMapCFG.drawScaleTimer);
         
         updateMapPosition();
         resetMapScale();
@@ -67,8 +70,6 @@ public class MiniMap {
         float centerMapX = mapBacking.x + mapBacking.width / 2;
         float centerMapY = mapBacking.y + mapBacking.height / 2;
         
-        float loadDist = SpaceProject.celestCFG.loadSystemDistance;
-        
         
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -78,13 +79,13 @@ public class MiniMap {
         shape.begin(ShapeRenderer.ShapeType.Filled);
         {
             //draw backing
-            shape.setColor(cfg.backingColor);
+            shape.setColor(miniMapCFG.backingColor);
             shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, mapBacking.height);
             
             
             //draw mouse pos
             if (mapState == MapState.full) {
-                shape.setColor(cfg.mouseColor);
+                shape.setColor(miniMapCFG.mouseColor);
                 int mX = Gdx.input.getX();
                 int mY = Gdx.graphics.getHeight() - Gdx.input.getY();
                 if (mapBacking.contains(mX, mY)) {
@@ -95,21 +96,21 @@ public class MiniMap {
             
             
             //draw grid X
-            shape.setColor(cfg.gridColor);
+            shape.setColor(miniMapCFG.gridColor);
             int halfWidth = (int) (((mapBacking.width / 2)));
-            int startX = (int) ((-halfWidth * mapScale) + MyScreenAdapter.cam.position.x) / cfg.gridSize;
-            int endX = (int) ((halfWidth * mapScale) + MyScreenAdapter.cam.position.x) / cfg.gridSize;
+            int startX = (int) ((-halfWidth * mapScale) + MyScreenAdapter.cam.position.x) / miniMapCFG.gridSize;
+            int endX = (int) ((halfWidth * mapScale) + MyScreenAdapter.cam.position.x) / miniMapCFG.gridSize;
             for (int i = startX; i < endX + 1; i++) {
-                float finalX = (((i * cfg.gridSize) - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
+                float finalX = (((i * miniMapCFG.gridSize) - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
                 shape.rect(finalX, mapBacking.y, 1, mapBacking.height);
             }
             
             // draw grid Y
             int halfHeight = (int) (((mapBacking.height / 2)));
-            int startY = (int) ((-halfHeight * mapScale) + MyScreenAdapter.cam.position.y) / cfg.gridSize;
-            int endY = (int) ((halfHeight * mapScale) + MyScreenAdapter.cam.position.y) / cfg.gridSize;
+            int startY = (int) ((-halfHeight * mapScale) + MyScreenAdapter.cam.position.y) / miniMapCFG.gridSize;
+            int endY = (int) ((halfHeight * mapScale) + MyScreenAdapter.cam.position.y) / miniMapCFG.gridSize;
             for (int i = startY; i < endY + 1; i++) {
-                float finalY = (((i * cfg.gridSize) - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
+                float finalY = (((i * miniMapCFG.gridSize) - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
                 shape.rect(mapBacking.x, finalY, mapBacking.width, 1);
             }
         }
@@ -118,10 +119,10 @@ public class MiniMap {
         
         shape.begin(ShapeRenderer.ShapeType.Line);
         {
-            boolean drawOrbit = mapScale <= cfg.lodRenderOrbitPathScale;
+            boolean drawOrbit = mapScale <= miniMapCFG.lodRenderOrbitPathScale;
             if (drawOrbit) {
                 if (entities != null) {
-                    shape.setColor(cfg.orbitPath);
+                    shape.setColor(miniMapCFG.orbitPath);
                     for (Entity mapEntity : entities) {
                         
                         Vector2 screenPos = Mappers.transform.get(mapEntity).pos;
@@ -145,14 +146,14 @@ public class MiniMap {
             
             //debug
             if (debugDrawLoadDist) {
-                shape.setColor(cfg.debugLoadDistColor);
+                shape.setColor(miniMapCFG.debugLoadDistColor);
                 if (GameScreen.inSpace()) {
                     for (Vector2 p : GameScreen.universe.points) {
                         // n = relative pos / scale + mapPos
                         float x = ((p.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
                         float y = ((p.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
                         
-                        shape.circle(x, y, loadDist / mapScale);
+                        shape.circle(x, y, celestCFG.loadSystemDistance / mapScale);
                     }
                 }
             }
@@ -164,8 +165,10 @@ public class MiniMap {
         {
             //draw all celestial bodies
             if (GameScreen.inSpace()) {
+                float loadDist = celestCFG.loadSystemDistance;
+                loadDist *= loadDist;
                 for (Vector2 p : GameScreen.universe.points) {
-                    if (p.dst2(MyScreenAdapter.cam.position.x, MyScreenAdapter.cam.position.y) < (loadDist * loadDist)) {
+                    if (p.dst2(MyScreenAdapter.cam.position.x, MyScreenAdapter.cam.position.y) < loadDist) {
                         continue;
                     }
                     
@@ -175,7 +178,7 @@ public class MiniMap {
                     
                     if (mapBacking.contains(x, y)) {
                         shape.setColor(1, 1, 1, 1);//TODO: dynamic color based on celestial body type
-                        shape.circle(x, y, cfg.celestialMarkerSize);
+                        shape.circle(x, y, miniMapCFG.celestialMarkerSize);
                     }
                 }
             }
@@ -223,11 +226,11 @@ public class MiniMap {
             
             
             //draw border
-            shape.setColor(cfg.borderColor);
-            shape.rect(mapBacking.x, mapBacking.height + mapBacking.y - cfg.borderWidth, mapBacking.width, cfg.borderWidth);//top
-            shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, cfg.borderWidth);//bottom
-            shape.rect(mapBacking.x, mapBacking.y, cfg.borderWidth, mapBacking.height);//left
-            shape.rect(mapBacking.width + mapBacking.x - cfg.borderWidth, mapBacking.y, cfg.borderWidth, mapBacking.height);//right
+            shape.setColor(miniMapCFG.borderColor);
+            shape.rect(mapBacking.x, mapBacking.height + mapBacking.y - miniMapCFG.borderWidth, mapBacking.width, miniMapCFG.borderWidth);//top
+            shape.rect(mapBacking.x, mapBacking.y, mapBacking.width, miniMapCFG.borderWidth);//bottom
+            shape.rect(mapBacking.x, mapBacking.y, miniMapCFG.borderWidth, mapBacking.height);//left
+            shape.rect(mapBacking.width + mapBacking.x - miniMapCFG.borderWidth, mapBacking.y, miniMapCFG.borderWidth, mapBacking.height);//right
         }
         shape.end();
         
@@ -283,18 +286,18 @@ public class MiniMap {
     
     private Rectangle getMiniMapRectangle() {
         if (mapState == MapState.full) {
-            return new Rectangle(cfg.edgePad, cfg.edgePad, Gdx.graphics.getWidth() - cfg.edgePad * 2, Gdx.graphics.getHeight() - cfg.edgePad * 2);
+            return new Rectangle(miniMapCFG.edgePad, miniMapCFG.edgePad, Gdx.graphics.getWidth() - miniMapCFG.edgePad * 2, Gdx.graphics.getHeight() - miniMapCFG.edgePad * 2);
         } else {
             
             switch (miniMapPosition) {
                 case topLeft:
-                    return new Rectangle(cfg.miniEdgePad, Gdx.graphics.getHeight() - cfg.miniHeight - cfg.miniEdgePad, cfg.miniWidth, cfg.miniHeight);
+                    return new Rectangle(miniMapCFG.miniEdgePad, Gdx.graphics.getHeight() - miniMapCFG.miniHeight - miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
                 case topRight:
-                    return new Rectangle(Gdx.graphics.getWidth() - cfg.miniWidth - cfg.miniEdgePad, Gdx.graphics.getHeight() - cfg.miniHeight - cfg.miniEdgePad, cfg.miniWidth, cfg.miniHeight);
+                    return new Rectangle(Gdx.graphics.getWidth() - miniMapCFG.miniWidth - miniMapCFG.miniEdgePad, Gdx.graphics.getHeight() - miniMapCFG.miniHeight - miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
                 case bottomLeft:
-                    return new Rectangle(cfg.miniEdgePad, cfg.miniEdgePad, cfg.miniWidth, cfg.miniHeight);
+                    return new Rectangle(miniMapCFG.miniEdgePad, miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
                 case bottomRight:
-                    return new Rectangle(Gdx.graphics.getWidth() - cfg.miniWidth - cfg.miniEdgePad, cfg.miniEdgePad, cfg.miniWidth, cfg.miniHeight);
+                    return new Rectangle(Gdx.graphics.getWidth() - miniMapCFG.miniWidth - miniMapCFG.miniEdgePad, miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
             }
         }
         return new Rectangle();
@@ -302,9 +305,9 @@ public class MiniMap {
     
     
     public void scrollMiniMap(int amount) {
-        float scrollAmount = amount * mapScale / cfg.zoomMultiplier;
+        float scrollAmount = amount * mapScale / miniMapCFG.zoomMultiplier;
         mapScale += scrollAmount;
-        mapScale = MathUtils.clamp(mapScale, cfg.minScale, cfg.maxSale);
+        mapScale = MathUtils.clamp(mapScale, miniMapCFG.minScale, miniMapCFG.maxSale);
         
         drawScaleTimer.reset();
     }
@@ -328,7 +331,7 @@ public class MiniMap {
     
     
     public void resetMapScale() {
-        mapScale = cfg.mapScale;
+        mapScale = miniMapCFG.mapScale;
         drawScaleTimer.reset();
     }
     

@@ -31,6 +31,7 @@ import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.config.EntityConfig;
 import com.spaceproject.generation.BodyFactory;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.GameScreen;
@@ -43,6 +44,7 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class ControlSystem extends IteratingSystem {
     
+    private EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
     private ImmutableArray<Entity> vehicles;
     private ImmutableArray<Entity> planets;
     
@@ -384,7 +386,7 @@ public class ControlSystem extends IteratingSystem {
                 
                 // remove character
                 getEngine().removeEntity(characterEntity);
-                GameScreen.world.destroyBody(characterEntity.getComponent(PhysicsComponent.class).body);
+                GameScreen.box2dWorld.destroyBody(characterEntity.getComponent(PhysicsComponent.class).body);
                 characterEntity.getComponent(PhysicsComponent.class).body = null;
                 
                 control.timerVehicle.reset();
@@ -458,7 +460,7 @@ public class ControlSystem extends IteratingSystem {
         
         ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
         screenTrans.takeOffStage = ScreenTransitionComponent.TakeOffAnimStage.screenEffectFadeIn;
-        screenTrans.timer = new SimpleTimer(SpaceProject.entityCFG.shrinkGrowAnimTime, true);
+        screenTrans.timer = new SimpleTimer(entityCFG.shrinkGrowAnimTime, true);
         screenTrans.animInterpolation = Interpolation.pow2;
         entity.add(screenTrans);
         
@@ -480,7 +482,7 @@ public class ControlSystem extends IteratingSystem {
                 ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
                 screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.shrink;//begin animation
                 screenTrans.planet = planet;
-                screenTrans.timer = new SimpleTimer(SpaceProject.entityCFG.shrinkGrowAnimTime, true);
+                screenTrans.timer = new SimpleTimer(entityCFG.shrinkGrowAnimTime, true);
                 screenTrans.animInterpolation = Interpolation.sineIn;
                 entity.add(screenTrans);
                 
@@ -523,7 +525,7 @@ public class ControlSystem extends IteratingSystem {
             //accumulate size
             growCannon.size = growCannon.growRateTimer.ratio() * growCannon.maxSize;
             growCannon.size = MathUtils.clamp(growCannon.size, 1, growCannon.maxSize);
-            growCannon.projectile.getComponent(TextureComponent.class).scale = growCannon.size * SpaceProject.entityCFG.renderScale;
+            growCannon.projectile.getComponent(TextureComponent.class).scale = growCannon.size * entityCFG.renderScale;
             //growCannon.projectile.getComponent(PhysicsComponent.class).poly.setScale(growCannon.size, growCannon.size);
             
             //damage modifier

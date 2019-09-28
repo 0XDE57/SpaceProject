@@ -42,7 +42,7 @@ public class CelestialConfig extends Config {
     //distance to check when to load or unload planets
     public float loadSystemDistance;
     
-    public int maxGenThreads;
+    public int maxGenThreads;//TODO; move into engine config
     
     public void loadDefault() {
         //system gen

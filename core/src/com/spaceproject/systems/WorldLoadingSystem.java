@@ -7,6 +7,7 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.PlanetComponent;
+import com.spaceproject.config.WorldConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.IRequireGameContext;
@@ -14,7 +15,8 @@ import com.spaceproject.utility.Mappers;
 
 public class WorldLoadingSystem extends EntitySystem implements IRequireGameContext {
     
-    int mapSize;
+    private WorldConfig worldCFG;
+    private int mapSize;
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -24,13 +26,14 @@ public class WorldLoadingSystem extends EntitySystem implements IRequireGameCont
     @Override
     public void initContext(GameScreen gameScreen) {
         mapSize = gameScreen.getCurrentPlanet().getComponent(PlanetComponent.class).mapSize;
+        worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
     }
     
     private void initMobs(Engine engine) {
         //a placeholder to add dummy objects for now
         
         // test ships
-        int position = mapSize * SpaceProject.worldCFG.tileSize / 2;//set  position to middle of planet
+        int position = mapSize * worldCFG.tileSize / 2;//set  position to middle of planet
         
         engine.addEntity(EntityFactory.createShip3(position + 10, position + 10));
         engine.addEntity(EntityFactory.createShip3(position - 10, position + 10));

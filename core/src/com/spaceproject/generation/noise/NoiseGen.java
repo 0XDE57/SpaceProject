@@ -3,7 +3,6 @@ package com.spaceproject.generation.noise;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.spaceproject.SpaceProject;
 import com.spaceproject.ui.Tile;
 import com.spaceproject.utility.MyMath;
 
@@ -104,9 +103,8 @@ public class NoiseGen {
         
     }
     
-    public static int[][] createPixelatedTileMap(int[][] tileMap, ArrayList<Tile> tiles) {
+    public static int[][] createPixelatedTileMap(int[][] tileMap, ArrayList<Tile> tiles, int chunkSize) {
         
-        int chunkSize = SpaceProject.worldCFG.chunkSize;
         int chunks = tileMap.length / chunkSize;
         int[][] pixelatedMap = new int[chunks][chunks];
         

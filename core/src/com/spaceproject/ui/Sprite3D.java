@@ -15,7 +15,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
-import com.spaceproject.SpaceProject;
 
 
 //based on: xoppa.github.io/blog/a-simple-card-game/
@@ -29,7 +28,7 @@ public class Sprite3D extends Renderable implements Disposable {
     public float angle;
     
     
-    public Sprite3D(Texture frontTex, Texture backTex) {
+    public Sprite3D(Texture frontTex, Texture backTex, float renderScale) {
         //combine textures: Sprites loaded into material texture must come from same texture
         int width = frontTex.getWidth(), height = frontTex.getHeight();
         Texture combinedTex = combineTextures(frontTex, backTex);
@@ -44,8 +43,8 @@ public class Sprite3D extends Renderable implements Disposable {
                 //,FloatAttribute.createAlphaTest(0.5f)
         );
         
-        float scaledWidth = front.getWidth() * SpaceProject.entityCFG.renderScale;
-        float scaledHeight = front.getHeight() * SpaceProject.entityCFG.renderScale;
+        float scaledWidth = front.getWidth() * renderScale;
+        float scaledHeight = front.getHeight() * renderScale;
         front.setSize(scaledWidth, scaledHeight);
         back.setSize(scaledWidth, scaledHeight);
         

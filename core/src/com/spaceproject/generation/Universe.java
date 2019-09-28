@@ -8,15 +8,19 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.config.CelestialConfig;
+import com.spaceproject.screens.GameScreen;
 
 
 public class Universe {
     
+    private static CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
     public Array<Vector2> points;
     public Array<AstroBody> objects = new Array<AstroBody>();
+    private static boolean debugForceCreateNearPlayer = true;
     
     public Universe() {
-        this(generatePoints());
+        this(generatePoints(GameScreen.SEED, celestCFG.numPoints, celestCFG.pointGenRange, celestCFG.minPointDistance));
     }
     
     public Universe(Array<Vector2> points) {
@@ -25,23 +29,15 @@ public class Universe {
         }
         this.points = points;
         //saveToJson();
-        
     }
     
     
-    private static Array<Vector2> generatePoints() {
-        MathUtils.random.setSeed(SpaceProject.SEED);
+    private static Array<Vector2> generatePoints(long seed, int numStars, int genRange, float dist) {
+        MathUtils.random.setSeed(seed);
         Array<Vector2> points = new Array<Vector2>();
         
-        // how many stars TRY to create(does not guarantee this many points will actually be generated)
-        int numStars = SpaceProject.celestCFG.numPoints;
-        // range from origin(0,0) to create points
-        int genRange = SpaceProject.celestCFG.pointGenRange;
-        // minimum distance between points
-        float dist = SpaceProject.celestCFG.minPointDistance;
         dist *= dist;//squared for dst2
         
-        // generate points
         for (int i = 0; i < numStars; i++) {
             Vector2 newPoint;
             
@@ -76,8 +72,9 @@ public class Universe {
                 points.add(newPoint);
         }
         
-        
-        points.add(new Vector2(1000, 1000));//TODO: system near origin for debug, don't forget about me
+        if (debugForceCreateNearPlayer) {
+            points.add(new Vector2(1000, 1000));//TODO: system near origin for debug, don't forget about me
+        }
         
         return points;
     }

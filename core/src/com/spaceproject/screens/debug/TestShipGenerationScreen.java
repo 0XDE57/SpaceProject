@@ -7,8 +7,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 
@@ -35,7 +35,7 @@ public class TestShipGenerationScreen extends ScreenAdapter {
     
     private ArrayList<Texture> generateShips() {
         ArrayList<Texture> tex = new ArrayList<Texture>();
-        MathUtils.random.setSeed(SpaceProject.SEED);
+        MathUtils.random.setSeed(GameScreen.SEED);
         
         while (tex.size() < numShips) {
             Texture body = TextureFactory.generateShip(MathUtils.random(Long.MAX_VALUE), MathUtils.random(10, 36));
@@ -83,7 +83,7 @@ public class TestShipGenerationScreen extends ScreenAdapter {
         
         if (Gdx.input.isKeyJustPressed(Keys.R)) {
             //generate new set of ships
-            SpaceProject.SEED = MathUtils.random(Long.MAX_VALUE);
+            GameScreen.SEED = MathUtils.random(Long.MAX_VALUE);
             ships.clear();
             ships = generateShips();
         }

@@ -20,9 +20,10 @@ import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
-import com.spaceproject.config.ConfigManager;
+import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.SysCFG;
 import com.spaceproject.config.SystemsConfig;
+import com.spaceproject.config.WorldConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.Universe;
@@ -39,6 +40,8 @@ import java.util.concurrent.TimeUnit;
 
 public class GameScreen extends MyScreenAdapter {
     
+    public static long SEED = 4; //test seed
+    
     public Engine engine;//, persistenceEngine;
     
     private static long gameTimeCurrent, gameTimeStart, timePaused;
@@ -48,17 +51,19 @@ public class GameScreen extends MyScreenAdapter {
     private Entity currentPlanet = null;
     
     
-    public static World world;
+    public static World box2dWorld;
     public static Universe universe;
     public static NoiseManager noiseManager;
     
     private ShaderProgram shader = null;
     
-    
+    private SystemsConfig systemsCFG;
     
     
     public GameScreen(boolean inSpace) {
         GameScreen.inSpace = inSpace;
+        systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
+        CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
         
         //init scene2d/VisUI
         if (VisUI.isLoaded())
@@ -83,9 +88,9 @@ public class GameScreen extends MyScreenAdapter {
         
         
         engine = new Engine();
-        world = new World(new Vector2(), true);
+        box2dWorld = new World(new Vector2(), true);
         universe = new Universe();
-        noiseManager = new NoiseManager(SpaceProject.celestCFG.maxGenThreads);
+        noiseManager = new NoiseManager(celestCFG.maxGenThreads);
         
         // load test default values
         Entity playerTESTSHIP = EntityFactory.createPlayerShip(0, 0);
@@ -113,7 +118,7 @@ public class GameScreen extends MyScreenAdapter {
         inSpace = true;
         currentPlanet = null;
         
-        SystemLoader.loadSystems(this, engine, inSpace, SpaceProject.systemsCFG);
+        SystemLoader.loadSystems(this, engine, inSpace, systemsCFG);
         
         
         //add player
@@ -129,12 +134,14 @@ public class GameScreen extends MyScreenAdapter {
         Misc.printObjectFields(planet.getComponent(PlanetComponent.class));
         //Misc.printEntity(transitionComponent.transitioningEntity);
         
-        SystemLoader.loadSystems(this, engine, inSpace, SpaceProject.systemsCFG);
+        SystemLoader.loadSystems(this, engine, inSpace, systemsCFG);
         
         
         // add player
+        //TODo: this player init stuff is part of transition, should be part of sync / load process
+        WorldConfig worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
         int mapSize = planet.getComponent(PlanetComponent.class).mapSize;
-        int position = mapSize * SpaceProject.worldCFG.tileSize / 2;//set position to middle of planet
+        int position = mapSize * worldCFG.tileSize / 2;//set position to middle of planet
         Body body = transitioningEntity.getComponent(PhysicsComponent.class).body;
         body.setTransform(position, position, body.getAngle());
         //body.setAngularDamping(30);
@@ -267,9 +274,9 @@ public class GameScreen extends MyScreenAdapter {
         Gdx.app.log(this.getClass().getSimpleName(), "paused [" + pause + "]");
         
         
-        SystemsConfig systemsConfig = SpaceProject.systemsCFG;
+        
         for (EntitySystem system : engine.getSystems()) {
-            SysCFG sysCFG = systemsConfig.getConfig(system.getClass().getName());
+            SysCFG sysCFG = systemsCFG.getConfig(system.getClass().getName());
             if (sysCFG.isHaltOnGamePause()) {
                 system.setProcessing(!isPaused);
             }
@@ -297,7 +304,7 @@ public class GameScreen extends MyScreenAdapter {
         engine.removeAllEntities();
         engine = null;
         
-        world.dispose();
+        box2dWorld.dispose();
         
     }
     

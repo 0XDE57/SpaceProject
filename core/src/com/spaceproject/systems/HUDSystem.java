@@ -32,6 +32,8 @@ import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.config.CelestialConfig;
+import com.spaceproject.config.KeyConfig;
 import com.spaceproject.config.MiniMapConfig;
 import com.spaceproject.config.UIConfig;
 import com.spaceproject.screens.GameScreen;
@@ -70,6 +72,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     private ScreenTransitionOverlay screenTransitionOverlay;
     private UIConfig uiCFG;
+    private KeyConfig keyCFG;
     
     public HUDSystem() {
         cam = MyScreenAdapter.cam;
@@ -78,9 +81,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         stage = new Stage(new ScreenViewport());
         
         uiCFG = SpaceProject.configManager.getConfig(UIConfig.class);
+        keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     
         MiniMapConfig miniMapConfig = SpaceProject.configManager.getConfig(MiniMapConfig.class);
-        miniMap = new MiniMap(miniMapConfig);
+        CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
+        miniMap = new MiniMap(miniMapConfig, celestCFG);
         
         screenTransitionOverlay = new ScreenTransitionOverlay();
     }
@@ -174,15 +179,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     private void CheckInput() {
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleHUD)) {
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleHUD)) {
             drawHud = !drawHud;
             Gdx.app.log(this.getClass().getSimpleName(), "HUD: " + drawHud);
         }
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleEdgeMap)) {
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleEdgeMap)) {
             drawEdgeMap = !drawEdgeMap;
             Gdx.app.log(this.getClass().getSimpleName(), "Edge mapState: " + drawEdgeMap);
         }
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.toggleSpaceMap)) {
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleSpaceMap)) {
             miniMap.cycleMapState();
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {

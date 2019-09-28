@@ -1,6 +1,8 @@
 package com.spaceproject.generation.noise;
 
 import com.badlogic.gdx.Gdx;
+import com.spaceproject.SpaceProject;
+import com.spaceproject.config.WorldConfig;
 import com.spaceproject.ui.Tile;
 import com.spaceproject.components.PlanetComponent;
 
@@ -26,7 +28,8 @@ public class NoiseManager implements INoiseGenListener {
             return;
         }
         
-        noiseThreadPool.execute(new NoiseThread(planet.scale, planet.octaves, planet.persistence, planet.lacunarity, seed, planet.mapSize, Tile.defaultTiles));
+        int chunkSize = SpaceProject.configManager.getConfig(WorldConfig.class).chunkSize;
+        noiseThreadPool.execute(new NoiseThread(planet.scale, planet.octaves, planet.persistence, planet.lacunarity, seed, planet.mapSize, chunkSize, Tile.defaultTiles));
     }
     
     public NoiseBuffer getNoiseForSeed(long seed) {

@@ -15,7 +15,7 @@ public class BodyFactory {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(x, y);
-        body = GameScreen.world.createBody(bodyDef);
+        body = GameScreen.box2dWorld.createBody(bodyDef);
         
         CircleShape circle = new CircleShape();
         circle.setRadius(radius);
@@ -38,7 +38,7 @@ public class BodyFactory {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(x, y);
-        body = GameScreen.world.createBody(bodyDef);
+        body = GameScreen.box2dWorld.createBody(bodyDef);
         
         PolygonShape poly = new PolygonShape();
         poly.setAsBox(width/2, height/2);

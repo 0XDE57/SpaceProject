@@ -14,16 +14,17 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.ui.Tile;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.config.WorldConfig;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.utility.Mappers;
+import com.spaceproject.ui.Tile;
 import com.spaceproject.utility.IRequireGameContext;
+import com.spaceproject.utility.Mappers;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -55,11 +56,11 @@ public class WorldRenderingSystem extends IteratingSystem implements IRequireGam
     private int surround; //how many tiles to draw around the camera
     
     private Texture tileTex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));
-    
+    WorldConfig worldCFG;
     
     public WorldRenderingSystem() {
         super(Family.all(TransformComponent.class).one(TextureComponent.class, Sprite3DComponent.class).get());
-        
+        worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
         this.cam = GameScreen.cam;
         this.spriteBatch = GameScreen.batch;
         modelBatch = new ModelBatch();
@@ -103,7 +104,7 @@ public class WorldRenderingSystem extends IteratingSystem implements IRequireGam
         
         
         //render background tiles
-        drawTiles();
+        drawTiles(worldCFG.tileSize);
         
         
         //draw game objects
@@ -145,10 +146,9 @@ public class WorldRenderingSystem extends IteratingSystem implements IRequireGam
     }
     
     
-    private void drawTiles() {
+    private void drawTiles(int tileSize) {
         
         // calculate tile that the camera is in
-        int tileSize = SpaceProject.worldCFG.tileSize;
         int centerX = (int) (cam.position.x / tileSize);
         int centerY = (int) (cam.position.y / tileSize);
         

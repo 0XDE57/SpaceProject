@@ -9,14 +9,16 @@ import com.badlogic.gdx.InputProcessor;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.config.KeyConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.IRequireGameContext;
 
 public class DesktopInputSystem extends EntitySystem implements InputProcessor, IRequireGameContext {
     
+    KeyConfig keyCFG;
     private ImmutableArray<Entity> players;
     
     @Override
@@ -27,6 +29,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor, 
     @Override
     public void addedToEngine(com.badlogic.ashley.core.Engine engine) {
         players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
+        keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     }
     
     
@@ -45,32 +48,32 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor, 
         
         //movement
         control.movementMultiplier = 1; // set multiplier to full power because a key switch is on or off
-        if (keycode == SpaceProject.keyCFG.forward) {
+        if (keycode == keyCFG.forward) {
             control.moveForward = keyDown;
             handled = true;
         }
-        if (keycode == SpaceProject.keyCFG.right) {
+        if (keycode == keyCFG.right) {
             control.moveRight = keyDown;
             handled = true;
         }
-        if (keycode == SpaceProject.keyCFG.left) {
+        if (keycode == keyCFG.left) {
             control.moveLeft = keyDown;
             handled = true;
         }
-        if (keycode == SpaceProject.keyCFG.back) {
+        if (keycode == keyCFG.back) {
             control.moveBack = keyDown;
             handled = true;
         }
         
-        if (keycode == SpaceProject.keyCFG.defend) {
+        if (keycode == keyCFG.defend) {
             control.defend = keyDown;
             handled = true;
         }
-        if (keycode == SpaceProject.keyCFG.changeVehicle) {
+        if (keycode == keyCFG.changeVehicle) {
             control.changeVehicle = keyDown;
             handled = true;
         }
-        if (keycode == SpaceProject.keyCFG.land) {
+        if (keycode == keyCFG.land) {
             control.transition = keyDown;
             handled = true;
         }
@@ -91,31 +94,31 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor, 
     }
     
     
-    private static void cameraControls(float delta) {
+    private void cameraControls(float delta) {
         //zoom test
-        if (Gdx.input.isKeyPressed(SpaceProject.keyCFG.zoomSpace)) {
+        if (Gdx.input.isKeyPressed(keyCFG.zoomSpace)) {
             if (MyScreenAdapter.cam.zoom >= 10f) {
                 MyScreenAdapter.setZoomTarget(60);
             } else {
                 MyScreenAdapter.setZoomTarget(10);
             }
         }
-        if (Gdx.input.isKeyPressed(SpaceProject.keyCFG.resetZoom)) {
+        if (Gdx.input.isKeyPressed(keyCFG.resetZoom)) {
             MyScreenAdapter.setZoomTarget(1);
         }
-        if (Gdx.input.isKeyPressed(SpaceProject.keyCFG.zoomCharacter)) {
+        if (Gdx.input.isKeyPressed(keyCFG.zoomCharacter)) {
             MyScreenAdapter.setZoomTarget(0.1f);
         }
-        if (Gdx.input.isKeyPressed(SpaceProject.keyCFG.zoomOut)) {
+        if (Gdx.input.isKeyPressed(keyCFG.zoomOut)) {
             MyScreenAdapter.setZoomTarget(MyScreenAdapter.cam.zoom + 0.001f);
         }
-        if (Gdx.input.isKeyPressed(SpaceProject.keyCFG.zoomIn)) {
+        if (Gdx.input.isKeyPressed(keyCFG.zoomIn)) {
             MyScreenAdapter.setZoomTarget(MyScreenAdapter.cam.zoom - 0.001f);
         }
-        if (Gdx.input.isKeyPressed(SpaceProject.keyCFG.rotateRight)) {
+        if (Gdx.input.isKeyPressed(keyCFG.rotateRight)) {
             MyScreenAdapter.cam.rotate(5f * delta);
         }
-        if (Gdx.input.isKeyPressed(SpaceProject.keyCFG.rotateLeft)) {
+        if (Gdx.input.isKeyPressed(keyCFG.rotateLeft)) {
             MyScreenAdapter.cam.rotate(-5f * delta);
         }
         

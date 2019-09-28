@@ -11,10 +11,11 @@ import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.config.WorldConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
-import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.IRequireGameContext;
+import com.spaceproject.utility.Mappers;
 
 public class WorldWrapSystem extends EntitySystem implements IRequireGameContext {
     /**
@@ -42,16 +43,16 @@ public class WorldWrapSystem extends EntitySystem implements IRequireGameContext
      * https://en.wikipedia.org/wiki/Toroidal_coordinates
      * http://jsfiddle.net/fg5bLh6e/
      */
-    
-    int wrap;
-    int offsetX, offsetY;
-    
-    ImmutableArray<Entity> entities;
+
+    private int wrap;
+    private int offsetX, offsetY;
+    private ImmutableArray<Entity> entities;
     
     @Override
     public void initContext(GameScreen gameScreen) {
         int mapSize = gameScreen.getCurrentPlanet().getComponent(PlanetComponent.class).mapSize;
-        wrap = SpaceProject.worldCFG.tileSize * mapSize;
+        WorldConfig worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
+        wrap = worldCFG.tileSize * mapSize;
     }
     
     @Override

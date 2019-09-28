@@ -18,6 +18,7 @@ import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.generation.AstroBody;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureFactory;
@@ -30,15 +31,14 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     
-    //private Universe universe;
+    private CelestialConfig celestCFG;
     private ImmutableArray<Entity> loadedAstronomicalBodies;
-    
-    
-    SimpleTimer checkStarsTimer;//this system might make sense as an interval system instead of timer
+    private SimpleTimer checkStarsTimer;
     
     
     @Override
     public void addedToEngine(Engine engine) {
+        celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
         
         // currently loaded stars/planets
         loadedAstronomicalBodies = engine.getEntitiesFor(Family.all(BarycenterComponent.class, TransformComponent.class).get());
@@ -116,7 +116,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     @Override
     public void update(float delta) {
         // load and unload stars
-        updateStars();
+        updateStars(celestCFG.loadSystemDistance);
         
         // update/replace textures
         updatePlanetTextures();
@@ -149,10 +149,8 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     }
     
     
-    private void updateStars() {
+    private void updateStars(float loadDistance) {
         if (checkStarsTimer.tryEvent()) {
-            //distance to check when to load planets
-            int loadDistance = (int) SpaceProject.celestCFG.loadSystemDistance;
             loadDistance *= loadDistance;//square for dst2
             
             // remove stars from engine that are too far
@@ -163,7 +161,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         }
     }
     
-    private void loadCloseEntities(int loadDistance) {
+    private void loadCloseEntities(float loadDistance) {
         for (AstroBody astroBodies : GameScreen.universe.objects) {
             //check if point is close enough to be loaded
             if (Vector2.dst2(astroBodies.x, astroBodies.y, GameScreen.cam.position.x, GameScreen.cam.position.y) < loadDistance) {
@@ -188,7 +186,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         }
     }
     
-    private void unloadFarEntities(int loadDistance) {
+    private void unloadFarEntities(float loadDistance) {
         for (Entity entity : loadedAstronomicalBodies) {
             TransformComponent t = Mappers.transform.get(entity);
             if (Vector2.dst2(t.pos.x, t.pos.y, GameScreen.cam.position.x, GameScreen.cam.position.y) > loadDistance) {

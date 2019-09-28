@@ -17,7 +17,7 @@ import com.kotcrab.vis.ui.widget.tabbedpane.Tab;
 import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPane;
 import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPaneAdapter;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.config.MiniMapConfig;
+import com.spaceproject.config.KeyConfig;
 import com.spaceproject.ui.TestShapeRenderActor;
 import com.spaceproject.ui.menu.tabs.ConfigManagerTab;
 import com.spaceproject.ui.menu.tabs.ConfigTab;
@@ -120,7 +120,7 @@ public class GameMenu extends VisWindow {
         tabbedPane.add(new ConfigVeiwerTab(this, SpaceProject.configManager.getConfigs()));
         
         
-        keyConfigTab = new KeyConfigTab(this, "Input Settings", SpaceProject.keyCFG);
+        keyConfigTab = new KeyConfigTab(this, "Input Settings", SpaceProject.configManager.getConfig(KeyConfig.class));
         tabbedPane.add(keyConfigTab);
         
         //tabbedPane.add(createConfigTab(new TestConfig()));

@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.config.KeyConfig;
 
 public abstract class MyScreenAdapter extends ScreenAdapter implements InputProcessor {
     
@@ -41,9 +42,12 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     //private static float panSpeed/panTarget(lerp to entity)
     
     private InputMultiplexer inputMultiplexer;
+    private KeyConfig keyCFG;
     
     public MyScreenAdapter() {
         Gdx.app.log(this.getClass().getSimpleName(), "ScreenAdapter Reset.");
+        
+        keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
         
         cam = new OrthographicCamera();
         batch = new SpriteBatch();
@@ -77,12 +81,12 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
         
         
         //fullscreen toggle
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.fullscreen)) {
+        if (Gdx.input.isKeyJustPressed(keyCFG.fullscreen)) {
             MyScreenAdapter.toggleFullscreen();
         }
         
         //vsync toggle
-        if (Gdx.input.isKeyJustPressed(SpaceProject.keyCFG.vsync)) {
+        if (Gdx.input.isKeyJustPressed(keyCFG.vsync)) {
             MyScreenAdapter.toggleVsync();
         }
         
