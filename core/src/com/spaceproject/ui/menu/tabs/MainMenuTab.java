@@ -23,11 +23,11 @@ public class MainMenuTab extends HotKeyTab {
         super("GameMenu", Input.Keys.ESCAPE);
         
         
-        TextButton btnGotoMain = new TextButton("main gameMenu", VisUI.getSkin());
+        TextButton btnGotoMain = new TextButton("main menu", VisUI.getSkin());
         btnGotoMain.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Dialogs.showOptionDialog(gameMenu.getStage(), "Exit", "go to the main gameMenu?", Dialogs.OptionDialogType.YES_NO, new OptionDialogAdapter() {
+                Dialogs.showOptionDialog(gameMenu.getStage(), "Exit", "go to the main menu?", Dialogs.OptionDialogType.YES_NO, new OptionDialogAdapter() {
                     @Override
                     public void yes() {
                         game.setScreen(new TitleScreen(game));
