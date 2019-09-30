@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.KeyConfig;
 
 public abstract class MyScreenAdapter extends ScreenAdapter implements InputProcessor {
@@ -23,18 +24,12 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     public static ShapeRenderer shape;
     public static ExtendViewport viewport;
     
-    // rendering resolution
-    private final static float VIRTUAL_HEIGHT  = 40f;//meters
-    public final static float SCALE = 60f; //todo: move to engine config
-    private final static float INV_SCALE = 1.f / SCALE;
-    private final static float VIEWPORT_WIDTH = 1280 * INV_SCALE;//todo: move to engine config
-    private final static float VIEWPORT_HEIGHT = 720 * INV_SCALE;//todo: move to engine config
-    
+
     //save window size for switching between fullscreen and windowed
-    private static int prevWindowWidth = (int) VIEWPORT_WIDTH;
-    private static int prevWindowHeight = (int) VIEWPORT_HEIGHT;
+    private int prevWindowWidth;
+    private int prevWindowHeight;
     
-    private static boolean vsync = true;//todo: move to engine config
+    //private static boolean vsync = true;//todo: move to engine config
     
     
     private static float zoomTarget = 1;//todo: move to engine config
@@ -42,17 +37,25 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     //private static float panSpeed/panTarget(lerp to entity)
     
     private InputMultiplexer inputMultiplexer;
+    private EngineConfig engineCFG;
     private KeyConfig keyCFG;
     
     public MyScreenAdapter() {
         Gdx.app.log(this.getClass().getSimpleName(), "ScreenAdapter Reset.");
         
         keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
+        engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
+        // rendering resolution
+        float invScale = 1.0f / engineCFG.renderScale;
+        float viewportWidth = engineCFG.viewportWidth * invScale;
+        float viewportHeight = engineCFG.viewportHeight * invScale;
+        prevWindowWidth = (int) viewportWidth;
+        prevWindowHeight = (int) viewportHeight;
         
         cam = new OrthographicCamera();
         batch = new SpriteBatch();
         shape = new ShapeRenderer();
-        viewport = new ExtendViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, cam);
+        viewport = new ExtendViewport(viewportWidth, viewportHeight, cam);
         viewport.apply();
         
         resetCamera();
@@ -80,18 +83,17 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
         
         //fullscreen toggle
         if (Gdx.input.isKeyJustPressed(keyCFG.fullscreen)) {
-            MyScreenAdapter.toggleFullscreen();
+            toggleFullscreen();
         }
         
         //vsync toggle
         if (Gdx.input.isKeyJustPressed(keyCFG.vsync)) {
-            MyScreenAdapter.toggleVsync();
+            toggleVsync();
         }
         
         //reset zoom
         if (Gdx.input.isButtonPressed(Buttons.MIDDLE)) {
-            cam.zoom = 1;
-            setZoomTarget(1);
+            resetCamera();
         }
         
     }
@@ -110,7 +112,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     /**
      * Switch between fullscreen and windowed mode.
      */
-    public static void toggleFullscreen() {
+    public void toggleFullscreen() {
         if (Gdx.graphics.isFullscreen()) {
             //set window to previous window size
             Gdx.graphics.setWindowedMode(prevWindowWidth, prevWindowHeight);
@@ -133,10 +135,10 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     /**
      * Turn vsync on or off
      */
-    public static void toggleVsync() {
-        vsync = !vsync;
-        Gdx.graphics.setVSync(vsync);
-        Gdx.app.log(MyScreenAdapter.class.getSimpleName(), "vsync = " + vsync);
+    private void toggleVsync() {
+        engineCFG.vsync = !engineCFG.vsync;
+        Gdx.graphics.setVSync(engineCFG.vsync);
+        Gdx.app.log(this.getClass().getSimpleName(), "vsync = " + engineCFG.vsync);
     }
     
     

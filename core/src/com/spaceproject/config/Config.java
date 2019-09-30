@@ -54,6 +54,14 @@ public abstract class Config {
             }
         } catch (SerializationException e) {
             Gdx.app.error(logSource, "Could not load: " + fileName, e);
+            //todo: handle missing field
+            //com.badlogic.gdx.utils.SerializationException: Field not found: scale
+            //if (e.detailMessage.contains(Field not found:) {
+            //  extract field
+            //  load default (badField = new Config.loadDefault().badField)
+            //}
+            //if (extra field) {
+            //  dont load field?
         } catch (Exception e) {
             Gdx.app.error(logSource, "Could not load: " + fileName, e);
         }

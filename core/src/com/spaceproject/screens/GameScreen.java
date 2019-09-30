@@ -20,7 +20,7 @@ import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
-import com.spaceproject.config.CelestialConfig;
+import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.SysCFG;
 import com.spaceproject.config.SystemsConfig;
 import com.spaceproject.config.WorldConfig;
@@ -63,7 +63,7 @@ public class GameScreen extends MyScreenAdapter {
     public GameScreen(boolean inSpace) {
         GameScreen.inSpace = inSpace;
         systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
-        CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
+        EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
         
         //init scene2d/VisUI
         if (VisUI.isLoaded())
@@ -90,7 +90,7 @@ public class GameScreen extends MyScreenAdapter {
         engine = new Engine();
         box2dWorld = new World(new Vector2(), true);
         universe = new Universe();
-        noiseManager = new NoiseManager(celestCFG.maxGenThreads);
+        noiseManager = new NoiseManager(engineCFG.maxNoiseGenThreads);
         
         // load test default values
         Entity playerTESTSHIP = EntityFactory.createPlayerShip(0, 0);

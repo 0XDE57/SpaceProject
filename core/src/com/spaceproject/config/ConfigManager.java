@@ -10,6 +10,7 @@ public class ConfigManager {
     
     public ConfigManager() {
         configs = new ArrayList<>();
+        configs.add(new EngineConfig());
         configs.add(new SystemsConfig());
         configs.add(new EntityConfig());
         configs.add(new CelestialConfig());

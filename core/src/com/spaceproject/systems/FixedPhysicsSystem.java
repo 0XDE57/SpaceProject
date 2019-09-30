@@ -6,8 +6,10 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.physics.box2d.World;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.config.EngineConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.PhysicsContactListener;
@@ -18,14 +20,11 @@ import com.spaceproject.utility.Mappers;
 // http://saltares.com/blog/games/fixing-your-timestep-in-libgdx-and-box2d/
 public class FixedPhysicsSystem extends EntitySystem implements IRequireGameContext {
     
-    private static final int VELOCITY_ITERATIONS = 6;//TODO: move to engine config
-    private static final int POSITION_ITERATIONS = 2;//TODO: move to engine config
-    private static final int STEP_PER_FRAME = 60;//TODO: move to engine config
-    private static final float TIME_STEP = 1 / (float) STEP_PER_FRAME;
-    private static float accumulator = 0f;
-    
-    //movement limit = 2 * units per step
-    //eg step of 60: 60 * 2 = 120,  max vel = 120
+    private EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
+    private int velocityIterations = engineCFG.physicsVelocityIterations;
+    private int positionIterations = engineCFG.physicsPositionIterations;
+    private float timeStep = 1 / (float) engineCFG.physicsStepPerFrame;
+    private float accumulator = 0f;
     
     private World world;
     
@@ -47,10 +46,10 @@ public class FixedPhysicsSystem extends EntitySystem implements IRequireGameCont
     @Override
     public void update(float deltaTime) {
         accumulator += deltaTime;
-        while (accumulator >= TIME_STEP) {
+        while (accumulator >= timeStep) {
             //System.out.println("update: " + deltaTime + ". " + accumulator);
-            world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
-            accumulator -= TIME_STEP;
+            world.step(timeStep, velocityIterations, positionIterations);
+            accumulator -= timeStep;
             
             updateTransform();
         }
@@ -81,6 +80,11 @@ public class FixedPhysicsSystem extends EntitySystem implements IRequireGameCont
         }*/
     }
     
+    private int getMovementLimit() {
+        //movement limit = 2 * units per step
+        //eg step of 60: 60 * 2 = 120,  max velocity = 120
+        return 2 * engineCFG.physicsStepPerFrame;
+    }
 }
 
 
