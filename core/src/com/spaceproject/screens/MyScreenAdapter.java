@@ -25,20 +25,20 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     
     // rendering resolution
     private final static float VIRTUAL_HEIGHT  = 40f;//meters
-    public final static float SCALE = 60f;
+    public final static float SCALE = 60f; //todo: move to engine config
     private final static float INV_SCALE = 1.f / SCALE;
-    private final static float VIEWPORT_WIDTH = 1280 * INV_SCALE;
-    private final static float VIEWPORT_HEIGHT = 720 * INV_SCALE;
+    private final static float VIEWPORT_WIDTH = 1280 * INV_SCALE;//todo: move to engine config
+    private final static float VIEWPORT_HEIGHT = 720 * INV_SCALE;//todo: move to engine config
     
     //save window size for switching between fullscreen and windowed
     private static int prevWindowWidth = (int) VIEWPORT_WIDTH;
     private static int prevWindowHeight = (int) VIEWPORT_HEIGHT;
     
-    private static boolean vsync = true;
+    private static boolean vsync = true;//todo: move to engine config
     
     
-    private static float zoomTarget = 1;
-    private static float zoomSpeed = 3;
+    private static float zoomTarget = 1;//todo: move to engine config
+    private static float zoomSpeed = 3;//todo: move to engine config
     //private static float panSpeed/panTarget(lerp to entity)
     
     private InputMultiplexer inputMultiplexer;
@@ -55,9 +55,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
         viewport = new ExtendViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, cam);
         viewport.apply();
         
-        //reset camera
-        cam.zoom = 1;
-        setZoomTarget(1);
+        resetCamera();
         
         //set this as input processor for mouse wheel scroll events
         inputMultiplexer = new InputMultiplexer();

@@ -25,16 +25,13 @@ public class MyMath {
         float dx = MathUtils.cos(direction) * magnitude;
         float dy = MathUtils.sin(direction) * magnitude;
         return tmpVec.set(dx, dy);
-        //return new Vector2(magnitude,0).setAngleRad(direction);
     }
     
     
     public static Vector2 logVec(Vector2 vec, float scale) {
         float length = (float) Math.log(vec.len()) * scale;
         float angle = vec.angle() * MathUtils.degreesToRadians;
-        float dX = length * MathUtils.cos(angle);
-        float dY = length * MathUtils.sin(angle);
-        return new Vector2(dX, dY);
+        return vector(angle, length);
     }
     
     

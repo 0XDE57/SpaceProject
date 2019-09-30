@@ -140,7 +140,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         drawHUD();
         
         Entity p = player.size() > 0 ? player.first() : null;
-        miniMap.drawSpaceMap(shape, batch, p, mapableEntities);
+        miniMap.drawMiniMap(shape, batch, p, mapableEntities);
         
         screenTransitionOverlay.render();
         

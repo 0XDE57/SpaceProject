@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class ConfigManager {
     
+    public boolean debugDevForceLoadDefault = false;
     private ArrayList<Config> configs;
     
     
@@ -21,6 +22,11 @@ public class ConfigManager {
     
     
     public void init() {
+        if (debugDevForceLoadDefault) {
+            loadDefaultAll();
+            return;
+        }
+        
         for (int i = 0; i < configs.size(); i++) {
             //todo: test load bad config, broken names, bad structure, bad int val in bool, missing fields, extra fields
             Config loaded = configs.get(i).loadFromJson();

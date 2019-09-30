@@ -2,12 +2,16 @@ package com.spaceproject.config;
 
 
 import com.badlogic.gdx.graphics.Color;
+import com.spaceproject.SpaceProject;
+import com.spaceproject.ui.map.MiniMapPosition;
 
 public class MiniMapConfig extends Config {
     
-    public float mapScale;
+    public MiniMapPosition miniMapPosition;
+    public float defaultMapScale;
     public int gridSize;
     public int borderWidth;
+    public int playerMarkerSize;
     public int celestialMarkerSize;
     public int lodRenderOrbitPathScale;
     public int edgePad;
@@ -18,18 +22,29 @@ public class MiniMapConfig extends Config {
     public float minScale;
     public float maxSale;
     public long drawScaleTimer;
+    public int fontSize;
+    public boolean debugDisableClipping;
+    public boolean debugDrawLoadDist;
     
     public Color backingColor;
     public Color borderColor;
     public Color gridColor;
     public Color mouseColor;
-    public Color orbitPath;
+    public Color universeMarkerColor;
+    public Color orbitPathColor;
+    public Color playerMarkerColor;
+    public Color velocityVecColor;
     public Color debugLoadDistColor;
     
     public void loadDefault() {
-        mapScale = 500;
+        miniMapPosition = MiniMapPosition.bottomRight;
+        if (SpaceProject.isMobile()) {
+            miniMapPosition = MiniMapPosition.topLeft;
+        }
+        defaultMapScale = 500;
         gridSize = (int) Math.pow(2, 17 - 1);
-        borderWidth = 3;
+        borderWidth = 1;
+        playerMarkerSize = 3;
         celestialMarkerSize = 6;
         lodRenderOrbitPathScale = 500;
         edgePad = 50;
@@ -40,12 +55,18 @@ public class MiniMapConfig extends Config {
         minScale = 0.5f;
         maxSale = 10000;
         drawScaleTimer = 5000;
-    
-        backingColor = new Color(0, 0, 0, 0.8f);
-        borderColor = new Color(0.6f, 0.6f, 0.6f, 1f);
+        fontSize = 12;
+        debugDisableClipping = false;
+        debugDrawLoadDist = false;
+        
+        backingColor = new Color(0, 0, 0, 0.9f);
+        borderColor = new Color(0.1f, 0.63f, 0.88f, 1f);
         gridColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
         mouseColor = new Color(1f, 0.2f, 0.2f, 1f);
-        orbitPath = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+        universeMarkerColor = new Color(1, 1, 1, 1);
+        orbitPathColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+        playerMarkerColor = new Color(1, 1, 1, 1);
+        velocityVecColor = new Color(1, 0, 0, 1);
         debugLoadDistColor = new Color(1, 0, 0, 1);
     }
 }

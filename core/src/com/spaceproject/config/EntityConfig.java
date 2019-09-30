@@ -2,8 +2,9 @@ package com.spaceproject.config;
 
 
 public class EntityConfig extends Config {
+    //TODO: find better way to do entity config + generation
     
-    public float renderScale;
+    public float renderScale;//TODO: move to engine config
     
     //character
     public float characterHealth;

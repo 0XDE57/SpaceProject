@@ -20,7 +20,7 @@ public class MainMenuTab extends HotKeyTab {
     private int itemPadding = 2;
     
     public MainMenuTab(final GameMenu gameMenu) {
-        super("GameMenu", Input.Keys.ESCAPE);
+        super("menu", Input.Keys.ESCAPE);
         
         
         TextButton btnGotoMain = new TextButton("main menu", VisUI.getSkin());

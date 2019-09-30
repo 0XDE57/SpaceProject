@@ -18,9 +18,9 @@ import com.spaceproject.utility.Mappers;
 // http://saltares.com/blog/games/fixing-your-timestep-in-libgdx-and-box2d/
 public class FixedPhysicsSystem extends EntitySystem implements IRequireGameContext {
     
-    private static final int VELOCITY_ITERATIONS = 6;
-    private static final int POSITION_ITERATIONS = 2;
-    private static final int STEP_PER_FRAME = 60;
+    private static final int VELOCITY_ITERATIONS = 6;//TODO: move to engine config
+    private static final int POSITION_ITERATIONS = 2;//TODO: move to engine config
+    private static final int STEP_PER_FRAME = 60;//TODO: move to engine config
     private static final float TIME_STEP = 1 / (float) STEP_PER_FRAME;
     private static float accumulator = 0f;
     

@@ -437,12 +437,12 @@ public class EntityFactory {
         Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
         Sprite3DComponent sprite3DComp = new Sprite3DComponent();
         sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom, entityCFG.renderScale);
-        float s = 0.025f;
+        float s = 0.025f;//TODO: better way to manage render scale (3d vs tex, relation to physics body)
         sprite3DComp.renderable.scale.set(s, s, s);
         
         //collision detection
         PhysicsComponent physics = new PhysicsComponent();
-        float scale = 0.1f;
+        float scale = 0.1f;//TODO: map this to engine config scale
         float width = shipTop.getWidth() * scale;
         float height = shipTop.getHeight() * scale;
         physics.body = BodyFactory.createShip(x, y, width, height, entity);

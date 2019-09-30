@@ -21,6 +21,54 @@
         http://www.koonsolo.com/news/dewitters-gameloop/
 
 
+[ ] project structure cleanup and refactoring
+    [x] cleanup some ui stuff...
+
+
+[...] config
+    [x] config manager, save and load all configs
+    [...] move more things to config
+        [ ] entities
+            need to find a way to generate entities from config. consider ranges
+            eg:
+            Ship {
+                SeedComponent{},
+                TransformComponent {
+
+                },
+                Sprite3DComponent {
+                    shipSize = rand range(x,y)
+                }
+                PhysicsComponent {
+                }
+                CannonComponent {
+                    ammo,
+                    damage,
+                    fireRate,
+                    cannonSize,
+                    cannonVelocity,
+                },
+                HealthComponent {
+                    maxHealth
+                },
+                MapComponent {
+                    color,
+                    distance
+                }
+            }
+
+            and what about multi entity groups? eg System
+            createPlanetarySystem {
+                numPlanets = range(0,10),
+                distFromBarycenter = range(0, 10),
+                distFromNextEntity = range()
+            }
+        [x] debug
+        [x] minimap
+        [ ] engine (threads, physics, renderscales)
+    [...] config UI
+        [...] nice way to view and edit configs
+
 
 [...] refactor screen transition
     [ ] ready / sync / load state. should all be in transition system?
