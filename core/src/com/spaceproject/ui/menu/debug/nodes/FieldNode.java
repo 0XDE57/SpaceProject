@@ -30,11 +30,11 @@ public class FieldNode extends UpdateNode {
     
     @Override
     public String toString() {
-        if (getObject() == null || getOwner() == null) {
+        if (getValue() == null || getOwner() == null) {
             return super.toString();
         }
         try {
-            return String.format("%-14s %s", ((Field) getObject()).getName(), ((Field) getObject()).get(getOwner()));
+            return String.format("%-14s %s", ((Field) getValue()).getName(), ((Field) getValue()).get(getOwner()));
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
             return e.getMessage();

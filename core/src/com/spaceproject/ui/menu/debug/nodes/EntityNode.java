@@ -36,12 +36,12 @@ public class EntityNode extends UpdateNode {
     }
     
     public Entity getEntity() {
-        return (Entity) getObject();
+        return (Entity) getValue();
     }
     
     @Override
     public void update() {
-        if (getObject() == null) {
+        if (getValue() == null) {
             return;
         }
         
@@ -67,24 +67,25 @@ public class EntityNode extends UpdateNode {
         }
         
         //update nodes, clean up dead nodes
-        for (Tree.Node node : getChildren()) {
-            if (!components.contains((Component) node.getObject(), false)) {
+        for (Object child : getChildren()) {
+            UpdateNode node = (UpdateNode)child;
+            if (!components.contains((Component) node.getValue(), false)) {
                 if (showHistory) {
                     if (!(node instanceof GhostNode)) {
-                        ((UpdateNode) node).removeAndCreateGhost(DebugEngineWindow.includeChildren);
+                        node.removeAndCreateGhost(DebugEngineWindow.includeChildren);
                     }
                 } else {
                     node.remove();
                 }
             } else {
-                ((UpdateNode) node).update();
+                node.update();
             }
         }
     }
     
     @Override
     public String toString() {
-        if (getObject() == null)
+        if (getValue() == null)
             return super.toString();
         
         return Misc.objString(getEntity()) + " [" + getEntity().getComponents().size() + "]";

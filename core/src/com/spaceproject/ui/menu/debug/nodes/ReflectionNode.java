@@ -36,8 +36,8 @@ public class ReflectionNode extends UpdateNode {
     }
     
     private void init() {
-        for (Field f : getObject().getClass().getFields()) {
-            add(new FieldNode(new Label("init", VisUI.getSkin(), skinSmallFont, Color.WHITE), getObject(), f));
+        for (Field f : getValue().getClass().getFields()) {
+            add(new FieldNode(new Label("init", VisUI.getSkin(), skinSmallFont, Color.WHITE), getValue(), f));
         }
     }
     
@@ -52,16 +52,16 @@ public class ReflectionNode extends UpdateNode {
         if (!isExpanded())
             return;
         
-        for (Tree.Node node : getChildren())
+        for (Object node : getChildren())
             ((FieldNode) node).update();
         
     }
     
     @Override
     public String toString() {
-        if (getObject() == null)
+        if (getValue() == null)
             return super.toString();
         
-        return Misc.objString(getObject());
+        return Misc.objString(getValue());
     }
 }

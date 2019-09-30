@@ -20,10 +20,10 @@ allprojects {
     version = '1.0'
     ext {
         appName = 'spaceproject'
-        gdxVersion = '1.9.8'
+        gdxVersion = '1.9.10'
         roboVMVersion = '2.3.7'
         ashleyVersion = '1.7.3'
-        visuiVersion = '1.4.1'
+        visuiVersion = '1.4.4'
     }
 
     repositories {
@@ -85,8 +85,6 @@ project(":android") {
 project(":ios") {
     apply plugin: "java-library"
     apply plugin: "robovm"
-
-    configurations { natives }
 
     dependencies {
         implementation project(":core")

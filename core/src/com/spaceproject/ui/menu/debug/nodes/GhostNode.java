@@ -44,7 +44,7 @@ public class GhostNode extends UpdateNode {
         for (Tree.Node child : children) {
             addChildren(child.getChildren(), root);
             
-            add(new Tree.Node(new Label(child.getActor().getName(), VisUI.getSkin(), skinSmallFont, Color.RED)));
+            add(new MyNode(new Label(child.getActor().getName(), VisUI.getSkin(), skinSmallFont, Color.RED)));
         }
     }
     
