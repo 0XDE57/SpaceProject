@@ -40,6 +40,8 @@
                     shipSize = rand range(x,y)
                 }
                 PhysicsComponent {
+                    linearDamping, (when on planet)
+                    angularDamping (when on planet)
                 }
                 CannonComponent {
                     ammo,
