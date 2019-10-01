@@ -4,7 +4,7 @@ sourceCompatibility = '1.7'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 ext {
-    mainClassName = "com.spaceproject.IOSLauncher"
+	mainClassName = "com.spaceproject.IOSLauncher"
 }
 
 launchIPhoneSimulator.dependsOn build
@@ -13,5 +13,5 @@ launchIOSDevice.dependsOn build
 createIPA.dependsOn build
 
 robovm {
-    archs = "thumbv7:arm64"
+	archs = "thumbv7:arm64"
 }

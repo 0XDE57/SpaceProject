@@ -8,16 +8,17 @@ buildscript {
         jcenter()
         google()
     }
+	
     dependencies {
-        classpath 'org.wisepersist:gwt-gradle-plugin:1.0.9'
         classpath 'com.android.tools.build:gradle:3.5.0'
-        classpath 'com.mobidevelop.robovm:robovm-gradle-plugin:2.3.7'
+        classpath 'com.mobidevelop.robovm:robovm-gradle-plugin:2.3.7'      
     }
 }
 
-allprojects {
 
+allprojects {
     version = '1.0'
+	
     ext {
         appName = 'spaceproject'
         gdxVersion = '1.9.10'
@@ -25,7 +26,7 @@ allprojects {
         ashleyVersion = '1.7.3'
         visuiVersion = '1.4.4'
     }
-
+	
     repositories {
         mavenLocal()
         mavenCentral()
@@ -44,10 +45,10 @@ project(":desktop") {
         implementation project(":core")
         api "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
+        api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx:gdx-controllers-desktop:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-controllers-platform:$gdxVersion:natives-desktop"
-        api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
-        api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
     }
 }
 
@@ -71,13 +72,13 @@ project(":android") {
         natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-arm64-v8a"
         natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-x86"
         natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-x86_64"
-        api "com.badlogicgames.ashley:ashley:$ashleyVersion"
         api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-armeabi"
         natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-armeabi-v7a"
         natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-arm64-v8a"
         natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86"
         natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86_64"
+        api "com.badlogicgames.ashley:ashley:$ashleyVersion"
     }
 }
 
@@ -92,8 +93,8 @@ project(":ios") {
         api "com.mobidevelop.robovm:robovm-cocoatouch:$roboVMVersion"
         api "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
-        api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-ios"
         api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-ios"
+        api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-ios"
     }
 }
 
@@ -103,9 +104,8 @@ project(":core") {
 
     dependencies {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-controllers:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         api "com.badlogicgames.ashley:ashley:$ashleyVersion"
         api "com.kotcrab.vis:vis-ui:$visuiVersion"
     }
