@@ -4,9 +4,9 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
+import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.SpaceBackgroundTile;
 import com.spaceproject.ui.SpaceBackgroundTile.TileType;
-import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.SimpleTimer;
 
 import java.util.ArrayList;

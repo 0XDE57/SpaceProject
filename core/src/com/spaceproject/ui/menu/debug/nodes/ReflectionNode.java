@@ -2,7 +2,6 @@ package com.spaceproject.ui.menu.debug.nodes;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.kotcrab.vis.ui.VisUI;
 import com.spaceproject.ui.menu.debug.DebugEngineWindow;
 import com.spaceproject.utility.Misc;

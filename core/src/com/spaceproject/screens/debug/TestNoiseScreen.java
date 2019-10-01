@@ -10,14 +10,14 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
-import com.spaceproject.ui.Tile;
 import com.spaceproject.generation.FontFactory;
+import com.spaceproject.generation.noise.NoiseGen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
+import com.spaceproject.ui.Tile;
 import com.spaceproject.ui.custom.ColorProfile;
 import com.spaceproject.ui.custom.Slider;
 import com.spaceproject.utility.MyMath;
-import com.spaceproject.generation.noise.NoiseGen;
 
 /* TODO:
  * -mapsize

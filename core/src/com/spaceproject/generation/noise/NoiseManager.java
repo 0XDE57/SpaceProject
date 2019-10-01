@@ -2,9 +2,9 @@ package com.spaceproject.generation.noise;
 
 import com.badlogic.gdx.Gdx;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.config.WorldConfig;
 import com.spaceproject.ui.Tile;
-import com.spaceproject.components.PlanetComponent;
 
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;

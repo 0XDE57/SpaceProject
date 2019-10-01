@@ -12,8 +12,8 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.IRequireGameContext;
-import com.spaceproject.utility.PhysicsContactListener;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.PhysicsContactListener;
 
 // based off:
 // http://gafferongames.com/game-physics/fix-your-timestep/

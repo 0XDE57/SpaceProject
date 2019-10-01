@@ -8,8 +8,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.utility.Mappers;
 import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.utility.Mappers;
 
 public class CameraSystem extends IteratingSystem {
     

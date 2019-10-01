@@ -6,7 +6,6 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.spaceproject.ui.menu.debug.DebugEngineWindow;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.SimpleTimer;
