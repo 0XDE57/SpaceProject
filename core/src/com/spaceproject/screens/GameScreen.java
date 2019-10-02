@@ -93,7 +93,7 @@ public class GameScreen extends MyScreenAdapter {
         noiseManager = new NoiseManager(engineCFG.maxNoiseGenThreads);
         
         // load test default values
-        Entity playerTESTSHIP = EntityFactory.createPlayerShip(0, 0);
+        Entity playerTESTSHIP = EntityFactory.createPlayerShip(0, 0, inSpace);
         
         if (inSpace) {
             initSpace(playerTESTSHIP);
@@ -107,12 +107,7 @@ public class GameScreen extends MyScreenAdapter {
         gameTimeStart = System.nanoTime();
     }
     
-    
-    public static boolean inSpace() {
-        return inSpace;
-    }
-    
-    
+ 
     //region system loading
     private void initSpace(Entity transitioningEntity) {
         inSpace = true;
@@ -144,8 +139,6 @@ public class GameScreen extends MyScreenAdapter {
         int position = mapSize * worldCFG.tileSize / 2;//set position to middle of planet
         Body body = transitioningEntity.getComponent(PhysicsComponent.class).body;
         body.setTransform(position, position, body.getAngle());
-        //body.setAngularDamping(30);
-        //body.setLinearDamping(45);
         engine.addEntity(transitioningEntity);
     }
     //endregion
@@ -202,7 +195,20 @@ public class GameScreen extends MyScreenAdapter {
     
             ScreenTransitionSystem.nextStage(screenTrans);
         }
-    
+        
+        
+        //adjust physics (no friction in space)
+        for (Entity e : transitioningEntities) {
+            Body body = e.getComponent(PhysicsComponent.class).body;
+            if (inSpace) {
+                body.setLinearDamping(0);
+                body.setAngularDamping(0);
+            } else {
+                body.setAngularDamping(30);
+                body.setLinearDamping(45);
+            }
+        }
+        
         /*TODO: persist
         for (Entity relevantEntity : backgroundEngine.getEntities()) {
             //if landing on planet, and relevantEntity is on planet, add to engine, remove from backgroundEngine
@@ -212,6 +218,10 @@ public class GameScreen extends MyScreenAdapter {
         resetCamera();
     }
     
+    
+    public static boolean inSpace() {
+        return inSpace;
+    }
     
     public static long getGameTimeCurrent() {
         return gameTimeCurrent;
@@ -272,8 +282,6 @@ public class GameScreen extends MyScreenAdapter {
             gameTimeStart += delta;
         }
         Gdx.app.log(this.getClass().getSimpleName(), "paused [" + pause + "]");
-        
-        
         
         for (EntitySystem system : engine.getSystems()) {
             SysCFG sysCFG = systemsCFG.getConfig(system.getClass().getName());

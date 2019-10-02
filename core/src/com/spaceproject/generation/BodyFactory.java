@@ -63,9 +63,16 @@ public class BodyFactory {
         return body;
     }
     
-    public static Body createShip(float x, float y, float width, float height, Entity entity) {
+    public static Body createShip(float x, float y, float width, float height, Entity entity, boolean inSpace) {
         Body body = createRect(x, y, width, height);
         body.setUserData(entity);
+        if (inSpace) {
+            body.setLinearDamping(0);
+            body.setAngularDamping(0);
+        } else {
+            body.setAngularDamping(30);
+            body.setLinearDamping(45);
+        }
         return body;
     }
 }

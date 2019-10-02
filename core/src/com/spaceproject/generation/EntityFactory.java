@@ -83,14 +83,14 @@ public class EntityFactory {
         return entity;
     }
     
-    public static Entity createPlayerShip(int x, int y) {
+    public static Entity createPlayerShip(int x, int y, boolean inSpace) {
         Entity player = createCharacter(x, y);
         
         PhysicsComponent physicsComponent = player.getComponent(PhysicsComponent.class);
         GameScreen.box2dWorld.destroyBody(physicsComponent.body);
         physicsComponent.body = null;
         
-        Entity playerShip = createShip3(x, y, 0, player);
+        Entity playerShip = createShip3(x, y, 0, player, inSpace);
         playerShip.add(new CameraFocusComponent());
         playerShip.add(new ControlFocusComponent());
         ControllableComponent controllable = new ControllableComponent();
@@ -404,15 +404,15 @@ public class EntityFactory {
     
     
     //region ships
-    public static Entity createShip3(float x, float y) {
-        return createShip3(x, y, null);
+    public static Entity createShip3(float x, float y, boolean inSpace) {
+        return createShip3(x, y, null, inSpace);
     }
     
-    public static Entity createShip3(float x, float y, Entity driver) {
-        return createShip3(x, y, MyMath.getSeed(x, y), driver);
+    public static Entity createShip3(float x, float y, Entity driver, boolean inSpace) {
+        return createShip3(x, y, MyMath.getSeed(x, y), driver, inSpace);
     }
     
-    public static Entity createShip3(float x, float y, long seed, Entity driver) {
+    public static Entity createShip3(float x, float y, long seed, Entity driver, boolean inSpace) {
         Entity entity = new Entity();
         
         MathUtils.random.setSeed(seed);
@@ -445,7 +445,7 @@ public class EntityFactory {
         float scale = 0.1f;//TODO: map this to engine config scale
         float width = shipTop.getWidth() * scale;
         float height = shipTop.getHeight() * scale;
-        physics.body = BodyFactory.createShip(x, y, width, height, entity);
+        physics.body = BodyFactory.createShip(x, y, width, height, entity, inSpace);
         
         //weapon
         CannonComponent cannon = new CannonComponent();
@@ -488,8 +488,8 @@ public class EntityFactory {
         return entity;
     }
     
-    public static Entity createShip3Test(float x, float y, long seed, Entity driver) {
-        Entity ship = createShip3(x, y, seed, driver);
+    public static Entity createShip3Test(float x, float y, long seed, Entity driver, boolean inSpace) {
+        Entity ship = createShip3(x, y, seed, driver, inSpace);
         ship.remove(CannonComponent.class);
         
         GrowCannonComponent growCannon = new GrowCannonComponent();
