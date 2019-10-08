@@ -475,7 +475,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     
     @Override
     public void render(float delta) {
-        super.render(delta);
         
         //clear screen
         Gdx.gl20.glClearColor(1, 1, 1, 1);
