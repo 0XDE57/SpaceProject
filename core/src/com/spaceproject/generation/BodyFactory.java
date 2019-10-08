@@ -6,9 +6,14 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.spaceproject.SpaceProject;
+import com.spaceproject.config.EngineConfig;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.utility.TestScaleThing;
 
 public class BodyFactory {
+    
+    private static EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     
     public static Body createCircle(float x, float y, float radius) {
         Body body;
@@ -33,10 +38,10 @@ public class BodyFactory {
         return body;
     }
     
-    public static Body createRect(float x, float y, float width, float height) {
+    public static Body createRect(float x, float y, float width, float height, BodyDef.BodyType bodyType) {
         Body body;
         BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.type = bodyType;
         bodyDef.position.set(x, y);
         body = GameScreen.box2dWorld.createBody(bodyDef);
         
@@ -57,22 +62,56 @@ public class BodyFactory {
     }
     
     public static Body createPlayerBody(float x, float y, Entity entity) {
-        Body body = createRect(x, y, 0.4f, 0.4f);
+        Body body = createRect(x, y, 0.4f, 0.4f, BodyDef.BodyType.DynamicBody);
         body.setLinearDamping(10f);
         body.setUserData(entity);
         return body;
     }
     
     public static Body createShip(float x, float y, float width, float height, Entity entity, boolean inSpace) {
-        Body body = createRect(x, y, width, height);
+        Body body = createRect(x, y, width, height, BodyDef.BodyType.DynamicBody);
         body.setUserData(entity);
         if (inSpace) {
             body.setLinearDamping(0);
             body.setAngularDamping(0);
         } else {
+            //todo: might need to take body size into account?
             body.setAngularDamping(30);
             body.setLinearDamping(45);
         }
+        return body;
+    }
+    
+    public static Body createWall(float x, float y, int width, int height, Entity entity) {
+        Body body = createRect(x, y, width, height, BodyDef.BodyType.StaticBody);
+        body.setUserData(entity);
+        return body;
+    }
+    
+    public static Body createRect(float x, float y, int width, int height, BodyDef.BodyType bodyType) {
+        // * 0.5f is half-width / half-height required by setAsBox()
+        float scaledWidth  = engineCFG.meterPerUnit * width * 0.5f;
+        float scaledHeight = engineCFG.meterPerUnit * height * 0.5f;
+        
+        Body body;
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = bodyType;
+        bodyDef.position.set(x, y);
+        body = GameScreen.box2dWorld.createBody(bodyDef);
+        
+        PolygonShape poly = new PolygonShape();
+        poly.setAsBox(scaledWidth, scaledHeight);
+        // Create a fixture definition to apply our shape to
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = poly;
+        fixtureDef.density = 0.5f;
+        fixtureDef.friction = 0.0f;
+        fixtureDef.restitution = 0.6f; // Make it bounce a little bit
+        // Create our fixture and attach it to the body
+        body.createFixture(fixtureDef);
+        // Remember to dispose of any shapes after you're done with them!
+        // BodyDef and FixtureDef don't need disposing, but shapes do.
+        poly.dispose();
         return body;
     }
 }

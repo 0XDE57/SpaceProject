@@ -1,8 +1,10 @@
 package com.spaceproject.systems;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
@@ -14,6 +16,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.spaceproject.components.CameraFocusComponent;
+import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
@@ -46,7 +50,6 @@ public class SpaceRenderingSystem extends IteratingSystem {
     
     private Array<Entity> renderQueue3D = new Array<Entity>();
     
-    
     public SpaceRenderingSystem() {
         super(Family.all(TransformComponent.class).one(TextureComponent.class, Sprite3DComponent.class).get());
         
@@ -54,6 +57,11 @@ public class SpaceRenderingSystem extends IteratingSystem {
         this.spriteBatch = GameScreen.batch;
         this.shape = GameScreen.shape;
         modelBatch = new ModelBatch();
+    }
+    
+    @Override
+    public void addedToEngine(Engine engine) {
+        super.addedToEngine(engine);
     }
     
     @Override
@@ -66,6 +74,8 @@ public class SpaceRenderingSystem extends IteratingSystem {
         Gdx.gl.glClearDepthf(1f);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         
+        
+        spriteBatch.setProjectionMatrix(cam.combined);
         spriteBatch.begin();
         
         //draw background tiles (stars)
@@ -229,7 +239,7 @@ public class SpaceRenderingSystem extends IteratingSystem {
     private static Color backgroundColor(Camera cam) {
         //still playing with these values to get the right feel/intensity of color...
         float maxColor = 0.25f;
-        float ratio = 0.00001f;
+        float ratio = 0.0001f;
         float green = Math.abs(cam.position.x * ratio);
         float blue = Math.abs(cam.position.y * ratio);
         //green based on x position. range amount of green between 0 and maxColor

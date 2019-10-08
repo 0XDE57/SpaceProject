@@ -3,9 +3,7 @@ package com.spaceproject.config;
 
 public class EntityConfig extends Config {
     //TODO: find better way to do entity config + generation
-    
-    public float renderScale;//TODO: move to engine config
-    
+
     //character
     public float characterHealth;
     public float characterWalkSpeed;
@@ -31,8 +29,6 @@ public class EntityConfig extends Config {
     
     @Override
     public void loadDefault() {
-        renderScale = 4.0f;
-        
         characterHealth = 100;
         characterWalkSpeed = 200f;
         

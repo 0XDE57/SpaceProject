@@ -515,4 +515,17 @@ public class TextureFactory {
     }
     
     
+    public static Texture generateWall(int width, int height, Color color) {
+        pixmap = new Pixmap(width, height, Format.RGB565);
+        
+        //fill square
+        pixmap.setColor(color);
+        pixmap.fill();
+        pixmap.setColor(0, 0, 0, 1);
+        pixmap.drawRectangle(0, 0, width, height);
+        
+        Texture t = new Texture(pixmap);
+        pixmap.dispose();
+        return t;
+    }
 }

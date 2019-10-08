@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
@@ -33,16 +34,19 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.CelestialConfig;
+import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.EntityConfig;
 import com.spaceproject.config.WorldConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Sprite3D;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.SimpleTimer;
+import com.spaceproject.utility.TestScaleThing;
 
 
 public class EntityFactory {
     
+    private static EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     private static EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
     private static CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
     
@@ -247,7 +251,7 @@ public class EntityFactory {
         TextureComponent texture = new TextureComponent();
         int radius = MathUtils.random(celestCFG.minStarSize, celestCFG.maxStarSize);
         texture.texture = TextureFactory.generateStar(seed, radius);
-        texture.scale = entityCFG.renderScale;
+        texture.scale = engineCFG.entityScale;
         
         // set position
         TransformComponent transform = new TransformComponent();
@@ -436,7 +440,7 @@ public class EntityFactory {
         Texture shipTop = TextureFactory.generateShip(seed, size);
         Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
         Sprite3DComponent sprite3DComp = new Sprite3DComponent();
-        sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom, entityCFG.renderScale);
+        sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom, engineCFG.entityScale);
         float s = 0.025f;//TODO: better way to manage render scale (3d vs tex, relation to physics body)
         sprite3DComp.renderable.scale.set(s, s, s);
         
@@ -503,96 +507,6 @@ public class EntityFactory {
         return ship;
     }
     
-    @Deprecated
-    public static Entity createShip2(int x, int y, int seed) {
-        MathUtils.random.setSeed((x + y) * seed);
-        Entity entity = new Entity();
-        
-        TransformComponent transform = new TransformComponent();
-        TextureComponent texture = new TextureComponent();
-        
-        transform.pos.set(x, y);
-        transform.zOrder = -10;
-        transform.rotation = (float) Math.PI / 2; //face upwards
-        
-        //generate random even size
-        int size;
-        int minSize = 8;
-        int maxSize = 36;
-        do {
-            size = MathUtils.random(minSize, maxSize);
-        } while (size % 2 == 1);
-        
-        // generate pixmap texture
-        //int size = 24;
-        Pixmap pixmap = new Pixmap(size, size / 2, Format.RGBA8888);
-        pixmap.setColor(1, 1, 1, 1);
-        pixmap.fillRectangle(0, 0, size, size);
-        
-        pixmap.setColor(0.7f, 0.7f, 0.7f, 1);
-        pixmap.drawRectangle(0, 0, size - 1, size - 1 / 2);
-        
-        Texture pixmapTex = new Texture(pixmap);
-        pixmap.dispose(); // clean up
-        texture.texture = pixmapTex;// give texture component the generated pixmapTexture
-        texture.scale = entityCFG.renderScale;
-        
-        PhysicsComponent physics = new PhysicsComponent();
-        float width = texture.texture.getWidth() * entityCFG.renderScale;
-        float height = texture.texture.getHeight() * entityCFG.renderScale;
-        //physics.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
-        //physics.poly.setOrigin(width / 2, height / 2);
-        physics.body = BodyFactory.createRect(x, y, width, height);
-        
-        entity.add(physics);
-        entity.add(texture);
-        entity.add(transform);
-        entity.add(new VehicleComponent());
-        
-        return entity;
-    }
-    
-    @Deprecated
-    public static Entity createShip(int x, int y) {
-        Entity entity = new Entity();
-        
-        TransformComponent transform = new TransformComponent();
-        TextureComponent texture = new TextureComponent();
-        
-        transform.pos.set(x, y);
-        transform.zOrder = -10;
-        transform.rotation = (float) Math.PI / 2; //face upwards
-        
-        // generate pixmap texture
-        int size = 16;
-        Pixmap pixmap = new Pixmap(size, size, Format.RGB565);
-        pixmap.setColor(1, 1, 1, 1);
-        pixmap.fillTriangle(0, 0, 0, size - 1, size - 1, size / 2);
-        
-        pixmap.setColor(0, 1, 1, 1);
-        pixmap.drawLine(size, size / 2, size / 2, size / 2);
-        
-        
-        Texture pixmapTex = new Texture(pixmap);
-        pixmap.dispose(); // clean up
-        texture.texture = pixmapTex;// give texture component the generated pixmapTexture
-        texture.scale = entityCFG.renderScale;
-        
-        PhysicsComponent physics = new PhysicsComponent();
-        float width = texture.texture.getWidth() * entityCFG.renderScale;
-        float height = texture.texture.getHeight() * entityCFG.renderScale;
-        //physics.poly = new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
-        //physics.poly.setOrigin(width / 2, height / 2);
-        physics.body = BodyFactory.createRect(x, y, width, height);
-        
-        
-        entity.add(physics);
-        entity.add(texture);
-        entity.add(transform);
-        entity.add(new VehicleComponent());
-        
-        return entity;
-    }
     //endregion
     
     
@@ -611,7 +525,7 @@ public class EntityFactory {
         Body sourceBody = owner.getComponent(PhysicsComponent.class).body;
         Vector2 ownerVel = sourceBody.getLinearVelocity();
         Vector2 velocity = MyMath.vector(sourceBody.getAngle(), 60).add(ownerVel);
-        physics.body = BodyFactory.createRect(source.pos.x, source.pos.y, width, height);
+        physics.body = BodyFactory.createRect(source.pos.x, source.pos.y, width, height, BodyDef.BodyType.DynamicBody);
         physics.body.setTransform(source.pos, source.rotation);
         physics.body.setLinearVelocity(velocity);
         physics.body.setBullet(true);//turn on CCD
@@ -640,4 +554,24 @@ public class EntityFactory {
         return entity;
     }
 
+    
+    public static Entity createWall(int x, int y, int width, int height) {
+        Entity entity = new Entity();
+        
+        TextureComponent texture = new TextureComponent();
+        texture.texture = TextureFactory.generateWall(width * engineCFG.pixelPerUnit, height * engineCFG.pixelPerUnit, new Color(0.4f, 0.4f, 0.4f, 1));
+        texture.scale = 0.05f;
+    
+        PhysicsComponent physics = new PhysicsComponent();
+        physics.body = BodyFactory.createWall(x, y, width, height, entity);
+    
+        TransformComponent transform = new TransformComponent();
+        transform.pos.set(x, y);
+        
+        entity.add(transform);
+        entity.add(physics);
+        entity.add(texture);
+        
+        return entity;
+    }
 }

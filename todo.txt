@@ -1,5 +1,4 @@
 current priority
- - couple static world entities (wall { physicscomp{static}, health component{} })
  - finish config editor
  - entity config
  - space background (maybe something like this: https://www.shadertoy.com/view/ltXSDN | https://www.shadertoy.com/view/ldKGDd)
@@ -9,10 +8,10 @@ current priority
 [...] physics and movement
     [...] move to box2d
         [...] move logic to new physics
-            [...] gravity / linear / angular damping on planets, 0 friction in space
-                [x] affects transitioning entity
-                [x] affects created entities (entity factory)
-                [ ] config?
+            [x] gravity / linear / angular damping on planets, 0 friction in space
+            [x] affects transitioning entity
+            [x] affects created entities (entity factory)
+            [ ] config?
             [ ] shield broken
             [ ] dodge broken
             [ ] space tile scale bad and tile loading broken
@@ -151,12 +150,12 @@ current priority
 
 
 [...] rendering system
-    [...] fix stuff moving ahead of camera
-        [ ] when moving around, entities seem to sway relative to the camera
+    [x] fix stuff moving ahead of camera
+        [x] when moving around, entities seem to sway relative to the camera
         [x] ship - fixed
-        [ ] player - still jumps ahead of camera. (this may be caused by adding directly to pos instead of vel/accel?)
+        [x] player - still jumps ahead of camera. (this may be caused by adding directly to pos instead of vel/accel?)
         [x] shaperenderer - shield moves ahead of camera
-        [ ] projectiles from ship - moves ahead of ship
+        [x] projectiles from ship - moves ahead of ship
 
     [...] fix render priority (z-order)
           [X] moved into separate variable

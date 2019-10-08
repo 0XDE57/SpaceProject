@@ -111,6 +111,8 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
 		test3DEntity.add(sprite3DComp);
 		engine.addEntity(test3DEntity);
 		*/
+    
+        //engine.addEntity(EntityFactory.createWall(5, 5));
     }
     
     @Override

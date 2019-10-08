@@ -1,9 +1,9 @@
 package com.spaceproject.utility;
 
 public class TestScaleThing {
-    
-    static final float meterPerUnit = 0.1f;
-    static final int pixelPerUnit = 2;
+    /*
+    public static final float meterPerUnit = 0.1f;
+    public static final int pixelPerUnit = 2;
     
     public static float PixelToMeter(int pixels) {
       return 0;
@@ -24,7 +24,7 @@ public class TestScaleThing {
     public static float UnitToMeter(int unit) {
         return unit * meterPerUnit;
     }
-    
+    */
     
     //render size = define objects in units, don't care about pixel count. set image to take up units,
     //bullet = 1 unit = 0.1m

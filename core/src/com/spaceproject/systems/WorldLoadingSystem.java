@@ -47,6 +47,8 @@ public class WorldLoadingSystem extends EntitySystem implements IRequireGameCont
 		Mappers.AI.get(aiTest2).state = AIComponent.testState.takeOffPlanet;
 		engine.addEntity(aiTest2);
 		*/
+        engine.addEntity(EntityFactory.createWall(position + 5, position + 5, 8, 16));
+        engine.addEntity(EntityFactory.createWall(position + 9, position + 5, 16, 8));
     }
     
     

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class ConfigManager {
     
-    public boolean debugDevForceLoadDefault = false;
+    private boolean debugDevForceLoadDefault = true;
     private ArrayList<Config> configs;
     
     
@@ -37,7 +37,6 @@ public class ConfigManager {
                 configs.get(i).saveToJson();
             } else {
                 configs.set(i,loaded);
-                
             }
         }
     }

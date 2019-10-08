@@ -31,6 +31,7 @@ import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.EntityConfig;
 import com.spaceproject.generation.BodyFactory;
 import com.spaceproject.generation.EntityFactory;
@@ -44,6 +45,7 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class ControlSystem extends IteratingSystem {
     
+    private EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     private EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
     private ImmutableArray<Entity> vehicles;
     private ImmutableArray<Entity> planets;
@@ -525,7 +527,7 @@ public class ControlSystem extends IteratingSystem {
             //accumulate size
             growCannon.size = growCannon.growRateTimer.ratio() * growCannon.maxSize;
             growCannon.size = MathUtils.clamp(growCannon.size, 1, growCannon.maxSize);
-            growCannon.projectile.getComponent(TextureComponent.class).scale = growCannon.size * entityCFG.renderScale;
+            growCannon.projectile.getComponent(TextureComponent.class).scale = growCannon.size * engineCFG.entityScale;
             //growCannon.projectile.getComponent(PhysicsComponent.class).poly.setScale(growCannon.size, growCannon.size);
             
             //damage modifier
