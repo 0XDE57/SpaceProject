@@ -13,7 +13,8 @@ current priority
             [x] affects created entities (entity factory)
             [ ] config?
             [ ] shield broken
-            [ ] dodge broken
+            [...] dodge broken
+                [ ] adjust feel
             [ ] space tile scale bad and tile loading broken
             [x] fix edge map scaling / icon show hide when near
                 [x] account for camera zoom

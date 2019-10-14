@@ -20,8 +20,10 @@ public class ControllableComponent implements Component {
     public boolean changeVehicle;
     public boolean transition;
     public boolean canTransition;
+    public boolean alter;
     
     //timers
-    public SimpleTimer timerVehicle;// = new SimpleTimer(1500);
-    public SimpleTimer timerDodge;// = new SimpleTimer(500);
+    public SimpleTimer timerVehicle;
+    public SimpleTimer timerDodge;
+    
 }

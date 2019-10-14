@@ -30,6 +30,7 @@ import com.spaceproject.generation.Universe;
 import com.spaceproject.generation.noise.NoiseManager;
 import com.spaceproject.systems.HUDSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
+import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
@@ -156,7 +157,7 @@ public class GameScreen extends MyScreenAdapter {
         
         if (Gdx.input.isKeyJustPressed(Keys.F1)) {
             //debug
-            Misc.printEntities(engine);
+            DebugUtil.printEntities(engine);
         }
         
         if (Gdx.input.isKeyJustPressed(Keys.GRAVE)) {//tilda

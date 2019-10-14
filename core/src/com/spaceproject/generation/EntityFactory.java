@@ -3,8 +3,6 @@ package com.spaceproject.generation;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -39,9 +37,9 @@ import com.spaceproject.config.EntityConfig;
 import com.spaceproject.config.WorldConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Sprite3D;
+import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.SimpleTimer;
-import com.spaceproject.utility.TestScaleThing;
 
 
 public class EntityFactory {
@@ -75,6 +73,9 @@ public class EntityFactory {
         ControllableComponent control = new ControllableComponent();
         control.timerVehicle = new SimpleTimer(entityCFG.controlTimerVehicle);
         control.timerDodge = new SimpleTimer(entityCFG.controlTimerDodge);
+        //int doubleTapTime = 1000;
+        //.timerDodgeLeft = new SimpleTimer(doubleTapTime);
+        //control.timerDodgeRight = new SimpleTimer(doubleTapTime);
         
         
         entity.add(health);
@@ -87,23 +88,11 @@ public class EntityFactory {
         return entity;
     }
     
-    public static Entity createPlayerShip(int x, int y, boolean inSpace) {
-        Entity player = createCharacter(x, y);
-        
-        PhysicsComponent physicsComponent = player.getComponent(PhysicsComponent.class);
-        GameScreen.box2dWorld.destroyBody(physicsComponent.body);
-        physicsComponent.body = null;
-        
-        Entity playerShip = createShip3(x, y, 0, player, inSpace);
-        playerShip.add(new CameraFocusComponent());
-        playerShip.add(new ControlFocusComponent());
-        ControllableComponent controllable = new ControllableComponent();
-        controllable.timerVehicle = new SimpleTimer(entityCFG.controlTimerVehicle);
-        controllable.timerDodge = new SimpleTimer(entityCFG.controlTimerDodge);
-        playerShip.add(controllable);
-        
-        
-        return playerShip;
+    public static Entity createPlayer(float x, float y) {
+        Entity character = createCharacter(x, y);
+        character.add(new CameraFocusComponent());
+        character.add(new ControlFocusComponent());
+        return character;
     }
     
     public static Entity createCharacterAI(float x, float y) {
@@ -111,6 +100,26 @@ public class EntityFactory {
         character.add(new AIComponent());
         return character;
     }
+    
+    public static Entity createPlayerShip(int x, int y, boolean inSpace) {
+        Entity player = createCharacter(x, y);//createPlayer(x, y);
+        
+        PhysicsComponent physicsComponent = player.getComponent(PhysicsComponent.class);
+        GameScreen.box2dWorld.destroyBody(physicsComponent.body);
+        physicsComponent.body = null;
+        
+        Entity playerShip = createShip3(x, y, 0, player, inSpace);
+        
+        playerShip.add(new CameraFocusComponent());
+        playerShip.add(new ControlFocusComponent());
+        //ECSUtil.transferComponent(player, playerShip, ControlFocusComponent.class);
+        //ECSUtil.transferComponent(player, playerShip, CameraFocusComponent.class);
+        ECSUtil.transferComponent(player, playerShip, ControllableComponent.class);
+        
+        return playerShip;
+    }
+    
+    
     //endregion
     
     

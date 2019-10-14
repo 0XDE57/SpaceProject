@@ -65,6 +65,10 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor, 
             handled = true;
         }
         
+        if (keycode == keyCFG.alter) {
+            control.alter = keyDown;
+            handled = true;
+        }
         if (keycode == keyCFG.defend) {
             control.defend = keyDown;
             handled = true;

@@ -37,6 +37,7 @@ import com.spaceproject.generation.BodyFactory;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
@@ -51,6 +52,8 @@ public class ControlSystem extends IteratingSystem {
     private ImmutableArray<Entity> planets;
     
     private float offsetDist = 1.5f;//TODO: dynamic based on ship size
+    float strafeAngle = 40 * MathUtils.degRad;
+    float strafeRot = 3f;
     
     public ControlSystem() {
         super(Family.all(ControllableComponent.class, TransformComponent.class).one(CharacterComponent.class, VehicleComponent.class).get());
@@ -112,31 +115,33 @@ public class ControlSystem extends IteratingSystem {
         DodgeComponent dodgeComp = Mappers.dodge.get(entity);
         ScreenTransitionComponent screenTransComp = Mappers.screenTrans.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
-        
+    
         boolean canAct = (dodgeComp == null && screenTransComp == null);
         //boolean canMove = dodgeComp == null && screenTransComp == null;
         boolean canShoot = dodgeComp == null && shield == null;
         boolean canDodge = shield == null;
-        
-        
+    
+    
         barrelRoll(entity, transform, dodgeComp);
         manageShield(entity, control, transform, shield);
-        
+    
         //debug force insta-stop
-        if (Gdx.input.isKeyJustPressed(Keys.X)) physicsComp.body.setLinearVelocity(0,0);
-        if (Gdx.input.isKeyJustPressed(Keys.Z)) physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(physicsComp.body.getLinearVelocity()));
-        
+        if (Gdx.input.isKeyJustPressed(Keys.X))
+            physicsComp.body.setLinearVelocity(0, 0);
+        if (Gdx.input.isKeyJustPressed(Keys.Z))
+            physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(physicsComp.body.getLinearVelocity()));
+    
         if (!canAct) {
             return;
         }
-        
-        
+    
+    
         //make vehicle face angle from mouse/joystick
         float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleFacing, 8f * delta);
         float impulse = MyMath.getAngularImpulse(physicsComp.body, angle, delta);
         physicsComp.body.applyAngularImpulse(impulse, true);
-        
-
+    
+    
         if (control.moveForward) {
             accelerate(control, physicsComp.body, vehicle, delta);
         }
@@ -144,14 +149,26 @@ public class ControlSystem extends IteratingSystem {
             decelerate(physicsComp.body, delta);
         }
         
-        if (canDodge) {
-            if (control.moveLeft) {
+        Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
+        float strafe = this.strafeRot * delta;
+        if (control.moveLeft) {
+            strafeLeft(vehicle, control, delta, physicsComp, sprite3D, strafe);
+            
+            if (canDodge && control.alter) {
                 dodgeLeft(entity, transform, control);
             }
+        }
+    
+        if (control.moveRight) {
+            strafeRight(vehicle, control, delta, physicsComp, sprite3D, strafe);
             
-            if (control.moveRight) {
+            if (canDodge && control.alter) {
                 dodgeRight(entity, transform, control);
             }
+        }
+    
+        if (!control.moveRight && !control.moveLeft) {
+            stabilizeRotation(sprite3D, strafe);
         }
         
         
@@ -189,6 +206,18 @@ public class ControlSystem extends IteratingSystem {
         
     }
     
+    private void stabilizeRotation(Sprite3DComponent sprite3D, float strafe) {
+        if (sprite3D != null) {
+            if (sprite3D.renderable.angle > 0) {
+                sprite3D.renderable.angle -= strafe;
+            }
+            if (sprite3D.renderable.angle < 0) {
+                sprite3D.renderable.angle += strafe;
+            }
+            //if (MathUtils.isEqual(sprite3D.renderable.angle, 0, 0.01f))
+            //    sprite3D.renderable.angle = 0;
+        }
+    }
     
     private static void accelerate(ControllableComponent control, Body body, VehicleComponent vehicle, float delta) {
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
@@ -209,21 +238,50 @@ public class ControlSystem extends IteratingSystem {
         }
     }
     
+    private void strafeRight(VehicleComponent vehicle, ControllableComponent control, float delta, PhysicsComponent physicsComp, Sprite3DComponent sprite3D, float strafe) {
+        float thrust = vehicle.thrust * control.movementMultiplier * delta;
+        physicsComp.body.applyForceToCenter(MyMath.vector(physicsComp.body.getAngle(), thrust).rotate90(-1), true);
+        
+        //strafe right
+        if (sprite3D != null) {
+            sprite3D.renderable.angle -= strafe;
+            if (sprite3D.renderable.angle < -strafeAngle) {
+                sprite3D.renderable.angle = -strafeAngle;
+            }
+        }
+    }
+    
+    private void strafeLeft(VehicleComponent vehicle, ControllableComponent control, float delta, PhysicsComponent physicsComp, Sprite3DComponent sprite3D, float strafe) {
+        float thrust = vehicle.thrust * control.movementMultiplier * delta;
+        physicsComp.body.applyForceToCenter(MyMath.vector(physicsComp.body.getAngle(), thrust).rotate90(1), true);
+        
+        //strafe left
+        if (sprite3D != null) {
+            sprite3D.renderable.angle += strafe;
+            if (sprite3D.renderable.angle > strafeAngle) {
+                sprite3D.renderable.angle = strafeAngle;
+            }
+        }
+    }
+    
     private static void dodgeRight(Entity entity, TransformComponent transform, ControllableComponent control) {
         if (control.timerDodge.canDoEvent() && Mappers.dodge.get(entity) == null) {
             control.timerDodge.reset();
             
             //bypass lerp to make dodge feel better/more responsive
-            transform.rotation = control.angleFacing;
+            //transform.rotation = control.angleFacing;
             
             DodgeComponent d = new DodgeComponent();
             d.animationTimer = new SimpleTimer(475, true);
             d.animInterpolation = Interpolation.pow2;//new Interpolation.Pow(2);
             d.revolutions = 1;
-            d.distance = 200;
             d.direction = transform.rotation - MathUtils.PI / 2;
             d.dir = DodgeComponent.FlipDir.right;
+            d.force = 5f;
             entity.add(d);
+    
+            Body body = Mappers.physics.get(entity).body;
+            body.applyLinearImpulse(MyMath.vector(d.direction, d.force), body.getPosition(), true);
         }
     }
     
@@ -232,16 +290,26 @@ public class ControlSystem extends IteratingSystem {
             control.timerDodge.reset();
             
             //bypass lerp to make dodge feel better/more responsive
-            transform.rotation = control.angleFacing;
+            //transform.rotation = control.angleFacing;
             
             DodgeComponent d = new DodgeComponent();
             d.animationTimer = new SimpleTimer(475, true);
             d.animInterpolation = Interpolation.pow2;//new Interpolation.Pow(2);
             d.revolutions = 1;
-            d.distance = 200;
             d.direction = transform.rotation + MathUtils.PI / 2;
-            d.dir = DodgeComponent.FlipDir.right;
+            d.dir = DodgeComponent.FlipDir.left;
+            d.force = 5f;
+            
             entity.add(d);
+            
+            
+            Body body = Mappers.physics.get(entity).body;
+            transform.rotation = control.angleFacing;
+            body.setAngularVelocity(0);
+            body.setTransform(body.getPosition(), control.angleFacing); //bypass position lerp to make dodge feel better/more responsive
+            body.applyLinearImpulse(MyMath.vector(d.direction, d.force), body.getPosition(), true);
+            //physicsComp.body.applyForceToCenter(d.dodgeVec, true);
+            //physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(d.dodgeVec));
         }
     }
     
@@ -252,11 +320,21 @@ public class ControlSystem extends IteratingSystem {
         
         
         //TODO, this use of interpolation seems a little odd, do I need to track distance traveled?
-        float interp = dodgeComp.animInterpolation.apply(0, dodgeComp.distance, dodgeComp.animationTimer.ratio());
-        float distance = interp - dodgeComp.traveled;
-        dodgeComp.traveled += distance;
-        transform.pos.add(MyMath.vector(dodgeComp.direction, distance));
+        //float interp = dodgeComp.animInterpolation.apply(0, dodgeComp.distance, dodgeComp.animationTimer.ratio());
+        //float distance = interp - dodgeComp.traveled;
+        //dodgeComp.traveled += distance;
+        //transform.pos.add(MyMath.vector(dodgeComp.direction, distance));
         //System.out.println(dodgeComp.animationTimer.ratio() + ": " + interp + ": " + distance + ": " + dodgeComp.traveled + ": " + (dodgeComp.distance-interp));
+        
+        //PhysicsComponent physicsComp = Mappers.physics.get(entity);
+        //physicsComp.body.applyForceToCenter(MyMath.vector(dodgeComp.direction, dodgeComp.force), true);
+        /*
+        if (dodgeComp.animationTimer.ratio() >= 0.5f) {
+            //physicsComp.body.applyForceToCenter(dodgeComp.dodgeVec, true);
+        } else {
+            //physicsComp.body.applyForceToCenter(dodgeComp.dodgeVec.rotate(180), true);
+        }*/
+        //physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(dodgeComp.dodgeVec));
         
         
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
@@ -269,9 +347,10 @@ public class ControlSystem extends IteratingSystem {
                 break;
         }
         
+        /*
         //ensure bounding box follows sprite, ship should be thinner/harder to hit when rolling
-        PhysicsComponent physicsComponent = Mappers.physics.get(entity);
-        float scaleY = 1 - (sprite3D.renderable.angle / MathUtils.PI);//TODO, this is wrong: need to find something that maps like below
+        //TODO, this is wrong: need to find something that maps like below
+        float scaleY = 1 - (sprite3D.renderable.angle / MathUtils.PI);
         //degrees, scale
         //0   = 1 	-> top
         //45  = 0.5
@@ -283,13 +362,21 @@ public class ControlSystem extends IteratingSystem {
         //315 = 0.5
         //360 = 1	-> top
         //System.out.println(sprite3D.renderable.angle + ", " + sy);
-        //physicsComponent.poly.setScale(1, scaleY);
+        physicsComponent.poly.setScale(1, scaleY);
+        */
         
         
         if (dodgeComp.animationTimer.canDoEvent()) {
             //reset
             sprite3D.renderable.angle = 0;
+            
             //physicsComponent.poly.setScale(1, 1);
+            //physicsComp.body.applyForceToCenter(MyMath.vector(dodgeComp.direction - (float)Math.PI, /*dodgeComp.force*/ 1000f), true);
+            //physicsComp.body.setLinearVelocity(MyMath.vector(dodgeComp.direction - (float)Math.PI, /*dodgeComp.force*/ 0f));
+            //physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(MyMath.vector(dodgeComp.direction - (float)Math.PI, /*dodgeComp.force*/ dodgeForce)));
+            //physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().sub(dodgeComp.dodgeVec));
+            PhysicsComponent physicsComp = Mappers.physics.get(entity);
+            physicsComp.body.applyLinearImpulse(MyMath.vector(dodgeComp.direction - (float) Math.PI, dodgeComp.force/2), physicsComp.body.getPosition(), true);
             
             //end anim
             entity.remove(DodgeComponent.class);
@@ -365,26 +452,13 @@ public class ControlSystem extends IteratingSystem {
                 Mappers.vehicle.get(vehicle).driver = characterEntity;
                 
                 // set focus to vehicle
-                if (characterEntity.getComponent(CameraFocusComponent.class) != null) {
-                    vehicle.add(characterEntity.remove(CameraFocusComponent.class));
-                    Gdx.app.log(this.getClass().getSimpleName(), "[CameraFocus] " + Misc.objString(characterEntity) + " -> " + Misc.objString(vehicle));
-                    
+                if (ECSUtil.transferComponent(characterEntity, vehicle, CameraFocusComponent.class)) {
                     MyScreenAdapter.setZoomTarget(1);// zoom out camera, TODO: add pan animation
                 }
-                if (characterEntity.getComponent(ControllableComponent.class) != null) {
-                    vehicle.add(characterEntity.remove(ControllableComponent.class));
-                    Gdx.app.log(this.getClass().getSimpleName(), "[Controllable] " + Misc.objString(characterEntity) + " -> " + Misc.objString(vehicle));
-                }
-                // move control to vehicle (AI/player)
-                if (characterEntity.getComponent(AIComponent.class) != null) {
-                    vehicle.add(characterEntity.remove(AIComponent.class));
-                    Gdx.app.log(this.getClass().getSimpleName(), "[AI] " + Misc.objString(characterEntity) + " -> " + Misc.objString(vehicle));
-                }
-                if (characterEntity.getComponent(ControlFocusComponent.class) != null) {
-                    vehicle.add(characterEntity.remove(ControlFocusComponent.class));
-                    Gdx.app.log(this.getClass().getSimpleName(), "[ControlFocus] " + Misc.objString(characterEntity) + " -> " + Misc.objString(vehicle));
-                }
                 
+                ECSUtil.transferComponent(characterEntity, vehicle, ControllableComponent.class);
+                ECSUtil.transferComponent(characterEntity, vehicle, AIComponent.class);
+                ECSUtil.transferComponent(characterEntity, vehicle, ControlFocusComponent.class);
                 
                 // remove character
                 getEngine().removeEntity(characterEntity);
@@ -412,7 +486,7 @@ public class ControlSystem extends IteratingSystem {
         // set the player at the position of vehicle
         Vector2 vehiclePosition = Mappers.transform.get(vehicleEntity).pos;
         Body body = BodyFactory.createPlayerBody(0, 0, characterEntity);
-       
+        
         
         Vector2 offset = MyMath.vector(MathUtils.random(360) * MathUtils.degRad, offsetDist);//set player next to vehicle
         
@@ -422,33 +496,20 @@ public class ControlSystem extends IteratingSystem {
         
         
         //set focus to character
-        if (vehicleEntity.getComponent(CameraFocusComponent.class) != null) {
-            characterEntity.add(vehicleEntity.remove(CameraFocusComponent.class));
-            Gdx.app.log(this.getClass().getSimpleName(), "[CameraFocus] " + Misc.objString(vehicleEntity) + " -> " + Misc.objString(characterEntity));
-            
+        if (ECSUtil.transferComponent(vehicleEntity, characterEntity, CameraFocusComponent.class)) {
             MyScreenAdapter.setZoomTarget(0.5f);// zoom in camera
         }
-        if (vehicleEntity.getComponent(ControlFocusComponent.class) != null) {
-            characterEntity.add(vehicleEntity.remove(ControlFocusComponent.class));
-            Gdx.app.log(this.getClass().getSimpleName(), "[ControlFocus] " + Misc.objString(vehicleEntity) + " -> " + Misc.objString(characterEntity));
-        }
         
-        //move control to character (AI/player)
-        if (vehicleEntity.getComponent(AIComponent.class) != null) {
-            characterEntity.add(vehicleEntity.remove(AIComponent.class));
-            Gdx.app.log(this.getClass().getSimpleName(), "[AI] " + Misc.objString(vehicleEntity) + " -> " + Misc.objString(characterEntity));
-        }
-        if (vehicleEntity.getComponent(ControllableComponent.class) != null) {
-            characterEntity.add(vehicleEntity.remove(ControllableComponent.class));
-            Gdx.app.log(this.getClass().getSimpleName(), "[Controllable] " + Misc.objString(vehicleEntity) + " -> " + Misc.objString(characterEntity));
-        }
+        ECSUtil.transferComponent(vehicleEntity, characterEntity, ControlFocusComponent.class);
+        ECSUtil.transferComponent(vehicleEntity, characterEntity, AIComponent.class);
+        ECSUtil.transferComponent(vehicleEntity, characterEntity, ControllableComponent.class);
+        
         
         // remove reference
         Mappers.vehicle.get(vehicleEntity).driver = null;
         
         // add player back into world
         getEngine().addEntity(characterEntity);
-        
         
         
     }

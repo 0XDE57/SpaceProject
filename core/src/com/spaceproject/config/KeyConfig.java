@@ -9,6 +9,7 @@ public class KeyConfig extends Config {
     public int right;
     public int left;
     public int back;
+    public int alter;
     public int attack;
     public int defend;
     public int changeVehicle;
@@ -40,12 +41,14 @@ public class KeyConfig extends Config {
     public int toggleVector;
     public int toggleMenu;
     
+    
     public void loadDefault() {
         //player
         forward = Keys.W;
         right = Keys.D;
         left = Keys.A;
         back = Keys.S;
+        alter = Keys.ALT_LEFT;
         attack = Keys.SPACE;
         defend = Keys.SHIFT_LEFT;
         changeVehicle = Keys.G;

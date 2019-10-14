@@ -13,8 +13,8 @@ import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
 
 public class AISystem extends IteratingSystem {
@@ -56,7 +56,7 @@ public class AISystem extends IteratingSystem {
                     
                     VehicleComponent vehicle = Mappers.vehicle.get(entity);
                     if (vehicle == null) {
-                        Entity closestVehicle = Misc.closestEntity(aiPos, vehicles);
+                        Entity closestVehicle = ECSUtil.closestEntity(aiPos, vehicles);
                         if (closestVehicle != null) {
                             control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
                             control.moveForward = true;
@@ -103,7 +103,7 @@ public class AISystem extends IteratingSystem {
                 
                 VehicleComponent vehicle = Mappers.vehicle.get(entity);
                 if (vehicle == null) {
-                    Entity closestVehicle = Misc.closestEntity(aiPos, vehicles);
+                    Entity closestVehicle = ECSUtil.closestEntity(aiPos, vehicles);
                     if (closestVehicle != null) {
                         control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
                         control.moveForward = true;
@@ -121,7 +121,7 @@ public class AISystem extends IteratingSystem {
                         }
                     }
                 } else {
-                    ai.planetTarget = Misc.closestEntity(aiPos, planets);
+                    ai.planetTarget = ECSUtil.closestEntity(aiPos, planets);
                     if (ai.planetTarget != null) {
                         
                         Vector2 pPos = Mappers.transform.get(ai.planetTarget).pos;
@@ -165,7 +165,7 @@ public class AISystem extends IteratingSystem {
                 CharacterComponent character = Mappers.character.get(entity);
                 if (character != null) {
                     // follow closet vehicle
-                    Entity closestVehicle = Misc.closestEntity(aiPos, vehicles);
+                    Entity closestVehicle = ECSUtil.closestEntity(aiPos, vehicles);
                     if (closestVehicle != null) {
                         control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
                     }
@@ -189,7 +189,7 @@ public class AISystem extends IteratingSystem {
             case takeOffPlanet: {
                 VehicleComponent vehicle = Mappers.vehicle.get(entity);
                 if (vehicle == null) {
-                    Entity closestVehicle = Misc.closestEntity(aiPos, vehicles);
+                    Entity closestVehicle = ECSUtil.closestEntity(aiPos, vehicles);
                     if (closestVehicle != null) {
                         control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
                         control.moveForward = false;

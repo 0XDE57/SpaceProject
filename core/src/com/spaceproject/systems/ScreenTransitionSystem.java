@@ -44,80 +44,9 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(entity);
         
         if (screenTrans.landStage != null) {
-            if (screenTrans.curLandStage == null || screenTrans.curLandStage != screenTrans.landStage) {
-                Gdx.app.log(this.getClass().getSimpleName(), "Animation Stage: " + screenTrans.landStage + " for " + Misc.objString(entity));
-                screenTrans.curLandStage = screenTrans.landStage;
-            }
-            switch (screenTrans.landStage) {
-                case shrink:
-                    shrink(entity, screenTrans);
-                    break;
-                case zoomIn:
-                    zoomIn(screenTrans);
-                    break;
-                case screenEffectFadeIn:
-                    fadeIn(screenTrans);
-                    break;
-                case transition:
-                    landOnPlanet(gameScreen, entity, screenTrans);
-                    return;
-                case screenEffectFadeOut:
-                    fadeOut(screenTrans);
-                    break;
-                case pause:
-                    pause(screenTrans);
-                    break;
-                case exit:
-                    exit(entity, screenTrans);
-                    break;
-                case end:
-                    entity.remove(ScreenTransitionComponent.class);
-                    Gdx.app.log(this.getClass().getSimpleName(), "Animation complete. Removed ScreenTransitionComponent for " + Misc.objString(entity));
-                    break;
-                default:
-                    try {
-                        throw new Exception("Unknown Animation Stage: " + screenTrans.landStage);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-            }
+            processLanding(entity, screenTrans);
         } else if (screenTrans.takeOffStage != null) {
-            if (screenTrans.curTakeOffStage == null || screenTrans.curTakeOffStage != screenTrans.takeOffStage) {
-                Gdx.app.log(this.getClass().getSimpleName(), "Animation Stage: " + screenTrans.takeOffStage + " for " + Misc.objString(entity));
-                screenTrans.curTakeOffStage = screenTrans.takeOffStage;
-            }
-            switch (screenTrans.takeOffStage) {
-                case screenEffectFadeIn:
-                    fadeIn(screenTrans);
-                    break;
-                case transition:
-                    takeOff(gameScreen, entity, screenTrans);
-                    break;
-                case sync:
-                    syncLoadPosition(entity, screenTrans);
-                    break;
-                case screenEffectFadeOut:
-                    fadeOut(screenTrans);
-                    break;
-                case zoomOut:
-                    zoomOut(screenTrans);
-                    break;
-                case grow:
-                    grow(entity, screenTrans);
-                    break;
-                case end:
-                    entity.remove(screenTrans.getClass());
-                    Gdx.app.log(this.getClass().getSimpleName(), "Animation complete. Removed ScreenTransitionComponent from " + Misc.objString(entity));
-                    break;
-                default:
-                    try {
-                        throw new Exception("Unknown Animation Stage: " + screenTrans.takeOffStage);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-            }
+            processTakeOff(entity, screenTrans);
         }
     }
     
@@ -127,6 +56,85 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         }
         if (screenTrans.takeOffStage != null) {
             screenTrans.takeOffStage = screenTrans.takeOffStage.next();
+        }
+    }
+    
+    private void processLanding(Entity entity, ScreenTransitionComponent screenTrans) {
+        if (screenTrans.curLandStage == null || screenTrans.curLandStage != screenTrans.landStage) {
+            Gdx.app.log(this.getClass().getSimpleName(), "Animation Stage: " + screenTrans.landStage + " for " + Misc.objString(entity));
+            screenTrans.curLandStage = screenTrans.landStage;
+        }
+        switch (screenTrans.landStage) {
+            case shrink:
+                shrink(entity, screenTrans);
+                break;
+            case zoomIn:
+                zoomIn(screenTrans);
+                break;
+            case screenEffectFadeIn:
+                fadeIn(screenTrans);
+                break;
+            case transition:
+                landOnPlanet(gameScreen, entity, screenTrans);
+                return;
+            case screenEffectFadeOut:
+                fadeOut(screenTrans);
+                break;
+            case pause:
+                pause(screenTrans);
+                break;
+            case exit:
+                exit(entity, screenTrans);
+                break;
+            case end:
+                entity.remove(ScreenTransitionComponent.class);
+                Gdx.app.log(this.getClass().getSimpleName(), "Animation complete. Removed ScreenTransitionComponent for " + Misc.objString(entity));
+                break;
+            default:
+                try {
+                    throw new Exception("Unknown Animation Stage: " + screenTrans.landStage);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+        }
+    }
+    
+    private void processTakeOff(Entity entity, ScreenTransitionComponent screenTrans) {
+        if (screenTrans.curTakeOffStage == null || screenTrans.curTakeOffStage != screenTrans.takeOffStage) {
+            Gdx.app.log(this.getClass().getSimpleName(), "Animation Stage: " + screenTrans.takeOffStage + " for " + Misc.objString(entity));
+            screenTrans.curTakeOffStage = screenTrans.takeOffStage;
+        }
+        switch (screenTrans.takeOffStage) {
+            case screenEffectFadeIn:
+                fadeIn(screenTrans);
+                break;
+            case transition:
+                takeOff(gameScreen, entity, screenTrans);
+                break;
+            case sync:
+                syncLoadPosition(entity, screenTrans);
+                break;
+            case screenEffectFadeOut:
+                fadeOut(screenTrans);
+                break;
+            case zoomOut:
+                zoomOut(screenTrans);
+                break;
+            case grow:
+                grow(entity, screenTrans);
+                break;
+            case end:
+                entity.remove(screenTrans.getClass());
+                Gdx.app.log(this.getClass().getSimpleName(), "Animation complete. Removed ScreenTransitionComponent from " + Misc.objString(entity));
+                break;
+            default:
+                try {
+                    throw new Exception("Unknown Animation Stage: " + screenTrans.takeOffStage);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
         }
     }
     
