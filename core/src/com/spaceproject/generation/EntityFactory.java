@@ -73,6 +73,7 @@ public class EntityFactory {
         ControllableComponent control = new ControllableComponent();
         control.timerVehicle = new SimpleTimer(entityCFG.controlTimerVehicle);
         control.timerDodge = new SimpleTimer(entityCFG.controlTimerDodge);
+        control.actionACooldownTimer = new SimpleTimer(entityCFG.controlATimerCoolDown);
         
         
         entity.add(health);
@@ -470,6 +471,7 @@ public class EntityFactory {
         //engine data and marks entity as drive-able
         VehicleComponent vehicle = new VehicleComponent();
         vehicle.driver = driver;
+        vehicle.hyperSpeed = entityCFG.hyperVelocity;
         vehicle.thrust = entityCFG.engineThrust;//higher is faster
         vehicle.maxSpeed = vehicle.NOLIMIT;
         

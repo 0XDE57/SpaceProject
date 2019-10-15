@@ -7,6 +7,7 @@ public class VehicleComponent implements Component {
     
     public Entity driver;
     
+    
     //TODO: implement engine state behavior
     enum EngineState {
         local,    //intention: combat, interactions, land on planet, small distance travel (planet to planet within a star system)
@@ -23,6 +24,7 @@ public class VehicleComponent implements Component {
     public float thrust;
     
     // maximum speed vehicle can
+    public float hyperSpeed;
     public float maxSpeed = 60;
     public static final int NOLIMIT = -1;//no max speed/infinite
     

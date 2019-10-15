@@ -14,6 +14,9 @@ public class KeyConfig extends Config {
     public int defend;
     public int changeVehicle;
     public int land;
+    public int actionA;
+    public int actionB;
+    public int actionC;
     
     //---UI controls---
     public int toggleHUD;
@@ -53,6 +56,9 @@ public class KeyConfig extends Config {
         defend = Keys.SHIFT_LEFT;
         changeVehicle = Keys.G;
         land = Keys.T;
+        actionA = Keys.NUM_1;
+        actionB = Keys.NUM_2;
+        actionC = Keys.NUM_3;
         
         //ui
         toggleHUD = Keys.H;

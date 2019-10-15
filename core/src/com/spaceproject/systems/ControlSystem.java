@@ -23,6 +23,7 @@ import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.DodgeComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.GrowCannonComponent;
+import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
@@ -52,8 +53,11 @@ public class ControlSystem extends IteratingSystem {
     private ImmutableArray<Entity> planets;
     
     private float offsetDist = 1.5f;//TODO: dynamic based on ship size
+    //TODO: move values to config
     private float strafeAngle = 40 * MathUtils.degRad;
     private float strafeRot = 3f;
+    private float faceRotSpeed = 8f;
+    private int hyperModeTimeout = 1000;
     
     public ControlSystem() {
         super(Family.all(ControllableComponent.class, TransformComponent.class).one(CharacterComponent.class, VehicleComponent.class).get());
@@ -92,7 +96,7 @@ public class ControlSystem extends IteratingSystem {
         PhysicsComponent physicsComp = Mappers.physics.get(entity);
         
         //make character face mouse/joystick
-        float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleFacing, 8f * delta);
+        float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleFacing, faceRotSpeed * delta);
         float impulse = MyMath.getAngularImpulse(physicsComp.body, angle, delta);
         physicsComp.body.applyAngularImpulse(impulse, true);
         
@@ -120,8 +124,8 @@ public class ControlSystem extends IteratingSystem {
         //boolean canMove = dodgeComp == null && screenTransComp == null;
         boolean canShoot = dodgeComp == null && shield == null;
         boolean canDodge = shield == null;
-    
-    
+
+        
         barrelRoll(entity, dodgeComp);
         manageShield(entity, control, transform, shield);
     
@@ -135,9 +139,40 @@ public class ControlSystem extends IteratingSystem {
             return;
         }
     
+        HyperDriveComponent hyperDriveComponent = entity.getComponent(HyperDriveComponent.class);
+        if (control.actionA) {
+            if (hyperDriveComponent == null) {
+                if (control.actionACooldownTimer.canDoEvent()) {
+                    hyperDriveComponent = new HyperDriveComponent();
+                    hyperDriveComponent.coolDownTimer = new SimpleTimer(hyperModeTimeout, true);
+                    hyperDriveComponent.velocity.set(MyMath.vector(physicsComp.body.getAngle(), vehicle.hyperSpeed));
+                    entity.add(hyperDriveComponent);
+    
+                    physicsComp.body.setActive(false);
+                }
+            } else {
+                if (hyperDriveComponent.coolDownTimer.canDoEvent()) {
+        
+                    entity.remove(HyperDriveComponent.class);
+        
+                    physicsComp.body.setTransform(transform.pos, transform.rotation);
+                    physicsComp.body.setLinearVelocity(MyMath.vector(transform.rotation, 0));
+                    physicsComp.body.setActive(true);
+                    
+                    control.actionACooldownTimer.reset();
+                }
+            }
+        }
+        //if (control.actionB) { /*doSomething()*/ }
+        //if (control.actionC) { /*doSomething()*/}
+        
+        if (hyperDriveComponent != null) {
+            transform.pos.add(hyperDriveComponent.velocity.cpy().scl(delta));
+        }
+    
     
         //make vehicle face angle from mouse/joystick
-        float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleFacing, 8f * delta);
+        float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleFacing, faceRotSpeed * delta);
         float impulse = MyMath.getAngularImpulse(physicsComp.body, angle, delta);
         physicsComp.body.applyAngularImpulse(impulse, true);
     

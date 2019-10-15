@@ -272,7 +272,7 @@ current priority
             [ ] Laser cannon
     [ ] engine mode:
             [x] local/combat (slow, for interacting with object near, landing planets, fighting)
-            [ ] travel/cruise (medium, for navigating within a system, planet to planet, avoid/escape, faster travel)
+            [...] travel/cruise (medium, for navigating within a system, planet to planet, avoid/escape, faster travel)
             [ ] hyper/warp   (fast, warp to other systems, can't turn, can't fight)
 
     [ ] ship generation

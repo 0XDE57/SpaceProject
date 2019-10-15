@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
+import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TextureComponent;
@@ -155,6 +156,10 @@ public class MiniMap {
         if (player != null) {
             Body body = Mappers.physics.get(player).body;
             String playerInfo = ": " + MyMath.round(body.getLinearVelocity().len(), 1);
+            HyperDriveComponent hyper = player.getComponent(HyperDriveComponent.class);
+            if (hyper != null) {
+                playerInfo = ": " + MyMath.round(hyper.velocity.len(), 1);
+            }
             mapString += playerInfo;
         }
         font.draw(batch, mapString, textPosX, textPosY - lineHeight);

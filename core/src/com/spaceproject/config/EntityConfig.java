@@ -11,12 +11,14 @@ public class EntityConfig extends Config {
     //control
     public long controlTimerDodge;
     public long controlTimerVehicle;
+    public long controlATimerCoolDown;
     
     //ship
     public int shipSizeMin;
     public int shipSizeMax;
     public float shipHealth;
     public float engineThrust;
+    public float hyperVelocity;
     public float dodgeForce;
     public long dodgeAnimationTimer;
     public int cannonSize;
@@ -29,6 +31,7 @@ public class EntityConfig extends Config {
     public long shrinkGrowAnimTime;
     
     
+    
     @Override
     public void loadDefault() {
         characterHealth = 100;
@@ -36,11 +39,13 @@ public class EntityConfig extends Config {
         
         controlTimerVehicle = 1000;
         controlTimerDodge = 500;
+        controlATimerCoolDown = 2000;
         
         shipSizeMin = 10;
         shipSizeMax = 36;
         shipHealth = 200;
         engineThrust = 200;
+        hyperVelocity = 320;
         dodgeAnimationTimer = 475;
         dodgeForce = 5f;
         cannonSize = 1;

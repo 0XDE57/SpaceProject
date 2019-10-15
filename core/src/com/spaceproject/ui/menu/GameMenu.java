@@ -36,6 +36,7 @@ public class GameMenu extends VisWindow {
     private Tab keyConfigTab;
     
     private boolean alwaysHideOnEscape = false;
+    private boolean debugShowPlaceholderTests = false;
     
     public GameMenu(boolean vertical) {
         super(SpaceProject.TITLE + " (" + SpaceProject.VERSION + ")");
@@ -81,49 +82,54 @@ public class GameMenu extends VisWindow {
         Tab mapTab = new HotKeyTab("map", Input.Keys.M);
         tabbedPane.add(mapTab);
     
-    
-        Tab customRenderTab = new HotKeyTab("test render", Input.Keys.H);
-        TestShapeRenderActor shapeRenderActor = new TestShapeRenderActor();
-        customRenderTab.getContentTable().add(shapeRenderActor).grow();
-        //TODO: something about the .grow (and also .expand().fill()) is breaking the window resizing
-        //customRender.getContentTable().add(new Actor()).grow();
-        //customRender.getContentTable().add(new Actor()).expand().fill();
-        tabbedPane.add(customRenderTab);
-        
-        
-        Tab placeholderATab = new HotKeyTab("placeholder", Input.Keys.NUM_1);
-        placeholderATab.getContentTable().add(new TextButton("do stuff", VisUI.getSkin()));
-        tabbedPane.add(placeholderATab);
-        
-        Tab placeholderBTab = new HotKeyTab("placeholder", Input.Keys.NUM_2);
-        //test rainbow text
-        BitmapFont font = VisUI.getSkin().get("default-font", BitmapFont.class);
-        font.getData().markupEnabled = true;
-        Label testRainbowLabel = new Label("<<[BLUE]M[RED]u[YELLOW]l[GREEN]t[OLIVE]ic[]o[]l[]o[]r[]*[MAROON]Label[][] [Unknown Color]>>", VisUI.getSkin());
-        placeholderBTab.getContentTable().add(testRainbowLabel);
-        placeholderBTab.getContentTable().row();
-        placeholderBTab.getContentTable().add(new Label("[RED]This[BLUE] is a [GREEN]test!", VisUI.getSkin()));
-        tabbedPane.add(placeholderBTab);
-        
-        
         Tab debugMenuTab = new DebugTab(this);
         tabbedPane.add(debugMenuTab);
+    
         
         
-        /*
-        Tab testConfigTab = new ConfigTab(this, SpaceProject.celestCFG);
-        tabbedPane.add(testConfigTab);
         
-        tabbedPane.add(new ConfigTab(this, "MiniMp", SpaceProject.configManager.getConfig(MiniMapConfig.class)));
-        tabbedPane.add(new ConfigTab(this, SpaceProject.keyCFG));*/
-        tabbedPane.add(new ConfigManagerTab(this));
-        tabbedPane.add(new ConfigVeiwerTab(this, SpaceProject.configManager.getConfigs()));
+        if (debugShowPlaceholderTests) {
+            Tab customRenderTab = new HotKeyTab("test render", Input.Keys.H);
+            TestShapeRenderActor shapeRenderActor = new TestShapeRenderActor();
+            customRenderTab.getContentTable().add(shapeRenderActor).grow();
+            //TODO: something about the .grow (and also .expand().fill()) is breaking the window resizing
+            //customRender.getContentTable().add(new Actor()).grow();
+            //customRender.getContentTable().add(new Actor()).expand().fill();
+            tabbedPane.add(customRenderTab);
+            
+            
+            Tab placeholderATab = new HotKeyTab("placeholder", Input.Keys.NUM_1);
+            placeholderATab.getContentTable().add(new TextButton("do stuff", VisUI.getSkin()));
+            tabbedPane.add(placeholderATab);
+    
+            
+            Tab placeholderBTab = new HotKeyTab("placeholder", Input.Keys.NUM_2);
+            //test rainbow text
+            BitmapFont font = VisUI.getSkin().get("default-font", BitmapFont.class);
+            font.getData().markupEnabled = true;
+            Label testRainbowLabel = new Label("<<[BLUE]M[RED]u[YELLOW]l[GREEN]t[OLIVE]ic[]o[]l[]o[]r[]*[MAROON]Label[][] [Unknown Color]>>", VisUI.getSkin());
+            placeholderBTab.getContentTable().add(testRainbowLabel);
+            placeholderBTab.getContentTable().row();
+            placeholderBTab.getContentTable().add(new Label("[RED]This[BLUE] is a [GREEN]test!", VisUI.getSkin()));
+            tabbedPane.add(placeholderBTab);
+            
+            
+             /*
+             Tab testConfigTab = new ConfigTab(this, SpaceProject.celestCFG);
+             tabbedPane.add(testConfigTab);
+             
+             tabbedPane.add(new ConfigTab(this, "MiniMp", SpaceProject.configManager.getConfig(MiniMapConfig.class)));
+             tabbedPane.add(new ConfigTab(this, SpaceProject.keyCFG));*/
+            tabbedPane.add(new ConfigManagerTab(this));
+            tabbedPane.add(new ConfigVeiwerTab(this, SpaceProject.configManager.getConfigs()));
+    
+    
+            keyConfigTab = new KeyConfigTab(this, "Input Settings", SpaceProject.configManager.getConfig(KeyConfig.class));
+            tabbedPane.add(keyConfigTab);
+    
+            //tabbedPane.add(createConfigTab(new TestConfig()));
+        }
         
-        
-        keyConfigTab = new KeyConfigTab(this, "Input Settings", SpaceProject.configManager.getConfig(KeyConfig.class));
-        tabbedPane.add(keyConfigTab);
-        
-        //tabbedPane.add(createConfigTab(new TestConfig()));
         
         tabbedPane.switchTab(mainMenuTab);
     }
