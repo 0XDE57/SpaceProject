@@ -47,13 +47,13 @@ import com.spaceproject.utility.SimpleTimer;
 public class ControlSystem extends IteratingSystem {
     
     private EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
-    private EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
+    private static EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
     private ImmutableArray<Entity> vehicles;
     private ImmutableArray<Entity> planets;
     
     private float offsetDist = 1.5f;//TODO: dynamic based on ship size
-    float strafeAngle = 40 * MathUtils.degRad;
-    float strafeRot = 3f;
+    private float strafeAngle = 40 * MathUtils.degRad;
+    private float strafeRot = 3f;
     
     public ControlSystem() {
         super(Family.all(ControllableComponent.class, TransformComponent.class).one(CharacterComponent.class, VehicleComponent.class).get());
@@ -122,7 +122,7 @@ public class ControlSystem extends IteratingSystem {
         boolean canDodge = shield == null;
     
     
-        barrelRoll(entity, transform, dodgeComp);
+        barrelRoll(entity, dodgeComp);
         manageShield(entity, control, transform, shield);
     
         //debug force insta-stop
@@ -150,7 +150,7 @@ public class ControlSystem extends IteratingSystem {
         }
         
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
-        float strafe = this.strafeRot * delta;
+        float strafe = strafeRot * delta;
         if (control.moveLeft) {
             strafeLeft(vehicle, control, delta, physicsComp, sprite3D, strafe);
             
@@ -264,78 +264,51 @@ public class ControlSystem extends IteratingSystem {
         }
     }
     
+    
     private static void dodgeRight(Entity entity, TransformComponent transform, ControllableComponent control) {
         if (control.timerDodge.canDoEvent() && Mappers.dodge.get(entity) == null) {
             control.timerDodge.reset();
             
-            //bypass lerp to make dodge feel better/more responsive
-            //transform.rotation = control.angleFacing;
-            
-            DodgeComponent d = new DodgeComponent();
-            d.animationTimer = new SimpleTimer(475, true);
-            d.animInterpolation = Interpolation.pow2;//new Interpolation.Pow(2);
-            d.revolutions = 1;
-            d.direction = transform.rotation - MathUtils.PI / 2;
-            d.dir = DodgeComponent.FlipDir.right;
-            d.force = 5f;
-            entity.add(d);
-    
-            Body body = Mappers.physics.get(entity).body;
-            body.applyLinearImpulse(MyMath.vector(d.direction, d.force), body.getPosition(), true);
+            applyDodge(entity, transform, control, DodgeComponent.FlipDir.right);
         }
     }
     
     private static void dodgeLeft(Entity entity, TransformComponent transform, ControllableComponent control) {
         if (control.timerDodge.canDoEvent() && Mappers.dodge.get(entity) == null) {
             control.timerDodge.reset();
-            
-            //bypass lerp to make dodge feel better/more responsive
-            //transform.rotation = control.angleFacing;
-            
-            DodgeComponent d = new DodgeComponent();
-            d.animationTimer = new SimpleTimer(475, true);
-            d.animInterpolation = Interpolation.pow2;//new Interpolation.Pow(2);
-            d.revolutions = 1;
-            d.direction = transform.rotation + MathUtils.PI / 2;
-            d.dir = DodgeComponent.FlipDir.left;
-            d.force = 5f;
-            
-            entity.add(d);
-            
-            
-            Body body = Mappers.physics.get(entity).body;
-            transform.rotation = control.angleFacing;
-            body.setAngularVelocity(0);
-            body.setTransform(body.getPosition(), control.angleFacing); //bypass position lerp to make dodge feel better/more responsive
-            body.applyLinearImpulse(MyMath.vector(d.direction, d.force), body.getPosition(), true);
-            //physicsComp.body.applyForceToCenter(d.dodgeVec, true);
-            //physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(d.dodgeVec));
+    
+            applyDodge(entity, transform, control, DodgeComponent.FlipDir.left);
         }
     }
     
-    private void barrelRoll(Entity entity, TransformComponent transform, DodgeComponent dodgeComp) {
+    private static DodgeComponent createDodgeComponent(float dodgeForce, float rotation, DodgeComponent.FlipDir dir, long timer) {
+        DodgeComponent d = new DodgeComponent();
+        d.animationTimer = new SimpleTimer(timer, true);
+        d.animInterpolation = Interpolation.pow2;
+        d.revolutions = 1;
+        d.direction = dir == DodgeComponent.FlipDir.left ? rotation + MathUtils.PI / 2 : rotation - MathUtils.PI / 2;
+        d.dir = dir;
+        d.force = dodgeForce;
+        return d;
+    }
+    
+    private static void applyDodge(Entity entity, TransformComponent transform, ControllableComponent control, DodgeComponent.FlipDir flipDir) {
+        DodgeComponent d = createDodgeComponent(entityCFG.dodgeForce, transform.rotation, flipDir, entityCFG.dodgeAnimationTimer);
+        entity.add(d);
+        
+        Body body = Mappers.physics.get(entity).body;
+        //bypass position lerp to make dodge feel better/more responsive
+        transform.rotation = control.angleFacing;
+        body.setAngularVelocity(0);
+        body.setTransform(body.getPosition(), control.angleFacing);
+        
+        body.applyLinearImpulse(MyMath.vector(d.direction, d.force), body.getPosition(), true);
+    }
+    
+    private void barrelRoll(Entity entity, DodgeComponent dodgeComp) {
         if (dodgeComp == null) {
             return;
         }
-        
-        
-        //TODO, this use of interpolation seems a little odd, do I need to track distance traveled?
-        //float interp = dodgeComp.animInterpolation.apply(0, dodgeComp.distance, dodgeComp.animationTimer.ratio());
-        //float distance = interp - dodgeComp.traveled;
-        //dodgeComp.traveled += distance;
-        //transform.pos.add(MyMath.vector(dodgeComp.direction, distance));
-        //System.out.println(dodgeComp.animationTimer.ratio() + ": " + interp + ": " + distance + ": " + dodgeComp.traveled + ": " + (dodgeComp.distance-interp));
-        
-        //PhysicsComponent physicsComp = Mappers.physics.get(entity);
-        //physicsComp.body.applyForceToCenter(MyMath.vector(dodgeComp.direction, dodgeComp.force), true);
-        /*
-        if (dodgeComp.animationTimer.ratio() >= 0.5f) {
-            //physicsComp.body.applyForceToCenter(dodgeComp.dodgeVec, true);
-        } else {
-            //physicsComp.body.applyForceToCenter(dodgeComp.dodgeVec.rotate(180), true);
-        }*/
-        //physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(dodgeComp.dodgeVec));
-        
         
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         switch (dodgeComp.dir) {
@@ -370,13 +343,9 @@ public class ControlSystem extends IteratingSystem {
             //reset
             sprite3D.renderable.angle = 0;
             
-            //physicsComponent.poly.setScale(1, 1);
-            //physicsComp.body.applyForceToCenter(MyMath.vector(dodgeComp.direction - (float)Math.PI, /*dodgeComp.force*/ 1000f), true);
-            //physicsComp.body.setLinearVelocity(MyMath.vector(dodgeComp.direction - (float)Math.PI, /*dodgeComp.force*/ 0f));
-            //physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(MyMath.vector(dodgeComp.direction - (float)Math.PI, /*dodgeComp.force*/ dodgeForce)));
-            //physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().sub(dodgeComp.dodgeVec));
+            //apply counter force to slow dodge
             PhysicsComponent physicsComp = Mappers.physics.get(entity);
-            physicsComp.body.applyLinearImpulse(MyMath.vector(dodgeComp.direction - (float) Math.PI, dodgeComp.force/2), physicsComp.body.getPosition(), true);
+            physicsComp.body.applyLinearImpulse(MyMath.vector(dodgeComp.direction - (float) Math.PI, dodgeComp.force / 2), physicsComp.body.getPosition(), true);
             
             //end anim
             entity.remove(DodgeComponent.class);

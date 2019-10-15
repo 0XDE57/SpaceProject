@@ -73,9 +73,6 @@ public class EntityFactory {
         ControllableComponent control = new ControllableComponent();
         control.timerVehicle = new SimpleTimer(entityCFG.controlTimerVehicle);
         control.timerDodge = new SimpleTimer(entityCFG.controlTimerDodge);
-        //int doubleTapTime = 1000;
-        //.timerDodgeLeft = new SimpleTimer(doubleTapTime);
-        //control.timerDodgeRight = new SimpleTimer(doubleTapTime);
         
         
         entity.add(health);
@@ -102,7 +99,7 @@ public class EntityFactory {
     }
     
     public static Entity createPlayerShip(int x, int y, boolean inSpace) {
-        Entity player = createCharacter(x, y);//createPlayer(x, y);
+        Entity player = createPlayer(x, y);
         
         PhysicsComponent physicsComponent = player.getComponent(PhysicsComponent.class);
         GameScreen.box2dWorld.destroyBody(physicsComponent.body);
@@ -110,10 +107,8 @@ public class EntityFactory {
         
         Entity playerShip = createShip3(x, y, 0, player, inSpace);
         
-        playerShip.add(new CameraFocusComponent());
-        playerShip.add(new ControlFocusComponent());
-        //ECSUtil.transferComponent(player, playerShip, ControlFocusComponent.class);
-        //ECSUtil.transferComponent(player, playerShip, CameraFocusComponent.class);
+        ECSUtil.transferComponent(player, playerShip, ControlFocusComponent.class);
+        ECSUtil.transferComponent(player, playerShip, CameraFocusComponent.class);
         ECSUtil.transferComponent(player, playerShip, ControllableComponent.class);
         
         return playerShip;
