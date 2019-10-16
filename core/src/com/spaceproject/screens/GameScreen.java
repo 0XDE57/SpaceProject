@@ -85,6 +85,10 @@ public class GameScreen extends MyScreenAdapter {
         return seed;
     }
     
+    public long getPlanetSeed() {
+        return currentPlanet.getComponent(SeedComponent.class).seed;
+    }
+    
     private void initUI() {
         //init scene2d/VisUI
         if (VisUI.isLoaded())

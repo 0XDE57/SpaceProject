@@ -344,9 +344,11 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         debugTexts.add(new DebugText(
                 "time: " + Misc.formatDuration(GameScreen.getGameTimeCurrent()) + " (" + GameScreen.getGameTimeCurrent() + ")",
                 Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10, fontLarge));
-        debugTexts.add(new DebugText("seed: " + GameScreen.getInstance().getSeed(),
-                Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight, fontLarge));
-        
+        debugTexts.add(new DebugText("seed: " + GameScreen.getInstance().getSeed(), Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight, fontLarge));
+        if (!GameScreen.getInstance().inSpace()) {
+            debugTexts.add(new DebugText("planet: " + GameScreen.getInstance().getPlanetSeed(),
+                    Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight * 2, fontLarge));
+        }
         //view threads
         String noisePool = GameScreen.noiseManager.getNoiseThreadPool().toString();
         debugTexts.add(new DebugText(noisePool, x, y - (lineHeight * linePos++)));

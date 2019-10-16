@@ -168,7 +168,11 @@ public class MiniMap {
             //draw game time
             font.draw(batch, Misc.formatDuration(GameScreen.getGameTimeCurrent()), textPosX, textPosY - lineHeight * 2);
             //draw seed
-            font.draw(batch, GameScreen.getInstance().getSeed() + "", textPosX, textPosY - mapContainer.height + lineHeight);
+            long seed = GameScreen.getInstance().getSeed();
+            if (!GameScreen.getInstance().inSpace()) {
+                seed = GameScreen.getInstance().getPlanetSeed();
+            }
+            font.draw(batch, seed + "", textPosX, textPosY - mapContainer.height + lineHeight);
         }
         if (mapState == MapState.full && !drawScaleTimer.canDoEvent()) {
             font.draw(batch, "scale: " + mapScale, centerMapX, textPosY - lineHeight);
