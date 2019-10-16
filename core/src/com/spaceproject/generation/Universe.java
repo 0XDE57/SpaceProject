@@ -17,10 +17,10 @@ public class Universe {
     private static CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
     public Array<Vector2> points;
     public Array<AstroBody> objects = new Array<AstroBody>();
-    private static boolean debugForceCreateNearPlayer = true;
+    
     
     public Universe() {
-        this(generatePoints(GameScreen.SEED, celestCFG.numPoints, celestCFG.pointGenRange, celestCFG.minPointDistance));
+        this(generatePoints(GameScreen.getInstance().getSeed(), celestCFG.numPoints, celestCFG.pointGenRange, celestCFG.minPointDistance));
     }
     
     public Universe(Array<Vector2> points) {
@@ -72,7 +72,7 @@ public class Universe {
                 points.add(newPoint);
         }
         
-        if (debugForceCreateNearPlayer) {
+        if (GameScreen.getInstance().debugForceDevWorld) {
             points.add(new Vector2(1000, 1000));//TODO: system near origin for debug, don't forget about me
         }
         

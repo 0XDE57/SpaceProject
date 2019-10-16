@@ -321,8 +321,6 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
     
     
     private void drawDiagnosticInfo(int x, int y) {
-        //DebugUtil.
-        
         //camera position
         String camera = String.format("Pos: %s %s  Zoom:%3$.2f", (int) cam.position.x, (int) cam.position.y, cam.zoom);
         
@@ -345,8 +343,9 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         debugTexts.add(new DebugText(camera, x, y - (lineHeight * linePos++), fontLarge));
         debugTexts.add(new DebugText(
                 "time: " + Misc.formatDuration(GameScreen.getGameTimeCurrent()) + " (" + GameScreen.getGameTimeCurrent() + ")",
-                500, Gdx.graphics.getHeight() - 10, fontLarge));
-        
+                Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10, fontLarge));
+        debugTexts.add(new DebugText("seed: " + GameScreen.getInstance().getSeed(),
+                Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight, fontLarge));
         
         //view threads
         String noisePool = GameScreen.noiseManager.getNoiseThreadPool().toString();

@@ -37,9 +37,9 @@ public class TextureFactory {
         return tex;
     }
     
-    static OpenSimplexNoise opacityGen = new OpenSimplexNoise(GameScreen.SEED);
-    static OpenSimplexNoise redGen = new OpenSimplexNoise(GameScreen.SEED + 1);
-    static OpenSimplexNoise blueGen = new OpenSimplexNoise(GameScreen.SEED + 2);
+    static OpenSimplexNoise opacityGen = new OpenSimplexNoise(GameScreen.getInstance().getSeed());
+    static OpenSimplexNoise redGen = new OpenSimplexNoise(GameScreen.getInstance().getSeed() + 1);
+    static OpenSimplexNoise blueGen = new OpenSimplexNoise(GameScreen.getInstance().getSeed() + 2);
     
     public static Texture generateSpaceBackgroundDust(int tX, int tY, int tileSize) {
         pixmap = new Pixmap(tileSize, tileSize, Format.RGBA8888);

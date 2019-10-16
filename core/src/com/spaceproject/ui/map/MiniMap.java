@@ -165,7 +165,10 @@ public class MiniMap {
         }
         font.draw(batch, mapString, textPosX, textPosY - lineHeight);
         if (mapState == MapState.full) {
+            //draw game time
             font.draw(batch, Misc.formatDuration(GameScreen.getGameTimeCurrent()), textPosX, textPosY - lineHeight * 2);
+            //draw seed
+            font.draw(batch, GameScreen.getInstance().getSeed() + "", textPosX, textPosY - mapContainer.height + lineHeight);
         }
         if (mapState == MapState.full && !drawScaleTimer.canDoEvent()) {
             font.draw(batch, "scale: " + mapScale, centerMapX, textPosY - lineHeight);

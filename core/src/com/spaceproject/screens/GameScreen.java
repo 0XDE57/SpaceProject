@@ -37,43 +37,52 @@ import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.ResourceDisposer;
 import com.spaceproject.utility.SystemLoader;
 
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class GameScreen extends MyScreenAdapter {
     
-    private static GameScreen gameScreenInstance = null;
-    
-    public static long SEED = 4; //test seed
-    
-    public Engine engine;//, persistenceEngine;
-    
+    //core
+    private Engine engine;//, persistenceEngine;
+    public static World box2dWorld;
+    public static NoiseManager noiseManager;
     private static long gameTimeCurrent, gameTimeStart, timePaused;
     private boolean isPaused = false;
     
+    private long seed;
     private boolean inSpace;
     private Entity currentPlanet = null;
-    
-    
-    public static World box2dWorld;
     public static Universe universe;
-    public static NoiseManager noiseManager;
-    
+
     private ShaderProgram shader = null;
     
-    private SystemsConfig systemsCFG;
+    public boolean debugForceDevWorld = true;
     
+    private GameScreen() { }
     
-    private GameScreen() {
-        
-        systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
-        
-        
+    @Override
+    public void show() {
+        seed = initSeed();
         initUI();
         initShader();
-    
         initCore();
+        
+        initGame(true);
+    }
     
-        //initGame();
+    private long initSeed() {
+        long newSeed = new Random().nextLong();
+    
+        if (debugForceDevWorld) {
+            newSeed = 4; //test seed
+        }
+        Gdx.app.log("initSeed", "" + newSeed);
+        
+        return newSeed;
+    }
+    
+    public long getSeed() {
+        return seed;
     }
     
     private void initUI() {
@@ -107,9 +116,6 @@ public class GameScreen extends MyScreenAdapter {
         //physics
         box2dWorld = new World(new Vector2(), true);
         
-        //content
-        universe = new Universe();
-        
         //worker
         EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
         noiseManager = new NoiseManager(engineCFG.maxNoiseGenThreads);
@@ -117,6 +123,10 @@ public class GameScreen extends MyScreenAdapter {
     
     public void initGame(boolean space) {
         this.inSpace = space;
+    
+        //content
+        universe = new Universe();
+        
         
         // load test default values
         Entity playerTESTSHIP = EntityFactory.createPlayerShip(0, 0, inSpace);
@@ -133,19 +143,18 @@ public class GameScreen extends MyScreenAdapter {
         gameTimeStart = System.nanoTime();
     }
     
-    
     //region system loading
     private void initSpace(Entity transitioningEntity) {
         inSpace = true;
         currentPlanet = null;
         
+        SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
         SystemLoader.loadSystems(this, engine, inSpace, systemsCFG);
         
         
         //add player
         engine.addEntity(transitioningEntity);
     }
-    
     
     private void initWorld(Entity transitioningEntity, Entity planet) {
         inSpace = false;
@@ -154,7 +163,8 @@ public class GameScreen extends MyScreenAdapter {
         Misc.printObjectFields(planet.getComponent(SeedComponent.class));
         Misc.printObjectFields(planet.getComponent(PlanetComponent.class));
         //Misc.printEntity(transitionComponent.transitioningEntity);
-        
+    
+        SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
         SystemLoader.loadSystems(this, engine, inSpace, systemsCFG);
         
         
@@ -286,24 +296,15 @@ public class GameScreen extends MyScreenAdapter {
     //region pause/resume
     @Override
     public void pause() {
-        //this is called from on lose focus
-        //should be separate & optional
-        //if pauseOnLoseFocus, pause.
-        //if (SpaceProject.isMobile()) {
-             setSystemProcessing(false);
-       // }
+        setSystemProcessing(false);
     }
     
     @Override
     public void resume() {
-        //called on regain focus
-        //if pauseOnLoseFocus, resume
-        //if (SpaceProject.isMobile()) {
-            setSystemProcessing(true);
-        //}
+        setSystemProcessing(true);
     }
     
-    public void setSystemProcessing(boolean process) {
+    private void setSystemProcessing(boolean process) {
         if (isPaused != process) {
             return;
         }
@@ -321,6 +322,7 @@ public class GameScreen extends MyScreenAdapter {
         
         //enable/disable systems
         for (EntitySystem system : engine.getSystems()) {
+            SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
             SysCFG sysCFG = systemsCFG.getConfig(system.getClass().getName());
             if (sysCFG.isHaltOnGamePause()) {
                 system.setProcessing(!isPaused);
@@ -350,6 +352,8 @@ public class GameScreen extends MyScreenAdapter {
         engine = null;
         
         box2dWorld.dispose();
+        
+        //getInputMultiplexer().clear();
         
     }
     

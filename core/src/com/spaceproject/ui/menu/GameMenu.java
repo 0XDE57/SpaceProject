@@ -132,10 +132,8 @@ public class GameMenu extends VisWindow {
              tabbedPane.add(new ConfigTab(this, SpaceProject.keyCFG));*/
             tabbedPane.add(new ConfigManagerTab(this));
             tabbedPane.add(new ConfigVeiwerTab(this, SpaceProject.configManager.getConfigs()));
-    
-    
             
-    
+            
             //tabbedPane.add(createConfigTab(new TestConfig()));
         }
         
@@ -156,8 +154,9 @@ public class GameMenu extends VisWindow {
             resetPosition();
         }
         fadeIn();
+    
         if (pauseOnMenuOpen) {
-            GameScreen.getInstance().setSystemProcessing(false);
+            GameScreen.getInstance().pause();
         }
     }
     
@@ -176,7 +175,7 @@ public class GameMenu extends VisWindow {
             return;
         }*/
         
-        GameScreen.getInstance().setSystemProcessing(true);
+        GameScreen.getInstance().resume();
         
         fadeOut();
     }

@@ -29,9 +29,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     private int prevWindowWidth;
     private int prevWindowHeight;
     
-    //private static boolean vsync = true;//todo: move to engine config
-    
-    
+
     private static float zoomTarget = 1;//todo: move to engine config
     private static float zoomSpeed = 3;//todo: move to engine config
     //private static float panSpeed/panTarget(lerp to entity)
@@ -183,7 +181,6 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     
     private static void resetRotation() {
         cam.up.set(0, 1, 0);
-        //cam.direction.set(0, 0, 1);
         cam.rotate(0);
     }
     

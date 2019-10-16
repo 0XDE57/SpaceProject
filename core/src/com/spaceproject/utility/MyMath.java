@@ -7,7 +7,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.spaceproject.screens.GameScreen;
 
-public class MyMath {
+public abstract class MyMath {
     
     public static long getSeed(float x, float y) {
         return getSeed((int) x, (int) y);
@@ -15,7 +15,7 @@ public class MyMath {
     
     public static long getSeed(int x, int y) {
         //long is 64 bits. store x in upper bits, y in lower bits
-        return (x << 32) + y + GameScreen.SEED;
+        return (x << 32) + y + GameScreen.getInstance().getSeed();
     }
     
     

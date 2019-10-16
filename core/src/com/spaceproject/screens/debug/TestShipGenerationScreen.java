@@ -8,34 +8,33 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.generation.TextureFactory;
-import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class TestShipGenerationScreen extends ScreenAdapter {
     
+    private SpriteBatch batch = new SpriteBatch();
     
-    SpriteBatch batch = new SpriteBatch();
+    private ArrayList<Texture> ships;
     
-    public ArrayList<Texture> ships;
-    
-    int numShips = 32;
-    int scale = 4;
-    int rows = 8;
-    int spacing = 150;
+    private int numShips = 32;
+    private int scale = 4;
+    private int rows = 8;
+    private int spacing = 150;
     
     public TestShipGenerationScreen() {
-        
         ships = generateShips();
-        
     }
     
     
     private ArrayList<Texture> generateShips() {
         ArrayList<Texture> tex = new ArrayList<Texture>();
-        MathUtils.random.setSeed(GameScreen.SEED);
+        long seed = new Random().nextLong();
+        Gdx.app.log("gen ship", "seed:" + seed);
+        MathUtils.random.setSeed(seed);
         
         while (tex.size() < numShips) {
             Texture body = TextureFactory.generateShip(MathUtils.random(Long.MAX_VALUE), MathUtils.random(10, 36));
@@ -83,7 +82,6 @@ public class TestShipGenerationScreen extends ScreenAdapter {
         
         if (Gdx.input.isKeyJustPressed(Keys.R)) {
             //generate new set of ships
-            GameScreen.SEED = MathUtils.random(Long.MAX_VALUE);
             ships.clear();
             ships = generateShips();
         }

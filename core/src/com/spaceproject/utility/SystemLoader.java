@@ -25,13 +25,12 @@ public abstract class SystemLoader {
     @SuppressWarnings("unchecked")
     private static void LoadSystem(GameScreen game, Engine engine, boolean inSpace, String tag, SysCFG sysCFG) {
         boolean correctPlatform = (SpaceProject.isMobile() && sysCFG.isLoadOnMobile()) || (!SpaceProject.isMobile() && sysCFG.isLoadOnDesktop());
-        
         if (!correctPlatform) {
             Gdx.app.log(tag, "Skip loading: " + sysCFG.getClassName());
             return;
         }
-        boolean shouldBeLoaded = (inSpace && sysCFG.isLoadInSpace()) || (!inSpace && sysCFG.isLoadInWorld());
         
+        boolean shouldBeLoaded = (inSpace && sysCFG.isLoadInSpace()) || (!inSpace && sysCFG.isLoadInWorld());
         try {
             Class<? extends EntitySystem> systemClass = (Class<? extends EntitySystem>) Class.forName(sysCFG.getClassName());
             EntitySystem systemInEngine = engine.getSystem(systemClass);
