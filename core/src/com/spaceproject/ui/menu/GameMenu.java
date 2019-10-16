@@ -79,8 +79,8 @@ public class GameMenu extends VisWindow {
         tabbedPane.add(mainMenuTab);
     
     
-        Tab mapTab = new HotKeyTab("map", Input.Keys.M);
-        tabbedPane.add(mapTab);
+        keyConfigTab = new KeyConfigTab(this, "Input Settings", SpaceProject.configManager.getConfig(KeyConfig.class));
+        //tabbedPane.add(keyConfigTab);
     
         Tab debugMenuTab = new DebugTab(this);
         tabbedPane.add(debugMenuTab);
@@ -89,6 +89,9 @@ public class GameMenu extends VisWindow {
         
         
         if (debugShowPlaceholderTests) {
+            Tab mapTab = new HotKeyTab("map", Input.Keys.M);
+            tabbedPane.add(mapTab);
+            
             Tab customRenderTab = new HotKeyTab("test render", Input.Keys.H);
             TestShapeRenderActor shapeRenderActor = new TestShapeRenderActor();
             customRenderTab.getContentTable().add(shapeRenderActor).grow();
@@ -124,8 +127,7 @@ public class GameMenu extends VisWindow {
             tabbedPane.add(new ConfigVeiwerTab(this, SpaceProject.configManager.getConfigs()));
     
     
-            keyConfigTab = new KeyConfigTab(this, "Input Settings", SpaceProject.configManager.getConfig(KeyConfig.class));
-            tabbedPane.add(keyConfigTab);
+            
     
             //tabbedPane.add(createConfigTab(new TestConfig()));
         }

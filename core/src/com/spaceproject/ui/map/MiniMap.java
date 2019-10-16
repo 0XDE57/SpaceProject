@@ -25,6 +25,7 @@ import com.spaceproject.generation.FontFactory;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.SimpleTimer;
 
@@ -163,7 +164,9 @@ public class MiniMap {
             mapString += playerInfo;
         }
         font.draw(batch, mapString, textPosX, textPosY - lineHeight);
-        
+        if (mapState == MapState.full) {
+            font.draw(batch, Misc.formatDuration(GameScreen.getGameTimeCurrent()), textPosX, textPosY - lineHeight * 2);
+        }
         if (mapState == MapState.full && !drawScaleTimer.canDoEvent()) {
             font.draw(batch, "scale: " + mapScale, centerMapX, textPosY - lineHeight);
         }

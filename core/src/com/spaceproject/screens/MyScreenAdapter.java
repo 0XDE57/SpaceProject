@@ -177,6 +177,14 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     public static void resetCamera() {
         cam.zoom = 1;
         setZoomTarget(1);
+        
+        resetRotation();
+    }
+    
+    private static void resetRotation() {
+        cam.up.set(0, 1, 0);
+        //cam.direction.set(0, 0, 1);
+        cam.rotate(0);
     }
     
     @Override
