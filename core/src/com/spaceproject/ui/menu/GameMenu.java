@@ -18,6 +18,7 @@ import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPane;
 import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPaneAdapter;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.KeyConfig;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.TestShapeRenderActor;
 import com.spaceproject.ui.menu.tabs.ConfigManagerTab;
 import com.spaceproject.ui.menu.tabs.ConfigTab;
@@ -32,10 +33,18 @@ import com.spaceproject.ui.menu.tabs.MainMenuTab;
  */
 public class GameMenu extends VisWindow {
     private final TabbedPane tabbedPane;
-    private Tab mainMenuTab;
-    private Tab keyConfigTab;
+    private final VisTable container;
+    private final Tab mainMenuTab;
+    private final Tab keyConfigTab;
     
+    //todo: move behaviors to config
+    private boolean pauseOnMenuOpen = true;
     private boolean alwaysHideOnEscape = false;
+    private boolean retainPositionOnOpen = false;
+    private boolean isResizable = true;
+    private boolean isMovable = true;
+    private int edgePadding = 150;
+    
     private boolean debugShowPlaceholderTests = false;
     
     public GameMenu(boolean vertical) {
@@ -44,11 +53,11 @@ public class GameMenu extends VisWindow {
         
         TableUtils.setSpacingDefaults(this);
         
-        setResizable(true);
-        setMovable(true);
+        setResizable(isResizable);
+        setMovable(isMovable);
         addCloseButton();
         
-        final VisTable container = new VisTable();
+        container = new VisTable();
         
         TabbedPane.TabbedPaneStyle style = VisUI.getSkin().get(vertical ? "vertical" : "default", TabbedPane.TabbedPaneStyle.class);
         tabbedPane = new TabbedPane(style);
@@ -77,15 +86,13 @@ public class GameMenu extends VisWindow {
         
         mainMenuTab = new MainMenuTab(this);
         tabbedPane.add(mainMenuTab);
-    
-    
+        
+        
         keyConfigTab = new KeyConfigTab(this, "Input Settings", SpaceProject.configManager.getConfig(KeyConfig.class));
         //tabbedPane.add(keyConfigTab);
-    
+        
         Tab debugMenuTab = new DebugTab(this);
         tabbedPane.add(debugMenuTab);
-    
-        
         
         
         if (debugShowPlaceholderTests) {
@@ -144,40 +151,34 @@ public class GameMenu extends VisWindow {
     
     public void show(Stage stage) {
         stage.addActor(this);
-        resetPosition();
-        fadeIn();
-    }
-    
-    public void hide() {
-        Gdx.app.log(this.getClass().getSimpleName(), "menu hide");
-        /*
-        ConfigTab tab = checkTabChanges();
-        if (tab != null) {
-            tab.promptSaveChanges();
-            return;
-        }
-        */
         
-        fadeOut();
+        if (!retainPositionOnOpen) {
+            resetPosition();
+        }
+        fadeIn();
+        if (pauseOnMenuOpen) {
+            GameScreen.getInstance().setSystemProcessing(false);
+        }
     }
     
     private void resetPosition() {
-        setSize(Gdx.graphics.getWidth() - 150, Gdx.graphics.getHeight() - 150);
+        setSize(Gdx.graphics.getWidth() - edgePadding, Gdx.graphics.getHeight() - edgePadding);
         centerWindow();
     }
     
     @Override
-    protected void close() {
+    public void close() {
         Gdx.app.log(this.getClass().getSimpleName(), "menu close");
         /*
         ConfigTab tab = checkTabChanges();
         if (tab != null) {
             tab.promptSaveChanges();
             return;
-        }
-        */
+        }*/
         
-        super.close();
+        GameScreen.getInstance().setSystemProcessing(true);
+        
+        fadeOut();
     }
     
     private ConfigTab checkTabChanges() {
@@ -196,7 +197,7 @@ public class GameMenu extends VisWindow {
         if (alwaysHideOnEscape) {
             if (keycode == Input.Keys.ESCAPE) {
                 if (isVisible()) {
-                    hide();
+                    close();
                 } else {
                     tabbedPane.switchTab(mainMenuTab);
                     return true;
@@ -209,7 +210,7 @@ public class GameMenu extends VisWindow {
             if (tab instanceof HotKeyTab) {
                 if (((HotKeyTab) tab).getHotKey() == keycode) {
                     if (tabbedPane.getActiveTab().equals(tab) && getStage() != null) {
-                        fadeOut();
+                        close();
                         return false;
                     }
                     tabbedPane.switchTab(tab);

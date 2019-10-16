@@ -54,7 +54,7 @@ public class MobileInputSystem extends EntitySystem {
             if (hud != null) {
                 GameMenu gameMenu = hud.getGameMenu();
                 if (gameMenu.isVisible()) {
-                    gameMenu.hide();
+                    gameMenu.close();
                 } else {
                     gameMenu.show(hud.getStage());
                 }
