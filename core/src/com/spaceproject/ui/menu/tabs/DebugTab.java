@@ -16,6 +16,7 @@ public class DebugTab extends HotKeyTab {
         final DebugConfig debugCFG = SpaceProject.configManager.getConfig(DebugConfig.class);
         
         final CheckBox toggleComponentList = new CheckBox("show components", VisUI.getSkin());
+        toggleComponentList.setChecked(debugCFG.drawComponentList);
         toggleComponentList.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -25,6 +26,7 @@ public class DebugTab extends HotKeyTab {
         
         
         final CheckBox togglePos = new CheckBox("show pos", VisUI.getSkin());
+        togglePos.setChecked(debugCFG.drawPos);
         togglePos.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -34,6 +36,7 @@ public class DebugTab extends HotKeyTab {
         
         
         final CheckBox toggleBounds = new CheckBox("show box2d debug", VisUI.getSkin());
+        toggleBounds.setChecked(debugCFG.box2DDebugRender);
         toggleBounds.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -42,6 +45,7 @@ public class DebugTab extends HotKeyTab {
         });
         
         final CheckBox toggleOrbitPath = new CheckBox("show orbit path", VisUI.getSkin());
+        toggleOrbitPath.setChecked(debugCFG.drawOrbitPath);
         toggleOrbitPath.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -51,6 +55,7 @@ public class DebugTab extends HotKeyTab {
         
         
         final CheckBox toggleVectors = new CheckBox("show velocity vectors", VisUI.getSkin());
+        toggleVectors.setChecked(debugCFG.drawVelocities);
         toggleVectors.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -60,6 +65,7 @@ public class DebugTab extends HotKeyTab {
         
         
         final CheckBox toggleMousePos = new CheckBox("show mouse pos", VisUI.getSkin());
+        toggleMousePos.setChecked(debugCFG.drawMousePos);
         toggleMousePos.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -69,6 +75,7 @@ public class DebugTab extends HotKeyTab {
         
         
         final CheckBox toggleFPS = new CheckBox("show fps", VisUI.getSkin());
+        toggleFPS.setChecked(debugCFG.drawFPS);
         toggleFPS.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -77,6 +84,7 @@ public class DebugTab extends HotKeyTab {
         });
         
         final CheckBox toggleExtraInfo = new CheckBox("show diagnostic info", VisUI.getSkin());
+        toggleExtraInfo.setChecked(debugCFG.drawDiagnosticInfo);
         toggleExtraInfo.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -85,6 +93,7 @@ public class DebugTab extends HotKeyTab {
         });
         
         final CheckBox toggleEntityList = new CheckBox("show entity list", VisUI.getSkin());
+        toggleEntityList.setChecked(debugCFG.drawEntityList);
         toggleEntityList.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
