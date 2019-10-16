@@ -1,6 +1,7 @@
 package com.spaceproject.generation.noise;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.config.WorldConfig;
@@ -9,7 +10,7 @@ import com.spaceproject.ui.Tile;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class NoiseManager implements INoiseGenListener {
+public class NoiseManager implements INoiseGenListener, Disposable {
     
     private NoiseThreadPoolExecutor noiseThreadPool;
     private LinkedBlockingQueue<NoiseBuffer> noiseBufferQueue;
@@ -29,14 +30,12 @@ public class NoiseManager implements INoiseGenListener {
         }
         
         int chunkSize = SpaceProject.configManager.getConfig(WorldConfig.class).chunkSize;
-        noiseThreadPool.execute(new NoiseThread(planet.scale, planet.octaves, planet.persistence, planet.lacunarity, seed, planet.mapSize, chunkSize, Tile.defaultTiles));
+        NoiseThread noiseThread = new NoiseThread(planet.scale, planet.octaves, planet.persistence, planet.lacunarity, seed, planet.mapSize, chunkSize, Tile.defaultTiles);
+        noiseThreadPool.execute(noiseThread);
     }
     
     public NoiseBuffer getNoiseForSeed(long seed) {
-        if (loadedNoise.containsKey(seed)) {
-            return loadedNoise.get(seed);
-        }
-        return null;
+        return loadedNoise.get(seed);
     }
     
     public void loadOrCreateNoiseFor(long seed, PlanetComponent planet) {
@@ -59,8 +58,10 @@ public class NoiseManager implements INoiseGenListener {
         //add to loadednoise
         //let otheres poll loaded noise, or fire another event from here?
         NoiseBuffer noise = noiseThread.getNoise();
-        loadedNoise.put(noise.seed, noise);
-        noiseBufferQueue.add(noise);
+        if (noise != null) {
+            loadedNoise.put(noise.seed, noise);
+            noiseBufferQueue.add(noise);
+        }
     }
     
     
@@ -90,5 +91,29 @@ public class NoiseManager implements INoiseGenListener {
         }
         
         return null;
+    }
+    
+    @Override
+    public void dispose() {
+        Gdx.app.log(this.getClass().getSimpleName(), "Dispose: " + noiseThreadPool.getActiveCount());
+        loadedNoise.clear();
+        noiseBufferQueue.clear();
+        for (Runnable thread : noiseThreadPool.getQueue()) {
+            ((NoiseThread) thread).stop();//kindly stop
+        }
+        noiseThreadPool.purge();
+        //noiseThreadPool.shutdown();???????????
+        /*
+        try {
+            if (noiseThreadPool.awaitTermination(10, TimeUnit.SECONDS)) {
+                Gdx.app.error(this.getClass().getSimpleName(), "Thread shutdown timed out. Forcing!");
+                noiseThreadPool.shutdownNow();//yeah yeah, shut down is bad
+            } else {
+                Gdx.app.log(this.getClass().getSimpleName(), "Thread shutdown complete");
+            }
+        } catch (InterruptedException e) {
+            Gdx.app.error(this.getClass().getSimpleName(), "Error shutting down threads", e);
+        }*/
+        
     }
 }

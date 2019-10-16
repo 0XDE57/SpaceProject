@@ -86,7 +86,7 @@ public class GameScreen extends MyScreenAdapter {
     }
     
     public long getPlanetSeed() {
-        return currentPlanet.getComponent(SeedComponent.class).seed;
+        return Mappers.seed.get(currentPlanet).seed;
     }
     
     private void initUI() {
@@ -121,13 +121,15 @@ public class GameScreen extends MyScreenAdapter {
         box2dWorld = new World(new Vector2(), true);
         
         //worker
-        EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
-        noiseManager = new NoiseManager(engineCFG.maxNoiseGenThreads);
+        if (noiseManager == null) {
+            EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
+            noiseManager = new NoiseManager(engineCFG.maxNoiseGenThreads);
+        }
     }
     
     public void initGame(boolean space) {
         this.inSpace = space;
-    
+        
         //content
         universe = new Universe();
         
@@ -358,7 +360,8 @@ public class GameScreen extends MyScreenAdapter {
         box2dWorld.dispose();
         
         //getInputMultiplexer().clear();
-        
+        universe = null;
+        noiseManager.dispose();
     }
     
     

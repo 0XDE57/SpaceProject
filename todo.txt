@@ -151,13 +151,6 @@ current priority
 
 
 [...] rendering system
-    [x] fix stuff moving ahead of camera
-        [x] when moving around, entities seem to sway relative to the camera
-        [x] ship - fixed
-        [x] player - still jumps ahead of camera. (this may be caused by adding directly to pos instead of vel/accel?)
-        [x] shaperenderer - shield moves ahead of camera
-        [x] projectiles from ship - moves ahead of ship
-
     [...] fix render priority (z-order)
           [X] moved into separate variable
           [ ] define proper heights for importance as current values are somewhat arbitrary
@@ -194,7 +187,7 @@ current priority
 
 
 [ ] new DevPlay button on title screen
-    [ ] use Dev world as the one with hardcoded seed and forced test entities and forced close star system
+    [...] use Dev world as the one with hardcoded seed and forced test entities and forced close star system
     [ ] current play button should give random seed, no hardcoded entities. entities should come from spawning systems instead
         [ ] game start
             [ ] birth/tutorial screen
