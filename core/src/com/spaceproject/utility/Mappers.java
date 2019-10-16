@@ -11,6 +11,7 @@ import com.spaceproject.components.DodgeComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.GrowCannonComponent;
 import com.spaceproject.components.HealthComponent;
+import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PhysicsComponent;
@@ -35,6 +36,7 @@ public class Mappers {
     public static final ComponentMapper<DodgeComponent> dodge = ComponentMapper.getFor(DodgeComponent.class);
     public static final ComponentMapper<ExpireComponent> expire = ComponentMapper.getFor(ExpireComponent.class);
     public static final ComponentMapper<HealthComponent> health = ComponentMapper.getFor(HealthComponent.class);
+    public static final ComponentMapper<HyperDriveComponent> hyper = ComponentMapper.getFor(HyperDriveComponent.class);
     public static final ComponentMapper<MapComponent> map = ComponentMapper.getFor(MapComponent.class);
     public static final ComponentMapper<DamageComponent> damage = ComponentMapper.getFor(DamageComponent.class);
     public static final ComponentMapper<OrbitComponent> orbit = ComponentMapper.getFor(OrbitComponent.class);

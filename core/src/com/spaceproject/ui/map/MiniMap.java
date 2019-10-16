@@ -183,14 +183,19 @@ public class MiniMap {
     private void drawPlayerMarker(ShapeRenderer shape, Entity player, float centerMapX, float centerMapY, int playerMarkerSize, Color playerMarkerColor, Color velocityVecColor) {
         if (player != null) {
             float scale = 5; //how long to make vectors (higher number is longer line)
+            int facingLength = 10;
             int vecWidth = 2;
             
             Body body = Mappers.physics.get(player).body;
             
             Vector2 velocity = MyMath.logVec(body.getLinearVelocity(), scale).add(centerMapX, centerMapY);
+            HyperDriveComponent hyperComp = Mappers.hyper.get(player);
+            if (hyperComp != null) {
+                velocity = MyMath.logVec(hyperComp.velocity, scale).add(centerMapX, centerMapY);
+            }
             shape.rectLine(centerMapX, centerMapY, velocity.x, velocity.y, vecWidth, velocityVecColor, velocityVecColor);
             
-            Vector2 facing = MyMath.vector(body.getAngle(), 10).add(centerMapX, centerMapY);
+            Vector2 facing = MyMath.vector(body.getAngle(), facingLength).add(centerMapX, centerMapY);
             shape.rectLine(centerMapX, centerMapY, facing.x, facing.y, vecWidth, playerMarkerColor, playerMarkerColor);
         }
         shape.setColor(playerMarkerColor);
