@@ -6,9 +6,9 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
@@ -30,7 +30,6 @@ import com.spaceproject.generation.Universe;
 import com.spaceproject.generation.noise.NoiseManager;
 import com.spaceproject.systems.HUDSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
-import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
@@ -43,30 +42,27 @@ import java.util.concurrent.TimeUnit;
 public class GameScreen extends MyScreenAdapter {
     
     //core
-    private Engine engine;//, persistenceEngine;
+    private static Engine engine;//, persistenceEngine;
     public static World box2dWorld;
     public static NoiseManager noiseManager;
     private static long gameTimeCurrent, gameTimeStart, timePaused;
     private boolean isPaused = false;
     
-    private long seed;
-    private boolean inSpace;
-    private Entity currentPlanet = null;
+    private static long seed;
+    private static boolean inSpace;
+    private static Entity currentPlanet = null;
     public static Universe universe;
 
     private ShaderProgram shader = null;
     
-    public boolean debugForceDevWorld = true;
+    public static boolean debugForceDevWorld = true;
     
-    private GameScreen() { }
-    
-    @Override
-    public void show() {
+    public GameScreen() {
         seed = initSeed();
         initUI();
         initShader();
         initCore();
-        
+    
         initGame(true);
     }
     
@@ -79,14 +75,6 @@ public class GameScreen extends MyScreenAdapter {
         Gdx.app.log("initSeed", "" + newSeed);
         
         return newSeed;
-    }
-    
-    public long getSeed() {
-        return seed;
-    }
-    
-    public long getPlanetSeed() {
-        return Mappers.seed.get(currentPlanet).seed;
     }
     
     private void initUI() {
@@ -108,8 +96,10 @@ public class GameScreen extends MyScreenAdapter {
             shader = new ShaderProgram(Gdx.files.internal("shaders/grayscale.vsh"), Gdx.files.internal("shaders/grayscale.fsh"));
             ShaderProgram.pedantic = false;
             Gdx.app.log(this.getClass().getSimpleName(), "Shader compiled: " + shader.isCompiled() + ": " + shader.getLog());
-            if (shader.isCompiled())
+            if (shader.isCompiled()) {
                 batch.setShader(shader);
+                shape = new ShapeRenderer(5000, shader);//5000 = default
+            }
         }
     }
     
@@ -183,29 +173,6 @@ public class GameScreen extends MyScreenAdapter {
         body.setTransform(position, position, body.getAngle());
         engine.addEntity(transitioningEntity);
     }
-    //endregion
-    
-    
-    @Override
-    public void render(float delta) {
-        super.render(delta);
-        
-        // update engine
-        if (!isPaused) {
-            gameTimeCurrent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - gameTimeStart);
-        }
-        engine.update(delta);
-        
-        if (Gdx.input.isKeyJustPressed(Keys.F1)) {
-            //debug
-            DebugUtil.printEntities(engine);
-        }
-        
-        if (Gdx.input.isKeyJustPressed(Keys.GRAVE)) {//tilda
-            setSystemProcessing(isPaused);
-        }
-        
-    }
     
     public void switchScreen(Entity transEntity, Entity planet) {
         if (Mappers.AI.get(transEntity) != null) {
@@ -219,13 +186,13 @@ public class GameScreen extends MyScreenAdapter {
 				System.out.println("MOVED to background engine: " + Misc.objString(e));
 				persistenceEngine.addEntity(e);
 			}*/
-			return;
+            return;
         }
         
         ImmutableArray<Entity> transitioningEntities = engine.getEntitiesFor(Family.all(ScreenTransitionComponent.class).get());
         ResourceDisposer.disposeAllExcept(engine.getEntities(), transitioningEntities);
         engine.removeAllEntities();//to fix family references when entities added to new engine
-    
+        
         ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(transEntity);
         if (inSpace) {
             initWorld(transEntity, planet);
@@ -234,7 +201,7 @@ public class GameScreen extends MyScreenAdapter {
         } else {
             Mappers.screenTrans.get(transEntity).planet = currentPlanet;
             initSpace(transEntity);
-    
+            
             ScreenTransitionSystem.nextStage(screenTrans);
         }
         
@@ -256,23 +223,39 @@ public class GameScreen extends MyScreenAdapter {
             //if landing on planet, and relevantEntity is on planet, add to engine, remove from backgroundEngine
             //if going to space, and relevantEntity in space, add to engine, remove from backgroundEngine
         }*/
-    
+        
         resetCamera();
     }
+    //endregion
     
+    @Override
+    public void render(float delta) {
+        super.render(delta);
+        
+        // update engine
+        if (!isPaused) {
+            gameTimeCurrent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - gameTimeStart);
+        }
+        engine.update(delta);
+    }
     
-    public boolean inSpace() {
+    //region states
+    public static long getSeed() {
+        return seed;
+    }
+    
+    public static long getPlanetSeed() {
+        return Mappers.seed.get(currentPlanet).seed;
+    }
+    
+    public static boolean inSpace() {
         return inSpace;
     }
     
     public static long getGameTimeCurrent() {
         return gameTimeCurrent;
     }
-    
-    public Entity getCurrentPlanet() {
-        return currentPlanet;
-    }
-    
+    //endregion
     
     @Override
     public void resize(int width, int height) {
@@ -297,7 +280,6 @@ public class GameScreen extends MyScreenAdapter {
         
         return super.scrolled(amount);
     }
-    
     
     //region pause/resume
     @Override
@@ -364,13 +346,5 @@ public class GameScreen extends MyScreenAdapter {
         noiseManager.dispose();
     }
     
-    
-    public static GameScreen getInstance() {
-        return GameContext.gameContext;
-    }
-    
-    private static class GameContext {
-        private static final GameScreen gameContext = new GameScreen();
-    }
 }
 

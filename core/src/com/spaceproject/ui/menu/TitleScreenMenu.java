@@ -26,7 +26,7 @@ public class TitleScreenMenu {
         btnPlay.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(GameScreen.getInstance());
+                game.setScreen(new GameScreen());
             }
         });
         

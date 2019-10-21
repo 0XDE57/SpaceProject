@@ -17,9 +17,14 @@ public abstract class SystemLoader {
         String tag = "SystemLoader";
         Gdx.app.log(tag, inSpace ? "==========SPACE==========" : "==========WORLD==========");
         
+        long time = System.currentTimeMillis();
+        
         for (SysCFG sysCFG : cfg.getSystems()) {
             LoadSystem(game, engine, inSpace, tag, sysCFG);
         }
+        
+        long now = System.currentTimeMillis();
+        Gdx.app.log(tag, "loaded in " + (now - time) + "ms");
     }
     
     @SuppressWarnings("unchecked")
@@ -51,7 +56,7 @@ public abstract class SystemLoader {
             } else {
                 if (isLoaded) {
                     if (systemInEngine instanceof EntityListener) {
-                        //listener must be removed, otherwise a reference is kept in engine (i think)
+                        //listener must be removed, otherwise a reference is kept in engine (i think?)
                         //when system is re-added / re-removed down the line, the families/listeners are broken
                         engine.removeEntityListener((EntityListener) systemInEngine);
                     }

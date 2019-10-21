@@ -93,6 +93,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     @Override
     public void initContext(GameScreen gameScreen) {
         gameScreen.getInputMultiplexer().addProcessor(0, getStage());
+        gameMenu = new GameMenu(gameScreen, false);
     }
     
     
@@ -101,9 +102,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         mapableEntities = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
         player = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
         killableEntities = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(ControlFocusComponent.class).get());
-        
-        
-        gameMenu = new GameMenu(false);
         
         stage.addListener(new InputListener() {
             @Override

@@ -226,13 +226,13 @@ public class ControlSystem extends IteratingSystem {
         }
         
         //transition or take off from planet
-        if (GameScreen.getInstance().inSpace()) {
+        if (GameScreen.inSpace()) {
             control.canTransition = canLandOnPlanet(transform.pos);
         } else {
             control.canTransition = true;
         }
         if (control.transition) {
-            if (GameScreen.getInstance().inSpace()) {
+            if (GameScreen.inSpace()) {
                 landOnPlanet(entity);
             } else {
                 takeOffPlanet(entity);

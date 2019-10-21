@@ -200,7 +200,11 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
     
     
     private void updateKeyToggles() {
-        KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);;
+        KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
+    
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
+            DebugUtil.printEntities(engine);
+        }
         
         //toggle debug
         if (Gdx.input.isKeyJustPressed(keyCFG.toggleDebug)) {
@@ -344,9 +348,9 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         debugTexts.add(new DebugText(
                 "time: " + Misc.formatDuration(GameScreen.getGameTimeCurrent()) + " (" + GameScreen.getGameTimeCurrent() + ")",
                 Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10, fontLarge));
-        debugTexts.add(new DebugText("seed: " + GameScreen.getInstance().getSeed(), Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight, fontLarge));
-        if (!GameScreen.getInstance().inSpace()) {
-            debugTexts.add(new DebugText("planet: " + GameScreen.getInstance().getPlanetSeed(),
+        debugTexts.add(new DebugText("seed: " + GameScreen.getSeed(), Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight, fontLarge));
+        if (!GameScreen.inSpace()) {
+            debugTexts.add(new DebugText("planet: " + GameScreen.getPlanetSeed(),
                     Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight * 2, fontLarge));
         }
         //view threads

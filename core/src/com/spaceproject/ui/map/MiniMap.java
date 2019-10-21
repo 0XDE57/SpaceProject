@@ -109,7 +109,7 @@ public class MiniMap {
         shape.begin(ShapeRenderer.ShapeType.Filled);
         {
             //draw all celestial bodies
-            if (GameScreen.getInstance().inSpace()) {
+            if (GameScreen.inSpace()) {
                 drawUniversePoints(shape, centerMapX, centerMapY, celestCFG.loadSystemDistance, miniMapCFG.celestialMarkerSize, miniMapCFG.universeMarkerColor);
             }
             
@@ -168,9 +168,9 @@ public class MiniMap {
             //draw game time
             font.draw(batch, Misc.formatDuration(GameScreen.getGameTimeCurrent()), textPosX, textPosY - lineHeight * 2);
             //draw seed
-            long seed = GameScreen.getInstance().getSeed();
-            if (!GameScreen.getInstance().inSpace()) {
-                seed = GameScreen.getInstance().getPlanetSeed();
+            long seed = GameScreen.getSeed();
+            if (!GameScreen.inSpace()) {
+                seed = GameScreen.getPlanetSeed();
             }
             font.draw(batch, seed + "", textPosX, textPosY - mapContainer.height + lineHeight);
         }
@@ -305,7 +305,7 @@ public class MiniMap {
     
     private void drawDebugLoadDist(ShapeRenderer shape, float centerMapX, float centerMapY, float loadSystemDistance, Color color) {
         shape.setColor(color);
-        if (GameScreen.getInstance().inSpace()) {
+        if (GameScreen.inSpace()) {
             for (Vector2 p : GameScreen.universe.points) {
                 // n = relative pos / scale + mapPos
                 float x = ((p.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;

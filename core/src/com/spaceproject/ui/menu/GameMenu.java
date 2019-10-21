@@ -32,6 +32,8 @@ import com.spaceproject.ui.menu.tabs.MainMenuTab;
  * Modified from https://github.com/kotcrab/vis-editor/blob/master/ui/src/test/java/com/kotcrab/vis/ui/test/manual/TestTabbedPane.java
  */
 public class GameMenu extends VisWindow {
+    private GameScreen game;
+    
     private final TabbedPane tabbedPane;
     private final VisTable container;
     private final Tab mainMenuTab;
@@ -47,9 +49,11 @@ public class GameMenu extends VisWindow {
     
     private boolean debugShowPlaceholderTests = false;
     
-    public GameMenu(boolean vertical) {
+    public GameMenu(GameScreen game, boolean vertical) {
         super(SpaceProject.TITLE + " (" + SpaceProject.VERSION + ")");
         getTitleLabel().setAlignment(Align.center);
+        
+        this.game = game;
         
         TableUtils.setSpacingDefaults(this);
         
@@ -156,7 +160,7 @@ public class GameMenu extends VisWindow {
         fadeIn();
     
         if (pauseOnMenuOpen) {
-            GameScreen.getInstance().pause();
+            game.pause();
         }
     }
     
@@ -175,7 +179,7 @@ public class GameMenu extends VisWindow {
             return;
         }*/
         
-        GameScreen.getInstance().resume();
+        game.resume();
         
         fadeOut();
     }
