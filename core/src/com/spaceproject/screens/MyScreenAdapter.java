@@ -28,10 +28,6 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
     private int prevWindowWidth;
     private int prevWindowHeight;
     
-    //private static float zoomTarget = 1;//todo: move to engine config
-    //private static float zoomSpeed = 3;//todo: move to engine config
-    //private static float panSpeed/panTarget(lerp to entity)
-    
     private EngineConfig engineCFG;
     private KeyConfig keyCFG;
     boolean debugTestShader = false;
@@ -63,7 +59,6 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
         
         //set this as input processor for mouse wheel scroll events
         inputMultiplexer = new InputMultiplexer();
-        //inputMultiplexer.addProcessor(this);
         Gdx.input.setInputProcessor(inputMultiplexer);
         
         
@@ -157,46 +152,5 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
         shape.dispose();
         batch.dispose();
     }
-    
-    /*
-    @Override
-    public boolean scrolled(int amount) {
-        return false;
-    }
-    
-    @Override
-    public boolean keyDown(int keycode) {
-        return false;
-    }
-    
-    @Override
-    public boolean keyUp(int keycode) {
-        return false;
-    }
-    
-    @Override
-    public boolean keyTyped(char character) {
-        return false;
-    }
-    
-    @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-    
-    @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-    
-    @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        return false;
-    }
-    
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        return false;
-    }*/
     
 }

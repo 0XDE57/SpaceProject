@@ -113,69 +113,74 @@ public class ControlSystem extends IteratingSystem {
     
     //region ship controls
     private void controlShip(Entity entity, VehicleComponent vehicle, ControllableComponent control, float delta) {
-        TransformComponent transform = Mappers.transform.get(entity);
+        TransformComponent transformComp = Mappers.transform.get(entity);
         PhysicsComponent physicsComp = Mappers.physics.get(entity);
         DodgeComponent dodgeComp = Mappers.dodge.get(entity);
         ScreenTransitionComponent screenTransComp = Mappers.screenTrans.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
+        HyperDriveComponent hyperComp = Mappers.hyper.get(entity);
     
-        boolean canAct = (dodgeComp == null && screenTransComp == null);
+        boolean canAct = (dodgeComp == null && screenTransComp == null && hyperComp == null);
         //boolean canMove = dodgeComp == null && screenTransComp == null;
         boolean canShoot = dodgeComp == null && shield == null;
         boolean canDodge = shield == null;
 
         
         barrelRoll(entity, dodgeComp);
-        manageShield(entity, control, transform, shield);
+        manageShield(entity, control, transformComp, shield);
+        manageHyperDrive(transformComp, hyperComp, delta);
     
         //debug force insta-stop
-        if (Gdx.input.isKeyJustPressed(Keys.X))
+        if (Gdx.input.isKeyJustPressed(Keys.X)) {
             physicsComp.body.setLinearVelocity(0, 0);
+            if (entity.remove(HyperDriveComponent.class) != null) {
+                physicsComp.body.setActive(true);
+                physicsComp.body.setTransform(transformComp.pos, transformComp.rotation);
+            }
+        }
         if (Gdx.input.isKeyJustPressed(Keys.Z))
             physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(physicsComp.body.getLinearVelocity()));
-    
-        if (!canAct) {
-            return;
-        }
-    
-        HyperDriveComponent hyperDriveComponent = entity.getComponent(HyperDriveComponent.class);
+
+        
         if (control.actionA) {
-            if (hyperDriveComponent == null) {
+            if (hyperComp == null) {
                 if (control.actionACooldownTimer.canDoEvent()) {
-                    hyperDriveComponent = new HyperDriveComponent();
-                    hyperDriveComponent.coolDownTimer = new SimpleTimer(hyperModeTimeout, true);
-                    hyperDriveComponent.velocity.set(MyMath.vector(physicsComp.body.getAngle(), vehicle.hyperSpeed));
-                    entity.add(hyperDriveComponent);
+                    hyperComp = new HyperDriveComponent();
+                    hyperComp.coolDownTimer = new SimpleTimer(hyperModeTimeout, true);
+                    hyperComp.velocity.set(MyMath.vector(physicsComp.body.getAngle(), vehicle.hyperSpeed));
+                    entity.add(hyperComp);
     
                     physicsComp.body.setActive(false);
                 }
             } else {
-                if (hyperDriveComponent.coolDownTimer.canDoEvent()) {
-        
+                if (hyperComp.coolDownTimer.canDoEvent()) {
                     entity.remove(HyperDriveComponent.class);
         
-                    physicsComp.body.setTransform(transform.pos, transform.rotation);
-                    physicsComp.body.setLinearVelocity(MyMath.vector(transform.rotation, 0));
+                    physicsComp.body.setTransform(transformComp.pos, transformComp.rotation);
                     physicsComp.body.setActive(true);
+                    physicsComp.body.setLinearVelocity(MyMath.vector(transformComp.rotation, 60/*entity.getComponent(VehicleComponent.class).maxSpeed*/));
                     
                     control.actionACooldownTimer.reset();
                 }
             }
         }
-        //if (control.actionB) { /*doSomething()*/ }
-        //if (control.actionC) { /*doSomething()*/}
-        
-        if (hyperDriveComponent != null) {
-            transform.pos.add(hyperDriveComponent.velocity.cpy().scl(delta));
+        if (control.actionB) {
+            /*doSomething()*/
         }
-    
-    
+        if (control.actionC) {
+            /*doSomething()*/
+        }
+        
+        
+        if (!canAct) {
+            return;
+        }
+        
         //make vehicle face angle from mouse/joystick
         float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleFacing, faceRotSpeed * delta);
         float impulse = MyMath.getAngularImpulse(physicsComp.body, angle, delta);
         physicsComp.body.applyAngularImpulse(impulse, true);
-    
-    
+        
         if (control.moveForward) {
             accelerate(control, physicsComp.body, vehicle, delta);
         }
@@ -189,7 +194,7 @@ public class ControlSystem extends IteratingSystem {
             strafeLeft(vehicle, control, delta, physicsComp, sprite3D, strafe);
             
             if (canDodge && control.alter) {
-                dodgeLeft(entity, transform, control);
+                dodgeLeft(entity, transformComp, control);
             }
         }
     
@@ -197,7 +202,7 @@ public class ControlSystem extends IteratingSystem {
             strafeRight(vehicle, control, delta, physicsComp, sprite3D, strafe);
             
             if (canDodge && control.alter) {
-                dodgeRight(entity, transform, control);
+                dodgeRight(entity, transformComp, control);
             }
         }
     
@@ -211,12 +216,12 @@ public class ControlSystem extends IteratingSystem {
         if (cannon != null) {
             refillAmmo(cannon);//TODO: ammo should refill on all entities regardless of player presence
             if (control.attack && canShoot) {
-                fireCannon(transform, physicsComp, cannon, entity);
+                fireCannon(transformComp, physicsComp, cannon, entity);
             }
         }
         if (canShoot) {
             GrowCannonComponent growCannon = Mappers.growCannon.get(entity);
-            manageGrowCannon(entity, control, transform, growCannon, physicsComp.body);
+            manageGrowCannon(entity, control, transformComp, growCannon, physicsComp.body);
         }
         
         //exit vehicle
@@ -226,7 +231,7 @@ public class ControlSystem extends IteratingSystem {
         
         //transition or take off from planet
         if (GameScreen.inSpace()) {
-            control.canTransition = canLandOnPlanet(transform.pos);
+            control.canTransition = canLandOnPlanet(transformComp.pos);
         } else {
             control.canTransition = true;
         }
@@ -427,6 +432,12 @@ public class ControlSystem extends IteratingSystem {
         }
         
         
+    }
+    
+    private void manageHyperDrive(TransformComponent transformComp, HyperDriveComponent hyperComp, float delta) {
+        if (hyperComp != null) {
+            transformComp.pos.add(hyperComp.velocity.cpy().scl(delta));
+        }
     }
     
     private void tryEnterVehicle(Entity characterEntity, ControllableComponent control) {

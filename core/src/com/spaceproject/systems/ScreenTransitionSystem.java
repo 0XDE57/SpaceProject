@@ -259,8 +259,11 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         sprite3D.renderable.scale.set(screenTrans.initialScale, screenTrans.initialScale, screenTrans.initialScale);
         
         Mappers.physics.get(entity).body.setLinearVelocity(0, 0);
-        
-        entity.getComponent(CameraFocusComponent.class).zoomTarget = SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle;
+    
+        CameraFocusComponent camFocus = entity.getComponent(CameraFocusComponent.class);
+        if (camFocus != null) {
+            camFocus.zoomTarget = SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle;
+        }
         
         gameContext.switchScreen(entity, screenTrans.planet);
     }

@@ -63,7 +63,6 @@ public class GameScreen extends MyScreenAdapter {
         initCore();
     
         initGame(true);
-        
     }
     
     private long initSeed() {
