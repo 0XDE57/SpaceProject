@@ -37,7 +37,6 @@ import com.spaceproject.config.EntityConfig;
 import com.spaceproject.generation.BodyFactory;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
@@ -106,7 +105,7 @@ public class ControlSystem extends IteratingSystem {
         }
         
         if (control.changeVehicle) {
-            enterVehicle(entity, control);
+            tryEnterVehicle(entity, control);
         }
     }
     //endregion
@@ -299,7 +298,6 @@ public class ControlSystem extends IteratingSystem {
         }
     }
     
-    
     private static void dodgeRight(Entity entity, TransformComponent transform, ControllableComponent control) {
         if (control.timerDodge.canDoEvent() && Mappers.dodge.get(entity) == null) {
             control.timerDodge.reset();
@@ -431,44 +429,29 @@ public class ControlSystem extends IteratingSystem {
         
     }
     
-    private void enterVehicle(Entity characterEntity, ControllableComponent control) {
-        //action timer
+    private void tryEnterVehicle(Entity characterEntity, ControllableComponent control) {
         if (!control.timerVehicle.canDoEvent())
             return;
         
         control.changeVehicle = false;
         
-        //get all vehicles and check if player is close to one(bounds overlap)
+        //get all vehicles and check if player is close to one
         PhysicsComponent playerPhysics = Mappers.physics.get(characterEntity);
-        for (Entity vehicle : vehicles) {
+        for (Entity vehicleEntity : vehicles) {
             
             //skip vehicle is occupied
-            if (Mappers.vehicle.get(vehicle).driver != null) {
-                Gdx.app.log(this.getClass().getSimpleName(), "Vehicle [" + Misc.objString(vehicle) + "] already has a driver [" + Misc.objString(Mappers.vehicle.get(vehicle).driver) + "]!");
+            if (Mappers.vehicle.get(vehicleEntity).driver != null) {
+                Gdx.app.log(this.getClass().getSimpleName(), "Vehicle [" + Misc.objString(vehicleEntity)
+                        + "] already has a driver [" + Misc.objString(Mappers.vehicle.get(vehicleEntity).driver) + "]!");
                 continue;
             }
             
             //check if character is near a vehicle
-            PhysicsComponent vehiclePhysics = Mappers.physics.get(vehicle);
+            PhysicsComponent vehiclePhysics = Mappers.physics.get(vehicleEntity);
             if (playerPhysics.body.getPosition().dst(vehiclePhysics.body.getPosition()) < offsetDist) {
                 
-                //set reference
-                Mappers.vehicle.get(vehicle).driver = characterEntity;
-                
-                // set focus to vehicle
-                if (ECSUtil.transferComponent(characterEntity, vehicle, CameraFocusComponent.class)) {
-                    MyScreenAdapter.setZoomTarget(1);// zoom out camera, TODO: add pan animation
-                }
-                
-                ECSUtil.transferComponent(characterEntity, vehicle, ControllableComponent.class);
-                ECSUtil.transferComponent(characterEntity, vehicle, AIComponent.class);
-                ECSUtil.transferComponent(characterEntity, vehicle, ControlFocusComponent.class);
-                
-                // remove character
-                getEngine().removeEntity(characterEntity);
-                GameScreen.box2dWorld.destroyBody(characterEntity.getComponent(PhysicsComponent.class).body);
-                characterEntity.getComponent(PhysicsComponent.class).body = null;
-                
+                enterVehicle(characterEntity, vehicleEntity);
+    
                 control.timerVehicle.reset();
                 
                 return;
@@ -476,20 +459,38 @@ public class ControlSystem extends IteratingSystem {
         }
     }
     
+    private void enterVehicle(Entity characterEntity, Entity vehicle) {
+        //set reference
+        Mappers.vehicle.get(vehicle).driver = characterEntity;
+        
+        // transfer focus & controls to vehicle
+        CameraFocusComponent cameraFocus = (CameraFocusComponent) ECSUtil.transferComponent(characterEntity, vehicle, CameraFocusComponent.class);
+        if (cameraFocus != null) {
+            // zoom out camera
+            vehicle.getComponent(CameraFocusComponent.class).zoomTarget = engineCFG.defaultZoomVehicle;
+        }
+        ECSUtil.transferComponent(characterEntity, vehicle, ControllableComponent.class);
+        ECSUtil.transferComponent(characterEntity, vehicle, AIComponent.class);
+        ECSUtil.transferComponent(characterEntity, vehicle, ControlFocusComponent.class);
+        
+        
+        // remove character
+        getEngine().removeEntity(characterEntity);
+        GameScreen.box2dWorld.destroyBody(characterEntity.getComponent(PhysicsComponent.class).body);//todo: try enable/disable instead of delete and recreate
+        characterEntity.getComponent(PhysicsComponent.class).body = null;
+    }
+    
     private void exitVehicle(Entity vehicleEntity, ControllableComponent control) {
-        
         //action timer
-        if (!control.timerVehicle.canDoEvent())
+        if (!control.timerVehicle.tryEvent())
             return;
-        control.timerVehicle.reset();
         control.changeVehicle = false;
-        
         
         Entity characterEntity = Mappers.vehicle.get(vehicleEntity).driver;
         
         // set the player at the position of vehicle
         Vector2 vehiclePosition = Mappers.transform.get(vehicleEntity).pos;
-        Body body = BodyFactory.createPlayerBody(0, 0, characterEntity);
+        Body body = BodyFactory.createPlayerBody(0, 0, characterEntity);//todo: try enable/disable instead of delete and recreate
         
         
         Vector2 offset = MyMath.vector(MathUtils.random(360) * MathUtils.degRad, offsetDist);//set player next to vehicle
@@ -499,11 +500,12 @@ public class ControlSystem extends IteratingSystem {
         Mappers.physics.get(characterEntity).body = body;
         
         
-        //set focus to character
-        if (ECSUtil.transferComponent(vehicleEntity, characterEntity, CameraFocusComponent.class)) {
-            MyScreenAdapter.setZoomTarget(0.5f);// zoom in camera
+        //transfer focus and controls to character
+        CameraFocusComponent cameraFocus = (CameraFocusComponent) ECSUtil.transferComponent(vehicleEntity, characterEntity, CameraFocusComponent.class);
+        if (cameraFocus != null) {
+            // zoom in camera
+            characterEntity.getComponent(CameraFocusComponent.class).zoomTarget = engineCFG.defaultZoomCharacter;
         }
-        
         ECSUtil.transferComponent(vehicleEntity, characterEntity, ControlFocusComponent.class);
         ECSUtil.transferComponent(vehicleEntity, characterEntity, AIComponent.class);
         ECSUtil.transferComponent(vehicleEntity, characterEntity, ControllableComponent.class);
@@ -514,8 +516,6 @@ public class ControlSystem extends IteratingSystem {
         
         // add player back into world
         getEngine().addEntity(characterEntity);
-        
-        
     }
     //endregion
     
@@ -630,7 +630,6 @@ public class ControlSystem extends IteratingSystem {
         
     }
     
-    
     private void fireCannon(TransformComponent transform, PhysicsComponent body, CannonComponent cannon, Entity owner) {
         /*
          * Cheat for debug:
@@ -672,6 +671,5 @@ public class ControlSystem extends IteratingSystem {
         }
     }
     //endregion
-    
     
 }

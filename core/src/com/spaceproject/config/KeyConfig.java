@@ -36,6 +36,7 @@ public class KeyConfig extends Config {
     
     //---debug menu controls---
     public int toggleDebug;
+    public int toggleEngineViewer;
     public int togglePos;
     public int toggleComponents;
     public int toggleBounds;
@@ -78,6 +79,7 @@ public class KeyConfig extends Config {
         
         //debug menu
         toggleDebug = Keys.F3;
+        toggleEngineViewer = Keys.F9;
         togglePos = Keys.NUMPAD_0;
         toggleComponents = Keys.NUMPAD_1;
         toggleBounds = Keys.NUMPAD_2;

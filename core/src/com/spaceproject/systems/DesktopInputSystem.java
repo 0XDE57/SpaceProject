@@ -5,37 +5,42 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
-import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 
-public class DesktopInputSystem extends EntitySystem implements InputProcessor, IRequireGameContext {
+public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     KeyConfig keyCFG;
     private ImmutableArray<Entity> players;
-    
-    @Override
-    public void initContext(GameScreen gameScreen) {
-        gameScreen.getInputMultiplexer().addProcessor(this);
-    }
-    
+
     @Override
     public void addedToEngine(com.badlogic.ashley.core.Engine engine) {
         players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
         keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
+        
+        MyScreenAdapter.getInputMultiplexer().addProcessor(this);
     }
-    
     
     @Override
     public void update(float delta) {
-        cameraControls(delta);
+        if (players.size() == 0)
+            return;
+        Entity player = players.first();
+        CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
+        if (cameraFocus != null) {
+            cameraControls(player, cameraFocus, delta);
+        }
     }
     
     private boolean playerControls(int keycode, boolean keyDown) {
@@ -111,27 +116,36 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor, 
         return true;
     }
     
-    
-    private void cameraControls(float delta) {
+    private void cameraControls(Entity entity, CameraFocusComponent cameraFocus, float delta) {
+        if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
+            GameScreen.resetCamera();
+            EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
+            if (entity.getComponent(VehicleComponent.class) != null) {
+                cameraFocus.zoomTarget = engineConfig.defaultZoomVehicle;
+            } else {
+                cameraFocus.zoomTarget = engineConfig.defaultZoomCharacter;
+            }
+        }
+        
         //zoom test
         if (Gdx.input.isKeyPressed(keyCFG.zoomSpace)) {
             if (MyScreenAdapter.cam.zoom >= 10f) {
-                MyScreenAdapter.setZoomTarget(60);
+                cameraFocus.zoomTarget = 60;
             } else {
-                MyScreenAdapter.setZoomTarget(10);
+                cameraFocus.zoomTarget = 10;
             }
         }
         if (Gdx.input.isKeyPressed(keyCFG.resetZoom)) {
-            MyScreenAdapter.setZoomTarget(1);
+            cameraFocus.zoomTarget = 1;
         }
         if (Gdx.input.isKeyPressed(keyCFG.zoomCharacter)) {
-            MyScreenAdapter.setZoomTarget(0.1f);
+            cameraFocus.zoomTarget = 0.1f;
         }
         if (Gdx.input.isKeyPressed(keyCFG.zoomOut)) {
-            MyScreenAdapter.setZoomTarget(MyScreenAdapter.cam.zoom + 0.001f);
+            cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom + 0.001f;
         }
         if (Gdx.input.isKeyPressed(keyCFG.zoomIn)) {
-            MyScreenAdapter.setZoomTarget(MyScreenAdapter.cam.zoom - 0.001f);
+            cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom - 0.001f;
         }
         if (Gdx.input.isKeyPressed(keyCFG.rotateRight)) {
             MyScreenAdapter.cam.rotate(5f * delta);
@@ -139,16 +153,26 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor, 
         if (Gdx.input.isKeyPressed(keyCFG.rotateLeft)) {
             MyScreenAdapter.cam.rotate(-5f * delta);
         }
-        
-        
     }
     
+    @Override
+    public boolean scrolled(int amount) {
+        if (players.size() != 0) {
+            Entity player = players.first();
+            CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
+            if (cameraFocus != null) {
+                float scrollAmount = amount * MyScreenAdapter.cam.zoom / 2;
+                cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
+            }
+        }
+        
+        return false;
+    }
     
     @Override
     public boolean keyDown(int keycode) {
         return playerControls(keycode, true);
     }
-    
     
     @Override
     public boolean keyUp(int keycode) {
@@ -189,11 +213,5 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor, 
     public boolean mouseMoved(int screenX, int screenY) {
         return playerFace(screenX, screenY);
     }
-    
-    @Override
-    public boolean scrolled(int amount) {
-        return false;
-    }
-    
     
 }

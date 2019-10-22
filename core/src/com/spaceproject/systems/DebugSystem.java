@@ -21,10 +21,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PhysicsComponent;
@@ -39,8 +37,6 @@ import com.spaceproject.ui.menu.debug.DebugEngineWindow;
 import com.spaceproject.utility.DebugText;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.DebugVec;
-import com.spaceproject.utility.IRequireGameContext;
-import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
@@ -49,11 +45,9 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class DebugSystem extends IteratingSystem implements IRequireGameContext, IScreenResizeListener, Disposable {
+public class DebugSystem extends IteratingSystem implements Disposable {
     
     private DebugConfig debugCFG;
-    private Engine engine;
-    private Stage stage;
     private DebugEngineWindow engineView;
     private Box2DDebugRenderer debugRenderer;
     
@@ -71,8 +65,8 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
     //entity storage
     private Array<Entity> objects;
     
-    public static ArrayList<DebugText> debugTexts = new ArrayList<DebugText>();
-    public static ArrayList<DebugVec> debugVecs = new ArrayList<DebugVec>();
+    private static ArrayList<DebugText> debugTexts = new ArrayList<DebugText>();
+    private static ArrayList<DebugVec> debugVecs = new ArrayList<DebugVec>();
     
     
     public DebugSystem() {
@@ -87,37 +81,20 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
     
         debugRenderer = new Box2DDebugRenderer(debugCFG.drawBodies, debugCFG.drawJoints, debugCFG.drawAABBs, debugCFG.drawInactiveBodies, debugCFG.drawVelocities, debugCFG.drawContacts);
         
-        stage = new Stage(new ScreenViewport());
-    }
-    
-    
-    @Override
-    public void initContext(GameScreen gameScreen) {
-        gameScreen.getInputMultiplexer().addProcessor(0, getStage());
-    }
-    
-    
-    @Override
-    public void addedToEngine(Engine engine) {
-        super.addedToEngine(engine);
-        this.engine = engine;
-        
-        
-        engineView = new DebugEngineWindow(engine);
-        stage.addListener(new InputListener() {
+        GameScreen.getStage().addListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
                 super.keyDown(event, keycode);
                 engineView.keyDown(event, keycode);
                 return false;
             }
-            
+        
             @Override
             public boolean keyUp(InputEvent event, int keycode) {
                 super.keyUp(event, keycode);
                 return false;
             }
-            
+        
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 super.touchDown(event, x, y, pointer, button);
@@ -126,22 +103,18 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         });
     }
     
+    @Override
+    public void addedToEngine(Engine engine) {
+        super.addedToEngine(engine);
+
+        engineView = new DebugEngineWindow(getEngine());
+    }
     
     @Override
     public void update(float delta) {
-        int diagnosticX = 15;
-        int diagnosticY = Gdx.graphics.getHeight() - 15;
+        engineView.update();
         
-        //check key presses
         updateKeyToggles();
-        
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F9)) {
-            engineView.toggle(stage);
-        }
-        
-        engineView.refreshNodes();
-        stage.act(Math.min(delta, 1 / 30f));
-        stage.draw();
         
         //don't update if we aren't drawing
         if (!debugCFG.drawDebugUI) return;
@@ -168,11 +141,12 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         
         
         //draw diagnostic info
+        int diagnosticX = 15;
+        int diagnosticY = Gdx.graphics.getHeight() - 15;
         if (debugCFG.drawFPS)  drawFPS(diagnosticX, diagnosticY);
         
         if (debugCFG.drawDiagnosticInfo) drawDiagnosticInfo(diagnosticX, diagnosticY);
         
-        //draw entity position
         if (debugCFG.drawPos) drawPos();
         
         if (debugCFG.drawMousePos) drawMousePos();
@@ -202,8 +176,12 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
     private void updateKeyToggles() {
         KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
-            DebugUtil.printEntities(engine);
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleEngineViewer)) {
+            engineView.toggle();
+        }
+    
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
+            GameScreen.getStage().setDebugAll(!GameScreen.getStage().isDebugAll());
         }
         
         //toggle debug
@@ -332,7 +310,7 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         String memory = DebugUtil.getMemory();
         
         //entity/component count
-        String count = DebugUtil.getECSString(engine);
+        String count = DebugUtil.getECSString(getEngine());
         
         //threads
         Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
@@ -374,7 +352,7 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         int x = 30;
         int y = 30;
         int i = 0;
-        for (Entity entity : engine.getEntities()) {
+        for (Entity entity : getEngine().getEntities()) {
             debugTexts.add(new DebugText(Integer.toHexString(entity.hashCode()), x, y + (fontHeight * i++)));
         }
     }
@@ -518,15 +496,6 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         debugTexts.clear();
     }
     
-    public Stage getStage() {
-        return stage;
-    }
-    
-    @Override
-    public void resize(int width, int height) {
-        stage.getViewport().update(width, height, true);
-    }
-    
     @Override
     public void processEntity(Entity entity, float deltaTime) {
         objects.add(entity);
@@ -540,8 +509,7 @@ public class DebugSystem extends IteratingSystem implements IRequireGameContext,
         fontSmall.dispose();
         fontLarge.dispose();
         
-        engine.removeEntityListener(engineView);
-        stage.dispose();
+        getEngine().removeEntityListener(engineView);
     }
     
 }

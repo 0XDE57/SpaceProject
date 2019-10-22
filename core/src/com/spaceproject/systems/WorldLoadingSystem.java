@@ -10,26 +10,18 @@ import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.config.WorldConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.Mappers;
 
-public class WorldLoadingSystem extends EntitySystem implements IRequireGameContext {
-    
-    private WorldConfig worldCFG;
-    private int mapSize;
-    
+public class WorldLoadingSystem extends EntitySystem {
+
     @Override
     public void addedToEngine(Engine engine) {
         initMobs(engine);
     }
     
-    @Override
-    public void initContext(GameScreen gameScreen) {
-        mapSize = gameScreen.getCurrentPlanet().getComponent(PlanetComponent.class).mapSize;
-        worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
-    }
-    
     private void initMobs(Engine engine) {
+        WorldConfig worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
+        int mapSize = GameScreen.getCurrentPlanet().getComponent(PlanetComponent.class).mapSize;
         //a placeholder to add dummy objects for now
         
         // test ships
@@ -50,6 +42,5 @@ public class WorldLoadingSystem extends EntitySystem implements IRequireGameCont
         engine.addEntity(EntityFactory.createWall(position + 5, position + 5, 8, 16));
         engine.addEntity(EntityFactory.createWall(position + 9, position + 5, 16, 8));
     }
-    
     
 }

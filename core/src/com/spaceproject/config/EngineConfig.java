@@ -17,6 +17,9 @@ public class EngineConfig extends Config {
     public int physicsStepPerFrame;
     public int maxNoiseGenThreads;
     
+    public float defaultZoomCharacter;
+    public float defaultZoomVehicle;
+    
     
     @Override
     public void loadDefault() {
@@ -31,5 +34,8 @@ public class EngineConfig extends Config {
         physicsPositionIterations = 2;
         physicsStepPerFrame = 60;
         maxNoiseGenThreads = Gdx.app.getType() == Application.ApplicationType.Desktop ? 4 : 2; //Runtime.getRuntime().availableProcessors()-1;
+        
+        defaultZoomCharacter = 0.5f;
+        defaultZoomVehicle = 1.0f;
     }
 }

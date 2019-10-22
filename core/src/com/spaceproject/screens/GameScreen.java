@@ -7,12 +7,12 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.PhysicsComponent;
@@ -28,7 +28,6 @@ import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.Universe;
 import com.spaceproject.generation.noise.NoiseManager;
-import com.spaceproject.systems.HUDSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
@@ -50,20 +49,21 @@ public class GameScreen extends MyScreenAdapter {
     
     private static long seed;
     private static boolean inSpace;
-    private static Entity currentPlanet = null;
+    private static Entity currentPlanet;
     public static Universe universe;
-
-    private ShaderProgram shader = null;
+    
+    private static Stage stage;
     
     public static boolean debugForceDevWorld = true;
     
     public GameScreen() {
         seed = initSeed();
         initUI();
-        initShader();
+        
         initCore();
     
         initGame(true);
+        
     }
     
     private long initSeed() {
@@ -84,23 +84,8 @@ public class GameScreen extends MyScreenAdapter {
         VisUI.load(SpaceProject.isMobile() ? VisUI.SkinScale.X2 : VisUI.SkinScale.X1);
         BitmapFont font = FontFactory.createFont(FontFactory.fontBitstreamVM, 12);
         VisUI.getSkin().add(FontFactory.skinSmallFont, font);
-    }
     
-    private void initShader() {
-        //playing with shaders
-        boolean useShader = false;
-        if (useShader) {
-            //shader = new ShaderProgram(Gdx.files.internal("shaders/quadRotation.vsh"), Gdx.files.internal("shaders/quadRotation.fsh"));
-            //shader = new ShaderProgram(Gdx.files.internal("shaders/passthrough.vsh"), Gdx.files.internal("shaders/passthrough.fsh"));
-            //shader = new ShaderProgram(Gdx.files.internal("shaders/invert.vsh"), Gdx.files.internal("shaders/invert.fsh"));
-            shader = new ShaderProgram(Gdx.files.internal("shaders/grayscale.vsh"), Gdx.files.internal("shaders/grayscale.fsh"));
-            ShaderProgram.pedantic = false;
-            Gdx.app.log(this.getClass().getSimpleName(), "Shader compiled: " + shader.isCompiled() + ": " + shader.getLog());
-            if (shader.isCompiled()) {
-                batch.setShader(shader);
-                shape = new ShapeRenderer(5000, shader);//5000 = default
-            }
-        }
+        stage = new Stage(new ScreenViewport());
     }
     
     private void initCore() {
@@ -115,10 +100,12 @@ public class GameScreen extends MyScreenAdapter {
             EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
             noiseManager = new NoiseManager(engineCFG.maxNoiseGenThreads);
         }
+        
+        getInputMultiplexer().addProcessor(0, stage);
     }
     
-    public void initGame(boolean space) {
-        this.inSpace = space;
+    private void initGame(boolean space) {
+        inSpace = space;
         
         //content
         universe = new Universe();
@@ -237,6 +224,10 @@ public class GameScreen extends MyScreenAdapter {
             gameTimeCurrent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - gameTimeStart);
         }
         engine.update(delta);
+        
+        
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.draw();
     }
     
     //region states
@@ -248,6 +239,10 @@ public class GameScreen extends MyScreenAdapter {
         return Mappers.seed.get(currentPlanet).seed;
     }
     
+    public static Entity getCurrentPlanet() {
+        return currentPlanet;
+    }
+    
     public static boolean inSpace() {
         return inSpace;
     }
@@ -255,30 +250,23 @@ public class GameScreen extends MyScreenAdapter {
     public static long getGameTimeCurrent() {
         return gameTimeCurrent;
     }
+    
+    public static Stage getStage() {
+        return stage;
+    }
     //endregion
     
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
         
+        stage.getViewport().update(width, height, true);
+        
         for (EntitySystem system : engine.getSystems()) {
             if (system instanceof IScreenResizeListener) {
                 ((IScreenResizeListener) system).resize(width, height);
             }
         }
-    }
-    
-    @Override
-    public boolean scrolled(int amount) {
-        //TODO: move into hud, hud as input processor
-        HUDSystem hud = engine.getSystem(HUDSystem.class);
-        if (hud != null) {
-            if (hud.getMiniMap().scrolled(amount)) {
-                return true;
-            }
-        }
-        
-        return super.scrolled(amount);
     }
     
     //region pause/resume

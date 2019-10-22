@@ -8,14 +8,14 @@ import com.badlogic.gdx.math.Vector2;
 
 public class ECSUtil {
     
-    public static boolean transferComponent(Entity fromEntity, Entity toEntity, Class<? extends Component> componentClass) {
+    public static Component transferComponent(Entity fromEntity, Entity toEntity, Class<? extends Component> componentClass) {
         if (fromEntity.getComponent(componentClass) != null) {
             Component transferred = toEntity.addAndReturn(fromEntity.remove(componentClass));
             //Gdx.app.log("transferComponent", Misc.objString(transferred) + ": " + Misc.objString(fromEntity) + " -> " + Misc.objString(toEntity));
-            return true;
+            return transferred;
         }
         
-        return false;
+        return null;
     }
     
     public static Entity copyEntity(Entity entity) {

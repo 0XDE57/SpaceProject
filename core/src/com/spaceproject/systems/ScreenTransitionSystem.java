@@ -8,8 +8,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AstronomicalComponent;
+import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PhysicsComponent;
@@ -17,6 +19,7 @@ import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.config.EngineConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.FadeState;
@@ -69,7 +72,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
                 shrink(entity, screenTrans);
                 break;
             case zoomIn:
-                zoomIn(screenTrans);
+                zoomIn(entity, screenTrans);
                 break;
             case screenEffectFadeIn:
                 fadeIn(screenTrans);
@@ -119,7 +122,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
                 fadeOut(screenTrans);
                 break;
             case zoomOut:
-                zoomOut(screenTrans);
+                zoomOut(entity, screenTrans);
                 break;
             case grow:
                 grow(entity, screenTrans);
@@ -139,7 +142,6 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     }
     
     private static void shrink(Entity entity, ScreenTransitionComponent screenTrans) {
-        
         PhysicsComponent physics = Mappers.physics.get(entity);
         if (physics != null) {
             // freeze movement during animation
@@ -175,7 +177,6 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     }
     
     private static void grow(Entity entity, ScreenTransitionComponent screenTrans) {
-    
         PhysicsComponent physics = Mappers.physics.get(entity);
         if (physics != null) {
             //match planet vel
@@ -200,8 +201,9 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         }
     }
     
-    private void zoomIn(ScreenTransitionComponent screenTrans) {
-        MyScreenAdapter.setZoomTarget(0.05f);
+    private void zoomIn(Entity entity, ScreenTransitionComponent screenTrans) {
+        entity.getComponent(CameraFocusComponent.class).zoomTarget = 0.05f;
+        
         if (MyScreenAdapter.cam.zoom <= 0.05f) {
             nextStage(screenTrans);
         }
@@ -215,8 +217,8 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         }
     }
     
-    private static void zoomOut(ScreenTransitionComponent screenTrans) {
-        MyScreenAdapter.setZoomTarget(1);
+    private static void zoomOut(Entity entity, ScreenTransitionComponent screenTrans) {
+        entity.getComponent(CameraFocusComponent.class).zoomTarget = 1;
         if (MyScreenAdapter.cam.zoom >= 1) {
             screenTrans.timer.reset();
             nextStage(screenTrans);
@@ -235,7 +237,6 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
                 nextStage(screenTrans);
                 break;
         }
-        
     }
     
     private void fadeOut(ScreenTransitionComponent screenTrans) {
@@ -259,6 +260,8 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         
         Mappers.physics.get(entity).body.setLinearVelocity(0, 0);
         
+        entity.getComponent(CameraFocusComponent.class).zoomTarget = SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle;
+        
         gameContext.switchScreen(entity, screenTrans.planet);
     }
     
@@ -267,9 +270,8 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         screenTrans.initialScale = sprite3D.renderable.scale.x;
         sprite3D.renderable.scale.set(0, 0, 0);
-    
-        MyScreenAdapter.setZoomTarget(0);
-        MyScreenAdapter.cam.zoom = 0;
+        
+        entity.getComponent(CameraFocusComponent.class).zoomTarget = SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle;
         
         gameContext.switchScreen(entity, null);
     }

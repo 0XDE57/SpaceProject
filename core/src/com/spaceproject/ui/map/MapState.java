@@ -1,9 +1,9 @@
 package com.spaceproject.ui.map;
 
 public enum MapState {
-    full,
+    off,
     mini,
-    off;
+    full;
     
     private static MapState[] vals = values();
     

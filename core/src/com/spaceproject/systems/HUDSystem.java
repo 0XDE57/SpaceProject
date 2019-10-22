@@ -20,8 +20,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
@@ -50,19 +48,17 @@ import com.spaceproject.utility.MyMath;
 
 public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener {
     
-    private Stage stage;
-    private GameMenu gameMenu;
+    private GameMenu gameMenu;//todo: move to core?
     
     //rendering
     private OrthographicCamera cam;
-    private Matrix4 projectionMatrix = new Matrix4();
+    private Matrix4 projectionMatrix;
     private ShapeRenderer shape;
     private SpriteBatch batch;
     
-    
     //entity storage
     private ImmutableArray<Entity> mapableEntities;
-    private ImmutableArray<Entity> player;
+    private ImmutableArray<Entity> players;
     private ImmutableArray<Entity> killableEntities;
     
     private MiniMap miniMap;
@@ -70,7 +66,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private boolean drawHud = true;
     private boolean drawEdgeMap = true;
     
-    private ScreenTransitionOverlay screenTransitionOverlay;
+    private ScreenTransitionOverlay screenTransitionOverlay;//todo: move to core?
     private UIConfig uiCFG;
     private KeyConfig keyCFG;
     
@@ -78,7 +74,41 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         cam = MyScreenAdapter.cam;
         shape = MyScreenAdapter.shape;
         batch = MyScreenAdapter.batch;
-        stage = new Stage(new ScreenViewport());
+        projectionMatrix = new Matrix4();
+        
+        GameScreen.getStage().addListener(new InputListener() {
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+                if (gameMenu.switchTabForKey(keycode)) {
+                    if (!gameMenu.isVisible()) {
+                        gameMenu.show();
+                    }
+                    return true;
+                }
+                return gameMenu.isVisible();
+            }
+        
+            @Override
+            public boolean keyUp(InputEvent event, int keycode) {
+                super.keyUp(event, keycode);
+                return gameMenu.isVisible();
+            }
+        
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                super.touchDown(event, x, y, pointer, button);
+                return gameMenu.isVisible();
+            }
+    
+            @Override
+            public boolean scrolled(InputEvent event, float x, float y, int amount) {
+                if (getMiniMap().scrolled(amount)) {
+                    return true;
+                }
+                
+                return super.scrolled(event, x, y, amount);
+            }
+        });
         
         uiCFG = SpaceProject.configManager.getConfig(UIConfig.class);
         keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
@@ -90,61 +120,29 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         screenTransitionOverlay = new ScreenTransitionOverlay();
     }
     
-    @Override
-    public void initContext(GameScreen gameScreen) {
-        gameScreen.getInputMultiplexer().addProcessor(0, getStage());
-        gameMenu = new GameMenu(gameScreen, false);
-    }
     
+    @Override
+    public void initContext(GameScreen game) {
+        gameMenu = new GameMenu(game, false);
+    }
     
     @Override
     public void addedToEngine(Engine engine) {
         mapableEntities = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
-        player = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
+        players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
         killableEntities = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(ControlFocusComponent.class).get());
-        
-        stage.addListener(new InputListener() {
-            @Override
-            public boolean keyDown(InputEvent event, int keycode) {
-                if (gameMenu.switchTabForKey(keycode)) {
-                    if (!gameMenu.isVisible()) {
-                        gameMenu.show(stage);
-                    }
-                    return true;
-                }
-                return gameMenu.isVisible();
-            }
-            
-            @Override
-            public boolean keyUp(InputEvent event, int keycode) {
-                super.keyUp(event, keycode);
-                return gameMenu.isVisible();
-            }
-            
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                super.touchDown(event, x, y, pointer, button);
-                return gameMenu.isVisible();
-            }
-        });
     }
-    
     
     @Override
     public void update(float delta) {
-        
-        CheckInput();
+        checkInput();
         
         drawHUD();
         
-        Entity p = player.size() > 0 ? player.first() : null;
+        Entity p = players.size() > 0 ? players.first() : null;
         miniMap.drawMiniMap(shape, batch, p, mapableEntities);
         
         screenTransitionOverlay.render();
-        
-        //draw gameMenu
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
-        stage.draw();
     }
     
     private void drawHUD() {
@@ -176,7 +174,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             mobileUI.drawControls();
     }
     
-    private void CheckInput() {
+    private void checkInput() {
         if (Gdx.input.isKeyJustPressed(keyCFG.toggleHUD)) {
             drawHud = !drawHud;
             Gdx.app.log(this.getClass().getSimpleName(), "HUD: " + drawHud);
@@ -192,20 +190,13 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             miniMap.cycleMiniMapPosition();
         }
         if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
+            //todo: if mouse in rect
             if (miniMap.mapState != MapState.off) {
                 miniMap.resetMapScale();
             }
         }
-        
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
-            stage.setDebugAll(!stage.isDebugAll());
-        }
     }
     
-    
-    /**
-     * Draw health bars on entities.
-     */
     private void drawHealthBars() {
         //bar dimensions
         int barLength = uiCFG.entityHPbarLength;
@@ -216,7 +207,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             Vector3 pos = cam.project(new Vector3(Mappers.transform.get(entity).pos.cpy(), 0));
             HealthComponent health = Mappers.health.get(entity);
             
-            
             //ignore full health
             if (!uiCFG.renderFullHealth && health.health == health.maxHealth) {
                 continue;
@@ -224,30 +214,45 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             
             //background
             shape.setColor(uiCFG.entityHPbarBackground);
-            shape.rect(pos.x - barLength / 2, pos.y + yOffset, barLength, barWidth);
+            shape.rect(pos.x - barLength * 0.5f, pos.y + yOffset, barLength, barWidth);
             
             //health
             float ratio = health.health / health.maxHealth;
             shape.setColor(1 - ratio, ratio, 0, uiCFG.entityHPbarOpacity); //creates color between red and green
-            shape.rect(pos.x - barLength / 2, pos.y + yOffset, barLength * ratio, barWidth);
+            shape.rect(pos.x - barLength * 0.5f, pos.y + yOffset, barLength * ratio, barWidth);
         }
-        
     }
     
-    /**
-     * Draw the players health and ammo bar.
-     */
+    //region player status
     private void drawPlayerStatus() {
+        if (players == null || players.size() == 0) {
+            return;
+        }
+        
         int barWidth = uiCFG.playerHPBarWidth;
         int barHeight = uiCFG.playerHPBarHeight;
         int playerBarX = Gdx.graphics.getWidth() / 2 - barWidth / 2;
         int playerHPBarY = uiCFG.playerHPBarY;
         int playerAmmoBarY = playerHPBarY - barHeight - 1;
+        Entity playerEntity = players.first();
         
-        if (player == null || player.size() == 0) return;
-        
-        //draw health bar
-        HealthComponent health = Mappers.health.get(player.first());
+        drawPlayerHealth(playerEntity, playerBarX, playerHPBarY, barWidth, barHeight);
+        drawPlayerShield(playerEntity, playerBarX, playerHPBarY, barWidth, barHeight);
+        drawPlayerAmmoBar(playerEntity, playerBarX, playerAmmoBarY, barWidth, barHeight);
+
+		/*
+		//border
+		shape.setColor(new Color(1,1,1,1));
+		int thickness = 1;
+		shape.rectLine(playerBarX, playerHPBarY+barHeight, playerBarX+barWidth, playerHPBarY+barHeight, thickness);//top
+		shape.rectLine(playerBarX, playerHPBarY-barHeight, playerBarX+barWidth, playerHPBarY-barHeight,thickness);//bottom
+		shape.rectLine(playerBarX, playerHPBarY+barHeight, playerBarX, playerHPBarY-barHeight, thickness);//left
+		shape.rectLine(playerBarX+barWidth, playerHPBarY+barHeight, playerBarX+barWidth, playerHPBarY-barHeight, thickness);//right
+		*/
+    }
+    
+    private void drawPlayerHealth(Entity playerEntity, int playerBarX, int playerHPBarY, int barWidth, int barHeight) {
+        HealthComponent health = Mappers.health.get(playerEntity);
         if (health != null) {
             float ratioHP = health.health / health.maxHealth;
             shape.setColor(uiCFG.entityHPbarBackground);
@@ -255,8 +260,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             shape.setColor(1 - ratioHP, ratioHP, 0, uiCFG.entityHPbarOpacity);
             shape.rect(playerBarX, playerHPBarY, barWidth * ratioHP, barHeight);
         }
-        
-        ShieldComponent shield = Mappers.shield.get(player.first());
+    }
+    
+    private void drawPlayerShield(Entity playerEntity, int playerBarX, int playerHPBarY, int barWidth, int barHeight) {
+        ShieldComponent shield = Mappers.shield.get(playerEntity);
         if (shield != null) {
             float ratioShield = shield.radius / shield.maxRadius;
             if (shield.active) {
@@ -266,9 +273,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             }
             shape.rect(playerBarX, playerHPBarY, barWidth * ratioShield, barHeight);
         }
-        
-        //draw ammo bar
-        CannonComponent cannon = Mappers.cannon.get(player.first());
+    }
+    
+    private void drawPlayerAmmoBar(Entity playerEntity, int playerBarX, int playerAmmoBarY, int barWidth, int barHeight) {
+        CannonComponent cannon = Mappers.cannon.get(playerEntity);
         if (cannon != null) {
             float ratioAmmo = (float) cannon.curAmmo / (float) cannon.maxAmmo;
             shape.setColor(uiCFG.entityHPbarBackground);
@@ -300,17 +308,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 			}
 			*/
         }
-
-		/*
-		//border
-		shape.setColor(new Color(1,1,1,1));
-		int thickness = 1;
-		shape.rectLine(playerBarX, playerHPBarY+barHeight, playerBarX+barWidth, playerHPBarY+barHeight, thickness);//top
-		shape.rectLine(playerBarX, playerHPBarY-barHeight, playerBarX+barWidth, playerHPBarY-barHeight,thickness);//bottom
-		shape.rectLine(playerBarX, playerHPBarY+barHeight, playerBarX, playerHPBarY-barHeight, thickness);//left
-		shape.rectLine(playerBarX+barWidth, playerHPBarY+barHeight, playerBarX+barWidth, playerHPBarY-barHeight, thickness);//right
-		*/
     }
+    //endregion
     
     /**
      * Mark off-screen objects on edge of screen for navigation.
@@ -418,14 +417,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         
     }
     
-    
     public MiniMap getMiniMap() {
         return miniMap;
-    }
-    
-    
-    public Stage getStage() {
-        return stage;
     }
     
     public GameMenu getGameMenu() {
@@ -438,8 +431,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     @Override
     public void resize(int width, int height) {
-        gameMenu.setSize(Gdx.graphics.getWidth() - 150, Gdx.graphics.getHeight() - 150);
-        stage.getViewport().update(width, height, true);
+        gameMenu.resetPosition();
         
         miniMap.updateMapPosition();
     }

@@ -1,42 +1,41 @@
 package com.spaceproject.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.KeyConfig;
 
-public abstract class MyScreenAdapter extends ScreenAdapter implements InputProcessor {
+public abstract class MyScreenAdapter extends ScreenAdapter {
     
     public static SpaceProject game;
     
+    private static InputMultiplexer inputMultiplexer;
+    
     // rendering objects
     public static OrthographicCamera cam;
+    public static ExtendViewport viewport;
     public static SpriteBatch batch;
     public static ShapeRenderer shape;
-    public static ExtendViewport viewport;
-    
-
+    public static ShaderProgram shader;
     //save window size for switching between fullscreen and windowed
     private int prevWindowWidth;
     private int prevWindowHeight;
     
-
-    private static float zoomTarget = 1;//todo: move to engine config
-    private static float zoomSpeed = 3;//todo: move to engine config
+    //private static float zoomTarget = 1;//todo: move to engine config
+    //private static float zoomSpeed = 3;//todo: move to engine config
     //private static float panSpeed/panTarget(lerp to entity)
     
-    private InputMultiplexer inputMultiplexer;
     private EngineConfig engineCFG;
     private KeyConfig keyCFG;
+    boolean debugTestShader = false;
+    
     
     public MyScreenAdapter() {
         Gdx.app.log(this.getClass().getSimpleName(), "ScreenAdapter Reset.");
@@ -56,29 +55,40 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
         viewport = new ExtendViewport(viewportWidth, viewportHeight, cam);
         viewport.apply();
         
+        if (debugTestShader) {
+            initShader();
+        }
+        
         resetCamera();
         
         //set this as input processor for mouse wheel scroll events
         inputMultiplexer = new InputMultiplexer();
-        inputMultiplexer.addProcessor(this);
+        //inputMultiplexer.addProcessor(this);
         Gdx.input.setInputProcessor(inputMultiplexer);
+        
         
         //debug
         toggleVsync();
     }
     
+    private void initShader() {
+        //playing with shaders
+        
+        //shader = new ShaderProgram(Gdx.files.internal("shaders/quadRotation.vsh"), Gdx.files.internal("shaders/quadRotation.fsh"));
+        //shader = new ShaderProgram(Gdx.files.internal("shaders/passthrough.vsh"), Gdx.files.internal("shaders/passthrough.fsh"));
+        //shader = new ShaderProgram(Gdx.files.internal("shaders/invert.vsh"), Gdx.files.internal("shaders/invert.fsh"));
+        shader = new ShaderProgram(Gdx.files.internal("shaders/grayscale.vsh"), Gdx.files.internal("shaders/grayscale.fsh"));
+        ShaderProgram.pedantic = false;
+        Gdx.app.log(this.getClass().getSimpleName(), "Shader compiled: " + shader.isCompiled() + ": " + shader.getLog());
+        if (shader.isCompiled()) {
+            batch.setShader(shader);
+            shape = new ShapeRenderer(5000, shader);//5000 = default
+        }
+        
+    }
     
     @Override
     public void render(float delta) {
-        
-        //cam.update();
-        batch.setProjectionMatrix(cam.combined);
-        shape.setProjectionMatrix(cam.combined);
-        
-        //adjust zoom
-        zoomCamera(delta);
-        
-        
         //fullscreen toggle
         if (Gdx.input.isKeyJustPressed(keyCFG.fullscreen)) {
             toggleFullscreen();
@@ -88,23 +98,16 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
         if (Gdx.input.isKeyJustPressed(keyCFG.vsync)) {
             toggleVsync();
         }
-        
-        //reset zoom
-        if (Gdx.input.isButtonPressed(Buttons.MIDDLE)) {
-            resetCamera();
-        }
-        
     }
     
-    public InputMultiplexer getInputMultiplexer() {
+    public static InputMultiplexer getInputMultiplexer() {
         return inputMultiplexer;
     }
-    
     
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
-        //Gdx.app.log(this.getClass().getSimpleName(), "resize: " + width + ", " + height);
+        Gdx.app.log(this.getClass().getSimpleName(), "resize: " + width + ", " + height);
     }
     
     /**
@@ -139,43 +142,8 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
         Gdx.app.log(this.getClass().getSimpleName(), "vsync = " + engineCFG.vsync);
     }
     
-    
-    /**
-     * Animate camera zoom. Will zoom camera in or out until it reaches zoomTarget.
-     *
-     * @param delta
-     */
-    private static void zoomCamera(float delta) {
-        //todo: move cam zoom behavior to @CameraSystem
-        //animate settings in CameraFocusComponent?
-        //eg: pan / zoom speed, pan / zoom interpolation curve
-        if (cam.zoom != zoomTarget) {
-            //zoom in/out
-            float scaleSpeed = zoomSpeed * delta;
-            cam.zoom += (cam.zoom < zoomTarget) ? scaleSpeed : -scaleSpeed;
-            
-            //if zoom is close enough, just set it to target
-            if (Math.abs(cam.zoom - zoomTarget) < 0.2) {
-                cam.zoom = zoomTarget;
-            }
-            
-        }
-        cam.zoom = MathUtils.clamp(cam.zoom, 0.001f, 100000);
-    }
-    
-    /**
-     * Set zoom for camera to animate to.
-     *
-     * @param zoom
-     */
-    public static void setZoomTarget(float zoom) {
-        zoomTarget = zoom;
-    }
-    
     public static void resetCamera() {
         cam.zoom = 1;
-        setZoomTarget(1);
-        
         resetRotation();
     }
     
@@ -190,10 +158,9 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
         batch.dispose();
     }
     
+    /*
     @Override
     public boolean scrolled(int amount) {
-        float scrollAmount = amount * cam.zoom / 2;
-        setZoomTarget(cam.zoom += scrollAmount);
         return false;
     }
     
@@ -230,7 +197,6 @@ public abstract class MyScreenAdapter extends ScreenAdapter implements InputProc
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
         return false;
-    }
-    
+    }*/
     
 }

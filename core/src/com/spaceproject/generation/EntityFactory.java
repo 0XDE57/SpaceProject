@@ -88,7 +88,9 @@ public class EntityFactory {
     
     public static Entity createPlayer(float x, float y) {
         Entity character = createCharacter(x, y);
-        character.add(new CameraFocusComponent());
+        CameraFocusComponent cameraFocus = new CameraFocusComponent();
+        cameraFocus.zoomTarget = engineCFG.defaultZoomCharacter;
+        character.add(cameraFocus);
         character.add(new ControlFocusComponent());
         return character;
     }
@@ -109,8 +111,9 @@ public class EntityFactory {
         Entity playerShip = createShip3(x, y, 0, player, inSpace);
         
         ECSUtil.transferComponent(player, playerShip, ControlFocusComponent.class);
-        ECSUtil.transferComponent(player, playerShip, CameraFocusComponent.class);
         ECSUtil.transferComponent(player, playerShip, ControllableComponent.class);
+        CameraFocusComponent cameraFocus = (CameraFocusComponent)ECSUtil.transferComponent(player, playerShip, CameraFocusComponent.class);
+        cameraFocus.zoomTarget = engineCFG.defaultZoomVehicle;
         
         return playerShip;
     }

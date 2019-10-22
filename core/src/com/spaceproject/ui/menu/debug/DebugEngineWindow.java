@@ -21,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Selection;
 import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisWindow;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.menu.debug.nodes.EntityNode;
 import com.spaceproject.ui.menu.debug.nodes.GhostNode;
 import com.spaceproject.ui.menu.debug.nodes.MyNode;
@@ -100,22 +101,27 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         
     }
     
-    public void refreshNodes() {
+    public void update() {
         if (!isVisible()) {
             return;
         }
         
         if (refreshTimer.tryEvent()) {
-            if (showHistory) {
-                clearGhosts(entityNodes.getChildren());
-            }
-            updateSystems();
-            updateEntities();
+            refreshNodes();
         }
+    }
+    
+    private void refreshNodes() {
+        if (showHistory) {
+            clearGhosts(entityNodes.getChildren());
+        }
+        updateSystems();
+        updateEntities();
     }
     
     private void updateEntities() {
         //update entities
+        ((Label)entityNodes.getActor()).setText("Entities [" + engine.getEntities().size() + "]");
         for (Entity entity : engine.getEntities()) {
             Node entNode = entityNodes.findNode(entity);
             if (entNode == null) {
@@ -128,6 +134,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     
     private void updateSystems() {
         //add nodes
+        ((Label)systemNodes.getActor()).setText("Systems [" + engine.getSystems().size() + "]");
         for (EntitySystem system : engine.getSystems()) {
             Node sysNode = systemNodes.findNode(system);
             if (sysNode == null) {
@@ -163,7 +170,10 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         return getStage() != null;
     }
     
-    public void show(Stage stage) {
+    private void show() {
+        show(GameScreen.getStage());
+    }
+    private void show(Stage stage) {
         stage.addActor(this);
         fadeIn();
         
@@ -171,7 +181,7 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         refreshNodes();
     }
     
-    public void hide() {
+    private void hide() {
         fadeOut();
         
         engine.removeEntityListener(this);
@@ -179,11 +189,11 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
         entityNodes.removeAll();
     }
     
-    public void toggle(Stage stage) {
+    public void toggle() {
         if (isVisible()) {
             hide();
         } else {
-            show(stage);
+            show();
         }
     }
     

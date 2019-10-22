@@ -54,7 +54,6 @@ public class MiniMap {
         font = FontFactory.createFont(FontFactory.fontPressStart, miniMapCFG.fontSize);
     }
     
-    
     public void drawMiniMap(ShapeRenderer shape, SpriteBatch batch, Entity player, ImmutableArray<Entity> entities) {
         if (mapState == MapState.off)
             return;
@@ -147,7 +146,6 @@ public class MiniMap {
         
     }
     
-    
     private void drawMapText(SpriteBatch batch, Entity player, float centerMapX) {
         float textPosX = mapContainer.x + 10;
         float textPosY = mapContainer.y + mapContainer.height;
@@ -179,7 +177,6 @@ public class MiniMap {
         }
     }
     
-    
     private void drawPlayerMarker(ShapeRenderer shape, Entity player, float centerMapX, float centerMapY, int playerMarkerSize, Color playerMarkerColor, Color velocityVecColor) {
         if (player != null) {
             float scale = 5; //how long to make vectors (higher number is longer line)
@@ -201,7 +198,6 @@ public class MiniMap {
         shape.setColor(playerMarkerColor);
         shape.circle(centerMapX, centerMapY, playerMarkerSize);
     }
-    
     
     private void drawMapableEntities(ShapeRenderer shape, ImmutableArray<Entity> entities, float centerMapX, float centerMapY) {
         for (Entity mapEntity : entities) {
@@ -226,7 +222,6 @@ public class MiniMap {
         }
     }
     
-    
     private void drawUniversePoints(ShapeRenderer shape, float centerMapX, float centerMapY, float loadDist, int celestialMarkerSize, Color color) {
         loadDist *= loadDist;
         for (Vector2 p : GameScreen.universe.points) {
@@ -244,7 +239,6 @@ public class MiniMap {
             }
         }
     }
-    
     
     private void drawOrbitPaths(ShapeRenderer shape, ImmutableArray<Entity> entities, float centerMapX, float centerMapY, Color color) {
         if (entities != null) {
@@ -270,7 +264,6 @@ public class MiniMap {
         }
     }
     
-    
     private void drawMouseGrid(ShapeRenderer shape, Color color) {
         shape.setColor(color);
         int mX = Gdx.input.getX();
@@ -280,7 +273,6 @@ public class MiniMap {
             shape.line(mX, mapContainer.y, mX, mapContainer.y + mapContainer.height);//vertical
         }
     }
-    
     
     private void drawGrid(ShapeRenderer shape, float centerMapX, float centerMapY, int gridSize, float width, Color gridColor) {
         shape.setColor(gridColor);
@@ -302,7 +294,6 @@ public class MiniMap {
         }
     }
     
-    
     private void drawDebugLoadDist(ShapeRenderer shape, float centerMapX, float centerMapY, float loadSystemDistance, Color color) {
         shape.setColor(color);
         if (GameScreen.inSpace()) {
@@ -315,24 +306,20 @@ public class MiniMap {
         }
     }
     
-    
     public void cycleMiniMapPosition() {
         miniMapCFG.miniMapPosition = miniMapCFG.miniMapPosition.next();
         updateMapPosition();
     }
-    
     
     public void cycleMapState() {
         mapState = mapState.next();
         updateMapPosition();
     }
     
-    
     public void updateMapPosition() {
         mapContainer = getMiniMapRectangle();
         drawScaleTimer.reset();
     }
-    
     
     private Rectangle getMiniMapRectangle() {
         if (mapState == MapState.full) {
@@ -353,7 +340,6 @@ public class MiniMap {
         return new Rectangle();
     }
     
-    
     public void scrollMiniMap(int amount) {
         float scrollAmount = amount * mapScale / miniMapCFG.zoomMultiplier;
         mapScale += scrollAmount;
@@ -361,7 +347,6 @@ public class MiniMap {
         
         drawScaleTimer.reset();
     }
-    
     
     public boolean scrolled(int amount) {
         switch (mapState) {
@@ -378,7 +363,6 @@ public class MiniMap {
         
         return false;
     }
-    
     
     public void resetMapScale() {
         mapScale = miniMapCFG.defaultMapScale;

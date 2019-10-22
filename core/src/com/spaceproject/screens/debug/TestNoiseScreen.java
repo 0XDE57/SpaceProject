@@ -2,12 +2,12 @@ package com.spaceproject.screens.debug;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.generation.FontFactory;
@@ -26,7 +26,7 @@ import com.spaceproject.utility.MyMath;
  * -saving and loading color/feature profiles to json
  * -fix screen skew on resize
  */
-public class TestNoiseScreen extends MyScreenAdapter {
+public class TestNoiseScreen extends MyScreenAdapter implements InputProcessor {
     
     SpriteBatch batch = new SpriteBatch();
     ShapeRenderer shape = new ShapeRenderer();
@@ -57,8 +57,7 @@ public class TestNoiseScreen extends MyScreenAdapter {
     int mapX, mapY;
     
     public TestNoiseScreen() {
-        //set this as input processor for mouse wheel scroll events
-        Gdx.input.setInputProcessor(this);
+        getInputMultiplexer().addProcessor(this);
         
         font = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 15);
         
@@ -83,17 +82,6 @@ public class TestNoiseScreen extends MyScreenAdapter {
     }
     
     private void loadTestProfile() {
-		/*
-		colorProfile.add(new Tile("water",  0.41f,  Color.BLUE));
-		colorProfile.add(new Tile("water1", 0.345f, new Color(0,0,0.42f,1)));
-		colorProfile.add(new Tile("water2", 0.240f, new Color(0,0,0.23f,1)));
-		colorProfile.add(new Tile("water3", 0.085f, new Color(0,0,0.1f,1)));
-		colorProfile.add(new Tile("sand",   0.465f, Color.YELLOW));
-		colorProfile.add(new Tile("grass",  0.625f, Color.GREEN));
-		colorProfile.add(new Tile("grass1", 0.725f, new Color(0,0.63f,0,1)));
-		colorProfile.add(new Tile("grass2", 0.815f, new Color(0,0.48f,0,1)));
-		colorProfile.add(new Tile("lava",   1f,     Color.RED));
-		colorProfile.add(new Tile("rock",   0.95f,  Color.BROWN));*/
         colorProfile.getTiles().addAll(Tile.defaultTiles);
         
         scale.setValue(100);
@@ -109,7 +97,7 @@ public class TestNoiseScreen extends MyScreenAdapter {
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
         
         
-        shape.begin(ShapeType.Filled);
+        shape.begin(ShapeRenderer.ShapeType.Filled);
         
         //draw noise map
         drawMap();
@@ -393,7 +381,6 @@ public class TestNoiseScreen extends MyScreenAdapter {
         
     }
     
-    
     @Override
     public boolean scrolled(int amount) {
         pixelSize = MathUtils.clamp(pixelSize - amount, 1, 32);
@@ -408,6 +395,41 @@ public class TestNoiseScreen extends MyScreenAdapter {
         
         //mapY = Gdx.graphics.getHeight() - heightMap.length*pixelSize - 20;
         mapY = Gdx.graphics.getHeight() - pixelSize - 20;
+        return false;
+    }
+    
+    @Override
+    public boolean keyDown(int keycode) {
+        return false;
+    }
+    
+    @Override
+    public boolean keyUp(int keycode) {
+        return false;
+    }
+
+    @Override
+    public boolean keyTyped(char character) {
+        return false;
+    }
+    
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+    
+    @Override
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(int screenX, int screenY, int pointer) {
+        return false;
+    }
+    
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
         return false;
     }
     

@@ -93,9 +93,11 @@ public class GameMenu extends VisWindow {
         
         
         keyConfigTab = new KeyConfigTab(this, "Input Settings", SpaceProject.configManager.getConfig(KeyConfig.class));
+        //keyConfigTab = new ConfigTab(this, SpaceProject.configManager.getConfig(KeyConfig.class));
         //tabbedPane.add(keyConfigTab);
         
         Tab debugMenuTab = new DebugTab(this);
+        //Tab debugMenuTab = new ConfigTab(this, SpaceProject.configManager.getConfig(DebugConfig.class));
         tabbedPane.add(debugMenuTab);
         
         
@@ -151,7 +153,11 @@ public class GameMenu extends VisWindow {
         return getStage() != null;
     }
     
-    public void show(Stage stage) {
+    public void show() {
+        show(GameScreen.getStage());
+    }
+    
+    private void show(Stage stage) {
         stage.addActor(this);
         
         if (!retainPositionOnOpen) {
@@ -164,7 +170,7 @@ public class GameMenu extends VisWindow {
         }
     }
     
-    private void resetPosition() {
+    public void resetPosition() {
         setSize(Gdx.graphics.getWidth() - edgePadding, Gdx.graphics.getHeight() - edgePadding);
         centerWindow();
     }
