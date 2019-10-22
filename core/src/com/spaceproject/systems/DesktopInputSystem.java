@@ -117,17 +117,8 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     }
     
     private void cameraControls(Entity entity, CameraFocusComponent cameraFocus, float delta) {
-        if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
-            GameScreen.resetCamera();
-            EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
-            if (entity.getComponent(VehicleComponent.class) != null) {
-                cameraFocus.zoomTarget = engineConfig.defaultZoomVehicle;
-            } else {
-                cameraFocus.zoomTarget = engineConfig.defaultZoomCharacter;
-            }
-        }
-        
-        //zoom test
+
+        //debug
         if (Gdx.input.isKeyPressed(keyCFG.zoomSpace)) {
             if (MyScreenAdapter.cam.zoom >= 10f) {
                 cameraFocus.zoomTarget = 60;
@@ -186,11 +177,29 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        if (players.size() != 0) {
+        if (players.size() == 0) {
+            return false;
+        }
+        
+        Entity player = players.first();
+        if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
+            CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
+            if (cameraFocus != null) {
+                GameScreen.resetCamera();
+                EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
+                if (player.getComponent(VehicleComponent.class) != null) {
+                    cameraFocus.zoomTarget = engineConfig.defaultZoomVehicle;
+                } else {
+                    cameraFocus.zoomTarget = engineConfig.defaultZoomCharacter;
+                }
+                return true;
+            }
+        } else {
             ControllableComponent control = Mappers.controllable.get(players.first());
             control.attack = true;
             return true;
         }
+        
         return false;
     }
     

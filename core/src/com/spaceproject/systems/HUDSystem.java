@@ -96,6 +96,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                if (button == Input.Buttons.MIDDLE) {
+                    if (miniMap.getMiniMapRectangle().contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY())) {
+                        if (miniMap.getState() != MapState.off) {
+                            miniMap.resetMapScale();
+                            return true;
+                        }
+                    }
+                }
+                
                 super.touchDown(event, x, y, pointer, button);
                 return gameMenu.isVisible();
             }
@@ -188,12 +197,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
             miniMap.cycleMiniMapPosition();
-        }
-        if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
-            //todo: if mouse in rect
-            if (miniMap.mapState != MapState.off) {
-                miniMap.resetMapScale();
-            }
         }
     }
     

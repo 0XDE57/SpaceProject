@@ -34,7 +34,7 @@ public class MiniMap {
     
     private MiniMapConfig miniMapCFG;
     private CelestialConfig celestCFG;
-    public MapState mapState = MapState.mini;
+    private MapState mapState = MapState.mini;
     private Rectangle mapContainer;
     private BitmapFont font;
     private float mapScale;
@@ -321,7 +321,11 @@ public class MiniMap {
         drawScaleTimer.reset();
     }
     
-    private Rectangle getMiniMapRectangle() {
+    public MapState getState() {
+        return mapState;
+    }
+    
+    public Rectangle getMiniMapRectangle() {
         if (mapState == MapState.full) {
             return new Rectangle(miniMapCFG.edgePad, miniMapCFG.edgePad, Gdx.graphics.getWidth() - miniMapCFG.edgePad * 2, Gdx.graphics.getHeight() - miniMapCFG.edgePad * 2);
         } else {
@@ -340,7 +344,7 @@ public class MiniMap {
         return new Rectangle();
     }
     
-    public void scrollMiniMap(int amount) {
+    private void scrollMiniMap(int amount) {
         float scrollAmount = amount * mapScale / miniMapCFG.zoomMultiplier;
         mapScale += scrollAmount;
         mapScale = MathUtils.clamp(mapScale, miniMapCFG.minScale, miniMapCFG.maxSale);
