@@ -4,6 +4,8 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
+import com.spaceproject.SpaceProject;
+import com.spaceproject.config.EngineConfig;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.SpaceBackgroundTile;
 import com.spaceproject.ui.SpaceBackgroundTile.TileType;
@@ -30,18 +32,15 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     private Vector2 bgCenterTile; // background
     private Vector2 fgCenterTile; // foreground
     
-    private static int tileSize = 1024; // how large a tile texture is
+    private static int tileSize = 1024;
     private int surround = 1;// how many tiles to load around center tile
     
     // timer for how often to check if player moved tiles
     private SimpleTimer checkTileTimer;
     
-    public SpaceParallaxSystem() {
-        this(MyScreenAdapter.cam);
-    }
     
-    public SpaceParallaxSystem(OrthographicCamera camera) {
-        cam = camera;
+    public SpaceParallaxSystem() {
+        cam = MyScreenAdapter.cam;
         
         tiles = new ArrayList<SpaceBackgroundTile>();
         
@@ -95,7 +94,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
      */
     private Vector2 updateLayer(Vector2 lastTile, float depth, SpaceBackgroundTile.TileType type) {
         //calculate tile camera is within
-        Vector2 currentTile = getTilePos(cam.position.x, cam.position.y, depth);
+        Vector2 currentTile = getTilePos(cam.position.x, cam.position.y, depth, type);
         
         //load initial tiles
         if (lastTile == null) {
@@ -111,7 +110,6 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
             
             // load new tiles
             loadTiles(currentTile, depth, type);
-            
         }
         
         return currentTile;
@@ -123,19 +121,31 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
      *
      * @param posX
      * @param posY
+     * @param type
      * @return tile that an object is in.
      */
-    public static Vector2 getTilePos(float posX, float posY, float depth) {
+    private static Vector2 getTilePos(float posX, float posY, float depth, TileType type) {
+        //TODO: clean this up. also dust tiles have an overlap rendering issue
         // calculate position
-        int x = (int) (posX - (cam.position.x - (tileSize / 2)) * depth);
-        int y = (int) (posY - (cam.position.y - (tileSize / 2)) * depth);
+        float scale = 1.0f;
+        switch (type) {
+            case Dust:
+                scale = 4.0f;
+                break;
+            case Stars:
+                scale = 1.0f;
+                break;
+        }
+        int size = (int)((tileSize / scale) * (scale / SpaceProject.configManager.getConfig(EngineConfig.class).renderScale));
+        int x = (int) (posX - (posX - (size * 0.5)) * depth);
+        int y = (int) (posY - (posY - (size * 0.5)) * depth);
         
         // calculate tile that position is in
-        int tX = x / tileSize;
-        int tY = y / tileSize;
+        int tX = x / size;
+        int tY = y / size;
         
-        // subtract 1 from tile position if less than zero to account for -1/x
-        // giving 0
+        // subtract 1 from tile position if less than zero
+        // to account for -1/x giving 0
         if (x < 0) {
             --tX;
         }
@@ -222,6 +232,6 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
             t.tex.dispose();
         }
         tiles.clear();
-        
     }
+    
 }

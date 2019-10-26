@@ -32,11 +32,12 @@ public class SpaceBackgroundTile {
         switch (type) {
             case Stars:
                 tex = TextureFactory.generateSpaceBackgroundStars(tileX, tileY, tileSize, renderDepth);
-                scale = 1/ SpaceProject.configManager.getConfig(EngineConfig.class).renderScale;
+                scale = 1.0f / SpaceProject.configManager.getConfig(EngineConfig.class).renderScale;
                 break;
             case Dust:
-                scale = 4;
-                tileSize /= scale;
+                int altScale = 4;
+                this.scale = altScale / SpaceProject.configManager.getConfig(EngineConfig.class).renderScale;
+                tileSize /= altScale;
                 tex = TextureFactory.generateSpaceBackgroundDust(tileX, tileY, tileSize);
                 break;
             default:

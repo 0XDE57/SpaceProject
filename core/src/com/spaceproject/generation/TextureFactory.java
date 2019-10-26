@@ -68,6 +68,12 @@ public class TextureFactory {
                 pixmap.drawPixel(x, pixmap.getHeight() - 1 - y);
             }
         }
+        /*
+        pixmap.setColor(MathUtils.random(), MathUtils.random(), MathUtils.random(), 0.5f);
+        pixmap.fill();
+        */
+        pixmap.setColor(1, 1, 1, 1);
+        pixmap.drawPixel(0, 0);
         
         Texture tex = new Texture(pixmap);
         pixmap.dispose();

@@ -15,7 +15,9 @@ current priority
             [ ] shield broken
             [...] dodge broken
                 [ ] adjust feel
-            [ ] space tile scale bad and tile loading broken
+            [...] space tile scale bad and tile loading broken
+                [x] fix load/unload and scale
+                [...] dust layer has render issue, tiles overlapping edges/gap
             [x] fix edge map scaling / icon show hide when near
                 [x] account for camera zoom
         [...] figure out scales and values that make sense and work with the b2d engine (consider scale of space)

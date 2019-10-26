@@ -36,8 +36,7 @@ public class CameraSystem extends IteratingSystem {
     }
     
     private void animateZoom(float delta, float zoomTarget) {
-        //animate settings in CameraFocusComponent?
-        //eg: pan / zoom speed, pan / zoom interpolation curve
+        //todo: pan / zoom speed, pan / zoom interpolation curve
         if (cam.zoom != zoomTarget) {
             //zoom in/out
             float scaleSpeed = zoomSpeed * delta;
@@ -47,7 +46,6 @@ public class CameraSystem extends IteratingSystem {
             if (Math.abs(cam.zoom - zoomTarget) < 0.2) {
                 cam.zoom = zoomTarget;
             }
-            
         }
         cam.zoom = MathUtils.clamp(cam.zoom, 0.001f, 100000);
     }
