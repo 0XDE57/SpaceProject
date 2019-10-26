@@ -17,6 +17,11 @@ public class UIConfig extends Config {
     public Color entityHPbarBackground;
     public float entityHPbarOpacity;
     
+    public Color orbitObjectColor;
+    public Color orbitSyncPosColor;
+    public float lodShowOrbitPath;
+    public int orbitFadeFactor;
+    
     @Override
     public void loadDefault() {
         playerHPBarY = 55;
@@ -25,12 +30,16 @@ public class UIConfig extends Config {
         playerAmmoBarColor = Color.TEAL;
         playerAmmoBarRechargeColor = Color.SLATE;
         
-        
         renderFullHealth = false;
         entityHPbarLength = 40;
         entityHPbarWidth = 8;
         entityHPbarYOffset = -20;
         entityHPbarBackground = new Color(1, 1, 1, 0.5f);
         entityHPbarOpacity = 0.7f;
+        
+        orbitObjectColor = new Color(1, 1, 1, 1);
+        orbitSyncPosColor = new Color(1, 0, 0, 1);
+        lodShowOrbitPath = 500;
+        orbitFadeFactor = 6;
     }
 }

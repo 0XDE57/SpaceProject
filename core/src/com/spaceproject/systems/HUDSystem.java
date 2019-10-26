@@ -27,6 +27,7 @@ import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.MapComponent;
+import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -60,6 +61,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private ImmutableArray<Entity> mapableEntities;
     private ImmutableArray<Entity> players;
     private ImmutableArray<Entity> killableEntities;
+    private ImmutableArray<Entity> orbitEntities;
     
     private MiniMap miniMap;
     
@@ -121,7 +123,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         
         uiCFG = SpaceProject.configManager.getConfig(UIConfig.class);
         keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
-    
+        
         MiniMapConfig miniMapConfig = SpaceProject.configManager.getConfig(MiniMapConfig.class);
         CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
         miniMap = new MiniMap(miniMapConfig, celestCFG);
@@ -140,13 +142,18 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         mapableEntities = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
         players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
         killableEntities = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(ControlFocusComponent.class).get());
+        orbitEntities = engine.getEntitiesFor(Family.all(TransformComponent.class).get());
     }
     
     @Override
     public void update(float delta) {
         checkInput();
-        
-        drawHUD();
+    
+        if (drawHud) {
+            drawOrbitPath(false);
+            
+            drawHUD();
+        }
         
         Entity p = players.size() > 0 ? players.first() : null;
         miniMap.drawMiniMap(shape, batch, p, mapableEntities);
@@ -155,7 +162,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     private void drawHUD() {
-        if (!drawHud) return;
         //set projection matrix so things render using correct coordinates
         projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         shape.setProjectionMatrix(projectionMatrix);
@@ -181,6 +187,59 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         MobileInputSystem mobileUI = getEngine().getSystem(MobileInputSystem.class);
         if (mobileUI != null)
             mobileUI.drawControls();
+    }
+    
+    private void drawOrbitPath(boolean showSyncedPos) {
+        if (cam.zoom <= uiCFG.lodShowOrbitPath / uiCFG.orbitFadeFactor) {
+            return;
+        }
+        
+        float alpha = MathUtils.clamp((cam.zoom / uiCFG.lodShowOrbitPath / uiCFG.orbitFadeFactor), 0, 1);
+        uiCFG.orbitObjectColor.a = alpha;
+        uiCFG.orbitSyncPosColor.a = alpha;
+        
+        //enable transparency
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        
+        shape.begin(ShapeType.Line);
+        
+        for (Entity entity : orbitEntities) {
+            
+            OrbitComponent orbit = Mappers.orbit.get(entity);
+            if (orbit != null) {
+                TransformComponent entityPos = Mappers.transform.get(entity);
+                
+                if (orbit.parent != null) {
+                    TransformComponent parentPos = Mappers.transform.get(orbit.parent);
+                    
+                    if (showSyncedPos) {
+                        //synced orbit position (where the object should be)
+                        Vector2 orbitPos = OrbitSystem.getSyncPos(entity, GameScreen.getGameTimeCurrent());
+                        shape.setColor(uiCFG.orbitSyncPosColor);
+                        shape.line(parentPos.pos.x, parentPos.pos.y, orbitPos.x, orbitPos.y);
+                    }
+                    
+                    //actual position
+                    shape.setColor(uiCFG.orbitObjectColor);
+                    shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
+                    shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
+                }
+                
+                TextureComponent tex = Mappers.texture.get(entity);
+                if (tex != null) {
+                    float radius = tex.texture.getWidth() * 0.5f * tex.scale;
+                    Vector2 orientation = MyMath.vector(entityPos.rotation, radius).add(entityPos.pos);
+                    shape.setColor(uiCFG.orbitObjectColor);
+                    shape.line(entityPos.pos.x, entityPos.pos.y, orientation.x, orientation.y);
+                    shape.circle(entityPos.pos.x, entityPos.pos.y, radius);
+                }
+            }
+        }
+        
+        shape.end();
+        
+        Gdx.gl.glDisable(GL20.GL_BLEND);
     }
     
     private void checkInput() {
