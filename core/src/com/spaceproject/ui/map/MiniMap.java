@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.spaceproject.components.HyperDriveComponent;
@@ -101,6 +102,10 @@ public class MiniMap {
             if (miniMapCFG.debugDrawLoadDist) {
                 drawDebugLoadDist(shape, centerMapX, centerMapY, celestCFG.loadSystemDistance, miniMapCFG.debugLoadDistColor);
             }
+            
+            //if (mapState == MapState.full) {
+                drawViewport(shape, centerMapX, centerMapY, miniMapCFG.viewportColor);
+            //}
         }
         shape.end();
         
@@ -120,13 +125,8 @@ public class MiniMap {
             
             drawPlayerMarker(shape, player, centerMapX, centerMapY, miniMapCFG.playerMarkerSize,  miniMapCFG.playerMarkerColor, miniMapCFG.velocityVecColor);
     
-    
-            //draw border
-            shape.setColor(miniMapCFG.borderColor);
-            shape.rect(mapContainer.x, mapContainer.height + mapContainer.y - miniMapCFG.borderWidth, mapContainer.width, miniMapCFG.borderWidth);//top
-            shape.rect(mapContainer.x, mapContainer.y, mapContainer.width, miniMapCFG.borderWidth);//bottom
-            shape.rect(mapContainer.x, mapContainer.y, miniMapCFG.borderWidth, mapContainer.height);//left
-            shape.rect(mapContainer.width + mapContainer.x - miniMapCFG.borderWidth, mapContainer.y, miniMapCFG.borderWidth, mapContainer.height);//right
+            
+            drawBorder(shape);
         }
         shape.end();
         
@@ -274,6 +274,14 @@ public class MiniMap {
         }
     }
     
+    private void drawBorder(ShapeRenderer shape) {
+        shape.setColor(miniMapCFG.borderColor);
+        shape.rect(mapContainer.x, mapContainer.height + mapContainer.y - miniMapCFG.borderWidth, mapContainer.width, miniMapCFG.borderWidth);//top
+        shape.rect(mapContainer.x, mapContainer.y, mapContainer.width, miniMapCFG.borderWidth);//bottom
+        shape.rect(mapContainer.x, mapContainer.y, miniMapCFG.borderWidth, mapContainer.height);//left
+        shape.rect(mapContainer.width + mapContainer.x - miniMapCFG.borderWidth, mapContainer.y, miniMapCFG.borderWidth, mapContainer.height);//right
+    }
+    
     private void drawGrid(ShapeRenderer shape, float centerMapX, float centerMapY, int gridSize, float width, Color gridColor) {
         shape.setColor(gridColor);
         int halfWidth = (int) (((width / 2)));
@@ -292,6 +300,23 @@ public class MiniMap {
             float finalY = (((i * gridSize) - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
             shape.rect(mapContainer.x, finalY, width, 1);
         }
+    }
+    
+    private void drawViewport(ShapeRenderer shape, float centerMapX, float centerMapY, Color color) {
+        shape.setColor(color);
+    
+        Vector3 topLeft = MyScreenAdapter.cam.unproject(new Vector3(0, 0, 0));
+        float x1 = ((topLeft.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
+        float y1 = ((topLeft.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
+    
+        Vector3 bottomRight = MyScreenAdapter.cam.unproject(new Vector3(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0));
+        float x2 = ((bottomRight.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
+        float y2 = ((bottomRight.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
+        
+        shape.line(x1, y1, x2, y1);//top
+        shape.line(x1, y2, x2, y2);//bottom
+        shape.line(x1, y1, x1, y2);//left
+        shape.line(x2, y1, x2, y2);//right
     }
     
     private void drawDebugLoadDist(ShapeRenderer shape, float centerMapX, float centerMapY, float loadSystemDistance, Color color) {

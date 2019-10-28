@@ -30,6 +30,7 @@ public class MiniMapConfig extends Config {
     public Color borderColor;
     public Color gridColor;
     public Color mouseColor;
+    public Color viewportColor;
     public Color universeMarkerColor;
     public Color orbitPathColor;
     public Color playerMarkerColor;
@@ -63,6 +64,7 @@ public class MiniMapConfig extends Config {
         borderColor = new Color(0.1f, 0.63f, 0.88f, 1f);
         gridColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
         mouseColor = new Color(1f, 0.2f, 0.2f, 1f);
+        viewportColor = new Color(0.05f, 0.32f, 0.44f, 1f);
         universeMarkerColor = new Color(1, 1, 1, 1);
         orbitPathColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
         playerMarkerColor = new Color(1, 1, 1, 1);
