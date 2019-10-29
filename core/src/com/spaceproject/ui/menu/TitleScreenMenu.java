@@ -15,6 +15,7 @@ import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.debug.Test3DScreen;
 import com.spaceproject.screens.debug.TestNoiseScreen;
 import com.spaceproject.screens.debug.TestShipGenerationScreen;
+import com.spaceproject.screens.debug.TestSpiralGalaxy;
 import com.spaceproject.screens.debug.TestVoronoiScreen;
 
 public class TitleScreenMenu {
@@ -70,7 +71,7 @@ public class TitleScreenMenu {
             }
         });
         
-        /*
+        
         TextButton btnSpiral = new TextButton("Spiral Gen [DEBUG]", VisUI.getSkin());
         btnSpiral.getLabel().setAlignment(Align.left);
         btnSpiral.addListener(new ChangeListener() {
@@ -78,7 +79,7 @@ public class TitleScreenMenu {
             public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(new TestSpiralGalaxy());
             }
-        });*/
+        });
         
         
         TextButton btnLoad = new TextButton("load", VisUI.getSkin());
@@ -123,6 +124,7 @@ public class TitleScreenMenu {
         Table table = new Table();
         table.add(btnPlay).fillX().row();
         if (showDebugScreens) {
+            table.add(btnSpiral).fillX().row();
             table.add(btnVoronoi).fillX().row();
             table.add(btnNoise).fillX().row();
             table.add(btn3D).fillX().row();
