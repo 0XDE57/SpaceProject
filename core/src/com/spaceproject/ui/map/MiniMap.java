@@ -93,19 +93,19 @@ public class MiniMap {
         
         shape.begin(ShapeRenderer.ShapeType.Line);
         {
-            boolean drawOrbit = mapScale <= miniMapCFG.lodRenderOrbitPathScale;
-            if (drawOrbit) {
-                drawOrbitPaths(shape, entities, centerMapX, centerMapY, miniMapCFG.orbitPathColor);
+            if (GameScreen.inSpace()) {
+                boolean drawOrbit = mapScale <= miniMapCFG.lodRenderOrbitPathScale;
+                if (drawOrbit) {
+                    drawOrbitPaths(shape, entities, centerMapX, centerMapY, miniMapCFG.orbitPathColor);
+                }
+    
+                //debug
+                if (miniMapCFG.debugDrawLoadDist) {
+                    drawDebugLoadDist(shape, centerMapX, centerMapY, celestCFG.loadSystemDistance, miniMapCFG.debugLoadDistColor);
+                }
             }
             
-            //debug
-            if (miniMapCFG.debugDrawLoadDist) {
-                drawDebugLoadDist(shape, centerMapX, centerMapY, celestCFG.loadSystemDistance, miniMapCFG.debugLoadDistColor);
-            }
-            
-            //if (mapState == MapState.full) {
-                drawViewport(shape, centerMapX, centerMapY, miniMapCFG.viewportColor);
-            //}
+            drawViewport(shape, centerMapX, centerMapY, miniMapCFG.viewportColor);
         }
         shape.end();
         
@@ -122,15 +122,14 @@ public class MiniMap {
                 drawMapableEntities(shape, entities, centerMapX, centerMapY);
             }
             
-            
             drawPlayerMarker(shape, player, centerMapX, centerMapY, miniMapCFG.playerMarkerSize,  miniMapCFG.playerMarkerColor, miniMapCFG.velocityVecColor);
-    
             
             drawBorder(shape);
         }
         shape.end();
         
         Gdx.gl.glDisable(GL20.GL_BLEND);
+        
         
         if (!miniMapCFG.debugDisableClipping) {
             ScissorStack.popScissors();
@@ -342,7 +341,7 @@ public class MiniMap {
     }
     
     public void updateMapPosition() {
-        mapContainer = getMiniMapRectangle();
+        mapContainer = createNewMapRectangle();
         drawScaleTimer.reset();
     }
     
@@ -350,23 +349,27 @@ public class MiniMap {
         return mapState;
     }
     
-    public Rectangle getMiniMapRectangle() {
+    private Rectangle createNewMapRectangle() {
         if (mapState == MapState.full) {
             return new Rectangle(miniMapCFG.edgePad, miniMapCFG.edgePad, Gdx.graphics.getWidth() - miniMapCFG.edgePad * 2, Gdx.graphics.getHeight() - miniMapCFG.edgePad * 2);
-        } else {
-            
-            switch (miniMapCFG.miniMapPosition) {
-                case topLeft:
-                    return new Rectangle(miniMapCFG.miniEdgePad, Gdx.graphics.getHeight() - miniMapCFG.miniHeight - miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
-                case topRight:
-                    return new Rectangle(Gdx.graphics.getWidth() - miniMapCFG.miniWidth - miniMapCFG.miniEdgePad, Gdx.graphics.getHeight() - miniMapCFG.miniHeight - miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
-                case bottomLeft:
-                    return new Rectangle(miniMapCFG.miniEdgePad, miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
-                case bottomRight:
-                    return new Rectangle(Gdx.graphics.getWidth() - miniMapCFG.miniWidth - miniMapCFG.miniEdgePad, miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
-            }
         }
-        return new Rectangle();
+        
+        switch (miniMapCFG.miniMapPosition) {
+            case topLeft:
+                return new Rectangle(miniMapCFG.miniEdgePad, Gdx.graphics.getHeight() - miniMapCFG.miniHeight - miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
+            case topRight:
+                return new Rectangle(Gdx.graphics.getWidth() - miniMapCFG.miniWidth - miniMapCFG.miniEdgePad, Gdx.graphics.getHeight() - miniMapCFG.miniHeight - miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
+            case bottomLeft:
+                return new Rectangle(miniMapCFG.miniEdgePad, miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
+            case bottomRight:
+                return new Rectangle(Gdx.graphics.getWidth() - miniMapCFG.miniWidth - miniMapCFG.miniEdgePad, miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
+            default:
+                return new Rectangle();
+        }
+    }
+    
+    public Rectangle getMapContainer() {
+        return mapContainer;
     }
     
     private void scrollMiniMap(int amount) {

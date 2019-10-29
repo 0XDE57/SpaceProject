@@ -99,7 +99,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 if (button == Input.Buttons.MIDDLE) {
-                    if (miniMap.getMiniMapRectangle().contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY())) {
+                    if (miniMap.getMapContainer().contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY())) {
                         if (miniMap.getState() != MapState.off) {
                             miniMap.resetMapScale();
                             return true;
@@ -150,7 +150,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         checkInput();
     
         if (drawHud) {
-            drawOrbitPath(false);
+            if (GameScreen.inSpace()) {
+                drawOrbitPath(false);
+            }
             
             drawHUD();
         }

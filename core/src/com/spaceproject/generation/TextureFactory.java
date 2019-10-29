@@ -343,7 +343,7 @@ public class TextureFactory {
             }
         }
         
-        //TODO: cross-thread GLContext issue cause be texuture creation not pixmap, can we create the pixmap in noisethread?
+        //TODO: cross-thread GLContext issue cause by texture creation not pixmap, can we create the pixmap in noisethread?
         //play with drawing the pixmap in the thread too and then delegating the
         //"No OpenGL context found in the current thread." or straight up crashes
         //https://github.com/libgdx/libgdx/wiki/Threading
