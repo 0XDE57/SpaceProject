@@ -3,26 +3,42 @@ package com.spaceproject.screens.debug;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.spaceproject.utility.Misc;
+import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.screens.TitleScreen;
 import com.spaceproject.utility.MyMath;
 
-public class TestSpiralGalaxy extends ScreenAdapter {
-    ShapeRenderer shape = new ShapeRenderer();
+public class TestSpiralGalaxy extends MyScreenAdapter {
+    //ShapeRenderer shape = new ShapeRenderer();
+    
+    Vector2 center;
     
     Array<Vector2> starPoints;
-    Array<Vector2> edgePoints = new Array<>();
+    Array<Vector2> edgePointsA = new Array<>();
+    Array<Vector2> edgePointsB = new Array<>();
     
-    //int[] fib;//= new int[]{0, 1, 1, 2, 3, 5, 8, 13, 21};//{ 1, 1, 2, 3, 5, 8, 13, 21 };
+   
+    float scale = 6;
+    int iterations = 15;
     
     public TestSpiralGalaxy() {
-        starPoints = genStarPoints();
+        center = new Vector2(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+        generate();
     
+    
+        //test();
+    
+    }
+    
+    private void test() {
+        int[] fib = new int[]{0, 1, 1, 2, 3, 5, 8, 13, 21};
+        //how to get from this ^^^ to this vvv
         int[][] test = {
                 {0, 0},
                 {-1, -1},
@@ -42,57 +58,53 @@ public class TestSpiralGalaxy extends ScreenAdapter {
             vector2.set(x, y);
             System.out.println(x + ", " + y + ": " + MyMath.round(vector2.len(), 2) + ": " + MyMath.round(vector2.angle(),2));
         }
-    
-        generateSpiral(9, 0);
-        center = new Vector2(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
     }
     
-    public static long fibonacci(int n) {
-        if (n == 0) {
-            return 0;
-        }
-        if (n <= 2) {
-            return 1;
-        }
+    private void generate() {
+        int dir = MathUtils.random(4);
+        edgePointsA = generateSpiral(iterations, dir);
+        edgePointsB = generateSpiral(iterations, dir+2);//180 rotate
         
-        return fibonacci(n - 1) + fibonacci(n - 2);
+        starPoints = genStarPoints();
     }
     
-    private void generateSpiral(int iterations, int startAngle) {
-        
-        edgePoints.clear();
+    private Array<Vector2> generateSpiral(int iterations, int startAngle) {
+        Array<Vector2> points = new Array<>(iterations);
+        Array<Rectangle> rects = new Array<>(iterations);
+
         int[] angles = new int[]{0, 90, 180, 270};
         for (int s = 0; s < iterations; s++) {
-            float fib = fibonacci(s);
+            float fib = MyMath.fibonacci(s);
             int angle = angles[(s + startAngle) % 4];
             
             
             Vector2 newVec = MyMath.vector(angle * MathUtils.degRad, fib).cpy();
             if (s > 1) {
-                Vector2 previous = edgePoints.get(s - 1);
+                Vector2 previous = points.get(s - 1);
                 newVec.add(previous);
             }
-            edgePoints.add(newVec);
+            
+            points.add(newVec);
         }
         
-        for (Vector2 p : edgePoints) {
-            System.out.println(Misc.vecString(p,2));
-        }
+        //for (Vector2 p : points) { System.out.println(Misc.vecString(p,2)); }
+        
+        return points;
     }
     
-    Vector2 center;
+    
     
     
     public void render(float delta) {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
+    
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            MyScreenAdapter.game.setScreen(new TitleScreen(MyScreenAdapter.game));
+        }
         
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            //points = genPoints();
-            generateSpiral(15, MathUtils.random(4));
-            
-            starPoints.clear();
-            starPoints = genStarPoints();
+            generate();
         }
         
         shape.begin(ShapeRenderer.ShapeType.Line);
@@ -100,35 +112,47 @@ public class TestSpiralGalaxy extends ScreenAdapter {
         shape.setColor(1, 1, 0, 1);
         shape.line(center.x, 0, center.x, Gdx.graphics.getHeight());
         shape.line(0, center.y, Gdx.graphics.getWidth(), center.y);
+    
         
-        
-        shape.setColor(1, 1, 1, 1);
-        
-        float scale = 6;
-        Vector2 prev = new Vector2();
-        for (Vector2 p : edgePoints) {
-            Vector2 v1 = p.cpy().scl(scale).add(center);
-            Vector2 v2 = prev.cpy().scl(scale).add(center);
-            shape.line(v1, v2);
-            shape.circle(v1.x, v1.y, 3);
-            prev.set(p);
-        }
-        
+        drawSpiral(edgePointsA, center, Color.RED);
+        drawSpiral(edgePointsB, center, Color.YELLOW);
+
         
         shape.setColor(1, 0, 0, 1);
         shape.circle(center.x, center.y, 3);
     
+    
+        drawStars();
+    
+    }
+    
+    private void drawSpiral(Array<Vector2> points, Vector2 center, Color color) {
+        shape.setColor(color);
         
-        shape.setColor(0, 1, 1, 1);
+        int c = 0;
+        for (Vector2 p : points) {
+            Vector2 v1 = p.cpy().scl(scale).add(center);
+            if (c > 0) {
+                Vector2 v2 = points.get(c-1).cpy().scl(scale).add(center);
+                shape.line(v1, v2);
+            }
+            shape.circle(v1.x, v1.y, 3);
+            
+            c++;
+        }
+    }
+    
+    private void drawStars() {
+        shape.setColor(1, 1, 1, 1);
         int centerCluster = 512;
         for (Vector2 p : starPoints) {
             Vector2 r = p.cpy().add(center).sub(centerCluster, centerCluster);
             shape.circle(r.x, r.y, 3);
         }
         shape.end();
-
     }
     
+   
     
     public Array<Vector2> genStarPoints() {
         //http://beltoforion.de/article.php?a=spiral_galaxy_renderer
@@ -140,14 +164,14 @@ public class TestSpiralGalaxy extends ScreenAdapter {
         //skew horizontally and vertically
         
         int size = 1024;
-        int numGen = 2000;
+        int numGen = 1000;
         Vector2 hotSpot = new Vector2(size / 2, size / 2);
         Array<Vector2> p = new Array<>();
         //p.add(new Vector2(0, 0));
         //p.add(hotSpot);
         while (p.size < numGen) {
             Vector2 potentialPoint = new Vector2(MathUtils.random(size), MathUtils.random(size));
-            float chance = (potentialPoint.dst(hotSpot) / size * 0.5f);
+            float chance = 1-(potentialPoint.dst(hotSpot) / size);
             if (MathUtils.random(1.0f) < chance) {
                 p.add(potentialPoint);
             }
