@@ -12,10 +12,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
+import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
 
 public class TestSpiralGalaxy extends MyScreenAdapter {
-    //ShapeRenderer shape = new ShapeRenderer();
     
     Vector2 center;
     
@@ -30,10 +30,8 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
     public TestSpiralGalaxy() {
         center = new Vector2(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
         generate();
-    
-    
+        
         //test();
-    
     }
     
     private void test() {
@@ -71,28 +69,35 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
     private Array<Vector2> generateSpiral(int iterations, int startAngle) {
         Array<Vector2> points = new Array<>(iterations);
         Array<Rectangle> rects = new Array<>(iterations);
-
+        String format = "| %1$-5s | %2$-15s | %3$-7s | %4$-7s | %5$-3s \n";
+        System.out.format(format, "fib", "coord", "len", "angle", "dir");
+        
         int[] angles = new int[]{0, 90, 180, 270};
         for (int s = 0; s < iterations; s++) {
-            float fib = MyMath.fibonacci(s);
-            int angle = angles[(s + startAngle) % 4];
+            long fib = MyMath.fibonacci(s);
+            int direction = angles[(s + startAngle) % 4];
             
             
-            Vector2 newVec = MyMath.vector(angle * MathUtils.degRad, fib).cpy();
+            Vector2 newVec = MyMath.vector(direction * MathUtils.degRad, fib).cpy();
             if (s > 1) {
                 Vector2 previous = points.get(s - 1);
                 newVec.add(previous);
             }
             
             points.add(newVec);
+            
+            System.out.format(format,
+                    fib,
+                    Misc.vecString(newVec, 2),
+                    MyMath.round(newVec.len(), 2),
+                    MyMath.round(newVec.angle(), 2),
+                    direction);
         }
         
-        //for (Vector2 p : points) { System.out.println(Misc.vecString(p,2)); }
+        //for (Vector2 p : points) {  }
         
         return points;
     }
-    
-    
     
     
     public void render(float delta) {
