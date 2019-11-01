@@ -16,40 +16,93 @@ import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
 
 public class TestSpiralGalaxy extends MyScreenAdapter {
+    enum Direction {
+        UP(90), RIGHT(0), DOWN(270), LEFT(180);
+        private int dir;
+        Direction(int dir) {
+            this.dir = dir;
+        }
+    }
+    
+    enum Origin {
+        BL,
+        TL,
+        TR,
+        BR
+    }
     
     private class SpiralTest {
+        
         public Array<Vector2> points;
+        public Array<Vector2> approxPoints;
         public Array<Rectangle> rects;
         
-        public SpiralTest(int iterations, int startAngle) {
+        public SpiralTest(int iterations, int startAngle, boolean clockwise) {
             points = new Array<>(iterations);
+            approxPoints = new Array<>(iterations);
             rects = new Array<>(iterations);
             
-            String format = "| %1$-5s | %2$-15s | %3$-7s | %4$-7s | %5$-3s \n";
-            System.out.format(format, "fib", "coord", "len", "angle", "dir");
-        
-            int[] angles = new int[]{0, 90, 180, 270};
-            for (int s = 0; s < iterations; s++) {
-                long fib = MyMath.fibonacci(s);
-                int direction = angles[(s + startAngle) % 4];
+            System.out.format("[FIB] iteration %s, start dir %s, clockwise %s \n", iterations, startAngle, clockwise);
+            String format = "| %1$-5s | %2$-5s | %3$-15s | %4$-7s | %5$-7s | %6$-10s | %7$-10s |\n";
+            System.out.format(format, "iter", "fib", "coord", "len", "angle", "dir", "rect");
+    
+            //0 = right, 90 = up, 180 = left, 270 = down
+            int[] angles = clockwise ? new int[]{ 270, 180, 90, 0 } : new int[]{ 0, 90, 180, 270 };
+            byte[] dirr = new byte[] {0, 1, 2, 3};
+            
+            for (int iter = 0; iter < iterations; iter++) {
+                long fib = MyMath.fibonacci(iter);
+                int direction = angles[(iter + startAngle) % 4];
+                
+                //if iter = 2, handle fib 1 case
                 
                 Vector2 newVec = MyMath.vector(direction * MathUtils.degRad, fib).cpy();
-                if (s > 1) {
-                    Vector2 previous = points.get(s - 1);
-                    newVec.add(previous);
+                points.add(newVec);//edge
                 
-                    Rectangle rectangle = new Rectangle(newVec.x, newVec.y, fib, fib);
-                    rects.add(rectangle);
+                //calc rectangles and spiral approximation
+                Vector2 approxP = null;
+                Rectangle newRect = null;// = new Rectangle(newVec.x, newVec.y, fib, fib);
+                
+                if (iter > 0) {
+                    Vector2 previous = points.get(iter - 1);
+                    newVec.add(previous);
+                    
+                    int originX = (int)newVec.x;
+                    int originY = (int)newVec.y;
+                    switch (direction) {
+                        case 0:
+                            //right
+                            originX -= fib;
+                            break;
+                        case 90: break;
+                        case 180: break;
+                        case 2700: break;
+                    }
+    
+                    newRect = new Rectangle(originX, originY, fib, fib);
+                    rects.add(newRect);
+    
+                    //approxP = new Vector2(originX, originY);
+                    //approxPoints.add(approxP);
                 }
             
-                points.add(newVec);
+                
             
+                String dir = "";
+                switch (direction) {
+                    case 0:   dir = ">"; break;
+                    case 90:  dir = "^"; break;
+                    case 180: dir = "<"; break;
+                    case 270: dir = "v"; break;
+                }
                 System.out.format(format,
+                        iter,
                         fib,
                         Misc.vecString(newVec, 2),
                         MyMath.round(newVec.len(), 2),
                         MyMath.round(newVec.angle(), 2),
-                        direction);
+                        "(" + dir + ") "+ direction,
+                        newRect == null ? "null" : newRect.toString());
             }
         }
     }
@@ -60,8 +113,8 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
     SpiralTest spiralA, spiralB;
     
     
-    float scale = 6;
-    int iterations = 15;
+    float scale = 60;
+    int iterations = 8;
     
     public TestSpiralGalaxy() {
         center = new Vector2(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
@@ -96,12 +149,11 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
     
     private void generate() {
         int dir = MathUtils.random(4);
-        spiralA = new SpiralTest(iterations, dir);
-        spiralB = new SpiralTest(iterations, dir+2);//180 rotation
+        boolean clockwise = MathUtils.randomBoolean();
+        spiralA = new SpiralTest(iterations, dir, clockwise);
+        //spiralB = new SpiralTest(iterations, dir+2, clockwise);//180 rotation
         starPoints = genStarPoints();
     }
-    
-    
     
     
     public void render(float delta) {
@@ -123,29 +175,38 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
         shape.line(0, center.y, Gdx.graphics.getWidth(), center.y);
     
         
-        drawSpiral(spiralA.points, center, scale, Color.RED);
+        
         //drawSpiral(spiralB.points, center, scale, Color.YELLOW);
         
-        drawRects(spiralA.rects, center, scale, Color.WHITE);
-
+        drawRects(spiralA.rects, center, scale, Color.GREEN);
+    
+        shape.setColor(0, 1, 0, 1);
+        long fibTest = MyMath.fibonacci(3);
+        Rectangle test = new Rectangle(1, 1, fibTest, fibTest);
+        Vector2 v1 = new Vector2(test.x, test.y).scl(scale).add(center);
+        //shape.rect(v1.x, v1.y, test.width * scale, test.height * scale);
+    
+        
+        
+        drawSpiral(spiralA.points, center, scale, Color.RED);
         
         shape.setColor(1, 0, 0, 1);
         shape.circle(center.x, center.y, 3);
     
     
-        drawStars();
+        //drawStars();
     
+        shape.end();
     }
     
     private void drawRects(Array<Rectangle> rects, Vector2 center, float scale, Color color) {
         shape.setColor(color);
-        //shape.begin(ShapeRenderer.ShapeType.Line);
+        
+        Vector2 v1 = new Vector2();
         for (Rectangle r : rects) {
-            //shape.rect(r.x, r.y, r.width, r.height);
-            Vector2 centered = new Vector2(r.getX(), r.getY()).add(center);
-            shape.rect(centered.x, centered.y, r.width, r.height);
+            v1.set(r.x, r.y).scl(scale).add(center);
+            shape.rect(v1.x, v1.y, r.width * scale, r.height * scale);
         }
-        //shape.end();
     }
     
     private void drawSpiral(Array<Vector2> points, Vector2 center, float scale, Color color) {
@@ -171,7 +232,6 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
             Vector2 r = p.cpy().add(center).sub(centerCluster, centerCluster);
             shape.circle(r.x, r.y, 3);
         }
-        shape.end();
     }
     
    
