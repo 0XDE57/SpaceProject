@@ -42,15 +42,22 @@ public abstract class MyMath {
     
     /**
      * Get angle from position 1 to position 2.
+     * TODO despite working, this seems strange..
      */
     public static float angleTo(int x1, int y1, int x2, int y2) {
         return (float) -(Math.atan2(x2 - x1, y2 - y1)) - 1.57f;
     }
-    
+   
     public static float angleTo(Vector2 a, Vector2 b) {
         return angleTo((int) a.x, (int) a.y, (int) b.x, (int) b.y);
     }
-    
+    public static float angle2(Vector2 a, Vector2 b) {
+        return angle2((int) a.x, (int) a.y, (int) b.x, (int) b.y);
+    }
+    public static float angle2(int x1, int y1, int x2, int y2) {
+        //return (float) Math.atan2(y2 - y1, x2 - x1);
+        return (float) -(Math.atan2(x2 - x1, y2 - y1)) ;//- 1.57f;
+    }
     /**
      * Round value with specified precision.
      *

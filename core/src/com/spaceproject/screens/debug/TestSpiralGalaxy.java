@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
+import com.spaceproject.utility.DebugTextRenderer;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.MyMath;
 
@@ -31,13 +32,13 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
         BR
     }
     
-    private class SpiralTest {
+    private class SpiralArm {
         
         public Array<Vector2> points;
         public Array<Vector2> approxPoints;
         public Array<Rectangle> rects;
         
-        public SpiralTest(int iterations, int startAngle, boolean clockwise) {
+        public SpiralArm(int iterations, int startAngle, boolean clockwise) {
             points = new Array<>(iterations);
             approxPoints = new Array<>(iterations);
             rects = new Array<>(iterations);
@@ -67,20 +68,24 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
                     Vector2 previous = points.get(iter - 1);
                     newVec.add(previous);
                     
+                    long nextFib = MyMath.fibonacci(iter+1);
                     int originX = (int)newVec.x;
                     int originY = (int)newVec.y;
                     switch (direction) {
                         case 0:
                             //right
-                            originX -= fib;
+                            //originX -= fib;
                             break;
                         case 90: break;
                         case 180: break;
                         case 2700: break;
                     }
     
+                    
                     newRect = new Rectangle(originX, originY, fib, fib);
-                    rects.add(newRect);
+                    if (iter != 1) {
+                        rects.add(newRect);
+                    }
     
                     //approxP = new Vector2(originX, originY);
                     //approxPoints.add(approxP);
@@ -107,20 +112,23 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
         }
     }
     
-    Vector2 center;
+    private Vector2 center;
+    private Array<Vector2> starPoints;
+    private SpiralArm spiralA, spiralB;
     
-    Array<Vector2> starPoints;
-    SpiralTest spiralA, spiralB;
+    private float scale = 60;
+    private int iterations = 5;
+    int dir;
+    boolean clockwise;
     
-    
-    float scale = 60;
-    int iterations = 8;
+    private DebugTextRenderer debugText = new DebugTextRenderer();
     
     public TestSpiralGalaxy() {
         center = new Vector2(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
-        generate();
+        generate(1, true);
         
         //test();
+        
     }
     
     private void test() {
@@ -147,16 +155,25 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
         }
     }
     
-    private void generate() {
-        int dir = MathUtils.random(4);
-        boolean clockwise = MathUtils.randomBoolean();
-        spiralA = new SpiralTest(iterations, dir, clockwise);
-        //spiralB = new SpiralTest(iterations, dir+2, clockwise);//180 rotation
+    private void generateRand() {
+        generate(MathUtils.random(4), MathUtils.randomBoolean());
+    }
+    
+    private void generate(int direction, boolean clockwise) {
+        this.dir = direction % 4;
+        if (dir < 0) {
+            dir = 1-direction;
+        }
+        this.clockwise = clockwise;
+        spiralA = new SpiralArm(iterations, dir, clockwise);
+        //spiralB = new SpiralArm(iterations, dir+2, clockwise);//180 rotation
         starPoints = genStarPoints();
     }
     
     
     public void render(float delta) {
+        super.render(delta);
+        
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
     
@@ -165,7 +182,23 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
         }
         
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            generate();
+            generateRand();
+        }
+        
+        if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+            iterations++;
+            generate(dir, clockwise);
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+            iterations--;
+            generate(dir, clockwise);
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
+            generate(dir-1, clockwise);
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+            generate(dir+1, clockwise);
+            
         }
         
         shape.begin(ShapeRenderer.ShapeType.Line);
@@ -173,7 +206,7 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
         shape.setColor(1, 1, 0, 1);
         shape.line(center.x, 0, center.x, Gdx.graphics.getHeight());
         shape.line(0, center.y, Gdx.graphics.getWidth(), center.y);
-    
+        
         
         
         //drawSpiral(spiralB.points, center, scale, Color.YELLOW);
@@ -185,18 +218,24 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
         Rectangle test = new Rectangle(1, 1, fibTest, fibTest);
         Vector2 v1 = new Vector2(test.x, test.y).scl(scale).add(center);
         //shape.rect(v1.x, v1.y, test.width * scale, test.height * scale);
-    
         
         
         drawSpiral(spiralA.points, center, scale, Color.RED);
         
         shape.setColor(1, 0, 0, 1);
         shape.circle(center.x, center.y, 3);
-    
-    
+        
+        shape.setColor(Color.WHITE);
+        shape.line(center, new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()));
+        
         //drawStars();
-    
+        
         shape.end();
+        
+        showMousePos(center, scale);
+        
+        debugText.draw(batch);
+        
     }
     
     private void drawRects(Array<Rectangle> rects, Vector2 center, float scale, Color color) {
@@ -215,6 +254,8 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
         int c = 0;
         for (Vector2 p : points) {
             Vector2 v1 = p.cpy().scl(scale).add(center);
+            debugText.add(Misc.vecString(p, 1), v1.x, v1.y);
+            debugText.add(Misc.vecString(v1, 1), v1.x, v1.y + debugText.getFontHeight());
             if (c > 0) {
                 Vector2 v2 = points.get(c-1).cpy().scl(scale).add(center);
                 shape.line(v1, v2);
@@ -234,7 +275,19 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
         }
     }
     
-   
+    private void showMousePos(Vector2 center, float scale) {
+        int x = Gdx.input.getX();
+        int y = Gdx.graphics.getHeight() - Gdx.input.getY();
+        
+        String localPos = x + "," + y;
+        //debugText.add(new Vector2(x, y).scl(scale).add(center).toString(), x,  y);
+        
+        //Vector3 worldPos = cam.unproject(new Vector3(x, y, 0));
+        //debugText.add((int) worldPos.x + "," + (int) worldPos.y, x, y + (int) debugText.getFontHeight());
+    
+        //float angle = MyMath.angle2(center, new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()));
+        //debugText.add(MyMath.round(angle,3) + " / " + MyMath.round(angle * MathUtils.radDeg, 3), x, y + (int) debugText.getFontHeight()*2);
+    }
     
     public Array<Vector2> genStarPoints() {
         //http://beltoforion.de/article.php?a=spiral_galaxy_renderer

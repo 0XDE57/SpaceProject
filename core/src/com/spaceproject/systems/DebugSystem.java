@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -437,12 +438,16 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     
     private void drawMousePos() {
         int x = Gdx.input.getX();
-        int y = Gdx.input.getY();
+        int y = Gdx.graphics.getHeight() - Gdx.input.getY();
         
-        Vector3 worldPos = cam.unproject(new Vector3(x, y, 0));
         String localPos = x + "," + y;
-        debugTexts.add(new DebugText(localPos, x, Gdx.graphics.getHeight() - y));
-        debugTexts.add(new DebugText((int) worldPos.x + "," + (int) worldPos.y, x, Gdx.graphics.getHeight() - y + fontSmall.getLineHeight()));
+        debugTexts.add(new DebugText(localPos, x, y));
+    
+        Vector3 worldPos = cam.unproject(new Vector3(x, y, 0));
+        debugTexts.add(new DebugText((int) worldPos.x + "," + (int) worldPos.y, x, y + fontSmall.getLineHeight()));
+    
+        float angle = MyMath.angleTo(Gdx.input.getX(), Gdx.input.getY(), Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+        debugTexts.add(new DebugText(MyMath.round(angle,3) + " / " + MyMath.round(angle * MathUtils.radDeg, 3), x, y + (int) fontSmall.getLineHeight()*2));
     }
     
     private void drawMouseLine() {
