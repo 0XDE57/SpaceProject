@@ -39,12 +39,14 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
         public Array<Rectangle> rects;
         
         public SpiralArm(int iterations, int startAngle, boolean clockwise) {
+            iterations = Math.abs(iterations);//keep positive
+            
             points = new Array<>(iterations);
             approxPoints = new Array<>(iterations);
             rects = new Array<>(iterations);
             
             System.out.format("[FIB] iteration %s, start dir %s, clockwise %s \n", iterations, startAngle, clockwise);
-            String format = "| %1$-5s | %2$-5s | %3$-15s | %4$-7s | %5$-7s | %6$-10s | %7$-10s |\n";
+            String format = "| %1$-5s | %2$-5s | %3$-15s | %4$-7s | %5$-7s | %6$-10s | %7$-10s\n";
             System.out.format(format, "iter", "fib", "coord", "len", "angle", "dir", "rect");
     
             //0 = right, 90 = up, 180 = left, 270 = down
@@ -55,7 +57,7 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
                 long fib = MyMath.fibonacci(iter);
                 int direction = angles[(iter + startAngle) % 4];
                 
-                //if iter = 2, handle fib 1 case
+                //if iter = 1, handle first fib 1 odd case?
                 
                 Vector2 newVec = MyMath.vector(direction * MathUtils.degRad, fib).cpy();
                 points.add(newVec);//edge
@@ -68,7 +70,7 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
                     Vector2 previous = points.get(iter - 1);
                     newVec.add(previous);
                     
-                    long nextFib = MyMath.fibonacci(iter+1);
+                    long prevFib = MyMath.fibonacci(iter-1);
                     int originX = (int)newVec.x;
                     int originY = (int)newVec.y;
                     switch (direction) {
@@ -78,11 +80,11 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
                             break;
                         case 90: break;
                         case 180: break;
-                        case 2700: break;
+                        case 270: break;
                     }
     
                     
-                    newRect = new Rectangle(originX, originY, fib, fib);
+                    newRect = new Rectangle(originX, originY, prevFib, prevFib);
                     if (iter != 1) {
                         rects.add(newRect);
                     }
@@ -160,9 +162,9 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
     }
     
     private void generate(int direction, boolean clockwise) {
-        this.dir = direction % 4;
+        this.dir = direction;
         if (dir < 0) {
-            dir = 1-direction;
+            dir += 4;
         }
         this.clockwise = clockwise;
         spiralA = new SpiralArm(iterations, dir, clockwise);
@@ -172,38 +174,14 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
     
     
     public void render(float delta) {
-        super.render(delta);
-        
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
     
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            MyScreenAdapter.game.setScreen(new TitleScreen(MyScreenAdapter.game));
-        }
-        
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            generateRand();
-        }
-        
-        if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            iterations++;
-            generate(dir, clockwise);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            iterations--;
-            generate(dir, clockwise);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
-            generate(dir-1, clockwise);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
-            generate(dir+1, clockwise);
-            
-        }
-        
+        checkInput();
+    
         shape.begin(ShapeRenderer.ShapeType.Line);
         
-        shape.setColor(1, 1, 0, 1);
+        shape.setColor(Color.DARK_GRAY);
         shape.line(center.x, 0, center.x, Gdx.graphics.getHeight());
         shape.line(0, center.y, Gdx.graphics.getWidth(), center.y);
         
@@ -222,10 +200,10 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
         
         drawSpiral(spiralA.points, center, scale, Color.RED);
         
-        shape.setColor(1, 0, 0, 1);
-        shape.circle(center.x, center.y, 3);
+        //shape.setColor(1, 0, 0, 1);
+        //shape.circle(center.x, center.y, 3);
         
-        shape.setColor(Color.WHITE);
+        shape.setColor(Color.DARK_GRAY);
         shape.line(center, new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()));
         
         //drawStars();
@@ -236,6 +214,47 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
         
         debugText.draw(batch);
         
+    }
+    
+    private void checkInput() {
+        //fullscreen toggle
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
+            toggleFullscreen();
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            MyScreenAdapter.game.setScreen(new TitleScreen(MyScreenAdapter.game));
+        }
+        
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            //generateRand();
+            clockwise = !clockwise;
+            generate(dir, clockwise);
+        }
+        
+        if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+            iterations++;
+            generate(dir, clockwise);
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+            iterations--;
+            generate(dir, clockwise);
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
+            generate(dir-1, clockwise);
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+            generate(dir+1, clockwise);
+        }
+        
+        if (Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
+            scale++;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
+            scale--;
+            if (scale == 0) {
+                scale = 1;
+            }
+        }
     }
     
     private void drawRects(Array<Rectangle> rects, Vector2 center, float scale, Color color) {
