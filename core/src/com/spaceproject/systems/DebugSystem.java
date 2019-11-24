@@ -34,7 +34,7 @@ import com.spaceproject.config.KeyConfig;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.ui.menu.debug.DebugEngineWindow;
+import com.spaceproject.ui.menu.debug.ECSExplorerWindow;
 import com.spaceproject.utility.DebugText;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.DebugVec;
@@ -49,7 +49,7 @@ import java.util.Set;
 public class DebugSystem extends IteratingSystem implements Disposable {
     
     private DebugConfig debugCFG;
-    private DebugEngineWindow engineView;
+    private ECSExplorerWindow engineView;
     private Box2DDebugRenderer debugRenderer;
     
     //rendering
@@ -108,7 +108,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
 
-        engineView = new DebugEngineWindow(getEngine());
+        engineView = new ECSExplorerWindow(getEngine());
     }
     
     @Override

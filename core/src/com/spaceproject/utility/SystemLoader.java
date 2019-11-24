@@ -20,15 +20,15 @@ public abstract class SystemLoader {
         long time = System.currentTimeMillis();
         
         for (SysCFG sysCFG : cfg.getSystems()) {
-            LoadSystem(game, engine, inSpace, tag, sysCFG);
+            loadSystem(game, engine, inSpace, tag, sysCFG);
         }
         
         long now = System.currentTimeMillis();
-        Gdx.app.log(tag, "loaded in " + (now - time) + "ms");
+        Gdx.app.log(tag, "systems loaded in " + (now - time) + "ms");
     }
     
     @SuppressWarnings("unchecked")
-    private static void LoadSystem(GameScreen game, Engine engine, boolean inSpace, String tag, SysCFG sysCFG) {
+    private static void loadSystem(GameScreen game, Engine engine, boolean inSpace, String tag, SysCFG sysCFG) {
         boolean correctPlatform = (SpaceProject.isMobile() && sysCFG.isLoadOnMobile()) || (!SpaceProject.isMobile() && sysCFG.isLoadOnDesktop());
         if (!correctPlatform) {
             Gdx.app.log(tag, "Skip loading: " + sysCFG.getClassName());

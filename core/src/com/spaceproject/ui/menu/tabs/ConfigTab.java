@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -22,7 +23,6 @@ import com.kotcrab.vis.ui.widget.spinner.Spinner;
 import com.kotcrab.vis.ui.widget.tabbedpane.Tab;
 import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPane;
 import com.spaceproject.config.Config;
-import com.spaceproject.ui.menu.GameMenu;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -34,11 +34,11 @@ public class ConfigTab extends Tab {
     VisTable scrollContainer;
     int padSize = 2;
     
-    public ConfigTab(GameMenu gameMenu, Config config) {
-        this(gameMenu, config.getClass().getSimpleName(), config);
+    public ConfigTab(Stage stage, Config config) {
+        this(stage, config, config.getClass().getSimpleName());
     }
     
-    public ConfigTab(final GameMenu gameMenu, String title, Config config) {
+    public ConfigTab(final Stage stage, Config config, String title) {
         super(true, true);
         this.title = title;
         this.localConfig = config;
@@ -66,7 +66,7 @@ public class ConfigTab extends Tab {
         btnSave.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Dialogs.showOKDialog(gameMenu.getStage(), "save", "not implemented yet");
+                Dialogs.showOKDialog(stage, "save", "not implemented yet");
             }
         });
         
@@ -74,7 +74,7 @@ public class ConfigTab extends Tab {
         btnUndo.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Dialogs.showOKDialog(gameMenu.getStage(), "undo", "not implemented yet");
+                Dialogs.showOKDialog(stage, "undo", "not implemented yet");
             }
         });
         
@@ -82,7 +82,7 @@ public class ConfigTab extends Tab {
         btnReset.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Dialogs.showOKDialog(gameMenu.getStage(), "reset", "not implemented yet");
+                Dialogs.showOKDialog(stage, "reset", "not implemented yet");
             }
         });
         

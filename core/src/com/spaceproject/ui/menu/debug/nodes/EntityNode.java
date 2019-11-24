@@ -6,7 +6,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.spaceproject.ui.menu.debug.DebugEngineWindow;
+import com.spaceproject.ui.menu.debug.ECSExplorerWindow;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.SimpleTimer;
 
@@ -29,7 +29,7 @@ public class EntityNode extends UpdateNode {
         
         isNew = markNew;
         if (isNew) {
-            newTimer = new SimpleTimer(DebugEngineWindow.newTime, true);
+            newTimer = new SimpleTimer(ECSExplorerWindow.newTime, true);
             getActor().setColor(Color.GREEN);
         }
     }
@@ -55,7 +55,7 @@ public class EntityNode extends UpdateNode {
         if (!isExpanded())
             return;
         
-        boolean showHistory = DebugEngineWindow.showHistory;
+        boolean showHistory = ECSExplorerWindow.showHistory;
         
         //add nodes
         ImmutableArray<Component> components = getEntity().getComponents();
@@ -71,7 +71,7 @@ public class EntityNode extends UpdateNode {
             if (!components.contains((Component) node.getValue(), false)) {
                 if (showHistory) {
                     if (!(node instanceof GhostNode)) {
-                        node.removeAndCreateGhost(DebugEngineWindow.includeChildren);
+                        node.removeAndCreateGhost(ECSExplorerWindow.includeChildren);
                     }
                 } else {
                     node.remove();

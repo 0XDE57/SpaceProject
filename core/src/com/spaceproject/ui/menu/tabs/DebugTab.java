@@ -7,11 +7,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.kotcrab.vis.ui.VisUI;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.DebugConfig;
-import com.spaceproject.ui.menu.GameMenu;
 
 public class DebugTab extends HotKeyTab {
     
-    public DebugTab(GameMenu gameMenu) {
+    public DebugTab() {
         super("Debug", Input.Keys.F4);
         final DebugConfig debugCFG = SpaceProject.configManager.getConfig(DebugConfig.class);
         

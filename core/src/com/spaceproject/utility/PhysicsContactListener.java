@@ -69,7 +69,7 @@ public class PhysicsContactListener implements ContactListener {
             return;
         }
         
-        //check for AI
+        //check if attacked entity was AI
         AIComponent ai = Mappers.AI.get(attackedEntity);
         if (ai != null) {
             ai.attackTarget = damageComponent.source;
@@ -77,13 +77,13 @@ public class PhysicsContactListener implements ContactListener {
             Gdx.app.log(this.getClass().getSimpleName(), "AI [" + Misc.objString(attackedEntity) + "] attacked by: [" + Misc.objString(damageComponent.source) + "]");
         }
         
-        
         //check for shield
         ShieldComponent shieldComp = Mappers.shield.get(attackedEntity);
         if (shieldComp != null) {
             if (shieldComp.active) {
                 Vector2 pos = Mappers.transform.get(attackedEntity).pos;
                 Circle c = new Circle(pos, shieldComp.radius);
+                //todo: fix, broke shield in physics migration
                 PhysicsComponent physicsComponent = Mappers.physics.get(attackedEntity);
                 //if (PolygonUtil.overlaps(physicsComponent.poly, c)) {
                     attackedEntity.remove(ShieldComponent.class);
@@ -92,7 +92,6 @@ public class PhysicsContactListener implements ContactListener {
                 //}
             }
         }
-        
         
         //do damage
         healthComponent.health -= damageComponent.damage;

@@ -41,7 +41,8 @@ import java.util.concurrent.TimeUnit;
 public class GameScreen extends MyScreenAdapter {
     
     //core
-    private static Engine engine;//, persistenceEngine;
+    private static Engine engine;
+    //private static Engine persistenceEngine;//background state
     public static World box2dWorld;
     public static NoiseManager noiseManager;
     private static long gameTimeCurrent, gameTimeStart, timePaused;
@@ -166,6 +167,7 @@ public class GameScreen extends MyScreenAdapter {
             transEntity.add(new RemoveComponent());
 			/*//TODO: persist
 			// what happens (in terms of persistence) to an entity in process of transitioning?
+			// eg: you land on planet and shortly after an AI also lands. you load before them. when we land, we want to see them land shortly after
             //if important -> persist
             //if same world (even if not important) -> persist (land on planet at same time as AI=where is AI)
 			if (Mappers.persist.get(e)) {
@@ -301,6 +303,7 @@ public class GameScreen extends MyScreenAdapter {
             SysCFG sysCFG = systemsCFG.getConfig(system.getClass().getName());
             if (sysCFG.isHaltOnGamePause()) {
                 system.setProcessing(!isPaused);
+                Gdx.app.log(this.getClass().getSimpleName(), "processing " + (isPaused ? "disabled" : "enabled") + " for " + system.getClass().getSimpleName());
             }
         }
     }

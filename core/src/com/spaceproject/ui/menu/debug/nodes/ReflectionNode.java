@@ -3,7 +3,7 @@ package com.spaceproject.ui.menu.debug.nodes;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.kotcrab.vis.ui.VisUI;
-import com.spaceproject.ui.menu.debug.DebugEngineWindow;
+import com.spaceproject.ui.menu.debug.ECSExplorerWindow;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.SimpleTimer;
 
@@ -29,7 +29,7 @@ public class ReflectionNode extends UpdateNode {
         
         isNew = markNew;
         if (isNew) {
-            newTimer = new SimpleTimer(DebugEngineWindow.newTime, true);
+            newTimer = new SimpleTimer(ECSExplorerWindow.newTime, true);
             getActor().setColor(Color.GREEN);
         }
     }

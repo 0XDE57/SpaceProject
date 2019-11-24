@@ -4,12 +4,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.tabbedpane.Tab;
 
-//template, leave me for now
-public class MyTab extends Tab {
+public class AboutTab extends Tab {
     private String title;
     private Table content;
+    VisTable scrollContainer;
     
-    public MyTab(String title) {
+    public AboutTab(String title) {
         super(false, false);
         this.title = title;
         

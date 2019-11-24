@@ -13,6 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.util.dialog.Dialogs;
+import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.screens.animations.DelaunayAnim;
@@ -121,7 +123,12 @@ public class TitleScreen extends MyScreenAdapter {
         }
         
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            Gdx.app.exit();
+            Dialogs.showOptionDialog(stage, "Exit", "goodbye?", Dialogs.OptionDialogType.YES_NO, new OptionDialogAdapter() {
+                @Override
+                public void yes() {
+                    Gdx.app.exit();
+                }
+            });
         }
         
     }

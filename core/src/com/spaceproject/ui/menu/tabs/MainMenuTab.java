@@ -27,7 +27,7 @@ public class MainMenuTab extends HotKeyTab {
         btnGotoMain.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Dialogs.showOptionDialog(gameMenu.getStage(), "Exit", "go to the main menu?", Dialogs.OptionDialogType.YES_NO, new OptionDialogAdapter() {
+                Dialogs.showOptionDialog(gameMenu.getStage(), "Exit", "return to main menu?", Dialogs.OptionDialogType.YES_NO, new OptionDialogAdapter() {
                     @Override
                     public void yes() {
                         game.setScreen(new TitleScreen(game));
@@ -73,7 +73,7 @@ public class MainMenuTab extends HotKeyTab {
         btnExit.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Dialogs.showOptionDialog(gameMenu.getStage(), "Exit", "close game?", Dialogs.OptionDialogType.YES_NO, new OptionDialogAdapter() {
+                Dialogs.showOptionDialog(gameMenu.getStage(), "Exit", "good bye?", Dialogs.OptionDialogType.YES_NO, new OptionDialogAdapter() {
                     @Override
                     public void yes() {
                         Gdx.app.exit();

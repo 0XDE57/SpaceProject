@@ -3,6 +3,7 @@ package com.spaceproject.config;
 import com.badlogic.gdx.Input.Keys;
 
 public class KeyConfig extends Config {
+    //Todo: controls shouldn't be limited to keys. what about mapping to mouse and keyboard or controller
     
     //---player controls---
     public int forward;

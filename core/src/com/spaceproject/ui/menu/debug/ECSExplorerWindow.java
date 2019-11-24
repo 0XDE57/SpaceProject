@@ -34,8 +34,24 @@ import java.util.List;
 
 import static com.spaceproject.generation.FontFactory.skinSmallFont;
 
+/**
+ * A tree based debug/dev tool for exploring and inspecting the contents of the engine.
+ *      view Systems in the Engine, and their Priorities
+ *      view Entities
+ *      view Components in Entities
+ *      view Fields in Components via reflection
 
-public class DebugEngineWindow extends VisWindow implements EntityListener {
+ *      todo: view by component, eg:
+ *          AIComponent
+ *              Entity A
+ *              Entity B
+ *              Entity C
+ *
+ *     todo: allow view private fields
+ *     todo: allow edit values
+ *
+ */
+public class ECSExplorerWindow extends VisWindow implements EntityListener {
     
     private Engine engine;
     private Tree tree;
@@ -54,8 +70,8 @@ public class DebugEngineWindow extends VisWindow implements EntityListener {
     private final int keyRight = Input.Keys.RIGHT;
     
     
-    public DebugEngineWindow(Engine engine) {
-        super("Debug Engine View");
+    public ECSExplorerWindow(Engine engine) {
+        super("ECS Explorer");
         
         this.engine = engine;
         refreshTimer = new SimpleTimer(refreshRate, true);

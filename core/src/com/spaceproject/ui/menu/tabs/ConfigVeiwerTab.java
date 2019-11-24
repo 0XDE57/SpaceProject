@@ -2,6 +2,7 @@ package com.spaceproject.ui.menu.tabs;
 
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.value.PrefHeightIfVisibleValue;
 import com.kotcrab.vis.ui.widget.VisTable;
@@ -9,7 +10,6 @@ import com.kotcrab.vis.ui.widget.tabbedpane.Tab;
 import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPane;
 import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPaneAdapter;
 import com.spaceproject.config.Config;
-import com.spaceproject.ui.menu.GameMenu;
 
 import java.util.ArrayList;
 
@@ -18,7 +18,7 @@ public class ConfigVeiwerTab extends HotKeyTab {
     private final TabbedPane tabbedPane;
     private int itemPadding = 2;
     
-    public ConfigVeiwerTab(final GameMenu gameMenu, ArrayList<Config> configurations) {
+    public ConfigVeiwerTab(final Stage stage, ArrayList<Config> configurations) {
         super("Config List", Input.Keys.UNKNOWN);
         
         boolean vertical = true;
@@ -49,7 +49,7 @@ public class ConfigVeiwerTab extends HotKeyTab {
         }
         
         for (Config config : configurations) {
-            tabbedPane.add(new ConfigTab(gameMenu, config));
+            tabbedPane.add(new ConfigTab(stage, config));
             /*
             TextButton editButton = new TextButton(config.getClass().getSimpleName(), VisUI.getSkin());
             editButton.addListener(new ChangeListener() {

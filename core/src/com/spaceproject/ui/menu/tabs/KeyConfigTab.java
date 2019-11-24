@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
@@ -16,7 +17,6 @@ import com.badlogic.gdx.utils.SnapshotArray;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisSelectBox;
 import com.spaceproject.config.Config;
-import com.spaceproject.ui.menu.GameMenu;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -27,8 +27,8 @@ public class KeyConfigTab extends ConfigTab {
     private static ObjectIntMap<String> keyNames;
     private Map<String, String> changes;
     
-    public KeyConfigTab(GameMenu gameMenu, String title, Config config) {
-        super(gameMenu, title, config);
+    public KeyConfigTab(Stage stage, Config config, String title) {
+        super(stage, config, title);
         changes = new HashMap<>();
     }
     

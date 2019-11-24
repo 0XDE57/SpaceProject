@@ -5,7 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
-import com.spaceproject.ui.menu.debug.DebugEngineWindow;
+import com.spaceproject.ui.menu.debug.ECSExplorerWindow;
 import com.spaceproject.utility.SimpleTimer;
 
 import static com.spaceproject.generation.FontFactory.skinSmallFont;
@@ -32,7 +32,7 @@ public class GhostNode extends UpdateNode {
         parent.insert(index, this);
         
         
-        removeTimer = new SimpleTimer(DebugEngineWindow.removeTime, true);
+        removeTimer = new SimpleTimer(ECSExplorerWindow.removeTime, true);
         
         setExpanded(nodeRemoved.isExpanded());
         if (includeChildren && isExpanded()) {

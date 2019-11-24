@@ -19,7 +19,7 @@ import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPaneAdapter;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.ui.TestShapeRenderActor;
+import com.spaceproject.ui.ShapeRenderActor;
 import com.spaceproject.ui.menu.tabs.ConfigManagerTab;
 import com.spaceproject.ui.menu.tabs.ConfigTab;
 import com.spaceproject.ui.menu.tabs.ConfigVeiwerTab;
@@ -28,9 +28,7 @@ import com.spaceproject.ui.menu.tabs.HotKeyTab;
 import com.spaceproject.ui.menu.tabs.KeyConfigTab;
 import com.spaceproject.ui.menu.tabs.MainMenuTab;
 
-/**
- * Modified from https://github.com/kotcrab/vis-editor/blob/master/ui/src/test/java/com/kotcrab/vis/ui/test/manual/TestTabbedPane.java
- */
+
 public class GameMenu extends VisWindow {
     private GameScreen game;
     
@@ -46,7 +44,6 @@ public class GameMenu extends VisWindow {
     private boolean isResizable = true;
     private boolean isMovable = true;
     private int edgePadding = 150;
-    
     private boolean debugShowPlaceholderTests = false;
     
     public GameMenu(GameScreen game, boolean vertical) {
@@ -56,11 +53,9 @@ public class GameMenu extends VisWindow {
         this.game = game;
         
         TableUtils.setSpacingDefaults(this);
-        
         setResizable(isResizable);
         setMovable(isMovable);
         addCloseButton();
-        
         container = new VisTable();
         
         TabbedPane.TabbedPaneStyle style = VisUI.getSkin().get(vertical ? "vertical" : "default", TabbedPane.TabbedPaneStyle.class);
@@ -88,46 +83,51 @@ public class GameMenu extends VisWindow {
         }
         
         
+        //add tabs
         mainMenuTab = new MainMenuTab(this);
         tabbedPane.add(mainMenuTab);
         
-        
-        keyConfigTab = new KeyConfigTab(this, "Input Settings", SpaceProject.configManager.getConfig(KeyConfig.class));
+        keyConfigTab = new KeyConfigTab(getStage(), SpaceProject.configManager.getConfig(KeyConfig.class), "Input Settings");
         //keyConfigTab = new ConfigTab(this, SpaceProject.configManager.getConfig(KeyConfig.class));
         //tabbedPane.add(keyConfigTab);
         
-        Tab debugMenuTab = new DebugTab(this);
-        //Tab debugMenuTab = new ConfigTab(this, SpaceProject.configManager.getConfig(DebugConfig.class));
-        tabbedPane.add(debugMenuTab);
-        
+        tabbedPane.add(new DebugTab());
         
         if (debugShowPlaceholderTests) {
-            Tab mapTab = new HotKeyTab("map", Input.Keys.M);
-            tabbedPane.add(mapTab);
-            
-            Tab customRenderTab = new HotKeyTab("test render", Input.Keys.H);
-            TestShapeRenderActor shapeRenderActor = new TestShapeRenderActor();
-            customRenderTab.getContentTable().add(shapeRenderActor).grow();
-            //TODO: something about the .grow (and also .expand().fill()) is breaking the window resizing
-            //customRender.getContentTable().add(new Actor()).grow();
-            //customRender.getContentTable().add(new Actor()).expand().fill();
-            tabbedPane.add(customRenderTab);
-            
-            
-            Tab placeholderATab = new HotKeyTab("placeholder", Input.Keys.NUM_1);
-            placeholderATab.getContentTable().add(new TextButton("do stuff", VisUI.getSkin()));
-            tabbedPane.add(placeholderATab);
+            addTestTabs();
+        }
+        
+        
+        tabbedPane.switchTab(mainMenuTab);
+    }
     
-            
-            Tab placeholderBTab = new HotKeyTab("placeholder", Input.Keys.NUM_2);
-            //test rainbow text
-            BitmapFont font = VisUI.getSkin().get("default-font", BitmapFont.class);
-            font.getData().markupEnabled = true;
-            Label testRainbowLabel = new Label("<<[BLUE]M[RED]u[YELLOW]l[GREEN]t[OLIVE]ic[]o[]l[]o[]r[]*[MAROON]Label[][] [Unknown Color]>>", VisUI.getSkin());
-            placeholderBTab.getContentTable().add(testRainbowLabel);
-            placeholderBTab.getContentTable().row();
-            placeholderBTab.getContentTable().add(new Label("[RED]This[BLUE] is a [GREEN]test!", VisUI.getSkin()));
-            tabbedPane.add(placeholderBTab);
+    private void addTestTabs() {
+        Tab mapTab = new HotKeyTab("map", Input.Keys.M);
+        tabbedPane.add(mapTab);
+        
+        Tab customRenderTab = new HotKeyTab("test render", Input.Keys.H);
+        ShapeRenderActor shapeRenderActor = new ShapeRenderActor();
+        customRenderTab.getContentTable().add(shapeRenderActor).grow();
+        //TODO: something about the .grow (and also .expand().fill()) is breaking the window resizing
+        //customRender.getContentTable().add(new Actor()).grow();
+        //customRender.getContentTable().add(new Actor()).expand().fill();
+        tabbedPane.add(customRenderTab);
+        
+        
+        Tab placeholderATab = new HotKeyTab("placeholder", Input.Keys.NUM_1);
+        placeholderATab.getContentTable().add(new TextButton("do stuff", VisUI.getSkin()));
+        tabbedPane.add(placeholderATab);
+        
+        
+        Tab placeholderBTab = new HotKeyTab("placeholder", Input.Keys.NUM_2);
+        //test rainbow text
+        BitmapFont font = VisUI.getSkin().get("default-font", BitmapFont.class);
+        font.getData().markupEnabled = true;
+        Label testRainbowLabel = new Label("<<[BLUE]M[RED]u[YELLOW]l[GREEN]t[OLIVE]ic[]o[]l[]o[]r[]*[MAROON]Label[][] [Unknown Color]>>", VisUI.getSkin());
+        placeholderBTab.getContentTable().add(testRainbowLabel);
+        placeholderBTab.getContentTable().row();
+        placeholderBTab.getContentTable().add(new Label("[RED]This[BLUE] is a [GREEN]test!", VisUI.getSkin()));
+        tabbedPane.add(placeholderBTab);
             
             
              /*
@@ -136,15 +136,11 @@ public class GameMenu extends VisWindow {
              
              tabbedPane.add(new ConfigTab(this, "MiniMp", SpaceProject.configManager.getConfig(MiniMapConfig.class)));
              tabbedPane.add(new ConfigTab(this, SpaceProject.keyCFG));*/
-            tabbedPane.add(new ConfigManagerTab(this));
-            tabbedPane.add(new ConfigVeiwerTab(this, SpaceProject.configManager.getConfigs()));
-            
-            
-            //tabbedPane.add(createConfigTab(new TestConfig()));
-        }
+        tabbedPane.add(new ConfigManagerTab(this));
+        tabbedPane.add(new ConfigVeiwerTab(getStage(), SpaceProject.configManager.getConfigs()));
         
         
-        tabbedPane.switchTab(mainMenuTab);
+        //tabbedPane.add(createConfigTab(new TestConfig()));
     }
     
     
@@ -222,9 +218,9 @@ public class GameMenu extends VisWindow {
                         close();
                         return false;
                     }
+                    
                     tabbedPane.switchTab(tab);
                     return true;
-                    
                 }
             }
         }

@@ -1,10 +1,18 @@
-current priority
- - finish config editor
- - entity config
- - space background (maybe something like this: https://www.shadertoy.com/view/ltXSDN | https://www.shadertoy.com/view/ldKGDd)
- - universe generation ( type{galaxy/flat}?, density)
+Legend:
+    [ ]     = not started
+    [...]   = in progress
+    [x]     = complete
+    [!,?,*] = notes, questions, or exceptions
+
 
 ---ENGINE---
+[...] galaxy generation inspired by fibonacci spiral
+    [...] test screen to generate spiral
+    [ ] generate set of points that are concentrated near center, and near arms of spiral
+    [ ] implement generation into game
+    [ ] make a screen animation
+
+
 [...] physics and movement
     [...] move to box2d
         [...] move logic to new physics
@@ -13,8 +21,8 @@ current priority
             [x] affects created entities (entity factory)
             [ ] config?
             [ ] shield broken
-            [...] dodge broken
-                [ ] adjust feel
+            [...] dodge
+                [ ] adjust feel, its kinda clunky right now
             [...] space tile scale bad and tile loading broken
                 [x] fix load/unload and scale
                 [...] dust layer has render issue, tiles overlapping edges/gap
@@ -37,8 +45,8 @@ current priority
 [...] config
     [x] config manager, save and load all configs
     [...] move more things to config
-        [ ] entities
-            need to find a way to generate entities from config.
+        [ ] Ships are currently hardcoded by Entity factory
+            can we find a way to generate entities from config.
                 - consider ranges,
                 - consider space vs planet differences (eg: physics)...
                 - consider mobile vs desktop? maybe?
@@ -52,8 +60,8 @@ current priority
                     shipSize = rand range(x,y)
                 }
                 PhysicsComponent {
-                    linearDamping, (when on planet)
-                    angularDamping (when on planet)
+                    linearDamping, (when on planet, will be 0 in space)
+                    angularDamping (when on planet, will be 0 in space)
                 }
                 CannonComponent {
                     ammo,
@@ -77,11 +85,17 @@ current priority
                 distFromBarycenter = range(0, 10),
                 distFromNextEntity = range()
             }
+
+            or in theory allow scripting?
+            lets not reinvent this wheel.
+            stop brain. this is getting ridiculous.
         [x] debug
         [x] minimap
         [x] engine (threads, physics, renderscales)
     [...] config UI
         [...] nice way to view and edit configs
+            [ ] fix layout
+            [ ] hook up load save undo
 
 
 [...] refactor screen transition
@@ -91,44 +105,54 @@ current priority
         [ ] WorldRenderingSystem shouldn't be responsible for loading map: loadMap(). should be where?
         [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
             see: ScreenTransitionSystem.syncLoadPosition()
-    [...] genericize and make work land and take off work for AI, system doesn't supports non-player world switching
-          dumb loop where AI lands on planet, kept in some kind of background
-          processing state/alt engine, wait a second then take off to test all is working correctly
-          background engine meant to be low processing effort (eg: ultra dumbed down AI or simulations, no rendering, no physics, just states and events) to keep track of important entities
-          and states between space and worlds. eg: give entity important flag component to keep relevant, if dont have flag dont care and remove when switch
-          will be useful for persistence, AI and story type events.
+        [ ] bug: sometimes landing and take off unreliable
+            cannot find seed
+            cannot find seed
+            cannot find seed
 
-          eg:
-          Engine persistenceEngine.
-          if (player switch screen) {
-              //move persistent from main to background processing
-              for each entity in mainEngine {
-                  if (entity has PersistenceComponent) {
-                      //eg: attacked an AI, AI gets TimedPersistenceComponent and will remain on planet for 5 minutes waiting for you
-                      persistenceEngine.Add(entity);
-                  }
+
+[ ] genericize and make work land and take off work for AI, system doesn't supports non-player world switching
+      dumb loop where AI lands on planet, kept in some kind of background
+      processing state/alt engine, wait a second then take off to test all is working correctly
+      background engine meant to be low processing effort (eg: ultra dumbed down AI or simulations, no rendering, no physics, just states and events) to keep track of important entities
+      and states between space and worlds. eg: give entity important flag component to keep relevant, if dont have flag dont care and remove when switch
+      will be useful for persistence, AI and story type events.
+      //Example scenario:
+      //    you are on planet, you attack an AI, Ai comes after you. But you leave in your ship.
+      //    then AI gets TimedPersistenceComponent and will remain on planet for 5 minutes waiting for you, because angry!
+      //    maybe they will come after you. this could be very siple. we can fake intelligence in a background system
+      //
+      eg:
+      Engine persistenceEngine.
+      if (player switch screen) {
+          //move persistent from main to background processing
+          for each entity in mainEngine {
+              if (entity has PersistenceComponent) {
+
+                  persistenceEngine.Add(entity);
               }
-              //move relevant entity from background processing to main
-              for each entity in persistenceEngine {
-                  if (entity has PersistenceComponent) {
-                      if (nis persistence relevant to new context) {
-                          //example relevance:
-                          //player in space, important entity on planet
-                          //if land on planet with important entity, load into actual engine
-                          mainEngine.Add(entity);
-                          //could be more nuanced, like perhaps entity is only loaded when event triggers it
-                          //or specific location on planet. dunno till start implementing.
-                          //possibly have multiple engines handling contexts?
-                      }
+          }
+          //move relevant entity from background processing to main
+          for each entity in persistenceEngine {
+              if (entity has PersistenceComponent) {
+                  if (nis persistence relevant to new context) {
+                      //example relevance:
+                      //player in space, important entity on planet
+                      //if land on planet with important entity, load into actual engine
+                      mainEngine.Add(entity);
+                      //could be more nuanced, like perhaps entity is only loaded when event triggers it
+                      //or specific location on planet. dunno till start implementing.
+                      //possibly have multiple engines handling contexts?
                   }
               }
           }
-          if (AI switch screen) {
-              //similar thing to above
-              //if relevant load it, else keep in background
+      }
+      if (AI switch screen) {
+          //similar thing to above
+          //if relevant load it, else keep in background
 
-              //if not important, remove from engine, forget about existence
-          }
+          //if not important, remove from engine, forget about existence
+      }
 
 
     [ ] consider merging rendering system (SpaceRendering & World rendering)?
@@ -142,10 +166,13 @@ current priority
             * more responsibility for one class...
         alternatively, split up rendering type into difference systems? not sure yet
         what happens in refactoring space and world will affect this. need to think more about it
+        [ ] need to fix render priority with 2d, 3d, and shape renderer
 
 
 
 [...] fix texture / map loading
+    [ ] save load noise so it doesnt have to be generated
+
     [ ] clean up star save/load
     [!] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
         ! actually for now this is a convenient bug for testing
@@ -158,6 +185,11 @@ current priority
           [ ] define proper heights for importance as current values are somewhat arbitrary
           [ ] this is now a bit more complex, as there is a mix of 2d sprites and 3d renderables, that are rendered in separate batches (2d then 3d overlay).
               to mix the z between them may require multiple batch passes, or migrating to 3d, also shaperenderer on top of that...
+    [ ] better star rendering
+        it's currently static just like planets, but I want it to shift the z, exactly like the title screen background
+            com.spaceproject.screens.animations.NoiseAnim
+        could be done on gpu even:
+            https://www.shadertoy.com/view/XscGzl
 
 
 
@@ -200,11 +232,20 @@ current priority
     [ ] AI vs AI?
 
 
+[ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
+        maybe something like this:
+            https://www.shadertoy.com/view/ltXSDN
+            https://www.shadertoy.com/view/ldKGDd
+            https://gamedev.stackexchange.com/questions/146098/2d-parallax-scrolling-through-glsl-shader
+            https://badlogicgames.com/forum/viewtopic.php?f=11&t=11419
+        or something like this:
+            https://wwwtyro.github.io/space-2d/
+            https://github.com/wwwtyro/space-2d
+
 
 [ ] optimization
-    [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
     [ ] look at pooled engine
-    [ ] model batch
+    [ ] model batch for 3d sprites
     [ ] planets are rendered offscreen needlessly -> cull frustum
     [ ] something is funny with the memory, it climbs then resets in a cyclical fashion
         I have a feeling this is a poor use of 'new' somewhere and when the memory resets its the GC cleaning it up
@@ -255,6 +296,7 @@ current priority
                 [ ] mobile/touch UI way of activating dodge, a swipe on the joystick may be intuitive
         [x] shield
             [ ] bug: during cooldown, re-activating starts from full instead of current size
+            [ ] fix: currently broken due to physics shift
         [ ] bullets should come from a gun rather than magically from ship
         [ ] weapon types
             [x] basic cannon
@@ -273,43 +315,57 @@ current priority
 	    [ ] weapons
 	    [ ] details: eg: lines, another layer on top for depth/windshield type thing, different stuff on underside of sprite
 	    [ ] generation styles and classes, perhaps come up with some kind of classes of ships (cargo, highspeed traveler, tank/war machine, passenger, personal, commercial...)
-        http://davebollinger.org/works/pixelspaceships/
-        https://www.reddit.com/r/gamedev/comments/2tavse/2d_procedural_spaceship_generator/
+	    inspiration:
+            http://davebollinger.org/works/pixelspaceships/
+            https://www.reddit.com/r/gamedev/comments/2tavse/2d_procedural_spaceship_generator/
 
 
 [...] planet generation
-	research planet attributes //size, temperature, pressure, atmosphere/elements(https://en.wikipedia.org/wiki/Astronomical_spectroscopy)...etc
-	rings around planets? (like saturn)
-	moons/satellites
-	http://www.entropicparticles.com/6-days-of-creation/
-	https://plaxdev.wordpress.com/2017/05/04/procedurally-generating-islands/
-	https://www.reddit.com/search?q=%28perlin|simplex|opensimplex%29+noise&sort=new
-	http://ronvalstar.nl/creating-tileable-noise-maps/ <--looping noise
-	https://www.gamedev.net/blog/33/entry-2138456-seamless-noise/ <--looping noise
-	https://gamedev.stackexchange.com/questions/23625/how-do-you-generate-tileable-perlin-noise <--looping noise
-	http://developworlds.com/blog/2015/05/28/procedural-tilemap-generation/
-	https://flafla2.github.io/2014/08/09/perlinnoise.html
-	http://devmag.org.za/2009/04/25/perlin-noise/
-	http://blog.kaelan.org/randomly-generated-world-map/ <--biome
-	http://freespace.virgin.net/hugo.elias/models/m_perlin.htm
-	https://www.reddit.com/user/KdotJPG   <-OpenSimplex creator https://gist.github.com/KdotJPG/b1270127455a94ac5d19
+    [ ] add tempurature variable to planet
+        [ ] tempurature determined by distance from star
+            [ ] for now simple linear, close to planet = hot, far from planet = cold
+            [ ] if want more advanced, have star tempurature based of distance from galaxy center
+                then that would also affect star tempurature.
+                for inspiration see:
+                    https://beltoforion.de/article.php?a=spiral_galaxy_renderer
+                    https://github.com/beltoforion/Galaxy-Renderer
+	[ ] rings around planets? (like saturn)
+	[...] moons/satellites
+    [ ] research planet attributes //size, temperature, pressure, atmosphere/elements(https://en.wikipedia.org/wiki/Astronomical_spectroscopy)...etc
+	inspiration and references:
+	    http://www.entropicparticles.com/6-days-of-creation/
+	    https://plaxdev.wordpress.com/2017/05/04/procedurally-generating-islands/
+	    https://www.reddit.com/search?q=%28perlin|simplex|opensimplex%29+noise&sort=new
+	    http://ronvalstar.nl/creating-tileable-noise-maps/ <--looping noise
+	    https://www.gamedev.net/blog/33/entry-2138456-seamless-noise/ <--looping noise
+	    https://gamedev.stackexchange.com/questions/23625/how-do-you-generate-tileable-perlin-noise <--looping noise
+	    http://developworlds.com/blog/2015/05/28/procedural-tilemap-generation/
+	    https://flafla2.github.io/2014/08/09/perlinnoise.html
+	    http://devmag.org.za/2009/04/25/perlin-noise/
+	    http://blog.kaelan.org/randomly-generated-world-map/ <--biome
+	    http://freespace.virgin.net/hugo.elias/models/m_perlin.htm
+	    https://www.reddit.com/user/KdotJPG   <-OpenSimplex creator https://gist.github.com/KdotJPG/b1270127455a94ac5d19
 
 [ ] space stuff
-    https://en.wikipedia.org/wiki/Astronomical_object#Categories_by_location
-	-stars kill on touch
-	-wormhole (teleport)
-	-blackhole (death)
-	-dust
-	-fractal/noise
-	-light specs
-
-
-
+    [ ] various astronomical bodies
+        https://en.wikipedia.org/wiki/Astronomical_object#Categories_by_location
+	[ ] stars kill on touch (hot!)
+	[ ] wormhole (teleport)
+	    [ ] for now just render a circle
+	[ ] blackhole (death)
+	    place at center of galaxy
+	[ ] dust/noise
+	[ ] light specs/debris,details
 
 
 ---DEBUG---
     [ ] in game console
+        [ ] show debug output
+            redirect all gdx.log calls?
         [ ] commands
+            eg: /spawn entity -blah
+                /systemprocessing enable/disable "system name"
+                /
     [...] engine viewer
         [x] show entities and components and component values
         [x] clean up and bit of optimization (its pretty hacky atm)
@@ -332,7 +388,7 @@ current priority
         [...] history (like PE), if added, green for a second. if removed, red for a second
             [ ] systems should get history too, currently only entities working
             [ ] include children
-        [ ] add count to system and entities node eg: Entities (57), Systems (12)
+        [x] add count to system and entities node eg: Entities (57), Systems (12)
         [ ] filter for components, bonus points for values (eg: all entities with a health component where component.health > x)
         [ ] possibly a generic reflection object explorer
         [ ] watch window (when node is highlighted, on key or watch button, copy node into its own focused window (including children)
