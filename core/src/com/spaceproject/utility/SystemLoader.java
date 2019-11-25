@@ -72,4 +72,28 @@ public abstract class SystemLoader {
             Gdx.app.error(tag, "Could not load " + sysCFG.getClassName(), e);
         }
     }
+    
+    private void loadMods(){
+        //todo: allow custom loading from file, eg: http://tutorials.jenkov.com/java-reflection/dynamic-class-loading-reloading.html
+        //load from directory
+        //eg: users can simply drop mod in location
+        //  assets/mods/
+        //      mymodA: a mod pack. basically same structure as assets folder with user replaceable values
+        //          config: custom config settings, including SystemsConfig which will define priorities and
+        //          systems: replace and add systems logic
+        //          sound: replace sounds packs
+        
+        //Mod manager UI
+        //a file browser UI to select mod, mod will be copied to mods folder
+        //mod browser will list mods
+        //users will be able to select mods they wish to activate
+        //mod application will be granular
+        //eg: a user may only want the shader from one pack, or the systems from another
+        //
+        
+        //todo: consider security ramifications of loading arbitrary code. users need to be cautions of plugins found online
+        //eg: malicious plugin, starts uploading all your files to a remote server
+        //https://blog.jayway.com/2014/06/13/sandboxing-plugins-in-java/
+        //https://docstore.mik.ua/orelly/java-ent/security/ch06_03.htm
+    }
 }

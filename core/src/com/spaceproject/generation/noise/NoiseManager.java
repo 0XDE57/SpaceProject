@@ -80,7 +80,7 @@ public class NoiseManager implements INoiseGenListener, Disposable {
     }
     
     public boolean isNoiseAvailable() {
-        return noiseBufferQueue.isEmpty();
+        return !noiseBufferQueue.isEmpty();
     }
     
     public NoiseBuffer getNoiseFromQueue() {

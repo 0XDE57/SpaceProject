@@ -126,27 +126,31 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     
     
     private void updatePlanetTextures() {
+        //todo: this should probably subscribe to a thread finished event instead of polling
         //check queue for tilemaps / pixmaps to load into textures
         if (!GameScreen.noiseManager.isNoiseAvailable()) {
-            //todo: should be the event instead of the queue (as long as it remains separate threads)
-            
-            NoiseBuffer noise = GameScreen.noiseManager.getNoiseFromQueue();
-            if (noise.pixelatedTileMap == null) {
-                Gdx.app.log(this.getClass().getSimpleName(), "ERROR, no map for: [" + noise.seed + "]");
+            return;
+        }
+        
+        //grab noise from queue
+        NoiseBuffer noise = GameScreen.noiseManager.getNoiseFromQueue();
+        if (noise.pixelatedTileMap == null) {
+            Gdx.app.log(this.getClass().getSimpleName(), "ERROR, no map for: [" + noise.seed + "]");
+            return;
+        }
+    
+        //find planet that noise belongs to (matching seed)
+        for (Entity p : getEngine().getEntitiesFor(Family.all(PlanetComponent.class).get())) {
+            if (p.getComponent(SeedComponent.class).seed == noise.seed) {
+                // create planet texture from tileMap, replace texture
+                Texture newTex = TextureFactory.generatePlanet(noise.pixelatedTileMap, Tile.defaultTiles);
+                p.getComponent(TextureComponent.class).texture = newTex;
+                Gdx.app.log(this.getClass().getSimpleName(), "Texture loaded: [" + noise.seed + "]");
                 return;
             }
-            
-            for (Entity p : getEngine().getEntitiesFor(Family.all(PlanetComponent.class).get())) {
-                if (p.getComponent(SeedComponent.class).seed == noise.seed) {
-                    // create planet texture from tileMap, replace texture
-                    Texture newTex = TextureFactory.generatePlanet(noise.pixelatedTileMap, Tile.defaultTiles);
-                    p.getComponent(TextureComponent.class).texture = newTex;
-                    Gdx.app.log(this.getClass().getSimpleName(), "Texture loaded: [" + noise.seed + "]");
-                    return;
-                }
-            }
-            
         }
+            
+        
     }
     
     

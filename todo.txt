@@ -6,6 +6,9 @@ Legend:
 
 
 ---ENGINE---
+[ ] change config.cfg to config.json
+[ ] background space color fade to black when zoom out (temporary until better space background approach is implemented)
+
 [...] galaxy generation inspired by fibonacci spiral
     [...] test screen to generate spiral
     [ ] generate set of points that are concentrated near center, and near arms of spiral
@@ -22,7 +25,8 @@ Legend:
             [ ] config?
             [ ] shield broken
             [...] dodge
-                [ ] adjust feel, its kinda clunky right now
+                [ ] adjust feel, its kinda clunky right now. needs more JUICE!
+                    https://www.youtube.com/watch?v=Fy0aCDmgnxg
             [...] space tile scale bad and tile loading broken
                 [x] fix load/unload and scale
                 [...] dust layer has render issue, tiles overlapping edges/gap
@@ -166,13 +170,14 @@ Legend:
             * more responsibility for one class...
         alternatively, split up rendering type into difference systems? not sure yet
         what happens in refactoring space and world will affect this. need to think more about it
-        [ ] need to fix render priority with 2d, 3d, and shape renderer
+        *update in thoughts*
+            probably keep separate because world may need special rendering for the torus wrapping effect
+            also we don't neccesarilly need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not.)
 
 
 
 [...] fix texture / map loading
     [ ] save load noise so it doesnt have to be generated
-
     [ ] clean up star save/load
     [!] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
         ! actually for now this is a convenient bug for testing
@@ -244,12 +249,14 @@ Legend:
 
 
 [ ] optimization
-    [ ] look at pooled engine
-    [ ] model batch for 3d sprites
+    [ ] look at pooled engine/sprites
+        [ ] eg bullets. current cannon creates new sprite for each shot. bad!
+    [ ] model cache / renderable for 3d sprites
+        https://xoppa.github.io/blog/a-simple-card-game/#reduce-the-number-of-render-calls
     [ ] planets are rendered offscreen needlessly -> cull frustum
     [ ] something is funny with the memory, it climbs then resets in a cyclical fashion
         I have a feeling this is a poor use of 'new' somewhere and when the memory resets its the GC cleaning it up
-    [ ] fonts should all be in skin, ensure fonts are not duplicated
+    [ ] fonts should all be in skin, ensure fonts are not duplicated/loaded twice
     http://t-machine.org/index.php/2014/03/08/data-structures-for-entity-systems-contiguous-memory/
     http://unseen-academy.de/snippet_component_system.html
     https://github.com/junkdog/entity-system-benchmarks#entity-system-benchmarks
@@ -284,6 +291,8 @@ Legend:
             	at com.badlogic.ashley.core.Engine.removeAllEntities(Engine.java:98)
         * Solution: engine.removeEntityListener(the system) when removing system
 
+
+[ ] i should prolly start making some unit tests at some point...
 
 ---GAMEPLAY & DESIGN---
 [...] SHIPS
@@ -350,6 +359,7 @@ Legend:
     [ ] various astronomical bodies
         https://en.wikipedia.org/wiki/Astronomical_object#Categories_by_location
 	[ ] stars kill on touch (hot!)
+	    unless maybe you have an upgraded ship that can handle it?
 	[ ] wormhole (teleport)
 	    [ ] for now just render a circle
 	[ ] blackhole (death)
@@ -363,8 +373,9 @@ Legend:
         [ ] show debug output
             redirect all gdx.log calls?
         [ ] commands
-            eg: /spawn entity -blah
-                /systemprocessing enable/disable "system name"
+            eg: /create entity <ship>
+                /add component <component> <entitity id>
+                /enable/disable system <"system name">
                 /
     [...] engine viewer
         [x] show entities and components and component values

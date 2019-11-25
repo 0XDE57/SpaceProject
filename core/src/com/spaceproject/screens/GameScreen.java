@@ -72,7 +72,7 @@ public class GameScreen extends MyScreenAdapter {
         if (debugForceDevWorld) {
             newSeed = 4; //test seed
         }
-        Gdx.app.log("initSeed", "" + newSeed);
+        Gdx.app.log(this.getClass().getSimpleName(), "initSeed: " + newSeed);
         
         return newSeed;
     }
