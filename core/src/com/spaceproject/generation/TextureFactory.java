@@ -14,9 +14,9 @@ import java.util.ArrayList;
 
 public class TextureFactory {
     
-    static Pixmap pixmap;
-    
+
     public static Texture createTile(Color c) {
+        Pixmap pixmap;
         pixmap = new Pixmap(1, 1, Format.RGB888);
         pixmap.setColor(c);
         pixmap.fill();
@@ -27,6 +27,7 @@ public class TextureFactory {
     }
     
     public static Texture createTestTile() {
+        Pixmap pixmap;
         pixmap = new Pixmap(4, 4, Format.RGB888);
         pixmap.drawPixel(0, 0, Color.RED.toIntBits());
         pixmap.drawPixel(0, 1, Color.YELLOW.toIntBits());
@@ -42,7 +43,7 @@ public class TextureFactory {
     static OpenSimplexNoise blueGen = new OpenSimplexNoise(GameScreen.getSeed() + 2);
     
     public static Texture generateSpaceBackgroundDust(int tX, int tY, int tileSize) {
-        pixmap = new Pixmap(tileSize, tileSize, Format.RGBA8888);
+        Pixmap pixmap = new Pixmap(tileSize, tileSize, Format.RGBA8888);
         
         double featureSize = 100;
         for (int y = 0; y < pixmap.getHeight(); y++) {
@@ -84,7 +85,7 @@ public class TextureFactory {
         MathUtils.random.setSeed((long) (MyMath.getSeed(tileX, tileY) * depth));
         
         //pixmap = new Pixmap(tileSize, tileSize, Format.RGB565);
-        pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
+        Pixmap pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
         
         int numStars = 300;
         for (int i = 0; i < numStars; ++i) {
@@ -141,8 +142,7 @@ public class TextureFactory {
         for (int yY = 0; yY <= width; yY++) {
             // draw body
             if (yY == 0 || yY == width) {
-                // if first or last position of texture, "cap" it to complete
-                // the edging
+                // if first or last position of texture, "cap" it to complete the edging
                 //pixmap.setColor(0.7f, 0.7f, 0.7f, 1);
                 pixmap.setColor(Color.LIGHT_GRAY);
             } else {
@@ -492,7 +492,7 @@ public class TextureFactory {
     }
     
     public static Texture generateCharacter() {
-        pixmap = new Pixmap(4, 4, Format.RGB565);
+        Pixmap pixmap = new Pixmap(4, 4, Format.RGB565);
         
         //fill square
         pixmap.setColor(0.5f, 0.5f, 0.5f, 1);
@@ -509,7 +509,7 @@ public class TextureFactory {
     }
     
     public static Texture generateProjectile() {
-        pixmap = new Pixmap(1, 1, Format.RGB565);// new Pixmap(size, size/2 == 0 ? 1 : size/2, Format.RGB565);
+        Pixmap pixmap = new Pixmap(1, 1, Format.RGB565);// new Pixmap(size, size/2 == 0 ? 1 : size/2, Format.RGB565);
         pixmap.setColor(1, 1, 1, 1);
         //pixmap.setColor(1, 0, 0, 1);
         //pixmap.drawCircle(1,1,3);
@@ -522,7 +522,7 @@ public class TextureFactory {
     
     
     public static Texture generateWall(int width, int height, Color color) {
-        pixmap = new Pixmap(width, height, Format.RGB565);
+        Pixmap pixmap = new Pixmap(width, height, Format.RGB565);
         
         //fill square
         pixmap.setColor(color);

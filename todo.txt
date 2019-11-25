@@ -6,8 +6,8 @@ Legend:
 
 
 ---ENGINE---
-[ ] change config.cfg to config.json
 [ ] background space color fade to black when zoom out (temporary until better space background approach is implemented)
+[ ] experiment: can we make the background tiles just not zoom out? use a different batch perhaps?
 
 [...] galaxy generation inspired by fibonacci spiral
     [...] test screen to generate spiral
