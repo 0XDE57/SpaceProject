@@ -13,7 +13,7 @@ public class AIComponent implements Component {
     
     public Entity planetTarget; //test land
     
-    public enum testState {
+    public enum State {
         dumbwander,
         attack,
         landOnPlanet,
@@ -22,11 +22,11 @@ public class AIComponent implements Component {
         follow
     }
     
-    public testState state;
+    public State state;
     
     //statemachine?
 	/*
-	state {
+	State {
 		follow,
 		attack,
 		gotoPlace,

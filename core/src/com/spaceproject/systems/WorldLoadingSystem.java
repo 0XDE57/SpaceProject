@@ -31,12 +31,12 @@ public class WorldLoadingSystem extends EntitySystem {
         engine.addEntity(EntityFactory.createShip3(position - 10, position + 10, GameScreen.inSpace()));
         
         Entity aiTest = EntityFactory.createCharacterAI(position, position + 10);
-        Mappers.AI.get(aiTest).state = AIComponent.testState.dumbwander;
+        Mappers.AI.get(aiTest).state = AIComponent.State.dumbwander;
         engine.addEntity(aiTest);
 
 		/*
 		Entity aiTest2 = EntityFactory.createCharacterAI(position, position - 500);
-		Mappers.AI.get(aiTest2).state = AIComponent.testState.takeOffPlanet;
+		Mappers.AI.get(aiTest2).State = AIComponent.State.takeOffPlanet;
 		engine.addEntity(aiTest2);
 		*/
         engine.addEntity(EntityFactory.createWall(position + 5, position + 5, 8, 16));

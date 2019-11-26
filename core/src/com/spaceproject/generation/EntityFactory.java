@@ -27,6 +27,7 @@ import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.SeedComponent;
+import com.spaceproject.components.AISpawnComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -43,7 +44,10 @@ import com.spaceproject.utility.SimpleTimer;
 
 
 public class EntityFactory {
-    
+    //todo: fefactor into separate factories for entity types
+    // eg: planetary system should go into a AstronomicalBodyEntityFactory()
+    // ships into ShipEntityFactory
+    // rename this to base or common? and keep character
     private static EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     private static EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
     private static CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
@@ -118,7 +122,18 @@ public class EntityFactory {
         return playerShip;
     }
     
-    
+    public static Entity createAIShip(float x, float y, boolean inSpace) {
+        Entity ai = createCharacterAI(x, y);
+        
+        PhysicsComponent physicsComponent = ai.getComponent(PhysicsComponent.class);
+        GameScreen.box2dWorld.destroyBody(physicsComponent.body);
+        physicsComponent.body = null;
+        
+        Entity aiShip = createShip3(x, y, 0, ai, inSpace);
+        ECSUtil.transferComponent(ai, aiShip, AIComponent.class);
+        ECSUtil.transferComponent(ai, aiShip, ControllableComponent.class);
+        return aiShip;
+    }
     //endregion
     
     
@@ -172,7 +187,12 @@ public class EntityFactory {
         for (int i = 0; i < numPlanets; ++i) {
             //add some distance from previous entity
             distance += MathUtils.random(celestCFG.minPlanetDist, celestCFG.maxPlanetDist);
-            Entity planet = createPlanet(MyMath.getSeed(x, y + distance), star, distance, rotDir);
+            
+            //create planet
+            long planetSeed = MyMath.getSeed(x, y + distance);
+            Entity planet = createPlanet(planetSeed, star, distance, rotDir);
+            
+            //add moon
             boolean hasMoon = MathUtils.randomBoolean();
             if (hasMoon) {
                 float moonDist = planet.getComponent(TextureComponent.class).texture.getWidth() * planet.getComponent(TextureComponent.class).scale * 2;
@@ -180,6 +200,9 @@ public class EntityFactory {
                 Entity moon = createMoon(MyMath.getSeed(x, y + moonDist), planet, moonDist, rotDir);
                 entities.add(moon);
             }
+            
+            addLifeToPlanet(planet);
+    
             entities.add(planet);
         }
         
@@ -187,6 +210,33 @@ public class EntityFactory {
         
         return entities;
         
+    }
+    
+    private static void addLifeToPlanet(Entity planet) {
+        //add entity spawner if planet has life
+        //dumb coin flip for now, can have rules later like no life when super close to star = lava, or super far = ice
+        //simply base it on distance from star. habital zone
+        //  eg chance of life = distance from habit zone
+        //more complex rules can be applied like considering the planets type. ocean might have life but if entire planet is ocean = no ships = no spawner
+        //desert might have different life, so different spawner rules
+        boolean hasLife = MathUtils.randomBoolean();
+        if (hasLife) {
+            //todo: move values to config
+            int min = 1000;
+            int max = 10000;
+            int range = 3;
+            int lifeDensity = MathUtils.random(range);
+            
+            AISpawnComponent spawnComponent = new AISpawnComponent();
+            spawnComponent.min = min;
+            spawnComponent.max = max;
+            spawnComponent.timers = new SimpleTimer[lifeDensity];
+            spawnComponent.state = AIComponent.State.attack;
+            for (int t = 0; t < spawnComponent.timers.length; t++) {
+               spawnComponent.timers[t] = new SimpleTimer(MathUtils.random(spawnComponent.min, spawnComponent.max));
+            }
+            planet.add(spawnComponent);
+        }
     }
     
     public static Array<Entity> createBinarySystem(float x, float y) {

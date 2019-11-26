@@ -8,7 +8,7 @@ public class VehicleComponent implements Component {
     public Entity driver;
     
     
-    //TODO: implement engine state behavior
+    //TODO: implement engine State behavior
     enum EngineState {
         local,    //intention: combat, interactions, land on planet, small distance travel (planet to planet within a star system)
         //behavior: small friction applied (unrealistic but practical?/ toggleable engine tuning?), velocity cap, slightly less thrust than travel mode

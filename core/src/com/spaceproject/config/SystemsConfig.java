@@ -24,6 +24,7 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(HUDSystem.class, 13, false, true, true, true, true));
         systems.add(new SysCFG(MobileInputSystem.class, 2, true, true, true, false, true));
         systems.add(new SysCFG(OrbitSystem.class, 8, true, true, false, true, true));
+        systems.add(new SysCFG(PlanetarySystemEntitySpawner.class, 20, true, true, false, true, true));
         systems.add(new SysCFG(RemovalSystem.class, 20, false, true, true, true, true));
         systems.add(new SysCFG(ScreenTransitionSystem.class, 17, true, true, true, true, true));
         systems.add(new SysCFG(SpaceLoadingSystem.class, 15, false, true, false, true, true));

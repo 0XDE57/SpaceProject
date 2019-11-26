@@ -73,7 +73,7 @@ public class PhysicsContactListener implements ContactListener {
         AIComponent ai = Mappers.AI.get(attackedEntity);
         if (ai != null) {
             ai.attackTarget = damageComponent.source;
-            ai.state = AIComponent.testState.attack;
+            ai.state = AIComponent.State.attack;
             Gdx.app.log(this.getClass().getSimpleName(), "AI [" + Misc.objString(attackedEntity) + "] attacked by: [" + Misc.objString(damageComponent.source) + "]");
         }
         

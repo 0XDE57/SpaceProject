@@ -87,16 +87,16 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         
         
         Entity aiTest = EntityFactory.createCharacterAI(0, 40);
-        Mappers.AI.get(aiTest).state = AIComponent.testState.dumbwander;
+        Mappers.AI.get(aiTest).state = AIComponent.State.dumbwander;
         //aiTest.add(new CameraFocusComponent());//test cam focus on AI
         engine.addEntity(aiTest);
         
         Entity aiTest2 = EntityFactory.createCharacterAI(0, 60);
-        Mappers.AI.get(aiTest2).state = AIComponent.testState.idle;
+        Mappers.AI.get(aiTest2).state = AIComponent.State.idle;
         engine.addEntity(aiTest2);
         
         Entity aiTest3 = EntityFactory.createCharacterAI(0, 80);
-        Mappers.AI.get(aiTest3).state = AIComponent.testState.landOnPlanet;
+        Mappers.AI.get(aiTest3).state = AIComponent.State.landOnPlanet;
         //aiTest3.add(new CameraFocusComponent());
         engine.addEntity(aiTest3);
 
@@ -149,8 +149,6 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
                 return;
             }
         }
-            
-        
     }
     
     

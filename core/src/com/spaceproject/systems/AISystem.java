@@ -46,8 +46,8 @@ public class AISystem extends IteratingSystem {
         
         //aiPos.y += 100 * delta;
         if (ai.state == null) {
-            ai.state = AIComponent.testState.dumbwander;
-            //ai.state = AIComponent.testState.landOnPlanet;
+            ai.state = AIComponent.State.dumbwander;
+            //ai.State = AIComponent.State.landOnPlanet;
         }
         
         switch (ai.state) {
@@ -82,7 +82,7 @@ public class AISystem extends IteratingSystem {
                     }
                     
                 } else {
-                    ai.state = AIComponent.testState.dumbwander;
+                    ai.state = AIComponent.State.dumbwander;
                 }
                 break;
             case dumbwander:
@@ -96,7 +96,7 @@ public class AISystem extends IteratingSystem {
                 break;
             case landOnPlanet: {
                 if (Mappers.screenTrans.get(entity) != null) {
-                    ai.state = AIComponent.testState.idle;
+                    ai.state = AIComponent.State.idle;
                     control.transition = false;
                     return;
                 }
@@ -208,7 +208,7 @@ public class AISystem extends IteratingSystem {
                     }
                 } else {
                     control.transition = true;
-                    ai.state = AIComponent.testState.idle;
+                    ai.state = AIComponent.State.idle;
                 }
                 break;
             }
