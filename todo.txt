@@ -51,6 +51,10 @@ Legend:
 
 [...] config
     [x] config manager, save and load all configs
+    [...] config UI
+            [...] nice way to view and edit configs
+                [ ] fix layout
+                [ ] hook up load save undo
     [...] move more things to config
         [ ] Ships are currently hardcoded by Entity factory
             can we find a way to generate entities from config.
@@ -99,10 +103,7 @@ Legend:
         [x] debug
         [x] minimap
         [x] engine (threads, physics, renderscales)
-    [...] config UI
-        [...] nice way to view and edit configs
-            [ ] fix layout
-            [ ] hook up load save undo
+
 
 
 [...] refactor screen transition
@@ -116,7 +117,7 @@ Legend:
             cannot find seed
             cannot find seed
             cannot find seed
-            this bug is driving me insane, but there's still some transition and loading detials to work out
+            this bug is driving me insane, but there's still some transition and loading details to work out
 
 
 [ ] genericize and make work land and take off work for AI, system doesn't supports non-player world switching
@@ -128,29 +129,28 @@ Legend:
       //Example scenario:
       //    you are on planet, you attack an AI, Ai comes after you. But you leave in your ship.
       //    then AI gets TimedPersistenceComponent and will remain on planet for 5 minutes waiting for you, because angry!
-      //    maybe they will come after you. this could be very siple. we can fake intelligence in a background system
+      //    maybe they will come after you. this could be very simple. we can fake intelligence in a background system in persistence engine
       //
       eg:
       Engine persistenceEngine.
       if (player switch screen) {
-          //move persistent from main to background processing
+          //move important entities from main to background processing
           for each entity in mainEngine {
               if (entity has PersistenceComponent) {
-
                   persistenceEngine.Add(entity);
               }
           }
           //move relevant entity from background processing to main
           for each entity in persistenceEngine {
               if (entity has PersistenceComponent) {
-                  if (nis persistence relevant to new context) {
+                  if (is persistence relevant to new context) {
                       //example relevance:
                       //player in space, important entity on planet
                       //if land on planet with important entity, load into actual engine
                       mainEngine.Add(entity);
                       //could be more nuanced, like perhaps entity is only loaded when event triggers it
                       //or specific location on planet. dunno till start implementing.
-                      //possibly have multiple engines handling contexts?
+                      //possibly have multiple engines handling contexts? (thats dumb and overkill. keep it simple.)
                   }
               }
           }
@@ -176,7 +176,7 @@ Legend:
         what happens in refactoring space and world will affect this. need to think more about it
         *update in thoughts*
             probably keep separate because world may need special rendering for the torus wrapping effect
-            also we don't neccesarilly need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not.)
+            also we don't necessarily need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not.)
 
 
 
@@ -229,13 +229,16 @@ Legend:
 
 
 
-[ ] new DevPlay button on title screen
-    [...] use Dev world as the one with hardcoded seed and forced test entities and forced close star system
-    [ ] current play button should give random seed, no hardcoded entities. entities should come from spawning systems instead
-        [ ] game start
-            [ ] birth/tutorial screen
-            [ ] death
-    [ ] cleanup GameScreen to facilitate this
+[ ] devmode and play mode
+    [ ] DevMode
+        -dont load save files
+        -hardcoded seed
+        -forced test entities
+        -forced close star system
+    [ ] PlayMode
+        -load save
+        -random seed
+        -no hardcoded entities. entities should come from spawning systems instead
 [ ] new CombatTest debug screen
     [ ] one on one with an AI for prototyping combat and movement mechanics and feel
     [ ] AI vs AI?

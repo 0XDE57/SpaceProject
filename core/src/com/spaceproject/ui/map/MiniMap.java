@@ -223,7 +223,7 @@ public class MiniMap {
     
     private void drawUniversePoints(ShapeRenderer shape, float centerMapX, float centerMapY, float loadDist, int celestialMarkerSize, Color color) {
         loadDist *= loadDist;
-        for (Vector2 p : GameScreen.universe.points) {
+        for (Vector2 p : GameScreen.galaxy.points) {
             if (p.dst2(MyScreenAdapter.cam.position.x, MyScreenAdapter.cam.position.y) < loadDist) {
                 continue;
             }
@@ -321,7 +321,7 @@ public class MiniMap {
     private void drawDebugLoadDist(ShapeRenderer shape, float centerMapX, float centerMapY, float loadSystemDistance, Color color) {
         shape.setColor(color);
         if (GameScreen.inSpace()) {
-            for (Vector2 p : GameScreen.universe.points) {
+            for (Vector2 p : GameScreen.galaxy.points) {
                 // n = relative pos / scale + mapPos
                 float x = ((p.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
                 float y = ((p.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;

@@ -12,23 +12,26 @@ import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.screens.GameScreen;
 
 
-public class Universe {
+public class Galaxy {
     
     private static CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
     public Array<Vector2> points;
     public Array<AstroBody> objects = new Array<AstroBody>();
     
     
-    public Universe() {
+    public Galaxy() {
         this(generatePoints(GameScreen.getSeed(), celestCFG.numPoints, celestCFG.pointGenRange, celestCFG.minPointDistance));
     }
     
-    public Universe(Array<Vector2> points) {
+    public Galaxy(Array<Vector2> points) {
         for (Vector2 p : points) {
             objects.add(new AstroBody(p));
         }
         this.points = points;
-        //saveToJson();
+        
+        if(!GameScreen.isDebugMode) {
+            saveToJson();
+        }
     }
     
     
@@ -72,7 +75,7 @@ public class Universe {
                 points.add(newPoint);
         }
         
-        if (GameScreen.debugForceDevWorld) {
+        if (GameScreen.isDebugMode) {
             points.add(new Vector2(1000, 1000));//TODO: system near origin for debug, don't forget about me
         }
         

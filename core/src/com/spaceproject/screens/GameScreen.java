@@ -26,7 +26,7 @@ import com.spaceproject.config.SystemsConfig;
 import com.spaceproject.config.WorldConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.FontFactory;
-import com.spaceproject.generation.Universe;
+import com.spaceproject.generation.Galaxy;
 import com.spaceproject.generation.noise.NoiseManager;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.utility.IScreenResizeListener;
@@ -51,11 +51,11 @@ public class GameScreen extends MyScreenAdapter {
     private static long seed;
     private static boolean inSpace;
     private static Entity currentPlanet;
-    public static Universe universe;
+    public static Galaxy galaxy;
     
     private static Stage stage;
     
-    public static boolean debugForceDevWorld = true;
+    public static boolean isDebugMode = true;
     
     public GameScreen() {
         seed = initSeed();
@@ -69,7 +69,7 @@ public class GameScreen extends MyScreenAdapter {
     private long initSeed() {
         long newSeed = new Random().nextLong();
     
-        if (debugForceDevWorld) {
+        if (isDebugMode) {
             newSeed = 4; //test seed
         }
         Gdx.app.log(this.getClass().getSimpleName(), "initSeed: " + newSeed);
@@ -108,7 +108,7 @@ public class GameScreen extends MyScreenAdapter {
         inSpace = space;
         
         //content
-        universe = new Universe();
+        galaxy = new Galaxy();
         
         
         // load test default values
@@ -332,7 +332,7 @@ public class GameScreen extends MyScreenAdapter {
         box2dWorld.dispose();
         
         //getInputMultiplexer().clear();
-        universe = null;
+        galaxy = null;
         noiseManager.dispose();
     }
     

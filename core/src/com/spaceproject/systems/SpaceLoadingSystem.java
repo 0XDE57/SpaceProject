@@ -165,7 +165,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     }
     
     private void loadCloseEntities(float loadDistance) {
-        for (AstroBody astroBodies : GameScreen.universe.objects) {
+        for (AstroBody astroBodies : GameScreen.galaxy.objects) {
             //check if point is close enough to be loaded
             if (Vector2.dst2(astroBodies.x, astroBodies.y, GameScreen.cam.position.x, GameScreen.cam.position.y) < loadDistance) {
                 

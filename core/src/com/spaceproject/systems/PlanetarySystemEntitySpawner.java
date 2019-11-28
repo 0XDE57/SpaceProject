@@ -48,9 +48,6 @@ public class PlanetarySystemEntitySpawner extends IteratingSystem {
                 
                 spawn(entity, spawn);
             }
-            
-            
-            
         }
     }
     
@@ -79,6 +76,9 @@ public class PlanetarySystemEntitySpawner extends IteratingSystem {
                 if (destinationPlanet != null) {
                     aiComponent.planetTarget = destinationPlanet;
                 }
+                //maybe the AI wants to go to another system even
+                //eg: % chance destination is another start system outside current
+                //and % chance random direction
             }
         }
         
