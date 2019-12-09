@@ -250,25 +250,26 @@ public class MiniMap {
     }
     
     private void drawOrbitPaths(ShapeRenderer shape, ImmutableArray<Entity> entities, float centerMapX, float centerMapY, Color color) {
-        if (entities != null) {
-            shape.setColor(color);
-            for (Entity mapEntity : entities) {
-                
-                Vector2 screenPos = Mappers.transform.get(mapEntity).pos;
-                
-                // n = relative pos / scale + mapPos
-                float x = ((screenPos.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
-                float y = ((screenPos.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
-                
-                OrbitComponent orbit = Mappers.orbit.get(mapEntity);
-                if (orbit != null && orbit.parent != null) {
-                    TransformComponent parentPos = Mappers.transform.get(orbit.parent);
-                    float xx = ((parentPos.pos.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
-                    float yy = ((parentPos.pos.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
-                    
-                    shape.circle(xx, yy, orbit.radialDistance / mapScale);
-                    shape.line(xx, yy, x, y);
-                }
+        if (entities == null) {
+            return;
+        }
+        
+        shape.setColor(color);
+        for (Entity mapEntity : entities) {
+            Vector2 screenPos = Mappers.transform.get(mapEntity).pos;
+        
+            // n = relative pos / scale + mapPos
+            float x = ((screenPos.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
+            float y = ((screenPos.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
+        
+            OrbitComponent orbit = Mappers.orbit.get(mapEntity);
+            if (orbit != null && orbit.parent != null) {
+                TransformComponent parentPos = Mappers.transform.get(orbit.parent);
+                float xx = ((parentPos.pos.x - MyScreenAdapter.cam.position.x) / mapScale) + centerMapX;
+                float yy = ((parentPos.pos.y - MyScreenAdapter.cam.position.y) / mapScale) + centerMapY;
+            
+                shape.circle(xx, yy, orbit.radialDistance / mapScale);
+                shape.line(xx, yy, x, y);
             }
         }
     }

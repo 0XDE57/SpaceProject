@@ -26,25 +26,28 @@ public class PlanetarySystemEntitySpawner extends IteratingSystem {
     
     @Override
     protected void processEntity(Entity entity, float delta) {
-        //goal: when in a solar system (loaded planets
-        //get all plaenet entitys
+        //goal: give life to the universe
+        //when in a planetary system (loaded planets)
         //if planet has life
-        
-        //add to planet SpawnerComponent
-        //add spawning rules
-        //eg:
-        //spawn chance of xxxx everytick
-        //lets say spawn timer = 30 seconds, 50% spawn chance
-        //or timeer.setInterval(10 seconds from now, and
-        //once timer / spawner satisfied
-        //
-        //could have a more busy planet with more spawners
+        //  add to planet SpawnerComponent
+        //  add spawning rules
+        //possible rules:
+        //  ChanceSpawner: chance to spawn on interval
+        //      eg: 30 seconds interval, 50% spawn chance
+        //  IntervalSpawner: spawn x every x seconds
+        //  RandomIntervalSpawner:
+        //could have a more busy planet with more spawners / lower interval
+        //should consider spawn caps. we don't want to spawn too many,
+        //so should consider local count for how many spawner has spawned (entity tracking list?)
+        //could have spawnCap for spawner
+        //should also consider global entity count, we don't want to just endlessly fill
+        //eg: within this system, don't spawn more than 30?
         
         AISpawnComponent spawn = Mappers.spawn.get(entity);
         for (SimpleTimer timer : spawn.timers) {
             if (timer.canDoEvent()) {
                 long nextInterval = MathUtils.random(spawn.min, spawn.max);
-                timer.setInterval(nextInterval, true);//also reset
+                timer.setInterval(nextInterval, true);//reset to next interval
                 
                 spawn(entity, spawn);
             }
@@ -82,6 +85,7 @@ public class PlanetarySystemEntitySpawner extends IteratingSystem {
             }
         }
         
+        spawn.spawnCount++;
         getEngine().addEntity(aiShip);
         Gdx.app.log(this.getClass().getSimpleName(), "spawned: " + Misc.objString(entity) + " source:" + Misc.objString(entity));
     

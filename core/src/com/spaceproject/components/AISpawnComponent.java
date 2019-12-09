@@ -10,5 +10,6 @@ public class AISpawnComponent implements Component {
     public long min;
     public long max;
     public AIComponent.State state;
+    public int spawnCount;
     
 }
