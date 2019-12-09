@@ -50,6 +50,10 @@ public abstract class SystemLoader {
                         ((IRequireGameContext) systemToLoad).initContext(game);
                     }
                     
+                    if (systemToLoad instanceof EntityListener) {
+                        engine.addEntityListener((EntityListener) systemToLoad);
+                    }
+                    
                     engine.addSystem(systemToLoad);
                     Gdx.app.log(tag, "Loaded: " + systemToLoad.getClass().getName());
                 }

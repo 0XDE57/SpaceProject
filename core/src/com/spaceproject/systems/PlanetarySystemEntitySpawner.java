@@ -2,6 +2,7 @@ package com.spaceproject.systems;
 
 
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
@@ -18,7 +19,7 @@ import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.SimpleTimer;
 
-public class PlanetarySystemEntitySpawner extends IteratingSystem {
+public class PlanetarySystemEntitySpawner extends IteratingSystem implements EntityListener {
     
     public PlanetarySystemEntitySpawner() {
         super(Family.all(AISpawnComponent.class, TransformComponent.class).get());
@@ -95,5 +96,43 @@ public class PlanetarySystemEntitySpawner extends IteratingSystem {
         //Entity ai = EntityFactory.createCharacterAI(transform.pos.x, transform.pos.y);
         //ai.getComponent(AIComponent.class).State = AIComponent.State.dumbwander;
         //getEngine().addEntity(ai);
+    }
+    
+
+    @Override
+    public void entityAdded(Entity entity) {
+        if (entity.getComponent(PlanetComponent.class) != null) {
+            addLifeToPlanet(entity);
+        }
+    }
+    
+    @Override
+    public void entityRemoved(Entity entity) {
+    
+    }
+    
+    private static void addLifeToPlanet(Entity planet) {
+        //add entity spawner if planet has life
+        //dumb coin flip for now, can have rules later like no life when super close to star = lava, or super far = ice
+        //simply base it on distance from star. habital zone
+        //  eg chance of life = distance from habit zone
+        //more complex rules can be applied like considering the planets type. ocean might have life but if entire planet is ocean = no ships = no spawner
+        //desert might have different life, so different spawner rules
+        boolean hasLife = MathUtils.randomBoolean();
+        if (hasLife) {
+            int min = 10000;
+            int max = 100000;
+            int lifeDensity = MathUtils.random(1);
+            
+            AISpawnComponent spawnComponent = new AISpawnComponent();
+            spawnComponent.min = min;
+            spawnComponent.max = max;
+            spawnComponent.timers = new SimpleTimer[lifeDensity];
+            spawnComponent.state = AIComponent.State.attack;
+            for (int t = 0; t < spawnComponent.timers.length; t++) {
+                spawnComponent.timers[t] = new SimpleTimer(MathUtils.random(spawnComponent.min, spawnComponent.max));
+            }
+            planet.add(spawnComponent);
+        }
     }
 }

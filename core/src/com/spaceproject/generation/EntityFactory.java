@@ -201,7 +201,7 @@ public class EntityFactory {
                 entities.add(moon);
             }
             
-            addLifeToPlanet(planet);
+            //addLifeToPlanet(planet);
     
             entities.add(planet);
         }
