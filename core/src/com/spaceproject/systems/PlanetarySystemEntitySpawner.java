@@ -35,7 +35,7 @@ public class PlanetarySystemEntitySpawner extends IteratingSystem {
         //  ChanceSpawner: chance to spawn on interval
         //      eg: 30 seconds interval, 50% spawn chance
         //  IntervalSpawner: spawn x every x seconds
-        //  RandomIntervalSpawner:
+        //  RandomIntervalSpawner: spawn x between interval(min,max)
         //could have a more busy planet with more spawners / lower interval
         //should consider spawn caps. we don't want to spawn too many,
         //so should consider local count for how many spawner has spawned (entity tracking list?)
@@ -46,8 +46,9 @@ public class PlanetarySystemEntitySpawner extends IteratingSystem {
         AISpawnComponent spawn = Mappers.spawn.get(entity);
         for (SimpleTimer timer : spawn.timers) {
             if (timer.canDoEvent()) {
+                //reset to next interval
                 long nextInterval = MathUtils.random(spawn.min, spawn.max);
-                timer.setInterval(nextInterval, true);//reset to next interval
+                timer.setInterval(nextInterval, true);
                 
                 spawn(entity, spawn);
             }
