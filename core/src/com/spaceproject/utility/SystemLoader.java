@@ -11,27 +11,27 @@ import com.spaceproject.screens.GameScreen;
 
 
 public abstract class SystemLoader {
-    
+    private static String logSource = "SystemLoader";
     
     public static void loadSystems(GameScreen game, Engine engine, boolean inSpace, SystemsConfig cfg) {
-        String tag = "SystemLoader";
-        Gdx.app.log(tag, inSpace ? "==========SPACE==========" : "==========WORLD==========");
+        
+        Gdx.app.log(logSource, inSpace ? "==========SPACE==========" : "==========WORLD==========");
         
         long time = System.currentTimeMillis();
         
         for (SysCFG sysCFG : cfg.getSystems()) {
-            loadSystem(game, engine, inSpace, tag, sysCFG);
+            loadUnloadSystems(game, engine, inSpace, sysCFG);
         }
         
         long now = System.currentTimeMillis();
-        Gdx.app.log(tag, "systems loaded in " + (now - time) + "ms");
+        Gdx.app.log(logSource, "systems loaded in " + (now - time) + "ms");
     }
     
     @SuppressWarnings("unchecked")
-    private static void loadSystem(GameScreen game, Engine engine, boolean inSpace, String tag, SysCFG sysCFG) {
+    private static void loadUnloadSystems(GameScreen game, Engine engine, boolean inSpace, SysCFG sysCFG) {
         boolean correctPlatform = (SpaceProject.isMobile() && sysCFG.isLoadOnMobile()) || (!SpaceProject.isMobile() && sysCFG.isLoadOnDesktop());
         if (!correctPlatform) {
-            Gdx.app.log(tag, "Skip loading: " + sysCFG.getClassName());
+            Gdx.app.log(logSource, "Skip loading: " + sysCFG.getClassName());
             return;
         }
         
@@ -43,38 +43,47 @@ public abstract class SystemLoader {
             boolean isLoaded = systemInEngine != null;
             if (shouldBeLoaded) {
                 if (!isLoaded) {
-                    EntitySystem systemToLoad = systemClass.newInstance();
-                    systemToLoad.priority = sysCFG.getPriority();
-                    
-                    if (systemToLoad instanceof IRequireGameContext) {
-                        ((IRequireGameContext) systemToLoad).initContext(game);
-                    }
-                    
-                    if (systemToLoad instanceof EntityListener) {
-                        engine.addEntityListener((EntityListener) systemToLoad);
-                    }
-                    
-                    engine.addSystem(systemToLoad);
-                    Gdx.app.log(tag, "Loaded: " + systemToLoad.getClass().getName());
+                    load(game, engine, sysCFG.getPriority(), systemClass);
                 }
             } else {
                 if (isLoaded) {
-                    if (systemInEngine instanceof EntityListener) {
-                        //listener must be removed, otherwise a reference is kept in engine (i think?)
-                        //when system is re-added / re-removed down the line, the families/listeners are broken
-                        engine.removeEntityListener((EntityListener) systemInEngine);
-                    }
-                    engine.removeSystem(systemInEngine);
-                    Gdx.app.log(tag, "Unloaded: " + systemInEngine.getClass().getName());
+                    unLoad(engine, systemInEngine);
                 }
             }
         } catch (ClassNotFoundException e) {
-            Gdx.app.error(tag, "Could not find " + sysCFG.getClassName(), e);
+            Gdx.app.error(logSource, "Could not find " + sysCFG.getClassName(), e);
         } catch (InstantiationException e) {
-            Gdx.app.error(tag, "Could not instantiate " + sysCFG.getClassName(), e);
+            Gdx.app.error(logSource, "Could not instantiate " + sysCFG.getClassName(), e);
         } catch (Exception e) {
-            Gdx.app.error(tag, "Could not load " + sysCFG.getClassName(), e);
+            Gdx.app.error(logSource, "Could not load " + sysCFG.getClassName(), e);
         }
+    }
+    
+    private static void load(GameScreen game, Engine engine, int priority, Class<? extends EntitySystem> systemClass) throws InstantiationException, IllegalAccessException {
+        EntitySystem systemToLoad = systemClass.newInstance();
+        systemToLoad.priority = priority;
+        
+        //auto-hookup interfaces
+        if (systemToLoad instanceof IRequireGameContext) {
+            ((IRequireGameContext) systemToLoad).initContext(game);
+        }
+        
+        if (systemToLoad instanceof EntityListener) {
+            engine.addEntityListener((EntityListener) systemToLoad);
+        }
+        
+        engine.addSystem(systemToLoad);
+        Gdx.app.log(logSource, "Loaded: " + systemToLoad.getClass().getName());
+    }
+    
+    private static void unLoad(Engine engine, EntitySystem systemInEngine) {
+        if (systemInEngine instanceof EntityListener) {
+            //listener must be removed, otherwise a reference is kept in engine (i think?)
+            //when system is re-added / re-removed down the line, the families/listeners are broken
+            engine.removeEntityListener((EntityListener) systemInEngine);
+        }
+        engine.removeSystem(systemInEngine);
+        Gdx.app.log(logSource, "Unloaded: " + systemInEngine.getClass().getName());
     }
     
     private void loadMods(){
