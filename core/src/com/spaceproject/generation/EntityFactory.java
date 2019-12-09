@@ -541,6 +541,7 @@ public class EntityFactory {
         
         
         //add components to entity
+        entity.add(seedComp);
         entity.add(health);
         entity.add(cannon);
         entity.add(physics);

@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.OrbitComponent;
@@ -42,6 +43,9 @@ public class MiniMap {
     private SimpleTimer drawScaleTimer;
     private static final Circle tmpCircle = new Circle();
     
+    public MiniMap() {
+        this(SpaceProject.configManager.getConfig(MiniMapConfig.class), SpaceProject.configManager.getConfig(CelestialConfig.class));
+    }
     
     public MiniMap(MiniMapConfig miniMapConfig, CelestialConfig celestialConfig) {
         miniMapCFG = miniMapConfig;
@@ -56,9 +60,6 @@ public class MiniMap {
     }
     
     public void drawMiniMap(ShapeRenderer shape, SpriteBatch batch, Entity player, ImmutableArray<Entity> entities) {
-        if (mapState == MapState.off)
-            return;
-        
         if (!miniMapCFG.debugDisableClipping) {
             ScissorStack.pushScissors(mapContainer);
         }
@@ -141,8 +142,6 @@ public class MiniMap {
             drawMapText(batch, player, centerMapX);
         }
         batch.end();
-        
-        
     }
     
     private void drawMapText(SpriteBatch batch, Entity player, float centerMapX) {
@@ -178,18 +177,29 @@ public class MiniMap {
     
     private void drawPlayerMarker(ShapeRenderer shape, Entity player, float centerMapX, float centerMapY, int playerMarkerSize, Color playerMarkerColor, Color velocityVecColor) {
         if (player != null) {
-            float scale = 5; //how long to make vectors (higher number is longer line)
+            float scale = 5;
             int facingLength = 10;
             int vecWidth = 2;
-            
-            Body body = Mappers.physics.get(player).body;
-            
-            Vector2 velocity = MyMath.logVec(body.getLinearVelocity(), scale).add(centerMapX, centerMapY);
+    
             HyperDriveComponent hyperComp = Mappers.hyper.get(player);
-            if (hyperComp != null) {
-                velocity = MyMath.logVec(hyperComp.velocity, scale).add(centerMapX, centerMapY);
+            Body body = Mappers.physics.get(player).body;
+    
+    
+            //draw movement direction for navigation assistance, line up vector with target destination
+            Vector2 velocity = (hyperComp == null) ? body.getLinearVelocity() : hyperComp.velocity;
+            if (velocity.len() > 0) {
+                Vector2 direction = MyMath.vector(velocity.angleRad(), 50000).add(centerMapX, centerMapY);
+                Color darkGray = Color.DARK_GRAY.cpy();
+                darkGray.a = 0.4f;
+                shape.rectLine(centerMapX, centerMapY, direction.x, direction.y, 1, darkGray, darkGray);
             }
-            shape.rectLine(centerMapX, centerMapY, velocity.x, velocity.y, vecWidth, velocityVecColor, velocityVecColor);
+            
+            Vector2 velocityScaled = MyMath.logVec(velocity, scale).add(centerMapX, centerMapY);
+            //if (hyperComp != null) {
+            //    velocityScaled = MyMath.logVec(hyperComp.velocity, scale).add(centerMapX, centerMapY);
+            //}
+            shape.rectLine(centerMapX, centerMapY, velocityScaled.x, velocityScaled.y, vecWidth, velocityVecColor, velocityVecColor);
+            
             
             Vector2 facing = MyMath.vector(body.getAngle(), facingLength).add(centerMapX, centerMapY);
             shape.rectLine(centerMapX, centerMapY, facing.x, facing.y, vecWidth, playerMarkerColor, playerMarkerColor);

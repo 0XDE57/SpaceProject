@@ -31,9 +31,7 @@ import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.KeyConfig;
-import com.spaceproject.config.MiniMapConfig;
 import com.spaceproject.config.UIConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
@@ -124,9 +122,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         uiCFG = SpaceProject.configManager.getConfig(UIConfig.class);
         keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
         
-        MiniMapConfig miniMapConfig = SpaceProject.configManager.getConfig(MiniMapConfig.class);
-        CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
-        miniMap = new MiniMap(miniMapConfig, celestCFG);
+        miniMap = new MiniMap();
         
         screenTransitionOverlay = new ScreenTransitionOverlay();
     }
@@ -153,14 +149,21 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             if (GameScreen.inSpace()) {
                 drawOrbitPath(false);
             }
-            
+        
             drawHUD();
+        
+            if (miniMap.getState() != MapState.off) {
+                Entity p = players.size() > 0 ? players.first() : null;
+                miniMap.drawMiniMap(shape, batch, p, mapableEntities);
+            }
         }
+    
+        //TODO: temporary fix. engine system priority....
+        MobileInputSystem mobileUI = getEngine().getSystem(MobileInputSystem.class);
+        if (mobileUI != null)
+            mobileUI.drawControls();
         
-        Entity p = players.size() > 0 ? players.first() : null;
-        miniMap.drawMiniMap(shape, batch, p, mapableEntities);
-        
-        screenTransitionOverlay.render();
+        screenTransitionOverlay.render();//todo: maybe should be in another system? low priority to render after hud
     }
     
     private void drawHUD() {
@@ -183,12 +186,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         
         shape.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
-        
-        
-        //TODO: temporary fix. engine system priority....
-        MobileInputSystem mobileUI = getEngine().getSystem(MobileInputSystem.class);
-        if (mobileUI != null)
-            mobileUI.drawControls();
     }
     
     private void drawOrbitPath(boolean showSyncedPos) {
