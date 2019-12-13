@@ -406,14 +406,11 @@ public class ControlSystem extends IteratingSystem {
     private void manageShield(Entity entity, ControllableComponent control, TransformComponent transform, ShieldComponent shield) {
         if (shield == null) {
             if (control.defend) {
-                //add
                 shield = new ShieldComponent();
                 shield.animTimer = new SimpleTimer(400, true);
                 shield.defence = 100f;
-                //Polygon poly = entity.getComponent(PhysicsComponent.class).poly;
-                //Rectangle rect = PolygonUtil.getBoundingRectangle(poly.getVertices());
-                //float size = Math.min(rect.width, rect.height) * 1.3f;
-                float size = entity.getComponent(PhysicsComponent.class).body.getFixtureList().first().getShape().getRadius() * 1.3f;
+                Body body = entity.getComponent(PhysicsComponent.class).body;
+                float size = body.getFixtureList().first().getShape().getRadius() * 130f;
                 shield.maxRadius = size;
                 shield.color = Color.BLUE;
                 
