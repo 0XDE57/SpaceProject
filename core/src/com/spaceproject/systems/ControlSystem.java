@@ -410,6 +410,10 @@ public class ControlSystem extends IteratingSystem {
                 shield.animTimer = new SimpleTimer(400, true);
                 shield.defence = 100f;
                 Body body = entity.getComponent(PhysicsComponent.class).body;
+                //todo: size should be determined by entire body shape, all shapes, and rendered relative to body size
+                //todo: add box2d shape for shield that matches size of rendered shape. maybe make shape render box2d fixture instead?
+                //should we create a new box2d body on the shield component, of add it to the ships existing fixture?
+                //i think for physics to behave like we want, the shield body should be part of the existing body component
                 float size = body.getFixtureList().first().getShape().getRadius() * 130f;
                 shield.maxRadius = size;
                 shield.color = Color.BLUE;

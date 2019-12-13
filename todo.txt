@@ -26,7 +26,9 @@ Legend:
             [x] affects transitioning entity
             [x] affects created entities (entity factory)
             [ ] config?
-            [ ] shield broken
+            [...] shield broken
+                [...] render
+                [ ] physics and collision
             [...] dodge
                 [ ] adjust feel, its kinda clunky right now. needs more JUICE!
                     https://www.youtube.com/watch?v=Fy0aCDmgnxg
@@ -176,7 +178,7 @@ Legend:
         what happens in refactoring space and world will affect this. need to think more about it
         *update in thoughts*
             probably keep separate because world may need special rendering for the torus wrapping effect
-            also we don't necessarily need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not.)
+            also we don't necessarily need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not. or do we? ;)
 
 
 
