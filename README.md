@@ -49,13 +49,19 @@ This game is still in alpha phase and suffers severe feature creep. There's not 
   * haha, just kidding. submit a pull request. do I have to do everything around here?
 * Unit Tests
   * pfft... my code is perfect, the first time. every time.
+* Feature Creep and Unrealistic Scope!
 
 
 ## Current Status
-Work in progress. Currently in early development. More of an engine than a game at this point as there is not much content, just scaffolding for what will hopefully one day be a game. Actively...and painfully slowly...in progress... 
+Work in progress. Currently in early development. More of an engine than a game at this point as there is not much content, just scaffolding for what will hopefully one day be a game. The code is bit rough in some places, littered with todo's, half-baked features, and of course the occasional bug. Also, forgive my programmer graphics.
 
 
 ![screenshot](/Capture.PNG?raw=true)
+
+Actively...and painfully slowly...in progress... It doesn't even have sound and I have been poking at this for over 6 years now... Oh well. For what I am currently working on and just general notes to myself see [todo.txt](https://github.com/0XDE57/SpaceProject/blob/master/todo.txt)
+
+## License
+   MIT: https://github.com/0XDE57/SpaceProject/blob/master/LICENSE.md
 
 ## Libraries
 - [libGDX](https://github.com/libgdx/libgdx)
@@ -85,5 +91,5 @@ Work in progress. Currently in early development. More of an engine than a game 
   * connect phone, android studio should detect it
   * build and run!
 * IOS
-  * dunno fam, this shits broken for me currently. something about the provisioner ¯\_(ツ)_/¯
+  * dunno fam, this shits broken for me currently. something about a provisioner ¯\_(ツ)_/¯
 
