@@ -25,6 +25,7 @@ This game is still in alpha phase and suffers severe feature creep. There's not 
 | Attack / Shoot     | Right-Click  | one of the buttons, you'll figure it out |                    |
 | Defence / Shield   | Shift        | todo                                     |                    |
 | Defence / Dodge    | ALT + A/D    | todo                                     |                    |
+| Toggle HyperDrive  | 1            | todo                                     |                    |
 | Land/Take Off      | T            | one of the buttons, you'll figure it out |                    |
 | Enter/Exit vehicle | G            | one of the buttons, you'll figure it out |                    |
 | Zoom               | Scroll Wheel | Pinch Zoom (not implemented yet)         |                    |
