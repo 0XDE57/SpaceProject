@@ -122,7 +122,7 @@ Legend:
             this bug is driving me insane, but there's still some transition and loading details to work out
 
 
-[ ] genericize and make work land and take off work for AI, system doesn't supports non-player world switching
+[ ] genericize and make work land and take off work for AI, system doesn't support non-player world switching
       dumb loop where AI lands on planet, kept in some kind of background
       processing state/alt engine, wait a second then take off to test all is working correctly
       background engine meant to be low processing effort (eg: ultra dumbed down AI or simulations, no rendering, no physics, just states and events) to keep track of important entities
@@ -165,20 +165,6 @@ Legend:
       }
 
 
-    [ ] consider merging rendering system (SpaceRendering & World rendering)?
-        because they are basically duplicates which the difference of background tiles
-        or at least have them share rendering functions as the drawEntities() & draw3DRenderables() are identical between them
-        - pros:
-            * eliminates duplicate code
-            * might simplify some things
-        - cons:
-            * may introduce other issues
-            * more responsibility for one class...
-        alternatively, split up rendering type into difference systems? not sure yet
-        what happens in refactoring space and world will affect this. need to think more about it
-        *update in thoughts*
-            probably keep separate because world may need special rendering for the torus wrapping effect
-            also we don't necessarily need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not. or do we? ;)
 
 
 
@@ -191,6 +177,9 @@ Legend:
 
 
 [...] rendering system
+    [ ] consider merging rendering system (SpaceRendering & World rendering)?
+            probably keep separate because world may need special rendering for the torus wrapping effect
+            also we don't necessarily need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not
     [...] fix render priority (z-order)
           [X] moved into separate variable
           [ ] define proper heights for importance as current values are somewhat arbitrary
@@ -201,6 +190,16 @@ Legend:
             com.spaceproject.screens.animations.NoiseAnim
         could be done on gpu even:
             https://www.shadertoy.com/view/XscGzl
+    [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
+            maybe something like this:
+                https://www.shadertoy.com/view/ltXSDN
+                https://www.shadertoy.com/view/ldKGDd
+                https://gamedev.stackexchange.com/questions/146098/2d-parallax-scrolling-through-glsl-shader
+                https://badlogicgames.com/forum/viewtopic.php?f=11&t=11419
+            or something like this:
+                https://wwwtyro.github.io/space-2d/
+                https://github.com/wwwtyro/space-2d
+
 
 
 
@@ -246,15 +245,6 @@ Legend:
     [ ] AI vs AI?
 
 
-[ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
-        maybe something like this:
-            https://www.shadertoy.com/view/ltXSDN
-            https://www.shadertoy.com/view/ldKGDd
-            https://gamedev.stackexchange.com/questions/146098/2d-parallax-scrolling-through-glsl-shader
-            https://badlogicgames.com/forum/viewtopic.php?f=11&t=11419
-        or something like this:
-            https://wwwtyro.github.io/space-2d/
-            https://github.com/wwwtyro/space-2d
 
 
 [ ] optimization
@@ -339,11 +329,11 @@ Legend:
 
 
 [...] planet generation
-    [ ] add tempurature variable to planet
-        [ ] tempurature determined by distance from star
+    [ ] add temperature variable to planet
+        [ ] temperature determined by distance from star
             [ ] for now simple linear, close to planet = hot, far from planet = cold
-            [ ] if want more advanced, have star tempurature based of distance from galaxy center
-                then that would also affect star tempurature.
+            [ ] if want more advanced, have star temperature based of distance from galaxy center
+                then that would also affect star temperature.
                 for inspiration see:
                     https://beltoforion.de/article.php?a=spiral_galaxy_renderer
                     https://github.com/beltoforion/Galaxy-Renderer
