@@ -17,25 +17,6 @@ Worlds are also finite. If you move continuously in one direction you will event
 This game is still in alpha phase and suffers severe feature creep. There's not much content yet but I have plans. Stay tuned.
 
 
-
-| Control            | Desktop      | Mobile                                   | Controller/Gamepad |
-|------------------- | ------------ | ---------------------------------------- | -------------------|
-| Movement           | WASD         | Left Joystick                            |                    |
-| Aim                | Mouse        | Left Joystick                            |                    |
-| Attack / Shoot     | Right-Click  | one of the buttons, you'll figure it out |                    |
-| Defence / Shield   | Shift        | todo                                     |                    |
-| Defence / Dodge    | ALT + A/D    | todo                                     |                    |
-| Toggle HyperDrive  | 1            | todo                                     |                    |
-| Land/Take Off      | T            | one of the buttons, you'll figure it out |                    |
-| Enter/Exit vehicle | G            | one of the buttons, you'll figure it out |                    |
-| Zoom               | Scroll Wheel | Pinch Zoom (not implemented yet)         |                    |
-| Toggle Map State   | M            | one of the buttons, you'll figure it out |                    |
-| Full screen        | F11          | its always fullscreen on mobile silly    |                    |
-| Vsync              | F8           |                                          |                    |
-| ECS Debug Viewer   | F9           |                                          |                    |
-| Misc debug keys I am too lazy to document rn and won't be permanent anyway   |                    |
-
-
 ## Features
 * Open Source bruh!
 * DRM-Free!
@@ -60,6 +41,27 @@ Work in progress. Currently in early development. More of an engine than a game 
 ![screenshot](/Capture.PNG?raw=true)
 
 Actively...and painfully slowly...in progress... It doesn't even have sound and I have been poking at this for over 6 years now... Oh well. For what I am currently working on and just general notes to myself see [todo.txt](https://github.com/0XDE57/SpaceProject/blob/master/todo.txt)
+
+
+### Controls
+| Control            | Desktop      | Mobile (iOS, Android)                    | Controller/Gamepad |
+|------------------- | ------------ | ---------------------------------------- | -------------------|
+| Movement           | WASD         | Left Joystick                            |                    |
+| Aim                | Mouse        | Left Joystick                            |                    |
+| Attack / Shoot     | Right-Click  | one of the buttons, you'll figure it out |                    |
+| Defence / Shield   | Shift        | todo                                     |                    |
+| Defence / Dodge    | ALT + A/D    | todo                                     |                    |
+| Toggle HyperDrive  | 1            | todo                                     |                    |
+| Land/Take Off      | T            | one of the buttons, you'll figure it out |                    |
+| Enter/Exit vehicle | G            | one of the buttons, you'll figure it out |                    |
+| Zoom               | Scroll Wheel | Pinch Zoom (not implemented yet)         |                    |
+| Toggle Map State   | M            | one of the buttons, you'll figure it out |                    |
+| Full screen        | F11          | its always fullscreen on mobile silly    |                    |
+| Menu (Pause)       | Escape       | one of the buttons, you'll figure it out |                    |
+| Vsync              | F8           |                                          |                    |
+| ECS Debug Viewer   | F9           |                                          |                    |
+| Misc debug keys I am too lazy to document rn and won't be permanent anyway   |                    |
+
 
 ## License
    MIT: https://github.com/0XDE57/SpaceProject/blob/master/LICENSE.md
