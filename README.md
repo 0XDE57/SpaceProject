@@ -45,24 +45,24 @@ Actively...and painfully slowly...in progress... It doesn't even have sound and 
 
 
 ### Controls
-| Control            | Desktop      | Mobile (iOS, Android)                    | Controller/Gamepad |
-|------------------- | ------------ | ---------------------------------------- | -------------------|
-| Movement           | WASD         | Left Joystick                            |                    |
-| Aim                | Mouse        | Left Joystick                            |                    |
-| Attack / Shoot     | Right-Click  | one of the buttons, you'll figure it out |                    |
-| Defence / Shield   | Shift        | todo                                     |                    |
-| Defence / Dodge    | ALT + A/D    | todo                                     |                    |
-| Toggle HyperDrive  | 1            | todo                                     |                    |
-| Land/Take Off      | T            | one of the buttons, you'll figure it out |                    |
-| Enter/Exit vehicle | G            | one of the buttons, you'll figure it out |                    |
-| Zoom               | Scroll Wheel | Pinch Zoom (not implemented yet)         |                    |
-| Reset Zoom         | Middle-Click |                                          |                    |
-| Toggle Map State   | M            | one of the buttons, you'll figure it out |                    |
-| Full screen        | F11          | its always fullscreen on mobile silly    |                    |
-| Menu (Pause)       | Escape       | one of the buttons, you'll figure it out |                    |
-| Vsync              | F8           |                                          |                    |
-| ECS Debug Viewer   | F9           |                                          |                    |
-| Misc debug keys I am too lazy to document rn and won't be permanent anyway   |                    |
+| Control                        | Desktop      | Mobile (iOS, Android)                    | Controller/Gamepad |
+|------------------------------- | ------------ | ---------------------------------------- | ------------------ |
+| Movement                       | WASD         | Left Joystick                            |                    |
+| Aim                            | Mouse        | Left Joystick                            |                    |
+| Attack / Shoot                 | Right-Click  | one of the buttons, you'll figure it out |                    |
+| Defence / Shield               | Shift        | todo                                     |                    |
+| Defence / Dodge (Barrel Roll)  | ALT + A/D    | todo                                     |                    |
+| Toggle HyperDrive              | 1            | todo                                     |                    |
+| Land/Take Off                  | T            | one of the buttons, you'll figure it out |                    |
+| Enter/Exit vehicle             | G            | one of the buttons, you'll figure it out |                    |
+| Zoom                           | Scroll Wheel | Pinch Zoom (not implemented yet)         |                    |
+| Reset Zoom                     | Middle-Click |                                          |                    |
+| Toggle Map State               | M            | one of the buttons, you'll figure it out |                    |
+| Full screen                    | F11          | its always fullscreen on mobile silly    |                    |
+| Menu (Pause)                   | Escape       | one of the buttons, you'll figure it out |                    |
+| Vsync                          | F8           |                                          |                    |
+| ECS Debug Viewer               | F9           |                                          |                    |
+| Misc debug keys I am too lazy to document rn and won't be permanent anyway               |                    |
 
 
 ## License
