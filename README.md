@@ -23,6 +23,7 @@ This game is still in alpha phase and suffers severe feature creep. There's not 
 * Ad-Free!
 * Telemetry-Free!
 * Cloud-Free!
+* Microtransaction-Free!
 * Cross-Platform Desktop and Mobile Support
   * Windows, OSX, Linux, Android, IOS
 * Controller support: todo
@@ -55,6 +56,7 @@ Actively...and painfully slowly...in progress... It doesn't even have sound and 
 | Land/Take Off      | T            | one of the buttons, you'll figure it out |                    |
 | Enter/Exit vehicle | G            | one of the buttons, you'll figure it out |                    |
 | Zoom               | Scroll Wheel | Pinch Zoom (not implemented yet)         |                    |
+| Reset Zoom         | Middle-Click |                                          |                    |
 | Toggle Map State   | M            | one of the buttons, you'll figure it out |                    |
 | Full screen        | F11          | its always fullscreen on mobile silly    |                    |
 | Menu (Pause)       | Escape       | one of the buttons, you'll figure it out |                    |
