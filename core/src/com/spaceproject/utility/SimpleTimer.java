@@ -70,6 +70,18 @@ public class SimpleTimer {
         return Math.min((float) timeSinceLastEvent() / (float) interval, 1.0f);
     }
     
+    public void setRatio(float ratio) {
+        long newTime = GameScreen.getGameTimeCurrent() - (long)(ratio * interval);
+        setLastEvent(newTime);
+    }
+    
+    /** Invert ratio / reverse timer, eg: 0.7 -> 0.3
+     * @param reset
+     */
+    public void flipRatio() {
+        setRatio(1-ratio());
+    }
+    
     @Override
     public String toString() {
         return timeSinceLastEvent() + " (" + ratio() + ")";

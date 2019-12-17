@@ -90,6 +90,10 @@ public class PhysicsContactListener implements ContactListener {
                     damageEntity.add(new RemoveComponent());
                     return;
                 //}
+            } else {
+                //destroy shield if it isn't fully activated.
+                //todo: "premature break effect", sound effect here, maybe particle effect
+                attackedEntity.remove(shieldComp.getClass());
             }
         }
         

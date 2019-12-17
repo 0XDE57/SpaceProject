@@ -125,7 +125,7 @@ public class ControlSystem extends IteratingSystem {
 
         
         barrelRoll(entity, dodgeComp);
-        manageShield(entity, control, transformComp, shield);
+        manageShield(entity, control, shield);
         manageHyperDrive(transformComp, hyperComp, delta);
     
         
@@ -395,7 +395,8 @@ public class ControlSystem extends IteratingSystem {
             
             //apply counter force to slow dodge
             PhysicsComponent physicsComp = Mappers.physics.get(entity);
-            physicsComp.body.applyLinearImpulse(MyMath.vector(dodgeComp.direction - (float) Math.PI, dodgeComp.force / 2), physicsComp.body.getPosition(), true);
+            Vector2 impulse = MyMath.vector(dodgeComp.direction - (float) Math.PI, dodgeComp.force / 2);
+            physicsComp.body.applyLinearImpulse(impulse, physicsComp.body.getPosition(), true);
             
             //end anim
             entity.remove(DodgeComponent.class);
@@ -403,17 +404,20 @@ public class ControlSystem extends IteratingSystem {
         
     }
     
-    private void manageShield(Entity entity, ControllableComponent control, TransformComponent transform, ShieldComponent shield) {
+    private void manageShield(Entity entity, ControllableComponent control, ShieldComponent shield) {
         if (shield == null) {
             if (control.defend) {
                 shield = new ShieldComponent();
-                shield.animTimer = new SimpleTimer(400, true);
+                shield.animTimer = new SimpleTimer(300, true);
                 shield.defence = 100f;
                 Body body = entity.getComponent(PhysicsComponent.class).body;
                 //todo: size should be determined by entire body shape, all shapes, and rendered relative to body size
                 //todo: add box2d shape for shield that matches size of rendered shape. maybe make shape render box2d fixture instead?
+                //or probably should use an image, the mix of layers is more complex with shape for shield. just set z level in front of the ship
                 //should we create a new box2d body on the shield component, of add it to the ships existing fixture?
-                //i think for physics to behave like we want, the shield body should be part of the existing body component
+                //i think for physics to behave like we want, the shield body should be part of the existing body component?
+                //or separate shield entity with texture component, shield component, attachedComponent(Parent entity), physics component
+                //on hit, transfer force to attachedComponent.parent?
                 float size = body.getFixtureList().first().getShape().getRadius() * 130f;
                 shield.maxRadius = size;
                 shield.color = Color.BLUE;
@@ -425,26 +429,35 @@ public class ControlSystem extends IteratingSystem {
         
         
         if (control.defend) {
+            if (!shield.growing) {
+                //reactivate
+                if (shield.animTimer.ratio() >= 0.3f)
+                    shield.animTimer.flipRatio();
+            }
             shield.growing = true;
-            shield.radius = shield.maxRadius * shield.animTimer.ratio(); //charge
-            shield.active = shield.radius == shield.maxRadius; //activate
         } else {
-            //release
-            shield.active = false;
             if (shield.growing) {
-                shield.growing = false;
-                //shield.animTime
+                //release
+                shield.animTimer.flipRatio();
             }
-            //TODO: hookup shrink process to timer
-            shield.radius -= 0.5f;
-            //shield.animTimer.getInterval();
-            //shield.radius = shield.maxRadius * 1-shield.animTimer.ratio();
-            if (shield.radius <= 0) {
-                entity.remove(ShieldComponent.class);
-            }
+            shield.growing = false;
         }
         
+        if (shield.growing) {
+            //charge
+            shield.radius = shield.maxRadius * shield.animTimer.ratio();
+        } else {
+            //discharge
+            shield.radius = shield.maxRadius * (1 - shield.animTimer.ratio());
+        }
         
+        //activate
+        shield.active = shield.radius == shield.maxRadius;
+        
+        
+        if (shield.radius <= 0) {
+            entity.remove(ShieldComponent.class);
+        }
     }
     
     private void manageHyperDrive(TransformComponent transformComp, HyperDriveComponent hyperComp, float delta) {

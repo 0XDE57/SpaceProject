@@ -27,7 +27,7 @@ Legend:
             [x] affects created entities (entity factory)
             [ ] config?
             [...] shield broken
-                [...] render
+                [x] render
                 [ ] physics and collision
             [...] dodge
                 [ ] adjust feel, its kinda clunky right now. needs more JUICE!
@@ -178,8 +178,8 @@ Legend:
 
 [...] rendering system
     [ ] consider merging rendering system (SpaceRendering & World rendering)?
-            probably keep separate because world may need special rendering for the torus wrapping effect
-            also we don't necessarily need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not
+        probably keep separate because world may need special rendering for the torus wrapping effect
+        also we don't necessarily need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not
     [...] fix render priority (z-order)
           [X] moved into separate variable
           [ ] define proper heights for importance as current values are somewhat arbitrary
@@ -303,8 +303,8 @@ Legend:
                 [ ] clean up: optimize rendering -> ModelCache
                 [ ] mobile/touch UI way of activating dodge, a swipe on the joystick may be intuitive
         [x] shield
-            [ ] bug: during cooldown, re-activating starts from full instead of current size
-            [ ] fix: currently broken due to physics shift
+            [x] bug: during cooldown, re-activating starts from full instead of current size
+            [...] fix: currently broken due to physics shift
         [ ] bullets should come from a gun rather than magically from ship
         [ ] weapon types
             [x] basic cannon
@@ -326,6 +326,20 @@ Legend:
 	    inspiration:
             http://davebollinger.org/works/pixelspaceships/
             https://www.reddit.com/r/gamedev/comments/2tavse/2d_procedural_spaceship_generator/
+[ ] combat camera
+    right now manually zooming in an out when fighting is a bit clunky and jarring.
+    implement an auto lock on camera which will adjust the zoom to include both the player
+    and the enemy within frame, even have the camera back the player into the opposite side of the
+    screen relative to enemy, to keep more zoom and attention on the combat. focus!
+    if (in combat) {
+        enemyEntity.add(CombatFocusComponent)
+    }
+    camera systems looks for entities with CombatFocusComponent, auto adjust zoom so entity with combat focus
+    is within screen view.
+    consider multiple enemies, 3 on screen? include all will make zoom far and less focused, so probably some sort of
+    dynamic focus, maybe who gets shot last has focus? todo: study cam mechanics for smashbros / project m style combat
+    thresholds for how close to focus near the edge
+    still allow manual override with scroll, with perhaps a timer to focus back in, or when a new enemy joins
 
 
 [...] planet generation
