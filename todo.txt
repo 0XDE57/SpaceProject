@@ -6,10 +6,10 @@ for different abilities.
 
 In space there will be asteroids floating around. Kinda like the original arcade style asteroids. Just
 arbitrary convex polygons. But when they break ideally they would shatter in a way that all the pieces
-that break off can make up the ordinal object. To achieve this, voronoi diagrams! A cool property of voronoi
-diagrams is that the polygons it create are always convex by nature. When an asteroid is shot, create a set
-of random points (perhaps concentrated where the bullet hits) within the asteroids polygon. From those points
-make a voronoi diagram within the original polygon, then break up the asteroid into the resulting pieces.
+that break off can make up the original object. To achieve this, voronoi diagrams! A cool property of voronoi
+diagrams is that the polygons it creates are always convex by nature. When an asteroid is shot by player,
+create a set of random points (perhaps concentrated where the bullet hits) within the asteroids polygon.
+From those points make a voronoi diagram within the original polygon, then break up the asteroid into the resulting pieces.
 Those pieces can also be hit and broken down further with the same process. Until a certain threshold of
 smallness where we actually destroy the object because there's no point in breaking it own further.
 Upon destruction, chance to drop items/resources for the player to pick up.
@@ -42,11 +42,11 @@ Mobile and Desktop can have different systems. eg: don't need to render touch co
 
 
 One goal is to have everything highly configurable. (and perhaps I have gone too far in this direction...?)
-Data Directory (...\SpaceProject\android\assets) *.json: plain text json files that defined all values for game
+Data Directory (...\SpaceProject\android\assets) *.json: plain text json files that define all values for game
     CelestialConfig: defines star system generation rules
     DebugConfig: defines settings like show debug rendering
     EngineConfig: define physics and rendering constants
-    EntityConfig: define generations parameters for entities
+    EntityConfig: define generation parameters for entities
     KeyConfig: define input keycodes
     MinimapConfig: define colors and behaviors for minimap
     SystemsConfig: define system loading priorities and properties
@@ -66,12 +66,14 @@ Space Background Rendering
 
 Noise Generation
 	Noise is heavy to generate at runtime so it's done in background threads.
-	Once generated, it's picked up but SpaceLoadingSystem who then creates a texture from the noise
-	You can specify how many simultaneous threads you would like to allow in EngineConfig
+	Once generated, it's picked up by SpaceLoadingSystem who then creates a texture from the noise.
+	You can specify how many simultaneous threads you would like to allow in EngineConfig.
+	Todo: save textures/noise so it's only generated the first time. Load from disk.
+	For dev purposes, just generate ad-hoc for now.
 
 
 Screen transition logic/stages overview
-One of the trickier parts of the engine. Animation states for transition.
+One of the trickier parts of the engine. Animation states for transition, and dynamic system loading/unloading.
 When animation hits transition state, it calls the system loader and loads/unloads relevant systems based on SystemsConfig
 TODO: should make a proper sequence diagram for this.
 
@@ -103,6 +105,25 @@ TODO: should make a proper sequence diagram for this.
 			grow: grow ship sprite from 0 to give illusion of taking off planet
 			end: remove transition component
 
+
+Scale of the universe.
+Currently somewhat arbitrary. Just selected values that make sense at the time and feel ok.
+I originally wanted to play with n-body physics and have an "infinite" universe....hahahaha NO! Focus!
+So while in space, we are in a finite galaxy. Points of interest are generated relative to 0,0.
+Go to far into the void, and enjoy broken rendering and physics, courtesy of floating point arithmetic rounding!
+Todo: Need to make a more standard definition for everything:
+    sprites and unit: how big should a ship or player be in relation to the universe / planets?
+    planets: how big should a planet be?
+    distances between planets: how long should the player spend traveling between systems and planets and stars?
+    Values need to be chosen that make sense for gameplay. Considering combat, base building, interstellar travel.
+    Should optimize feel for spaceship combat as that will be a large part of gameplay.
+
+
+AI: currently primitive placeholder systems to flesh out ideas.
+They can't aim properly, need to predict where player will be. Lead target.
+And much more....problems for later.
+
+
 todo: focus! i keep jumping between ideas and features and never finish anything
 
 
@@ -118,7 +139,7 @@ Legend:
 [ ] background space color fade to black when zoom out (temporary until better space background approach is implemented)
 [ ] experiment: can we make the background tiles just not zoom out? use a different batch perhaps?
 [ ] minimap should show grayscale hightmap of world when on planet
-[ ] when finished test entity spawner, spec spawner for asteroid. begin make asteroid
+[ ] spec spawner for asteroid. begin make asteroid
 
 
 [...] galaxy generation inspired by fibonacci spiral
