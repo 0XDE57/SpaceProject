@@ -28,11 +28,83 @@ On the planet the player will be able to build their base. Mine for resources. B
 Currently space is fairly empty. Worlds are very empty. Just test objects while I flesh out my ideas
 and prototype systems.
 
+
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-Architecture
 todo...
 should start documenting and specking out the features and where its headed.
-I'ts half in notes, half in my head, and half in code.
+It's half in notes, half in my head, and half in code.
+
+Architecture
+Uses an ECS. Systems are dynamically loaded and unloaded per context.
+See https://github.com/libgdx/ashley/wiki/Framework-overview
+Space and World can have different systems. eg, don't need an orbit system when on a planet.
+Mobile and Desktop can have different systems. eg: don't need to render touch control on desktop
+
+
+One goal is to have everything highly configurable. (and perhaps I have gone too far in this direction...?)
+Data Directory (...\SpaceProject\android\assets) *.json: plain text json files that defined all values for game
+    CelestialConfig: defines star system generation rules
+    DebugConfig: defines settings like show debug rendering
+    EngineConfig: define physics and rendering constants
+    EntityConfig: define generations parameters for entities
+    KeyConfig: define input keycodes
+    MinimapConfig: define colors and behaviors for minimap
+    SystemsConfig: define system loading priorities and properties
+    UIConfig: define ui element colors and positions
+    WorldConfig: define terrain generation parameters (in progress)
+
+
+Space Background Rendering
+	Simple but effective (but also broken when zoom out):
+	3 parallax layers
+		stars close
+		stars far
+		noise far
+	Background color is set based on camera positioning.
+		Just some combinations and ratios of red, blue and green that I played around with until it looked nice.
+
+
+Noise Generation
+	Noise is heavy to generate at runtime so it's done in background threads.
+	Once generated, it's picked up but SpaceLoadingSystem who then creates a texture from the noise
+	You can specify how many simultaneous threads you would like to allow in EngineConfig
+
+
+Screen transition logic/stages overview
+One of the trickier parts of the engine. Animation states for transition.
+When animation hits transition state, it calls the system loader and loads/unloads relevant systems based on SystemsConfig
+TODO: should make a proper sequence diagram for this.
+
+	Transition action (key press, virtual button on mobile)
+	ControlSystem()
+		if in space
+			landOnPlanet()
+				find planet
+				add ScreenTransitionComponent -> anim stage = shrink
+			takeOffPlanet()
+				add ScreenTransitionComponent -> anim stage = transition
+
+	ScreenTransitionSystem()
+		landOnPlanet:
+			shrink: shrink ship sprite to give illusion of landing
+			zoomIn: zoom in camera
+			screenEffectFadeIn: fade screen to white
+			transition: trigger GameScreen to switch to planet. load and unload relevant systems.
+			load: (todo: ensure planet map loaded before allowing play)
+			screenEffectFadeOut: fade white back to screen
+			pause: brief pause for effect
+			exit: player get out of ship
+			end: remove transition component
+		takeOffPlanet:
+			screenEffectFadeIn: fade screen to white
+			transition: trigger GameScreen to switch to planet. load and unload relevant systems.
+			sync: ensure find planet landed on is loaded (based on seed), ensure found and texture loaded before allowing play
+			zoomOut: zoom camera from 0 to normal
+			grow: grow ship sprite from 0 to give illusion of taking off planet
+			end: remove transition component
+
+todo: focus! i keep jumping between ideas and features and never finish anything
+
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 Legend:
@@ -41,7 +113,6 @@ Legend:
     [x]     = complete
     [!,?,*] = notes, questions, or exceptions
 
-todo: focus! i keep jumping between ideas and features and never finish anything
 
 ---ENGINE---
 [ ] background space color fade to black when zoom out (temporary until better space background approach is implemented)
@@ -362,6 +433,7 @@ todo: focus! i keep jumping between ideas and features and never finish anything
 	    inspiration:
             http://davebollinger.org/works/pixelspaceships/
             https://www.reddit.com/r/gamedev/comments/2tavse/2d_procedural_spaceship_generator/
+
 [ ] combat camera
     right now manually zooming in an out when fighting is a bit clunky and jarring.
     implement an auto lock on camera which will adjust the zoom to include both the player
@@ -387,6 +459,9 @@ todo: focus! i keep jumping between ideas and features and never finish anything
                 for inspiration see:
                     https://beltoforion.de/article.php?a=spiral_galaxy_renderer
                     https://github.com/beltoforion/Galaxy-Renderer
+        [ ] hot planets can be lava / deserts, cold planets can be ice n snow.
+            stuff in between can be "normal" (green, water, etc)
+        https://en.wikipedia.org/wiki/Circumstellar_habitable_zone
 	[ ] rings around planets? (like saturn)
 	[...] moons/satellites
     [ ] research planet attributes //size, temperature, pressure, atmosphere/elements(https://en.wikipedia.org/wiki/Astronomical_spectroscopy)...etc
