@@ -19,11 +19,6 @@ This game is still in alpha phase and suffers severe feature creep. There's not 
 
 ## Features
 * Open Source bruh!
-* DRM-Free!
-* Ad-Free!
-* Telemetry-Free!
-* Cloud-Free!
-* Microtransaction-Free!
 * Cross-Platform Desktop and Mobile Support
   * Windows, OSX, Linux, Android, IOS
 * Controller support: todo
@@ -32,6 +27,8 @@ This game is still in alpha phase and suffers severe feature creep. There's not 
   * haha, just kidding. submit a pull request. do I have to do everything around here?
 * Unit Tests
   * pfft... my code is perfect, the first time. every time.
+* No Nonsense
+   * DRM-Free!, Ad-Free!, Telemetry-Free!, Cloud-Free!, Microtransaction-Free!
 * Feature Creep and Unrealistic Scope!
 
 
