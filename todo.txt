@@ -36,9 +36,12 @@ It's half in notes, half in my head, and half in code.
 
 Architecture
 Uses an ECS. Systems are dynamically loaded and unloaded per context.
-See https://github.com/libgdx/ashley/wiki/Framework-overview
-Space and World can have different systems. eg, don't need an orbit system when on a planet.
+If you are unfamiliar with the concept of an Entity Component System, start here:
+    https://github.com/libgdx/ashley/wiki/Framework-overview
+Space and World can have different systems. eg: don't need an orbit system when on a planet.
 Mobile and Desktop can have different systems. eg: don't need to render touch control on desktop
+See SystemsConfig for defining system priories and loading properties such as when to load and
+if they should be active when paused.
 
 
 One goal is to have everything highly configurable. (and perhaps I have gone too far in this direction...?)
@@ -110,7 +113,7 @@ Scale of the universe.
 Currently somewhat arbitrary. Just selected values that make sense at the time and feel ok.
 I originally wanted to play with n-body physics and have an "infinite" universe....hahahaha NO! Focus!
 So while in space, we are in a finite galaxy. Points of interest are generated relative to 0,0.
-Go to far into the void, and enjoy broken rendering and physics, courtesy of floating point arithmetic rounding!
+Go too far into the void, and enjoy broken rendering and physics, courtesy of floating point arithmetic rounding!
 Todo: Need to make a more standard definition for everything:
     sprites and unit: how big should a ship or player be in relation to the universe / planets?
     planets: how big should a planet be?
