@@ -136,7 +136,7 @@ Legend:
 
 
 ---ENGINE---
-[ ] background space color fade to black when zoom out (temporary until better space background approach is implemented)
+[x] background space color fade to black when zoom out (temporary until better space background approach is implemented)
 [ ] experiment: can we make the background tiles just not zoom out? use a different batch perhaps?
 [ ] minimap should show grayscale hightmap of world when on planet
 [ ] spec spawner for asteroid. begin make asteroid

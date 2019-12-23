@@ -5,7 +5,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -33,6 +32,7 @@ public class SpaceRenderingSystem extends IteratingSystem {
     private SpriteBatch spriteBatch;
     private ModelBatch modelBatch;
     private ShapeRenderer shape;
+    private static Color tmpColor = new Color();
     
     // array of entities to render
     private Array<Entity> renderQueue = new Array<Entity>();
@@ -233,8 +233,9 @@ public class SpaceRenderingSystem extends IteratingSystem {
      *
      * @return color
      */
-    private static Color backgroundColor(Camera cam) {
+    private static Color backgroundColor(OrthographicCamera cam) {
         //still playing with these values to get the right feel/intensity of color...
+        float camZoomBlackScale = 500.0f;
         float maxColor = 0.25f;
         float ratio = 0.0001f;
         float green = Math.abs(cam.position.x * ratio);
@@ -251,10 +252,11 @@ public class SpaceRenderingSystem extends IteratingSystem {
         } else {
             blue = maxColor - blue % maxColor;
         }
-        //red is combination of blue and green
         float red = blue + green;
-        Color color = new Color(red, green + (maxColor - red) + 0.2f, blue + (maxColor - red) + 0.1f, 1);
-        return color;
+        tmpColor.set(red, green + (maxColor - red) + 0.2f, blue + (maxColor - red) + 0.1f, 1);
+        
+        tmpColor.lerp(Color.BLACK, MathUtils.clamp(cam.zoom / camZoomBlackScale, 0, 1)); //fade to black on zoom out
+        return tmpColor;
     }
     
     @Override
