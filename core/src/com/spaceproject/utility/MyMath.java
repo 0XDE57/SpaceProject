@@ -15,7 +15,7 @@ public abstract class MyMath {
     
     public static long getSeed(int x, int y) {
         //long is 64 bits. store x in upper bits, y in lower bits
-        return (x << 32) + y + GameScreen.getSeed();
+        return (x << 32) + y + GameScreen.getGalaxySeed();
     }
     
     

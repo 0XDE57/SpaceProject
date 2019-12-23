@@ -327,7 +327,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         debugTexts.add(new DebugText(
                 "time: " + Misc.formatDuration(GameScreen.getGameTimeCurrent()) + " (" + GameScreen.getGameTimeCurrent() + ")",
                 Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10, fontLarge));
-        debugTexts.add(new DebugText("seed: " + GameScreen.getSeed(), Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight, fontLarge));
+        debugTexts.add(new DebugText("seed: " + GameScreen.getGalaxySeed(), Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight, fontLarge));
         if (!GameScreen.inSpace()) {
             debugTexts.add(new DebugText("planet: " + GameScreen.getPlanetSeed(),
                     Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight * 2, fontLarge));

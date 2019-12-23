@@ -48,7 +48,7 @@ public class GameScreen extends MyScreenAdapter {
     private static long gameTimeCurrent, gameTimeStart, timePaused;
     private boolean isPaused = false;
     
-    private static long seed;
+    private static long galaxySeed;
     private static boolean inSpace;
     private static Entity currentPlanet;
     public static Galaxy galaxy;
@@ -58,7 +58,7 @@ public class GameScreen extends MyScreenAdapter {
     public static boolean isDebugMode = true;
     
     public GameScreen() {
-        seed = initSeed();
+        galaxySeed = initSeed();
         initUI();
         
         initCore();
@@ -72,7 +72,7 @@ public class GameScreen extends MyScreenAdapter {
         if (isDebugMode) {
             newSeed = 4; //test seed
         }
-        Gdx.app.log(this.getClass().getSimpleName(), "initSeed: " + newSeed);
+        Gdx.app.log(this.getClass().getSimpleName(), "galaxy seed: " + newSeed);
         
         return newSeed;
     }
@@ -232,8 +232,8 @@ public class GameScreen extends MyScreenAdapter {
     }
     
     //region states
-    public static long getSeed() {
-        return seed;
+    public static long getGalaxySeed() {
+        return galaxySeed;
     }
     
     public static long getPlanetSeed() {

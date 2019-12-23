@@ -26,6 +26,7 @@ import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HealthComponent;
+import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.ShieldComponent;
@@ -295,15 +296,17 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         int playerBarX = Gdx.graphics.getWidth() / 2 - barWidth / 2;
         int playerHPBarY = uiCFG.playerHPBarY;
         int playerAmmoBarY = playerHPBarY - barHeight - 1;
+        int playerHyperBarY = playerHPBarY + barHeight + 1;
         Entity playerEntity = players.first();
         
         drawPlayerHealth(playerEntity, playerBarX, playerHPBarY, barWidth, barHeight);
         drawPlayerShield(playerEntity, playerBarX, playerHPBarY, barWidth, barHeight);
         drawPlayerAmmoBar(playerEntity, playerBarX, playerAmmoBarY, barWidth, barHeight);
+        drawHyperDriveBar(playerEntity, playerBarX, playerHyperBarY, barWidth, barHeight);
 
 		/*
 		//border
-		shape.setColor(new Color(1,1,1,1));
+		shape.setColor(new Color(0.1f, 0.63f, 0.88f, 1f));
 		int thickness = 1;
 		shape.rectLine(playerBarX, playerHPBarY+barHeight, playerBarX+barWidth, playerHPBarY+barHeight, thickness);//top
 		shape.rectLine(playerBarX, playerHPBarY-barHeight, playerBarX+barWidth, playerHPBarY-barHeight,thickness);//bottom
@@ -315,9 +318,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private void drawPlayerHealth(Entity playerEntity, int playerBarX, int playerHPBarY, int barWidth, int barHeight) {
         HealthComponent health = Mappers.health.get(playerEntity);
         if (health != null) {
-            float ratioHP = health.health / health.maxHealth;
             shape.setColor(uiCFG.entityHPbarBackground);
             shape.rect(playerBarX, playerHPBarY, barWidth, barHeight);
+    
+            float ratioHP = health.health / health.maxHealth;
             shape.setColor(1 - ratioHP, ratioHP, 0, uiCFG.entityHPbarOpacity);
             shape.rect(playerBarX, playerHPBarY, barWidth * ratioHP, barHeight);
         }
@@ -368,6 +372,19 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 				shape.rect(playerBarX, playerAmmoBarY, barWidth * cannon.timerRechargeRate.ratio(), rechargeBarHeight);
 			}
 			*/
+        }
+    }
+    
+    private void drawHyperDriveBar(Entity playerEntity, int playerBarX, int playerHyperBarY, int barWidth, int barHeight) {
+        HyperDriveComponent hyperDriveComponent = Mappers.hyper.get(playerEntity);
+        if (hyperDriveComponent != null) {
+            shape.setColor(Color.BLUE);
+            shape.rect(playerBarX, playerHyperBarY, barWidth, barHeight);
+            
+            //todo: render cooldown timer for both activating and deactivating
+            //float ratio = hyperDriveComponent.coolDownTimer.ratio() / barWidth;
+            //shape.setColor(1 - ratio, ratio, 0, uiCFG.entityHPbarOpacity);
+            //shape.rect(playerBarX, playerHyperBarY, barWidth * ratio, barHeight);
         }
     }
     //endregion

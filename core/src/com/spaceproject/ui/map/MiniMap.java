@@ -115,7 +115,10 @@ public class MiniMap {
         {
             //draw all celestial bodies
             if (GameScreen.inSpace()) {
-                drawUniversePoints(shape, centerMapX, centerMapY, celestCFG.loadSystemDistance, miniMapCFG.celestialMarkerSize, miniMapCFG.universeMarkerColor);
+                drawUniversePoints(shape, centerMapX, centerMapY,
+                        celestCFG.loadSystemDistance,
+                        miniMapCFG.celestialMarkerSize,
+                        miniMapCFG.universeMarkerColor);
             }
             
             //draw loaded celestial bodies
@@ -123,7 +126,11 @@ public class MiniMap {
                 drawMapableEntities(shape, entities, centerMapX, centerMapY);
             }
             
-            drawPlayerMarker(shape, player, centerMapX, centerMapY, miniMapCFG.playerMarkerSize,  miniMapCFG.playerMarkerColor, miniMapCFG.velocityVecColor);
+            drawPlayerMarker(shape, player, centerMapX, centerMapY,
+                    miniMapCFG.playerMarkerSize,
+                    miniMapCFG.playerMarkerColor,
+                    miniMapCFG.velocityVecColor,
+                    miniMapCFG.orientationColor);
             
             drawBorder(shape);
         }
@@ -164,7 +171,7 @@ public class MiniMap {
             //draw game time
             font.draw(batch, Misc.formatDuration(GameScreen.getGameTimeCurrent()), textPosX, textPosY - lineHeight * 2);
             //draw seed
-            long seed = GameScreen.getSeed();
+            long seed = GameScreen.getGalaxySeed();
             if (!GameScreen.inSpace()) {
                 seed = GameScreen.getPlanetSeed();
             }
@@ -175,7 +182,7 @@ public class MiniMap {
         }
     }
     
-    private void drawPlayerMarker(ShapeRenderer shape, Entity player, float centerMapX, float centerMapY, int playerMarkerSize, Color playerMarkerColor, Color velocityVecColor) {
+    private void drawPlayerMarker(ShapeRenderer shape, Entity player, float centerMapX, float centerMapY, int playerMarkerSize, Color playerMarkerColor, Color velocityVecColor, Color orientationColor) {
         if (player != null) {
             float scale = 5;
             int facingLength = 10;
@@ -183,27 +190,24 @@ public class MiniMap {
     
             HyperDriveComponent hyperComp = Mappers.hyper.get(player);
             Body body = Mappers.physics.get(player).body;
-    
-    
+            
             //draw movement direction for navigation assistance, line up vector with target destination
             Vector2 velocity = (hyperComp == null) ? body.getLinearVelocity() : hyperComp.velocity;
             if (velocity.len() > 0) {
                 Vector2 direction = MyMath.vector(velocity.angleRad(), 50000).add(centerMapX, centerMapY);
-                Color darkGray = Color.DARK_GRAY.cpy();
-                darkGray.a = 0.4f;
-                shape.rectLine(centerMapX, centerMapY, direction.x, direction.y, 1, darkGray, darkGray);
+                shape.rectLine(centerMapX, centerMapY, direction.x, direction.y, 1, orientationColor, orientationColor);
             }
-            
             Vector2 velocityScaled = MyMath.logVec(velocity, scale).add(centerMapX, centerMapY);
-            //if (hyperComp != null) {
-            //    velocityScaled = MyMath.logVec(hyperComp.velocity, scale).add(centerMapX, centerMapY);
-            //}
             shape.rectLine(centerMapX, centerMapY, velocityScaled.x, velocityScaled.y, vecWidth, velocityVecColor, velocityVecColor);
             
             
-            Vector2 facing = MyMath.vector(body.getAngle(), facingLength).add(centerMapX, centerMapY);
-            shape.rectLine(centerMapX, centerMapY, facing.x, facing.y, vecWidth, playerMarkerColor, playerMarkerColor);
+            Vector2 facing = MyMath.vector(body.getAngle(), 50000).add(centerMapX, centerMapY);
+            shape.rectLine(centerMapX, centerMapY, facing.x, facing.y, 1, orientationColor, orientationColor);
+            
+            Vector2 facingScaled = MyMath.vector(body.getAngle(), facingLength).add(centerMapX, centerMapY);
+            shape.rectLine(centerMapX, centerMapY, facingScaled.x, facingScaled.y, vecWidth, playerMarkerColor, playerMarkerColor);
         }
+        
         shape.setColor(playerMarkerColor);
         shape.circle(centerMapX, centerMapY, playerMarkerSize);
     }

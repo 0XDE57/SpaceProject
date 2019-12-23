@@ -20,7 +20,7 @@ public class Galaxy {
     
     
     public Galaxy() {
-        this(generatePoints(GameScreen.getSeed(), celestCFG.numPoints, celestCFG.pointGenRange, celestCFG.minPointDistance));
+        this(generatePoints(GameScreen.getGalaxySeed(), celestCFG.numPoints, celestCFG.pointGenRange, celestCFG.minPointDistance));
     }
     
     public Galaxy(Array<Vector2> points) {

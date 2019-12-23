@@ -35,7 +35,9 @@ public class MiniMapConfig extends Config {
     public Color orbitPathColor;
     public Color playerMarkerColor;
     public Color velocityVecColor;
+    public Color orientationColor;
     public Color debugLoadDistColor;
+    
     
     public void loadDefault() {
         miniMapPosition = MiniMapPosition.bottomRight;
@@ -69,6 +71,7 @@ public class MiniMapConfig extends Config {
         orbitPathColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
         playerMarkerColor = new Color(1, 1, 1, 1);
         velocityVecColor = new Color(1, 0, 0, 1);
+        orientationColor = new Color(0.63f, 0.63f, 0.63f, 0.4f);
         debugLoadDistColor = new Color(1, 0, 0, 1);
     }
 }
