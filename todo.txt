@@ -498,7 +498,8 @@ Legend:
 	    http://devmag.org.za/2009/04/25/perlin-noise/
 	    http://blog.kaelan.org/randomly-generated-world-map/ <--biome
 	    http://freespace.virgin.net/hugo.elias/models/m_perlin.htm
-	    https://www.reddit.com/user/KdotJPG   <-OpenSimplex creator https://gist.github.com/KdotJPG/b1270127455a94ac5d19
+	    OpenSimplex: https://gist.github.com/KdotJPG/b1270127455a94ac5d19
+	    new KdotJPG noise!: https://github.com/KdotJPG/New-Simplex-Style-Gradient-Noise
 
 [ ] space stuff
     [ ] various astronomical bodies
