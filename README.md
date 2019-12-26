@@ -46,17 +46,17 @@ Actively...and painfully slowly...in progress... It doesn't even have sound and 
 |------------------------------- | ------------ | ---------------------------------------- | ------------------ |
 | Movement                       | WASD         | Left Joystick                            |                    |
 | Aim                            | Mouse        | Left Joystick                            |                    |
-| Attack / Shoot                 | Right-Click  | one of the buttons, you'll figure it out |                    |
-| Defence / Shield               | Shift        | todo                                     |                    |
-| Defence / Dodge (Barrel Roll)  | ALT + A/D    | todo                                     |                    |
+| Attack / Shoot                 | Right-Click  | bottom right button                      |                    |
+| Defense / Shield               | Shift        | todo                                     |                    |
+| Defense / Dodge (Barrel Roll)  | ALT + A/D    | todo                                     |                    |
 | Toggle HyperDrive              | 1            | todo                                     |                    |
-| Land/Take Off                  | T            | one of the buttons, you'll figure it out |                    |
-| Enter/Exit vehicle             | G            | one of the buttons, you'll figure it out |                    |
+| Land/Take Off                  | T            | top center when over planet              |                    |
+| Enter/Exit vehicle             | G            | bottom right small button when in/near vehicle |                    |
 | Zoom                           | Scroll Wheel | Pinch Zoom (not implemented yet)         |                    |
 | Reset Zoom                     | Middle-Click |                                          |                    |
-| Toggle Map State               | M            | one of the buttons, you'll figure it out |                    |
-| Full screen                    | F11          | its always fullscreen on mobile silly    |                    |
-| Menu (Pause)                   | Escape       | one of the buttons, you'll figure it out |                    |
+| Toggle Map State               | M            | top left corner button                   |                    |
+| Full screen                    | F11          | n/a                                      |                    |
+| Menu (Pause)                   | Escape       | top right corner button                  |                    |
 | Vsync                          | F8           |                                          |                    |
 | ECS Debug Viewer               | F9           |                                          |                    |
 | Misc debug keys I am too lazy to document rn and won't be permanent anyway               |                    |
