@@ -1,4 +1,4 @@
-The vision:
+***the vision***
 In space you fly around to explore planets and star systems, and combat other ships.
 For Combat/fighting, my vision is to have some elements of reactive fighter style like smash bros
 where you can attack, dodge and use shield. Maybe you can upgrade your ship or swap out components
@@ -34,7 +34,7 @@ todo...
 should start documenting and specking out the features and where its headed.
 It's half in notes, half in my head, and half in code.
 
-Architecture
+***architecture***
 Uses an ECS. Systems are dynamically loaded and unloaded per context.
 If you are unfamiliar with the concept of an Entity Component System, start here:
     https://github.com/libgdx/ashley/wiki/Framework-overview
@@ -127,9 +127,6 @@ They can't aim properly, need to predict where player will be. Lead target.
 And much more....problems for later.
 
 
-todo: focus! i keep jumping between ideas and features and never finish anything
-
-
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 Legend:
     [ ]     = not started
@@ -137,21 +134,33 @@ Legend:
     [x]     = complete
     [!,?,*] = notes, questions, or exceptions
 
+todo: focus! i keep jumping between ideas and features and never finish anything
+***the plan***:
+Spaceship combat will be a core part of gameplay. So lets focus on cleaning that up first.
+    End goal: make combat fun. make flight and movement fun.
+    [ ] fix shield physics
+    [ ] make bullets better (more visible)
+    [ ] add basic asteroids (arbitrary poly)
+        [ ] spec spawner for asteroid. begin make asteroid
+    [ ] fix AI a bit (lead shot)
+    [ ] fix camera: combat camera
+        right now manually zooming in an out when fighting is a bit clunky and jarring.
+        implement an auto lock on camera which will adjust the zoom to include both the player
+        and the enemy within frame, even have the camera back the player into the opposite side of the
+        screen relative to enemy, to keep more zoom and attention on the combat. focus!
+        if (in combat) {
+            enemyEntity.add(CombatFocusComponent)
+        }
+        camera systems looks for entities with CombatFocusComponent, auto adjust zoom so entity with combat focus
+        is within screen view.
+        consider multiple enemies, 3 on screen? include all will make zoom far and less focused, so probably some sort of
+        dynamic focus, maybe who gets shot last has focus? todo: study cam mechanics for smashbros / project m style combat
+        thresholds for how close to focus near the edge
+        still allow manual override with scroll, with perhaps a timer to focus back in, or when a new enemy joins
+
+
 
 ---ENGINE---
-[x] background space color fade to black when zoom out (temporary until better space background approach is implemented)
-[ ] experiment: can we make the background tiles just not zoom out? use a different batch perhaps?
-[ ] minimap should show grayscale hightmap of world when on planet
-[ ] spec spawner for asteroid. begin make asteroid
-
-
-[...] galaxy generation inspired by fibonacci spiral
-    [...] test screen to generate spiral
-    [ ] generate set of points that are concentrated near center, and near arms of spiral
-    [ ] implement generation into game
-    [ ] make a screen animation
-
-
 [...] physics and movement
     [...] move to box2d
         [...] move logic to new physics
@@ -298,7 +307,14 @@ Legend:
       }
 
 
+[ ] minimap should show grayscale hightmap of world when on planet
 
+
+[...] galaxy generation inspired by fibonacci spiral
+    [...] test screen to generate spiral
+    [ ] generate set of points that are concentrated near center, and near arms of spiral
+    [ ] implement generation into game
+    [ ] make a screen animation
 
 
 [...] fix texture / map loading
@@ -332,6 +348,8 @@ Legend:
             or something like this:
                 https://wwwtyro.github.io/space-2d/
                 https://github.com/wwwtyro/space-2d
+        [x] background space color fade to black when zoom out (temporary until better space background approach is implemented)
+        [ ] experiment: can we make the background tiles just not zoom out? use a different batch perhaps?
 
 
 
@@ -458,20 +476,6 @@ Legend:
             http://davebollinger.org/works/pixelspaceships/
             https://www.reddit.com/r/gamedev/comments/2tavse/2d_procedural_spaceship_generator/
 
-[ ] combat camera
-    right now manually zooming in an out when fighting is a bit clunky and jarring.
-    implement an auto lock on camera which will adjust the zoom to include both the player
-    and the enemy within frame, even have the camera back the player into the opposite side of the
-    screen relative to enemy, to keep more zoom and attention on the combat. focus!
-    if (in combat) {
-        enemyEntity.add(CombatFocusComponent)
-    }
-    camera systems looks for entities with CombatFocusComponent, auto adjust zoom so entity with combat focus
-    is within screen view.
-    consider multiple enemies, 3 on screen? include all will make zoom far and less focused, so probably some sort of
-    dynamic focus, maybe who gets shot last has focus? todo: study cam mechanics for smashbros / project m style combat
-    thresholds for how close to focus near the edge
-    still allow manual override with scroll, with perhaps a timer to focus back in, or when a new enemy joins
 
 
 [...] planet generation

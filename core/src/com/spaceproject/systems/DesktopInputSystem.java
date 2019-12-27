@@ -36,10 +36,11 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     public void update(float delta) {
         if (players.size() == 0)
             return;
+        
         Entity player = players.first();
         CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
         if (cameraFocus != null) {
-            cameraControls(player, cameraFocus, delta);
+            cameraControls(cameraFocus, delta);
         }
     }
     
@@ -116,7 +117,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         return true;
     }
     
-    private void cameraControls(Entity entity, CameraFocusComponent cameraFocus, float delta) {
+    private void cameraControls(CameraFocusComponent cameraFocus, float delta) {
 
         //debug
         if (Gdx.input.isKeyPressed(keyCFG.zoomSpace)) {
