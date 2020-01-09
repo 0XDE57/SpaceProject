@@ -202,7 +202,7 @@ public class ControlSystem extends IteratingSystem {
         if (GameScreen.inSpace()) {
             Entity planet = getPlanetNearPosition(transformComp.pos);
             control.canTransition = planet != null;
-            if (control.transition) {
+            if (control.transition && control.canTransition) {
                 beginLandOnPlanet(entity, planet);
             }
         } else {
@@ -574,6 +574,11 @@ public class ControlSystem extends IteratingSystem {
     private void beginLandOnPlanet(Entity entity, Entity planet) {
         if (Mappers.screenTrans.get(entity) != null)
             return;
+        
+        if (planet == null) {
+            Gdx.app.error(this.getClass().getSimpleName(), "can not land on null planet");
+            return;
+        }
         
         ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
         screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.shrink;//begin animation
