@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.Array;
@@ -44,7 +45,7 @@ import com.spaceproject.utility.SimpleTimer;
 
 
 public class EntityFactory {
-    //todo: fefactor into separate factories for entity types
+    //todo: refactor into separate factories for entity types
     // eg: planetary system should go into a AstronomicalBodyEntityFactory()
     // ships into ShipEntityFactory
     // rename this to base or common? and keep character
@@ -574,21 +575,27 @@ public class EntityFactory {
     
     public static Entity createMissile(TransformComponent source, CannonComponent cannon, Entity owner) {
         Entity entity = new Entity();
+        float scale = 0.1f;
         
         //create texture
         TextureComponent texture = new TextureComponent();
         texture.texture = TextureFactory.generateProjectile();
-        texture.scale = 0.1f;
+        texture.scale = scale;
         
         //bounding box
         PhysicsComponent physics = new PhysicsComponent();
-        float width = 0.1f;
-        float height = 0.1f;
+        
         Body sourceBody = owner.getComponent(PhysicsComponent.class).body;
+        BoundingBox sourceBounds = MyMath.calculateBoundingBox(sourceBody);
+        //todo: make spawn point from a gun at front of ship, for now just outside of body bounds
+        Vector2 spawnPos = source.pos.add(MyMath.vector(sourceBody.getAngle(), Math.min(sourceBounds.getWidth(), sourceBounds.getHeight())));
+        float width = texture.texture.getWidth() * scale;
+        float height = texture.texture.getHeight() * scale;
+        physics.body = BodyFactory.createRect(spawnPos.x, spawnPos.y, width, height, BodyDef.BodyType.DynamicBody);
+        physics.body.setTransform(spawnPos, source.rotation);
+    
         Vector2 ownerVel = sourceBody.getLinearVelocity();
-        Vector2 velocity = MyMath.vector(sourceBody.getAngle(), 60).add(ownerVel);
-        physics.body = BodyFactory.createRect(source.pos.x, source.pos.y, width, height, BodyDef.BodyType.DynamicBody);
-        physics.body.setTransform(source.pos, source.rotation);
+        Vector2 velocity = MyMath.vector(sourceBody.getAngle(), 1).add(ownerVel);
         physics.body.setLinearVelocity(velocity);
         physics.body.setBullet(true);//turn on CCD
         physics.body.setUserData(entity);

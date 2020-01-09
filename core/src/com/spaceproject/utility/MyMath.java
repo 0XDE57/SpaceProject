@@ -1,10 +1,12 @@
 package com.spaceproject.utility;
 
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.spaceproject.screens.GameScreen;
 
 public abstract class MyMath {
@@ -96,22 +98,56 @@ public abstract class MyMath {
         return String.format("%.2f%sB", (double) bytes / (1L << (z * 10)), " KMGTPE".charAt(z));
     }
     
-    public static float getAABB(Body body) {
-        //Rectangle aabb = new Rectangle();// = fixture.;
+    
+    public static BoundingBox calculateBoundingBox(Body body) {
+        BoundingBox boundingBox = null;
         
-        for (Fixture f: body.getFixtureList()) {
-            //f.GetAABB()?
-            //combine
-            //f.getShape().getRadius()?
-            return f.getShape().getRadius();
+        for (Fixture fixture : body.getFixtureList()) {
+            if (boundingBox == null) {
+                boundingBox = calculateBoundingBox(fixture);
+            } else {
+                boundingBox.ext(calculateBoundingBox(fixture));
+            }
         }
         
-        return -1;
-        //return aabb;
+        return boundingBox;
     }
     
-    public static float getFixtureSize(Rectangle aabb) {
-        return Math.max(aabb.width, aabb.height);
+    /**
+     * Calculates a {@link BoundingBox} for the given {@link Fixture}. It will
+     * be in physics/world coordinates.
+     * credit: gist.github.com/nooone/8363982
+     */
+    public static BoundingBox calculateBoundingBox(Fixture fixture) {
+        BoundingBox boundingBox = new BoundingBox();
+        switch (fixture.getShape().getType()) {
+            case Polygon: {
+                PolygonShape shape = (PolygonShape) fixture.getShape();
+                
+                Vector2 tmp = new Vector2();
+                shape.getVertex(0, tmp);
+                tmp = fixture.getBody().getWorldPoint(tmp);
+                boundingBox = new BoundingBox(new Vector3(tmp, 0), new Vector3(tmp, 0));
+                for (int v = 1; v < shape.getVertexCount(); v++) {
+                    shape.getVertex(v, tmp);
+                    boundingBox.ext(new Vector3(fixture.getBody().getWorldPoint(tmp), 0));
+                }
+                
+                break;
+            }
+            case Circle:
+                // TODO implement
+                //fixture.getShape().getRadius()
+                break;
+            case Chain:
+                // TODO implement
+                break;
+            case Edge:
+                // TODO implement
+                break;
+        }
+        
+        return boundingBox;
     }
  
     

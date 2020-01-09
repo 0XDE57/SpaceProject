@@ -508,8 +508,13 @@ public class TextureFactory {
         return t;
     }
     
+    
     public static Texture generateProjectile() {
-        Pixmap pixmap = new Pixmap(1, 1, Format.RGB565);// new Pixmap(size, size/2 == 0 ? 1 : size/2, Format.RGB565);
+        return generateProjectile(3, 2);
+    }
+    
+    public static Texture generateProjectile(int length, int width) {
+        Pixmap pixmap = new Pixmap(length, width, Format.RGB565);// new Pixmap(size, size/2 == 0 ? 1 : size/2, Format.RGB565);
         pixmap.setColor(1, 1, 1, 1);
         //pixmap.setColor(1, 0, 0, 1);
         //pixmap.drawCircle(1,1,3);
