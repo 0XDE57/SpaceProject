@@ -6,7 +6,7 @@ for different abilities.
 
 In space there will be asteroids floating around. Kinda like the original arcade style asteroids. Just
 arbitrary convex polygons. But when they break ideally they would shatter in a way that all the pieces
-that break off can make up the original object. To achieve this, voronoi diagrams! A cool property of voronoi
+that break off can make up the original object. To achieve this; voronoi diagrams! A cool property of voronoi
 diagrams is that the polygons it creates are always convex by nature. When an asteroid is shot by player,
 create a set of random points (perhaps concentrated where the bullet hits) within the asteroids polygon.
 From those points make a voronoi diagram within the original polygon, then break up the asteroid into the resulting pieces.
@@ -139,7 +139,7 @@ todo: focus! i keep jumping between ideas and features and never finish anything
 Spaceship combat will be a core part of gameplay. So lets focus on cleaning that up first.
     End goal: make combat fun. make flight and movement fun.
     [ ] fix shield physics
-    [ ] make bullets better (more visible)
+    [...] make bullets better (more visible)
     [ ] add basic asteroids (arbitrary poly)
         [ ] spec spawner for asteroid. begin make asteroid
     [ ] fix AI a bit (lead shot)
@@ -595,6 +595,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
 
 ---GRAPHICS---
 [ ] particles
+    https://github.com/rockbite/talos
 [ ] shaders
 	https://github.com/mattdesl/lwjgl-basics/wiki/Shaders
 	https://github.com/mattdesl/lwjgl-basics/wiki

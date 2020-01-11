@@ -595,7 +595,7 @@ public class EntityFactory {
         physics.body.setTransform(spawnPos, source.rotation);
     
         Vector2 ownerVel = sourceBody.getLinearVelocity();
-        Vector2 velocity = MyMath.vector(sourceBody.getAngle(), 1).add(ownerVel);
+        Vector2 velocity = MyMath.vector(sourceBody.getAngle(), 60).add(ownerVel);
         physics.body.setLinearVelocity(velocity);
         physics.body.setBullet(true);//turn on CCD
         physics.body.setUserData(entity);
