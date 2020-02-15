@@ -203,7 +203,13 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     
     private void zoomIn(Entity entity, ScreenTransitionComponent screenTrans) {
         entity.getComponent(CameraFocusComponent.class).zoomTarget = 0.05f;
-        
+    
+        CameraFocusComponent camFocus = entity.getComponent(CameraFocusComponent.class);
+        if (camFocus != null) {
+            if (GameScreen.cam.zoom > SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle) {
+                GameScreen.cam.zoom = SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle;
+            }
+        }
         if (MyScreenAdapter.cam.zoom <= 0.05f) {
             nextStage(screenTrans);
         }
