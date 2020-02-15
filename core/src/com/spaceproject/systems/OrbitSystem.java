@@ -13,7 +13,7 @@ import com.spaceproject.utility.MyMath;
 
 public class OrbitSystem extends IteratingSystem {
     
-    private final int syncPosThreshold = 10;
+    private final int syncPosThreshold = 10;//todo, move to config
     private Vector2 tmp = new Vector2();
     
     public OrbitSystem() {
@@ -21,53 +21,60 @@ public class OrbitSystem extends IteratingSystem {
     }
     
     @Override
+    public void update(float deltaTime) {
+        super.update(deltaTime);
+        
+        resetProcessedFlag();
+    }
+    
+    @Override
     protected void processEntity(Entity entity, float delta) {
+        updateBody(entity, delta);
+    }
+    
+    private void updateBody(Entity entity, float delta) {
         OrbitComponent orbit = Mappers.orbit.get(entity);
+        if (orbit == null || orbit.isProcessed) {
+            return;
+        }
+        
         TransformComponent position = Mappers.transform.get(entity);
-        
-        
         //TODO: time sync planet rotation/spin just like orbit
         position.rotation += orbit.rotateClockwise ? orbit.rotSpeed * delta : -orbit.rotSpeed * delta;
-        
-        orbit.angle = getTimeSyncAngle(orbit, GameScreen.getGameTimeCurrent());
+    
+        //apply tangential velocity
+        orbit.angle = getTimeSyncedAngle(orbit, GameScreen.getGameTimeCurrent());
+        orbit.velocity.set(orbit.tangentialSpeed, 0).rotateRad(orbit.angle).rotate90(orbit.rotateClockwise ? 1 : -1);
         
         if (orbit.parent != null) {
-            //apply tangential velocity
-            orbit.velocity.set(orbit.tangentialSpeed, 0).rotateRad(orbit.angle).rotate90(orbit.rotateClockwise ? 1 : -1);
+            updateBody(orbit.parent, delta);
             
-            // calculate exact orbit position
-            Vector2 orbitPos = getSyncPos(entity, GameScreen.getGameTimeCurrent());
-            //ensure object is not too far from synced location
-            if (!position.pos.epsilonEquals(orbitPos, syncPosThreshold)) {
-                position.pos.set(orbitPos);
-            }
+            syncOrbit(orbit, position);
             
-            OrbitComponent parentOrbit = Mappers.orbit.get(orbit.parent);
-            if (parentOrbit != null && parentOrbit.parent != null) {
-				/*
-				System.out.println("I am: " + Mappers.astro.get(entity).classification
-						+ ", Parent is: " +  Mappers.astro.get(orbit.parent).classification
-						+ ", Parent's Parent is: " + Mappers.astro.get(parentOrbit.parent).classification);
-				*/
-                //TODO: make recursive for sake of child of moon: eg satellite, or more generally infinite nesting
-                orbit.velocity.add(Mappers.orbit.get(orbit.parent).velocity);
-            }
+            orbit.velocity.add(Mappers.orbit.get(orbit.parent).velocity);
         }
-    
+        
         //add velocity to position
         tmp.set(orbit.velocity).scl(delta);
         position.pos.add(tmp.x, tmp.y);
+    
+        orbit.isProcessed = true;
     }
     
-    
-    public static Vector2 getSyncPos(Entity entity, long time) {
-        OrbitComponent orbit = Mappers.orbit.get(entity);
-        TransformComponent parentPosition = Mappers.transform.get(orbit.parent);
-        return MyMath.vector(getTimeSyncAngle(orbit, time), orbit.radialDistance).add(parentPosition.pos);
+    private void syncOrbit(OrbitComponent orbitComp, TransformComponent position) {
+        //calculate exact orbit position, ensure object is not too far from synced location
+        Vector2 orbitPos = getTimeSyncedPos(orbitComp, GameScreen.getGameTimeCurrent());
+        if (!position.pos.epsilonEquals(orbitPos, syncPosThreshold)) {
+            position.pos.set(orbitPos);
+        }
     }
     
+    public static Vector2 getTimeSyncedPos(OrbitComponent orbitComp, long time) {
+        TransformComponent parentPosition = Mappers.transform.get(orbitComp.parent);
+        return MyMath.vector(getTimeSyncedAngle(orbitComp, time), orbitComp.radialDistance).add(parentPosition.pos);
+    }
     
-    public static float getTimeSyncAngle(OrbitComponent orbit, long gameTime) {
+    public static float getTimeSyncedAngle(OrbitComponent orbit, long gameTime) {
         //calculate time-synced angle, dictate position as a function of time based on tangential velocity
         float angularSpeed = orbit.tangentialSpeed / orbit.radialDistance;
         long msPerRevolution = (long) (1000 * MathUtils.PI2 / angularSpeed);
@@ -89,6 +96,13 @@ public class OrbitSystem extends IteratingSystem {
         }
         
         return timeSyncAngle;
+    }
+    
+    private void resetProcessedFlag() {
+        for (int i = 0; i < getEntities().size(); ++i) {
+            OrbitComponent orbit = Mappers.orbit.get(getEntities().get(i));
+            orbit.isProcessed = false;
+        }
     }
     
 }

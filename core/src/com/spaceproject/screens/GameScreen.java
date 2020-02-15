@@ -201,6 +201,7 @@ public class GameScreen extends MyScreenAdapter {
                 body.setLinearDamping(0);
                 body.setAngularDamping(0);
             } else {
+                //todo: move to values to engine/world config
                 body.setAngularDamping(30);
                 body.setLinearDamping(45);
             }
@@ -250,6 +251,10 @@ public class GameScreen extends MyScreenAdapter {
     
     public static long getGameTimeCurrent() {
         return gameTimeCurrent;
+    }
+    
+    public static void adjustGameTime(long deltaMillis) {
+        gameTimeStart += deltaMillis * 1000000;
     }
     
     public static Stage getStage() {

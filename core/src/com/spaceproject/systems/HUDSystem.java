@@ -215,7 +215,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                     
                     if (showSyncedPos) {
                         //synced orbit position (where the object should be)
-                        Vector2 orbitPos = OrbitSystem.getSyncPos(entity, GameScreen.getGameTimeCurrent());
+                        Vector2 orbitPos = OrbitSystem.getTimeSyncedPos(orbit, GameScreen.getGameTimeCurrent());
                         shape.setColor(uiCFG.orbitSyncPosColor);
                         shape.line(parentPos.pos.x, parentPos.pos.y, orbitPos.x, orbitPos.y);
                     }

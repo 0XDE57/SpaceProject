@@ -143,8 +143,6 @@ public class EntityFactory {
         long seed = MyMath.getSeed(x, y);
         MathUtils.random.setSeed(seed);
         
-        //return createPlanetarySystem(x,y,seed);
-        
         switch (MathUtils.random(2)) {
             case 0:
                 return createPlanetarySystem(x, y, seed);
@@ -152,9 +150,9 @@ public class EntityFactory {
                 return createBinarySystem(x, y, seed);
             case 2:
                 return createRoguePlanet(x, y, seed);
-            default:
-                return createPlanetarySystem(x, y, seed);
         }
+    
+        return createPlanetarySystem(x, y, seed);
     }
     
     public static Array<Entity> createPlanetarySystem(float x, float y) {
@@ -197,9 +195,19 @@ public class EntityFactory {
             boolean hasMoon = MathUtils.randomBoolean();
             if (hasMoon) {
                 float moonDist = planet.getComponent(TextureComponent.class).texture.getWidth() * planet.getComponent(TextureComponent.class).scale * 2;
+                moonDist *= 1.5f;
                 distance += moonDist;
-                Entity moon = createMoon(MyMath.getSeed(x, y + moonDist), planet, moonDist, rotDir);
+                Entity moon = createMoon(MyMath.getSeed(x, y + distance), planet, moonDist, rotDir);
                 entities.add(moon);
+                
+                /* nested test
+                distance += moonDist;
+                Entity moonsMoon = createMoon(MyMath.getSeed(x, y + distance), moon, moonDist, rotDir);
+                entities.add(moonsMoon);
+    
+                distance += moonDist;
+                Entity moonsMoonsMoon = createMoon(MyMath.getSeed(x, y + distance), moonsMoon, moonDist, rotDir);
+                entities.add(moonsMoonsMoon);*/
             }
             
             //addLifeToPlanet(planet);
@@ -362,7 +370,7 @@ public class EntityFactory {
         }
         
         entities.add(planet);
-        Gdx.app.log(EntityFactory.class.getSimpleName(), "Rougue Planet: (" + x + ", " + y + ")");
+        Gdx.app.log(EntityFactory.class.getSimpleName(), "Rogue Planet: (" + x + ", " + y + ")");
         return entities;
     }
     
@@ -389,10 +397,10 @@ public class EntityFactory {
         
         //orbit
         OrbitComponent orbit = new OrbitComponent();
-        orbit.parent = parent; //object to orbit around
-        orbit.radialDistance = radialDistance; //distance relative to star
+        orbit.parent = parent;
+        orbit.radialDistance = radialDistance;
         orbit.tangentialSpeed = MathUtils.random(celestCFG.minPlanetTangentialSpeed, celestCFG.maxPlanetTangentialSpeed);
-        orbit.startAngle = MathUtils.random(MathUtils.PI2); //angle relative to parent
+        orbit.startAngle = MathUtils.random(MathUtils.PI2);
         orbit.rotSpeed = MathUtils.random(celestCFG.minPlanetRot, celestCFG.maxPlanetRot);
         orbit.rotateClockwise = rotationDir;
         
@@ -443,10 +451,10 @@ public class EntityFactory {
         
         //orbit
         OrbitComponent orbit = new OrbitComponent();
-        orbit.parent = parent; //object to orbit around
-        orbit.radialDistance = radialDistance; //distance relative to star
+        orbit.parent = parent;
+        orbit.radialDistance = radialDistance;
         orbit.tangentialSpeed = MathUtils.random(celestCFG.minPlanetTangentialSpeed, celestCFG.maxPlanetTangentialSpeed);
-        orbit.startAngle = MathUtils.random(MathUtils.PI2); //angle relative to parent
+        orbit.startAngle = MathUtils.random(MathUtils.PI2);
         orbit.rotSpeed = MathUtils.random(celestCFG.minPlanetRot, celestCFG.maxPlanetRot);
         orbit.rotateClockwise = rotationDir;
         

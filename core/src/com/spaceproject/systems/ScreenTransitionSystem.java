@@ -287,16 +287,16 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         ImmutableArray<Entity> astroObjects = getEngine().getEntitiesFor(astro);
         for (Entity astroEnt : astroObjects) {
             if (Mappers.seed.get(astroEnt).seed == desiredSeed) {
-                Vector2 orbitPos = OrbitSystem.getSyncPos(astroEnt, GameScreen.getGameTimeCurrent());
+                Gdx.app.log(this.getClass().getSimpleName(), "FOUND SEED " + desiredSeed);
+                
+                //sync entity position with planet that it is leaving from
+                OrbitComponent orbitComp = Mappers.orbit.get(astroEnt);
+                Vector2 orbitPos = OrbitSystem.getTimeSyncedPos(orbitComp, GameScreen.getGameTimeCurrent());
                 Body body = Mappers.physics.get(entity).body;
                 body.setTransform(orbitPos, body.getAngle());
-                OrbitComponent orbit = Mappers.orbit.get(entity);
-                if (orbit != null) {
-                    body.setLinearVelocity(orbit.velocity);
-                }
+                body.setLinearVelocity(orbitComp.velocity);
                 
                 nextStage(screenTrans);
-                Gdx.app.log(this.getClass().getSimpleName(), "FOUND SEED " + desiredSeed);
                 break;
             }
         }

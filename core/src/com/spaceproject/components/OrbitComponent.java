@@ -23,4 +23,6 @@ public class OrbitComponent implements Component {
     //rotation direction
     public boolean rotateClockwise;
     
+    public boolean isProcessed;
+    
 }

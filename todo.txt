@@ -322,7 +322,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [ ] clean up star save/load
     [!] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
         ! actually for now this is a convenient bug for testing
-    [ ] nested orbit: consider children of children eg: satellite->moon->planet->star
+    [x] nested orbit: consider children of children eg: satellite->moon->planet->star
 
 
 [...] rendering system

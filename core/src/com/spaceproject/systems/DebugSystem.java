@@ -49,6 +49,7 @@ import java.util.Set;
 public class DebugSystem extends IteratingSystem implements Disposable {
     
     private DebugConfig debugCFG;
+    private KeyConfig keyCFG;
     private ECSExplorerWindow engineView;
     private Box2DDebugRenderer debugRenderer;
     
@@ -73,6 +74,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     public DebugSystem() {
         super(Family.all(TransformComponent.class).get());
         debugCFG = SpaceProject.configManager.getConfig(DebugConfig.class);
+        keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
         cam = GameScreen.cam;
         batch = GameScreen.batch;
         shape = GameScreen.shape;
@@ -175,7 +177,13 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     
     
     private void updateKeyToggles() {
-        KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
+        if (Gdx.input.isKeyPressed(Input.Keys.NUM_8)) {
+            GameScreen.adjustGameTime(1000);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.NUM_9)) {
+            GameScreen.adjustGameTime(-1000);
+        }
+        
     
         if (Gdx.input.isKeyJustPressed(keyCFG.toggleEngineViewer)) {
             engineView.toggle();
@@ -279,7 +287,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
                     
                     if (showSyncedPos) {
                         //synced orbit position (where the object should be)
-                        Vector2 orbitPos = OrbitSystem.getSyncPos(entity, GameScreen.getGameTimeCurrent());
+                        Vector2 orbitPos = OrbitSystem.getTimeSyncedPos(orbit, GameScreen.getGameTimeCurrent());
                         shape.setColor(orbitSyncPosColor);
                         shape.line(parentPos.pos.x, parentPos.pos.y, orbitPos.x, orbitPos.y);
                     }
