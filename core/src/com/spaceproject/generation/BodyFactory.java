@@ -9,7 +9,6 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.utility.TestScaleThing;
 
 public class BodyFactory {
     
@@ -113,5 +112,17 @@ public class BodyFactory {
         // BodyDef and FixtureDef don't need disposing, but shapes do.
         poly.dispose();
         return body;
+    }
+    
+    public static void addShieldFixtureToBody(Body body, float size) {
+        CircleShape circle = new CircleShape();
+        circle.setRadius(size);
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = circle;
+        fixtureDef.density = 0.5f;
+        fixtureDef.friction = 0.0f;
+        fixtureDef.restitution = 0.6f;
+        body.createFixture(fixtureDef);
+        circle.dispose();
     }
 }

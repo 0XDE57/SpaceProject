@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.CameraFocusComponent;
@@ -407,19 +408,14 @@ public class ControlSystem extends IteratingSystem {
     private void manageShield(Entity entity, ControllableComponent control, ShieldComponent shield) {
         if (shield == null) {
             if (control.defend) {
+                Body body = entity.getComponent(PhysicsComponent.class).body;
+                float radius = Math.max(MyMath.calculateBoundingBox(body).getWidth(), MyMath.calculateBoundingBox(body).getHeight());
+                BodyFactory.addShieldFixtureToBody(body, radius);
+                
                 shield = new ShieldComponent();
                 shield.animTimer = new SimpleTimer(300, true);
                 shield.defence = 100f;
-                Body body = entity.getComponent(PhysicsComponent.class).body;
-                //todo: size should be determined by entire body shape, all shapes, and rendered relative to body size
-                //todo: add box2d shape for shield that matches size of rendered shape. maybe make shape render box2d fixture instead?
-                //or probably should use an image, the mix of layers is more complex with shape for shield. just set z level in front of the ship
-                //should we create a new box2d body on the shield component, of add it to the ships existing fixture?
-                //i think for physics to behave like we want, the shield body should be part of the existing body component?
-                //or separate shield entity with texture component, shield component, attachedComponent(Parent entity), physics component
-                //on hit, transfer force to attachedComponent.parent?
-                float size = body.getFixtureList().first().getShape().getRadius() * 130f;
-                shield.maxRadius = size;
+                shield.maxRadius = radius;
                 shield.color = Color.BLUE;
                 
                 entity.add(shield);
@@ -456,6 +452,10 @@ public class ControlSystem extends IteratingSystem {
         
         
         if (shield.radius <= 0) {
+            Body body = entity.getComponent(PhysicsComponent.class).body;
+            Fixture circleFixture = body.getFixtureList().get(body.getFixtureList().size-1);
+            body.destroyFixture(circleFixture);
+            
             entity.remove(ShieldComponent.class);
         }
     }

@@ -3,8 +3,6 @@ package com.spaceproject.utility;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
@@ -12,7 +10,6 @@ import com.badlogic.gdx.physics.box2d.Manifold;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.HealthComponent;
-import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ShieldComponent;
 
@@ -81,15 +78,15 @@ public class PhysicsContactListener implements ContactListener {
         ShieldComponent shieldComp = Mappers.shield.get(attackedEntity);
         if (shieldComp != null) {
             if (shieldComp.active) {
-                Vector2 pos = Mappers.transform.get(attackedEntity).pos;
-                Circle c = new Circle(pos, shieldComp.radius);
-                //todo: fix, broke shield in physics migration
-                PhysicsComponent physicsComponent = Mappers.physics.get(attackedEntity);
-                //if (PolygonUtil.overlaps(physicsComponent.poly, c)) {
-                    attackedEntity.remove(ShieldComponent.class);
-                    damageEntity.add(new RemoveComponent());
-                    return;
-                //}
+                //Body body = attackedEntity.getComponent(PhysicsComponent.class).body;
+                //Fixture circleFixture = body.getFixtureList().get(body.getFixtureList().size - 1);
+                //body.destroyFixture(circleFixture);//cant remove mid collision
+                //attackedEntity.remove(ShieldComponent.class);
+                shieldComp.radius = -1f;
+                //shieldComp.animTimer.reset();
+                
+                damageEntity.add(new RemoveComponent());
+                return;
             } else {
                 //destroy shield if it isn't fully activated.
                 //todo: "premature break effect", sound effect here, maybe particle effect

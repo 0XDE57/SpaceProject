@@ -138,8 +138,15 @@ todo: focus! i keep jumping between ideas and features and never finish anything
 ***the plan***:
 Spaceship combat will be a core part of gameplay. So lets focus on cleaning that up first.
     End goal: make combat fun. make flight and movement fun.
-    [ ] fix shield physics
-    [...] make bullets better (more visible)
+    [...] fix shield physics
+        [...] if collide with bullet, shrink/destroy shield
+        [ ] fix radius is not consistent. rotation of body affects size of shield. don't trust calculateBoundingBox()?
+        [ ] grow/shrink. looks like cant resize bodies in box2d? destroy and recreate each frame seems inefficient likely
+        [ ] if collide with another body with significant difference in velocity
+            and if other has HealthComponent, do damage using velocity as damage factor
+    [...] make bullets better
+        [...] more visible
+        [ ] make bullets come from front of ship
     [ ] add basic asteroids (arbitrary poly)
         [ ] spec spawner for asteroid. begin make asteroid
     [ ] fix AI a bit (lead shot)
