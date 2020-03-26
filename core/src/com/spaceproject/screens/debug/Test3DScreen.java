@@ -64,11 +64,55 @@ public class Test3DScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+    
+        checkInput(delta);
+    
+        orthographicCam.position.x = playerX;
+        orthographicCam.position.y = playerY;
         
+        
+        orthographicCam.update();
+        batch.setProjectionMatrix(orthographicCam.combined);
+        /*
+        batch.begin();
+        batch.draw(combinedTex, 100,100,50,50);
+
+        int x = Gdx.input.getX();
+        int y = Gdx.graphics.getHeight()-Gdx.input.getY();
+        draw(combinedTex, x, y);
+        draw(shipTop, x + (int)(combinedTex.getWidth()*SpaceProject.entitycfg.renderScale) + 10, y + 25);
+        draw(shipBottom, x + (int)(combinedTex.getWidth()*SpaceProject.entitycfg.renderScale) + 10, y - 25);
+
+        batch.end();
+        */
+        
+        modelBatch.begin(orthographicCam);
+        modelBatch.render(ship3d);
+        modelBatch.end();
+        
+        
+        //ship3d.worldTransform.rotate(Vector3.X, 90 * delta);
+        //ship3d.worldTransform.rotate(Vector3.Y, 60 * delta);
+        //ship3d.worldTransform.rotate(Vector3.Z, 90 * delta);
+        ship3d.worldTransform.setToRotation(Vector3.Z, (MyMath.angleTo(
+                (int) Gdx.graphics.getWidth() / 2,
+                (int) Gdx.graphics.getHeight() / 2,
+                Gdx.input.getX(),
+                Gdx.graphics.getHeight() - Gdx.input.getY()) + 180) * MathUtils.radDeg);
+        
+        
+        ship3d.worldTransform.rotate(Vector3.X, rotX);
+        ship3d.worldTransform.setTranslation(playerX, playerY, -50);//bring z closer to camera so it doesn't clip outside the camera's near & far (should be at least sprites width/height)
+
+    }
+    
+    private void checkInput(float delta) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            MyScreenAdapter.game.setScreen(new TitleScreen(MyScreenAdapter.game));
+        }
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             generateShip();
         }
-        
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             playerX -= 1f;
         }
@@ -81,62 +125,17 @@ public class Test3DScreen extends ScreenAdapter {
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             playerY -= 1f;
         }
-        
         if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
             rotX += 400f * delta;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.E)) {
             rotX -= 400f * delta;
         }
-        
         if (Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
             orthographicCam.zoom += 1 * delta;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
             orthographicCam.zoom -= 1 * delta;
-        }
-        
-        orthographicCam.position.x = playerX;
-        orthographicCam.position.y = playerY;
-        
-        
-        orthographicCam.update();
-        batch.setProjectionMatrix(orthographicCam.combined);
-        /*
-        batch.begin();
-        batch.draw(combinedTex, 100,100,50,50);
-
-
-        int x = Gdx.input.getX();
-        int y = Gdx.graphics.getHeight()-Gdx.input.getY();
-        draw(combinedTex, x, y);
-        draw(shipTop, x + (int)(combinedTex.getWidth()*SpaceProject.entitycfg.renderScale) + 10, y + 25);
-        draw(shipBottom, x + (int)(combinedTex.getWidth()*SpaceProject.entitycfg.renderScale) + 10, y - 25);
-
-        batch.end();
-        */
-        
-        modelBatch.begin(orthographicCam);
-        modelBatch.render(ship3d);//, environment);
-        modelBatch.end();
-        
-        
-        //ship3d.worldTransform.rotate(Vector3.X, 90 * delta);
-        //ship3d.worldTransform.rotate(Vector3.Y, 60 * delta);
-        //ship3d.worldTransform.rotate(Vector3.Z, 90 * delta);
-        ship3d.worldTransform.setToRotation(Vector3.Z, MyMath.angleTo(
-                (int) Gdx.graphics.getWidth() / 2,//ship3d.worldTransform.getTranslation(Vector3.X).x,
-                (int) Gdx.graphics.getHeight() / 2,//ship3d.worldTransform.getTranslation(Vector3.Y).y,
-                Gdx.input.getX(),
-                Gdx.graphics.getHeight() - Gdx.input.getY()) * MathUtils.radDeg);
-        
-        
-        ship3d.worldTransform.rotate(Vector3.X, rotX);
-        ship3d.worldTransform.setTranslation(playerX, playerY, -50);//bring z closer to camera so it doesn't clip outside the camera's near & far (should be at least sprites width/height)
-        
-        
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            MyScreenAdapter.game.setScreen(new TitleScreen(MyScreenAdapter.game));
         }
     }
     
