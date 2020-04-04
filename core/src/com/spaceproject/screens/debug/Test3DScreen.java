@@ -94,11 +94,8 @@ public class Test3DScreen extends ScreenAdapter {
         //ship3d.worldTransform.rotate(Vector3.X, 90 * delta);
         //ship3d.worldTransform.rotate(Vector3.Y, 60 * delta);
         //ship3d.worldTransform.rotate(Vector3.Z, 90 * delta);
-        ship3d.worldTransform.setToRotation(Vector3.Z, (MyMath.angleTo(
-                (int) Gdx.graphics.getWidth() / 2,
-                (int) Gdx.graphics.getHeight() / 2,
-                Gdx.input.getX(),
-                Gdx.graphics.getHeight() - Gdx.input.getY()) + 180) * MathUtils.radDeg);
+        float faceMouse = MyMath.angleTo(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY(), Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+        ship3d.worldTransform.setToRotation(Vector3.Z, faceMouse * MathUtils.radDeg);
         
         
         ship3d.worldTransform.rotate(Vector3.X, rotX);
