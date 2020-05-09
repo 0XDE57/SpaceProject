@@ -452,7 +452,8 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         debugTexts.add(new DebugText(localPos, x, y));
     
         Vector3 worldPos = cam.unproject(new Vector3(x, y, 0));
-        debugTexts.add(new DebugText((int) worldPos.x + "," + (int) worldPos.y, x, y + fontSmall.getLineHeight()));
+        long seed = MyMath.getSeed(worldPos.x, worldPos.y);
+        debugTexts.add(new DebugText((int) worldPos.x + "," + (int) worldPos.y + " (" + seed + ")", x, y + fontSmall.getLineHeight()));
     
         float angle = MyMath.angleTo(Gdx.input.getX(), Gdx.input.getY(), Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
         debugTexts.add(new DebugText(MyMath.round(angle,3) + " / " + MyMath.round(angle * MathUtils.radDeg, 3), x, y + (int) fontSmall.getLineHeight()*2));
