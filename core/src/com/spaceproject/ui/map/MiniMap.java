@@ -200,12 +200,8 @@ public class MiniMap {
             Vector2 velocityScaled = MyMath.logVec(velocity, scale).add(centerMapX, centerMapY);
             shape.rectLine(centerMapX, centerMapY, velocityScaled.x, velocityScaled.y, vecWidth, velocityVecColor, velocityVecColor);
             
-            
             Vector2 facing = MyMath.vector(body.getAngle(), 50000).add(centerMapX, centerMapY);
             shape.rectLine(centerMapX, centerMapY, facing.x, facing.y, 1, orientationColor, orientationColor);
-            
-            Vector2 facingScaled = MyMath.vector(body.getAngle(), facingLength).add(centerMapX, centerMapY);
-            shape.rectLine(centerMapX, centerMapY, facingScaled.x, facingScaled.y, vecWidth, playerMarkerColor, playerMarkerColor);
         }
         
         shape.setColor(playerMarkerColor);
