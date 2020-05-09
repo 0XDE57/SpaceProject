@@ -185,7 +185,6 @@ public class MiniMap {
     private void drawPlayerMarker(ShapeRenderer shape, Entity player, float centerMapX, float centerMapY, int playerMarkerSize, Color playerMarkerColor, Color velocityVecColor, Color orientationColor) {
         if (player != null) {
             float scale = 5;
-            int facingLength = 10;
             int vecWidth = 2;
     
             HyperDriveComponent hyperComp = Mappers.hyper.get(player);
