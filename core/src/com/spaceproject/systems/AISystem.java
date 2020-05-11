@@ -58,7 +58,7 @@ public class AISystem extends IteratingSystem {
                     if (vehicle == null) {
                         Entity closestVehicle = ECSUtil.closestEntity(aiPos, vehicles);
                         if (closestVehicle != null) {
-                            control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
+                            control.angleTargetFace = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
                             control.moveForward = true;
                             control.movementMultiplier = 1f;
                             PhysicsComponent aiPhysics = Mappers.physics.get(entity);
@@ -75,7 +75,7 @@ public class AISystem extends IteratingSystem {
                         }
                     } else {
                         Vector2 pPos = Mappers.transform.get(ai.attackTarget).pos;
-                        control.angleFacing = MyMath.angleTo(pPos, aiPos);
+                        control.angleTargetFace = MyMath.angleTo(pPos, aiPos);
                         control.moveForward = true;
                         control.movementMultiplier = 0.3f;
                         control.attack = true;
@@ -89,7 +89,7 @@ public class AISystem extends IteratingSystem {
                 control.attack = false;
                 
                 //dumb wander
-                control.angleFacing += 1 * delta;
+                control.angleTargetFace += 1 * delta;
                 control.moveForward = true;
                 control.movementMultiplier = 0.1f;
                 
@@ -105,7 +105,7 @@ public class AISystem extends IteratingSystem {
                 if (vehicle == null) {
                     Entity closestVehicle = ECSUtil.closestEntity(aiPos, vehicles);
                     if (closestVehicle != null) {
-                        control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
+                        control.angleTargetFace = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
                         control.moveForward = true;
                         control.movementMultiplier = 0.5f;
                         PhysicsComponent aiPhysics = Mappers.physics.get(entity);
@@ -125,7 +125,7 @@ public class AISystem extends IteratingSystem {
                     if (ai.planetTarget != null) {
                         
                         Vector2 pPos = Mappers.transform.get(ai.planetTarget).pos;
-                        control.angleFacing = MyMath.angleTo(pPos, aiPos);
+                        control.angleTargetFace = MyMath.angleTo(pPos, aiPos);
                         
                         
                         if (aiPos.dst(pPos) < 200f) {
@@ -157,7 +157,7 @@ public class AISystem extends IteratingSystem {
                     // follow player
                     Entity player = getEngine().getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get()).first();
                     Vector2 pPos = Mappers.transform.get(player).pos;
-                    control.angleFacing = MyMath.angleTo(pPos, aiPos);
+                    control.angleTargetFace = MyMath.angleTo(pPos, aiPos);
                     control.moveForward = true;
                     control.movementMultiplier = 0.5f;
                 }
@@ -167,7 +167,7 @@ public class AISystem extends IteratingSystem {
                     // follow closet vehicle
                     Entity closestVehicle = ECSUtil.closestEntity(aiPos, vehicles);
                     if (closestVehicle != null) {
-                        control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
+                        control.angleTargetFace = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
                     }
                     
                     PhysicsComponent playerPhysics = Mappers.physics.get(entity);
@@ -191,7 +191,7 @@ public class AISystem extends IteratingSystem {
                 if (vehicle == null) {
                     Entity closestVehicle = ECSUtil.closestEntity(aiPos, vehicles);
                     if (closestVehicle != null) {
-                        control.angleFacing = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
+                        control.angleTargetFace = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
                         control.moveForward = false;
                         control.movementMultiplier = 0.01f;
                         PhysicsComponent aiPhysics = Mappers.physics.get(entity);

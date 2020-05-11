@@ -113,7 +113,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         
         float angle = MyMath.angleTo(x, Gdx.graphics.getHeight() - y,
                 Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
-        control.angleFacing = angle;
+        control.angleTargetFace = angle;
         return true;
     }
     

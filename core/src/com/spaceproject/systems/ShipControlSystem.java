@@ -118,7 +118,7 @@ public class ShipControlSystem extends IteratingSystem {
             return;
         }
         
-        faceMouse(control, physicsComp, delta);
+        faceTarget(control, physicsComp, delta);
     
         if (control.moveForward) {
             accelerate(control, physicsComp.body, vehicle, delta);
@@ -184,9 +184,8 @@ public class ShipControlSystem extends IteratingSystem {
         }
     }
     
-    private void faceMouse(ControllableComponent control, PhysicsComponent physicsComp, float delta) {
-        //make vehicle face angle from mouse/joystick
-        float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleFacing, faceRotSpeed * delta);
+    private void faceTarget(ControllableComponent control, PhysicsComponent physicsComp, float delta) {
+        float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleTargetFace, faceRotSpeed * delta);
         float impulse = MyMath.getAngularImpulse(physicsComp.body, angle, delta);
         physicsComp.body.applyAngularImpulse(impulse, true);
     }
@@ -326,9 +325,9 @@ public class ShipControlSystem extends IteratingSystem {
         
         Body body = Mappers.physics.get(entity).body;
         //snap to angle to bypass rotation lerp to make dodge feel better/more responsive
-        transform.rotation = control.angleFacing;
+        transform.rotation = control.angleTargetFace;
         body.setAngularVelocity(0);
-        body.setTransform(body.getPosition(), control.angleFacing);
+        body.setTransform(body.getPosition(), control.angleTargetFace);
         
         body.applyLinearImpulse(MyMath.vector(d.direction, d.force), body.getPosition(), true);
     }

@@ -82,7 +82,7 @@ public class MobileInputSystem extends EntitySystem {
         if (joyMovement.isTouched()) {
             
             // face finger
-            control.angleFacing = joyMovement.getAngle();
+            control.angleTargetFace = joyMovement.getAngle();
             
             //apply thrust
             control.movementMultiplier = joyMovement.getPowerRatio();

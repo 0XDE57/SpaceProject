@@ -12,7 +12,7 @@ public class ControllableComponent implements Component {
     public boolean moveBack;
     
     public float movementMultiplier;//analog control [0-1]
-    public float angleFacing;
+    public float angleTargetFace;
     
     //actions
     public boolean attack;

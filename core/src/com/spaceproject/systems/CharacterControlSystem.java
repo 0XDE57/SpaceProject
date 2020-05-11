@@ -55,7 +55,7 @@ public class CharacterControlSystem extends IteratingSystem {
         control.canTransition = false;
         
         //make character face mouse/joystick
-        faceMouse(control, physicsComp, delta);
+        faceTarget(control, physicsComp, delta);
         
         //todo: test moving control into relevant component? eg: if (character.walk) instead?
         if (control.moveForward) {
@@ -69,9 +69,8 @@ public class CharacterControlSystem extends IteratingSystem {
         }
     }
     
-    private void faceMouse(ControllableComponent control, PhysicsComponent physicsComp, float delta) {
-        //make vehicle face angle from mouse/joystick
-        float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleFacing, faceRotSpeed * delta);
+    private void faceTarget(ControllableComponent control, PhysicsComponent physicsComp, float delta) {
+        float angle = MathUtils.lerpAngle(physicsComp.body.getAngle(), control.angleTargetFace, faceRotSpeed * delta);
         float impulse = MyMath.getAngularImpulse(physicsComp.body, angle, delta);
         physicsComp.body.applyAngularImpulse(impulse, true);
     }
