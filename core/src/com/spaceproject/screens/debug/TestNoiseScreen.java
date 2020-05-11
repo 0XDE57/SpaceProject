@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.noise.NoiseGen;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 import com.spaceproject.ui.Tile;
@@ -149,7 +150,8 @@ public class TestNoiseScreen extends MyScreenAdapter implements InputProcessor {
         }
         
         if (visitWorld.isClicked()) {
-            //todo: game.setScreen(new GameScreen(false));
+            //todo:
+            game.setScreen(new GameScreen());
         }
         
         //TODO: make UI sliders for these values

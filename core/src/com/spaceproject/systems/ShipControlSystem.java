@@ -82,6 +82,10 @@ public class ShipControlSystem extends IteratingSystem {
         ScreenTransitionComponent screenTransComp = Mappers.screenTrans.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
         HyperDriveComponent hyperComp = Mappers.hyper.get(entity);
+        
+        if (vehicle == null) {
+            return;
+        }
     
         boolean canAct = (dodgeComp == null && screenTransComp == null && hyperComp == null);
         //boolean canMove = dodgeComp == null && screenTransComp == null;
