@@ -54,7 +54,7 @@ public class ControlSystem extends IteratingSystem {
     
     private float offsetDist = 1.5f;//TODO: dynamic based on ship size
     //TODO: move values to config
-    private float strafeAngle = 40 * MathUtils.degRad;
+    private float maxRollAngle = 40 * MathUtils.degRad;
     private float strafeRot = 3f;
     private float faceRotSpeed = 8f;
     private int hyperModeTimeout = 1000;
@@ -258,19 +258,6 @@ public class ControlSystem extends IteratingSystem {
         }
     }
     
-    private void stabilizeRoll(Sprite3DComponent sprite3D, float strafe) {
-        if (sprite3D != null) {
-            if (sprite3D.renderable.angle > 0) {
-                sprite3D.renderable.angle -= strafe;
-            }
-            if (sprite3D.renderable.angle < 0) {
-                sprite3D.renderable.angle += strafe;
-            }
-            //if (MathUtils.isEqual(sprite3D.renderable.angle, 0, 0.01f))
-            //    sprite3D.renderable.angle = 0;
-        }
-    }
-    
     private static void accelerate(ControllableComponent control, Body body, VehicleComponent vehicle, float delta) {
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
         body.applyForceToCenter(MyMath.vector(body.getAngle(), thrust), true);
@@ -292,30 +279,50 @@ public class ControlSystem extends IteratingSystem {
     
     private void strafeRight(VehicleComponent vehicle, ControllableComponent control, PhysicsComponent physicsComp, Sprite3DComponent sprite3D, float strafe, float delta) {
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
-        physicsComp.body.applyForceToCenter(MyMath.vector(physicsComp.body.getAngle(), thrust).rotate90(-1), true);
+        Vector2 force = MyMath.vector(physicsComp.body.getAngle(), thrust).rotate90(-1);
+        physicsComp.body.applyForceToCenter(force, true);
         
-        //roll
-        if (sprite3D != null) {
-            sprite3D.renderable.angle -= strafe;
-            if (sprite3D.renderable.angle < -strafeAngle) {
-                sprite3D.renderable.angle = -strafeAngle;
-            }
-        }
+        rollRight(sprite3D, strafe);
     }
     
     private void strafeLeft(VehicleComponent vehicle, ControllableComponent control, PhysicsComponent physicsComp, Sprite3DComponent sprite3D, float strafe, float delta) {
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
-        physicsComp.body.applyForceToCenter(MyMath.vector(physicsComp.body.getAngle(), thrust).rotate90(1), true);
-        
-        //roll
+        Vector2 force = MyMath.vector(physicsComp.body.getAngle(), thrust).rotate90(1);
+        physicsComp.body.applyForceToCenter(force, true);
+    
+        rollLeft(sprite3D, strafe);
+    }
+    
+    private void rollRight(Sprite3DComponent sprite3D, float strafe) {
         if (sprite3D != null) {
-            sprite3D.renderable.angle += strafe;
-            if (sprite3D.renderable.angle > strafeAngle) {
-                sprite3D.renderable.angle = strafeAngle;
+            sprite3D.renderable.angle -= strafe;
+            if (sprite3D.renderable.angle < -maxRollAngle) {
+                sprite3D.renderable.angle = -maxRollAngle;
             }
         }
     }
     
+    private void rollLeft(Sprite3DComponent sprite3D, float strafe) {
+        if (sprite3D != null) {
+            sprite3D.renderable.angle += strafe;
+            if (sprite3D.renderable.angle > maxRollAngle) {
+                sprite3D.renderable.angle = maxRollAngle;
+            }
+        }
+    }
+    
+    private void stabilizeRoll(Sprite3DComponent sprite3D, float strafe) {
+        if (sprite3D != null) {
+            if (sprite3D.renderable.angle > 0) {
+                sprite3D.renderable.angle -= strafe;
+            }
+            if (sprite3D.renderable.angle < 0) {
+                sprite3D.renderable.angle += strafe;
+            }
+            //if (MathUtils.isEqual(sprite3D.renderable.angle, 0, 0.01f))
+            //    sprite3D.renderable.angle = 0;
+        }
+    }
     private static void dodgeRight(Entity entity, TransformComponent transform, ControllableComponent control) {
         if (control.timerDodge.canDoEvent() && Mappers.dodge.get(entity) == null) {
             control.timerDodge.reset();
@@ -348,7 +355,7 @@ public class ControlSystem extends IteratingSystem {
         entity.add(d);
         
         Body body = Mappers.physics.get(entity).body;
-        //bypass position lerp to make dodge feel better/more responsive
+        //snap to angle to bypass rotation lerp to make dodge feel better/more responsive
         transform.rotation = control.angleFacing;
         body.setAngularVelocity(0);
         body.setTransform(body.getPosition(), control.angleFacing);
@@ -687,7 +694,7 @@ public class ControlSystem extends IteratingSystem {
     
     private static void refillAmmo(CannonComponent cannon) {
         if (cannon.curAmmo < cannon.maxAmmo && cannon.timerRechargeRate.canDoEvent()) {
-            cannon.curAmmo++; //refill ammo
+            cannon.curAmmo++;
             cannon.timerRechargeRate.reset();
         }
     }
