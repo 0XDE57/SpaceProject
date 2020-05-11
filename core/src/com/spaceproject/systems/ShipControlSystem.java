@@ -45,11 +45,10 @@ import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.SimpleTimer;
 
 
-public class ControlSystem extends IteratingSystem {
+public class ShipControlSystem extends IteratingSystem {
     
     private static EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     private static EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
-    //private ImmutableArray<Entity> vehicles;
     private ImmutableArray<Entity> planets;
     
     private float offsetDist = 1.5f;//TODO: dynamic based on ship size
@@ -59,14 +58,13 @@ public class ControlSystem extends IteratingSystem {
     private float faceRotSpeed = 8f;
     private int hyperModeTimeout = 1000;
     
-    public ControlSystem() {
+    public ShipControlSystem() {
         super(Family.all(ControllableComponent.class, TransformComponent.class).one(CharacterComponent.class, VehicleComponent.class).get());
     }
     
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-        //vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
         planets = engine.getEntitiesFor(Family.all(PlanetComponent.class).get());
     }
     
@@ -74,12 +72,6 @@ public class ControlSystem extends IteratingSystem {
     protected void processEntity(Entity entity, float delta) {
         
         ControllableComponent control = Mappers.controllable.get(entity);
-        /*
-        CharacterComponent character = Mappers.character.get(entity);
-        if (character != null) {
-            controlCharacter(entity, character, control, delta);
-            control.canTransition = false;
-        }*/
         
         VehicleComponent vehicle = Mappers.vehicle.get(entity);
         if (vehicle != null) {
@@ -87,28 +79,6 @@ public class ControlSystem extends IteratingSystem {
         }
         
     }
-    
-    /*
-    //region character controls
-    private void controlCharacter(Entity entity, CharacterComponent character, ControllableComponent control, float delta) {
-        //players position
-        TransformComponent transform = Mappers.transform.get(entity);
-        PhysicsComponent physicsComp = Mappers.physics.get(entity);
-        
-        //make character face mouse/joystick
-        faceMouse(control, physicsComp, delta);
-    
-        if (control.moveForward) {
-            float walkSpeed = character.walkSpeed * control.movementMultiplier * delta;
-            physicsComp.body.applyForceToCenter(MyMath.vector(transform.rotation, walkSpeed), true);
-        }
-        
-        if (control.changeVehicle) {
-            tryEnterVehicle(entity, control);
-        }
-    }
-    //endregion
-    */
     
     //region ship controls
     private void controlShip(Entity entity, VehicleComponent vehicle, ControllableComponent control, float delta) {
@@ -472,59 +442,6 @@ public class ControlSystem extends IteratingSystem {
             transformComp.pos.add(hyperComp.velocity.cpy().scl(delta));
         }
     }
-    
-    /*
-    private void tryEnterVehicle(Entity characterEntity, ControllableComponent control) {
-        if (!control.timerVehicle.canDoEvent())
-            return;
-        
-        control.changeVehicle = false;
-        
-        //get all vehicles and check if player is close to one
-        PhysicsComponent playerPhysics = Mappers.physics.get(characterEntity);
-        for (Entity vehicleEntity : vehicles) {
-            
-            //skip vehicle is occupied
-            if (Mappers.vehicle.get(vehicleEntity).driver != null) {
-                Gdx.app.log(this.getClass().getSimpleName(), "Vehicle [" + Misc.objString(vehicleEntity)
-                        + "] already has a driver [" + Misc.objString(Mappers.vehicle.get(vehicleEntity).driver) + "]!");
-                continue;
-            }
-            
-            //check if character is near a vehicle
-            PhysicsComponent vehiclePhysics = Mappers.physics.get(vehicleEntity);
-            if (playerPhysics.body.getPosition().dst(vehiclePhysics.body.getPosition()) < offsetDist) {
-                
-                enterVehicle(characterEntity, vehicleEntity);
-    
-                control.timerVehicle.reset();
-                
-                return;
-            }
-        }
-    }
-    
-    private void enterVehicle(Entity characterEntity, Entity vehicle) {
-        //set reference
-        Mappers.vehicle.get(vehicle).driver = characterEntity;
-        
-        // transfer focus & controls to vehicle
-        CameraFocusComponent cameraFocus = (CameraFocusComponent) ECSUtil.transferComponent(characterEntity, vehicle, CameraFocusComponent.class);
-        if (cameraFocus != null) {
-            // zoom out camera
-            vehicle.getComponent(CameraFocusComponent.class).zoomTarget = engineCFG.defaultZoomVehicle;
-        }
-        ECSUtil.transferComponent(characterEntity, vehicle, ControllableComponent.class);
-        ECSUtil.transferComponent(characterEntity, vehicle, AIComponent.class);
-        ECSUtil.transferComponent(characterEntity, vehicle, ControlFocusComponent.class);
-        
-        
-        // remove character
-        getEngine().removeEntity(characterEntity);
-        GameScreen.box2dWorld.destroyBody(characterEntity.getComponent(PhysicsComponent.class).body);//todo: try enable/disable instead of delete and recreate
-        characterEntity.getComponent(PhysicsComponent.class).body = null;
-    }
-    */
     
     private void exitVehicle(Entity vehicleEntity, ControllableComponent control) {
         //action timer

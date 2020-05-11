@@ -17,7 +17,7 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(AISystem.class, 3, true, true, true, true, true));
         systems.add(new SysCFG(CameraSystem.class, 10, false, true, true, true, true));
         systems.add(new SysCFG(CharacterControlSystem.class, 4, true, true, true, true, true));
-        systems.add(new SysCFG(ControlSystem.class, 4, true, true, true, true, true));
+        systems.add(new SysCFG(ShipControlSystem.class, 4, true, true, true, true, true));
         systems.add(new SysCFG(DebugSystem.class, 18, false, true, true, true, true));
         systems.add(new SysCFG(DesktopInputSystem.class, 1, true, true, true, true, false));
         systems.add(new SysCFG(ExpireSystem.class, 14, true, true, true, true, true));
