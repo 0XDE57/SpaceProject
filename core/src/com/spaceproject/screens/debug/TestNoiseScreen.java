@@ -15,6 +15,7 @@ import com.spaceproject.generation.noise.NoiseGen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 import com.spaceproject.ui.Tile;
+import com.spaceproject.ui.custom.Button;
 import com.spaceproject.ui.custom.ColorProfile;
 import com.spaceproject.ui.custom.Slider;
 import com.spaceproject.utility.MyMath;
@@ -45,6 +46,8 @@ public class TestNoiseScreen extends MyScreenAdapter implements InputProcessor {
     //feature sliders
     Slider scale, octave, persistence, lacunarity;
     
+    Button visitWorld;
+    
     //color picking tool
     ColorProfile colorProfile;
     
@@ -70,6 +73,8 @@ public class TestNoiseScreen extends MyScreenAdapter implements InputProcessor {
         octave = new Slider("octave", 1, 6, 40, 140, buttonWidth, width, height);//1 - x
         persistence = new Slider("persistence", 0, 1, 40, 100, buttonWidth, width, height);//0 - 1
         lacunarity = new Slider("lacunarity", 0, 5, 40, 60, buttonWidth, width, height);//0 - x
+        
+        visitWorld = new Button("Visit World", Gdx.graphics.getWidth()-100, 0, 100, 40);
         
         colorProfile = new ColorProfile(500, 50, 50, 200);
         loadTestProfile();
@@ -123,6 +128,7 @@ public class TestNoiseScreen extends MyScreenAdapter implements InputProcessor {
         persistence.draw(batch, font);
         lacunarity.draw(batch, font);
         
+        visitWorld.draw(batch, font);
         
         font.draw(batch, "Seed: " + seed, 15, Gdx.graphics.getHeight() - 15);
         font.draw(batch, "Zoom: " + pixelSize, 15, Gdx.graphics.getHeight() - 30);
@@ -140,6 +146,10 @@ public class TestNoiseScreen extends MyScreenAdapter implements InputProcessor {
         if (scale.update() || octave.update()
                 || persistence.update() || lacunarity.update()) {
             change = true;
+        }
+        
+        if (visitWorld.isClicked()) {
+            //todo: game.setScreen(new GameScreen(false));
         }
         
         //TODO: make UI sliders for these values
