@@ -47,9 +47,9 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class ControlSystem extends IteratingSystem {
     
-    private EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
+    private static EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     private static EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
-    private ImmutableArray<Entity> vehicles;
+    //private ImmutableArray<Entity> vehicles;
     private ImmutableArray<Entity> planets;
     
     private float offsetDist = 1.5f;//TODO: dynamic based on ship size
@@ -66,7 +66,7 @@ public class ControlSystem extends IteratingSystem {
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-        vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
+        //vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
         planets = engine.getEntitiesFor(Family.all(PlanetComponent.class).get());
     }
     
@@ -74,12 +74,12 @@ public class ControlSystem extends IteratingSystem {
     protected void processEntity(Entity entity, float delta) {
         
         ControllableComponent control = Mappers.controllable.get(entity);
-        
+        /*
         CharacterComponent character = Mappers.character.get(entity);
         if (character != null) {
             controlCharacter(entity, character, control, delta);
             control.canTransition = false;
-        }
+        }*/
         
         VehicleComponent vehicle = Mappers.vehicle.get(entity);
         if (vehicle != null) {
@@ -88,7 +88,7 @@ public class ControlSystem extends IteratingSystem {
         
     }
     
-    
+    /*
     //region character controls
     private void controlCharacter(Entity entity, CharacterComponent character, ControllableComponent control, float delta) {
         //players position
@@ -108,7 +108,7 @@ public class ControlSystem extends IteratingSystem {
         }
     }
     //endregion
-    
+    */
     
     //region ship controls
     private void controlShip(Entity entity, VehicleComponent vehicle, ControllableComponent control, float delta) {
@@ -473,6 +473,7 @@ public class ControlSystem extends IteratingSystem {
         }
     }
     
+    /*
     private void tryEnterVehicle(Entity characterEntity, ControllableComponent control) {
         if (!control.timerVehicle.canDoEvent())
             return;
@@ -523,6 +524,7 @@ public class ControlSystem extends IteratingSystem {
         GameScreen.box2dWorld.destroyBody(characterEntity.getComponent(PhysicsComponent.class).body);//todo: try enable/disable instead of delete and recreate
         characterEntity.getComponent(PhysicsComponent.class).body = null;
     }
+    */
     
     private void exitVehicle(Entity vehicleEntity, ControllableComponent control) {
         //action timer
