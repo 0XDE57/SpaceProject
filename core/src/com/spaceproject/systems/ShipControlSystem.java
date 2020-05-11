@@ -70,18 +70,12 @@ public class ShipControlSystem extends IteratingSystem {
     
     @Override
     protected void processEntity(Entity entity, float delta) {
-        
-        ControllableComponent control = Mappers.controllable.get(entity);
-        
-        VehicleComponent vehicle = Mappers.vehicle.get(entity);
-        if (vehicle != null) {
-            controlShip(entity, vehicle, control, delta);
-        }
-        
+        controlShip(entity, delta);
     }
     
-    //region ship controls
-    private void controlShip(Entity entity, VehicleComponent vehicle, ControllableComponent control, float delta) {
+    private void controlShip(Entity entity, float delta) {
+        ControllableComponent control = Mappers.controllable.get(entity);
+        VehicleComponent vehicle = Mappers.vehicle.get(entity);
         TransformComponent transformComp = Mappers.transform.get(entity);
         PhysicsComponent physicsComp = Mappers.physics.get(entity);
         DodgeComponent dodgeComp = Mappers.dodge.get(entity);
@@ -292,6 +286,7 @@ public class ShipControlSystem extends IteratingSystem {
             //    sprite3D.renderable.angle = 0;
         }
     }
+    
     private static void dodgeRight(Entity entity, TransformComponent transform, ControllableComponent control) {
         if (control.timerDodge.canDoEvent() && Mappers.dodge.get(entity) == null) {
             control.timerDodge.reset();
@@ -479,10 +474,9 @@ public class ShipControlSystem extends IteratingSystem {
         // add player back into world
         getEngine().addEntity(characterEntity);
     }
-    //endregion
     
     
-    //region transition
+    //region transition todo: move to ScreenTransitionSystem?
     private void takeOffPlanet(Entity entity) {
         if (Mappers.screenTrans.get(entity) != null)
             return;

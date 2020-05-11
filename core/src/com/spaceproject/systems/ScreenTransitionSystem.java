@@ -28,7 +28,7 @@ import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 
-
+//todo: consider separating into separate LandOnPlanetSystem and LeavePlanetSystem
 public class ScreenTransitionSystem extends IteratingSystem implements IRequireGameContext {
     
     private GameScreen gameScreen;
