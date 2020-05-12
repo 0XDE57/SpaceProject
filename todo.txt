@@ -57,7 +57,7 @@ Data Directory (...\SpaceProject\android\assets) *.json: plain text json files t
     WorldConfig: define terrain generation parameters (in progress)
 
 
-Space Background Rendering
+Space Background Rendering (broken)
 	Simple but effective (but also broken when zoom out):
 	3 parallax layers
 		stars close
@@ -314,8 +314,8 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
       }
 
 
-[ ] minimap should show grayscale hightmap of world when on planet
-
+[ ] minimap should show heightmap of world when on planet
+    (fog of war) start out with grayscale pixelated version, when area visited then render full map and color
 
 [...] galaxy generation inspired by fibonacci spiral
     [...] test screen to generate spiral
@@ -346,6 +346,8 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             com.spaceproject.screens.animations.NoiseAnim
         could be done on gpu even:
             https://www.shadertoy.com/view/XscGzl
+    [ ] better planet rendering
+        inspiration: https://github.com/yurkth/astraea
     [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
             maybe something like this:
                 https://www.shadertoy.com/view/ltXSDN
