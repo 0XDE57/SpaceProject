@@ -45,16 +45,47 @@ if they should be active when paused.
 
 
 One goal is to have everything highly configurable. (and perhaps I have gone too far in this direction...?)
-Data Directory (...\SpaceProject\android\assets) *.json: plain text json files that define all values for game
-    CelestialConfig: defines star system generation rules
-    DebugConfig: defines settings like show debug rendering
-    EngineConfig: define physics and rendering constants
-    EntityConfig: define generation parameters for entities
-    KeyConfig: define input keycodes
-    MinimapConfig: define colors and behaviors for minimap
-    SystemsConfig: define system loading priorities and properties
-    UIConfig: define ui element colors and positions
-    WorldConfig: define terrain generation parameters (in progress)
+Data Directory (...\SpaceProject\android\assets)
+    \config: plain text json files that define all values for game
+        CelestialConfig: defines star system generation rules
+        DebugConfig: defines settings like show debug rendering
+        EngineConfig: define physics and rendering constants
+        EntityConfig: define generation parameters for entities
+        KeyConfig: define input keycodes
+        MinimapConfig: define colors and behaviors for minimap
+        SystemsConfig: define system loading priorities and properties
+        UIConfig: define ui element colors and positions
+        WorldConfig: define terrain generation parameters (in progress)
+    \fonts: fonts for UI
+    \shaders: not really used yet, just playing around
+    \sounds: (todo)
+        each sound effect gets it's own folder.
+            if no sound in folder, dont play
+            if one sound in folder, play that
+            if multiple sound in folder, play random
+            allow user configurable chance? what about effects/volume? NO! this is overkill for now but just an idea. Keep it simple...
+        potential structure / implementation might look like
+            music
+                track a
+                track b
+            effects
+                effect a
+
+                effect b
+                effect c
+    \skin: (not implemented, proposed) scene 2d skin
+    \save: (todo) save game files
+        todo: figure out a sensible structure
+        https://github.com/libgdx/libgdx/wiki/Saved-game-serialization
+        save/<galaxy seed>/galaxy?
+            /points of interest?
+            /celestialBodies?
+            /body/<planetseed>?
+        save/<seed>/entities?
+        save/<seed>/planet
+            heightmap
+            world properties
+            entities
 
 
 Space Background Rendering (broken)
@@ -271,48 +302,50 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             this bug is driving me insane, but there's still some transition and loading details to work out
 
 
-[ ] genericize and make work land and take off work for AI, system doesn't support non-player world switching
-      dumb loop where AI lands on planet, kept in some kind of background
-      processing state/alt engine, wait a second then take off to test all is working correctly
-      background engine meant to be low processing effort (eg: ultra dumbed down AI or simulations, no rendering, no physics, just states and events) to keep track of important entities
-      and states between space and worlds. eg: give entity important flag component to keep relevant, if dont have flag dont care and remove when switch
-      will be useful for persistence, AI and story type events.
-      //Example scenario:
-      //    you are on planet, you attack an AI, Ai comes after you. But you leave in your ship.
-      //    then AI gets TimedPersistenceComponent and will remain on planet for 5 minutes waiting for you, because angry!
-      //    maybe they will come after you. this could be very simple. we can fake intelligence in a background system in persistence engine
-      //
-      eg:
-      Engine persistenceEngine.
-      if (player switch screen) {
-          //move important entities from main to background processing
-          for each entity in mainEngine {
-              if (entity has PersistenceComponent) {
-                  persistenceEngine.Add(entity);
-              }
-          }
-          //move relevant entity from background processing to main
-          for each entity in persistenceEngine {
-              if (entity has PersistenceComponent) {
-                  if (is persistence relevant to new context) {
-                      //example relevance:
-                      //player in space, important entity on planet
-                      //if land on planet with important entity, load into actual engine
-                      mainEngine.Add(entity);
-                      //could be more nuanced, like perhaps entity is only loaded when event triggers it
-                      //or specific location on planet. dunno till start implementing.
-                      //possibly have multiple engines handling contexts? (thats dumb and overkill. keep it simple.)
-                  }
-              }
-          }
-      }
-      if (AI switch screen) {
-          //similar thing to above
-          //if relevant load it, else keep in background
+[ ] "Persistence Engine" what to do with rest of universe when on a planet? or stuff going on on planets when we are in space?
+    genericize and make work land and take off work for AI, system doesn't support non-player world switching
+    dumb loop where AI lands on planet, kept in some kind of background
+    processing state/alt engine, wait a second then take off to test all is working correctly
+    background engine meant to be low processing effort (eg: ultra dumbed down AI or simulations, no rendering, no physics, just states and events) to keep track of important entities
+    and states between space and worlds. eg: give entity important flag component to keep relevant, if dont have flag dont care and remove when switch
+    will be useful for persistence, AI and story type events.
+    //Example scenario:
+    //    you are on planet, you attack an AI, Ai comes after you. But you leave in your ship.
+    //    then AI gets TimedPersistenceComponent and will remain on planet for 5 minutes waiting for you, because angry!
+    //    maybe they will come after you. this could be very simple. we can fake intelligence in a background system in persistence engine
+    //
+    eg:
+    Engine persistenceEngine.
+    if (player switch screen) {
+        //move important entities from main to background processing
+        for each entity in mainEngine {
+            if (entity has PersistenceComponent) {
+                persistenceEngine.Add(entity);
+            }
+        }
+        //move relevant entity from background processing to main
+        for each entity in persistenceEngine {
+            if (entity has PersistenceComponent) {
+                if (is persistence relevant to new context) {
+                    //example relevance:
+                    //player in space, important entity on planet
+                    //if land on planet with important entity, load into actual engine
+                    mainEngine.Add(entity);
+                    //could be more nuanced, like perhaps entity is only loaded when event triggers it
+                    //or specific location on planet. dunno till start implementing.
+                    //possibly have multiple engines handling contexts? (thats dumb and overkill. keep it simple.)
+                }
+            }
+        }
+    }
+    if (AI switch screen) {
+        //similar thing to above
+        //if relevant load it, else keep in background
 
-          //if not important, remove from engine, forget about existence
-      }
-
+        //if not important, remove from engine, forget about existence
+    }
+    --- alternatively ---
+    process entities from save files?, can have a system process important things from save
 
 [ ] minimap should show heightmap of world when on planet
     (fog of war) start out with grayscale pixelated version, when area visited then render full map and color
