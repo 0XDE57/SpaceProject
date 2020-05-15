@@ -13,7 +13,7 @@ From those points make a voronoi diagram within the original polygon, then break
 Those pieces can also be hit and broken down further with the same process. Until a certain threshold of
 smallness where we actually destroy the object because there's no point in breaking it own further.
 Upon destruction, chance to drop items/resources for the player to pick up.
-Maybe the asteroid contains gems or water, items which can be used by the player.
+Maybe the asteroid contains resources or items which can be used by the player.
 
 Asteroids could spawn as belts around stars. Or a random asteroid field floating through space.
 A set of asteroids in a group, for the player to mine/destroy.
@@ -35,11 +35,14 @@ should start documenting and specking out the features and where its headed.
 It's half in notes, half in my head, and half in code.
 
 ***architecture***
-Uses an ECS. Systems are dynamically loaded and unloaded per context.
-If you are unfamiliar with the concept of an Entity Component System, start here:
+Uses an ECS. If you are unfamiliar with the concept of an Entity Component System, start here:
     https://github.com/libgdx/ashley/wiki/Framework-overview
-Space and World can have different systems. eg: don't need an orbit system when on a planet.
-Mobile and Desktop can have different systems. eg: don't need to render touch control on desktop
+Components are pure data, no implementation.
+
+Systems are dynamically loaded and unloaded per context. Space and World can have different systems.
+    eg: don't need an orbit system when on a planet.
+Mobile and Desktop can have different systems.
+    eg: don't need to render touch control on desktop
 See SystemsConfig for defining system priories and loading properties such as when to load and
 if they should be active when paused.
 
@@ -110,6 +113,8 @@ Screen transition logic/stages overview
 One of the trickier parts of the engine. Animation states for transition, and dynamic system loading/unloading.
 When animation hits transition state, it calls the system loader and loads/unloads relevant systems based on SystemsConfig
 TODO: should make a proper sequence diagram for this.
+TODO: consider breaking up states into different components?
+    eg: ShrinkComponent,GrowComponent for sptite + body
 
 	Transition action (key press, virtual button on mobile)
 	ControlSystem()
