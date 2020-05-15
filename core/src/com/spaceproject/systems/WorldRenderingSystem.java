@@ -58,6 +58,8 @@ public class WorldRenderingSystem extends IteratingSystem implements IRequireGam
     private Texture tileTex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));
     WorldConfig worldCFG;
     
+    private boolean debugShowEdgeTile = false;
+    
     public WorldRenderingSystem() {
         super(Family.all(TransformComponent.class).one(TextureComponent.class, Sprite3DComponent.class).get());
         worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
@@ -148,7 +150,6 @@ public class WorldRenderingSystem extends IteratingSystem implements IRequireGam
     
     
     private void drawTiles(int tileSize) {
-        
         // calculate tile that the camera is in
         int centerX = (int) (cam.position.x / tileSize);
         int centerY = (int) (cam.position.y / tileSize);
@@ -168,14 +169,16 @@ public class WorldRenderingSystem extends IteratingSystem implements IRequireGam
                 
                 //render tile
                 spriteBatch.setColor(tiles.get(noise.tileMap[tX][tY]).getColor());
-                //if (tX == heightMap.length-1 || tY == heightMap.length-1) batch.setColor(Color.BLACK);
+                if (debugShowEdgeTile) {
+                    if (tX == noise.heightMap.length - 1 || tY == noise.heightMap.length - 1)
+                        spriteBatch.setColor(Color.BLACK);
+                }
                 spriteBatch.draw(tileTex,
                         tileX * tileSize,
                         tileY * tileSize,
                         tileSize, tileSize);
             }
         }
-        
     }
     
     private void draw3DRenderables(float delta) {
