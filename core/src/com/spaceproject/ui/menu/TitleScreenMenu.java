@@ -184,7 +184,7 @@ public class TitleScreenMenu {
         dialog.closeOnEscape();
         dialog.centerWindow();
         
-        dialog.text("a space game inspired by fractals...\nDeveloped with <3 by Whilow Schock");
+        dialog.text("this is a prototype.\nyou can fly ships to explore space, land on planets.\ncurrent state: a neat little engine with little to no content at this time. stay tuned.\n\nDeveloped with <3 by Whilow Schock");
         LinkLabel link = new LinkLabel("https://github.com/0xDE57/SpaceProject");
         link.setListener(new LinkLabel.LinkLabelListener() {
             @Override
