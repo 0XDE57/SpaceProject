@@ -73,7 +73,9 @@ Data Directory (...\SpaceProject\android\assets)
                 track b
             effects
                 effect a
-
+                    effect1.wav
+                    effect2.wav
+                    effect3.wav
                 effect b
                 effect c
     \skin: (not implemented, proposed) scene 2d skin
