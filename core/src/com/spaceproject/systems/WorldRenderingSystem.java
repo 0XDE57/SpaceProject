@@ -160,7 +160,6 @@ public class WorldRenderingSystem extends IteratingSystem implements IRequireGam
         
         for (int tileY = centerY - surround; tileY <= centerY + surround; tileY++) {
             for (int tileX = centerX - surround; tileX <= centerX + surround; tileX++) {
-                
                 //wrap tiles when position is outside of map
                 int tX = tileX % noise.heightMap.length;
                 int tY = tileY % noise.heightMap.length;
@@ -168,11 +167,12 @@ public class WorldRenderingSystem extends IteratingSystem implements IRequireGam
                 if (tY < 0) tY += noise.heightMap.length;
                 
                 //render tile
-                spriteBatch.setColor(tiles.get(noise.tileMap[tX][tY]).getColor());
+                Color tileColor = tiles.get(noise.tileMap[tX][tY]).getColor();
                 if (debugShowEdgeTile) {
                     if (tX == noise.heightMap.length - 1 || tY == noise.heightMap.length - 1)
-                        spriteBatch.setColor(Color.BLACK);
+                        tileColor = Color.BLACK;
                 }
+                spriteBatch.setColor(tileColor);
                 spriteBatch.draw(tileTex,
                         tileX * tileSize,
                         tileY * tileSize,
