@@ -32,10 +32,10 @@ import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
+import com.spaceproject.utility.MyMath;
 import com.spaceproject.utility.ResourceDisposer;
 import com.spaceproject.utility.SystemLoader;
 
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class GameScreen extends MyScreenAdapter {
@@ -58,23 +58,11 @@ public class GameScreen extends MyScreenAdapter {
     public static boolean isDebugMode = true;
     
     public GameScreen() {
-        galaxySeed = initSeed();
         initUI();
         
         initCore();
     
         initGame(true);
-    }
-    
-    private long initSeed() {
-        long newSeed = new Random().nextLong();
-    
-        if (isDebugMode) {
-            newSeed = 4; //test seed
-        }
-        Gdx.app.log(this.getClass().getSimpleName(), "galaxy seed: " + newSeed);
-        
-        return newSeed;
     }
     
     private void initUI() {
@@ -86,6 +74,7 @@ public class GameScreen extends MyScreenAdapter {
         VisUI.getSkin().add(FontFactory.skinSmallFont, font);
     
         stage = new Stage(new ScreenViewport());
+        getInputMultiplexer().addProcessor(0, stage);
     }
     
     private void initCore() {
@@ -100,27 +89,25 @@ public class GameScreen extends MyScreenAdapter {
             EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
             noiseManager = new NoiseManager(engineCFG.maxNoiseGenThreads);
         }
-        
-        getInputMultiplexer().addProcessor(0, stage);
     }
     
     private void initGame(boolean space) {
         inSpace = space;
         
-        //content
+        //init content and entities
+        galaxySeed = MyMath.getNewGalaxySeed();
         galaxy = new Galaxy();
         
+        Entity playerShip = EntityFactory.createPlayerShip(0, 0, inSpace);
         
-        // load test default values
-        Entity playerTESTSHIP = EntityFactory.createPlayerShip(0, 0, inSpace);
-        
+        //initSystems
         if (inSpace) {
-            initSpace(playerTESTSHIP);
+            initSpace(playerShip);
         } else {
             Entity planet = EntityFactory.createPlanet(0, new Entity(), 0, false);
             Gdx.app.log(this.getClass().getSimpleName(), "DEBUG PLANET LOADED");
             
-            initWorld(playerTESTSHIP, planet);
+            initWorld(playerShip, planet);
         }
         
         gameTimeStart = System.nanoTime();
@@ -133,7 +120,6 @@ public class GameScreen extends MyScreenAdapter {
         
         SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
         SystemLoader.loadSystems(this, engine, inSpace, systemsCFG);
-        
         
         //add player
         engine.addEntity(transitioningEntity);
@@ -194,18 +180,7 @@ public class GameScreen extends MyScreenAdapter {
         }
         
         
-        //adjust physics (no friction in space)
-        for (Entity e : transitioningEntities) {
-            Body body = e.getComponent(PhysicsComponent.class).body;
-            if (inSpace) {
-                body.setLinearDamping(0);
-                body.setAngularDamping(0);
-            } else {
-                //todo: move to values to engine/world config
-                body.setAngularDamping(30);
-                body.setLinearDamping(45);
-            }
-        }
+        adjustPhysics(transitioningEntities);
         
         /*TODO: persist
         for (Entity relevantEntity : backgroundEngine.getEntities()) {
@@ -214,6 +189,21 @@ public class GameScreen extends MyScreenAdapter {
         }*/
         
         resetCamera();
+    }
+    
+    private void adjustPhysics(ImmutableArray<Entity> entities) {
+        for (Entity e : entities) {
+            Body body = e.getComponent(PhysicsComponent.class).body;
+            if (inSpace) {
+                //no friction in space
+                body.setLinearDamping(0);
+                body.setAngularDamping(0);
+            } else {
+                //todo: move to values to engine/world config
+                body.setAngularDamping(30);
+                body.setLinearDamping(45);
+            }
+        }
     }
     //endregion
     
@@ -303,8 +293,8 @@ public class GameScreen extends MyScreenAdapter {
         }
         
         //enable/disable systems
+        SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
         for (EntitySystem system : engine.getSystems()) {
-            SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
             SysCFG sysCFG = systemsCFG.getConfig(system.getClass().getName());
             if (sysCFG.isHaltOnGamePause()) {
                 system.setProcessing(!isPaused);

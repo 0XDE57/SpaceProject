@@ -116,7 +116,7 @@ One of the trickier parts of the engine. Animation states for transition, and dy
 When animation hits transition state, it calls the system loader and loads/unloads relevant systems based on SystemsConfig
 TODO: should make a proper sequence diagram for this.
 TODO: consider breaking up states into different components?
-    eg: ShrinkComponent,GrowComponent for sptite + body
+    eg: ShrinkComponent,GrowComponent for sprite + body
 
 	Transition action (key press, virtual button on mobile)
 	ControlSystem()
@@ -462,6 +462,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     I would expect all references to a system/family membership to be when a system is removed from the engine.
     This may be intended behavior and I am using ashley wrong, need to reproduce these in a new project to confirm...
     In the context of this game, both occurrences where triggered when going transitioning between space/world which involves loading and unloading specific systems.
+    https://github.com/0XDE57/SpaceProject/commit/012bd0bdea4ef5c95b6f8b9454e96a7007d4c7ac
     [A] scenario A:
         1. create engine.
         2. add a new instance of system (SystemA) to engine that subscribes to a family

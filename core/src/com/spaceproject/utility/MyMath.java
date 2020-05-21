@@ -1,5 +1,6 @@
 package com.spaceproject.utility;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -8,6 +9,8 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.spaceproject.screens.GameScreen;
+
+import java.util.Random;
 
 public abstract class MyMath {
     
@@ -20,6 +23,16 @@ public abstract class MyMath {
         return (x << 32) + y + GameScreen.getGalaxySeed();
     }
     
+    public static long getNewGalaxySeed() {
+        long newSeed = new Random().nextLong();
+        
+        if (GameScreen.isDebugMode) {
+            newSeed = 4; //test seed
+        }
+        Gdx.app.log("MyMath", "galaxy seed: " + newSeed);
+        
+        return newSeed;
+    }
     
     static final Vector2 tmpVec = new Vector2();
     
