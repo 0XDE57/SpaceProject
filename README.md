@@ -54,8 +54,8 @@ Actively...and painfully slowly...in progress... It doesn't even have sound and 
 | Movement                       | WASD         | Left Joystick                            |                    |
 | Aim                            | Mouse        | Left Joystick                            |                    |
 | Attack / Shoot                 | Right-Click  | bottom right button                      |                    |
-| Defense / Shield               | Shift        | todo                                     |                    |
-| Defense / Dodge (Barrel Roll)  | ALT + A/D    | todo                                     |                    |
+| Defense / Shield               | Alt          | todo                                     |                    |
+| Defense / Dodge (Barrel Roll)  | Shift + A/D  | todo                                     |                    |
 | Toggle HyperDrive              | 1            | todo                                     |                    |
 | Land/Take Off                  | T            | top center when over planet              |                    |
 | Enter/Exit vehicle             | G            | bottom right small button when in/near vehicle |                    |
