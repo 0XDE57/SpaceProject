@@ -53,9 +53,9 @@ public class KeyConfig extends Config {
         right = Keys.D;
         left = Keys.A;
         back = Keys.S;
-        alter = Keys.ALT_LEFT;
+        alter = Keys.SHIFT_LEFT;
         attack = Keys.SPACE;
-        defend = Keys.SHIFT_LEFT;
+        defend = Keys.ALT_LEFT;
         changeVehicle = Keys.G;
         land = Keys.T;
         actionA = Keys.NUM_1;
