@@ -49,16 +49,19 @@ if they should be active when paused.
 
 One goal is to have everything highly configurable. (and perhaps I have gone too far in this direction...?)
 Data Directory (...\SpaceProject\android\assets)
-    \config: plain text json files that define all values for game
-        CelestialConfig: defines star system generation rules
-        DebugConfig: defines settings like show debug rendering
-        EngineConfig: define physics and rendering constants
-        EntityConfig: define generation parameters for entities
-        KeyConfig: define input keycodes
-        MinimapConfig: define colors and behaviors for minimap
-        SystemsConfig: define system loading priorities and properties
-        UIConfig: define ui element colors and positions
-        WorldConfig: define terrain generation parameters (in progress)
+    \config:
+        plain text json files that define all values for game. these files will be written on first run of the game.
+        if no config exists, default is loaded and written to disk. if config exists on disk, it is loaded.
+        [default always loaded when debugDevForceLoadDefault = true]
+            CelestialConfig: defines star system generation rules
+            DebugConfig: defines settings like show debug rendering
+            EngineConfig: define physics and rendering constants
+            EntityConfig: define generation parameters for entities
+            KeyConfig: define input keycodes
+            MinimapConfig: define colors and behaviors for minimap
+            SystemsConfig: define system loading priorities and properties
+            UIConfig: define ui element colors and positions
+            WorldConfig: define terrain generation parameters (in progress)
     \fonts: fonts for UI
     \shaders: not really used yet, just playing around
     \sounds: (todo)
