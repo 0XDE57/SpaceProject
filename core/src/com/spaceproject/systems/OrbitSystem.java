@@ -50,8 +50,11 @@ public class OrbitSystem extends IteratingSystem {
             updateBody(orbit.parent, delta);
             
             syncOrbit(orbit, position);
-            
-            orbit.velocity.add(Mappers.orbit.get(orbit.parent).velocity);
+    
+            OrbitComponent orbitComponent = Mappers.orbit.get(orbit.parent);
+            if (orbitComponent != null) {
+                orbit.velocity.add(orbitComponent.velocity);
+            }
         }
         
         //add velocity to position
