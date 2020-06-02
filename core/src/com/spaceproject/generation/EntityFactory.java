@@ -111,7 +111,7 @@ public class EntityFactory {
         GameScreen.box2dWorld.destroyBody(physicsComponent.body);
         physicsComponent.body = null;
         
-        Entity playerShip = createShip3(x, y, 0, player, inSpace);
+        Entity playerShip = createBasicShip(x, y, 0, player, inSpace);
         
         ECSUtil.transferComponent(player, playerShip, ControlFocusComponent.class);
         ECSUtil.transferComponent(player, playerShip, ControllableComponent.class);
@@ -128,7 +128,7 @@ public class EntityFactory {
         GameScreen.box2dWorld.destroyBody(physicsComponent.body);
         physicsComponent.body = null;
         
-        Entity aiShip = createShip3(x, y, 0, ai, inSpace);
+        Entity aiShip = createBasicShip(x, y, 0, ai, inSpace);
         ECSUtil.transferComponent(ai, aiShip, AIComponent.class);
         ECSUtil.transferComponent(ai, aiShip, ControllableComponent.class);
         return aiShip;
@@ -475,15 +475,15 @@ public class EntityFactory {
     
     
     //region ships
-    public static Entity createShip3(float x, float y, boolean inSpace) {
-        return createShip3(x, y, null, inSpace);
+    public static Entity createBasicShip(float x, float y, boolean inSpace) {
+        return createBasicShip(x, y, null, inSpace);
     }
     
-    public static Entity createShip3(float x, float y, Entity driver, boolean inSpace) {
-        return createShip3(x, y, MyMath.getSeed(x, y), driver, inSpace);
+    public static Entity createBasicShip(float x, float y, Entity driver, boolean inSpace) {
+        return createBasicShip(x, y, MyMath.getSeed(x, y), driver, inSpace);
     }
     
-    public static Entity createShip3(float x, float y, long seed, Entity driver, boolean inSpace) {
+    public static Entity createBasicShip(float x, float y, long seed, Entity driver, boolean inSpace) {
         Entity entity = new Entity();
         
         MathUtils.random.setSeed(seed);
@@ -557,8 +557,8 @@ public class EntityFactory {
         return entity;
     }
     
-    public static Entity createShip3Test(float x, float y, long seed, Entity driver, boolean inSpace) {
-        Entity ship = createShip3(x, y, seed, driver, inSpace);
+    public static Entity createShipTest(float x, float y, long seed, Entity driver, boolean inSpace) {
+        Entity ship = createBasicShip(x, y, seed, driver, inSpace);
         ship.remove(CannonComponent.class);
         
         GrowCannonComponent growCannon = new GrowCannonComponent();
@@ -571,7 +571,6 @@ public class EntityFactory {
         
         return ship;
     }
-    
     //endregion
     
     

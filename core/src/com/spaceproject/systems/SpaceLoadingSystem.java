@@ -80,10 +80,10 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     public void initMobs(Engine engine) {
         //a placeholder to add dummy objects for now
         
-        engine.addEntity(EntityFactory.createShip3(-20, 40, GameScreen.inSpace()));
-        engine.addEntity(EntityFactory.createShip3(-30, 40, GameScreen.inSpace()));
-        engine.addEntity(EntityFactory.createShip3(-40, 40, GameScreen.inSpace()));
-        engine.addEntity(EntityFactory.createShip3(-60, 40, GameScreen.inSpace()));
+        engine.addEntity(EntityFactory.createBasicShip(-20, 40, GameScreen.inSpace()));
+        engine.addEntity(EntityFactory.createBasicShip(-30, 40, GameScreen.inSpace()));
+        engine.addEntity(EntityFactory.createBasicShip(-40, 40, GameScreen.inSpace()));
+        engine.addEntity(EntityFactory.createBasicShip(-60, 40, GameScreen.inSpace()));
         
         
         Entity aiTest = EntityFactory.createCharacterAI(0, 40);

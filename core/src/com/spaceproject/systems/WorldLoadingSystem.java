@@ -27,8 +27,8 @@ public class WorldLoadingSystem extends EntitySystem {
         // test ships
         int position = mapSize * worldCFG.tileSize / 2;//set  position to middle of planet
         
-        engine.addEntity(EntityFactory.createShip3(position + 10, position + 10, GameScreen.inSpace()));
-        engine.addEntity(EntityFactory.createShip3(position - 10, position + 10, GameScreen.inSpace()));
+        engine.addEntity(EntityFactory.createBasicShip(position + 10, position + 10, GameScreen.inSpace()));
+        engine.addEntity(EntityFactory.createBasicShip(position - 10, position + 10, GameScreen.inSpace()));
         
         Entity aiTest = EntityFactory.createCharacterAI(position, position + 10);
         Mappers.AI.get(aiTest).state = AIComponent.State.dumbwander;
