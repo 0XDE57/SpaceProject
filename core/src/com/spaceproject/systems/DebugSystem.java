@@ -436,7 +436,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
             TransformComponent t = Mappers.transform.get(entity);
             
             //String vel = " ~ " + MyMath.round(t.velocity.len(), 1);
-            String info = Math.round(t.pos.x) + "," + Math.round(t.pos.y);
+            String info = MyMath.round(t.pos.x, 1) + "," + MyMath.round(t.pos.y, 1);
             
             Vector3 screenPos = cam.project(new Vector3(t.pos.cpy(), 0));
             debugTexts.add(new DebugText(Integer.toHexString(entity.hashCode()), screenPos.x, screenPos.y));
