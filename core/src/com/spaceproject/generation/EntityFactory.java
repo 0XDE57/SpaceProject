@@ -499,25 +499,20 @@ public class EntityFactory {
         transform.rotation = (float) Math.PI / 2; //face upwards
         
         //generate random even size
-        int size;
-        do {
-            //generate even size
-            size = MathUtils.random(entityCFG.shipSizeMin, entityCFG.shipSizeMax);
-        } while (size % 2 == 1);
-    
-       
-        Texture shipTop = TextureFactory.generateShip(seed, size);
+        int shipSize = MathUtils.random(entityCFG.shipSizeMin, entityCFG.shipSizeMax) * 2;
+        Texture shipTop = TextureFactory.generateShip(seed, shipSize);
         Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
+        float bodyScale = 0.1f;//TODO: map this to engine config scale
+        float spriteScale = 0.025f;//TODO: better way to manage render scale (3d vs tex, relation to physics body)
+        float width = shipTop.getWidth() * bodyScale;
+        float height = shipTop.getHeight() * bodyScale;
+        
         Sprite3DComponent sprite3DComp = new Sprite3DComponent();
         sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom, engineCFG.entityScale);
-        float s = 0.025f;//TODO: better way to manage render scale (3d vs tex, relation to physics body)
-        sprite3DComp.renderable.scale.set(s, s, s);
+        sprite3DComp.renderable.scale.set(spriteScale, spriteScale, spriteScale);
         
         //collision detection
         PhysicsComponent physics = new PhysicsComponent();
-        float scale = 0.1f;//TODO: map this to engine config scale
-        float width = shipTop.getWidth() * scale;
-        float height = shipTop.getHeight() * scale;
         physics.body = BodyFactory.createShip(x, y, width, height, entity, inSpace);
         
         //weapon
@@ -596,9 +591,14 @@ public class EntityFactory {
         Body sourceBody = owner.getComponent(PhysicsComponent.class).body;
         BoundingBox sourceBounds = MyMath.calculateBoundingBox(sourceBody);
         //todo: make spawn point from a gun at front of ship, for now just outside of body bounds
-        Vector2 spawnPos = source.pos.add(MyMath.vector(sourceBody.getAngle(), Math.min(sourceBounds.getWidth(), sourceBounds.getHeight())));
+        //float projectileSize = Math.max(texture.texture.getWidth(), texture.texture.getHeight());
+        float len = 1.5f; //Math.min(sourceBounds.getWidth(), sourceBounds.getHeight());
+        Vector2 spawnPos = source.pos.add(MyMath.vector(sourceBody.getAngle(), len));
         float width = texture.texture.getWidth() * scale;
         float height = texture.texture.getHeight() * scale;
+        //System.out.println(len + ", " + sourceBounds.getWidth() + "," + sourceBounds.getHeight());
+        //System.out.println(texture.texture.getWidth() + ", " + texture.texture.getHeight());
+        //System.out.println(projectileSize);
         physics.body = BodyFactory.createRect(spawnPos.x, spawnPos.y, width, height, BodyDef.BodyType.DynamicBody);
         physics.body.setTransform(spawnPos, source.rotation);
     
