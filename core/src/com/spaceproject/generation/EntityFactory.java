@@ -6,12 +6,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.collision.BoundingBox;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
+import com.spaceproject.components.AISpawnComponent;
 import com.spaceproject.components.AstronomicalComponent;
 import com.spaceproject.components.BarycenterComponent;
 import com.spaceproject.components.CameraFocusComponent;
@@ -28,7 +27,6 @@ import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.SeedComponent;
-import com.spaceproject.components.AISpawnComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -502,10 +500,10 @@ public class EntityFactory {
         int shipSize = MathUtils.random(entityCFG.shipSizeMin, entityCFG.shipSizeMax) * 2;
         Texture shipTop = TextureFactory.generateShip(seed, shipSize);
         Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
-        float bodyScale = 0.1f;//TODO: map this to engine config scale
+        
         float spriteScale = 0.025f;//TODO: better way to manage render scale (3d vs tex, relation to physics body)
-        float width = shipTop.getWidth() * bodyScale;
-        float height = shipTop.getHeight() * bodyScale;
+        float width = shipTop.getWidth() * engineCFG.bodyScale;
+        float height = shipTop.getHeight() * engineCFG.bodyScale;
         
         Sprite3DComponent sprite3DComp = new Sprite3DComponent();
         sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom, engineCFG.entityScale);
@@ -524,6 +522,7 @@ public class EntityFactory {
         cannon.size = entityCFG.cannonSize; //higher is bigger
         cannon.velocity = entityCFG.cannonVelocity; //higher is faster
         cannon.acceleration = entityCFG.cannonAcceleration;
+        cannon.anchorVec = new Vector2(width/2+0.2f, 0);
         cannon.timerRechargeRate = new SimpleTimer(entityCFG.cannonRechargeRate);//lower is faster
         
         
@@ -576,40 +575,32 @@ public class EntityFactory {
     //endregion
     
     
-    public static Entity createMissile(TransformComponent source, CannonComponent cannon, Entity owner) {
+    public static Entity createMissile(TransformComponent sourceTransform, CannonComponent cannon, Entity parentEntity) {
         Entity entity = new Entity();
-        float scale = 0.1f;
         
         //create texture
         TextureComponent texture = new TextureComponent();
         texture.texture = TextureFactory.generateProjectile();
-        texture.scale = scale;
+        texture.scale = engineCFG.bodyScale;
         
-        //bounding box
+        
+        //physics
         PhysicsComponent physics = new PhysicsComponent();
-        
-        Body sourceBody = owner.getComponent(PhysicsComponent.class).body;
-        BoundingBox sourceBounds = MyMath.calculateBoundingBox(sourceBody);
-        //todo: make spawn point from a gun at front of ship, for now just outside of body bounds
-        //float projectileSize = Math.max(texture.texture.getWidth(), texture.texture.getHeight());
-        float len = 1.5f; //Math.min(sourceBounds.getWidth(), sourceBounds.getHeight());
-        Vector2 spawnPos = source.pos.add(MyMath.vector(sourceBody.getAngle(), len));
-        float width = texture.texture.getWidth() * scale;
-        float height = texture.texture.getHeight() * scale;
-        //System.out.println(len + ", " + sourceBounds.getWidth() + "," + sourceBounds.getHeight());
-        //System.out.println(texture.texture.getWidth() + ", " + texture.texture.getHeight());
-        //System.out.println(projectileSize);
-        physics.body = BodyFactory.createRect(spawnPos.x, spawnPos.y, width, height, BodyDef.BodyType.DynamicBody);
-        physics.body.setTransform(spawnPos, source.rotation);
-    
-        Vector2 ownerVel = sourceBody.getLinearVelocity();
-        Vector2 velocity = MyMath.vector(sourceBody.getAngle(), 60).add(ownerVel);
-        physics.body.setLinearVelocity(velocity);
+        float bodyWidth = texture.texture.getWidth() * engineCFG.bodyScale;
+        float bodyHeight = texture.texture.getHeight() * engineCFG.bodyScale;
+        Vector2 spawnPos = sourceTransform.pos.add(cannon.anchorVec);
+        Vector2 sourceVel = parentEntity.getComponent(PhysicsComponent.class).body.getLinearVelocity();
+        Vector2 projectileVel = MyMath.vector(cannon.aimAngle, cannon.velocity).add(sourceVel);
+        physics.body = BodyFactory.createRect(spawnPos.x, spawnPos.y, bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody);
+        physics.body.setTransform(spawnPos, sourceTransform.rotation);
+        physics.body.setLinearVelocity(projectileVel);
         physics.body.setBullet(true);//turn on CCD
         physics.body.setUserData(entity);
         
-        //set position, orientation, velocity and acceleration
+        
         TransformComponent transform = new TransformComponent();
+        transform.pos.set(physics.body.getPosition());
+        transform.rotation = physics.body.getAngle();
         transform.zOrder = -9;//in front of background objects(eg: planets, tiles), behind collide-able objects (eg: players, vehicles)
         
         //set expire time
@@ -619,7 +610,7 @@ public class EntityFactory {
         //missile damage
         DamageComponent missile = new DamageComponent();
         missile.damage = cannon.damage;
-        missile.source = owner;
+        missile.source = parentEntity;
         
         
         entity.add(missile);

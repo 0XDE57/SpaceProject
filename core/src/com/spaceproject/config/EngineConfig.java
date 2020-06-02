@@ -12,6 +12,7 @@ public class EngineConfig extends Config {
     public float viewportHeight;
     
     public float entityScale;
+    public float bodyScale;
     public float meterPerUnit;
     public int pixelPerUnit;
     
@@ -34,6 +35,7 @@ public class EngineConfig extends Config {
         viewportHeight = 720;
         
         entityScale = 4.0f;
+        bodyScale = 0.1f;
         meterPerUnit = 0.1f;
         pixelPerUnit = 2;
         
@@ -41,7 +43,8 @@ public class EngineConfig extends Config {
         physicsPositionIterations = 2;
         physicsStepPerFrame = 60;
         
-        maxNoiseGenThreads = Gdx.app.getType() == Application.ApplicationType.Desktop ? 4 : 2; //Runtime.getRuntime().availableProcessors()-1;
+        maxNoiseGenThreads = Gdx.app.getType() == Application.ApplicationType.Desktop ? 4 : 2;
+        //maxNoiseGenThreads = Math.max(1, Runtime.getRuntime().availableProcessors()-2);
         
         defaultZoomCharacter = 0.5f;
         defaultZoomVehicle = 1.0f;

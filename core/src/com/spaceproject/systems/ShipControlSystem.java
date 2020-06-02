@@ -598,6 +598,8 @@ public class ShipControlSystem extends IteratingSystem {
         }
         
         //create missile
+        cannon.anchorVec.setAngleRad(transform.rotation);
+        cannon.aimAngle = transform.rotation;
         Entity missile = EntityFactory.createMissile(transform, cannon, owner);
         getEngine().addEntity(missile);
         
