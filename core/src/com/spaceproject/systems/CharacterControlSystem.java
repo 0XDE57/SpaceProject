@@ -48,22 +48,17 @@ public class CharacterControlSystem extends IteratingSystem {
     
     private void controlCharacter(Entity entity,  float delta) {
         ControllableComponent control = Mappers.controllable.get(entity);
-        CharacterComponent character = Mappers.character.get(entity);
-        TransformComponent transform = Mappers.transform.get(entity);
         PhysicsComponent physicsComp = Mappers.physics.get(entity);
-    
-        control.canTransition = false;
         
         //make character face mouse/joystick
         faceTarget(control, physicsComp, delta);
         
-        //todo: test moving control into relevant component? eg: if (character.walk) instead?
         if (control.moveForward) {
+            CharacterComponent character = Mappers.character.get(entity);
             float walkSpeed = character.walkSpeed * control.movementMultiplier * delta;
-            physicsComp.body.applyForceToCenter(MyMath.vector(transform.rotation, walkSpeed), true);
+            physicsComp.body.applyForceToCenter(MyMath.vector(physicsComp.body.getAngle(), walkSpeed), true);
         }
         
-        //character.enterVehicle
         if (control.changeVehicle) {
             tryEnterVehicle(entity, control);
         }
@@ -85,21 +80,18 @@ public class CharacterControlSystem extends IteratingSystem {
         PhysicsComponent playerPhysics = Mappers.physics.get(characterEntity);
         for (Entity vehicleEntity : vehicles) {
             
-            //skip vehicle is occupied //isVehicleOcupado?
+            //skip vehicle is occupied
             if (Mappers.vehicle.get(vehicleEntity).driver != null) {
                 Gdx.app.log(this.getClass().getSimpleName(), "Vehicle [" + Misc.objString(vehicleEntity)
                         + "] already has a driver [" + Misc.objString(Mappers.vehicle.get(vehicleEntity).driver) + "]!");
                 continue;
             }
             
-            //check if character is near a vehicle
+            //if character is near a vehicle, enter
             PhysicsComponent vehiclePhysics = Mappers.physics.get(vehicleEntity);
             if (playerPhysics.body.getPosition().dst(vehiclePhysics.body.getPosition()) < offsetDist) {
-                
                 enterVehicle(characterEntity, vehicleEntity);
-                
                 control.timerVehicle.reset();
-                
                 return;
             }
         }
@@ -113,17 +105,17 @@ public class CharacterControlSystem extends IteratingSystem {
         CameraFocusComponent cameraFocus = (CameraFocusComponent) ECSUtil.transferComponent(characterEntity, vehicle, CameraFocusComponent.class);
         if (cameraFocus != null) {
             // zoom out camera
-            vehicle.getComponent(CameraFocusComponent.class).zoomTarget = engineCFG.defaultZoomVehicle;
+            cameraFocus.zoomTarget = engineCFG.defaultZoomVehicle;
         }
         ECSUtil.transferComponent(characterEntity, vehicle, ControllableComponent.class);
         ECSUtil.transferComponent(characterEntity, vehicle, AIComponent.class);
         ECSUtil.transferComponent(characterEntity, vehicle, ControlFocusComponent.class);
         
-        
         // remove character
         getEngine().removeEntity(characterEntity);
-        GameScreen.box2dWorld.destroyBody(characterEntity.getComponent(PhysicsComponent.class).body);//todo: try enable/disable instead of delete and recreate?
-        characterEntity.getComponent(PhysicsComponent.class).body = null;
+        PhysicsComponent physicsComponent = characterEntity.getComponent(PhysicsComponent.class);
+        GameScreen.box2dWorld.destroyBody(physicsComponent.body);
+        physicsComponent.body = null;
     }
     
 }

@@ -29,8 +29,8 @@ public class EngineConfig extends Config {
     @Override
     public void loadDefault() {
         vsync = true;
-        renderScale = 30f;
         
+        renderScale = 30f;
         viewportWidth = 1280;
         viewportHeight = 720;
         

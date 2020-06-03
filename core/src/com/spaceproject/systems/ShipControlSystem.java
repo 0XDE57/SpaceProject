@@ -17,7 +17,6 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
-import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DamageComponent;
@@ -59,7 +58,7 @@ public class ShipControlSystem extends IteratingSystem {
     private int hyperModeTimeout = 1000;
     
     public ShipControlSystem() {
-        super(Family.all(ControllableComponent.class, TransformComponent.class).one(CharacterComponent.class, VehicleComponent.class).get());
+        super(Family.all(ControllableComponent.class, TransformComponent.class, VehicleComponent.class).get());
     }
     
     @Override
@@ -74,21 +73,20 @@ public class ShipControlSystem extends IteratingSystem {
     }
     
     private void controlShip(Entity entity, float delta) {
+        if (Mappers.screenTrans.get(entity) != null) {
+            //don't allow control of ship while landing or takeoff
+            return;
+        }
+        
         ControllableComponent control = Mappers.controllable.get(entity);
         VehicleComponent vehicle = Mappers.vehicle.get(entity);
         TransformComponent transformComp = Mappers.transform.get(entity);
         PhysicsComponent physicsComp = Mappers.physics.get(entity);
         DodgeComponent dodgeComp = Mappers.dodge.get(entity);
-        ScreenTransitionComponent screenTransComp = Mappers.screenTrans.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
         HyperDriveComponent hyperComp = Mappers.hyper.get(entity);
         
-        if (vehicle == null) {
-            return;
-        }
-    
-        boolean canAct = (dodgeComp == null && screenTransComp == null && hyperComp == null);
-        //boolean canMove = dodgeComp == null && screenTransComp == null;
+        boolean canAct = (dodgeComp == null && hyperComp == null);
         boolean canShoot = dodgeComp == null && shield == null;
         boolean canDodge = shield == null;
 
@@ -151,9 +149,9 @@ public class ShipControlSystem extends IteratingSystem {
         //fire cannon / attack
         CannonComponent cannon = Mappers.cannon.get(entity);
         if (cannon != null) {
-            refillAmmo(cannon);//TODO: ammo should refill on all entities regardless of player presence
+            refillAmmo(cannon);
             if (control.attack && canShoot) {
-                fireCannon(transformComp, physicsComp, cannon, entity);
+                fireCannon(transformComp, cannon, entity);
             }
         }
         if (canShoot) {
@@ -368,13 +366,7 @@ public class ShipControlSystem extends IteratingSystem {
         if (dodgeComp.animationTimer.canDoEvent()) {
             //reset
             sprite3D.renderable.angle = 0;
-            
-            //apply counter force to slow dodge
-            PhysicsComponent physicsComp = Mappers.physics.get(entity);
-            Vector2 impulse = MyMath.vector(dodgeComp.direction - (float) Math.PI, dodgeComp.force / 2);
-            physicsComp.body.applyLinearImpulse(impulse, physicsComp.body.getPosition(), true);
-            
-            //end anim
+
             entity.remove(DodgeComponent.class);
         }
         
@@ -449,28 +441,22 @@ public class ShipControlSystem extends IteratingSystem {
         
         Entity characterEntity = Mappers.vehicle.get(vehicleEntity).driver;
         
-        // set the player at the position of vehicle
+        // create body and set position near vehicle
         Vector2 vehiclePosition = Mappers.transform.get(vehicleEntity).pos;
-        Body body = BodyFactory.createPlayerBody(0, 0, characterEntity);//todo: try enable/disable instead of delete and recreate
-        
-        
-        Vector2 offset = MyMath.vector(MathUtils.random(360) * MathUtils.degRad, offsetDist);//set player next to vehicle
-        
-        body.setTransform(vehiclePosition.add(offset), body.getAngle());
+        Vector2 playerPosition = vehiclePosition.add(MyMath.vector(MathUtils.random(360) * MathUtils.degRad, offsetDist));
+        Body body = BodyFactory.createPlayerBody(0, 0, characterEntity);
+        body.setTransform(playerPosition, body.getAngle());
         body.setLinearVelocity(0, 0);
         Mappers.physics.get(characterEntity).body = body;
-        
         
         //transfer focus and controls to character
         CameraFocusComponent cameraFocus = (CameraFocusComponent) ECSUtil.transferComponent(vehicleEntity, characterEntity, CameraFocusComponent.class);
         if (cameraFocus != null) {
-            // zoom in camera
-            characterEntity.getComponent(CameraFocusComponent.class).zoomTarget = engineCFG.defaultZoomCharacter;
+            cameraFocus.zoomTarget = engineCFG.defaultZoomCharacter;
         }
         ECSUtil.transferComponent(vehicleEntity, characterEntity, ControlFocusComponent.class);
         ECSUtil.transferComponent(vehicleEntity, characterEntity, AIComponent.class);
         ECSUtil.transferComponent(vehicleEntity, characterEntity, ControllableComponent.class);
-        
         
         // remove reference
         Mappers.vehicle.get(vehicleEntity).driver = null;
@@ -581,7 +567,7 @@ public class ShipControlSystem extends IteratingSystem {
         }
     }
     
-    private void fireCannon(TransformComponent transform, PhysicsComponent body, CannonComponent cannon, Entity owner) {
+    private void fireCannon(TransformComponent transform, CannonComponent cannon, Entity owner) {
         if (GameScreen.isDebugMode) {
             //Cheat for debug: fast firing and infinite ammo
             cannon.curAmmo = cannon.maxAmmo;
