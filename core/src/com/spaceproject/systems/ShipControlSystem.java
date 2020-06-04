@@ -99,12 +99,6 @@ public class ShipControlSystem extends IteratingSystem {
         if (control.actionA) {
             toggleHyperDrive(entity, control, physicsComp);
         }
-        if (control.actionB) {
-            Gdx.app.log(this.getClass().getSimpleName(), "empty action B activated. make me do something!");
-        }
-        if (control.actionC) {
-            Gdx.app.log(this.getClass().getSimpleName(), "empty action C activated. make me do something!");
-        }
         
         if (!canAct) {
             return;

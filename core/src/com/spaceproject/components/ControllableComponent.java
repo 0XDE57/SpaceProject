@@ -23,8 +23,6 @@ public class ControllableComponent implements Component {
     public boolean alter;
     
     public boolean actionA;
-    public boolean actionB;
-    public boolean actionC;
     
     //timers
     public SimpleTimer timerVehicle;
