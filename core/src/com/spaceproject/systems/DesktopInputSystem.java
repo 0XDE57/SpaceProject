@@ -38,7 +38,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             return;
         
         Entity player = players.first();
-        cameraControls(player, delta);
+        debugCameraControls(player, delta);
     }
     
     private boolean playerControls(int keycode, boolean keyDown) {
@@ -114,27 +114,29 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         return true;
     }
     
-    private void cameraControls(Entity entity, float delta) {
+    private void debugCameraControls(Entity entity, float delta) {
         CameraFocusComponent cameraFocus = entity.getComponent(CameraFocusComponent.class);
         if (cameraFocus == null) {
             return;
         }
+    
+        float zoomSpeed = 0.001f;
+        float angle = 5f * delta;
         
-        //debug
         if (Gdx.input.isKeyPressed(keyCFG.resetZoom)) {
             cameraFocus.zoomTarget = 1;
         }
         if (Gdx.input.isKeyPressed(keyCFG.zoomOut)) {
-            cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom + 0.001f;
+            cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom + zoomSpeed;
         }
         if (Gdx.input.isKeyPressed(keyCFG.zoomIn)) {
-            cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom - 0.001f;
+            cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom - zoomSpeed;
         }
         if (Gdx.input.isKeyPressed(keyCFG.rotateRight)) {
-            MyScreenAdapter.cam.rotate(5f * delta);
+            MyScreenAdapter.cam.rotate(angle);
         }
         if (Gdx.input.isKeyPressed(keyCFG.rotateLeft)) {
-            MyScreenAdapter.cam.rotate(-5f * delta);
+            MyScreenAdapter.cam.rotate(-angle);
         }
     }
     
