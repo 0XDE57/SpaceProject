@@ -22,6 +22,7 @@ import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.GrowCannonComponent;
 import com.spaceproject.components.HealthComponent;
+import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PhysicsComponent;
@@ -525,14 +526,10 @@ public class EntityFactory {
         cannon.anchorVec = new Vector2(width/2+0.2f, 0);
         cannon.timerRechargeRate = new SimpleTimer(entityCFG.cannonRechargeRate);//lower is faster
         
-        
         //engine data and marks entity as drive-able
         VehicleComponent vehicle = new VehicleComponent();
         vehicle.driver = driver;
-        vehicle.hyperSpeed = entityCFG.hyperVelocity;
-        vehicle.thrust = entityCFG.engineThrust;//higher is faster
-        vehicle.maxSpeed = vehicle.NOLIMIT;
-        
+        vehicle.thrust = entityCFG.engineThrust;
         
         //health
         HealthComponent health = new HealthComponent();
@@ -544,6 +541,11 @@ public class EntityFactory {
         map.color = new Color(1, 1, 1, 0.9f);
         map.distance = 3000;
         
+        //hyper drive
+        HyperDriveComponent hyperDrive = new HyperDriveComponent();
+        int hyperModeTimeout = 1000;
+        hyperDrive.speed = entityCFG.hyperSpeed;
+        hyperDrive.coolDownTimer = new SimpleTimer(hyperModeTimeout, true);
         
         //add components to entity
         entity.add(seedComp);
@@ -554,6 +556,7 @@ public class EntityFactory {
         entity.add(transform);
         entity.add(vehicle);
         entity.add(map);
+        entity.add(hyperDrive);
         return entity;
     }
     

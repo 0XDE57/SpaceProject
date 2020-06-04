@@ -377,14 +377,18 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     private void drawHyperDriveBar(Entity playerEntity, int playerBarX, int playerHyperBarY, int barWidth, int barHeight) {
         HyperDriveComponent hyperDriveComponent = Mappers.hyper.get(playerEntity);
-        if (hyperDriveComponent != null) {
+        if (hyperDriveComponent == null) {
+            return;
+        }
+        
+        if (hyperDriveComponent.active) {
             shape.setColor(Color.BLUE);
             shape.rect(playerBarX, playerHyperBarY, barWidth, barHeight);
-            
+        } else {
             //todo: render cooldown timer for both activating and deactivating
-            //float ratio = hyperDriveComponent.coolDownTimer.ratio() / barWidth;
-            //shape.setColor(1 - ratio, ratio, 0, uiCFG.entityHPbarOpacity);
-            //shape.rect(playerBarX, playerHyperBarY, barWidth * ratio, barHeight);
+            float ratio = Math.max(hyperDriveComponent.coolDownTimer.ratio() * barWidth, barWidth);
+            shape.setColor(1 - ratio, ratio, 0, uiCFG.entityHPbarOpacity);
+            shape.rect(playerBarX, playerHyperBarY, ratio, barHeight);
         }
     }
     //endregion

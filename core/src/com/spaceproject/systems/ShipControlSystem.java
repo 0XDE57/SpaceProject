@@ -55,7 +55,6 @@ public class ShipControlSystem extends IteratingSystem {
     private float maxRollAngle = 40 * MathUtils.degRad;
     private float strafeRot = 3f;
     private float faceRotSpeed = 8f;
-    private int hyperModeTimeout = 1000;
     
     public ShipControlSystem() {
         super(Family.all(ControllableComponent.class, TransformComponent.class, VehicleComponent.class).get());
@@ -84,24 +83,21 @@ public class ShipControlSystem extends IteratingSystem {
         PhysicsComponent physicsComp = Mappers.physics.get(entity);
         DodgeComponent dodgeComp = Mappers.dodge.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
-        HyperDriveComponent hyperComp = Mappers.hyper.get(entity);
         
-        boolean canAct = (dodgeComp == null && hyperComp == null);
+        boolean canAct = (dodgeComp == null);
         boolean canShoot = dodgeComp == null && shield == null;
         boolean canDodge = shield == null;
 
         
         barrelRoll(entity, dodgeComp);
         manageShield(entity, control, shield);
-        manageHyperDrive(transformComp, hyperComp, delta);
-    
         
         if (GameScreen.isDebugMode) {
             applyDebugControls(entity, transformComp, physicsComp);
         }
         
         if (control.actionA) {
-            toggleHyperDrive(entity, vehicle, control, transformComp, physicsComp, hyperComp);
+            toggleHyperDrive(entity, control, physicsComp);
         }
         if (control.actionB) {
             Gdx.app.log(this.getClass().getSimpleName(), "empty action B activated. make me do something!");
@@ -115,7 +111,7 @@ public class ShipControlSystem extends IteratingSystem {
         }
         
         faceTarget(control, physicsComp, delta);
-    
+        
         if (control.moveForward) {
             accelerate(control, physicsComp.body, vehicle, delta);
         }
@@ -186,37 +182,50 @@ public class ShipControlSystem extends IteratingSystem {
         physicsComp.body.applyAngularImpulse(impulse, true);
     }
     
-    private void toggleHyperDrive(Entity entity, VehicleComponent vehicle, ControllableComponent control, TransformComponent transformComp, PhysicsComponent physicsComp, HyperDriveComponent hyperComp) {
-        if (hyperComp == null) {
+    private void toggleHyperDrive(Entity entity, ControllableComponent control, PhysicsComponent physicsComp) {
+        HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
+        if (hyperDrive.active) {
             if (control.actionACooldownTimer.canDoEvent()) {
-                hyperComp = new HyperDriveComponent();
-                hyperComp.coolDownTimer = new SimpleTimer(hyperModeTimeout, true);
-                hyperComp.velocity.set(MyMath.vector(physicsComp.body.getAngle(), vehicle.hyperSpeed));
-                entity.add(hyperComp);
-
-                physicsComp.body.setActive(false);
+                //hyperDrive.active = false;
+                control.actionACooldownTimer.reset();
             }
         } else {
+            if (control.actionACooldownTimer.canDoEvent()) {
+                control.actionACooldownTimer.reset();
+                //hyperComp = new HyperDriveComponent();
+                //hyperComp.coolDownTimer = new SimpleTimer(hyperModeTimeout, true);
+                hyperDrive.velocity.set(MyMath.vector(physicsComp.body.getAngle(), hyperDrive.speed));
+                hyperDrive.active = true;
+                //entity.add(hyperComp);
+    
+                physicsComp.body.setActive(false);
+            }
+        }
+        //} else {
+            /*
             if (hyperComp.coolDownTimer.canDoEvent()) {
-                entity.remove(HyperDriveComponent.class);
+                //entity.remove(HyperDriveComponent.class);
     
                 physicsComp.body.setTransform(transformComp.pos, transformComp.rotation);
                 physicsComp.body.setActive(true);
-                physicsComp.body.setLinearVelocity(MyMath.vector(transformComp.rotation, 60/*entity.getComponent(VehicleComponent.class).maxSpeed*/));
+                physicsComp.body.setLinearVelocity(MyMath.vector(transformComp.rotation, 60/*entity.getComponent(VehicleComponent.class).maxSpeed*));
                 
                 control.actionACooldownTimer.reset();
-            }
-        }
+            }*/
+        //}
     }
     
     private void applyDebugControls(Entity entity, TransformComponent transformComp, PhysicsComponent physicsComp) {
         //debug force insta-stop
         if (Gdx.input.isKeyJustPressed(Keys.X)) {
             physicsComp.body.setLinearVelocity(0, 0);
-            if (entity.remove(HyperDriveComponent.class) != null) {
+            //if (entity.remove(HyperDriveComponent.class) != null) {
                 physicsComp.body.setActive(true);
                 physicsComp.body.setTransform(transformComp.pos, transformComp.rotation);
-            }
+                
+            //}
+            HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
+            hyperDrive.active = false;
         }
         if (Gdx.input.isKeyJustPressed(Keys.Z)) {
             physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(physicsComp.body.getLinearVelocity()));
@@ -424,12 +433,6 @@ public class ShipControlSystem extends IteratingSystem {
             body.destroyFixture(circleFixture);
             
             entity.remove(ShieldComponent.class);
-        }
-    }
-    
-    private void manageHyperDrive(TransformComponent transformComp, HyperDriveComponent hyperComp, float delta) {
-        if (hyperComp != null) {
-            transformComp.pos.add(hyperComp.velocity.cpy().scl(delta));
         }
     }
     
