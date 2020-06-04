@@ -30,8 +30,6 @@ public class KeyConfig extends Config {
     public int zoomOut;
     public int zoomIn;
     public int resetZoom;
-    public int zoomCharacter;
-    public int zoomSpace;
     public int rotateLeft;
     public int rotateRight;
     
@@ -73,8 +71,6 @@ public class KeyConfig extends Config {
         zoomOut = Keys.MINUS;
         zoomIn = Keys.EQUALS;
         resetZoom = Keys.PERIOD;
-        zoomCharacter = Keys.SLASH;
-        zoomSpace = Keys.COMMA;
         rotateLeft = Keys.LEFT_BRACKET;
         rotateRight = Keys.RIGHT_BRACKET;
         

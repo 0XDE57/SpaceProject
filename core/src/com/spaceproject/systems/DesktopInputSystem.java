@@ -38,10 +38,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             return;
         
         Entity player = players.first();
-        CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
-        if (cameraFocus != null) {
-            cameraControls(cameraFocus, delta);
-        }
+        cameraControls(player, delta);
     }
     
     private boolean playerControls(int keycode, boolean keyDown) {
@@ -117,21 +114,15 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         return true;
     }
     
-    private void cameraControls(CameraFocusComponent cameraFocus, float delta) {
-
-        //debug
-        if (Gdx.input.isKeyPressed(keyCFG.zoomSpace)) {
-            if (MyScreenAdapter.cam.zoom >= 10f) {
-                cameraFocus.zoomTarget = 60;
-            } else {
-                cameraFocus.zoomTarget = 10;
-            }
+    private void cameraControls(Entity entity, float delta) {
+        CameraFocusComponent cameraFocus = entity.getComponent(CameraFocusComponent.class);
+        if (cameraFocus == null) {
+            return;
         }
+        
+        //debug
         if (Gdx.input.isKeyPressed(keyCFG.resetZoom)) {
             cameraFocus.zoomTarget = 1;
-        }
-        if (Gdx.input.isKeyPressed(keyCFG.zoomCharacter)) {
-            cameraFocus.zoomTarget = 0.1f;
         }
         if (Gdx.input.isKeyPressed(keyCFG.zoomOut)) {
             cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom + 0.001f;
