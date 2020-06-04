@@ -4,6 +4,7 @@ package com.spaceproject.config;
 import com.badlogic.ashley.core.EntitySystem;
 
 public class SysCFG {
+    
     private String className;
     private int priority;
     private boolean haltOnGamePause;
@@ -12,7 +13,6 @@ public class SysCFG {
     private boolean loadOnDesktop;
     private boolean loadOnMobile;
     
-    public SysCFG() { }
     
     SysCFG(Class<? extends EntitySystem> systemClass, int priority, boolean haltOnGamePause, boolean loadInSpace, boolean loadInWorld, boolean loadOnDesktop, boolean loadOnMobile) {
         this(systemClass.getName(), priority, haltOnGamePause, loadInSpace, loadInWorld, loadOnDesktop, loadOnMobile);
