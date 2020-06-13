@@ -48,7 +48,7 @@ import com.spaceproject.utility.MyMath;
 
 public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener {
     
-    private GameMenu gameMenu;//todo: move to core?
+    private GameMenu gameMenu;
     
     //rendering
     private OrthographicCamera cam;
@@ -67,7 +67,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private boolean drawHud = true;
     private boolean drawEdgeMap = true;
     
-    private ScreenTransitionOverlay screenTransitionOverlay;//todo: move to core?
+    private ScreenTransitionOverlay screenTransitionOverlay;
     private UIConfig uiCFG;
     private KeyConfig keyCFG;
     
@@ -164,7 +164,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (mobileUI != null)
             mobileUI.drawControls();
         
-        screenTransitionOverlay.render();//todo: maybe should be in another system? low priority to render after hud
+        screenTransitionOverlay.render();
     }
     
     private void drawHUD() {

@@ -10,13 +10,16 @@ public class ScreenTransitionOverlay {
     
     private SimpleTimer fadeTimer;
     private FadeState fadeState;
-    private int fadeTime = 2000;
-    private Color fadeColor = new Color(1, 1, 1, 1);
-    private ShapeRenderer shape = new ShapeRenderer();
+    private int fadeTime;
+    private Color fadeColor;
+    private ShapeRenderer shape;
     
     public ScreenTransitionOverlay() {
         fadeState = FadeState.off;
         fadeTimer = new SimpleTimer(fadeTime, false);
+        fadeTime = 2000;
+        fadeColor = new Color(1, 1, 1, 1);
+        shape = new ShapeRenderer();
     }
     
     public void fadeIn() {
