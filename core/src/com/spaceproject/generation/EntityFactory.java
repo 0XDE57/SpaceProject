@@ -545,6 +545,7 @@ public class EntityFactory {
         HyperDriveComponent hyperDrive = new HyperDriveComponent();
         hyperDrive.speed = entityCFG.hyperSpeed;
         hyperDrive.coolDownTimer = new SimpleTimer(entityCFG.controlTimerHyperCooldown, true);
+        hyperDrive.coolDownTimer.setCanDoEvent();
         
         //add components to entity
         entity.add(seedComp);
