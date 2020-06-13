@@ -172,25 +172,6 @@ public class ShipControlSystem extends IteratingSystem {
         physicsComp.body.applyAngularImpulse(impulse, true);
     }
     
-    /*
-    private void toggleHyperDrive(Entity entity, PhysicsComponent physicsComp) {
-        HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
-        if (hyperDrive.activate) {
-            if (hyperDrive.coolDownTimer.tryEvent()) {
-                if (hyperDrive.isActive) {
-                    hyperDrive.isActive = false;
-                    physicsComp.body.setTransform(entity.getComponent(TransformComponent.class).pos, physicsComp.body.getAngle());
-                    physicsComp.body.setActive(true);
-                    physicsComp.body.setLinearVelocity(MyMath.vector(physicsComp.body.getAngle(), 20));
-                } else {
-                    hyperDrive.isActive = true;
-                    hyperDrive.velocity.set(MyMath.vector(physicsComp.body.getAngle(), hyperDrive.speed));
-                    physicsComp.body.setActive(false);
-                }
-            }
-        }
-    }*/
-    
     private void applyDebugControls(Entity entity, TransformComponent transformComp, PhysicsComponent physicsComp) {
         //debug force insta-stop
         if (Gdx.input.isKeyJustPressed(Keys.X)) {
