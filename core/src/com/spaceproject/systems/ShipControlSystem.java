@@ -179,19 +179,15 @@ public class ShipControlSystem extends IteratingSystem {
     private void toggleHyperDrive(Entity entity, ControllableComponent control, PhysicsComponent physicsComp) {
         HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
         if (hyperDrive.active) {
-            if (control.actionACooldownTimer.canDoEvent()) {
-                //hyperDrive.active = false;
-                control.actionACooldownTimer.reset();
+            if (control.actionACooldownTimer.tryEvent()) {
+                hyperDrive.active = false;
+                physicsComp.body.setTransform(entity.getComponent(TransformComponent.class).pos, physicsComp.body.getAngle());
+                physicsComp.body.setActive(true);
             }
         } else {
-            if (control.actionACooldownTimer.canDoEvent()) {
-                control.actionACooldownTimer.reset();
-                //hyperComp = new HyperDriveComponent();
-                //hyperComp.coolDownTimer = new SimpleTimer(hyperModeTimeout, true);
+            if (control.actionACooldownTimer.tryEvent()) {
                 hyperDrive.velocity.set(MyMath.vector(physicsComp.body.getAngle(), hyperDrive.speed));
                 hyperDrive.active = true;
-                //entity.add(hyperComp);
-    
                 physicsComp.body.setActive(false);
             }
         }
