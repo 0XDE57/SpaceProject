@@ -75,9 +75,7 @@ public class SimpleTimer {
         setLastEvent(newTime);
     }
     
-    /** Invert ratio / reverse timer, eg: 0.7 -> 0.3
-     * @param reset
-     */
+    /** Invert ratio / reverse timer, eg: 0.7 -> 0.3 */
     public void flipRatio() {
         setRatio(1-ratio());
     }
