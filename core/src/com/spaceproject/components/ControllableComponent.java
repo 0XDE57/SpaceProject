@@ -22,10 +22,8 @@ public class ControllableComponent implements Component {
     public boolean canTransition;
     public boolean alter;
     
-    public boolean actionA;
-    
     //timers
     public SimpleTimer timerVehicle;
     public SimpleTimer timerDodge;
-    public SimpleTimer actionACooldownTimer;
+    
 }

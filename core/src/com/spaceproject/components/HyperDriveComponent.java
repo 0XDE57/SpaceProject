@@ -6,7 +6,9 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class HyperDriveComponent implements Component {
     
-    public boolean active;
+    public boolean activate;
+    
+    public boolean isActive;
     
     public float speed;
     

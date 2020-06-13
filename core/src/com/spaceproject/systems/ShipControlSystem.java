@@ -83,21 +83,17 @@ public class ShipControlSystem extends IteratingSystem {
         PhysicsComponent physicsComp = Mappers.physics.get(entity);
         DodgeComponent dodgeComp = Mappers.dodge.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
+        HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
         
-        boolean canAct = (dodgeComp == null);
+        boolean canAct = (dodgeComp == null) && (!hyperDrive.isActive);
         boolean canShoot = dodgeComp == null && shield == null;
         boolean canDodge = shield == null;
-
         
         barrelRoll(entity, dodgeComp);
         manageShield(entity, control, shield);
         
         if (GameScreen.isDebugMode) {
             applyDebugControls(entity, transformComp, physicsComp);
-        }
-        
-        if (control.actionA) {
-            toggleHyperDrive(entity, control, physicsComp);
         }
         
         if (!canAct) {
@@ -176,34 +172,24 @@ public class ShipControlSystem extends IteratingSystem {
         physicsComp.body.applyAngularImpulse(impulse, true);
     }
     
-    private void toggleHyperDrive(Entity entity, ControllableComponent control, PhysicsComponent physicsComp) {
+    /*
+    private void toggleHyperDrive(Entity entity, PhysicsComponent physicsComp) {
         HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
-        if (hyperDrive.active) {
-            if (control.actionACooldownTimer.tryEvent()) {
-                hyperDrive.active = false;
-                physicsComp.body.setTransform(entity.getComponent(TransformComponent.class).pos, physicsComp.body.getAngle());
-                physicsComp.body.setActive(true);
-            }
-        } else {
-            if (control.actionACooldownTimer.tryEvent()) {
-                hyperDrive.velocity.set(MyMath.vector(physicsComp.body.getAngle(), hyperDrive.speed));
-                hyperDrive.active = true;
-                physicsComp.body.setActive(false);
+        if (hyperDrive.activate) {
+            if (hyperDrive.coolDownTimer.tryEvent()) {
+                if (hyperDrive.isActive) {
+                    hyperDrive.isActive = false;
+                    physicsComp.body.setTransform(entity.getComponent(TransformComponent.class).pos, physicsComp.body.getAngle());
+                    physicsComp.body.setActive(true);
+                    physicsComp.body.setLinearVelocity(MyMath.vector(physicsComp.body.getAngle(), 20));
+                } else {
+                    hyperDrive.isActive = true;
+                    hyperDrive.velocity.set(MyMath.vector(physicsComp.body.getAngle(), hyperDrive.speed));
+                    physicsComp.body.setActive(false);
+                }
             }
         }
-        //} else {
-            /*
-            if (hyperComp.coolDownTimer.canDoEvent()) {
-                //entity.remove(HyperDriveComponent.class);
-    
-                physicsComp.body.setTransform(transformComp.pos, transformComp.rotation);
-                physicsComp.body.setActive(true);
-                physicsComp.body.setLinearVelocity(MyMath.vector(transformComp.rotation, 60/*entity.getComponent(VehicleComponent.class).maxSpeed*));
-                
-                control.actionACooldownTimer.reset();
-            }*/
-        //}
-    }
+    }*/
     
     private void applyDebugControls(Entity entity, TransformComponent transformComp, PhysicsComponent physicsComp) {
         //debug force insta-stop
@@ -215,7 +201,7 @@ public class ShipControlSystem extends IteratingSystem {
                 
             //}
             HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
-            hyperDrive.active = false;
+            hyperDrive.isActive = false;
         }
         if (Gdx.input.isKeyJustPressed(Keys.Z)) {
             physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(physicsComp.body.getLinearVelocity()));

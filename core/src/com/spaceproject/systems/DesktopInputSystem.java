@@ -11,6 +11,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.KeyConfig;
@@ -85,8 +86,9 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             handled = true;
         }
         
-        if (keycode == keyCFG.actionA) {
-            control.actionA = keyDown;
+        if (keycode == keyCFG.activateHyperDrive) {
+            HyperDriveComponent hyperDrive = Mappers.hyper.get(players.first());
+            hyperDrive.activate = keyDown;
             handled = true;
         }
         
@@ -101,6 +103,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         
         float angle = MyMath.angleTo(x, Gdx.graphics.getHeight() - y,
                 Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+        //angle = MyMath.angle2(x, Gdx.graphics.getHeight()-y,Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
         control.angleTargetFace = angle;
         return true;
     }

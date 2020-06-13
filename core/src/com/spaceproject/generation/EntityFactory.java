@@ -77,7 +77,7 @@ public class EntityFactory {
         ControllableComponent control = new ControllableComponent();
         control.timerVehicle = new SimpleTimer(entityCFG.controlTimerVehicle);
         control.timerDodge = new SimpleTimer(entityCFG.controlTimerDodge);
-        control.actionACooldownTimer = new SimpleTimer(entityCFG.controlATimerCoolDown);
+        //control.actionACooldownTimer = new SimpleTimer(entityCFG.controlATimerCoolDown);
         
         
         entity.add(health);
@@ -543,9 +543,8 @@ public class EntityFactory {
         
         //hyper drive
         HyperDriveComponent hyperDrive = new HyperDriveComponent();
-        int hyperModeTimeout = 1000;
         hyperDrive.speed = entityCFG.hyperSpeed;
-        hyperDrive.coolDownTimer = new SimpleTimer(hyperModeTimeout, true);
+        hyperDrive.coolDownTimer = new SimpleTimer(entityCFG.controlTimerHyperCooldown, true);
         
         //add components to entity
         entity.add(seedComp);

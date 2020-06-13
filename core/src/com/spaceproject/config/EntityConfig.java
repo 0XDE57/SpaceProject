@@ -11,7 +11,7 @@ public class EntityConfig extends Config {
     //control
     public long controlTimerDodge;
     public long controlTimerVehicle;
-    public long controlATimerCoolDown;
+    public long controlTimerHyperCooldown;
     
     //ship
     public int shipSizeMin;
@@ -39,13 +39,13 @@ public class EntityConfig extends Config {
         
         controlTimerVehicle = 1000;
         controlTimerDodge = 500;
-        controlATimerCoolDown = 2000;
+        controlTimerHyperCooldown = 1000;
         
         shipSizeMin = 10/2;
         shipSizeMax = 36/2;
         shipHealth = 200;
         engineThrust = 200;
-        hyperSpeed = 320;
+        hyperSpeed = 1000;
         dodgeAnimationTimer = 475;
         dodgeForce = 5f;
         cannonSize = 1;

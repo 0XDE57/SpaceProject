@@ -186,12 +186,16 @@ public class MiniMap {
         if (player != null) {
             float scale = 5;
             int vecWidth = 2;
-    
-            HyperDriveComponent hyperComp = Mappers.hyper.get(player);
-            Body body = Mappers.physics.get(player).body;
             
             //draw movement direction for navigation assistance, line up vector with target destination
-            Vector2 velocity = (hyperComp == null) ? body.getLinearVelocity() : hyperComp.velocity;
+            Body body = Mappers.physics.get(player).body;
+            Vector2 velocity = body.getLinearVelocity();
+            
+            HyperDriveComponent hyperComp = Mappers.hyper.get(player);
+            if (hyperComp != null && hyperComp.isActive) {
+                velocity = hyperComp.velocity;
+            }
+            
             if (velocity.len() > 0) {
                 Vector2 direction = MyMath.vector(velocity.angleRad(), 50000).add(centerMapX, centerMapY);
                 shape.rectLine(centerMapX, centerMapY, direction.x, direction.y, 1, orientationColor, orientationColor);
