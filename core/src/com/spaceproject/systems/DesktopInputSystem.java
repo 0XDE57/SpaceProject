@@ -1,5 +1,6 @@
 package com.spaceproject.systems;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
@@ -26,7 +27,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     private ImmutableArray<Entity> players;
 
     @Override
-    public void addedToEngine(com.badlogic.ashley.core.Engine engine) {
+    public void addedToEngine(Engine engine) {
         players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
         keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
         
@@ -35,11 +36,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     @Override
     public void update(float delta) {
-        if (players.size() == 0)
-            return;
-        
-        Entity player = players.first();
-        debugCameraControls(player, delta);
+        debugCameraControls(delta);
     }
     
     private boolean playerControls(int keycode, boolean keyDown) {
@@ -102,14 +99,18 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         ControllableComponent control = Mappers.controllable.get(players.first());
         
         float angle = MyMath.angleTo(x, Gdx.graphics.getHeight() - y,
-                Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
-        //angle = MyMath.angle2(x, Gdx.graphics.getHeight()-y,Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+                Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
         control.angleTargetFace = angle;
         return true;
     }
     
-    private void debugCameraControls(Entity entity, float delta) {
-        CameraFocusComponent cameraFocus = entity.getComponent(CameraFocusComponent.class);
+    private void debugCameraControls(float delta) {
+        if (players.size() == 0) {
+            return;
+        }
+        
+        Entity player = players.first();
+        CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
         if (cameraFocus == null) {
             return;
         }
