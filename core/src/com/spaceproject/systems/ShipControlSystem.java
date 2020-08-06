@@ -57,7 +57,7 @@ public class ShipControlSystem extends IteratingSystem {
     private float faceRotSpeed = 8f;
     
     public ShipControlSystem() {
-        super(Family.all(ControllableComponent.class, TransformComponent.class, VehicleComponent.class).get());
+        super(Family.all(ControllableComponent.class, TransformComponent.class, VehicleComponent.class).exclude(ScreenTransitionComponent.class).get());
     }
     
     @Override
@@ -72,11 +72,6 @@ public class ShipControlSystem extends IteratingSystem {
     }
     
     private void controlShip(Entity entity, float delta) {
-        if (Mappers.screenTrans.get(entity) != null) {
-            //don't allow control of ship while landing or takeoff
-            return;
-        }
-        
         ControllableComponent control = Mappers.controllable.get(entity);
         VehicleComponent vehicle = Mappers.vehicle.get(entity);
         TransformComponent transformComp = Mappers.transform.get(entity);
@@ -176,11 +171,9 @@ public class ShipControlSystem extends IteratingSystem {
         //debug force insta-stop
         if (Gdx.input.isKeyJustPressed(Keys.X)) {
             physicsComp.body.setLinearVelocity(0, 0);
-            //if (entity.remove(HyperDriveComponent.class) != null) {
-                physicsComp.body.setActive(true);
-                physicsComp.body.setTransform(transformComp.pos, transformComp.rotation);
-                
-            //}
+            physicsComp.body.setActive(true);
+            physicsComp.body.setTransform(transformComp.pos, transformComp.rotation);
+            
             HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
             hyperDrive.isActive = false;
         }

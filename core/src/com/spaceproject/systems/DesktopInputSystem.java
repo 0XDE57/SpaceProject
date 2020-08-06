@@ -92,14 +92,13 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         return handled;
     }
     
-    private boolean playerFace(int x, int y) {
+    private boolean facePosition(int x, int y) {
         if (players.size() == 0)
             return false;
         
-        ControllableComponent control = Mappers.controllable.get(players.first());
-        
         float angle = MyMath.angleTo(x, Gdx.graphics.getHeight() - y,
                 Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
+        ControllableComponent control = Mappers.controllable.get(players.first());
         control.angleTargetFace = angle;
         return true;
     }
@@ -204,12 +203,12 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        return playerFace(screenX, screenY);
+        return facePosition(screenX, screenY);
     }
     
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        return playerFace(screenX, screenY);
+        return facePosition(screenX, screenY);
     }
     
 }
