@@ -100,7 +100,7 @@ public class GameScreen extends MyScreenAdapter {
         
         Entity playerShip = EntityFactory.createPlayerShip(0, 0, inSpace);
         
-        //initSystems
+        //init systems
         if (inSpace) {
             initSpace(playerShip);
         } else {
@@ -329,6 +329,7 @@ public class GameScreen extends MyScreenAdapter {
         //getInputMultiplexer().clear();
         galaxy = null;
         noiseManager.dispose();
+        noiseManager = null;
     }
     
 }
