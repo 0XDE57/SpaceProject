@@ -70,7 +70,8 @@ Actively...and painfully slowly...in progress... It doesn't even have sound and 
 
 
 ## License
-   MIT: https://github.com/0XDE57/SpaceProject/blob/master/LICENSE.md
+   Apache 2.0: https://www.apache.org/licenses/LICENSE-2.0.html
+   Credit appreciated, but not required.
 
 ## Libraries
 - [libGDX](https://github.com/libgdx/libgdx)
