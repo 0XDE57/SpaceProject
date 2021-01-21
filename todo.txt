@@ -178,7 +178,7 @@ Legend:
 todo: focus! i keep jumping between ideas and features and never finish anything
 ***the plan***:
 Spaceship combat will be a core part of gameplay. So lets focus on cleaning that up first.
-    End goal: make combat fun. make flight and movement fun.
+    End goal: make combat fun. make flight and movement fun. and look a little better
     [...] fix shield physics
         [...] if collide with bullet, shrink/destroy shield
         [ ] fix radius is not consistent. rotation of body affects size of shield. don't trust calculateBoundingBox()?
@@ -191,6 +191,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [ ] add basic asteroids (arbitrary poly)
         [ ] spec spawner for asteroid. begin make asteroid
     [ ] fix AI a bit (lead shot)
+    [ ] lag camera behind movement a little for visual effect, especially when dodging for more visual impact
     [ ] fix camera: combat camera
         right now manually zooming in an out when fighting is a bit clunky and jarring.
         implement an auto lock on camera which will adjust the zoom to include both the player
@@ -205,7 +206,11 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         dynamic focus, maybe who gets shot last has focus? todo: study cam mechanics for smashbros / project m style combat
         thresholds for how close to focus near the edge
         still allow manual override with scroll, with perhaps a timer to focus back in, or when a new enemy joins
-
+    [...] fix background space rendering
+        [...] POC star shader with fullscreen quad in separate project
+            [ ] bring into this project and replace old system
+    [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
+        [ ] lol jk, sound will eventually exist
 
 
 ---ENGINE---
@@ -239,7 +244,10 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         https://gafferongames.com/post/fix_your_timestep/
         http://gameprogrammingpatterns.com/game-loop.html
         http://www.koonsolo.com/news/dewitters-gameloop/
-
+    [?] note to self, was my old physics broken due to #5048?
+        I dropped my physics because the impulse was so weird, i did infact use Intersector.overlapConvexPolygons() in CollisionSystem.java.overlaps()
+        https://github.com/0XDE57/SpaceProject/blob/1a764f9aaa405ba18341ad35c2a75b4ecd02a535/core/src/com/spaceproject/systems/CollisionSystem.java
+        [ ] todo: confirm that im not crazy? because i spent a lot of time moving to box2d if this is true lol.... thats ok.
 
 [...] config
     [x] config manager, save and load all configs
