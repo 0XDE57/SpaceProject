@@ -202,8 +202,8 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
         fadeOut();
         
         engine.removeEntityListener(this);
-        systemNodes.removeAll();
-        entityNodes.removeAll();
+        systemNodes.clearChildren();
+        entityNodes.clearChildren();
     }
     
     public void toggle() {

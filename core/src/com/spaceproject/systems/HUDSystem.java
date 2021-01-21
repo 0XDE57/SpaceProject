@@ -111,12 +111,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             }
     
             @Override
-            public boolean scrolled(InputEvent event, float x, float y, int amount) {
-                if (getMiniMap().scrolled(amount)) {
+            public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY) {
+                if (getMiniMap().scrolled(amountX, amountY)) {
                     return true;
                 }
                 
-                return super.scrolled(event, x, y, amount);
+                return super.scrolled(event, x, y, amountX, amountY);
             }
         });
         

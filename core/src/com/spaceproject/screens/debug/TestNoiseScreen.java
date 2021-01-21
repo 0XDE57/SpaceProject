@@ -394,8 +394,8 @@ public class TestNoiseScreen extends MyScreenAdapter implements InputProcessor {
     }
     
     @Override
-    public boolean scrolled(int amount) {
-        pixelSize = MathUtils.clamp(pixelSize - amount, 1, 32);
+    public boolean scrolled(float amountX, float amountY) {
+        pixelSize = (int) MathUtils.clamp(pixelSize - amountY, 1, 32);
 		
 		/*
 		int mouseX = Gdx.input.getX();

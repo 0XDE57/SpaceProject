@@ -386,7 +386,7 @@ public class MiniMap {
         return mapContainer;
     }
     
-    private void scrollMiniMap(int amount) {
+    private void scrollMiniMap(float amount) {
         float scrollAmount = amount * mapScale / miniMapCFG.zoomMultiplier;
         mapScale += scrollAmount;
         mapScale = MathUtils.clamp(mapScale, miniMapCFG.minScale, miniMapCFG.maxSale);
@@ -394,14 +394,14 @@ public class MiniMap {
         drawScaleTimer.reset();
     }
     
-    public boolean scrolled(int amount) {
+    public boolean scrolled(float amountX, float amountY) {
         switch (mapState) {
             case full:
-                scrollMiniMap(amount);
+                scrollMiniMap(amountY);
                 return true;
             case mini:
                 if (mapContainer.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY())) {
-                    scrollMiniMap(amount);
+                    scrollMiniMap(amountY);
                     return true;
                 }
                 break;

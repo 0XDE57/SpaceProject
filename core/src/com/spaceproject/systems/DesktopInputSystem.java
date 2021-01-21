@@ -135,12 +135,12 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     }
     
     @Override
-    public boolean scrolled(int amount) {
+    public boolean scrolled(float amountX, float amountY) {
         if (players.size() != 0) {
             Entity player = players.first();
             CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
             if (cameraFocus != null) {
-                float scrollAmount = amount * MyScreenAdapter.cam.zoom / 2;
+                float scrollAmount = amountY * MyScreenAdapter.cam.zoom / 2;
                 cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
             }
         }
