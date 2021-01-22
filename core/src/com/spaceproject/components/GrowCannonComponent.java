@@ -8,11 +8,11 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class GrowCannonComponent implements Component {
     
-    public Entity projectile;
+    public Entity projectileEntity;
     
-    public Vector2 anchorVec;
+    public Vector2 anchorVec; //offset relative to ship
     
-    public float aimAngle;
+    public float aimAngle; //relative to anchor
     
     public float baseDamage;
     

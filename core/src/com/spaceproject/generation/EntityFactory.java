@@ -527,7 +527,8 @@ public class EntityFactory {
         cannon.timerRechargeRate = new SimpleTimer(entityCFG.cannonRechargeRate);//lower is faster
         
         GrowCannonComponent growCannon = new GrowCannonComponent();
-        growCannon.anchorVec = new Vector2(width/2+0.5f, 0);
+        growCannon.anchorVec = new Vector2(width, 0);
+        growCannon.aimAngle = 0;
         growCannon.velocity = entityCFG.cannonVelocity;
         growCannon.maxSize = 0.5f;
         growCannon.size = 0.01f;

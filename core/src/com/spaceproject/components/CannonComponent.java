@@ -6,9 +6,9 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class CannonComponent implements Component {
     
-    public Vector2 anchorVec;
+    public Vector2 anchorVec; //offset relative to ship
     
-    public float aimAngle;
+    public float aimAngle; //relative to anchor
     
     public float damage;
     
