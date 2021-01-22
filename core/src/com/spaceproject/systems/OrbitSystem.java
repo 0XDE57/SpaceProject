@@ -14,7 +14,7 @@ import com.spaceproject.utility.MyMath;
 public class OrbitSystem extends IteratingSystem {
     
     private final int syncPosThreshold = 10;//todo, move to config
-    private Vector2 tmp = new Vector2();
+    private static final Vector2 TEMP_VEC = new Vector2();
     
     public OrbitSystem() {
         super(Family.all(OrbitComponent.class, TransformComponent.class).get());
@@ -58,8 +58,8 @@ public class OrbitSystem extends IteratingSystem {
         }
         
         //add velocity to position
-        tmp.set(orbit.velocity).scl(delta);
-        position.pos.add(tmp.x, tmp.y);
+        TEMP_VEC.set(orbit.velocity).scl(delta);
+        position.pos.add(TEMP_VEC.x, TEMP_VEC.y);
     
         orbit.isProcessed = true;
     }
