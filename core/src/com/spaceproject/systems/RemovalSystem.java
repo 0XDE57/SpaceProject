@@ -28,7 +28,12 @@ public class RemovalSystem extends IteratingSystem {
         ResourceDisposer.dispose(entity);
         getEngine().removeEntity(entity);
         
-        //respawn player
+        //attempt to respawn player
+        respawnPlayer(entity);
+    }
+    
+    private void respawnPlayer(Entity entity) {
+        //todo: perhaps should not be responsibility of removal system. player spawn system?
         ControlFocusComponent controlFocusComp = Mappers.controlFocus.get(entity);
         if (controlFocusComp != null) {
             Gdx.app.log(this.getClass().getSimpleName(), "Controlled entity assumed to be player; respawning");
