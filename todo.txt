@@ -179,7 +179,11 @@ todo: focus! i keep jumping between ideas and features and never finish anything
 ***the plan***:
 Spaceship combat will be a core part of gameplay. So lets focus on cleaning that up first.
     End goal: make combat fun. make flight and movement fun. and look a little better
-    [ ] respawn
+    [...] respawn
+        [x] for now, just place back at origin 0, 0
+        [ ] how to handle death? start on planet back at base? start at a space station?
+            [ ] could have a "home planet" and just spawn from there like transistionsystem takeoff
+        [ ] notify AI that are stuck attacking nothing
     [...] fix shield physics
         [...] if collide with bullet, shrink/destroy shield
         [ ] fix radius is not consistent. rotation of body affects size of shield. don't trust calculateBoundingBox()?
@@ -187,6 +191,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         [ ] if collide with another body with significant difference in velocity
             and if other has HealthComponent, do damage using velocity as damage factor
     [...] make bullets better
+        [ ] fix grow bullet
         [...] more visible
         [ ] make bullets come from front of ship
     [ ] add basic asteroids (arbitrary poly)
@@ -210,6 +215,8 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [...] fix background space rendering
         [...] POC star shader with fullscreen quad in separate project
             [ ] bring into this project and replace old system
+    [ ] basic controller input
+
     [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
         [ ] lol jk, sound will eventually exist
 

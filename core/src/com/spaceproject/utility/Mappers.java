@@ -2,9 +2,11 @@ package com.spaceproject.utility;
 
 import com.badlogic.ashley.core.ComponentMapper;
 import com.spaceproject.components.AIComponent;
+import com.spaceproject.components.AISpawnComponent;
 import com.spaceproject.components.AstronomicalComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
+import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.DodgeComponent;
@@ -19,7 +21,6 @@ import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.AISpawnComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -32,6 +33,7 @@ public class Mappers {
     public static final ComponentMapper<AstronomicalComponent> astro = ComponentMapper.getFor(AstronomicalComponent.class);
     public static final ComponentMapper<CannonComponent> cannon = ComponentMapper.getFor(CannonComponent.class);
     public static final ComponentMapper<CharacterComponent> character = ComponentMapper.getFor(CharacterComponent.class);
+    public static final ComponentMapper<ControlFocusComponent> controlFocus = ComponentMapper.getFor(ControlFocusComponent.class);
     public static final ComponentMapper<ControllableComponent> controllable = ComponentMapper.getFor(ControllableComponent.class);
     public static final ComponentMapper<DamageComponent> damage = ComponentMapper.getFor(DamageComponent.class);
     public static final ComponentMapper<DodgeComponent> dodge = ComponentMapper.getFor(DodgeComponent.class);
