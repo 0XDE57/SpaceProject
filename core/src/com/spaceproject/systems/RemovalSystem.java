@@ -49,4 +49,5 @@ public class RemovalSystem extends IteratingSystem {
             }
         }
     }
+    
 }
