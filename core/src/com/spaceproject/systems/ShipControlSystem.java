@@ -479,7 +479,7 @@ public class ShipControlSystem extends IteratingSystem {
             Entity projectile = growCannon.projectileEntity;
             
             TransformComponent transformComponent = projectile.getComponent(TransformComponent.class);
-            Vector2 spawnPos = growCannon.anchorVec.cpy().rotateRad(shipTransform.rotation).add(shipTransform.pos);
+            Vector2 spawnPos = growCannon.anchorVec.cpy().rotateRad(shipTransform.rotation).add(shipTransform.pos);//todo: jitter when moving, lerp?
             transformComponent.pos.set(spawnPos);
             transformComponent.rotation = shipTransform.rotation + growCannon.aimAngle;
             
@@ -489,16 +489,23 @@ public class ShipControlSystem extends IteratingSystem {
             TextureComponent textureComp = projectile.getComponent(TextureComponent.class);
             textureComp.scale = growCannon.size;
             
-            //damage modifier
-            DamageComponent damageComponent = projectile.getComponent(DamageComponent.class);
-            damageComponent.damage = growCannon.baseDamage + ((growCannon.size / growCannon.maxSize) * growCannon.baseDamage);
-            if (growCannon.size == growCannon.maxSize) {
-                damageComponent.damage *= 1.15;//bonus damage for maxed out
-            }
             
             //release
             if (!control.attack) {
                 growCannon.isCharging = false;
+    
+                float minProjectileSize = 0.1f;
+                growCannon.size = Math.max(minProjectileSize, growCannon.size);//cap minimum
+                textureComp.scale = growCannon.size;
+                
+                //damage modifier
+                DamageComponent damageComponent = new DamageComponent();
+                damageComponent.source = entity;
+                damageComponent.damage = growCannon.baseDamage + ((growCannon.size / growCannon.maxSize) * growCannon.baseDamage);
+                if (growCannon.size == growCannon.maxSize) {
+                    damageComponent.damage *= 1.15;//bonus damage for maxed out
+                }
+                projectile.add(damageComponent);
                 
                 //physics
                 PhysicsComponent physics = new PhysicsComponent();
@@ -507,10 +514,10 @@ public class ShipControlSystem extends IteratingSystem {
                 physics.body = BodyFactory.createRect(spawnPos.x, spawnPos.y, bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody);
                 physics.body.setTransform(spawnPos, transformComponent.rotation);
                 
-                Vector2 projectileVel = MyMath.vector(shipTransform.rotation, growCannon.velocity).add(body.getLinearVelocity());
+                Vector2 projectileVel = MyMath.vector(transformComponent.rotation, growCannon.velocity).add(body.getLinearVelocity());
                 physics.body.setLinearVelocity(projectileVel);
                 physics.body.setBullet(true);//turn on CCD
-                physics.body.setUserData(entity);
+                physics.body.setUserData(projectile);
                 projectile.add(physics);
                 
                 ExpireComponent expire = new ExpireComponent();
@@ -524,7 +531,7 @@ public class ShipControlSystem extends IteratingSystem {
                 growCannon.isCharging = true;
                 growCannon.growRateTimer.reset();
                 
-                growCannon.projectileEntity = EntityFactory.createGrowMissile(shipTransform, growCannon, entity);
+                growCannon.projectileEntity = EntityFactory.createGrowMissile(growCannon, entity);
                 getEngine().addEntity(growCannon.projectileEntity);
             }
         }

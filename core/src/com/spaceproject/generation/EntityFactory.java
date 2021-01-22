@@ -620,7 +620,7 @@ public class EntityFactory {
         return entity;
     }
     
-    public static Entity createGrowMissile(TransformComponent sourceTransform, GrowCannonComponent cannon, Entity parentEntity) {
+    public static Entity createGrowMissile(GrowCannonComponent cannon, Entity parentEntity) {
         Entity entity = new Entity();
         
         //create texture
@@ -628,37 +628,10 @@ public class EntityFactory {
         texture.texture = TextureFactory.generateProjectile();
         texture.scale = engineCFG.bodyScale;
         
-        /*
-        //physics
-        PhysicsComponent physics = new PhysicsComponent();
-        float bodyWidth = texture.texture.getWidth() * engineCFG.bodyScale;
-        float bodyHeight = texture.texture.getHeight() * engineCFG.bodyScale;
-        Vector2 spawnPos = sourceTransform.pos.add(cannon.anchorVec);
-        //Vector2 sourceVel = parentEntity.getComponent(PhysicsComponent.class).body.getLinearVelocity();
-        //Vector2 projectileVel = MyMath.vector(cannon.aimAngle, cannon.velocity).add(sourceVel);
-        
-        physics.body = BodyFactory.createRect(spawnPos.x, spawnPos.y, bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody);
-        //physics.body.setTransform(spawnPos, sourceTransform.rotation);
-        //physics.body.setLinearVelocity(projectileVel);
-        physics.body.setBullet(true);//turn on CCD
-        physics.body.setUserData(entity);
-        */
-        
         TransformComponent transform = new TransformComponent();
-        //transform.pos.set(spawnPos);
-        //transform.rotation = physics.body.getAngle();
         transform.zOrder = -9;//in front of background objects(eg: planets, tiles), behind collide-able objects (eg: players, vehicles)
         
-        //missile damage
-        DamageComponent missile = new DamageComponent();
-        missile.damage = cannon.baseDamage;
-        missile.source = parentEntity;
-        
-        
-        entity.add(missile);
-        //entity.add(expire);
         entity.add(texture);
-        //entity.add(physics);
         entity.add(transform);
         
         return entity;
