@@ -403,7 +403,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         also we don't necessarily need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not
     [...] fix render priority (z-order)
           [X] moved into separate variable
-          [ ] define proper heights for importance as current values are somewhat arbitrary
+          [x] define proper heights for importance as current values are somewhat arbitrary
           [ ] this is now a bit more complex, as there is a mix of 2d sprites and 3d renderables, that are rendered in separate batches (2d then 3d overlay).
               to mix the z between them may require multiple batch passes, or migrating to 3d, also shaperenderer on top of that...
     [ ] better star rendering

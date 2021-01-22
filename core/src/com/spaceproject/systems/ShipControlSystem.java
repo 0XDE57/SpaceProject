@@ -489,7 +489,6 @@ public class ShipControlSystem extends IteratingSystem {
             TextureComponent textureComp = projectile.getComponent(TextureComponent.class);
             textureComp.scale = growCannon.size;
             
-            
             //release
             if (!control.attack) {
                 growCannon.isCharging = false;
@@ -531,7 +530,7 @@ public class ShipControlSystem extends IteratingSystem {
                 growCannon.isCharging = true;
                 growCannon.growRateTimer.reset();
                 
-                growCannon.projectileEntity = EntityFactory.createGrowMissile(growCannon, entity);
+                growCannon.projectileEntity = EntityFactory.createGrowMissileGhost();
                 getEngine().addEntity(growCannon.projectileEntity);
             }
         }

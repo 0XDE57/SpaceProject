@@ -35,6 +35,7 @@ import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.EntityConfig;
+import com.spaceproject.config.RenderOrder;
 import com.spaceproject.config.WorldConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Sprite3D;
@@ -48,9 +49,9 @@ public class EntityFactory {
     // eg: planetary system should go into a AstronomicalBodyEntityFactory()
     // ships into ShipEntityFactory
     // rename this to base or common? and keep character
-    private static EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
-    private static EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
-    private static CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
+    private static final EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
+    private static final EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
+    private static final CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
     
     //region characters
     public static Entity createCharacter(float x, float y) {
@@ -58,7 +59,7 @@ public class EntityFactory {
         
         TransformComponent transform = new TransformComponent();
         transform.pos.set(x, y);
-        transform.zOrder = -100;
+        transform.zOrder = RenderOrder.CHARACTERS.getHierarchy();
         
         TextureComponent texture = new TextureComponent();
         texture.texture = TextureFactory.generateCharacter();
@@ -318,7 +319,7 @@ public class EntityFactory {
         // set position
         TransformComponent transform = new TransformComponent();
         transform.pos.set(x, y);
-        transform.zOrder = 50;
+        transform.zOrder = RenderOrder.ASTRO.getHierarchy();
         
         //orbit for rotation of self (kinda hacky; not really orbiting, just rotating)
         OrbitComponent orbit = new OrbitComponent();
@@ -392,7 +393,7 @@ public class EntityFactory {
         texture.scale = 16;
         
         TransformComponent transform = new TransformComponent();
-        transform.zOrder = 50;
+        transform.zOrder = RenderOrder.ASTRO.getHierarchy();
         
         //orbit
         OrbitComponent orbit = new OrbitComponent();
@@ -446,7 +447,7 @@ public class EntityFactory {
         texture.scale = 16;
         
         TransformComponent transform = new TransformComponent();
-        transform.zOrder = 50;
+        transform.zOrder = RenderOrder.ASTRO.getHierarchy();
         
         //orbit
         OrbitComponent orbit = new OrbitComponent();
@@ -494,7 +495,7 @@ public class EntityFactory {
         //transform
         TransformComponent transform = new TransformComponent();
         transform.pos.set(x, y);
-        transform.zOrder = -10;
+        transform.zOrder = RenderOrder.VEHICLES.getHierarchy();
         transform.rotation = (float) Math.PI / 2; //face upwards
         
         //generate random even size
@@ -599,7 +600,7 @@ public class EntityFactory {
         TransformComponent transform = new TransformComponent();
         transform.pos.set(physics.body.getPosition());
         transform.rotation = physics.body.getAngle();
-        transform.zOrder = -9;//in front of background objects(eg: planets, tiles), behind collide-able objects (eg: players, vehicles)
+        transform.zOrder = RenderOrder.PROJECTILES.getHierarchy();
         
         //set expire time
         ExpireComponent expire = new ExpireComponent();
@@ -620,16 +621,16 @@ public class EntityFactory {
         return entity;
     }
     
-    public static Entity createGrowMissile(GrowCannonComponent cannon, Entity parentEntity) {
+    public static Entity createGrowMissileGhost() {
         Entity entity = new Entity();
         
         //create texture
         TextureComponent texture = new TextureComponent();
         texture.texture = TextureFactory.generateProjectile();
-        texture.scale = engineCFG.bodyScale;
+        texture.scale = 0;//start at nothing
         
         TransformComponent transform = new TransformComponent();
-        transform.zOrder = -9;//in front of background objects(eg: planets, tiles), behind collide-able objects (eg: players, vehicles)
+        transform.zOrder = RenderOrder.PROJECTILES.getHierarchy();
         
         entity.add(texture);
         entity.add(transform);
@@ -650,6 +651,7 @@ public class EntityFactory {
     
         TransformComponent transform = new TransformComponent();
         transform.pos.set(x, y);
+        transform.zOrder = RenderOrder.WORLD_OBJECTS.getHierarchy();
         
         entity.add(transform);
         entity.add(physics);
