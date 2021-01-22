@@ -179,6 +179,7 @@ todo: focus! i keep jumping between ideas and features and never finish anything
 ***the plan***:
 Spaceship combat will be a core part of gameplay. So lets focus on cleaning that up first.
     End goal: make combat fun. make flight and movement fun. and look a little better
+    [ ] respawn
     [...] fix shield physics
         [...] if collide with bullet, shrink/destroy shield
         [ ] fix radius is not consistent. rotation of body affects size of shield. don't trust calculateBoundingBox()?
@@ -236,6 +237,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             [ ] create unit/body scale helper
         [x] remove old physics stuff
         [ ] test mobile
+        [ ] move to filters? https://gamefromscratch.com/libgdx-libgdx-tutorial-13-physics-with-box2d-part-4-controlling-collisions-using-filters/
     https://gamedev.stackexchange.com/questions/23834/how-to-properly-implement-message-handling-in-a-component-based-entity-system
     [x] fixed time step (necessary for multiplayer?)
         [ ] interpolation
