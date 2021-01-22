@@ -34,21 +34,18 @@ public abstract class MyMath {
         return newSeed;
     }
     
-    static final Vector2 tmpVec = new Vector2();
+    static final Vector2 TEMP_VEC = new Vector2();
     
     public static Vector2 vector(float direction, float magnitude) {
         float dx = MathUtils.cos(direction) * magnitude;
         float dy = MathUtils.sin(direction) * magnitude;
-        return tmpVec.set(dx, dy);
+        return TEMP_VEC.set(dx, dy);
     }
-    
     
     public static Vector2 logVec(Vector2 vec, float scale) {
         float length = (float) Math.log(vec.len()) * scale;
-        float angle = vec.angle() * MathUtils.degreesToRadians;
-        return vector(angle, length);
+        return vector(vec.angleRad(), length);
     }
-    
     
     public static float distance(float x1, float y1, float x2, float y2) {
         return (float) Math.hypot(x2 - x1, y2 - y1);
