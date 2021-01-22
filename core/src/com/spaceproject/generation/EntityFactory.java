@@ -526,6 +526,15 @@ public class EntityFactory {
         cannon.anchorVec = new Vector2(width/2+0.2f, 0);
         cannon.timerRechargeRate = new SimpleTimer(entityCFG.cannonRechargeRate);//lower is faster
         
+        GrowCannonComponent growCannon = new GrowCannonComponent();
+        growCannon.anchorVec = new Vector2(width/2+0.5f, 0);
+        growCannon.velocity = entityCFG.cannonVelocity;
+        growCannon.maxSize = 0.5f;
+        growCannon.size = 0.01f;
+        growCannon.growRateTimer = new SimpleTimer(8000);
+        growCannon.baseDamage = 8f;
+        
+        
         //engine data and marks entity as drive-able
         VehicleComponent vehicle = new VehicleComponent();
         vehicle.driver = driver;
@@ -550,7 +559,8 @@ public class EntityFactory {
         //add components to entity
         entity.add(seedComp);
         entity.add(health);
-        entity.add(cannon);
+        entity.add(growCannon);
+        //entity.add(cannon);
         entity.add(physics);
         entity.add(sprite3DComp);
         entity.add(transform);
@@ -558,21 +568,6 @@ public class EntityFactory {
         entity.add(map);
         entity.add(hyperDrive);
         return entity;
-    }
-    
-    public static Entity createShipTest(float x, float y, long seed, Entity driver, boolean inSpace) {
-        Entity ship = createBasicShip(x, y, seed, driver, inSpace);
-        ship.remove(CannonComponent.class);
-        
-        GrowCannonComponent growCannon = new GrowCannonComponent();
-        growCannon.velocity = entityCFG.cannonVelocity;
-        growCannon.maxSize = 6f;
-        growCannon.size = 1f;
-        growCannon.growRateTimer = new SimpleTimer(2000);
-        growCannon.baseDamage = 8f;
-        ship.add(growCannon);
-        
-        return ship;
     }
     //endregion
     
@@ -619,6 +614,50 @@ public class EntityFactory {
         entity.add(expire);
         entity.add(texture);
         entity.add(physics);
+        entity.add(transform);
+        
+        return entity;
+    }
+    
+    public static Entity createGrowMissile(TransformComponent sourceTransform, GrowCannonComponent cannon, Entity parentEntity) {
+        Entity entity = new Entity();
+        
+        //create texture
+        TextureComponent texture = new TextureComponent();
+        texture.texture = TextureFactory.generateProjectile();
+        texture.scale = engineCFG.bodyScale;
+        
+        /*
+        //physics
+        PhysicsComponent physics = new PhysicsComponent();
+        float bodyWidth = texture.texture.getWidth() * engineCFG.bodyScale;
+        float bodyHeight = texture.texture.getHeight() * engineCFG.bodyScale;
+        Vector2 spawnPos = sourceTransform.pos.add(cannon.anchorVec);
+        //Vector2 sourceVel = parentEntity.getComponent(PhysicsComponent.class).body.getLinearVelocity();
+        //Vector2 projectileVel = MyMath.vector(cannon.aimAngle, cannon.velocity).add(sourceVel);
+        
+        physics.body = BodyFactory.createRect(spawnPos.x, spawnPos.y, bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody);
+        //physics.body.setTransform(spawnPos, sourceTransform.rotation);
+        //physics.body.setLinearVelocity(projectileVel);
+        physics.body.setBullet(true);//turn on CCD
+        physics.body.setUserData(entity);
+        */
+        
+        TransformComponent transform = new TransformComponent();
+        //transform.pos.set(spawnPos);
+        //transform.rotation = physics.body.getAngle();
+        transform.zOrder = -9;//in front of background objects(eg: planets, tiles), behind collide-able objects (eg: players, vehicles)
+        
+        //missile damage
+        DamageComponent missile = new DamageComponent();
+        missile.damage = cannon.baseDamage;
+        missile.source = parentEntity;
+        
+        
+        entity.add(missile);
+        //entity.add(expire);
+        entity.add(texture);
+        //entity.add(physics);
         entity.add(transform);
         
         return entity;

@@ -2,12 +2,17 @@ package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.utility.SimpleTimer;
 
 
 public class GrowCannonComponent implements Component {
     
     public Entity projectile;
+    
+    public Vector2 anchorVec;
+    
+    public float aimAngle;
     
     public float baseDamage;
     

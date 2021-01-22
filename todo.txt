@@ -182,7 +182,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [...] respawn
         [x] for now, just place back at origin 0, 0
         [ ] how to handle death? start on planet back at base? start at a space station?
-            [ ] could have a "home planet" and just spawn from there like transistionsystem takeoff
+            [ ] could have a "home planet" and just spawn from there like transitionsystem takeoff
         [ ] notify AI that are stuck attacking nothing
     [...] fix shield physics
         [...] if collide with bullet, shrink/destroy shield
@@ -191,7 +191,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         [ ] if collide with another body with significant difference in velocity
             and if other has HealthComponent, do damage using velocity as damage factor
     [...] make bullets better
-        [ ] fix grow bullet
+        [...] fix grow bullet
         [...] more visible
         [ ] make bullets come from front of ship
     [ ] add basic asteroids (arbitrary poly)

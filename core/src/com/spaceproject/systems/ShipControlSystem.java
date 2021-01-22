@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
@@ -467,7 +468,7 @@ public class ShipControlSystem extends IteratingSystem {
     
     
     //region combat
-    private void manageGrowCannon(Entity entity, ControllableComponent control, TransformComponent transform, GrowCannonComponent growCannon, Body body) {
+    private void manageGrowCannon(Entity entity, ControllableComponent control, TransformComponent shipTransform, GrowCannonComponent growCannon, Body body) {
         //TODO: clean up
         if (growCannon == null) {
             return;
@@ -476,28 +477,49 @@ public class ShipControlSystem extends IteratingSystem {
         if (growCannon.isCharging) {
             //update position to be in front of ship
             //Rectangle bounds = entity.getComponent(PhysicsComponent.class).poly.getBoundingRectangle();
+            Entity projectile = growCannon.projectile;
+            
             float offset = 2;//Math.max(bounds.getWidth(), bounds.getHeight()) + growCannon.maxSize;
-            TransformComponent transformComponent = growCannon.projectile.getComponent(TransformComponent.class);
-            transformComponent.pos.set(MyMath.vector(transform.rotation, offset).add(transform.pos));
-            transformComponent.rotation = transform.rotation;
+            TransformComponent transformComponent = projectile.getComponent(TransformComponent.class);
+            Vector2 spawnPosition = MyMath.vector(shipTransform.rotation, offset).add(shipTransform.pos);
+            shipTransform.pos.add(growCannon.anchorVec.cpy().rotateRad(shipTransform.rotation));
+            transformComponent.pos.set(spawnPosition);
+            transformComponent.rotation = shipTransform.rotation;
+            
             
             //accumulate size
             growCannon.size = growCannon.growRateTimer.ratio() * growCannon.maxSize;
-            growCannon.size = MathUtils.clamp(growCannon.size, 1, growCannon.maxSize);
-            growCannon.projectile.getComponent(TextureComponent.class).scale = growCannon.size * engineCFG.entityScale;
+    
+            TextureComponent textureComp = projectile.getComponent(TextureComponent.class);
+            textureComp.scale = growCannon.size;
             //growCannon.projectile.getComponent(PhysicsComponent.class).poly.setScale(growCannon.size, growCannon.size);
             
             //damage modifier
-            DamageComponent damageComponent = growCannon.projectile.getComponent(DamageComponent.class);
-            damageComponent.damage = growCannon.size * growCannon.baseDamage;
+            DamageComponent damageComponent = projectile.getComponent(DamageComponent.class);
+            damageComponent.damage = growCannon.baseDamage + ((growCannon.size / growCannon.maxSize) * growCannon.baseDamage);
             if (growCannon.size == growCannon.maxSize) {
-                damageComponent.damage *= 1.5;//bonus damage for maxed out
+                damageComponent.damage *= 1.15;//bonus damage for maxed out
             }
             
             //release
             if (!control.attack) {
-                Vector2 vec = MyMath.vector(transform.rotation, growCannon.velocity).add(body.getLinearVelocity());
-                body.setLinearVelocity(vec);
+                Vector2 vec = MyMath.vector(shipTransform.rotation, growCannon.velocity).add(body.getLinearVelocity());
+                //physics
+                PhysicsComponent physics = new PhysicsComponent();
+                float bodyWidth = textureComp.texture.getWidth() * engineCFG.bodyScale;
+                float bodyHeight = textureComp.texture.getHeight() * engineCFG.bodyScale;
+                Vector2 spawnPos = shipTransform.pos.add(growCannon.anchorVec.cpy().rotateRad(shipTransform.rotation));
+                //Vector2 sourceVel = parentEntity.getComponent(PhysicsComponent.class).body.getLinearVelocity();
+                //Vector2 projectileVel = MyMath.vector(cannon.aimAngle, cannon.velocity).add(sourceVel);
+    
+                physics.body = BodyFactory.createRect(spawnPos.x, spawnPos.y, bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody);
+                //physics.body.setTransform(spawnPos, sourceTransform.rotation);
+                //physics.body.setLinearVelocity(vec);
+                physics.body.setBullet(true);//turn on CCD
+                physics.body.setUserData(entity);
+                //Body projectileBody = growCannon.projectile.getComponent(PhysicsComponent.class).body;
+                //projectileBody.setTransform(spawnPosition, shipTransform.rotation);
+                //projectileBody.setLinearVelocity(vec);
                 ExpireComponent expire = new ExpireComponent();
                 expire.time = 5;
                 growCannon.projectile.add(expire);
@@ -507,13 +529,13 @@ public class ShipControlSystem extends IteratingSystem {
             }
         } else {
             if (control.attack) {
-                CannonComponent test = new CannonComponent();
-                test.size = 1;
-                growCannon.projectile = EntityFactory.createMissile(transform, test, entity);
-                growCannon.projectile.remove(ExpireComponent.class);
-                growCannon.projectile.getComponent(DamageComponent.class).source = entity;
                 growCannon.isCharging = true;
                 growCannon.growRateTimer.reset();
+                
+                growCannon.projectile = EntityFactory.createGrowMissile(shipTransform, growCannon, entity);
+                //growCannon.anchorVec = new Vector2(width/2+0.5f, 0).rotateDeg(180)
+                //growCannon.projectile.remove(ExpireComponent.class);
+                //growCannon.projectile.getComponent(DamageComponent.class).source = entity;
                 
                 getEngine().addEntity(growCannon.projectile);
             }
@@ -537,8 +559,8 @@ public class ShipControlSystem extends IteratingSystem {
         }
         
         //create missile
-        cannon.anchorVec.setAngleRad(transform.rotation);
-        cannon.aimAngle = transform.rotation;
+        cannon.anchorVec.setAngleRad(transform.rotation);//todo false, should not change relative to ship
+        cannon.aimAngle = transform.rotation;//todo false, should not change relative to ship
         Entity missile = EntityFactory.createMissile(transform, cannon, owner);
         getEngine().addEntity(missile);
         
