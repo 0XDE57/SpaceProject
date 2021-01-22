@@ -1,6 +1,7 @@
 package com.spaceproject.config;
 
 
+import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.spaceproject.systems.*;
 
@@ -41,6 +42,10 @@ public class SystemsConfig extends Config {
     
     public ArrayList<SysCFG> getSystems() {
         return systems;
+    }
+    
+    public SysCFG getConfig(EntitySystem system) {
+        return getConfig(system.getClass().getName());
     }
     
     public SysCFG getConfig(String className) {

@@ -295,7 +295,7 @@ public class GameScreen extends MyScreenAdapter {
         //enable/disable systems
         SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
         for (EntitySystem system : engine.getSystems()) {
-            SysCFG sysCFG = systemsCFG.getConfig(system.getClass().getName());
+            SysCFG sysCFG = systemsCFG.getConfig(system);
             if (sysCFG.isHaltOnGamePause()) {
                 system.setProcessing(!isPaused);
                 Gdx.app.log(this.getClass().getSimpleName(), "processing " + (isPaused ? "disabled" : "enabled") + " for " + system.getClass().getSimpleName());
