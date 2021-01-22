@@ -21,9 +21,9 @@ import com.spaceproject.utility.PhysicsContactListener;
 public class FixedPhysicsSystem extends EntitySystem implements IRequireGameContext {
     
     private EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
-    private int velocityIterations = engineCFG.physicsVelocityIterations;
-    private int positionIterations = engineCFG.physicsPositionIterations;
-    private float timeStep = 1 / (float) engineCFG.physicsStepPerFrame;
+    private final int velocityIterations = engineCFG.physicsVelocityIterations;
+    private final int positionIterations = engineCFG.physicsPositionIterations;
+    private final float timeStep = 1 / (float) engineCFG.physicsStepPerFrame;
     private float accumulator = 0f;
     
     private World world;
