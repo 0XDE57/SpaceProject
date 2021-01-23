@@ -15,8 +15,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.HyperDriveComponent;
+import com.spaceproject.ui.menu.GameMenu;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
+import com.spaceproject.utility.SimpleTimer;
 
 public class ControllerInputSystem extends EntitySystem implements ControllerListener {
     
@@ -29,6 +32,87 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             Gdx.app.log(this.getClass().getSimpleName(), controller.getName());
         }
     }
+    
+    private SimpleTimer doubleTap = new SimpleTimer(1000);
+    private boolean playerControls(int buttonCode, boolean buttonDown) {
+        Gdx.app.log(this.getClass().getSimpleName(), "button: " + buttonCode + ": " + buttonDown);
+        
+        if (players.size() == 0)
+            return false;
+        
+        boolean handled = false;
+        
+        ControllableComponent control = Mappers.controllable.get(players.first());
+    
+        if (buttonCode == Xbox.A) {
+            control.attack = buttonDown;
+            handled = true;
+        }
+        if (buttonCode == Xbox.B) {
+            control.defend = buttonDown;
+            handled = true;
+        }
+        if (buttonCode == Xbox.Y) {
+            control.changeVehicle = buttonDown;
+            handled = true;
+        }
+    
+        if (buttonCode == Xbox.DPAD_UP) {
+            HyperDriveComponent hyperDrive = Mappers.hyper.get(players.first());
+            hyperDrive.activate = buttonDown;
+            handled = true;
+        }
+        if (buttonCode == Xbox.DPAD_DOWN) {
+            control.transition = buttonDown;
+            handled = true;
+        }
+        
+        if (buttonCode == Xbox.R_BUMPER) {
+            control.movementMultiplier = 1;
+            control.moveRight = buttonDown;
+            
+            /* //todo: double tap for dodge
+            if (buttonDown) {
+                if (doubleTap.getLastEvent() != 0 && doubleTap.canDoEvent()) {
+                    Gdx.app.log("", "double tap unlatch");
+                    doubleTap.setLastEvent(0);
+                }
+                if (doubleTap.getLastEvent() == 0) {
+                    Gdx.app.log("", "double tap begin latch");
+                    doubleTap.reset();
+                } else if (!doubleTap.canDoEvent()) {
+                    Gdx.app.log("", "double tap activate");
+                    control.alter = true;
+                }
+            } else {
+                control.alter = false;
+            }*/
+            
+            handled = true;
+        }
+        if (buttonCode == Xbox.L_BUMPER) {
+            control.movementMultiplier = 1;
+            control.moveLeft = buttonDown;
+            //control.alter = buttonDown;
+            handled = true;
+        }
+        
+        if (buttonCode == Xbox.START) {
+            GameMenu menu = getEngine().getSystem(HUDSystem.class).getGameMenu();
+            if (buttonDown) {
+                if (!menu.isVisible()) {
+                    menu.show();
+                } else {
+                    menu.close();
+                }
+            }
+            
+            handled = true;
+        }
+        
+        return handled;
+    }
+    
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -47,14 +131,14 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
 
     @Override
     public boolean buttonDown(Controller controller, int buttonCode) {
-        //Gdx.app.log(this.getClass().getSimpleName(), buttonCode + "");
-        return false;
+        return playerControls(buttonCode, true);
     }
     
     @Override
     public boolean buttonUp(Controller controller, int buttonCode) {
-        return false;
+        return playerControls(buttonCode, false);
     }
+    
     
     float leftStickHorAxis;
     float leftStickVertAxis;
@@ -63,25 +147,22 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     public boolean axisMoved(Controller controller, int axisCode, float value) {
         //Gdx.app.log(this.getClass().getSimpleName(), axisCode + " " + value);
         float deadZone = 0.25f;
-    
-       
+        //controller.getMapping()
+
+        if (axisCode == Xbox.L_STICK_HORIZONTAL_AXIS) {
+            //if (value >= deadZone) {
+                leftStickHorAxis = value;
+            //}
+            //Gdx.app.log(this.getClass().getSimpleName(), "horizontal " + value);
+        }
+        if (axisCode == Xbox.L_STICK_VERTICAL_AXIS) {
+            //if (value >= deadZone) {
+                leftStickVertAxis = value;
+            //}
+            //Gdx.app.log(this.getClass().getSimpleName(), "vertical " + value);
+        }
         
-    
-        
-            if (axisCode == Xbox.L_STICK_HORIZONTAL_AXIS) {
-                //if (value >= deadZone) {
-                    leftStickHorAxis = value;
-                //}
-                //Gdx.app.log(this.getClass().getSimpleName(), "horizontal " + value);
-            }
-            if (axisCode == Xbox.L_STICK_VERTICAL_AXIS) {
-                //if (value >= deadZone) {
-                    leftStickVertAxis = value;
-                //}
-                //Gdx.app.log(this.getClass().getSimpleName(), "vertical " + value);
-            }
-            
-            //Gdx.app.log(this.getClass().getSimpleName(), "d " + dist);
+        //Gdx.app.log(this.getClass().getSimpleName(), "d " + dist);
         
     
         dist = MyMath.distance(0, 0, leftStickHorAxis, leftStickVertAxis);

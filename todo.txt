@@ -220,10 +220,18 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [...] fix background space rendering
         [...] POC star shader with fullscreen quad in separate project
             [ ] bring into this project and replace old system
-    [ ] basic controller input
+    [x] basic controller input
+        [...] basic Xbox 360 support
+            [ ] not detecting DPAD buttons
+            [ ] double tap
+        [ ] move to getMapping() but seems im on an older lib?
 
     [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
         [ ] lol jk, sound will eventually exist
+    [ ] detangle, some things are messy over time
+        [ ] Ship control system doing too much
+        [ ] HUD system doing too much
+        [ ] entity factory refactor into entity types
 
 
 ---ENGINE---
@@ -236,7 +244,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             [ ] config?
             [...] shield broken
                 [x] render
-                [ ] physics and collision
+                [...] physics and collision
             [...] dodge
                 [ ] adjust feel, its kinda clunky right now. needs more JUICE!
                     https://www.youtube.com/watch?v=Fy0aCDmgnxg
@@ -528,11 +536,11 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
                 [ ] mobile/touch UI way of activating dodge, a swipe on the joystick may be intuitive
         [x] shield
             [x] bug: during cooldown, re-activating starts from full instead of current size
-            [...] fix: currently broken due to physics shift
+            [x] fix: currently broken due to physics shift
         [ ] bullets should come from a gun rather than magically from ship
         [ ] weapon types
             [x] basic cannon
-            [...] grow cannon shoot circles/rectangles with radius relative to damage "weight" of projectile (damage = size * velocity * typeMultiplier)?
+            [x] grow cannon shoot circles/rectangles with radius relative to damage "weight" of projectile (damage = size * velocity * typeMultiplier)?
             [ ] L cannon, touhou style multiple bullet cannon
             [ ] Laser cannon
     [ ] engine mode:

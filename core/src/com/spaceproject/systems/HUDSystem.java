@@ -68,8 +68,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private boolean drawEdgeMap = true;
     
     private ScreenTransitionOverlay screenTransitionOverlay;
-    private UIConfig uiCFG;
-    private KeyConfig keyCFG;
+    private final UIConfig uiCFG = SpaceProject.configManager.getConfig(UIConfig.class);
+    private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     
     public HUDSystem() {
         cam = MyScreenAdapter.cam;
@@ -119,9 +119,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 return super.scrolled(event, x, y, amountX, amountY);
             }
         });
-        
-        uiCFG = SpaceProject.configManager.getConfig(UIConfig.class);
-        keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
         
         miniMap = new MiniMap();
         

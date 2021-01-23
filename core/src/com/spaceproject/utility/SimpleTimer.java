@@ -45,6 +45,10 @@ public class SimpleTimer {
             reset();
     }
     
+    public long getLastEvent() {
+        return lastEvent;
+    }
+    
     public void setLastEvent(long time) {
         lastEvent = time;
     }

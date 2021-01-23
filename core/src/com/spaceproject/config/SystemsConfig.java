@@ -15,8 +15,8 @@ public class SystemsConfig extends Config {
     public void loadDefault() {
         systems = new ArrayList<>();
         //SysCFG(entitySystem, priority, haltOnGamePause, loadInSpace, loadInWorld, loadOnDesktop, loadOnMobile)
-        systems.add(new SysCFG(DesktopInputSystem.class, 10, true, true, true, true, false));
-        //systems.add(new SysCFG(ControllerInputSystem.class, 15, true, true, true, true, true));
+        //systems.add(new SysCFG(DesktopInputSystem.class, 10, true, true, true, true, false));
+        systems.add(new SysCFG(ControllerInputSystem.class, 15, true, true, true, true, true));
         systems.add(new SysCFG(MobileInputSystem.class, 20, true, true, true, false, true));
         systems.add(new SysCFG(AISystem.class, 30, true, true, true, true, true));
         systems.add(new SysCFG(CharacterControlSystem.class, 40, true, true, true, true, true));
