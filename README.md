@@ -18,6 +18,7 @@ Worlds are also finite. If you move continuously in one direction you will event
 
 
 ## Features
+* Feature Creep and Unrealistic Scope!
 * Explore a random Galaxy in a spaceship
 * Discover various planetary systems and cellestial bodies
 * Land on planets and explore.
@@ -25,18 +26,18 @@ Worlds are also finite. If you move continuously in one direction you will event
 * Fight against other ship (in progress)
 * Destroy asterdoids (todo)
 * Mining and base-building (todo)
-* Open Source bruh!
-* Cross-Platform Desktop and Mobile Support
-  * Windows, OSX, Linux, Android, IOS
-* Controller support (todo)
+* Controller support (in progress)
 * Developer Tools & Mod Support (in progress)
 * Multiplayer
   * haha, just kidding. submit a pull request. do I have to do everything around here?
 * Unit Tests
   * pfft... my code is perfect, the first time. every time.
+* Open Source bruh!
+* Cross-Platform Desktop and Mobile Support
+  * Windows, OSX, Linux, Android, IOS
 * No Nonsense
    * DRM-Free! Ad-Free! Telemetry-Free! Cloud-Free! Microtransaction-Free!
-* Feature Creep and Unrealistic Scope!
+
 
 
 ## Current Status
@@ -51,19 +52,19 @@ Actively...and painfully slowly...in progress... It doesn't even have sound and 
 ### Controls
 | Control                        | Desktop      | Mobile (iOS, Android)                    | Controller/Gamepad |
 |------------------------------- | ------------ | ---------------------------------------- | ------------------ |
-| Movement                       | WASD         | Left Joystick                            |                    |
-| Aim                            | Mouse        | Left Joystick                            |                    |
-| Attack / Shoot                 | Right-Click  | bottom right button                      |                    |
-| Defense / Shield               | Alt          | todo                                     |                    |
-| Defense / Dodge (Barrel Roll)  | Shift + A/D  | todo                                     |                    |
-| Toggle HyperDrive              | 1            | todo                                     |                    |
-| Land/Take Off                  | T            | top center when over planet              |                    |
-| Enter/Exit vehicle             | G            | bottom right small button when in/near vehicle |                    |
+| Movement                       | WASD         | Left Joystick                            | Left Joystick      |
+| Aim                            | Mouse        | Left Joystick                            | Left Joystick      |
+| Attack / Shoot                 | Right-Click  | bottom right button                      | A                  |
+| Defense / Shield               | Alt          | todo                                     | B                  |
+| Defense / Dodge (Barrel Roll)  | Shift + A/D  | todo                                     | Right/Left Bumper  |
+| Toggle HyperDrive              | 1            | todo                                     | D-Pad Up           |
+| Land/Take Off                  | T            | top center when over planet              | D-Pad Down         |
+| Enter/Exit vehicle             | G            | bottom right small button when in/near vehicle | Y            |
 | Zoom                           | Scroll Wheel | Pinch Zoom (not implemented yet)         |                    |
 | Reset Zoom                     | Middle-Click |                                          |                    |
 | Toggle Map State               | M            | top left corner button                   |                    |
 | Full screen                    | F11          | n/a                                      |                    |
-| Menu (Pause)                   | Escape       | top right corner button                  |                    |
+| Menu (Pause)                   | Escape       | top right corner button                  | Start              |
 | Vsync                          | F8           |                                          |                    |
 | ECS Debug Viewer               | F9           |                                          |                    |
 | Misc debug keys I am too lazy to document rn and won't be permanent anyway               |                    |
