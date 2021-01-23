@@ -55,15 +55,15 @@ Actively...and painfully slowly...in progress... It doesn't even have sound and 
 | Movement                       | WASD         | Left Joystick                            | Left Joystick      |
 | Aim                            | Mouse        | Left Joystick                            | Left Joystick      |
 | Attack / Shoot                 | Right-Click  | bottom right button                      | A                  |
-| Defense / Shield               | Alt          | todo                                     | B                  |
-| Defense / Dodge (Barrel Roll)  | Shift + A/D  | todo                                     | Right/Left Bumper  |
-| Toggle HyperDrive              | 1            | todo                                     | D-Pad Up           |
+| Defense / Shield               | Space        | todo: needs button                       | B                  |
+| Defense / Dodge (Barrel Roll)  | Shift + A/D  | todo: swipe gesture?                     | Right/Left Bumper  |
+| Toggle HyperDrive              | 1            | todo: needs button                       | D-Pad Up           |
 | Land/Take Off                  | T            | top center when over planet              | D-Pad Down         |
 | Enter/Exit vehicle             | G            | bottom right small button when in/near vehicle | Y            |
-| Zoom                           | Scroll Wheel | Pinch Zoom (not implemented yet)         |                    |
-| Reset Zoom                     | Middle-Click |                                          |                    |
+| Zoom                           | Scroll Wheel | todo: Pinch Zoom                         | todo: Right JoyStick |
+| Reset Zoom                     | Middle-Click | todo: double tap                         | todo: Click in Right stick |
 | Toggle Map State               | M            | top left corner button                   |                    |
-| Full screen                    | F11          | n/a                                      |                    |
+| Full screen                    | F11          |                                          |                    |
 | Menu (Pause)                   | Escape       | top right corner button                  | Start              |
 | Vsync                          | F8           |                                          |                    |
 | ECS Debug Viewer               | F9           |                                          |                    |
