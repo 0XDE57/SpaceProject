@@ -206,14 +206,15 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             [ ] particle trail
             [ ] particle affect for absorb while growing
     [ ] particle effect for ships engine: fire or something neat
-        [ ] particlesystem and emiter components?
+        [ ] particlesystem and emitter components?
         [ ] mess around with the particle editor
     [...] control tuning
         [x] basic controller input
-            [ ] allow hotpluging, currently handled by commenting out system is annoying, multiplexor? and what about stage...
+            [ ] allow hot-plugging, currently handled by commenting out system is annoying, multiplexer? and what about stage...
             [...] basic Xbox 360 support
                 [ ] not detecting DPAD buttons
-                [ ] double tap
+                [ ] double tap right left bumpers for barrel roll
+                [ ] right stick camera control, click to reset
             [ ] move to getMapping() but seems im on an older lib?
         [ ] hyperdrive should be charge instead of instant activate [1]
             [ ] needs control for mobile
@@ -241,13 +242,16 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [...] fix background space rendering
         [...] POC star shader with fullscreen quad in separate project
             [ ] bring into this project and replace old system
-
-
     [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
         [ ] lol jk, sound will eventually exist
-    [ ] detangle, some things are messy over time
+    [...] detangle, some things are messy over time
         [...] Ship control system doing too much
+            [x] move growcannon to own system
+            [ ] move normal cannon to own system
+            [ ] can refactor stuff in control component into their respective components just like grow and hyper?
+            [ ] barrel roll and 3d sprite stuff into own system?
         [...] HUD system doing too much
+            [ ] shouldn't have gamemenu and input listener?
         [ ] entity factory refactor into entity types
 
 

@@ -82,7 +82,7 @@ public class ShipControlSystem extends IteratingSystem {
         boolean canDodge = shield == null;
         
         barrelRoll(entity, dodgeComp);
-        manageShield(entity, control, shield);
+        manageShield(entity, control, shield);//todo: move into ShieldSystem
         
         if (GameScreen.isDebugMode) {
             applyDebugControls(entity, transformComp, physicsComp);
@@ -124,7 +124,7 @@ public class ShipControlSystem extends IteratingSystem {
         }
         
         
-        //fire cannon / attack
+        //fire cannon / attack todo: move into cannon system
         CannonComponent cannon = Mappers.cannon.get(entity);
         if (cannon != null) {
             refillAmmo(cannon);
