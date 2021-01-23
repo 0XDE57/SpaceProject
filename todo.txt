@@ -194,7 +194,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         [...] fix grow bullet
             [x] AI not detecting hit
                 [ ] ai doesnt know to release grow cannon, only tuned for regular cannon
-            [...] tune damage
+            [x] tune damage
             [x] tune size
             [ ] lock on nearest target when max
             [x] bullet jitter in front of ship when moving, not visible with vsync disabled. lerp?

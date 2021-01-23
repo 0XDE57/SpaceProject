@@ -3,7 +3,6 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -93,11 +92,10 @@ public class GrowCannonSystem extends IteratingSystem {
         //damage modifier
         DamageComponent damageComponent = new DamageComponent();
         damageComponent.source = entity;
-        damageComponent.damage = growCannon.baseDamage + ((growCannon.size / growCannon.maxSize) * growCannon.baseDamage);
+        damageComponent.damage = growCannon.baseDamage + (10 * (growCannon.size / growCannon.maxSize) * growCannon.baseDamage);
         if (growCannon.size >= growCannon.maxSize) {
             damageComponent.damage *= 1.15;//bonus damage for maxed out
         }
-        Gdx.app.log("shoot", damageComponent.damage + "");
         projectile.add(damageComponent);
         
         //physics
