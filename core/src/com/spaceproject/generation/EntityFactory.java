@@ -25,6 +25,7 @@ import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.SeedComponent;
+import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -485,32 +486,52 @@ public class EntityFactory {
     public static Entity createBasicShip(float x, float y, long seed, Entity driver, boolean inSpace) {
         Entity entity = new Entity();
         
+        //seed
         MathUtils.random.setSeed(seed);
         SeedComponent seedComp = new SeedComponent();
         seedComp.seed = seed;
+        entity.add(seedComp);
+        
         
         //transform
         TransformComponent transform = new TransformComponent();
         transform.pos.set(x, y);
         transform.zOrder = RenderOrder.VEHICLES.getHierarchy();
         transform.rotation = (float) Math.PI / 2; //face upwards
+        entity.add(transform);
         
-        //generate random even size
+        //generate 3D sprite with random even size
         int shipSize = MathUtils.random(entityCFG.shipSizeMin, entityCFG.shipSizeMax) * 2;
         Texture shipTop = TextureFactory.generateShip(seed, shipSize);
         Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
-        
         float spriteScale = 0.025f;//TODO: better way to manage render scale (3d vs tex, relation to physics body)
         float width = shipTop.getWidth() * engineCFG.bodyScale;
         float height = shipTop.getHeight() * engineCFG.bodyScale;
-        
         Sprite3DComponent sprite3DComp = new Sprite3DComponent();
         sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom, engineCFG.entityScale);
         sprite3DComp.renderable.scale.set(spriteScale, spriteScale, spriteScale);
+        entity.add(sprite3DComp);
+        
         
         //collision detection
         PhysicsComponent physics = new PhysicsComponent();
         physics.body = BodyFactory.createShip(x, y, width, height, entity, inSpace);
+        entity.add(physics);
+        
+        
+        //engine data and marks entity as drive-able
+        VehicleComponent vehicle = new VehicleComponent();
+        vehicle.driver = driver;
+        vehicle.thrust = entityCFG.engineThrust;
+        entity.add(vehicle);
+        
+        
+        //health
+        HealthComponent health = new HealthComponent();
+        health.maxHealth = entityCFG.shipHealth;
+        health.health = health.maxHealth;
+        entity.add(health);
+        
         
         //weapon
         CannonComponent cannon = new CannonComponent();
@@ -524,7 +545,7 @@ public class EntityFactory {
         cannon.anchorVec = new Vector2(width, 0);
         cannon.aimAngle = 0;
         cannon.timerRechargeRate = new SimpleTimer(entityCFG.cannonRechargeRate);
-        
+    
         ChargeCannonComponent chargeCannon = new ChargeCannonComponent();
         chargeCannon.anchorVec = new Vector2(width, 0);
         chargeCannon.aimAngle = 0;
@@ -534,44 +555,38 @@ public class EntityFactory {
         chargeCannon.growRateTimer = new SimpleTimer(1500);
         chargeCannon.baseDamage = 8f;
         
-        
-        //engine data and marks entity as drive-able
-        VehicleComponent vehicle = new VehicleComponent();
-        vehicle.driver = driver;
-        vehicle.thrust = entityCFG.engineThrust;
-        
-        //health
-        HealthComponent health = new HealthComponent();
-        health.maxHealth = entityCFG.shipHealth;
-        health.health = health.maxHealth;
-        
-        //map
-        MapComponent map = new MapComponent();
-        map.color = new Color(1, 1, 1, 0.9f);
-        map.distance = 3000;
-        
-        //hyper drive
-        HyperDriveComponent hyperDrive = new HyperDriveComponent();
-        hyperDrive.speed = entityCFG.hyperSpeed;
-        hyperDrive.coolDownTimer = new SimpleTimer(entityCFG.controlTimerHyperCooldown, true);
-        hyperDrive.coolDownTimer.setCanDoEvent();
-        
-        //add components to entity
-        entity.add(seedComp);
-        entity.add(health);
-        
         if (MathUtils.randomBoolean()) {
             entity.add(cannon);
         } else {
             entity.add(chargeCannon);
         }
         
-        entity.add(physics);
-        entity.add(sprite3DComp);
-        entity.add(transform);
-        entity.add(vehicle);
-        entity.add(map);
+        
+        //hyper drive
+        HyperDriveComponent hyperDrive = new HyperDriveComponent();
+        hyperDrive.speed = entityCFG.hyperSpeed;
+        hyperDrive.coolDownTimer = new SimpleTimer(entityCFG.controlTimerHyperCooldown, true);
+        hyperDrive.coolDownTimer.setCanDoEvent();
         entity.add(hyperDrive);
+        
+        
+        //shield
+        ShieldComponent shield = new ShieldComponent();
+        shield.animTimer = new SimpleTimer(300, true);
+        shield.defence = 100f;
+        float radius = Math.max(MyMath.calculateBoundingBox(physics.body).getWidth(), MyMath.calculateBoundingBox(physics.body).getHeight());
+        shield.maxRadius = radius;
+        shield.color = Color.BLUE;
+        //entity.add(shield);
+        
+        
+        //map
+        MapComponent map = new MapComponent();
+        map.color = new Color(1, 1, 1, 0.9f);
+        map.distance = 3000;
+        entity.add(map);
+        
+        
         return entity;
     }
     //endregion

@@ -77,7 +77,7 @@ public class PhysicsContactListener implements ContactListener {
         //check for shield
         ShieldComponent shieldComp = Mappers.shield.get(attackedEntity);
         if (shieldComp != null) {
-            if (shieldComp.active) {
+            if (shieldComp.isActive) {
                 //Body body = attackedEntity.getComponent(PhysicsComponent.class).body;
                 //Fixture circleFixture = body.getFixtureList().get(body.getFixtureList().size - 1);
                 //body.destroyFixture(circleFixture);//cant remove mid collision

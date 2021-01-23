@@ -322,7 +322,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         ShieldComponent shield = Mappers.shield.get(playerEntity);
         if (shield != null) {
             float ratioShield = shield.radius / shield.maxRadius;
-            if (shield.active) {
+            if (shield.isActive) {
                 shape.setColor(shield.color);
             } else {
                 shape.setColor(shield.color.r, shield.color.g, shield.color.b, 0.25f);

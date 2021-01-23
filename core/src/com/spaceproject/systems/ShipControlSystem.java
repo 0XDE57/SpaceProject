@@ -79,7 +79,7 @@ public class ShipControlSystem extends IteratingSystem {
         boolean canDodge = shield == null;
         
         barrelRoll(entity, dodgeComp);
-        manageShield(entity, control, shield);//todo: move into ShieldSystem
+        //manageShield(entity, control, shield);//todo: move into ShieldSystem
         
         if (GameScreen.isDebugMode) {
             applyDebugControls(entity, transformComp, physicsComp);
@@ -332,21 +332,21 @@ public class ShipControlSystem extends IteratingSystem {
         
         
         if (control.defend) {
-            if (!shield.growing) {
+            if (!shield.isCharging) {
                 //reactivate
                 if (shield.animTimer.ratio() >= 0.3f)
                     shield.animTimer.flipRatio();
             }
-            shield.growing = true;
+            shield.isCharging = true;
         } else {
-            if (shield.growing) {
+            if (shield.isCharging) {
                 //release
                 shield.animTimer.flipRatio();
             }
-            shield.growing = false;
+            shield.isCharging = false;
         }
         
-        if (shield.growing) {
+        if (shield.isCharging) {
             //charge
             shield.radius = shield.maxRadius * shield.animTimer.ratio();
         } else {
@@ -355,7 +355,7 @@ public class ShipControlSystem extends IteratingSystem {
         }
         
         //activate
-        shield.active = shield.radius == shield.maxRadius;
+        shield.isActive = shield.radius == shield.maxRadius;
         
         
         if (shield.radius <= 0) {

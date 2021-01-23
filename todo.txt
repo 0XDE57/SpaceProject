@@ -251,8 +251,9 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         [...] Ship control system doing too much
             [x] move charge cannon to own system
             [x] move normal cannon to own system
-            [?] can refactor stuff in control component into their respective components just like grow and hyper?
+            [...] move shield into own system
             [?] barrel roll and 3d sprite stuff into own system?
+            [?] can refactor stuff in control component into their respective components just like grow and hyper?
         [...] HUD system doing too much
             [ ] shouldn't have mobileinput rendering
             [?] shouldn't have gamemenu and input listener?

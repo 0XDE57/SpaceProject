@@ -203,7 +203,7 @@ public class SpaceRenderingSystem extends IteratingSystem {
                 
                 //draw overlay
                 shape.begin(ShapeRenderer.ShapeType.Filled);
-                if (shield.active) {
+                if (shield.isActive) {
                     shape.setColor(c.r, c.g, c.b, 0.25f);
                 } else {
                     shape.setColor(c.r, c.g, c.b, 0.15f);
@@ -213,7 +213,7 @@ public class SpaceRenderingSystem extends IteratingSystem {
                 
                 //draw outline
                 shape.begin(ShapeRenderer.ShapeType.Line);
-                if (shield.active) {
+                if (shield.isActive) {
                     shape.setColor(Color.WHITE);
                 } else {
                     shape.setColor(c.r, c.g, c.b, 1f);
