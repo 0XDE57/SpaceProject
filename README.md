@@ -103,5 +103,5 @@ Actively...and painfully slowly...in progress... It doesn't even have sound and 
   * connect phone, android studio should detect it
   * build and run!
 * IOS
-  * https://github.com/libgdx/libgdx/wiki/Ios-notes
+  * https://libgdx.com/dev/import_and_running/#ios
 
