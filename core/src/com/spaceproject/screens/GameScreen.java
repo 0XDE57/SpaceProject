@@ -170,16 +170,13 @@ public class GameScreen extends MyScreenAdapter {
         ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(transEntity);
         if (inSpace) {
             initWorld(transEntity, planet);
-            
-            ScreenTransitionSystem.nextStage(screenTrans);
         } else {
             Mappers.screenTrans.get(transEntity).planet = currentPlanet;
             initSpace(transEntity);
-            
-            ScreenTransitionSystem.nextStage(screenTrans);
         }
-        
-        
+        ScreenTransitionSystem.nextStage(screenTrans);
+    
+    
         adjustPhysics(transitioningEntities);
         
         /*TODO: persist
