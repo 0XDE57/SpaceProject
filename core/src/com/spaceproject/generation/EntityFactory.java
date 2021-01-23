@@ -559,8 +559,13 @@ public class EntityFactory {
         //add components to entity
         entity.add(seedComp);
         entity.add(health);
-        //entity.add(chargeCannon);
-        entity.add(cannon);
+        
+        if (MathUtils.randomBoolean()) {
+            entity.add(cannon);
+        } else {
+            entity.add(chargeCannon);
+        }
+        
         entity.add(physics);
         entity.add(sprite3DComp);
         entity.add(transform);
