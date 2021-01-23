@@ -183,24 +183,43 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         [x] for now, just place back at origin 0, 0
         [ ] how to handle death? start on planet back at base? start at a space station?
             [ ] could have a "home planet" and just spawn from there like transitionsystem takeoff
-        [ ] notify AI that are stuck attacking nothing
+        [ ] notify AI that are stuck attacking nothing and should return to dumbwander or previous task
     [...] fix shield physics
         [...] if collide with bullet, shrink/destroy shield
         [ ] fix radius is not consistent. rotation of body affects size of shield. don't trust calculateBoundingBox()?
         [ ] grow/shrink. looks like cant resize bodies in box2d? destroy and recreate each frame seems inefficient likely
         [ ] if collide with another body with significant difference in velocity
             and if other has HealthComponent, do damage using velocity as damage factor
+            [ ] shield dash bash? high impulse forward, then activate shield to ram other objects and do damage to them
     [...] make bullets better
         [...] fix grow bullet
             [x] AI not detecting hit
-                [ ] ai doesnt know to release grow cannon, only tuned for regular cannon
+                [ ] ai doesn't know to release grow cannon, only tuned for regular cannon
             [x] tune damage
             [x] tune size
             [ ] lock on nearest target when max
+                [ ] visual in hudsystem for tracked entity
+                [ ] predict angle to aim to hit based on pos and velocity
+                [ ] steering behavior AI?
             [x] bullet jitter in front of ship when moving, not visible with vsync disabled. lerp?
         [...] more visible
             [ ] particle trail
-            [ ] particle affect for absorb
+            [ ] particle affect for absorb while growing
+    [ ] particle effect for ships engine: fire or something neat
+        [ ] particlesystem and emiter components?
+        [ ] mess around with the particle editor
+    [...] control tuning
+        [x] basic controller input
+            [ ] allow hotpluging, currently handled by commenting out system is annoying, multiplexor? and what about stage...
+            [...] basic Xbox 360 support
+                [ ] not detecting DPAD buttons
+                [ ] double tap
+            [ ] move to getMapping() but seems im on an older lib?
+        [ ] hyperdrive should be charge instead of instant activate [1]
+            [ ] needs control for mobile
+        [ ] new control?: hold shift to charge, then forward + release charge for boost: impulse
+        [x] change shield from alt to space
+        [ ] shield bash: double tap forward(or direction) and hold to rush, then shield do shield action [B] within time window of dash, and hold
     [ ] add basic asteroids (arbitrary poly)
         [ ] spec spawner for asteroid. begin make asteroid
     [ ] fix AI a bit (lead shot)
@@ -222,11 +241,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [...] fix background space rendering
         [...] POC star shader with fullscreen quad in separate project
             [ ] bring into this project and replace old system
-    [x] basic controller input
-        [...] basic Xbox 360 support
-            [ ] not detecting DPAD buttons
-            [ ] double tap
-        [ ] move to getMapping() but seems im on an older lib?
+
 
     [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
         [ ] lol jk, sound will eventually exist
