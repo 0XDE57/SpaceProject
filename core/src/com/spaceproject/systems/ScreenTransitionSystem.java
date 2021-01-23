@@ -22,7 +22,6 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
-import com.spaceproject.ui.FadeState;
 import com.spaceproject.ui.ScreenTransitionOverlay;
 import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.Mappers;
@@ -32,6 +31,7 @@ import com.spaceproject.utility.Misc;
 public class ScreenTransitionSystem extends IteratingSystem implements IRequireGameContext {
     
     private GameScreen gameScreen;
+    private final ScreenTransitionOverlay screenOverlay = new ScreenTransitionOverlay();
     
     public ScreenTransitionSystem() {
         super(Family.all(ScreenTransitionComponent.class, TransformComponent.class).get());
@@ -40,6 +40,12 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     @Override
     public void initContext(GameScreen gameScreen) {
         this.gameScreen = gameScreen;
+    }
+    
+    @Override
+    public void update(float deltaTime) {
+        super.update(deltaTime);
+        screenOverlay.render();
     }
     
     @Override
@@ -213,14 +219,6 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         if (MyScreenAdapter.cam.zoom <= 0.05f) {
             nextStage(screenTrans);
         }
-    
-        //begin fade while also zoom
-        //TODO: would probably look better to sync camera zoom with fade amount
-        HUDSystem hud = getEngine().getSystem(HUDSystem.class);
-        ScreenTransitionOverlay overlay = hud.getScreenTransitionOverlay();
-        if (overlay.getFadeState() == FadeState.off) {
-            overlay.fadeIn();
-        }
     }
     
     private static void zoomOut(Entity entity, ScreenTransitionComponent screenTrans) {
@@ -232,12 +230,9 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     }
     
     private void fadeIn(ScreenTransitionComponent screenTrans) {
-        HUDSystem hud = getEngine().getSystem(HUDSystem.class);
-        ScreenTransitionOverlay overlay = hud.getScreenTransitionOverlay();
-        
-        switch (overlay.getFadeState()) {
+        switch (screenOverlay.getFadeState()) {
             case off:
-                overlay.fadeIn();
+                screenOverlay.fadeIn();
                 break;
             case on:
                 nextStage(screenTrans);
@@ -246,15 +241,12 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     }
     
     private void fadeOut(ScreenTransitionComponent screenTrans) {
-        HUDSystem hud = getEngine().getSystem(HUDSystem.class);
-        ScreenTransitionOverlay overlay = hud.getScreenTransitionOverlay();
-        
-        switch (overlay.getFadeState()) {
+        switch (screenOverlay.getFadeState()) {
             case off:
                 nextStage(screenTrans);
                 break;
             case on:
-                overlay.fadeOut();
+                screenOverlay.fadeOut();
                 break;
         }
     }

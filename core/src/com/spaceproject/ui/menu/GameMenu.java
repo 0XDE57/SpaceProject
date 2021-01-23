@@ -143,7 +143,6 @@ public class GameMenu extends VisWindow {
         //tabbedPane.add(createConfigTab(new TestConfig()));
     }
     
-    
     //region menu controls
     public boolean isVisible() {
         return getStage() != null;

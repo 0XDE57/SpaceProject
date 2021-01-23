@@ -36,7 +36,6 @@ import com.spaceproject.config.KeyConfig;
 import com.spaceproject.config.UIConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
-import com.spaceproject.ui.ScreenTransitionOverlay;
 import com.spaceproject.ui.map.MapState;
 import com.spaceproject.ui.map.MiniMap;
 import com.spaceproject.ui.menu.GameMenu;
@@ -67,7 +66,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private boolean drawHud = true;
     private boolean drawEdgeMap = true;
     
-    private ScreenTransitionOverlay screenTransitionOverlay;
     private final UIConfig uiCFG = SpaceProject.configManager.getConfig(UIConfig.class);
     private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     
@@ -121,8 +119,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         });
         
         miniMap = new MiniMap();
-        
-        screenTransitionOverlay = new ScreenTransitionOverlay();
     }
     
     
@@ -160,8 +156,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         MobileInputSystem mobileUI = getEngine().getSystem(MobileInputSystem.class);
         if (mobileUI != null)
             mobileUI.drawControls();
-        
-        screenTransitionOverlay.render();
     }
     
     private void drawHUD() {
@@ -500,10 +494,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     public GameMenu getGameMenu() {
         return gameMenu;
-    }
-    
-    public ScreenTransitionOverlay getScreenTransitionOverlay() {
-        return screenTransitionOverlay;
     }
     
     @Override

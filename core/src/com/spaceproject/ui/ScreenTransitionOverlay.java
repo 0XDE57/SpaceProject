@@ -16,8 +16,8 @@ public class ScreenTransitionOverlay {
     
     public ScreenTransitionOverlay() {
         fadeState = FadeState.off;
-        fadeTimer = new SimpleTimer(fadeTime, false);
         fadeTime = 2000;
+        fadeTimer = new SimpleTimer(fadeTime, false);
         fadeColor = new Color(1, 1, 1, 1);
         shape = new ShapeRenderer();
     }
