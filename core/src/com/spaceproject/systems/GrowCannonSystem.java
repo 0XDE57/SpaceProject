@@ -15,8 +15,9 @@ import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.config.RenderOrder;
 import com.spaceproject.generation.BodyFactory;
-import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 
@@ -88,7 +89,7 @@ public class GrowCannonSystem extends IteratingSystem {
         growCannon.isCharging = true;
         growCannon.growRateTimer.reset();
         
-        growCannon.projectileEntity = EntityFactory.createGrowMissileGhost();
+        growCannon.projectileEntity = createGrowMissileChargeEntity();
         getEngine().addEntity(growCannon.projectileEntity);
     }
     
@@ -138,6 +139,23 @@ public class GrowCannonSystem extends IteratingSystem {
         
         //release
         growCannon.projectileEntity = null;
+    }
+    
+    private Entity createGrowMissileChargeEntity() {
+        Entity entity = new Entity();
+        
+        //create texture
+        TextureComponent texture = new TextureComponent();
+        texture.texture = TextureFactory.generateProjectile();
+        texture.scale = 0;//start at nothing
+        
+        TransformComponent transform = new TransformComponent();
+        transform.zOrder = RenderOrder.PROJECTILES.getHierarchy();
+        
+        entity.add(texture);
+        entity.add(transform);
+        
+        return entity;
     }
     
 }

@@ -561,8 +561,8 @@ public class EntityFactory {
         //add components to entity
         entity.add(seedComp);
         entity.add(health);
-        entity.add(growCannon);
-        //entity.add(cannon);
+        //entity.add(growCannon);
+        entity.add(cannon);
         entity.add(physics);
         entity.add(sprite3DComp);
         entity.add(transform);
@@ -616,23 +616,6 @@ public class EntityFactory {
         entity.add(expire);
         entity.add(texture);
         entity.add(physics);
-        entity.add(transform);
-        
-        return entity;
-    }
-    
-    public static Entity createGrowMissileGhost() {
-        Entity entity = new Entity();
-        
-        //create texture
-        TextureComponent texture = new TextureComponent();
-        texture.texture = TextureFactory.generateProjectile();
-        texture.scale = 0;//start at nothing
-        
-        TransformComponent transform = new TransformComponent();
-        transform.zOrder = RenderOrder.PROJECTILES.getHierarchy();
-        
-        entity.add(texture);
         entity.add(transform);
         
         return entity;

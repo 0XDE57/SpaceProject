@@ -170,10 +170,12 @@ And much more....problems for later.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 Legend:
-    [ ]     = not started
-    [...]   = in progress
-    [x]     = complete
-    [!,?,*] = notes, questions, or exceptions
+    [   ] = not started
+    [...] = in progress
+    [ x ] = complete
+    [ ? ] = question
+    [ ! ] = notes
+    [ * ] = exceptions
 
 todo: focus! i keep jumping between ideas and features and never finish anything
 ***the plan***:
@@ -221,6 +223,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         [ ] new control?: hold shift to charge, then forward + release charge for boost: impulse
         [x] change shield from alt to space
         [ ] shield bash: double tap forward(or direction) and hold to rush, then shield do shield action [B] within time window of dash, and hold
+        [ ] land take off could be hold instead of instant
     [ ] add basic asteroids (arbitrary poly)
         [ ] spec spawner for asteroid. begin make asteroid
     [ ] fix AI a bit (lead shot)
@@ -247,11 +250,12 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [...] detangle, some things are messy over time
         [...] Ship control system doing too much
             [x] move growcannon to own system
-            [ ] move normal cannon to own system
-            [ ] can refactor stuff in control component into their respective components just like grow and hyper?
-            [ ] barrel roll and 3d sprite stuff into own system?
+            [...] move normal cannon to own system
+            [?] can refactor stuff in control component into their respective components just like grow and hyper?
+            [?] barrel roll and 3d sprite stuff into own system?
         [...] HUD system doing too much
-            [ ] shouldn't have gamemenu and input listener?
+            [ ] shouldn't have mobile rendering
+            [?] shouldn't have gamemenu and input listener?
         [ ] entity factory refactor into entity types
 
 
@@ -291,7 +295,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
                 [ ] fix layout
                 [ ] hook up load save undo
     [...] move more things to config
-        [ ] Ships are currently hardcoded by Entity factory
+        [?] Ships are currently hardcoded by Entity factory
             can we find a way to generate entities from config.
                 - consider ranges,
                 - consider space vs planet differences (eg: physics)...
@@ -355,7 +359,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             this bug is driving me insane, but there's still some transition and loading details to work out
 
 
-[ ] "Persistence Engine" what to do with rest of universe when on a planet? or stuff going on on planets when we are in space?
+[?] "Persistence Engine" what to do with rest of universe when on a planet? or stuff going on on planets when we are in space?
     genericize and make work land and take off work for AI, system doesn't support non-player world switching
     dumb loop where AI lands on planet, kept in some kind of background
     processing state/alt engine, wait a second then take off to test all is working correctly
@@ -424,7 +428,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [...] fix render priority (z-order)
           [X] moved into separate variable
           [x] define proper heights for importance as current values are somewhat arbitrary
-          [ ] this is now a bit more complex, as there is a mix of 2d sprites and 3d renderables, that are rendered in separate batches (2d then 3d overlay).
+          [?] this is now a bit more complex, as there is a mix of 2d sprites and 3d renderables, that are rendered in separate batches (2d then 3d overlay).
               to mix the z between them may require multiple batch passes, or migrating to 3d, also shaperenderer on top of that...
     [ ] better star rendering
         it's currently static just like planets, but I want it to shift the z, exactly like the title screen background

@@ -23,14 +23,12 @@ import com.spaceproject.utility.MyMath;
 
 public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
-    KeyConfig keyCFG;
+    private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     private ImmutableArray<Entity> players;
 
     @Override
     public void addedToEngine(Engine engine) {
         players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
-        keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
-        
         MyScreenAdapter.getInputMultiplexer().addProcessor(this);
     }
     
