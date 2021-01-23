@@ -99,7 +99,6 @@ public class WorldRenderingSystem extends IteratingSystem implements IRequireGam
         
         //clear screen
         Gdx.gl20.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClearDepthf(1f);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
     
         spriteBatch.setProjectionMatrix(cam.combined);

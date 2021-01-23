@@ -68,7 +68,6 @@ public class SpaceRenderingSystem extends IteratingSystem {
         //clear screen with color based on camera position
         Color color = backgroundColor(cam);
         Gdx.gl20.glClearColor(color.r, color.g, color.b, 1);
-        Gdx.gl.glClearDepthf(1f);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         
         
