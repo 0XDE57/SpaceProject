@@ -198,7 +198,8 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             [ ] lock on nearest target when max
             [x] bullet jitter in front of ship when moving, not visible with vsync disabled. lerp?
         [...] more visible
-        [ ] make bullets come from front of ship
+            [ ] particle trail
+            [ ] particle affect for absorb
     [ ] add basic asteroids (arbitrary poly)
         [ ] spec spawner for asteroid. begin make asteroid
     [ ] fix AI a bit (lead shot)
@@ -229,8 +230,8 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
         [ ] lol jk, sound will eventually exist
     [ ] detangle, some things are messy over time
-        [ ] Ship control system doing too much
-        [ ] HUD system doing too much
+        [...] Ship control system doing too much
+        [...] HUD system doing too much
         [ ] entity factory refactor into entity types
 
 
@@ -238,10 +239,6 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
 [...] physics and movement
     [...] move to box2d
         [...] move logic to new physics
-            [x] gravity / linear / angular damping on planets, 0 friction in space
-            [x] affects transitioning entity
-            [x] affects created entities (entity factory)
-            [ ] config?
             [...] shield broken
                 [x] render
                 [...] physics and collision
@@ -251,12 +248,8 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             [...] space tile scale bad and tile loading broken
                 [x] fix load/unload and scale
                 [...] dust layer has render issue, tiles overlapping edges/gap
-            [x] fix edge map scaling / icon show hide when near
-                [x] account for camera zoom
         [...] figure out scales and values that make sense and work with the b2d engine (consider scale of space)
             [ ] create unit/body scale helper
-        [x] remove old physics stuff
-        [ ] test mobile
         [ ] move to filters? https://gamefromscratch.com/libgdx-libgdx-tutorial-13-physics-with-box2d-part-4-controlling-collisions-using-filters/
     https://gamedev.stackexchange.com/questions/23834/how-to-properly-implement-message-handling-in-a-component-based-entity-system
     [x] fixed time step (necessary for multiplayer?)
@@ -402,7 +395,6 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [ ] clean up star save/load
     [!] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
         ! actually for now this is a convenient bug for testing
-    [x] nested orbit: consider children of children eg: satellite->moon->planet->star
 
 
 [...] rendering system
@@ -534,9 +526,6 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
                 [ ] clean up: should move values to config
                 [ ] clean up: optimize rendering -> ModelCache
                 [ ] mobile/touch UI way of activating dodge, a swipe on the joystick may be intuitive
-        [x] shield
-            [x] bug: during cooldown, re-activating starts from full instead of current size
-            [x] fix: currently broken due to physics shift
         [ ] bullets should come from a gun rather than magically from ship
         [ ] weapon types
             [x] basic cannon
@@ -616,8 +605,6 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
                 /takecontrol <entity> (set control /input focus, if has AI, override (or maybe swap with player would be cool)
                 /transfercomponent <component> <entityFrom> <entityTo>
     [...] engine viewer
-        [x] show entities and components and component values
-        [x] clean up and bit of optimization (its pretty hacky atm)
         [...] arrow navigation and menu expansion
             [x] fix some edge cases on up and down and expansion of empty nodes
             [ ] nothing select, re-select last selected / refocus
@@ -625,9 +612,6 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         [ ] aesthetics and usability
             [ ] on key navigation, if selection out of scrollpane view, scroll to make it visible
             [ ] fix arrow expand image on entity node pre/post expand
-            [x] smaller font
-            [x] font coloring
-                https://github.com/libgdx/libgdx/blob/master/tests/gdx-tests/src/com/badlogic/gdx/tests/BitmapFontTest.java
             [ ] fix scroll bar to show
             [ ] focus on mouse over
         [ ] options
