@@ -3,6 +3,7 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -21,8 +22,6 @@ import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 
 public class GrowCannonSystem extends IteratingSystem {
-    
-    private final float minProjectileSize = 0.1f;
     
     public GrowCannonSystem() {
         super(Family.all(GrowCannonComponent.class, ControllableComponent.class).get());
@@ -64,7 +63,15 @@ public class GrowCannonSystem extends IteratingSystem {
             
             //release
             if (!control.attack) {
-                releaseProjectile(entity, growCannon, projectile, transformComponent, spawnPos, textureComp);
+                int fireRateMinChargeMS = 60;
+                if (growCannon.growRateTimer.timeSinceLastEvent() < fireRateMinChargeMS) {
+                    //kill ghost, cancel shot
+                    growCannon.projectileEntity.add(new RemoveComponent());
+                    growCannon.projectileEntity = null;
+                    growCannon.isCharging = false;
+                } else {
+                    releaseProjectile(entity, growCannon, projectile, transformComponent, spawnPos, textureComp);
+                }
             }
         } else {
             if (control.attack) {
@@ -80,16 +87,17 @@ public class GrowCannonSystem extends IteratingSystem {
     private void releaseProjectile(Entity entity, GrowCannonComponent growCannon, Entity projectile, TransformComponent transformComponent, Vector2 spawnPos, TextureComponent textureComp) {
         growCannon.isCharging = false;
         
-        growCannon.size = Math.max(minProjectileSize, growCannon.size);//cap minimum
+        growCannon.size = Math.max(growCannon.minSize, growCannon.size);//cap minimum
         textureComp.scale = growCannon.size;
         
         //damage modifier
         DamageComponent damageComponent = new DamageComponent();
         damageComponent.source = entity;
         damageComponent.damage = growCannon.baseDamage + ((growCannon.size / growCannon.maxSize) * growCannon.baseDamage);
-        if (growCannon.size == growCannon.maxSize) {
+        if (growCannon.size >= growCannon.maxSize) {
             damageComponent.damage *= 1.15;//bonus damage for maxed out
         }
+        Gdx.app.log("shoot", damageComponent.damage + "");
         projectile.add(damageComponent);
         
         //physics

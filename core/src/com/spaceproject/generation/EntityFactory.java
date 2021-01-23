@@ -531,10 +531,10 @@ public class EntityFactory {
         growCannon.anchorVec = new Vector2(width, 0);
         growCannon.aimAngle = 0;
         growCannon.velocity = entityCFG.cannonVelocity;
-        growCannon.maxSize = 0.5f;
-        growCannon.size = 0.01f;
-        growCannon.growRateTimer = new SimpleTimer(8000);
-        growCannon.baseDamage = 8f;
+        growCannon.maxSize = 0.35f;
+        growCannon.minSize = 0.1f;
+        growCannon.growRateTimer = new SimpleTimer(4000);
+        growCannon.baseDamage = 10f;
         
         
         //engine data and marks entity as drive-able

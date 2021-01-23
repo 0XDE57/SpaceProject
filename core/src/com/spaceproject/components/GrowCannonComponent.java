@@ -20,6 +20,8 @@ public class GrowCannonComponent implements Component {
     
     public float size;
     
+    public float minSize;
+    
     public float maxSize;
     
     public SimpleTimer growRateTimer;
