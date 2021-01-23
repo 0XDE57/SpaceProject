@@ -35,13 +35,13 @@ public class ChargeCannonSystem extends IteratingSystem {
         
         if (chargeCannon.isCharging) {
             //update position to be in front of ship
-            updateChargePosition(entity, chargeCannon);
+            updateChargePosition(chargeCannon, entity);
         
             //accumulate size
             growCharge(chargeCannon);
         }
         
-        //use of shield will cancel grow
+        //use of shield will cancel charge
         ShieldComponent shieldComponent = Mappers.shield.get(entity);
         if (shieldComponent != null && chargeCannon.isCharging) {
             //kill charge, cancel shot
@@ -61,7 +61,7 @@ public class ChargeCannonSystem extends IteratingSystem {
                 deactivate(chargeCannon);
             } else {
                 if (chargeCannon.isCharging) {
-                    releaseProjectile(entity, chargeCannon);
+                    releaseProjectile(chargeCannon, entity);
                 }
             }
         }
@@ -77,7 +77,7 @@ public class ChargeCannonSystem extends IteratingSystem {
         textureComp.scale = chargeCannon.size;
     }
     
-    private void updateChargePosition(Entity parentEntity, ChargeCannonComponent chargeCannon) {
+    private void updateChargePosition(ChargeCannonComponent chargeCannon, Entity parentEntity) {
         TransformComponent parentTransform = Mappers.transform.get(parentEntity);
         TransformComponent projectileTransform = Mappers.transform.get(chargeCannon.projectileEntity);
         Vector2 spawnPos = chargeCannon.anchorVec.cpy().rotateRad(parentTransform.rotation).add(parentTransform.pos);
@@ -101,11 +101,11 @@ public class ChargeCannonSystem extends IteratingSystem {
         chargeCannon.isCharging = false;
     }
     
-    private void releaseProjectile(Entity parentEntity, ChargeCannonComponent chargeCannon) {
+    private void releaseProjectile(ChargeCannonComponent chargeCannon, Entity parentEntity) {
         chargeCannon.isCharging = false;
         
         //ensure minimum size and update
-        chargeCannon.size = Math.max(chargeCannon.minSize, chargeCannon.size);//cap minimum
+        chargeCannon.size = Math.max(chargeCannon.minSize, chargeCannon.size);
         updateChargeTexture(chargeCannon);
         
         //damage modifier

@@ -23,7 +23,8 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(ShipControlSystem.class, 50, true, true, true, true, true));
         systems.add(new SysCFG(HyperDriveSystem.class, 55, true, true, true, true, true));
         systems.add(new SysCFG(FixedPhysicsSystem.class, 60, true, true, true, true, true));
-        systems.add(new SysCFG(ChargeCannonSystem.class, 65, true, true, true, true,true));
+        systems.add(new SysCFG(CannonSystem.class, 64, true, true, true, true, true));
+        systems.add(new SysCFG(ChargeCannonSystem.class, 65, true, true, true, true, true));
         systems.add(new SysCFG(OrbitSystem.class, 70, true, true, false, true, true));
         systems.add(new SysCFG(WorldWrapSystem.class, 80, true, false, true, true, true));
         systems.add(new SysCFG(CameraSystem.class, 90, false, true, true, true, true));

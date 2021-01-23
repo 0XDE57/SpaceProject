@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
@@ -16,11 +15,9 @@ import com.spaceproject.components.BarycenterComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
+import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.components.DamageComponent;
-import com.spaceproject.components.ExpireComponent;
-import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.MapComponent;
@@ -520,12 +517,13 @@ public class EntityFactory {
         cannon.damage = entityCFG.cannonDamage;
         cannon.maxAmmo = entityCFG.cannonAmmo;
         cannon.curAmmo = cannon.maxAmmo;
-        cannon.timerFireRate = new SimpleTimer(entityCFG.cannonFireRate);//lower is faster
-        cannon.size = entityCFG.cannonSize; //higher is bigger
-        cannon.velocity = entityCFG.cannonVelocity; //higher is faster
+        cannon.timerFireRate = new SimpleTimer(entityCFG.cannonFireRate);
+        cannon.size = entityCFG.cannonSize;
+        cannon.velocity = entityCFG.cannonVelocity;
         cannon.acceleration = entityCFG.cannonAcceleration;
-        cannon.anchorVec = new Vector2(width/2+0.2f, 0);
-        cannon.timerRechargeRate = new SimpleTimer(entityCFG.cannonRechargeRate);//lower is faster
+        cannon.anchorVec = new Vector2(width, 0);
+        cannon.aimAngle = 0;
+        cannon.timerRechargeRate = new SimpleTimer(entityCFG.cannonRechargeRate);
         
         ChargeCannonComponent chargeCannon = new ChargeCannonComponent();
         chargeCannon.anchorVec = new Vector2(width, 0);
@@ -561,8 +559,8 @@ public class EntityFactory {
         //add components to entity
         entity.add(seedComp);
         entity.add(health);
-        entity.add(chargeCannon);
-        //entity.add(cannon);
+        //entity.add(chargeCannon);
+        entity.add(cannon);
         entity.add(physics);
         entity.add(sprite3DComp);
         entity.add(transform);
@@ -572,55 +570,6 @@ public class EntityFactory {
         return entity;
     }
     //endregion
-    
-    
-    public static Entity createMissile(TransformComponent sourceTransform, CannonComponent cannon, Entity parentEntity) {
-        Entity entity = new Entity();
-        
-        //create texture
-        TextureComponent texture = new TextureComponent();
-        texture.texture = TextureFactory.generateProjectile();
-        texture.scale = engineCFG.bodyScale;
-        
-        
-        //physics
-        PhysicsComponent physics = new PhysicsComponent();
-        float bodyWidth = texture.texture.getWidth() * engineCFG.bodyScale;
-        float bodyHeight = texture.texture.getHeight() * engineCFG.bodyScale;
-        Vector2 spawnPos = sourceTransform.pos.add(cannon.anchorVec);
-        Vector2 sourceVel = parentEntity.getComponent(PhysicsComponent.class).body.getLinearVelocity();
-        Vector2 projectileVel = MyMath.vector(cannon.aimAngle, cannon.velocity).add(sourceVel);
-        physics.body = BodyFactory.createRect(spawnPos.x, spawnPos.y, bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody);
-        physics.body.setTransform(spawnPos, sourceTransform.rotation);
-        physics.body.setLinearVelocity(projectileVel);
-        physics.body.setBullet(true);//turn on CCD
-        physics.body.setUserData(entity);
-        
-        
-        TransformComponent transform = new TransformComponent();
-        transform.pos.set(physics.body.getPosition());
-        transform.rotation = physics.body.getAngle();
-        transform.zOrder = RenderOrder.PROJECTILES.getHierarchy();
-        
-        //set expire time
-        ExpireComponent expire = new ExpireComponent();
-        expire.time = 5;//in seconds ~approx
-        
-        //missile damage
-        DamageComponent missile = new DamageComponent();
-        missile.damage = cannon.damage;
-        missile.source = parentEntity;
-        
-        
-        entity.add(missile);
-        entity.add(expire);
-        entity.add(texture);
-        entity.add(physics);
-        entity.add(transform);
-        
-        return entity;
-    }
-
     
     public static Entity createWall(int x, int y, int width, int height) {
         Entity entity = new Entity();

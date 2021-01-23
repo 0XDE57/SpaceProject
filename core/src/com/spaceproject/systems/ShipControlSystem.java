@@ -16,7 +16,6 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.CameraFocusComponent;
-import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DodgeComponent;
@@ -32,7 +31,6 @@ import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.EntityConfig;
 import com.spaceproject.generation.BodyFactory;
-import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
@@ -78,7 +76,6 @@ public class ShipControlSystem extends IteratingSystem {
         HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
         
         boolean canAct = (dodgeComp == null) && (!hyperDrive.isActive);
-        boolean canShoot = dodgeComp == null && shield == null;
         boolean canDodge = shield == null;
         
         barrelRoll(entity, dodgeComp);
@@ -123,15 +120,6 @@ public class ShipControlSystem extends IteratingSystem {
             stabilizeRoll(sprite3D, strafe);
         }
         
-        
-        //fire cannon / attack todo: move into cannon system
-        CannonComponent cannon = Mappers.cannon.get(entity);
-        if (cannon != null) {
-            refillAmmo(cannon);
-            if (control.attack && canShoot) {
-                fireCannon(transformComp, cannon, entity);
-            }
-        }
         
         //exit vehicle
         if (control.changeVehicle) {
@@ -455,45 +443,6 @@ public class ShipControlSystem extends IteratingSystem {
         }
         
         return null;
-    }
-    //endregion
-    
-    
-    //region combat
-    private void fireCannon(TransformComponent transform, CannonComponent cannon, Entity owner) {
-        if (GameScreen.isDebugMode) {
-            //Cheat for debug: fast firing and infinite ammo
-            cannon.curAmmo = cannon.maxAmmo;
-            //cannon.timerFireRate.setLastEvent(0);
-        }
-        
-        //check if can fire before shooting
-        if (!(cannon.curAmmo > 0 && cannon.timerFireRate.canDoEvent()))
-            return;
-        
-        //reset timer if ammo is full, to prevent instant recharge on next shot
-        if (cannon.curAmmo == cannon.maxAmmo) {
-            cannon.timerRechargeRate.reset();
-        }
-        
-        //create missile
-        cannon.anchorVec.setAngleRad(transform.rotation);//todo false, should not change relative to ship
-        cannon.aimAngle = transform.rotation;//todo false, should not change relative to ship
-        Entity missile = EntityFactory.createMissile(transform, cannon, owner);
-        getEngine().addEntity(missile);
-        
-        //subtract ammo
-        --cannon.curAmmo;
-        
-        //reset timer
-        cannon.timerFireRate.reset();
-    }
-    
-    private static void refillAmmo(CannonComponent cannon) {
-        if (cannon.curAmmo < cannon.maxAmmo && cannon.timerRechargeRate.canDoEvent()) {
-            cannon.curAmmo++;
-            cannon.timerRechargeRate.reset();
-        }
     }
     //endregion
     
