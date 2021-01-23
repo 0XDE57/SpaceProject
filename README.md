@@ -71,7 +71,7 @@ Actively...and painfully slowly...in progress... It doesn't even have sound and 
 
 
 ## License
-   Apache 2.0: https://www.apache.org/licenses/LICENSE-2.0.html
+   Apache 2.0: see [LICENSE.md](https://github.com/0XDE57/SpaceProject/blob/master/LICENSE.md)
    
    Credit appreciated, but not required.
 
