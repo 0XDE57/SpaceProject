@@ -12,7 +12,6 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
@@ -20,10 +19,7 @@ import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.DodgeComponent;
-import com.spaceproject.components.ExpireComponent;
-import com.spaceproject.components.GrowCannonComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
@@ -135,10 +131,6 @@ public class ShipControlSystem extends IteratingSystem {
             if (control.attack && canShoot) {
                 fireCannon(transformComp, cannon, entity);
             }
-        }
-        if (canShoot) {
-            GrowCannonComponent growCannon = Mappers.growCannon.get(entity);
-            manageGrowCannon(entity, control, transformComp, growCannon, physicsComp.body);
         }
         
         //exit vehicle
@@ -420,7 +412,7 @@ public class ShipControlSystem extends IteratingSystem {
     }
     
     
-    //region transition todo: move to ScreenTransitionSystem?
+    //region transition
     private void takeOffPlanet(Entity entity) {
         if (Mappers.screenTrans.get(entity) != null)
             return;
@@ -468,74 +460,6 @@ public class ShipControlSystem extends IteratingSystem {
     
     
     //region combat
-    private void manageGrowCannon(Entity entity, ControllableComponent control, TransformComponent shipTransform, GrowCannonComponent growCannon, Body body) {
-        //TODO: clean up
-        if (growCannon == null) {
-            return;
-        }
-        
-        if (growCannon.isCharging) {
-            //update position to be in front of ship
-            Entity projectile = growCannon.projectileEntity;
-            
-            TransformComponent transformComponent = projectile.getComponent(TransformComponent.class);
-            Vector2 spawnPos = growCannon.anchorVec.cpy().rotateRad(shipTransform.rotation).add(shipTransform.pos);//todo: jitter when moving, lerp?
-            transformComponent.pos.set(spawnPos);
-            transformComponent.rotation = shipTransform.rotation + growCannon.aimAngle;
-            
-            //accumulate size
-            growCannon.size = growCannon.growRateTimer.ratio() * growCannon.maxSize;
-    
-            TextureComponent textureComp = projectile.getComponent(TextureComponent.class);
-            textureComp.scale = growCannon.size;
-            
-            //release
-            if (!control.attack) {
-                growCannon.isCharging = false;
-    
-                float minProjectileSize = 0.1f;
-                growCannon.size = Math.max(minProjectileSize, growCannon.size);//cap minimum
-                textureComp.scale = growCannon.size;
-                
-                //damage modifier
-                DamageComponent damageComponent = new DamageComponent();
-                damageComponent.source = entity;
-                damageComponent.damage = growCannon.baseDamage + ((growCannon.size / growCannon.maxSize) * growCannon.baseDamage);
-                if (growCannon.size == growCannon.maxSize) {
-                    damageComponent.damage *= 1.15;//bonus damage for maxed out
-                }
-                projectile.add(damageComponent);
-                
-                //physics
-                PhysicsComponent physics = new PhysicsComponent();
-                float bodyWidth = textureComp.texture.getWidth() * textureComp.scale;
-                float bodyHeight = textureComp.texture.getHeight() * textureComp.scale;
-                physics.body = BodyFactory.createRect(spawnPos.x, spawnPos.y, bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody);
-                physics.body.setTransform(spawnPos, transformComponent.rotation);
-                
-                Vector2 projectileVel = MyMath.vector(transformComponent.rotation, growCannon.velocity).add(body.getLinearVelocity());
-                physics.body.setLinearVelocity(projectileVel);
-                physics.body.setBullet(true);//turn on CCD
-                physics.body.setUserData(projectile);
-                projectile.add(physics);
-                
-                ExpireComponent expire = new ExpireComponent();
-                expire.time = 5;
-                projectile.add(expire);
-    
-                growCannon.projectileEntity = null; //release
-            }
-        } else {
-            if (control.attack) {
-                growCannon.isCharging = true;
-                growCannon.growRateTimer.reset();
-                
-                growCannon.projectileEntity = EntityFactory.createGrowMissileGhost();
-                getEngine().addEntity(growCannon.projectileEntity);
-            }
-        }
-    }
-    
     private void fireCannon(TransformComponent transform, CannonComponent cannon, Entity owner) {
         if (GameScreen.isDebugMode) {
             //Cheat for debug: fast firing and infinite ammo

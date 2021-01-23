@@ -196,7 +196,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
                 [ ] ai doesnt know to release grow cannon, only tuned for regular cannon
             [ ] tune damage
             [ ] lock on nearest target when max
-            [ ] bullet jitter in front of ship when moving, not visible with vsync disabled. lerp?
+            [x] bullet jitter in front of ship when moving, not visible with vsync disabled. lerp?
         [...] more visible
         [ ] make bullets come from front of ship
     [ ] add basic asteroids (arbitrary poly)
