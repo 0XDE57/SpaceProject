@@ -25,6 +25,7 @@ import com.spaceproject.utility.MyMath;
 
 public class CannonSystem extends IteratingSystem {
     
+    public CannonSystem() {
         super(Family.all(CannonComponent.class, ControllableComponent.class).get());
     }
     
