@@ -9,7 +9,7 @@ public enum RenderOrder {
     CHARACTERS((byte)100),
     PROJECTILES((byte)200);
     
-    private byte hierarchy;
+    private final byte hierarchy;
     
     RenderOrder(final byte hierarchy) {
         this.hierarchy = hierarchy;
