@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.spaceproject.utility.SimpleTimer;
 
 
-public class GrowCannonComponent implements Component {
+public class ChargeCannonComponent implements Component {
     
     public Entity projectileEntity;
     

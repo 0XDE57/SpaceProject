@@ -9,7 +9,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.ExpireComponent;
-import com.spaceproject.components.GrowCannonComponent;
+import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ShieldComponent;
@@ -21,124 +21,124 @@ import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
 
-public class GrowCannonSystem extends IteratingSystem {
+public class ChargeCannonSystem extends IteratingSystem {
     
     final int fireRateMinChargeMS = 60;
     
-    public GrowCannonSystem() {
-        super(Family.all(GrowCannonComponent.class, ControllableComponent.class).get());
+    public ChargeCannonSystem() {
+        super(Family.all(ChargeCannonComponent.class, ControllableComponent.class).get());
     }
     
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        GrowCannonComponent growCannon = Mappers.growCannon.get(entity);
+        ChargeCannonComponent chargeCannon = Mappers.chargeCannon.get(entity);
         
-        if (growCannon.isCharging) {
+        if (chargeCannon.isCharging) {
             //update position to be in front of ship
-            updateChargePosition(entity, growCannon);
+            updateChargePosition(entity, chargeCannon);
         
             //accumulate size
-            growCharge(growCannon);
+            growCharge(chargeCannon);
         }
         
         //use of shield will cancel grow
         ShieldComponent shieldComponent = Mappers.shield.get(entity);
-        if (shieldComponent != null && growCannon.isCharging) {
+        if (shieldComponent != null && chargeCannon.isCharging) {
             //kill charge, cancel shot
-            deactivate(growCannon);
+            deactivate(chargeCannon);
             return;
         }
         
         ControllableComponent control = Mappers.controllable.get(entity);
         if (control.attack) {
-            if (!growCannon.isCharging) {
-                activate(growCannon);
+            if (!chargeCannon.isCharging) {
+                activate(chargeCannon);
             }
         } else {
             //release
-            if (growCannon.growRateTimer.timeSinceLastEvent() < fireRateMinChargeMS) {
+            if (chargeCannon.growRateTimer.timeSinceLastEvent() < fireRateMinChargeMS) {
                 //kill charge, cancel shot
-                deactivate(growCannon);
+                deactivate(chargeCannon);
             } else {
-                if (growCannon.isCharging) {
-                    releaseProjectile(entity, growCannon);
+                if (chargeCannon.isCharging) {
+                    releaseProjectile(entity, chargeCannon);
                 }
             }
         }
     }
     
-    private void growCharge(GrowCannonComponent growCannon) {
-        growCannon.size = growCannon.growRateTimer.ratio() * growCannon.maxSize;
-        updateChargeTexture(growCannon);
+    private void growCharge(ChargeCannonComponent chargeCannon) {
+        chargeCannon.size = chargeCannon.growRateTimer.ratio() * chargeCannon.maxSize;
+        updateChargeTexture(chargeCannon);
     }
     
-    private void updateChargeTexture(GrowCannonComponent growCannon) {
-        TextureComponent textureComp = Mappers.texture.get(growCannon.projectileEntity);
-        textureComp.scale = growCannon.size;
+    private void updateChargeTexture(ChargeCannonComponent chargeCannon) {
+        TextureComponent textureComp = Mappers.texture.get(chargeCannon.projectileEntity);
+        textureComp.scale = chargeCannon.size;
     }
     
-    private void updateChargePosition(Entity parentEntity, GrowCannonComponent growCannon) {
+    private void updateChargePosition(Entity parentEntity, ChargeCannonComponent chargeCannon) {
         TransformComponent parentTransform = Mappers.transform.get(parentEntity);
-        TransformComponent projectileTransform = Mappers.transform.get(growCannon.projectileEntity);
-        Vector2 spawnPos = growCannon.anchorVec.cpy().rotateRad(parentTransform.rotation).add(parentTransform.pos);
+        TransformComponent projectileTransform = Mappers.transform.get(chargeCannon.projectileEntity);
+        Vector2 spawnPos = chargeCannon.anchorVec.cpy().rotateRad(parentTransform.rotation).add(parentTransform.pos);
         projectileTransform.pos.set(spawnPos);
-        projectileTransform.rotation = parentTransform.rotation + growCannon.aimAngle;
+        projectileTransform.rotation = parentTransform.rotation + chargeCannon.aimAngle;
     }
     
-    private void activate(GrowCannonComponent growCannon) {
-        growCannon.isCharging = true;
-        growCannon.growRateTimer.reset();
+    private void activate(ChargeCannonComponent chargeCannon) {
+        chargeCannon.isCharging = true;
+        chargeCannon.growRateTimer.reset();
         
-        growCannon.projectileEntity = createGrowMissileChargeEntity();
-        getEngine().addEntity(growCannon.projectileEntity);
+        chargeCannon.projectileEntity = createGrowMissileChargeEntity();
+        getEngine().addEntity(chargeCannon.projectileEntity);
     }
     
-    private void deactivate(GrowCannonComponent growCannon) {
-        if (growCannon.projectileEntity != null) {
-            growCannon.projectileEntity.add(new RemoveComponent());
-            growCannon.projectileEntity = null;
+    private void deactivate(ChargeCannonComponent chargeCannon) {
+        if (chargeCannon.projectileEntity != null) {
+            chargeCannon.projectileEntity.add(new RemoveComponent());
+            chargeCannon.projectileEntity = null;
         }
-        growCannon.isCharging = false;
+        chargeCannon.isCharging = false;
     }
     
-    private void releaseProjectile(Entity parentEntity, GrowCannonComponent growCannon) {
-        growCannon.isCharging = false;
+    private void releaseProjectile(Entity parentEntity, ChargeCannonComponent chargeCannon) {
+        chargeCannon.isCharging = false;
         
         //ensure minimum size and update
-        growCannon.size = Math.max(growCannon.minSize, growCannon.size);//cap minimum
-        updateChargeTexture(growCannon);
+        chargeCannon.size = Math.max(chargeCannon.minSize, chargeCannon.size);//cap minimum
+        updateChargeTexture(chargeCannon);
         
         //damage modifier
         DamageComponent damageComponent = new DamageComponent();
         damageComponent.source = parentEntity;
-        damageComponent.damage = growCannon.baseDamage + (10 * (growCannon.size / growCannon.maxSize) * growCannon.baseDamage);
-        if (growCannon.size >= growCannon.maxSize) {
+        damageComponent.damage = chargeCannon.baseDamage + (10 * (chargeCannon.size / chargeCannon.maxSize) * chargeCannon.baseDamage);
+        if (chargeCannon.size >= chargeCannon.maxSize) {
             damageComponent.damage *= 1.15;//bonus damage for maxed out
         }
-        growCannon.projectileEntity.add(damageComponent);
+        chargeCannon.projectileEntity.add(damageComponent);
         
         //physics
-        TextureComponent textureComponent = Mappers.texture.get(growCannon.projectileEntity);
+        TextureComponent textureComponent = Mappers.texture.get(chargeCannon.projectileEntity);
         float bodyWidth = textureComponent.texture.getWidth() * textureComponent.scale;
         float bodyHeight = textureComponent.texture.getHeight() * textureComponent.scale;
-        TransformComponent transformComponent = Mappers.transform.get(growCannon.projectileEntity);
+        TransformComponent transformComponent = Mappers.transform.get(chargeCannon.projectileEntity);
         PhysicsComponent physics = new PhysicsComponent();
         physics.body = BodyFactory.createRect(transformComponent.pos.x, transformComponent.pos.y, bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody);
         physics.body.setTransform(transformComponent.pos, transformComponent.rotation);
         
         Body parentBody = Mappers.physics.get(parentEntity).body;
-        Vector2 projectileVel = MyMath.vector(transformComponent.rotation, growCannon.velocity).add(parentBody.getLinearVelocity());
+        Vector2 projectileVel = MyMath.vector(transformComponent.rotation, chargeCannon.velocity).add(parentBody.getLinearVelocity());
         physics.body.setLinearVelocity(projectileVel);
         physics.body.setBullet(true);//turn on CCD
-        physics.body.setUserData(growCannon.projectileEntity);
-        growCannon.projectileEntity.add(physics);
+        physics.body.setUserData(chargeCannon.projectileEntity);
+        chargeCannon.projectileEntity.add(physics);
         
         ExpireComponent expire = new ExpireComponent();
         expire.time = 5;
-        growCannon.projectileEntity.add(expire);
+        chargeCannon.projectileEntity.add(expire);
         
         //release
-        growCannon.projectileEntity = null;
+        chargeCannon.projectileEntity = null;
     }
     
     private Entity createGrowMissileChargeEntity() {

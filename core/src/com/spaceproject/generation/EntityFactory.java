@@ -20,7 +20,7 @@ import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.ExpireComponent;
-import com.spaceproject.components.GrowCannonComponent;
+import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.MapComponent;
@@ -527,14 +527,14 @@ public class EntityFactory {
         cannon.anchorVec = new Vector2(width/2+0.2f, 0);
         cannon.timerRechargeRate = new SimpleTimer(entityCFG.cannonRechargeRate);//lower is faster
         
-        GrowCannonComponent growCannon = new GrowCannonComponent();
-        growCannon.anchorVec = new Vector2(width, 0);
-        growCannon.aimAngle = 0;
-        growCannon.velocity = entityCFG.cannonVelocity;
-        growCannon.maxSize = 0.30f;
-        growCannon.minSize = 0.1f;
-        growCannon.growRateTimer = new SimpleTimer(1500);
-        growCannon.baseDamage = 8f;
+        ChargeCannonComponent chargeCannon = new ChargeCannonComponent();
+        chargeCannon.anchorVec = new Vector2(width, 0);
+        chargeCannon.aimAngle = 0;
+        chargeCannon.velocity = entityCFG.cannonVelocity;
+        chargeCannon.maxSize = 0.30f;
+        chargeCannon.minSize = 0.1f;
+        chargeCannon.growRateTimer = new SimpleTimer(1500);
+        chargeCannon.baseDamage = 8f;
         
         
         //engine data and marks entity as drive-able
@@ -561,8 +561,8 @@ public class EntityFactory {
         //add components to entity
         entity.add(seedComp);
         entity.add(health);
-        //entity.add(growCannon);
-        entity.add(cannon);
+        entity.add(chargeCannon);
+        //entity.add(cannon);
         entity.add(physics);
         entity.add(sprite3DComp);
         entity.add(transform);
