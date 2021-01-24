@@ -40,7 +40,7 @@ public class FixedPhysicsSystem extends EntitySystem implements IRequireGameCont
         Family family = Family.all(PhysicsComponent.class, TransformComponent.class).get();
         entities = engine.getEntitiesFor(family);
     
-        world.setContactListener(new PhysicsContactListener(engine));
+        world.setContactListener(new PhysicsContactListener());
     }
     
     @Override

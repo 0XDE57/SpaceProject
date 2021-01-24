@@ -1,6 +1,5 @@
 package com.spaceproject.utility;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.physics.box2d.Contact;
@@ -15,11 +14,6 @@ import com.spaceproject.components.ShieldComponent;
 
 public class PhysicsContactListener implements ContactListener {
     
-    private Engine engine;
-    
-    public PhysicsContactListener(Engine engine) {
-        this.engine = engine;
-    }
     
     @Override
     public void beginContact(Contact contact) {
