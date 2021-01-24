@@ -7,12 +7,10 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.Fixture;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.CameraFocusComponent;
@@ -73,24 +71,16 @@ public class ShipControlSystem extends IteratingSystem {
         PhysicsComponent physicsComp = Mappers.physics.get(entity);
         DodgeComponent dodgeComp = Mappers.dodge.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
-        HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
-        
-        boolean canAct = (dodgeComp == null) && (!hyperDrive.isActive);
-        boolean canDodge = shield == null;
         
         barrelRoll(entity, dodgeComp);
-        //manageShield(entity, control, shield);//todo: move into ShieldSystem
         
         if (GameScreen.isDebugMode) {
             applyDebugControls(entity, transformComp, physicsComp);
         }
         
-        if (!canAct) {
-            return;
-        }
-        
         faceTarget(control, physicsComp, delta);
-        
+    
+        boolean canDodge = shield == null;
         if (control.moveForward) {
             accelerate(control, physicsComp.body, vehicle, delta);
         }
@@ -310,61 +300,6 @@ public class ShipControlSystem extends IteratingSystem {
             entity.remove(DodgeComponent.class);
         }
         
-    }
-    
-    private void manageShield(Entity entity, ControllableComponent control, ShieldComponent shield) {
-        if (shield == null) {
-            if (control.defend) {
-                Body body = entity.getComponent(PhysicsComponent.class).body;
-                float radius = Math.max(MyMath.calculateBoundingBox(body).getWidth(), MyMath.calculateBoundingBox(body).getHeight());
-                BodyFactory.addShieldFixtureToBody(body, radius);
-                
-                shield = new ShieldComponent();
-                shield.animTimer = new SimpleTimer(300, true);
-                shield.defence = 100f;
-                shield.maxRadius = radius;
-                shield.color = Color.BLUE;
-                
-                entity.add(shield);
-            }
-            return;
-        }
-        
-        
-        if (control.defend) {
-            if (!shield.isCharging) {
-                //reactivate
-                if (shield.animTimer.ratio() >= 0.3f)
-                    shield.animTimer.flipRatio();
-            }
-            shield.isCharging = true;
-        } else {
-            if (shield.isCharging) {
-                //release
-                shield.animTimer.flipRatio();
-            }
-            shield.isCharging = false;
-        }
-        
-        if (shield.isCharging) {
-            //charge
-            shield.radius = shield.maxRadius * shield.animTimer.ratio();
-        } else {
-            //discharge
-            shield.radius = shield.maxRadius * (1 - shield.animTimer.ratio());
-        }
-        
-        //activate
-        shield.isActive = shield.radius == shield.maxRadius;
-        
-        
-        if (shield.radius <= 0) {
-            Body body = entity.getComponent(PhysicsComponent.class).body;
-            Fixture circleFixture = body.getFixtureList().get(body.getFixtureList().size-1);
-            body.destroyFixture(circleFixture);
-            
-            entity.remove(ShieldComponent.class);
-        }
     }
     
     private void exitVehicle(Entity vehicleEntity, ControllableComponent control) {

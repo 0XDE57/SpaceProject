@@ -35,13 +35,21 @@ public class CannonSystem extends IteratingSystem {
         
          refillAmmo(cannon);
          
-         ControllableComponent control = Mappers.controllable.get(entity);
-         DodgeComponent dodgeComp = Mappers.dodge.get(entity);
-         ShieldComponent shield = Mappers.shield.get(entity);
-         boolean canShoot = dodgeComp == null && shield == null;
-         if (control.attack && canShoot) {
+        if (canShoot(entity)) {
             fireCannon(cannon, entity);
          }
+    }
+    
+    private boolean canShoot(Entity entity) {
+        ControllableComponent control = Mappers.controllable.get(entity);//todo: move control.attack into cannon property to decouple
+        if (!control.attack) {
+            return false;
+        }
+        
+        DodgeComponent dodgeComp = Mappers.dodge.get(entity);
+        ShieldComponent shield = Mappers.shield.get(entity);
+        //boolean canShoot = dodgeComp == null && shield == null;
+        return shield != null && shield.state == ShieldComponent.State.off;
     }
     
     private void fireCannon(CannonComponent cannon, Entity parentEntity) {

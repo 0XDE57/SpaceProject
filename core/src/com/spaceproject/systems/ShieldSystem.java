@@ -89,49 +89,6 @@ public class ShieldSystem extends IteratingSystem {
                 }
                 break;
         }
-        
-        /*
-        if (control.defend) {
-            //reactivate
-            if (shield.animTimer.ratio() >= 0.3f) {
-                shield.animTimer.flipRatio();
-            } else {
-                shield.animTimer.reset();
-            }
-        } else {
-            //release
-            shield.animTimer.flipRatio();
-        }
-        
-        
-        if (shield.isCharging) {
-            //charge
-            shield.radius = shield.maxRadius * shield.animTimer.ratio();
-        } else {
-            //discharge
-            shield.radius = shield.maxRadius * (1 - shield.animTimer.ratio());
-        }
-        //shield.isActive = shield.radius == shield.maxRadius;
-        
-        //activate shield when max "fully charged"
-        if (shield.radius == shield.maxRadius) {
-            if (!shield.isActive) {
-                shield.isActive = true;
-                Body body = entity.getComponent(PhysicsComponent.class).body;
-                BodyFactory.addShieldFixtureToBody(body, shield.radius);
-            }
-        }
-        
-        //deactivate shield when charge empty
-        //if (shield.radius <= 0) {
-        if (!shield.isCharging && shield.isActive) {
-            Body body = entity.getComponent(PhysicsComponent.class).body;
-            Fixture circleFixture = body.getFixtureList().get(body.getFixtureList().size - 1);
-            body.destroyFixture(circleFixture);
-            shield.isActive = false;
-        }
-        //}*/
-        
     }
     
 }

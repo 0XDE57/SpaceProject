@@ -43,7 +43,7 @@ public class ChargeCannonSystem extends IteratingSystem {
         
         //use of shield will cancel charge
         ShieldComponent shieldComponent = Mappers.shield.get(entity);
-        if (shieldComponent != null && chargeCannon.isCharging) {
+        if ((shieldComponent != null && shieldComponent.state != ShieldComponent.State.off) && chargeCannon.isCharging) {
             //kill charge, cancel shot
             deactivate(chargeCannon);
             return;
