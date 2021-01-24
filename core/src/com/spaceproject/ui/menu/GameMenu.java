@@ -40,7 +40,7 @@ public class GameMenu extends VisWindow {
     //todo: move behaviors to config
     private boolean pauseOnMenuOpen = true;
     private boolean alwaysHideOnEscape = false;
-    private boolean retainPositionOnOpen = false;
+    private boolean retainPositionOnOpen = true;
     private boolean isResizable = true;
     private boolean isMovable = true;
     private int edgePadding = 150;
