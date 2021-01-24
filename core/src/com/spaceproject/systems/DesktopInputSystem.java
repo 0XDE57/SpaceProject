@@ -96,6 +96,10 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         
         float angle = MyMath.angleTo(x, Gdx.graphics.getHeight() - y,
                 Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
+        
+        //todo: investigate strange -1.57f offset. projection?
+        //angle = MyMath.angle2(x, y, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
+        
         ControllableComponent control = Mappers.controllable.get(players.first());
         control.angleTargetFace = angle;
         return true;
@@ -167,8 +171,9 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             return false;
         }
         
-        Entity player = players.first();
+        
         if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
+            Entity player = players.first();
             CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
             if (cameraFocus != null) {
                 GameScreen.resetCamera();

@@ -13,9 +13,15 @@ import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.controllers.mappings.Xbox;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.SpaceProject;
+import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HyperDriveComponent;
+import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.config.EngineConfig;
+import com.spaceproject.screens.GameScreen;
+import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.menu.GameMenu;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.MyMath;
@@ -110,6 +116,23 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             handled = true;
         }
         
+        if (buttonCode == Xbox.R_STICK) {
+            //reset cam
+            Entity player = players.first();
+            CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
+            if (cameraFocus != null) {
+                GameScreen.resetCamera();
+                EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
+                if (player.getComponent(VehicleComponent.class) != null) {
+                    cameraFocus.zoomTarget = engineConfig.defaultZoomVehicle;
+                } else {
+                    cameraFocus.zoomTarget = engineConfig.defaultZoomCharacter;
+                }
+                return true;
+            }
+        }
+        
+        
         return handled;
     }
     
@@ -142,10 +165,13 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     
     float leftStickHorAxis;
     float leftStickVertAxis;
+    float rightStickHorAxis;
+    float rightStickVertAxis;
     float dist;
+    
     @Override
     public boolean axisMoved(Controller controller, int axisCode, float value) {
-        //Gdx.app.log(this.getClass().getSimpleName(), axisCode + " " + value);
+        //Gdx.app.log(this.getClass().getSimpleName(), controller.getName() + ":" + axisCode + ": " + value);
         float deadZone = 0.25f;
         //controller.getMapping()
 
@@ -153,13 +179,13 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             //if (value >= deadZone) {
                 leftStickHorAxis = value;
             //}
-            //Gdx.app.log(this.getClass().getSimpleName(), "horizontal " + value);
+            Gdx.app.log(this.getClass().getSimpleName(), "left horizontal " + value);
         }
         if (axisCode == Xbox.L_STICK_VERTICAL_AXIS) {
             //if (value >= deadZone) {
                 leftStickVertAxis = value;
             //}
-            //Gdx.app.log(this.getClass().getSimpleName(), "vertical " + value);
+            Gdx.app.log(this.getClass().getSimpleName(), "left vertical " + value);
         }
         
         //Gdx.app.log(this.getClass().getSimpleName(), "d " + dist);
@@ -168,12 +194,32 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         dist = MyMath.distance(0, 0, leftStickHorAxis, leftStickVertAxis);
         ControllableComponent control = Mappers.controllable.get(players.first());
         if (dist >= deadZone) {
-            
-            control.angleTargetFace = MyMath.angleTo(0, 0, leftStickVertAxis, leftStickHorAxis) + 1.57f;
+            Gdx.app.log(this.getClass().getSimpleName(), controller.getName() + " left stick > deadZone: " + axisCode + ": " + value);
+            control.angleTargetFace = MyMath.angle2(0, 0, -leftStickVertAxis, leftStickHorAxis);
             control.movementMultiplier = MathUtils.clamp(dist, 0, 1);
             control.moveForward = true;
         } else {
             control.moveForward = false;
+        }
+        
+        
+        if (axisCode == Xbox.R_STICK_HORIZONTAL_AXIS) {
+            rightStickHorAxis = value;
+        }
+        if (axisCode == Xbox.R_STICK_VERTICAL_AXIS) {
+            rightStickVertAxis = value;
+            if (rightStickVertAxis >= deadZone) {
+                Gdx.app.log(this.getClass().getSimpleName(), rightStickVertAxis + " - right vert");
+    
+                if (players.size() != 0) {
+                    Entity player = players.first();
+                    CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
+                    if (cameraFocus != null) {
+                        float scrollAmount = rightStickHorAxis * MyScreenAdapter.cam.zoom / 2;
+                        //cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
+                    }
+                }
+            }
         }
 
         return false;

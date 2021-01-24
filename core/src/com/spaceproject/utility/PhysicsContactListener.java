@@ -77,6 +77,7 @@ public class PhysicsContactListener implements ContactListener {
         //check for shield
         ShieldComponent shieldComp = Mappers.shield.get(attackedEntity);
         if (shieldComp != null) {
+            /*
             if (shieldComp.isActive) {
                 //Body body = attackedEntity.getComponent(PhysicsComponent.class).body;
                 //Fixture circleFixture = body.getFixtureList().get(body.getFixtureList().size - 1);
@@ -91,7 +92,7 @@ public class PhysicsContactListener implements ContactListener {
                 //destroy shield if it isn't fully activated.
                 //todo: "premature break effect", sound effect here, maybe particle effect
                 attackedEntity.remove(shieldComp.getClass());
-            }
+            }*/
         }
         
         //do damage

@@ -193,6 +193,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         [ ] if collide with another body with significant difference in velocity
             and if other has HealthComponent, do damage using velocity as damage factor
             [ ] shield dash bash? high impulse forward, then activate shield to ram other objects and do damage to them
+    [!] barrel roll broken
     [...] make bullets better
         [...] fix grow bullet
             [x] AI not detecting hit
@@ -216,11 +217,12 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             [...] basic Xbox 360 support
                 [ ] not detecting DPAD buttons
                 [ ] double tap right left bumpers for barrel roll
-                [ ] right stick camera control, click to reset
+                [...] right stick camera control, click to reset
             [ ] move to getMapping() but seems im on an older lib?
         [ ] hyperdrive should be charge instead of instant activate [1]
             [ ] needs control for mobile
-        [ ] new control?: hold shift to charge, then forward + release charge for boost: impulse
+        [?] should sheild and cannon be unavailable during hypder drive? probably yes
+        [?] new control?: hold shift to charge, then forward + release charge for boost: impulse
         [x] change shield from alt to space
         [ ] shield bash: double tap forward(or direction) and hold to rush, then shield do shield action [B] within time window of dash, and hold
         [ ] land take off could be hold instead of instant
@@ -251,7 +253,9 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         [...] Ship control system doing too much
             [x] move charge cannon to own system
             [x] move normal cannon to own system
-            [...] move shield into own system
+            [x] move shield into own system
+                [!] fix shield not render on planet
+
             [?] barrel roll and 3d sprite stuff into own system?
             [?] can refactor stuff in control component into their respective components just like grow and hyper?
         [...] HUD system doing too much

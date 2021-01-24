@@ -6,16 +6,15 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class ShieldComponent implements Component {
     
+    public enum State { off, on, charge, discharge }
+    
+    public State state = State.off;
+    
     public float defence;
     
     public float radius;
     
     public float maxRadius;
-    
-    public boolean isActive;
-    
-    public State state = State.off;
-    public enum State { off, on, charge, discharge }
     
     public SimpleTimer animTimer;
     
