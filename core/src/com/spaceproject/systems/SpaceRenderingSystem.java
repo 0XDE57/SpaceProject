@@ -122,8 +122,6 @@ public class SpaceRenderingSystem extends IteratingSystem {
                     MathUtils.radiansToDegrees * t.rotation,
                     0, 0, (int) width, (int) height, false, false);
         }
-        
-        //renderQueue.clear();
     }
     
     private void drawParallaxTiles() {
