@@ -174,6 +174,7 @@ public class AsteroidAnim extends TitleAnimation {
         }
     }
     
+    //todo: move into on class
     private class CustomShapeRenderer extends ShapeRenderer {
         //stackoverflow.com/a/33076149
         EarClippingTriangulator ear = new EarClippingTriangulator();

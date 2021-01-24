@@ -189,6 +189,9 @@ public class SpaceRenderingSystem extends IteratingSystem {
         }
     }
     
+    //todo: broken - should render on planets too
+    //todo[?] - potential optimization: could use CustomShapeRenderer.java instead of two separate shape types being Filled Then Line
+    //  todo[?] - is it possible to abstract this into a custom ShapeType.FilledOutline = ShapeType.Filled && ShapeType.Line
     private void renderShields() {
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -203,7 +206,7 @@ public class SpaceRenderingSystem extends IteratingSystem {
                 
                 //draw overlay
                 shape.begin(ShapeRenderer.ShapeType.Filled);
-                if (shield.isActive) {
+                if (shield.state == ShieldComponent.State.on) {
                     shape.setColor(c.r, c.g, c.b, 0.25f);
                 } else {
                     shape.setColor(c.r, c.g, c.b, 0.15f);
@@ -213,7 +216,7 @@ public class SpaceRenderingSystem extends IteratingSystem {
                 
                 //draw outline
                 shape.begin(ShapeRenderer.ShapeType.Line);
-                if (shield.isActive) {
+                if (shield.state == ShieldComponent.State.on) {
                     shape.setColor(Color.WHITE);
                 } else {
                     shape.setColor(c.r, c.g, c.b, 1f);
