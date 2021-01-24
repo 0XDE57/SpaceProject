@@ -212,7 +212,7 @@ public class SpaceRenderingSystem extends IteratingSystem {
                     shape.setColor(c.r, c.g, c.b, 0.15f);
                 }
                 shape.circle(t.pos.x, t.pos.y, shield.radius);
-                shape.end();
+                shape.end();//flush inside loop = bad!
                 
                 //draw outline
                 shape.begin(ShapeRenderer.ShapeType.Line);
