@@ -23,6 +23,7 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
+import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HealthComponent;
@@ -366,6 +367,20 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 			}
 			*/
         }
+        
+        ChargeCannonComponent chargeCannon = Mappers.chargeCannon.get(playerEntity);
+        if (chargeCannon != null) {
+            float ratioAmmo = chargeCannon.size / chargeCannon.maxSize;
+            shape.setColor(uiCFG.entityHPbarBackground);
+            shape.rect(playerBarX, playerAmmoBarY, barWidth, barHeight);
+            if (chargeCannon.isCharging) {
+                shape.setColor(uiCFG.playerAmmoBarRechargeColor);
+                if (chargeCannon.size == chargeCannon.maxSize) {
+                    shape.setColor(uiCFG.playerAmmoBarColor);
+                }
+                shape.rect(playerBarX, playerAmmoBarY, barWidth * ratioAmmo, barHeight);
+            }
+        }
     }
     
     private void drawHyperDriveBar(Entity playerEntity, int playerBarX, int playerHyperBarY, int barWidth, int barHeight) {
@@ -374,7 +389,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             return;
         }
     
-        shape.setColor(Color.BLUE);
+        shape.setColor(Color.BLUE);//blue cuz blueshift, todo: should move to ui config
         if (hyperDrive.isActive) {
             shape.rect(playerBarX, playerHyperBarY, barWidth, barHeight);
         } else {
