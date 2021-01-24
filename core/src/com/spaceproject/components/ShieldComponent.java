@@ -14,10 +14,6 @@ public class ShieldComponent implements Component {
     
     public boolean isActive;
     
-    public boolean isCharging;
-    
-    public boolean isDischarging;
-    //or
     public State state = State.off;
     public enum State { off, on, charge, discharge }
     

@@ -320,15 +320,17 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     private void drawPlayerShield(Entity playerEntity, int playerBarX, int playerHPBarY, int barWidth, int barHeight) {
         ShieldComponent shield = Mappers.shield.get(playerEntity);
-        if (shield != null) {
-            float ratioShield = shield.radius / shield.maxRadius;
-            if (shield.isActive) {
-                shape.setColor(shield.color);
-            } else {
-                shape.setColor(shield.color.r, shield.color.g, shield.color.b, 0.25f);
-            }
-            shape.rect(playerBarX, playerHPBarY, barWidth * ratioShield, barHeight);
+        if (shield == null || shield.state == ShieldComponent.State.off){
+            return;
         }
+    
+        float ratioShield = shield.radius / shield.maxRadius;
+        if (shield.state == ShieldComponent.State.on) {
+            shape.setColor(shield.color);
+        } else {
+            shape.setColor(shield.color.r, shield.color.g, shield.color.b, 0.25f);
+        }
+        shape.rect(playerBarX, playerHPBarY, barWidth * ratioShield, barHeight);
     }
     
     private void drawPlayerAmmoBar(Entity playerEntity, int playerBarX, int playerAmmoBarY, int barWidth, int barHeight) {
