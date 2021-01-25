@@ -13,15 +13,14 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
+import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.components.DodgeComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
-import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -69,18 +68,15 @@ public class ShipControlSystem extends IteratingSystem {
         VehicleComponent vehicle = Mappers.vehicle.get(entity);
         TransformComponent transformComp = Mappers.transform.get(entity);
         PhysicsComponent physicsComp = Mappers.physics.get(entity);
-        DodgeComponent dodgeComp = Mappers.dodge.get(entity);
-        ShieldComponent shield = Mappers.shield.get(entity);
         
-        barrelRoll(entity, dodgeComp);
+        barrelRoll(entity);
         
         if (GameScreen.isDebugMode) {
             applyDebugControls(entity, transformComp, physicsComp);
         }
         
         faceTarget(control, physicsComp, delta);
-    
-        boolean canDodge = shield == null;
+        
         if (control.moveForward) {
             accelerate(control, physicsComp.body, vehicle, delta);
         }
@@ -88,6 +84,7 @@ public class ShipControlSystem extends IteratingSystem {
             decelerate(physicsComp.body, delta);
         }
         
+        boolean canDodge = true;// shield != null && shield.state == ShieldComponent.State.off;
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         float strafe = strafeRot * delta;
         if (control.moveLeft) {
@@ -104,10 +101,6 @@ public class ShipControlSystem extends IteratingSystem {
             if (canDodge && control.alter) {
                 dodgeRight(entity, transformComp, control);
             }
-        }
-    
-        if (!control.moveRight && !control.moveLeft) {
-            stabilizeRoll(sprite3D, strafe);
         }
         
         
@@ -176,78 +169,33 @@ public class ShipControlSystem extends IteratingSystem {
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
         Vector2 force = MyMath.vector(physicsComp.body.getAngle(), thrust).rotate90(-1);
         physicsComp.body.applyForceToCenter(force, true);
-        
-        rollRight(sprite3D, strafe);
     }
     
     private void strafeLeft(VehicleComponent vehicle, ControllableComponent control, PhysicsComponent physicsComp, Sprite3DComponent sprite3D, float strafe, float delta) {
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
         Vector2 force = MyMath.vector(physicsComp.body.getAngle(), thrust).rotate90(1);
         physicsComp.body.applyForceToCenter(force, true);
-    
-        rollLeft(sprite3D, strafe);
     }
     
-    private void rollRight(Sprite3DComponent sprite3D, float strafe) {
-        if (sprite3D != null) {
-            sprite3D.renderable.angle -= strafe;
-            if (sprite3D.renderable.angle < -maxRollAngle) {
-                sprite3D.renderable.angle = -maxRollAngle;
-            }
-        }
-    }
-    
-    private void rollLeft(Sprite3DComponent sprite3D, float strafe) {
-        if (sprite3D != null) {
-            sprite3D.renderable.angle += strafe;
-            if (sprite3D.renderable.angle > maxRollAngle) {
-                sprite3D.renderable.angle = maxRollAngle;
-            }
-        }
-    }
-    
-    private void stabilizeRoll(Sprite3DComponent sprite3D, float strafe) {
-        if (sprite3D != null) {
-            if (sprite3D.renderable.angle > 0) {
-                sprite3D.renderable.angle -= strafe;
-            }
-            if (sprite3D.renderable.angle < 0) {
-                sprite3D.renderable.angle += strafe;
-            }
-            //if (MathUtils.isEqual(sprite3D.renderable.angle, 0, 0.01f))
-            //    sprite3D.renderable.angle = 0;
-        }
-    }
     
     private static void dodgeRight(Entity entity, TransformComponent transform, ControllableComponent control) {
-        if (control.timerDodge.canDoEvent() && Mappers.dodge.get(entity) == null) {
+        if (control.timerDodge.canDoEvent() && Mappers.barrelRoll.get(entity) == null) {
             control.timerDodge.reset();
             
-            applyDodge(entity, transform, control, DodgeComponent.FlipDir.right);
+            applyDodge(entity, transform, control, BarrelRollComponent.FlipDir.right);
         }
     }
     
     private static void dodgeLeft(Entity entity, TransformComponent transform, ControllableComponent control) {
-        if (control.timerDodge.canDoEvent() && Mappers.dodge.get(entity) == null) {
+        if (control.timerDodge.canDoEvent() && Mappers.barrelRoll.get(entity) == null) {
             control.timerDodge.reset();
     
-            applyDodge(entity, transform, control, DodgeComponent.FlipDir.left);
+            applyDodge(entity, transform, control, BarrelRollComponent.FlipDir.left);
         }
     }
     
-    private static DodgeComponent createDodgeComponent(float dodgeForce, float rotation, DodgeComponent.FlipDir dir, long timer) {
-        DodgeComponent d = new DodgeComponent();
-        d.animationTimer = new SimpleTimer(timer, true);
-        d.animInterpolation = Interpolation.pow2;
-        d.revolutions = 1;
-        d.direction = dir == DodgeComponent.FlipDir.left ? rotation + MathUtils.PI / 2 : rotation - MathUtils.PI / 2;
-        d.dir = dir;
-        d.force = dodgeForce;
-        return d;
-    }
-    
-    private static void applyDodge(Entity entity, TransformComponent transform, ControllableComponent control, DodgeComponent.FlipDir flipDir) {
-        DodgeComponent d = createDodgeComponent(entityCFG.dodgeForce, transform.rotation, flipDir, entityCFG.dodgeAnimationTimer);
+    private static void applyDodge(Entity entity, TransformComponent transform, ControllableComponent control, BarrelRollComponent.FlipDir flipDir) {
+        BarrelRollComponent d = createDodgeComponent(entityCFG.dodgeForce, transform.rotation, flipDir, entityCFG.dodgeAnimationTimer);
         entity.add(d);
         
         Body body = Mappers.physics.get(entity).body;
@@ -255,11 +203,25 @@ public class ShipControlSystem extends IteratingSystem {
         transform.rotation = control.angleTargetFace;
         body.setAngularVelocity(0);
         body.setTransform(body.getPosition(), control.angleTargetFace);
+    
+        float direction = flipDir == BarrelRollComponent.FlipDir.left ? transform.rotation + MathUtils.PI / 2 : transform.rotation - MathUtils.PI / 2;
         
-        body.applyLinearImpulse(MyMath.vector(d.direction, d.force), body.getPosition(), true);
+        body.applyLinearImpulse(MyMath.vector(direction, d.force), body.getPosition(), true);
     }
     
-    private void barrelRoll(Entity entity, DodgeComponent dodgeComp) {
+    private static BarrelRollComponent createDodgeComponent(float dodgeForce, float rotation, BarrelRollComponent.FlipDir dir, long timer) {
+        BarrelRollComponent d = new BarrelRollComponent();
+        d.animationTimer = new SimpleTimer(timer, true);
+        d.animInterpolation = Interpolation.pow2;
+        d.revolutions = 1;
+        //d.direction = dir == BarrelRollComponent.FlipDir.left ? rotation + MathUtils.PI / 2 : rotation - MathUtils.PI / 2;
+        d.dir = dir;
+        d.force = dodgeForce;
+        return d;
+    }
+    
+    private void barrelRoll(Entity entity) {
+        BarrelRollComponent dodgeComp = Mappers.barrelRoll.get(entity);
         if (dodgeComp == null) {
             return;
         }
@@ -297,7 +259,7 @@ public class ShipControlSystem extends IteratingSystem {
             //reset
             sprite3D.renderable.angle = 0;
 
-            entity.remove(DodgeComponent.class);
+            entity.remove(BarrelRollComponent.class);
         }
         
     }

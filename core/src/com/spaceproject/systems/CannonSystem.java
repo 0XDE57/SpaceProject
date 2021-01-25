@@ -9,7 +9,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DamageComponent;
-import com.spaceproject.components.DodgeComponent;
+import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ShieldComponent;
@@ -46,7 +46,7 @@ public class CannonSystem extends IteratingSystem {
             return false;
         }
         
-        DodgeComponent dodgeComp = Mappers.dodge.get(entity);
+        BarrelRollComponent dodgeComp = Mappers.barrelRoll.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
         //boolean canShoot = dodgeComp == null && shield == null;
         return shield != null && shield.state == ShieldComponent.State.off;

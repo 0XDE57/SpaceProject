@@ -193,7 +193,8 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         [ ] if collide with another body with significant difference in velocity
             and if other has HealthComponent, do damage using velocity as damage factor
             [ ] shield dash bash? high impulse forward, then activate shield to ram other objects and do damage to them
-    [!] barrel roll broken
+    [...] barrel roll broken
+        [...] decouple from ship control
     [...] make bullets better
         [...] fix grow bullet
             [x] AI not detecting hit

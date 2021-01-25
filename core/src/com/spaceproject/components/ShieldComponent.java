@@ -20,5 +20,4 @@ public class ShieldComponent implements Component {
     
     public Color color;
     
-    
 }

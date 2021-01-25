@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -11,6 +12,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AISpawnComponent;
 import com.spaceproject.components.AstronomicalComponent;
+import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.BarycenterComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
@@ -577,6 +579,16 @@ public class EntityFactory {
         shield.color = Color.BLUE;
         entity.add(shield);
         
+        
+        //barrel roll
+        BarrelRollComponent barrelRoll = new BarrelRollComponent();
+        barrelRoll.animationTimer = new SimpleTimer(entityCFG.dodgeAnimationTimer, true);
+        barrelRoll.animInterpolation = Interpolation.pow2;
+        barrelRoll.revolutions = 1;
+        //d.direction = dir == BarrelRollComponent.FlipDir.left ? rotation + MathUtils.PI / 2 : rotation - MathUtils.PI / 2;
+        //d.dir = dir;
+        //d.force = dodgeForce;
+        //entity.add(barrelRoll);
         
         //map
         MapComponent map = new MapComponent();

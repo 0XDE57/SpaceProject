@@ -14,7 +14,6 @@ import com.spaceproject.components.ShieldComponent;
 
 public class PhysicsContactListener implements ContactListener {
     
-    
     @Override
     public void beginContact(Contact contact) {
         Object dataA = contact.getFixtureA().getBody().getUserData();
@@ -26,17 +25,14 @@ public class PhysicsContactListener implements ContactListener {
     
     @Override
     public void endContact(Contact contact) {
-    
     }
     
     @Override
     public void preSolve(Contact contact, Manifold oldManifold) {
-    
     }
     
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {
-    
     }
     
     private void onCollision(Entity a, Entity b) {
@@ -71,6 +67,9 @@ public class PhysicsContactListener implements ContactListener {
         //check for shield
         ShieldComponent shieldComp = Mappers.shield.get(attackedEntity);
         if (shieldComp != null) {
+            if (shieldComp.state == ShieldComponent.State.on) {
+                //shieldComp.state == ShieldComponent.State.break;??
+            }
             /*
             if (shieldComp.isActive) {
                 //Body body = attackedEntity.getComponent(PhysicsComponent.class).body;
@@ -101,4 +100,5 @@ public class PhysicsContactListener implements ContactListener {
         //remove missile
         damageEntity.add(new RemoveComponent());
     }
+    
 }
