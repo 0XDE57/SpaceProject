@@ -62,6 +62,10 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             control.changeVehicle = buttonDown;
             handled = true;
         }
+        if (buttonCode == Xbox.X) {
+            control.alter = buttonDown;
+            handled = true;
+        }
     
         if (buttonCode == Xbox.DPAD_UP) {
             HyperDriveComponent hyperDrive = Mappers.hyper.get(players.first());

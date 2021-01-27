@@ -128,7 +128,7 @@ public class ShipControlSystem extends IteratingSystem {
         } else {
             //add thrust opposite direction of velocity to slow down ship
             float thrust = body.getLinearVelocity().len() * 20 * delta;
-            float angle = body.getLinearVelocity().angle();
+            float angle = body.getLinearVelocity().angleRad() - 180 * MathUtils.degRad;
             body.applyForceToCenter(MyMath.vector(angle, thrust), true);
         }
     }
