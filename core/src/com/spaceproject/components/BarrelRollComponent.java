@@ -17,7 +17,7 @@ public class BarrelRollComponent implements Component {
     public float force;
     
     public enum FlipDir {
-        left, right
+        none, left, right
     }
     
     public FlipDir dir;

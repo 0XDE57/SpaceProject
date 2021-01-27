@@ -13,7 +13,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
-import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
@@ -21,7 +20,6 @@ import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
-import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
@@ -69,8 +67,6 @@ public class ShipControlSystem extends IteratingSystem {
         TransformComponent transformComp = Mappers.transform.get(entity);
         PhysicsComponent physicsComp = Mappers.physics.get(entity);
         
-        //barrelRoll(entity);
-        
         if (GameScreen.isDebugMode) {
             applyDebugControls(entity, transformComp, physicsComp);
         }
@@ -83,25 +79,11 @@ public class ShipControlSystem extends IteratingSystem {
         if (control.moveBack) {
             decelerate(physicsComp.body, delta);
         }
-        
-        
-        boolean canDodge = true;// shield != null && shield.state == ShieldComponent.State.off;
-        Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
-        float strafe = strafeRot * delta;
         if (control.moveLeft) {
-            strafeLeft(vehicle, control, physicsComp, sprite3D, strafe, delta);
-            
-            if (canDodge && control.alter) {
-                //dodgeLeft(entity, transformComp, control);
-            }
+            strafeLeft(vehicle, control, physicsComp, delta);
         }
-    
         if (control.moveRight) {
-            strafeRight(vehicle, control, physicsComp, sprite3D, strafe, delta);
-            
-            if (canDodge && control.alter) {
-                //dodgeRight(entity, transformComp, control);
-            }
+            strafeRight(vehicle, control, physicsComp, delta);
         }
         
         
@@ -132,21 +114,6 @@ public class ShipControlSystem extends IteratingSystem {
         physicsComp.body.applyAngularImpulse(impulse, true);
     }
     
-    private void applyDebugControls(Entity entity, TransformComponent transformComp, PhysicsComponent physicsComp) {
-        //debug force insta-stop
-        if (Gdx.input.isKeyJustPressed(Keys.X)) {
-            physicsComp.body.setLinearVelocity(0, 0);
-            physicsComp.body.setActive(true);
-            physicsComp.body.setTransform(transformComp.pos, transformComp.rotation);
-            
-            HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
-            hyperDrive.isActive = false;
-        }
-        if (Gdx.input.isKeyJustPressed(Keys.Z)) {
-            physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(physicsComp.body.getLinearVelocity()));
-        }
-    }
-    
     private static void accelerate(ControllableComponent control, Body body, VehicleComponent vehicle, float delta) {
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
         body.applyForceToCenter(MyMath.vector(body.getAngle(), thrust), true);
@@ -166,105 +133,16 @@ public class ShipControlSystem extends IteratingSystem {
         }
     }
     
-    private void strafeRight(VehicleComponent vehicle, ControllableComponent control, PhysicsComponent physicsComp, Sprite3DComponent sprite3D, float strafe, float delta) {
+    private void strafeRight(VehicleComponent vehicle, ControllableComponent control, PhysicsComponent physicsComp, float delta) {
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
         Vector2 force = MyMath.vector(physicsComp.body.getAngle(), thrust).rotate90(-1);
         physicsComp.body.applyForceToCenter(force, true);
     }
     
-    private void strafeLeft(VehicleComponent vehicle, ControllableComponent control, PhysicsComponent physicsComp, Sprite3DComponent sprite3D, float strafe, float delta) {
+    private void strafeLeft(VehicleComponent vehicle, ControllableComponent control, PhysicsComponent physicsComp, float delta) {
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
         Vector2 force = MyMath.vector(physicsComp.body.getAngle(), thrust).rotate90(1);
         physicsComp.body.applyForceToCenter(force, true);
-    }
-    
-    
-    private static void dodgeRight(Entity entity, TransformComponent transform, ControllableComponent control) {
-        if (control.timerDodge.canDoEvent() && Mappers.barrelRoll.get(entity) == null) {
-            control.timerDodge.reset();
-            
-            applyDodge(entity, transform, control, BarrelRollComponent.FlipDir.right);
-        }
-    }
-    
-    private static void dodgeLeft(Entity entity, TransformComponent transform, ControllableComponent control) {
-        if (control.timerDodge.canDoEvent() && Mappers.barrelRoll.get(entity) == null) {
-            control.timerDodge.reset();
-    
-            applyDodge(entity, transform, control, BarrelRollComponent.FlipDir.left);
-        }
-    }
-    
-    
-    
-    private static void applyDodge(Entity entity, TransformComponent transform, ControllableComponent control, BarrelRollComponent.FlipDir flipDir) {
-        //BarrelRollComponent d = createDodgeComponent(entityCFG.dodgeForce, transform.rotation, flipDir, entityCFG.dodgeAnimationTimer);
-        //entity.add(d);
-        
-        Body body = Mappers.physics.get(entity).body;
-        //snap to angle to bypass rotation lerp to make dodge feel better/more responsive
-        transform.rotation = control.angleTargetFace;
-        body.setAngularVelocity(0);
-        body.setTransform(body.getPosition(), control.angleTargetFace);
-    
-        float direction = flipDir == BarrelRollComponent.FlipDir.left ? transform.rotation + MathUtils.PI / 2 : transform.rotation - MathUtils.PI / 2;
-        
-        body.applyLinearImpulse(MyMath.vector(direction, entityCFG.dodgeForce), body.getPosition(), true);
-    }
-    
-    private static BarrelRollComponent createDodgeComponent(float dodgeForce, float rotation, BarrelRollComponent.FlipDir dir, long timer) {
-        BarrelRollComponent d = new BarrelRollComponent();
-        d.animationTimer = new SimpleTimer(timer, true);
-        d.animInterpolation = Interpolation.pow2;
-        d.revolutions = 1;
-        //d.direction = dir == BarrelRollComponent.FlipDir.left ? rotation + MathUtils.PI / 2 : rotation - MathUtils.PI / 2;
-        d.dir = dir;
-        d.force = dodgeForce;
-        return d;
-    }
-    
-    private void barrelRoll(Entity entity) {
-        BarrelRollComponent dodgeComp = Mappers.barrelRoll.get(entity);
-        if (dodgeComp == null) {
-            return;
-        }
-        
-        Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
-        switch (dodgeComp.dir) {
-            case left:
-                sprite3D.renderable.angle = dodgeComp.animInterpolation.apply(MathUtils.PI2 * dodgeComp.revolutions, 0, dodgeComp.animationTimer.ratio());
-                break;
-            case right:
-                sprite3D.renderable.angle = dodgeComp.animInterpolation.apply(0, MathUtils.PI2 * dodgeComp.revolutions, dodgeComp.animationTimer.ratio());
-                break;
-        }
-        
-        /*
-        //ensure bounding box follows sprite, ship should be thinner/harder to hit when rolling
-        //TODO, this is wrong: need to find something that maps like below
-        float scaleY = 1 - (sprite3D.renderable.angle / MathUtils.PI);
-        //degrees, scale
-        //0   = 1 	-> top
-        //45  = 0.5
-        //90  = 0
-        //135 = 0.5
-        //180 = 1 	-> bottom
-        //225 = 0.5
-        //270 = 0
-        //315 = 0.5
-        //360 = 1	-> top
-        //System.out.println(sprite3D.renderable.angle + ", " + sy);
-        physicsComponent.poly.setScale(1, scaleY);
-        */
-        
-        
-        if (dodgeComp.animationTimer.canDoEvent()) {
-            //reset
-            sprite3D.renderable.angle = 0;
-
-            entity.remove(BarrelRollComponent.class);
-        }
-        
     }
     
     private void exitVehicle(Entity vehicleEntity, ControllableComponent control) {
@@ -299,6 +177,20 @@ public class ShipControlSystem extends IteratingSystem {
         getEngine().addEntity(characterEntity);
     }
     
+    private void applyDebugControls(Entity entity, TransformComponent transformComp, PhysicsComponent physicsComp) {
+        //debug force insta-stop
+        if (Gdx.input.isKeyJustPressed(Keys.X)) {
+            physicsComp.body.setLinearVelocity(0, 0);
+            physicsComp.body.setActive(true);
+            physicsComp.body.setTransform(transformComp.pos, transformComp.rotation);
+            
+            HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
+            hyperDrive.isActive = false;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.Z)) {
+            physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(physicsComp.body.getLinearVelocity()));
+        }
+    }
     
     //region transition
     private void takeOffPlanet(Entity entity) {

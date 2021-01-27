@@ -28,10 +28,22 @@ public class BarrelRollSystem extends IteratingSystem {
     protected void processEntity(Entity entity, float deltaTime) {
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         ControllableComponent control = Mappers.controllable.get(entity);
-    
-        barrelRoll(entity, sprite3D);
         
+        //barrel roll
+        BarrelRollComponent rollComp = Mappers.barrelRoll.get(entity);
+        if (rollComp != null && rollComp.dir != BarrelRollComponent.FlipDir.none) {
+            barrelRoll(sprite3D, rollComp);
+            
+            return;
+        }
+        if (control.moveLeft && control.alter) {
+            dodgeLeft(entity, control);
+        }
+        if (control.moveRight && control.alter) {
+            dodgeRight(entity, control);
+        }
         
+        //strafe roll
         float rollAmount = strafeRotSpeed * deltaTime;
         if (control.moveLeft) {
             rollLeft(sprite3D, rollAmount);
@@ -41,14 +53,6 @@ public class BarrelRollSystem extends IteratingSystem {
         }
         if (!control.moveLeft && !control.moveRight) {
             stabilizeRoll(sprite3D, rollAmount);
-        }
-    
-    
-        if (control.moveLeft && control.alter) {
-            dodgeLeft(entity, control);
-        }
-        if (control.moveRight && control.alter) {
-            dodgeRight(entity, control);
         }
     }
     
@@ -101,20 +105,19 @@ public class BarrelRollSystem extends IteratingSystem {
         float direction = (flipDir == BarrelRollComponent.FlipDir.left) ? transform.rotation + MathUtils.PI / 2 : transform.rotation - MathUtils.PI / 2;
         body.applyLinearImpulse(MyMath.vector(direction, entityCFG.dodgeForce), body.getPosition(), true);
     
+        //set roll animation
         BarrelRollComponent rollComponent = Mappers.barrelRoll.get(entity);
-        rollComponent.dir = flipDir;
-        rollComponent.animationTimer.reset();
+        if (rollComponent != null) {
+            rollComponent.dir = flipDir;
+            rollComponent.animationTimer.reset();
+        }
     }
     
-    private void barrelRoll(Entity entity, Sprite3DComponent sprite3D) {
-        BarrelRollComponent rollComp = Mappers.barrelRoll.get(entity);
-        if (rollComp == null) {
-            return;
-        }
-    
+    private void barrelRoll(Sprite3DComponent sprite3D, BarrelRollComponent rollComp) {
         //reset
         if (rollComp.animationTimer.canDoEvent()) {
-            //sprite3D.renderable.angle = 0;
+            rollComp.dir = BarrelRollComponent.FlipDir.none;
+            sprite3D.renderable.angle = 0;
         }
         
         switch (rollComp.dir) {

@@ -586,9 +586,10 @@ public class EntityFactory {
         barrelRoll.animationTimer = new SimpleTimer(entityCFG.dodgeAnimationTimer, true);
         barrelRoll.animInterpolation = Interpolation.pow2;
         barrelRoll.revolutions = 1;
-        barrelRoll.dir = BarrelRollComponent.FlipDir.right;
+        barrelRoll.dir = BarrelRollComponent.FlipDir.none;
         barrelRoll.force = entityCFG.dodgeForce;
         entity.add(barrelRoll);
+        
         
         //map
         MapComponent map = new MapComponent();

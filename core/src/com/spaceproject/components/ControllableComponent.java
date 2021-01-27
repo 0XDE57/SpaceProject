@@ -24,6 +24,6 @@ public class ControllableComponent implements Component {
     
     //timers
     public SimpleTimer timerVehicle;
-    public SimpleTimer timerDodge;
+    public SimpleTimer timerDodge;//todo, move to barrel roll comp
     
 }
