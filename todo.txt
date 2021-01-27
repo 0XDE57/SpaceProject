@@ -177,8 +177,7 @@ Legend:
     [ ! ] = notes
     [ * ] = exceptions
 
-todo: focus! i keep jumping between ideas and features and never finish anything
-***the plan***:
+***the plan***: focus! i keep jumping between ideas and features and never finish anything
 Spaceship combat will be a core part of gameplay. So lets focus on cleaning that up first.
 End goal: make combat fun. make flight and movement fun. and look a little better -> JUICE! https://www.youtube.com/watch?v=Fy0aCDmgnxg
     [...] respawn
@@ -193,15 +192,16 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [ ] if collide with another body with significant difference in velocity
             and if other has HealthComponent, do damage using velocity as damage factor
             [ ] shield dash bash? high impulse forward, then activate shield to ram other objects and do damage to them
+        [ ] should be unavailable during hyper drive
     [...] barrel roll
         [x] decouple from ship control
         [...] adjust feel
         [?] allow roll on other axis? could allow for front/backflips. also, could use other roll parameter for animation
             when hit by projectile, set the angles to roll opposite direction of hit angle, then the roll system will stabilize it back
             for impact feel
+        [ ] should not activate while using shield
+        [ ] should not activate while hyperdrive active
     [...] grow cannon
-        [x] AI not detecting hit
-        [ ] ai doesn't know to release grow cannon, only tuned for regular cannon
         [x] tune damage
         [x] tune size
         [ ] lock on nearest target when max
@@ -211,28 +211,30 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [x] bullet jitter in front of ship when moving, not visible with vsync disabled. lerp?
         [?] could perhaps shrink "lose energy" over time and destroy self when smaller than threshold
             only maintains size when fully charged to max
-        [ ] more visible
-            [ ] particle trail
-            [ ] particle affect for absorb while growing
+        [x] AI not detecting hit
+        [ ] AI doesn't know to release grow cannon, only tuned for regular cannon
+        [ ] particle trail off projectile
+        [ ] particle affect for absorb while growing
+    [ ] hyper drive
+        [ ] hyperdrive should be charge up instead of instant activate
+        [ ] needs control for mobile
     [ ] particle effect for ships engine: fire or something neat
+        https://github.com/rockbite/talos
         [ ] particlesystem and emitter components?
         [ ] mess around with the particle editor
-    [...] control tuning
+    [ ] controls
         [x] basic controller input
-            [ ] allow hot-plugging, currently handled by commenting out system is annoying, multiplexer? and what about stage...
+            [ ] allow hot-plugging, multiplexer? and what about stage...
             [...] basic Xbox 360 support
                 [ ] not detecting DPAD buttons
                 [ ] double tap right left bumpers for barrel roll
                 [...] right stick camera control, click to reset
             [ ] move to getMapping() but seems im on an older lib?
+                https://github.com/MrStahlfelge/gdx-controllerutils/wiki/Configurable-Game-Controller-Mappings
             [?] right trigger boost, similar to roll impulse?
             [ ] left trigger for break
-        [ ] hyperdrive should be charge instead of instant activate [1]
-            [ ] needs control for mobile
-        [?] should shield and cannon be unavailable during hyper drive? probably yes
         [?] new control?: hold shift to charge, then forward + release charge for boost: impulse
-        [x] change shield from alt to space
-        [?] shield bash: double tap forward(or direction) and hold to rush, then shield do shield action [B] within time window of dash, and hold
+        [?] shield bash?: double tap forward(or direction) and hold to rush, then shield do shield action [B] within time window of dash, and hold
         [?] land take off could be hold instead of instant
     [ ] add basic asteroids (arbitrary poly)
         [ ] spec spawner for asteroid. begin make asteroid
@@ -273,6 +275,9 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
             [ ] lol jk, sound will eventually exist
 
 
+
+
+
 ---ENGINE---
 [...] physics and movement
     [...] move to box2d
@@ -299,6 +304,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         I dropped my physics because the impulse was so weird, i did infact use Intersector.overlapConvexPolygons() in CollisionSystem.java.overlaps()
         https://github.com/0XDE57/SpaceProject/blob/1a764f9aaa405ba18341ad35c2a75b4ecd02a535/core/src/com/spaceproject/systems/CollisionSystem.java
         [ ] todo: confirm that im not crazy? because i spent a lot of time moving to box2d if this is true lol.... thats ok.
+
 
 [...] screen transition between world and space
     [ ] ready / sync / load state. should all be in transition system?
@@ -346,6 +352,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
     [?] consider merging rendering system (SpaceRendering & World rendering)?
         probably keep separate because world may need special rendering for the torus wrapping effect
         also we don't necessarily need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not
+
 
 [...] config
     [x] config manager, save and load all configs
@@ -460,8 +467,6 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         ! actually for now this is a convenient bug for testing
 
 
-
-
 [ ] voronoi, for destructible asteroids and world generation (can be used for tectonic plates / countries / biomes)
     https://www.badlogicgames.com/forum/viewtopic.php?f=11&t=22784 (my old thread)
     https://github.com/mjholtzem/Unity-2D-Destruction
@@ -474,10 +479,10 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         https://www.emanueleferonato.com/2012/01/17/create-real-explosions-with-box2d-adding-textures/
         https://www.emanueleferonato.com/2012/03/05/breaking-objects-with-box2d-the-realistic-way/
 
+
 [...] wrap planets properly (LOCAL COORDINATE SPACE?)
     https://www.reddit.com/r/gamedev/comments/1gi6np/magic_carpet_style_infinite_wrapping_terrain/
     https://simonschreibt.de/gat/1nsane-carpet-2-repetitive-worlds/
-
 
 
 [ ] fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
@@ -549,6 +554,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
 
 
 [ ] i should prolly start making some unit tests at some point...
+
 
 ---GAMEPLAY & DESIGN---
 [...] SHIPS
@@ -711,7 +717,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
 	http://www.alanzucconi.com/2015/07/01/vertex-and-fragment-shaders-in-unity3d/
 	http://www.alanzucconi.com/2016/01/27/arrays-shaders-heatmaps-in-unity3d/
 	http://wwwtyro.net/2016/10/22/2D-space-scene-procgen.html
-    h
+
 
 http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
 
