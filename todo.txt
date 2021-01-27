@@ -302,24 +302,19 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
 
 [...] screen transition between world and space
     [ ] ready / sync / load state. should all be in transition system?
-        [x] finish transition animation, should have screen effect for polish and to hide loading/level change. goal feel a little more seamless
-            (fade to white/pixelate shader during landing, load map (can wait here for a second if not finished generating, when generations finished start white then fade normal, continue)
-        [ ] WorldRenderingSystem shouldn't be responsible for loading map: loadMap(). should be where?
-        [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
-            see: ScreenTransitionSystem.syncLoadPosition()
-        [ ] bug: sometimes landing and take off unreliable
-            cannot find seed
-            cannot find seed
-            cannot find seed
-            this bug is driving me insane, but there's still some transition and loading details to work out
+    [x] finish transition animation, should have screen effect for polish and to hide loading/level change. goal feel a little more seamless
+        (fade to white/pixelate shader during landing, load map (can wait here for a second if not finished generating, when generations finished start white then fade normal, continue)
+    [ ] WorldRenderingSystem shouldn't be responsible for loading map: loadMap(). should be where?
+    [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
+        see: ScreenTransitionSystem.syncLoadPosition()
+    [ ] bug: sometimes landing and take off unreliable
+        cannot find seed
+        cannot find seed
+        cannot find seed
+        this bug is driving me insane, but there's still some transition and loading details to work out
 
 
 [...] rendering system
-    [?] 2D outline shader for ships and mouse over objects
-        https://www.youtube.com/watch?v=1yuYUVFUOvI&list=PLqpawGIg6Qj5CvjOaCbB536z862XhjPQi&index=17
-    [ ] consider merging rendering system (SpaceRendering & World rendering)?
-        probably keep separate because world may need special rendering for the torus wrapping effect
-        also we don't necessarily need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not
     [...] fix render priority (z-order)
           [X] moved into separate variable
           [x] define proper heights for importance as current values are somewhat arbitrary
@@ -345,7 +340,12 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
                 https://github.com/wwwtyro/space-2d
         [x] background space color fade to black when zoom out (temporary until better space background approach is implemented)
         [ ] experiment: can we make the background tiles just not zoom out? use a different batch perhaps?
-
+    [?] 2D outline shader for ships and mouse over objects
+        http://www.allpiper.com/2d-selection-outline-shader-in-libgdx/
+        https://www.youtube.com/watch?v=1yuYUVFUOvI&list=PLqpawGIg6Qj5CvjOaCbB536z862XhjPQi&index=17
+    [?] consider merging rendering system (SpaceRendering & World rendering)?
+        probably keep separate because world may need special rendering for the torus wrapping effect
+        also we don't necessarily need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not
 
 [...] config
     [x] config manager, save and load all configs
@@ -445,8 +445,6 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
     --- alternatively ---
     process entities from save files?, can have a system process important things from save
 
-[ ] minimap should show heightmap of world when on planet
-    (fog of war) start out with grayscale pixelated version, when area visited then render full map and color
 
 [...] galaxy generation inspired by fibonacci spiral
     [...] test screen to generate spiral
@@ -553,8 +551,6 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
 [ ] i should prolly start making some unit tests at some point...
 
 ---GAMEPLAY & DESIGN---
-
-
 [...] SHIPS
     [...] COMBAT
         [...] 3D roll animation for dodge / barrel roll
@@ -590,12 +586,12 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
 [...] planet generation
     [ ] add temperature variable to planet
         [ ] temperature determined by distance from star
-            [ ] for now simple linear, close to planet = hot, far from planet = cold
-            [ ] if want more advanced, have star temperature based of distance from galaxy center
-                then that would also affect star temperature.
-                for inspiration see:
-                    https://beltoforion.de/article.php?a=spiral_galaxy_renderer
-                    https://github.com/beltoforion/Galaxy-Renderer
+        [ ] for now simple linear, close to planet = hot, far from planet = cold
+        [ ] if want more advanced, have star temperature based of distance from galaxy center
+            then that would also affect star temperature.
+            for inspiration see:
+                https://beltoforion.de/article.php?a=spiral_galaxy_renderer
+                https://github.com/beltoforion/Galaxy-Renderer
         [ ] hot planets can be lava / deserts, cold planets can be ice n snow.
             stuff in between can be "normal" (green, water, etc)
         https://en.wikipedia.org/wiki/Circumstellar_habitable_zone
@@ -626,6 +622,9 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
 	    [ ] for now just render a circle
 	[ ] blackhole (death)
 	    place at center of galaxy
+	    https://www.shadertoy.com/results?query=black+hole
+	    https://www.shadertoy.com/view/ldy3zK
+	    https://www.shadertoy.com/view/ltBGWh
 	[ ] dust/noise
 	[ ] light specs/debris,details
 
@@ -692,11 +691,15 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
 ---UI---
     [...] map
         needs more details, select planets and get info, set way points
+        [ ] minimap should show heightmap of world when on planet
+            (fog of war) start out with grayscale pixelated version, when area visited then render full map and color
+
     [...] menu menu
         [x] pause / freeze game
         [...] settings and config
     [ ] player manager/inventory/shipbuilder thingy
     [ ] career event timeline stats
+
 
 ---GRAPHICS---
 [ ] particles
@@ -708,7 +711,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
 	http://www.alanzucconi.com/2015/07/01/vertex-and-fragment-shaders-in-unity3d/
 	http://www.alanzucconi.com/2016/01/27/arrays-shaders-heatmaps-in-unity3d/
 	http://wwwtyro.net/2016/10/22/2D-space-scene-procgen.html
-    http://www.allpiper.com/2d-selection-outline-shader-in-libgdx/
+    h
 
 http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
 
