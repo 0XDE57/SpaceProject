@@ -32,14 +32,17 @@ public class BarrelRollSystem extends IteratingSystem {
         //barrel roll
         BarrelRollComponent rollComp = Mappers.barrelRoll.get(entity);
         if (rollComp != null) {
-            barrelRoll(sprite3D, rollComp);
+            if (rollComp.dir != BarrelRollComponent.FlipDir.none) {
+                barrelRoll(sprite3D, rollComp);
+                return;
+            }
+            
             if (control.moveLeft && control.alter) {
                 dodgeLeft(entity, control, rollComp);
             }
             if (control.moveRight && control.alter) {
                 dodgeRight(entity, control, rollComp);
             }
-            return;
         }
         
         //strafe roll
