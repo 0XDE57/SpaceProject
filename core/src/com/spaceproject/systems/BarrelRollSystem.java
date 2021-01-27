@@ -36,12 +36,11 @@ public class BarrelRollSystem extends IteratingSystem {
                 barrelRoll(sprite3D, rollComp);
                 return;
             }
-            
             if (control.moveLeft && control.alter) {
-                dodgeLeft(entity, control, rollComp);
+                dodgeLeft(entity, rollComp);
             }
             if (control.moveRight && control.alter) {
-                dodgeRight(entity, control, rollComp);
+                dodgeRight(entity, rollComp);
             }
         }
         
@@ -83,21 +82,22 @@ public class BarrelRollSystem extends IteratingSystem {
         }
     }
     
-    private void dodgeLeft(Entity entity, ControllableComponent control, BarrelRollComponent roll) {
+    private void dodgeLeft(Entity entity, BarrelRollComponent roll) {
         if (roll.rollTimer.tryEvent()) {
-            applyDodgeImpulse(entity, control, roll, BarrelRollComponent.FlipDir.left);
+            applyDodgeImpulse(entity, roll, BarrelRollComponent.FlipDir.left);
         }
     }
     
-    private void dodgeRight(Entity entity, ControllableComponent control, BarrelRollComponent roll) {
+    private void dodgeRight(Entity entity, BarrelRollComponent roll) {
         if (roll.rollTimer.tryEvent()) {
-            applyDodgeImpulse(entity, control, roll, BarrelRollComponent.FlipDir.right);
+            applyDodgeImpulse(entity, roll, BarrelRollComponent.FlipDir.right);
         }
     }
     
-    private void applyDodgeImpulse(Entity entity, ControllableComponent control, BarrelRollComponent roll, BarrelRollComponent.FlipDir flipDir) {
+    private void applyDodgeImpulse(Entity entity, BarrelRollComponent roll, BarrelRollComponent.FlipDir flipDir) {
         //snap to angle to bypass rotation lerp to make dodge feel better/more responsive
         TransformComponent transform = Mappers.transform.get(entity);
+        ControllableComponent control = Mappers.controllable.get(entity);
         transform.rotation = control.angleTargetFace;
         Body body = Mappers.physics.get(entity).body;
         body.setAngularVelocity(0);
