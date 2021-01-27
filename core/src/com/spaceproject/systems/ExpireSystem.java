@@ -12,7 +12,6 @@ import com.spaceproject.utility.Mappers;
 public class ExpireSystem extends IntervalSystem {
     
     private ImmutableArray<Entity> entities;
-    private Engine engine;
     
     public ExpireSystem() {
         super(1);
@@ -21,9 +20,7 @@ public class ExpireSystem extends IntervalSystem {
     @Override
     public void addedToEngine(Engine engine) {
         entities = engine.getEntitiesFor(Family.all(ExpireComponent.class).get());
-        this.engine = engine;
     }
-    
     
     @Override
     protected void updateInterval() {
@@ -37,8 +34,6 @@ public class ExpireSystem extends IntervalSystem {
                 entity.add(new RemoveComponent());
             }
         }
-        
     }
-    
     
 }
