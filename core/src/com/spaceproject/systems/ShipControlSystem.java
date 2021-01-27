@@ -69,7 +69,7 @@ public class ShipControlSystem extends IteratingSystem {
         TransformComponent transformComp = Mappers.transform.get(entity);
         PhysicsComponent physicsComp = Mappers.physics.get(entity);
         
-        barrelRoll(entity);
+        //barrelRoll(entity);
         
         if (GameScreen.isDebugMode) {
             applyDebugControls(entity, transformComp, physicsComp);
@@ -84,6 +84,7 @@ public class ShipControlSystem extends IteratingSystem {
             decelerate(physicsComp.body, delta);
         }
         
+        
         boolean canDodge = true;// shield != null && shield.state == ShieldComponent.State.off;
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         float strafe = strafeRot * delta;
@@ -91,7 +92,7 @@ public class ShipControlSystem extends IteratingSystem {
             strafeLeft(vehicle, control, physicsComp, sprite3D, strafe, delta);
             
             if (canDodge && control.alter) {
-                dodgeLeft(entity, transformComp, control);
+                //dodgeLeft(entity, transformComp, control);
             }
         }
     
@@ -99,7 +100,7 @@ public class ShipControlSystem extends IteratingSystem {
             strafeRight(vehicle, control, physicsComp, sprite3D, strafe, delta);
             
             if (canDodge && control.alter) {
-                dodgeRight(entity, transformComp, control);
+                //dodgeRight(entity, transformComp, control);
             }
         }
         
@@ -194,9 +195,11 @@ public class ShipControlSystem extends IteratingSystem {
         }
     }
     
+    
+    
     private static void applyDodge(Entity entity, TransformComponent transform, ControllableComponent control, BarrelRollComponent.FlipDir flipDir) {
-        BarrelRollComponent d = createDodgeComponent(entityCFG.dodgeForce, transform.rotation, flipDir, entityCFG.dodgeAnimationTimer);
-        entity.add(d);
+        //BarrelRollComponent d = createDodgeComponent(entityCFG.dodgeForce, transform.rotation, flipDir, entityCFG.dodgeAnimationTimer);
+        //entity.add(d);
         
         Body body = Mappers.physics.get(entity).body;
         //snap to angle to bypass rotation lerp to make dodge feel better/more responsive
@@ -206,7 +209,7 @@ public class ShipControlSystem extends IteratingSystem {
     
         float direction = flipDir == BarrelRollComponent.FlipDir.left ? transform.rotation + MathUtils.PI / 2 : transform.rotation - MathUtils.PI / 2;
         
-        body.applyLinearImpulse(MyMath.vector(direction, d.force), body.getPosition(), true);
+        body.applyLinearImpulse(MyMath.vector(direction, entityCFG.dodgeForce), body.getPosition(), true);
     }
     
     private static BarrelRollComponent createDodgeComponent(float dodgeForce, float rotation, BarrelRollComponent.FlipDir dir, long timer) {

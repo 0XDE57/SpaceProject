@@ -502,6 +502,7 @@ public class EntityFactory {
         transform.rotation = (float) Math.PI / 2; //face upwards
         entity.add(transform);
         
+        
         //generate 3D sprite with random even size
         int shipSize = MathUtils.random(entityCFG.shipSizeMin, entityCFG.shipSizeMax) * 2;
         Texture shipTop = TextureFactory.generateShip(seed, shipSize);
@@ -585,10 +586,9 @@ public class EntityFactory {
         barrelRoll.animationTimer = new SimpleTimer(entityCFG.dodgeAnimationTimer, true);
         barrelRoll.animInterpolation = Interpolation.pow2;
         barrelRoll.revolutions = 1;
-        //d.direction = dir == BarrelRollComponent.FlipDir.left ? rotation + MathUtils.PI / 2 : rotation - MathUtils.PI / 2;
-        //d.dir = dir;
-        //d.force = dodgeForce;
-        //entity.add(barrelRoll);
+        barrelRoll.dir = BarrelRollComponent.FlipDir.right;
+        barrelRoll.force = entityCFG.dodgeForce;
+        entity.add(barrelRoll);
         
         //map
         MapComponent map = new MapComponent();
