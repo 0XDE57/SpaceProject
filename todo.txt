@@ -180,36 +180,37 @@ Legend:
 todo: focus! i keep jumping between ideas and features and never finish anything
 ***the plan***:
 Spaceship combat will be a core part of gameplay. So lets focus on cleaning that up first.
-    End goal: make combat fun. make flight and movement fun. and look a little better
+End goal: make combat fun. make flight and movement fun. and look a little better -> JUICE! https://www.youtube.com/watch?v=Fy0aCDmgnxg
     [...] respawn
         [x] for now, just place back at origin 0, 0
         [ ] how to handle death? start on planet back at base? start at a space station?
             [ ] could have a "home planet" and just spawn from there like transitionsystem takeoff
         [ ] notify AI that are stuck attacking nothing and should return to dumbwander or previous task
-    [...] fix shield physics
+    [...] shield
         [...] if collide with bullet, shrink/destroy shield
         [ ] fix radius is not consistent. rotation of body affects size of shield. don't trust calculateBoundingBox()?
         [ ] grow/shrink. looks like cant resize bodies in box2d? destroy and recreate each frame seems inefficient likely
         [ ] if collide with another body with significant difference in velocity
             and if other has HealthComponent, do damage using velocity as damage factor
             [ ] shield dash bash? high impulse forward, then activate shield to ram other objects and do damage to them
-    [...] barrel roll broken
+    [...] barrel roll
         [x] decouple from ship control
         [...] adjust feel
         [?] allow roll on other axis? could allow for front/backflips. also, could use other roll parameter for animation
             when hit by projectile, set the angles to roll opposite direction of hit angle, then the roll system will stabilize it back
             for impact feel
-    [...] make bullets better
-        [...] fix grow bullet
-            [x] AI not detecting hit
-                [ ] ai doesn't know to release grow cannon, only tuned for regular cannon
-            [x] tune damage
-            [x] tune size
-            [ ] lock on nearest target when max
-                [ ] visual in hudsystem for tracked entity
-                [ ] predict angle to aim to hit based on pos and velocity
-                [ ] steering behavior AI?
-            [x] bullet jitter in front of ship when moving, not visible with vsync disabled. lerp?
+    [...] grow cannon
+        [x] AI not detecting hit
+        [ ] ai doesn't know to release grow cannon, only tuned for regular cannon
+        [x] tune damage
+        [x] tune size
+        [ ] lock on nearest target when max
+            [ ] visual in hudsystem for tracked entity
+            [ ] predict angle to aim to hit based on pos and velocity
+            [ ] steering behavior AI?
+        [x] bullet jitter in front of ship when moving, not visible with vsync disabled. lerp?
+        [?] could perhaps shrink "lose energy" over time and destroy self when smaller than threshold
+            only maintains size when fully charged to max
         [ ] more visible
             [ ] particle trail
             [ ] particle affect for absorb while growing
@@ -253,9 +254,9 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         still allow manual override with scroll, with perhaps a timer to focus back in, or when a new enemy joins
     [...] fix background space rendering
         [...] POC star shader with fullscreen quad in separate project
-            [ ] bring into this project and replace old system
-    [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
-        [ ] lol jk, sound will eventually exist
+            https://github.com/0XDE57/gdx-shadertoy
+            https://www.youtube.com/watch?v=rvDo9LvfoVE
+        [ ] bring into this project and replace old system
     [...] detangle, some things are messy over time
         [...] Ship control system doing too much
             [x] move charge cannon to own system
@@ -268,25 +269,23 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             [ ] shouldn't have mobileinput rendering
             [?] shouldn't have gamemenu and input listener?
         [ ] entity factory refactor into entity types
+    [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
+            [ ] lol jk, sound will eventually exist
 
 
 ---ENGINE---
 [...] physics and movement
     [...] move to box2d
         [...] move logic to new physics
-            [...] shield broken
-                [x] render
-                [...] physics and collision
-            [...] dodge
-                [ ] adjust feel, its kinda clunky right now. needs more JUICE!
-                    https://www.youtube.com/watch?v=Fy0aCDmgnxg
             [...] space tile scale bad and tile loading broken
                 [x] fix load/unload and scale
                 [...] dust layer has render issue, tiles overlapping edges/gap
         [...] figure out scales and values that make sense and work with the b2d engine (consider scale of space)
             [ ] create unit/body scale helper
-        [ ] move to filters? https://gamefromscratch.com/libgdx-libgdx-tutorial-13-physics-with-box2d-part-4-controlling-collisions-using-filters/
-    https://gamedev.stackexchange.com/questions/23834/how-to-properly-implement-message-handling-in-a-component-based-entity-system
+        [ ] move to filters?
+            http://www.iforce2d.net/b2dtut/collision-filtering
+            https://gamefromscratch.com/libgdx-libgdx-tutorial-13-physics-with-box2d-part-4-controlling-collisions-using-filters/
+            https://www.youtube.com/watch?v=IIZ7XI6L7IA
     [x] fixed time step (necessary for multiplayer?)
         [ ] interpolation
         https://github.com/libgdx/ashley/pull/215
@@ -294,10 +293,59 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         https://gafferongames.com/post/fix_your_timestep/
         http://gameprogrammingpatterns.com/game-loop.html
         http://www.koonsolo.com/news/dewitters-gameloop/
+    [?] how to better handle collision system telling other systems what to do?
+        https://gamedev.stackexchange.com/questions/23834/how-to-properly-implement-message-handling-in-a-component-based-entity-system
     [?] note to self, was my old physics broken due to #5048?
         I dropped my physics because the impulse was so weird, i did infact use Intersector.overlapConvexPolygons() in CollisionSystem.java.overlaps()
         https://github.com/0XDE57/SpaceProject/blob/1a764f9aaa405ba18341ad35c2a75b4ecd02a535/core/src/com/spaceproject/systems/CollisionSystem.java
         [ ] todo: confirm that im not crazy? because i spent a lot of time moving to box2d if this is true lol.... thats ok.
+
+[...] screen transition between world and space
+    [ ] ready / sync / load state. should all be in transition system?
+        [x] finish transition animation, should have screen effect for polish and to hide loading/level change. goal feel a little more seamless
+            (fade to white/pixelate shader during landing, load map (can wait here for a second if not finished generating, when generations finished start white then fade normal, continue)
+        [ ] WorldRenderingSystem shouldn't be responsible for loading map: loadMap(). should be where?
+        [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
+            see: ScreenTransitionSystem.syncLoadPosition()
+        [ ] bug: sometimes landing and take off unreliable
+            cannot find seed
+            cannot find seed
+            cannot find seed
+            this bug is driving me insane, but there's still some transition and loading details to work out
+
+
+[...] rendering system
+    [?] 2D outline shader for ships and mouse over objects
+        https://www.youtube.com/watch?v=1yuYUVFUOvI&list=PLqpawGIg6Qj5CvjOaCbB536z862XhjPQi&index=17
+    [ ] consider merging rendering system (SpaceRendering & World rendering)?
+        probably keep separate because world may need special rendering for the torus wrapping effect
+        also we don't necessarily need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not
+    [...] fix render priority (z-order)
+          [X] moved into separate variable
+          [x] define proper heights for importance as current values are somewhat arbitrary
+          [?] this is now a bit more complex, as there is a mix of 2d sprites and 3d renderables, that are rendered in separate batches (2d then 3d overlay).
+              to mix the z between them may require multiple batch passes, or migrating to 3d, also shaperenderer on top of that...
+              custom shape renderer?
+              https://github.com/earlygrey/shapedrawer
+    [ ] better star rendering
+        it's currently static just like planets, but I want it to shift the z, exactly like the title screen background
+            com.spaceproject.screens.animations.NoiseAnim
+        could be done on gpu even:
+            https://www.shadertoy.com/view/XscGzl
+    [ ] better planet rendering
+        inspiration: https://github.com/yurkth/astraea
+    [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
+            maybe something like this:
+                https://www.shadertoy.com/view/ltXSDN
+                https://www.shadertoy.com/view/ldKGDd
+                https://gamedev.stackexchange.com/questions/146098/2d-parallax-scrolling-through-glsl-shader
+                https://badlogicgames.com/forum/viewtopic.php?f=11&t=11419
+            or something like this:
+                https://wwwtyro.github.io/space-2d/
+                https://github.com/wwwtyro/space-2d
+        [x] background space color fade to black when zoom out (temporary until better space background approach is implemented)
+        [ ] experiment: can we make the background tiles just not zoom out? use a different batch perhaps?
+
 
 [...] config
     [x] config manager, save and load all configs
@@ -350,24 +398,6 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             or in theory allow scripting?
             lets not reinvent this wheel.
             stop brain. this is getting ridiculous.
-        [x] debug
-        [x] minimap
-        [x] engine (threads, physics, renderscales)
-
-
-
-[...] refactor screen transition
-    [ ] ready / sync / load state. should all be in transition system?
-        [x] finish transition animation, should have screen effect for polish and to hide loading/level change. goal feel a little more seamless
-            (fade to white/pixelate shader during landing, load map (can wait here for a second if not finished generating, when generations finished start white then fade normal, continue)
-        [ ] WorldRenderingSystem shouldn't be responsible for loading map: loadMap(). should be where?
-        [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
-            see: ScreenTransitionSystem.syncLoadPosition()
-        [ ] bug: sometimes landing and take off unreliable
-            cannot find seed
-            cannot find seed
-            cannot find seed
-            this bug is driving me insane, but there's still some transition and loading details to work out
 
 
 [?] "Persistence Engine" what to do with rest of universe when on a planet? or stuff going on on planets when we are in space?
@@ -431,34 +461,6 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [!] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
         ! actually for now this is a convenient bug for testing
 
-
-[...] rendering system
-    [ ] consider merging rendering system (SpaceRendering & World rendering)?
-        probably keep separate because world may need special rendering for the torus wrapping effect
-        also we don't necessarily need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not
-    [...] fix render priority (z-order)
-          [X] moved into separate variable
-          [x] define proper heights for importance as current values are somewhat arbitrary
-          [?] this is now a bit more complex, as there is a mix of 2d sprites and 3d renderables, that are rendered in separate batches (2d then 3d overlay).
-              to mix the z between them may require multiple batch passes, or migrating to 3d, also shaperenderer on top of that...
-    [ ] better star rendering
-        it's currently static just like planets, but I want it to shift the z, exactly like the title screen background
-            com.spaceproject.screens.animations.NoiseAnim
-        could be done on gpu even:
-            https://www.shadertoy.com/view/XscGzl
-    [ ] better planet rendering
-        inspiration: https://github.com/yurkth/astraea
-    [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
-            maybe something like this:
-                https://www.shadertoy.com/view/ltXSDN
-                https://www.shadertoy.com/view/ldKGDd
-                https://gamedev.stackexchange.com/questions/146098/2d-parallax-scrolling-through-glsl-shader
-                https://badlogicgames.com/forum/viewtopic.php?f=11&t=11419
-            or something like this:
-                https://wwwtyro.github.io/space-2d/
-                https://github.com/wwwtyro/space-2d
-        [x] background space color fade to black when zoom out (temporary until better space background approach is implemented)
-        [ ] experiment: can we make the background tiles just not zoom out? use a different batch perhaps?
 
 
 
@@ -630,6 +632,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
 
 ---DEBUG---
     [ ] in game console
+        https://github.com/StrongJoshua/libGDX-inGameConsole
         [ ] show debug output
             redirect all gdx.log calls?
         [ ] commands
