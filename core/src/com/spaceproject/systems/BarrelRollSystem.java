@@ -31,16 +31,15 @@ public class BarrelRollSystem extends IteratingSystem {
         
         //barrel roll
         BarrelRollComponent rollComp = Mappers.barrelRoll.get(entity);
-        if (rollComp != null && rollComp.dir != BarrelRollComponent.FlipDir.none) {
+        if (rollComp != null) {
             barrelRoll(sprite3D, rollComp);
-            
+            if (control.moveLeft && control.alter) {
+                dodgeLeft(entity, control, rollComp);
+            }
+            if (control.moveRight && control.alter) {
+                dodgeRight(entity, control, rollComp);
+            }
             return;
-        }
-        if (control.moveLeft && control.alter) {
-            dodgeLeft(entity, control);
-        }
-        if (control.moveRight && control.alter) {
-            dodgeRight(entity, control);
         }
         
         //strafe roll
@@ -81,19 +80,19 @@ public class BarrelRollSystem extends IteratingSystem {
         }
     }
     
-    private void dodgeLeft(Entity entity, ControllableComponent control) {
-        if (control.timerDodge.tryEvent()) {
-            applyDodgeImpulse(entity, control, BarrelRollComponent.FlipDir.left);
+    private void dodgeLeft(Entity entity, ControllableComponent control, BarrelRollComponent roll) {
+        if (roll.rollTimer.tryEvent()) {
+            applyDodgeImpulse(entity, control, roll, BarrelRollComponent.FlipDir.left);
         }
     }
     
-    private void dodgeRight(Entity entity, ControllableComponent control) {
-        if (control.timerDodge.tryEvent()) {
-            applyDodgeImpulse(entity, control, BarrelRollComponent.FlipDir.right);
+    private void dodgeRight(Entity entity, ControllableComponent control, BarrelRollComponent roll) {
+        if (roll.rollTimer.tryEvent()) {
+            applyDodgeImpulse(entity, control, roll, BarrelRollComponent.FlipDir.right);
         }
     }
     
-    private void applyDodgeImpulse(Entity entity, ControllableComponent control, BarrelRollComponent.FlipDir flipDir) {
+    private void applyDodgeImpulse(Entity entity, ControllableComponent control, BarrelRollComponent roll, BarrelRollComponent.FlipDir flipDir) {
         //snap to angle to bypass rotation lerp to make dodge feel better/more responsive
         TransformComponent transform = Mappers.transform.get(entity);
         transform.rotation = control.angleTargetFace;
@@ -106,11 +105,8 @@ public class BarrelRollSystem extends IteratingSystem {
         body.applyLinearImpulse(MyMath.vector(direction, entityCFG.dodgeForce), body.getPosition(), true);
     
         //set roll animation
-        BarrelRollComponent rollComponent = Mappers.barrelRoll.get(entity);
-        if (rollComponent != null) {
-            rollComponent.dir = flipDir;
-            rollComponent.animationTimer.reset();
-        }
+        roll.dir = flipDir;
+        roll.animationTimer.reset();
     }
     
     private void barrelRoll(Sprite3DComponent sprite3D, BarrelRollComponent rollComp) {

@@ -195,7 +195,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             [ ] shield dash bash? high impulse forward, then activate shield to ram other objects and do damage to them
     [...] barrel roll broken
         [x] decouple from ship control
-        [ ] adjust feel
+        [...] adjust feel
         [?] allow roll on other axis? could allow for front/backflips. also, could use other roll parameter for animation
             when hit by projectile, set the angles to roll opposite direction of hit angle, then the roll system will stabilize it back
             for impact feel
@@ -210,7 +210,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
                 [ ] predict angle to aim to hit based on pos and velocity
                 [ ] steering behavior AI?
             [x] bullet jitter in front of ship when moving, not visible with vsync disabled. lerp?
-        [...] more visible
+        [ ] more visible
             [ ] particle trail
             [ ] particle affect for absorb while growing
     [ ] particle effect for ships engine: fire or something neat
@@ -224,11 +224,11 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
                 [ ] double tap right left bumpers for barrel roll
                 [...] right stick camera control, click to reset
             [ ] move to getMapping() but seems im on an older lib?
-            [?] right trigger boost, similar to roll impusle?
+            [?] right trigger boost, similar to roll impulse?
             [ ] left trigger for break
         [ ] hyperdrive should be charge instead of instant activate [1]
             [ ] needs control for mobile
-        [?] should sheild and cannon be unavailable during hyper drive? probably yes
+        [?] should shield and cannon be unavailable during hyper drive? probably yes
         [?] new control?: hold shift to charge, then forward + release charge for boost: impulse
         [x] change shield from alt to space
         [?] shield bash: double tap forward(or direction) and hold to rush, then shield do shield action [B] within time window of dash, and hold

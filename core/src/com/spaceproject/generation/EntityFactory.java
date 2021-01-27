@@ -77,9 +77,6 @@ public class EntityFactory {
         
         ControllableComponent control = new ControllableComponent();
         control.timerVehicle = new SimpleTimer(entityCFG.controlTimerVehicle);
-        control.timerDodge = new SimpleTimer(entityCFG.controlTimerDodge);
-        //control.actionACooldownTimer = new SimpleTimer(entityCFG.controlATimerCoolDown);
-        
         
         entity.add(health);
         entity.add(control);
@@ -583,6 +580,7 @@ public class EntityFactory {
         
         //barrel roll
         BarrelRollComponent barrelRoll = new BarrelRollComponent();
+        barrelRoll.rollTimer = new SimpleTimer(entityCFG.dodgeTimeout);
         barrelRoll.animationTimer = new SimpleTimer(entityCFG.dodgeAnimationTimer, true);
         barrelRoll.animInterpolation = Interpolation.pow2;
         barrelRoll.revolutions = 1;

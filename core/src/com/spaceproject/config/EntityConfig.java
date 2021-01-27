@@ -9,7 +9,7 @@ public class EntityConfig extends Config {
     public float characterWalkSpeed;
     
     //control
-    public long controlTimerDodge;
+    public long dodgeTimeout;
     public long controlTimerVehicle;
     public long controlTimerHyperCooldown;
     
@@ -38,7 +38,6 @@ public class EntityConfig extends Config {
         characterWalkSpeed = 200f;
         
         controlTimerVehicle = 1000;
-        controlTimerDodge = 500;
         controlTimerHyperCooldown = 1000;
         
         shipSizeMin = 10/2;
@@ -46,8 +45,9 @@ public class EntityConfig extends Config {
         shipHealth = 200;
         engineThrust = 200;
         hyperSpeed = 1000;
+        dodgeTimeout = 500;
         dodgeAnimationTimer = 475;
-        dodgeForce = 5f;
+        dodgeForce = 8f;
         cannonSize = 1;
         cannonAmmo = 5;
         cannonDamage = 15;
@@ -56,7 +56,6 @@ public class EntityConfig extends Config {
         cannonVelocity = 60;
         cannonAcceleration = 200;
         shrinkGrowAnimTime = 2500;
-        
     }
     
 }
