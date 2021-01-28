@@ -29,20 +29,19 @@ public class HyperDriveSystem extends IteratingSystem {
     }
     
     private void toggleHyperDrive(Entity entity, HyperDriveComponent hyperDrive) {
-        if (hyperDrive.activate) {
-            if (hyperDrive.coolDownTimer.tryEvent()) {
-                PhysicsComponent physicsComp = Mappers.physics.get(entity);
-                if (hyperDrive.isActive) {
-                    hyperDrive.isActive = false;
-                    physicsComp.body.setTransform(entity.getComponent(TransformComponent.class).pos, physicsComp.body.getAngle());
-                    physicsComp.body.setActive(true);
-                    physicsComp.body.setLinearVelocity(MyMath.vector(physicsComp.body.getAngle(), 20));
-                } else {
-                    hyperDrive.isActive = true;
-                    hyperDrive.velocity.set(MyMath.vector(physicsComp.body.getAngle(), hyperDrive.speed));
-                    physicsComp.body.setActive(false);
-                }
+        if (hyperDrive.activate && hyperDrive.coolDownTimer.tryEvent()) {
+            PhysicsComponent physicsComp = Mappers.physics.get(entity);
+            if (hyperDrive.isActive) {
+                hyperDrive.isActive = false;
+                physicsComp.body.setTransform(entity.getComponent(TransformComponent.class).pos, physicsComp.body.getAngle());
+                physicsComp.body.setActive(true);
+                physicsComp.body.setLinearVelocity(MyMath.vector(physicsComp.body.getAngle(), 20));
+            } else {
+                hyperDrive.isActive = true;
+                hyperDrive.velocity.set(MyMath.vector(physicsComp.body.getAngle(), hyperDrive.speed));
+                physicsComp.body.setActive(false);
             }
+            
         }
     }
     
