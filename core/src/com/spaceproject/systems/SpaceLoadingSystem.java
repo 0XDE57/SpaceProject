@@ -31,24 +31,25 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     
-    private CelestialConfig celestCFG;
+    private final CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
     private ImmutableArray<Entity> loadedAstronomicalBodies;
     private SimpleTimer checkStarsTimer;
+    
+    private boolean hasInit;
     
     
     @Override
     public void addedToEngine(Engine engine) {
-        celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
-        
         // currently loaded stars/planets
         loadedAstronomicalBodies = engine.getEntitiesFor(Family.all(BarycenterComponent.class, TransformComponent.class).get());
         
-        engine.addEntityListener(Family.one(PlanetComponent.class, BarycenterComponent.class).get(), this);
+        //engine.addEntityListener(Family.one(PlanetComponent.class, BarycenterComponent.class).get(), this);
         
         
         // load space things (asteroids, wormhole, black hole, etc)
         // load ai/mobs
-        initMobs(engine);
+        //initMobs(engine);
+        hasInit = false;
         
         checkStarsTimer = new SimpleTimer(4000);
         checkStarsTimer.setCanDoEvent();
@@ -78,6 +79,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     
     
     public void initMobs(Engine engine) {
+        hasInit = true;
         //a placeholder to add dummy objects for now
         
         engine.addEntity(EntityFactory.createBasicShip(-20, 40, GameScreen.inSpace()));
@@ -117,6 +119,10 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     
     @Override
     public void update(float delta) {
+        if (!hasInit) {
+            initMobs(getEngine());
+        }
+        
         // load and unload stars
         updateStars(celestCFG.loadSystemDistance);
         

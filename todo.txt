@@ -187,11 +187,13 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [ ] notify AI that are stuck attacking nothing and should return to dumbwander or previous task
     [...] shield
         [...] if collide with bullet, shrink/destroy shield
-        [ ] fix radius is not consistent. rotation of body affects size of shield. don't trust calculateBoundingBox()?
+        [x] fix radius is not consistent. rotation of body affects size of shield. don't trust calculateBoundingBox()?
+        [ ] shield growth should be canceled if in charge phase
         [ ] grow/shrink. looks like cant resize bodies in box2d? destroy and recreate each frame seems inefficient likely
         [ ] if collide with another body with significant difference in velocity
             and if other has HealthComponent, do damage using velocity as damage factor
             [ ] shield dash bash? high impulse forward, then activate shield to ram other objects and do damage to them
+        [ ] bug not render on planet
         [ ] should be unavailable during hyper drive
     [...] barrel roll
         [x] decouple from ship control
@@ -218,13 +220,14 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
     [ ] hyper drive
         [ ] hyperdrive should be charge up instead of instant activate
         [ ] needs control for mobile
-    [ ] particle effect for ships engine: fire or something neat
+    [...] particle effect for ships engine: fire or something neat
+        https://gamefromscratch.com/libgdx-tutorial-part-15-particles-part-one-2d-particles/
         https://github.com/rockbite/talos
-        [ ] particlesystem and emitter components?
-        [ ] mess around with the particle editor
+        [...] particlesystem and emitter components
     [ ] controls
         [x] basic controller input
             [ ] allow hot-plugging, multiplexer? and what about stage...
+            [ ] crashes title screen after return to menu from game, looks like systems still loaded
             [...] basic Xbox 360 support
                 [ ] not detecting DPAD buttons
                 [ ] double tap right left bumpers for barrel roll
@@ -266,7 +269,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
             [x] move shield into own system
                 [!] fix shield not render on planet
             [x] barrel roll and 3d sprite stuff into own system
-            [?] can refactor stuff in control component into their respective components just like grow and hyper?
+            [?] can refactor stuff in control component into their respective components just like hyper?
         [...] HUD system doing too much
             [ ] shouldn't have mobileinput rendering
             [?] shouldn't have gamemenu and input listener?
@@ -509,6 +512,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
 
 
 [ ] optimization
+    https://github.com/libgdx/libgdx/wiki/Memory-management
     [ ] look at pooled engine/sprites
         [ ] eg bullets. current cannon creates new sprite for each shot. bad!
     [ ] model cache / renderable for 3d sprites

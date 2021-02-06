@@ -36,6 +36,7 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(WorldLoadingSystem.class, 140, true, false, true, true, true));
         systems.add(new SysCFG(SpaceLoadingSystem.class, 150, false, true, false, true, true));
         systems.add(new SysCFG(SpaceParallaxSystem.class, 160, true, true, false, true, true));
+        systems.add(new SysCFG(ParticleSystem.class, 165, true, true, true, true, true));
         systems.add(new SysCFG(ScreenTransitionSystem.class, 170, true, true, true, true, true));
         systems.add(new SysCFG(DebugSystem.class, 180, false, true, true, true, true));
         //systems.add(new SysCFG(PlanetarySystemEntitySpawner.class, 20, true, true, false, true, true));

@@ -24,6 +24,7 @@ import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.OrbitComponent;
+import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.SeedComponent;
@@ -587,7 +588,16 @@ public class EntityFactory {
         barrelRoll.dir = BarrelRollComponent.FlipDir.none;
         barrelRoll.force = entityCFG.dodgeForce;
         entity.add(barrelRoll);
+    
+        ParticleComponent particle = new ParticleComponent();
+        //particle.particleEffect = new ParticleEffectPool();
+        //particle.particleEffect.load(Gdx.files.internal("particles/test.particle"), Gdx.files.internal("particles/"));
+        //article.//particleEffect.getEmitters().first().setPosition(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+        //particle.particleEffect.start();
+        //particle.offsetY = 1f;
         
+        particle.offset = new Vector2(0, height + 0.2f);
+        entity.add(particle);
         
         //map
         MapComponent map = new MapComponent();
