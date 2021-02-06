@@ -83,7 +83,9 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
         if (particle != null && particle.pooledEffect == null) {
             Gdx.app.log(this.getClass().getSimpleName(), "obtained");
             particle.pooledEffect = effectPool.obtain();
-            particle.pooledEffect.allowCompletion();//start with emitter off
+            //start with emitter off
+            particle.pooledEffect.allowCompletion();
+            //particle.pooledEffect.reset();
         }
     }
     
