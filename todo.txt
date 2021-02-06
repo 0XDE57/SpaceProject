@@ -215,8 +215,6 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
             only maintains size when fully charged to max
         [x] AI not detecting hit
         [ ] AI doesn't know to release grow cannon, only tuned for regular cannon
-        [ ] particle trail off projectile
-        [ ] particle affect for absorb while growing
     [ ] hyper drive
         [ ] hyperdrive should be charge up instead of instant activate
         [ ] needs control for mobile
@@ -225,7 +223,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [ ] rendering is lagging behind camera "drift bug" -> refactor rendering/system order.
         [ ] side to side engine and rotation
         [ ] alternate engine effect when
-        [ ] absorb effect when charging charge cannon
+        [...] absorb effect when charging charge cannon
         [ ] absorb effect when charging shield
         [ ] charge burst effect when bullet destroyed
         [ ] shield burst effect when hit by bullet and shield destroyed
@@ -240,6 +238,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
                 [...] right stick camera control, click to reset
             [ ] move to getMapping() but seems im on an older lib?
                 https://github.com/MrStahlfelge/gdx-controllerutils/wiki/Configurable-Game-Controller-Mappings
+                https://github.com/libgdx/gdx-controllers/wiki/Migrate-from-v1
             [?] right trigger boost, similar to roll impulse?
             [ ] left trigger for break
         [?] new control?: hold shift to charge, then forward + release charge for boost: impulse

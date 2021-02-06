@@ -22,7 +22,9 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
     
     SpriteBatch spriteBatch;
     ParticleEffect fireEffect;
-    ParticleEffectPool effectPool;
+    ParticleEffectPool fireEffectPool;
+    ParticleEffect chargeEffect;
+    ParticleEffectPool chargeEffectPool;
     
     public ParticleSystem() {
         super(Family.all(ParticleComponent.class, TransformComponent.class).get());
@@ -30,11 +32,14 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
         spriteBatch = new SpriteBatch();
     
         fireEffect = new ParticleEffect();
-        fireEffect.load(Gdx.files.internal("particles/test.particle"), Gdx.files.internal("particles/"));
+        fireEffect.load(Gdx.files.internal("particles/shipEngineFire.particle"), Gdx.files.internal("particles/"));
         fireEffect.scaleEffect(0.02f);
-        effectPool = new ParticleEffectPool(fireEffect, 20, 20);
+        fireEffectPool = new ParticleEffectPool(fireEffect, 20, 20);
         
-        fireEffect.start();
+        chargeEffect = new ParticleEffect();
+        chargeEffect.load(Gdx.files.internal("particles/absorb.particle"), Gdx.files.internal("particles/"));
+        chargeEffect.scaleEffect(0.02f);
+        chargeEffectPool = new ParticleEffectPool(chargeEffect, 20, 20);
     }
     
     @Override
@@ -53,28 +58,39 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
             return;
         }
         
-        ControllableComponent control = Mappers.controllable.get(entity);
-        if (control != null) {
-            if (control.moveForward) {
-                particle.pooledEffect.start();
-            } else {
-                particle.pooledEffect.allowCompletion();
+        switch (particle.type) {
+            case shipEngine: {
+                ControllableComponent control = Mappers.controllable.get(entity);
+                if (control != null) {
+                    if (control.moveForward) {
+                        particle.pooledEffect.start();
+                    } else {
+                        particle.pooledEffect.allowCompletion();
+                    }
+                } else {
+                    particle.pooledEffect.allowCompletion();
+                }
+    
+                TransformComponent transform = Mappers.transform.get(entity);
+                Array<ParticleEmitter> emitters = particle.pooledEffect.getEmitters();
+                float engineRotation = transform.rotation * MathUtils.radDeg + 180;
+                for (int i = 0; i < emitters.size; i++) {
+                    ParticleEmitter.ScaledNumericValue val = emitters.get(i).getAngle();
+                    val.setHigh(engineRotation);
+                    val.setLow(engineRotation);
+                }
+                particle.offset.setAngleDeg(engineRotation);
+                particle.pooledEffect.setPosition(transform.pos.x + particle.offset.x, transform.pos.y + particle.offset.y);
+                particle.pooledEffect.draw(spriteBatch, deltaTime);
+                break;
             }
-        } else {
-            particle.pooledEffect.allowCompletion();
+            case bulletCharge: {
+                TransformComponent transform = Mappers.transform.get(entity);
+                particle.pooledEffect.setPosition(transform.pos.x, transform.pos.y);
+                particle.pooledEffect.draw(spriteBatch, deltaTime);
+                break;
+            }
         }
-        
-        TransformComponent transform = Mappers.transform.get(entity);
-        Array<ParticleEmitter> emitters = particle.pooledEffect.getEmitters();
-        float engineRotation = transform.rotation * MathUtils.radDeg + 180;
-        for (int i = 0; i < emitters.size; i++) {
-            ParticleEmitter.ScaledNumericValue val = emitters.get(i).getAngle();
-            val.setHigh(engineRotation);
-            val.setLow(engineRotation);
-        }
-        particle.offset.setAngleDeg(engineRotation);
-        particle.pooledEffect.setPosition(transform.pos.x + particle.offset.x, transform.pos.y + particle.offset.y);
-        particle.pooledEffect.draw(spriteBatch, deltaTime);
     }
     
     @Override
@@ -82,10 +98,19 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
         ParticleComponent particle = Mappers.particle.get(entity);
         if (particle != null && particle.pooledEffect == null) {
             Gdx.app.log(this.getClass().getSimpleName(), "obtained");
-            particle.pooledEffect = effectPool.obtain();
-            //start with emitter off
-            particle.pooledEffect.allowCompletion();
-            //particle.pooledEffect.reset();
+            switch (particle.type) {
+                case shipEngine:
+                    particle.pooledEffect = fireEffectPool.obtain();
+                    //start with emitter off
+                    particle.pooledEffect.allowCompletion();
+                    break;
+                case bulletCharge:
+                    particle.pooledEffect = chargeEffectPool.obtain();
+                    //start with emitter off
+                    particle.pooledEffect.start();
+                    //particle.pooledEffect.reset();
+            }
+            
         }
     }
     
@@ -93,8 +118,14 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
     public void entityRemoved(Entity entity) {
         ParticleComponent particle = Mappers.particle.get(entity);
         if (particle != null && particle.pooledEffect != null) {
+            switch (particle.type) {
+                case shipEngine:
+                    fireEffectPool.free(particle.pooledEffect);
+                    break;
+                case bulletCharge:
+                    chargeEffectPool.free(particle.pooledEffect);
+            }
             Gdx.app.log(this.getClass().getSimpleName(), "free");
-            effectPool.free(particle.pooledEffect);
         }
     }
 }

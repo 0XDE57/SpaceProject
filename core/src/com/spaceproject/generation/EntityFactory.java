@@ -428,12 +428,7 @@ public class EntityFactory {
         entity.add(barrelRoll);
     
         ParticleComponent particle = new ParticleComponent();
-        //particle.particleEffect = new ParticleEffectPool();
-        //particle.particleEffect.load(Gdx.files.internal("particles/test.particle"), Gdx.files.internal("particles/"));
-        //article.//particleEffect.getEmitters().first().setPosition(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
-        //particle.particleEffect.start();
-        //particle.offsetY = 1f;
-        
+        particle.type = ParticleComponent.EffectType.shipEngine;
         particle.offset = new Vector2(0, height + 0.2f);
         entity.add(particle);
         

@@ -6,10 +6,11 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.ExpireComponent;
-import com.spaceproject.components.ChargeCannonComponent;
+import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ShieldComponent;
@@ -148,12 +149,16 @@ public class ChargeCannonSystem extends IteratingSystem {
         TextureComponent texture = new TextureComponent();
         texture.texture = TextureFactory.generateProjectile();
         texture.scale = 0;//start at nothing
+        entity.add(texture);
         
         TransformComponent transform = new TransformComponent();
         transform.zOrder = RenderOrder.PROJECTILES.getHierarchy();
-        
-        entity.add(texture);
         entity.add(transform);
+        
+        ParticleComponent particle = new ParticleComponent();
+        particle.type = ParticleComponent.EffectType.bulletCharge;
+        particle.offset = new Vector2();
+        entity.add(particle);
         
         return entity;
     }
