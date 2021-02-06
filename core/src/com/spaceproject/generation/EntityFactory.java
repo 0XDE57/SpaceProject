@@ -10,7 +10,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
-import com.spaceproject.components.AISpawnComponent;
 import com.spaceproject.components.AstronomicalComponent;
 import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.BarycenterComponent;
@@ -137,168 +136,7 @@ public class EntityFactory {
     
     
     //region Astronomical / Celestial objects and bodies
-    public static Array<Entity> createAstronomicalObjects(float x, float y) {
-        long seed = MyMath.getSeed(x, y);
-        MathUtils.random.setSeed(seed);
-        
-        switch (MathUtils.random(2)) {
-            case 0:
-                return createPlanetarySystem(x, y, seed);
-            case 1:
-                return createBinarySystem(x, y, seed);
-            case 2:
-                return createRoguePlanet(x, y, seed);
-        }
-    
-        return createPlanetarySystem(x, y, seed);
-    }
-    
-    public static Array<Entity> createPlanetarySystem(float x, float y) {
-        long seed = MyMath.getSeed(x, y);
-        return createPlanetarySystem(x, y, seed);
-    }
-    
-    public static Array<Entity> createPlanetarySystem(float x, float y, long seed) {
-        MathUtils.random.setSeed(seed);
-        
-        //number of planets in a system
-        int numPlanets = MathUtils.random(celestCFG.minPlanets, celestCFG.maxPlanets);
-        
-        //distance between planets
-        float distance = celestCFG.minPlanetDist / 3; //add some initial distance between star and first planet
-        
-        //rotation of system (orbits and spins)
-        boolean rotDir = MathUtils.randomBoolean();
-        
-        //collection of planets/stars
-        Array<Entity> entities = new Array<Entity>();
-        
-        //add star to center of planetary system
-        Entity star = createStar(seed, x, y, rotDir);
-        BarycenterComponent barycenter = new BarycenterComponent();
-        barycenter.bodyType = numPlanets == 0 ? BarycenterComponent.AstronomicalBodyType.loneStar : BarycenterComponent.AstronomicalBodyType.uniStellar;
-        star.add(barycenter);
-        entities.add(star);
-        
-        //create planets around star
-        for (int i = 0; i < numPlanets; ++i) {
-            //add some distance from previous entity
-            distance += MathUtils.random(celestCFG.minPlanetDist, celestCFG.maxPlanetDist);
-            
-            //create planet
-            long planetSeed = MyMath.getSeed(x, y + distance);
-            Entity planet = createPlanet(planetSeed, star, distance, rotDir);
-            
-            //add moon
-            boolean hasMoon = MathUtils.randomBoolean();
-            if (hasMoon) {
-                float moonDist = planet.getComponent(TextureComponent.class).texture.getWidth() * planet.getComponent(TextureComponent.class).scale * 2;
-                moonDist *= 1.5f;
-                distance += moonDist;
-                Entity moon = createMoon(MyMath.getSeed(x, y + distance), planet, moonDist, rotDir);
-                entities.add(moon);
-                
-                /* nested test
-                distance += moonDist;
-                Entity moonsMoon = createMoon(MyMath.getSeed(x, y + distance), moon, moonDist, rotDir);
-                entities.add(moonsMoon);
-    
-                distance += moonDist;
-                Entity moonsMoonsMoon = createMoon(MyMath.getSeed(x, y + distance), moonsMoon, moonDist, rotDir);
-                entities.add(moonsMoonsMoon);*/
-            }
-            
-            //addLifeToPlanet(planet);
-    
-            entities.add(planet);
-        }
-        
-        Gdx.app.log(EntityFactory.class.getSimpleName(), "Planetary System: (" + x + ", " + y + ") Objects: " + (numPlanets));
-        
-        return entities;
-        
-    }
-    
-    private static void addLifeToPlanet(Entity planet) {
-        //add entity spawner if planet has life
-        //dumb coin flip for now, can have rules later like no life when super close to star = lava, or super far = ice
-        //simply base it on distance from star. habital zone
-        //  eg chance of life = distance from habit zone
-        //more complex rules can be applied like considering the planets type. ocean might have life but if entire planet is ocean = no ships = no spawner
-        //desert might have different life, so different spawner rules
-        boolean hasLife = MathUtils.randomBoolean();
-        if (hasLife) {
-            int min = 10000;
-            int max = 100000;
-            int lifeDensity = MathUtils.random(1);
-            
-            AISpawnComponent spawnComponent = new AISpawnComponent();
-            spawnComponent.min = min;
-            spawnComponent.max = max;
-            spawnComponent.timers = new SimpleTimer[lifeDensity];
-            spawnComponent.state = AIComponent.State.attack;
-            for (int t = 0; t < spawnComponent.timers.length; t++) {
-               spawnComponent.timers[t] = new SimpleTimer(MathUtils.random(spawnComponent.min, spawnComponent.max));
-            }
-            planet.add(spawnComponent);
-        }
-    }
-    
-    public static Array<Entity> createBinarySystem(float x, float y) {
-        long seed = MyMath.getSeed(x, y);
-        return createBinarySystem(x, y, seed);
-    }
-    
-    public static Array<Entity> createBinarySystem(float x, float y, long seed) {
-        Entity anchorEntity = new Entity();
-        
-        SeedComponent seedComp = new SeedComponent();
-        seedComp.seed = seed;
-        BarycenterComponent barycenter = new BarycenterComponent();
-        barycenter.bodyType = BarycenterComponent.AstronomicalBodyType.multiStellar;
-        TransformComponent transform = new TransformComponent();
-        transform.pos.set(x, y);
-        anchorEntity.add(transform);
-        anchorEntity.add(barycenter);
-        anchorEntity.add(seedComp);
-        
-        
-        //distance between planets
-        float distance = celestCFG.maxPlanetSize * 2 + celestCFG.maxPlanetDist * 2; //add distance between stars
-        
-        //rotation of system (orbits and spins)
-        boolean rotDir = MathUtils.randomBoolean();
-        
-        //collection of planets/stars
-        Array<Entity> entities = new Array<Entity>();
-        
-        //add stars
-        float startAngle = MathUtils.random(MathUtils.PI2);
-        float tangentialSpeed = MathUtils.random(celestCFG.minPlanetTangentialSpeed, celestCFG.maxPlanetTangentialSpeed);
-        Entity starA = createStar(MyMath.getSeed(x + distance, y), x + distance, y, rotDir);
-        OrbitComponent orbitA = starA.getComponent(OrbitComponent.class);
-        orbitA.parent = anchorEntity;
-        orbitA.radialDistance = distance;
-        orbitA.startAngle = startAngle;
-        orbitA.tangentialSpeed = tangentialSpeed;
-        
-        Entity starB = createStar(MyMath.getSeed(x - distance, y), x - distance, y, rotDir);
-        OrbitComponent orbitB = starB.getComponent(OrbitComponent.class);
-        orbitB.parent = anchorEntity;
-        orbitB.radialDistance = distance;
-        orbitB.startAngle = startAngle + MathUtils.PI;
-        orbitB.tangentialSpeed = tangentialSpeed;
-        
-        
-        entities.add(anchorEntity);
-        entities.add(starA);
-        entities.add(starB);
-        
-        Gdx.app.log(EntityFactory.class.getSimpleName(), "Binary System: (" + x + ", " + y + ")");
-        return entities;
-    }
-    
-    private static Entity createStar(long seed, float x, float y, boolean rotationDir) {
+    public static Entity createStar(long seed, float x, float y, boolean rotationDir) {
         MathUtils.random.setSeed(seed);
         
         Entity entity = new Entity();
@@ -427,7 +265,7 @@ public class EntityFactory {
         return entity;
     }
     
-    private static Entity createMoon(long seed, Entity parent, float radialDistance, boolean rotationDir) {
+    public static Entity createMoon(long seed, Entity parent, float radialDistance, boolean rotationDir) {
         MathUtils.random.setSeed(seed);
         
         Entity entity = new Entity();

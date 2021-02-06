@@ -220,10 +220,16 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
     [ ] hyper drive
         [ ] hyperdrive should be charge up instead of instant activate
         [ ] needs control for mobile
-    [...] particle effect for ships engine: fire or something neat
-        https://gamefromscratch.com/libgdx-tutorial-part-15-particles-part-one-2d-particles/
-        https://github.com/rockbite/talos
-        [...] particlesystem and emitter components
+    [...] particle effects!
+        [x] particlesystem and emitter components
+        [ ] rendering is lagging behind camera "drift bug" -> refactor rendering/system order.
+        [ ] side to side engine and rotation
+        [ ] alternate engine effect when
+        [ ] absorb effect when charging charge cannon
+        [ ] absorb effect when charging shield
+        [ ] charge burst effect when bullet destroyed
+        [ ] shield burst effect when hit by bullet and shield destroyed
+        [ ] explosion effect on ship destroy
     [ ] controls
         [x] basic controller input
             [ ] allow hot-plugging, multiplexer? and what about stage...
@@ -274,6 +280,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
             [ ] shouldn't have mobileinput rendering
             [?] shouldn't have gamemenu and input listener?
         [ ] entity factory refactor into entity types
+    [ ] orbit distance for moons should not have overlapping rings with previous orbit path, spacing needs to include children
     [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
             [ ] lol jk, sound will eventually exist
 
