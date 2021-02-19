@@ -89,7 +89,14 @@ public class ShipControlSystem extends IteratingSystem {
         
         //exit vehicle
         if (control.changeVehicle) {
-            exitVehicle(entity, control);
+            boolean canExit = !GameScreen.inSpace();
+            if (GameScreen.isDebugMode) {
+                canExit = true;
+            }
+            
+            if (canExit) {
+                exitVehicle(entity, control);
+            }
         }
         
         

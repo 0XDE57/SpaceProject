@@ -187,14 +187,16 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
 End goal: make combat fun. make flight and movement fun. and look a little better -> JUICE! https://www.youtube.com/watch?v=Fy0aCDmgnxg
     [...] respawn
         [x] for now, just place back at origin 0, 0
+        [ ] move into own system
         [ ] how to handle death? start on planet back at base? start at a space station?
-            [ ] could have a "home planet" and just spawn from there like transitionsystem takeoff
+            [?] could have a "home planet" and just spawn from there like transitionsystem takeoff
+            [?] base space station that has its own orbit around either planet or star. dock to space station
         [ ] notify AI that are stuck attacking nothing and should return to dumbwander or previous task
     [...] shield
         [...] if collide with bullet, shrink/destroy shield
         [x] fix radius is not consistent. rotation of body affects size of shield. don't trust calculateBoundingBox()?
-        [ ] shield growth should be canceled if in charge phase
-        [ ] grow/shrink. looks like cant resize bodies in box2d? destroy and recreate each frame seems inefficient likely
+        [x] shield growth overrides and cancels charge cannon
+        [ ] grow/shrink body with shield. looks like cant resize bodies in box2d? destroy and recreate each frame seems inefficient likely
         [ ] if collide with another body with significant difference in velocity
             and if other has HealthComponent, do damage using velocity as damage factor
             [ ] shield dash bash? high impulse forward, then activate shield to ram other objects and do damage to them
