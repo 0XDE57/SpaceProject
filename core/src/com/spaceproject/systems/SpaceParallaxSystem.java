@@ -2,6 +2,7 @@ package com.spaceproject.systems;
 
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
@@ -16,11 +17,12 @@ import java.util.ArrayList;
 public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     //TODO: loading, unloading tiles is slow, blame is probably pixmap generation, should try to replace with shader
     
-    //private Engine engine;
-    private static OrthographicCamera cam;
+    
+    private final OrthographicCamera cam;
+    private final SpriteBatch spriteBatch;
     
     // background layer of tiles
-    private static ArrayList<SpaceBackgroundTile> tiles;
+    private final ArrayList<SpaceBackgroundTile> tiles;
     
     // multiplier for parallax position of tile
     private static float dustTileDepth = 0.99f;
@@ -41,8 +43,9 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     
     public SpaceParallaxSystem() {
         cam = MyScreenAdapter.cam;
+        spriteBatch = MyScreenAdapter.batch;
         
-        tiles = new ArrayList<SpaceBackgroundTile>();
+        tiles = new ArrayList<>();
         
         checkTileTimer = new SimpleTimer(500);
     }
@@ -52,10 +55,38 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         
         // load and unload tiles
         updateTiles(delta);
+    
+        
+        //draw background tiles (stars)
+        spriteBatch.setProjectionMatrix(cam.combined);
+        spriteBatch.begin();
+        drawParallaxTiles();
+        spriteBatch.end();
         
         // load tiles/spacedust/background clouds(noise/fractals)
     }
     
+    
+    private void drawParallaxTiles() {
+        if (tiles == null) {
+            return;
+        }
+        
+        for (SpaceBackgroundTile tile : tiles) {
+            //draw = (tile position + (cam position - center of tile)) * depth
+            float drawX = tile.x + (cam.position.x - (tile.size / 2)) * tile.depth;
+            float drawY = tile.y + (cam.position.y - (tile.size / 2)) * tile.depth;
+            
+            //draw texture
+            float width = tile.tex.getWidth();
+            float height = tile.tex.getHeight();
+            spriteBatch.draw(tile.tex, drawX, drawY,
+                    0, 0,
+                    width, height,
+                    tile.scale, tile.scale,
+                    0, 0, 0, (int) width, (int) height, false, false);
+        }
+    }
     
     /**
      * If camera has changed position relative to tiles, unload far tiles and
@@ -114,7 +145,6 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         
         return currentTile;
     }
-    
     
     /**
      * Convert world position to tile position.
@@ -221,7 +251,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
                 || tileToCheck.tileY < centerTile.y - surround || tileToCheck.tileY > centerTile.y + surround;
     }
     
-    public static ArrayList<SpaceBackgroundTile> getTiles() {
+    public ArrayList<SpaceBackgroundTile> getTiles() {
         return tiles;
     }
     

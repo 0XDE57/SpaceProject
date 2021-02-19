@@ -19,10 +19,8 @@ import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.ui.SpaceBackgroundTile;
 import com.spaceproject.utility.Mappers;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 
 public class SpaceRenderingSystem extends IteratingSystem {
@@ -32,7 +30,7 @@ public class SpaceRenderingSystem extends IteratingSystem {
     private SpriteBatch spriteBatch;
     private ModelBatch modelBatch;
     private ShapeRenderer shape;
-    private static Color tmpColor = new Color();
+    //private static Color tmpColor = new Color();
     
     // array of entities to render
     private Array<Entity> renderQueue = new Array<Entity>();
@@ -65,17 +63,20 @@ public class SpaceRenderingSystem extends IteratingSystem {
     public void update(float delta) {
         super.update(delta); //adds entities to render queue
         
+        /*
+        //move to clearScreenSystem
         //clear screen with color based on camera position
         Color color = backgroundColor(cam);
         Gdx.gl20.glClearColor(color.r, color.g, color.b, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-        
+        //cam update? instead of CameraSystem? test drift bug
+        */
         
         spriteBatch.setProjectionMatrix(cam.combined);
         spriteBatch.begin();
         
         //draw background tiles (stars)
-        drawParallaxTiles();
+        //drawParallaxTiles();
         
         //draw game objects
         drawEntities();
@@ -124,6 +125,7 @@ public class SpaceRenderingSystem extends IteratingSystem {
         }
     }
     
+    /*
     private void drawParallaxTiles() {
         ArrayList<SpaceBackgroundTile> tiles = SpaceParallaxSystem.getTiles();
         if (tiles == null) {
@@ -144,7 +146,7 @@ public class SpaceRenderingSystem extends IteratingSystem {
                     tile.scale, tile.scale,
                     0, 0, 0, (int) width, (int) height, false, false);
         }
-    }
+    }*/
     
     private void draw3DRenderables(float delta) {
         for (Entity entity : renderQueue3D) {
@@ -227,12 +229,12 @@ public class SpaceRenderingSystem extends IteratingSystem {
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
     
-    
+    /*
     /**
      * Return color based on camera position
      *
      * @return color
-     */
+     *
     private static Color backgroundColor(OrthographicCamera cam) {
         //still playing with these values to get the right feel/intensity of color...
         float camZoomBlackScale = 500.0f;
@@ -257,7 +259,7 @@ public class SpaceRenderingSystem extends IteratingSystem {
         
         tmpColor.lerp(Color.BLACK, MathUtils.clamp(cam.zoom / camZoomBlackScale, 0, 1)); //fade to black on zoom out
         return tmpColor;
-    }
+    }*/
     
     @Override
     public void processEntity(Entity entity, float deltaTime) {
