@@ -45,10 +45,6 @@ import com.spaceproject.utility.SimpleTimer;
 
 
 public class EntityFactory {
-    //todo: refactor into separate factories for entity types
-    // eg: planetary system should go into a AstronomicalBodyEntityFactory()
-    // ships into ShipEntityFactory
-    // rename this to base or common? and keep character
     private static final EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     private static final EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
     private static final CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);

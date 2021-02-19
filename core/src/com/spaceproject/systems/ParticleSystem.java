@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
+import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.TransformComponent;
@@ -20,7 +21,9 @@ import com.spaceproject.utility.Mappers;
 
 public class ParticleSystem extends IteratingSystem implements EntityListener {
     
+    //Matrix4 projectionMatrix = new Matrix4();
     SpriteBatch spriteBatch;
+    
     ParticleEffect fireEffect;
     ParticleEffectPool fireEffectPool;
     ParticleEffect chargeEffect;
@@ -37,7 +40,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
         fireEffectPool = new ParticleEffectPool(fireEffect, 20, 20);
         
         chargeEffect = new ParticleEffect();
-        chargeEffect.load(Gdx.files.internal("particles/absorb.particle"), Gdx.files.internal("particles/"));
+        chargeEffect.load(Gdx.files.internal("particles/absorb2.particle"), Gdx.files.internal("particles/"));
         chargeEffect.scaleEffect(0.02f);
         chargeEffectPool = new ParticleEffectPool(chargeEffect, 20, 20);
     }
@@ -45,6 +48,8 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
     @Override
     public void update(float deltaTime) {
         spriteBatch.setProjectionMatrix(GameScreen.cam.combined);
+        //projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        //spriteBatch.setProjectionMatrix(projectionMatrix);
 
         spriteBatch.begin();
         super.update(deltaTime);
@@ -85,6 +90,15 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
                 break;
             }
             case bulletCharge: {
+                ChargeCannonComponent cannon = Mappers.chargeCannon.get(entity);
+                if (cannon != null) {
+                    if (cannon.isCharging) {
+                        particle.pooledEffect.start();
+                    } else {
+                        particle.pooledEffect.allowCompletion();
+                    }
+                }
+                
                 TransformComponent transform = Mappers.transform.get(entity);
                 particle.pooledEffect.setPosition(transform.pos.x, transform.pos.y);
                 particle.pooledEffect.draw(spriteBatch, deltaTime);
@@ -106,9 +120,8 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
                     break;
                 case bulletCharge:
                     particle.pooledEffect = chargeEffectPool.obtain();
-                    //start with emitter off
+                    //start with emitter on
                     particle.pooledEffect.start();
-                    //particle.pooledEffect.reset();
             }
             
         }
