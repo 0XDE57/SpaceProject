@@ -68,15 +68,20 @@ public class SystemsConfig extends Config {
         // - screen clear
         // - particle logic update
         // - cam update
-        // - astroid renderer -> shape render pre sprite
+        // - asteroid renderer -> shape render pre sprite
         // - sprite 2D renderer
         // - sprite 3D renderer
         // - shield renderer -> shape render post sprite
         // - particle renderer -> post sprite
-        systems.add(new SysCFG(SpaceRenderingSystem.class, 100, false, true, false, true, true));
+        systems.add(new SysCFG(WorldRenderingSystem.class, 94, false, false, true, true, true));
+    
+        systems.add(new SysCFG(Sprite2DRenderSystem.class, 95, false, true, true, true, true));
+        systems.add(new SysCFG(Sprite3DRenderSystem.class, 96, false, true, true, true, true));
+        //systems.add(new SysCFG(SpaceRenderingSystem.class, 100, false, true, false, true, true));
+        systems.add(new SysCFG(ShieldRenderSystem.class, 100, false, true, true, true, true));
+    
         //should not be a separate space and world renderer, both render entity sprites
-        systems.add(new SysCFG(WorldRenderingSystem.class, 110, false, false, true, true, true));
-
+        
         systems.add(new SysCFG(HUDSystem.class, 120, false, true, true, true, true));
     
         

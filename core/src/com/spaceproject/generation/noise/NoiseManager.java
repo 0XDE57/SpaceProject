@@ -42,7 +42,7 @@ public class NoiseManager implements INoiseGenListener, Disposable {
         NoiseBuffer noiseBuffer = getNoiseForSeed(seed);
         
         if (noiseBuffer == null) {
-            //Gdx.app.log(this.getClass().getSimpleName(), "no noise found, generating: " + seed);
+            Gdx.app.log(this.getClass().getSimpleName(), "no noise found, generating: " + seed);
             generate(seed, planet);
         } else {
             //push to queue for pickup by SpaceLoadingSystem

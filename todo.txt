@@ -200,16 +200,18 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [ ] if collide with another body with significant difference in velocity
             and if other has HealthComponent, do damage using velocity as damage factor
             [ ] shield dash bash? high impulse forward, then activate shield to ram other objects and do damage to them
-        [ ] bug not render on planet
+        [x] bug not render on planet
         [ ] should be unavailable during hyper drive
+        [ ] should not activate during screen transition
     [...] barrel roll
         [x] decouple from ship control
-        [...] adjust feel
+        [...] adjust feel, impulse
         [?] allow roll on other axis? could allow for front/backflips. also, could use other roll parameter for animation
             when hit by projectile, set the angles to roll opposite direction of hit angle, then the roll system will stabilize it back
             for impact feel
         [ ] should not activate while using shield
         [ ] should not activate while hyperdrive active
+        [ ] should not activate during screen transition
     [...] grow cannon
         [x] tune damage
         [x] tune size
@@ -222,7 +224,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
             only maintains size when fully charged to max
         [x] AI not detecting hit
         [ ] AI doesn't know to release grow cannon, only tuned for regular cannon
-        [ ] should not fire while ScreenTransition
+        [ ] should not fire during screen transition
     [ ] hyper drive
         [ ] hyperdrive should be charge up instead of instant activate
         [ ] needs control for mobile
