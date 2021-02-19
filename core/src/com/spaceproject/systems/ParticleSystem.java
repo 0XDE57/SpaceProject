@@ -21,13 +21,13 @@ import com.spaceproject.utility.Mappers;
 
 public class ParticleSystem extends IteratingSystem implements EntityListener {
     
-    //Matrix4 projectionMatrix = new Matrix4();
     SpriteBatch spriteBatch;
     
     ParticleEffect fireEffect;
     ParticleEffectPool fireEffectPool;
     ParticleEffect chargeEffect;
     ParticleEffectPool chargeEffectPool;
+    
     
     public ParticleSystem() {
         super(Family.all(ParticleComponent.class, TransformComponent.class).get());
@@ -48,9 +48,6 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
     @Override
     public void update(float deltaTime) {
         spriteBatch.setProjectionMatrix(GameScreen.cam.combined);
-        //projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        //spriteBatch.setProjectionMatrix(projectionMatrix);
-
         spriteBatch.begin();
         super.update(deltaTime);
         spriteBatch.end();
@@ -86,7 +83,6 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
                 }
                 particle.offset.setAngleDeg(engineRotation);
                 particle.pooledEffect.setPosition(transform.pos.x + particle.offset.x, transform.pos.y + particle.offset.y);
-                particle.pooledEffect.draw(spriteBatch, deltaTime);
                 break;
             }
             case bulletCharge: {
@@ -101,17 +97,16 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
                 
                 TransformComponent transform = Mappers.transform.get(entity);
                 particle.pooledEffect.setPosition(transform.pos.x, transform.pos.y);
-                particle.pooledEffect.draw(spriteBatch, deltaTime);
                 break;
             }
         }
+        particle.pooledEffect.draw(spriteBatch, deltaTime);
     }
     
     @Override
     public void entityAdded(Entity entity) {
         ParticleComponent particle = Mappers.particle.get(entity);
         if (particle != null && particle.pooledEffect == null) {
-            Gdx.app.log(this.getClass().getSimpleName(), "obtained");
             switch (particle.type) {
                 case shipEngine:
                     particle.pooledEffect = fireEffectPool.obtain();
@@ -123,7 +118,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
                     //start with emitter on
                     particle.pooledEffect.start();
             }
-            
+            //Gdx.app.log(this.getClass().getSimpleName(), "obtained");
         }
     }
     
@@ -138,7 +133,8 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
                 case bulletCharge:
                     chargeEffectPool.free(particle.pooledEffect);
             }
-            Gdx.app.log(this.getClass().getSimpleName(), "free");
+            //Gdx.app.log(this.getClass().getSimpleName(), "free");
         }
     }
+    
 }

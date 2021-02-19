@@ -203,6 +203,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [x] bug not render on planet
         [ ] should be unavailable during hyper drive
         [ ] should not activate during screen transition
+        [ ] needs control for mobile
     [...] barrel roll
         [x] decouple from ship control
         [...] adjust feel, impulse
@@ -212,6 +213,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [ ] should not activate while using shield
         [ ] should not activate while hyperdrive active
         [ ] should not activate during screen transition
+        [ ] needs control for mobile
     [...] grow cannon
         [x] tune damage
         [x] tune size
@@ -226,23 +228,29 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [ ] AI doesn't know to release grow cannon, only tuned for regular cannon
         [ ] should not fire during screen transition
     [ ] hyper drive
-        [ ] hyperdrive should be charge up instead of instant activate
+        [ ] hyperdrive should be hold key to charge up instead of instant activate
         [ ] needs control for mobile
     [...] particle effects!
         [x] particlesystem and emitter components
         [...] rendering is lagging behind camera "drift bug" -> refactor rendering/system order.
-            [ ] split into update and render
-        [ ] side to side engine and rotation
-        [ ] alternate engine effect when hyper
+            [...] split into update and render?
+        [...] engine fire effect
+            [ ] could look better (tune colors and properties)
+            [ ] looks wrong when faceing direction opposite of velocity (relative?)
+            [ ] side to side engine
+            [ ] rotate?
         [...] absorb effect when charging charge cannon
+            [ ] should not drift when rotating
+            [ ] should not drift when moving (absorb, locked to charge itself, not relative to ship movement)
+        [ ] alternate engine particle effect when hyperdrive active
         [ ] absorb effect when charging shield
-        [ ] charge burst effect when bullet destroyed
+        [ ] charge burst effect when bullet destroyed (absorb reversed)
         [ ] shield burst effect when hit by bullet and shield destroyed
         [ ] explosion effect on ship destroy
     [ ] controls
         [x] basic controller input
             [ ] allow hot-plugging, multiplexer? and what about stage...
-            [ ] crashes title screen after return to menu from game, looks like systems still loaded
+            [ ] crashes title screen after return to menu from game, looks like systems still loaded (unhook listners?)
             [...] basic Xbox 360 support
                 [ ] not detecting DPAD buttons
                 [ ] double tap right left bumpers for barrel roll
@@ -251,7 +259,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
                 https://github.com/MrStahlfelge/gdx-controllerutils/wiki/Configurable-Game-Controller-Mappings
                 https://github.com/libgdx/gdx-controllers/wiki/Migrate-from-v1
             [?] right trigger boost, similar to roll impulse?
-            [ ] left trigger for break
+            [ ] left trigger for break / slow down
         [?] new control?: hold shift to charge, then forward + release charge for boost: impulse
         [?] shield bash?: double tap forward(or direction) and hold to rush, then shield do shield action [B] within time window of dash, and hold
         [?] land take off could be hold instead of instant
@@ -291,7 +299,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
             [x] move charge cannon to own system
             [x] move normal cannon to own system
             [x] move shield into own system
-                [!] fix shield not render on planet
+                [x] fix shield not render on planet
             [x] barrel roll and 3d sprite stuff into own system
             [ ] can refactor stuff in control component into their respective components just like hyper?
         [...] HUD system doing too much
@@ -340,7 +348,6 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
     [ ] ready / sync / load state. should all be in transition system?
     [x] finish transition animation, should have screen effect for polish and to hide loading/level change. goal feel a little more seamless
         (fade to white/pixelate shader during landing, load map (can wait here for a second if not finished generating, when generations finished start white then fade normal, continue)
-    [ ] WorldRenderingSystem shouldn't be responsible for loading map: loadMap(). should be where?
     [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
         see: ScreenTransitionSystem.syncLoadPosition()
     [ ] bug: sometimes landing and take off unreliable
@@ -366,6 +373,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
             https://www.shadertoy.com/view/XscGzl
     [ ] better planet rendering
         inspiration: https://github.com/yurkth/astraea
+    [...] WorldRenderingSystem shouldn't be responsible for loading map: loadMap().
     [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
             maybe something like this:
                 https://www.shadertoy.com/view/ltXSDN
@@ -684,6 +692,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
             [x] fix some edge cases on up and down and expansion of empty nodes
             [ ] nothing select, re-select last selected / refocus
             [ ] press and hold up & down
+            [ ] page up / down jump to top / bottom
         [ ] aesthetics and usability
             [ ] on key navigation, if selection out of scrollpane view, scroll to make it visible
             [ ] fix arrow expand image on entity node pre/post expand

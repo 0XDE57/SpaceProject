@@ -122,7 +122,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         miniMap = new MiniMap();
     }
     
-    
     @Override
     public void initContext(GameScreen game) {
         gameMenu = new GameMenu(game, false);

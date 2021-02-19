@@ -33,37 +33,28 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(MobileInputSystem.class, 20, true, true, true, false, true));
         systems.add(new SysCFG(AISystem.class, 30, true, true, true, true, true));
         
+        
         //---logic---
         systems.add(new SysCFG(CharacterControlSystem.class, 40, true, true, true, true, true));
-        
         systems.add(new SysCFG(ShipControlSystem.class, 50, true, true, true, true, true));
+        
         systems.add(new SysCFG(HyperDriveSystem.class, 55, true, true, true, true, true));
         systems.add(new SysCFG(FixedPhysicsSystem.class, 60, true, true, true, true, true));
+        
         systems.add(new SysCFG(CannonSystem.class, 64, true, true, true, true, true));
         systems.add(new SysCFG(ChargeCannonSystem.class, 65, true, true, true, true, true));
         systems.add(new SysCFG(ShieldSystem.class, 66, true, true, true, true, true));
         systems.add(new SysCFG(BarrelRollSystem.class, 69, true, true, true, true, true));
         
-        
         systems.add(new SysCFG(OrbitSystem.class, 70, true, true, false, true, true));
         systems.add(new SysCFG(WorldWrapSystem.class, 80, true, false, true, true, true));
-    
-        //should probably be loading in logic section
+        
         systems.add(new SysCFG(WorldLoadingSystem.class, 82, true, false, true, true, true));
         systems.add(new SysCFG(SpaceLoadingSystem.class, 83, false, true, false, true, true));
         //systems.add(new SysCFG(PlanetarySystemEntitySpawner.class, 160, true, true, false, true, true));
         
         
         //----render----
-        systems.add(new SysCFG(SpaceParallaxSystem.class, 85, true, true, false, true, true));
-        
-        //todo: split into particle update and particle render (particles should render on top of sprites, but updates logic before camera update to fix drift)
-        //could have multilayer rendering if needed in rendering pipeline: particle layer pre sprite, particle layer post sprite
-        systems.add(new SysCFG(ParticleSystem.class, 86, true, true, true, true, true));
-        //particleUpdate
-        systems.add(new SysCFG(CameraSystem.class, 90, false, true, true, true, true));
-        //particleRender
-        
         //todo: rendering pipeline
         // - screen clear
         // - particle logic update
@@ -73,30 +64,25 @@ public class SystemsConfig extends Config {
         // - sprite 3D renderer
         // - shield renderer -> shape render post sprite
         // - particle renderer -> post sprite
-        systems.add(new SysCFG(WorldRenderingSystem.class, 94, false, false, true, true, true));
-    
+        //todo: split into particle update and particle render (particles should render on top of sprites, but updates logic before camera update to fix drift)
+        //could have multilayer rendering if needed in rendering pipeline: particle layer pre sprite (under sprites), particle layer post sprite (over sprites)
+        systems.add(new SysCFG(SpaceParallaxSystem.class, 86, true, true, false, true, true));
+        systems.add(new SysCFG(WorldRenderingSystem.class, 87, false, false, true, true, true));
+        systems.add(new SysCFG(ParticleSystem.class, 88, true, true, true, true, true));
+        systems.add(new SysCFG(CameraSystem.class, 90, false, true, true, true, true));
         systems.add(new SysCFG(Sprite2DRenderSystem.class, 95, false, true, true, true, true));
         systems.add(new SysCFG(Sprite3DRenderSystem.class, 96, false, true, true, true, true));
-        //systems.add(new SysCFG(SpaceRenderingSystem.class, 100, false, true, false, true, true));
         systems.add(new SysCFG(ShieldRenderSystem.class, 100, false, true, true, true, true));
-    
-        //should not be a separate space and world renderer, both render entity sprites
+        //systems.add(new SysCFG(ParticleRenderSystem.class, 101, false, true, true, true, true));
+        systems.add(new SysCFG(HUDSystem.class, 200, false, true, true, true, true));
         
-        systems.add(new SysCFG(HUDSystem.class, 120, false, true, true, true, true));
-    
+        systems.add(new SysCFG(ScreenTransitionSystem.class, 300, true, true, true, true, true));
         
-        
-        systems.add(new SysCFG(ScreenTransitionSystem.class, 170, true, true, true, true, true));
-        
-        systems.add(new SysCFG(ExpireSystem.class, 180, true, true, true, true, true));
-        
-        
+        systems.add(new SysCFG(ExpireSystem.class, 400, true, true, true, true, true));
         
         systems.add(new SysCFG(DebugSystem.class, 500, false, true, true, true, true));
-
         
         systems.add(new SysCFG(RemovalSystem.class, 1000, false, true, true, true, true));
-    
     }
     
     public ArrayList<SysCFG> getSystems() {

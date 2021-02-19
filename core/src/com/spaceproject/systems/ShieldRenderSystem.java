@@ -21,8 +21,8 @@ public class ShieldRenderSystem extends IteratingSystem {
     public ShieldRenderSystem() {
         super(Family.all(ShieldComponent.class, TransformComponent.class).get());
         
-        this.cam = GameScreen.cam;
-        this.shape = new ShapeRenderer();
+        cam = GameScreen.cam;
+        shape = new ShapeRenderer();
     }
     
     @Override

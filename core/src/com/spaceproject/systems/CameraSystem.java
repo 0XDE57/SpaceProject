@@ -12,7 +12,7 @@ import com.spaceproject.utility.Mappers;
 
 public class CameraSystem extends IteratingSystem {
     
-    private OrthographicCamera cam;
+    private final OrthographicCamera cam;
     
     private float zoomSpeed = 3;//todo: move to engine config
     //private static float panSpeed/panTarget(lerp to entity)
