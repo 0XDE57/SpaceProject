@@ -30,14 +30,13 @@ and prototype systems.
 
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-todo...
-should start documenting and specking out the features and where its headed.
+todo...should start documenting and specking out the features and where its headed.
 It's half in notes, half in my head, and half in code.
 
 ***architecture***
 Uses an ECS. If you are unfamiliar with the concept of an Entity Component System, start here:
     https://github.com/libgdx/ashley/wiki/Framework-overview
-Components are pure data, no implementation.
+For consistency, components are pure data, no implementation. This may change in future.
 
 Systems are dynamically loaded and unloaded per context. Space and World can have different systems.
     eg: don't need an orbit system when on a planet.
@@ -47,21 +46,27 @@ See SystemsConfig for defining system priories and loading properties such as wh
 if they should be active when paused.
 
 
-One goal is to have everything highly configurable. (and perhaps I have gone too far in this direction...?)
+One goal is to have everything highly configurable. (and perhaps I have gone too far in this direction at the cost of complexity?)
 Data Directory (...\SpaceProject\android\assets)
     \config:
         plain text json files that define all values for game. these files will be written on first run of the game.
         if no config exists, default is loaded and written to disk. if config exists on disk, it is loaded.
         [default always loaded when debugDevForceLoadDefault = true]
-            CelestialConfig: defines star system generation rules
-            DebugConfig: defines settings like show debug rendering
+            SystemsConfig: define system loading priorities and properties.
+                priority: order of execution is important for game loop logic and rendering pipeline.
+                haltOnGamePause: if true, system stops processing when game is paused.
+                loadInSpace: if true, system will be loaded when player is in space.
+                loadInWorld: if true, system will be loaded when player is on a planet.
+                loadOnDesktop: if true, will be loaded on desktop platform.
+                loadOnMobile: if true, will be loaded on iOS or Android platform.
             EngineConfig: define physics and rendering constants
-            EntityConfig: define generation parameters for entities
             KeyConfig: define input keycodes
-            MinimapConfig: define colors and behaviors for minimap
-            SystemsConfig: define system loading priorities and properties
-            UIConfig: define ui element colors and positions
+            EntityConfig: define generation parameters for entities
+            CelestialConfig: defines star system generation rules
             WorldConfig: define terrain generation parameters (in progress)
+            DebugConfig: defines settings like show debug rendering
+            MinimapConfig: define colors and behaviors for minimap
+            UIConfig: define ui element colors and positions
     \fonts: fonts for UI
     \shaders: not really used yet, just playing around
     \sounds: (todo)
@@ -215,14 +220,16 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
             only maintains size when fully charged to max
         [x] AI not detecting hit
         [ ] AI doesn't know to release grow cannon, only tuned for regular cannon
+        [ ] should not fire while ScreenTransition
     [ ] hyper drive
         [ ] hyperdrive should be charge up instead of instant activate
         [ ] needs control for mobile
     [...] particle effects!
         [x] particlesystem and emitter components
-        [ ] rendering is lagging behind camera "drift bug" -> refactor rendering/system order.
+        [...] rendering is lagging behind camera "drift bug" -> refactor rendering/system order.
+            [ ] split into update and render
         [ ] side to side engine and rotation
-        [ ] alternate engine effect when
+        [ ] alternate engine effect when hyper
         [...] absorb effect when charging charge cannon
         [ ] absorb effect when charging shield
         [ ] charge burst effect when bullet destroyed
@@ -245,7 +252,15 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [?] shield bash?: double tap forward(or direction) and hold to rush, then shield do shield action [B] within time window of dash, and hold
         [?] land take off could be hold instead of instant
     [ ] add basic asteroids (arbitrary poly)
-        [ ] spec spawner for asteroid. begin make asteroid
+        [...] spec spawner for asteroid.
+            [ ] belt - ring around barycenter component, orbit with flocking / group mechanic
+            [ ] field - randomly spawn while in space
+        [ ] begin make asteroid
+            see: AsteroidAnim.java for prototyped polygon and rendering
+        [ ] attach box2D poly to match asteroid poly
+        [ ] take damage when hit by shots
+        [ ] break into smaller asteroids
+            [ ] voronoi shatter
     [ ] fix AI a bit (lead shot)
     [ ] lag camera behind movement a little for visual effect, especially when dodging for more visual impact
     [ ] fix camera: combat camera
@@ -274,10 +289,12 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
             [x] move shield into own system
                 [!] fix shield not render on planet
             [x] barrel roll and 3d sprite stuff into own system
-            [?] can refactor stuff in control component into their respective components just like hyper?
+            [ ] can refactor stuff in control component into their respective components just like hyper?
         [...] HUD system doing too much
             [ ] shouldn't have mobileinput rendering
+                [ ] split into update and render, see render pipeline
             [?] shouldn't have gamemenu and input listener?
+                could move up into GameScreen, or into own system. i think former
         [ ] entity factory refactor into entity types
     [ ] orbit distance for moons should not have overlapping rings with previous orbit path, spacing needs to include children
     [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
@@ -336,6 +353,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
           [?] this is now a bit more complex, as there is a mix of 2d sprites and 3d renderables, that are rendered in separate batches (2d then 3d overlay).
               to mix the z between them may require multiple batch passes, or migrating to 3d, also shaperenderer on top of that...
               custom shape renderer?
+              if we are doing too much batch flushing could use (bonus if could do outlined shapes, perhaps a job for a shader instead?):
               https://github.com/earlygrey/shapedrawer
     [ ] better star rendering
         it's currently static just like planets, but I want it to shift the z, exactly like the title screen background

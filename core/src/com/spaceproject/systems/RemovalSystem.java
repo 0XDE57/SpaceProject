@@ -33,10 +33,11 @@ public class RemovalSystem extends IteratingSystem {
     }
     
     private void respawnPlayer(Entity entity) {
-        //todo: perhaps should not be responsibility of removal system. player spawn system?
+        //todo: should not be responsibility of removal system. player spawn system?
+        //change to, no player detected -> spawning? or fire an event?
         ControlFocusComponent controlFocusComp = Mappers.controlFocus.get(entity);
         if (controlFocusComp != null) {
-            Gdx.app.log(this.getClass().getSimpleName(), "Controlled entity assumed to be player; respawning");
+            Gdx.app.log(this.getClass().getSimpleName(), "Controlled entity assumed to be player; respawning...");
             if (GameScreen.inSpace()) {
                 Entity newPlayer = EntityFactory.createPlayerShip(0, 0, true);
                 getEngine().addEntity(newPlayer);

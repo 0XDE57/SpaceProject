@@ -30,7 +30,6 @@ public class SpaceRenderingSystem extends IteratingSystem {
     private SpriteBatch spriteBatch;
     private ModelBatch modelBatch;
     private ShapeRenderer shape;
-    //private static Color tmpColor = new Color();
     
     // array of entities to render
     private Array<Entity> renderQueue = new Array<Entity>();
@@ -63,20 +62,8 @@ public class SpaceRenderingSystem extends IteratingSystem {
     public void update(float delta) {
         super.update(delta); //adds entities to render queue
         
-        /*
-        //move to clearScreenSystem
-        //clear screen with color based on camera position
-        Color color = backgroundColor(cam);
-        Gdx.gl20.glClearColor(color.r, color.g, color.b, 1);
-        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-        //cam update? instead of CameraSystem? test drift bug
-        */
-        
         spriteBatch.setProjectionMatrix(cam.combined);
         spriteBatch.begin();
-        
-        //draw background tiles (stars)
-        //drawParallaxTiles();
         
         //draw game objects
         drawEntities();
@@ -125,29 +112,6 @@ public class SpaceRenderingSystem extends IteratingSystem {
         }
     }
     
-    /*
-    private void drawParallaxTiles() {
-        ArrayList<SpaceBackgroundTile> tiles = SpaceParallaxSystem.getTiles();
-        if (tiles == null) {
-            return;
-        }
-        
-        for (SpaceBackgroundTile tile : tiles) {
-            //draw = (tile position + (cam position - center of tile)) * depth
-            float drawX = tile.x + (cam.position.x - (tile.size / 2)) * tile.depth;
-            float drawY = tile.y + (cam.position.y - (tile.size / 2)) * tile.depth;
-            
-            //draw texture
-            float width = tile.tex.getWidth();
-            float height = tile.tex.getHeight();
-            spriteBatch.draw(tile.tex, drawX, drawY,
-                    0, 0,
-                    width, height,
-                    tile.scale, tile.scale,
-                    0, 0, 0, (int) width, (int) height, false, false);
-        }
-    }*/
-    
     private void draw3DRenderables(float delta) {
         for (Entity entity : renderQueue3D) {
             Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
@@ -188,6 +152,7 @@ public class SpaceRenderingSystem extends IteratingSystem {
             modelBatch.render(sprite3D.renderable);
         }
     }
+    
     
     //todo: broken - should render on planets too
     //todo[?] - potential optimization: could use CustomShapeRenderer.java instead of two separate shape types being Filled Then Line
