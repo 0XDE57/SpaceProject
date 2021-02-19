@@ -67,7 +67,7 @@ public class WorldRenderingSystem extends EntitySystem implements IRequireGameCo
                 //GameScreen.noiseManager.loadOrCreateNoiseFor(seed, PlanetComponent);
             }
         } while (noiseMap == null);
-        Gdx.app.log(this.getClass().getSimpleName(), "Successfully loaded: " + seed);
+        Gdx.app.log(this.getClass().getSimpleName(), "Successfully loaded: " + seed + " in: " + (System.currentTimeMillis() - time));
     }
     
     @Override

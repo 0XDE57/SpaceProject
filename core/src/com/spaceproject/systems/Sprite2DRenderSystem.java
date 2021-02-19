@@ -33,8 +33,8 @@ public class Sprite2DRenderSystem extends IteratingSystem {
     public Sprite2DRenderSystem() {
         super(Family.all(TextureComponent.class, TransformComponent.class).get());
     
-        this.cam = GameScreen.cam;
-        this.spriteBatch = new SpriteBatch();
+        cam = GameScreen.cam;
+        spriteBatch = new SpriteBatch();
     }
 
     @Override

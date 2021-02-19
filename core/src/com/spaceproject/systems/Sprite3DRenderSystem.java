@@ -34,7 +34,7 @@ public class Sprite3DRenderSystem extends IteratingSystem {
     public Sprite3DRenderSystem() {
         super(Family.all(Sprite3DComponent.class, TransformComponent.class).get());
         
-        this.cam = GameScreen.cam;
+        cam = GameScreen.cam;
         modelBatch = new ModelBatch();
     }
     
