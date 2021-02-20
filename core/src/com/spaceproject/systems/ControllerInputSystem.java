@@ -73,8 +73,10 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     
         if (buttonCode == Xbox.DPAD_UP) {
             HyperDriveComponent hyperDrive = Mappers.hyper.get(players.first());
-            hyperDrive.activate = buttonDown;
-            handled = true;
+            if (hyperDrive != null) {
+                hyperDrive.activate = buttonDown;
+                handled = true;
+            }
         }
         if (buttonCode == Xbox.DPAD_DOWN) {
             control.transition = buttonDown;
