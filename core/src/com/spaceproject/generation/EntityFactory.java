@@ -4,7 +4,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -417,7 +416,6 @@ public class EntityFactory {
         BarrelRollComponent barrelRoll = new BarrelRollComponent();
         barrelRoll.rollTimer = new SimpleTimer(entityCFG.dodgeTimeout);
         barrelRoll.animationTimer = new SimpleTimer(entityCFG.dodgeAnimationTimer, true);
-        barrelRoll.animInterpolation = Interpolation.pow2;
         barrelRoll.revolutions = 1;
         barrelRoll.dir = BarrelRollComponent.FlipDir.none;
         barrelRoll.force = entityCFG.dodgeForce;

@@ -3,6 +3,7 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.spaceproject.SpaceProject;
@@ -17,8 +18,10 @@ import com.spaceproject.utility.MyMath;
 public class BarrelRollSystem extends IteratingSystem {
     
     private final EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
-    private final float maxRollAngle = 40 * MathUtils.degRad;
-    private final float strafeRotSpeed = 3f;
+    
+    private final Interpolation animInterpolation = Interpolation.pow2;
+    private final float strafeMaxRollAngle = 40 * MathUtils.degRad;
+    private final float strafeRollSpeed = 3f;
     
     public BarrelRollSystem() {
         super(Family.all(Sprite3DComponent.class, ControllableComponent.class).get());
@@ -45,7 +48,7 @@ public class BarrelRollSystem extends IteratingSystem {
         }
         
         //strafe roll
-        float rollAmount = strafeRotSpeed * deltaTime;
+        float rollAmount = strafeRollSpeed * deltaTime;
         if (control.moveLeft) {
             rollLeft(sprite3D, rollAmount);
         }
@@ -59,15 +62,15 @@ public class BarrelRollSystem extends IteratingSystem {
     
     private void rollLeft(Sprite3DComponent sprite3D, float roll) {
         sprite3D.renderable.angle += roll;
-        if (sprite3D.renderable.angle > maxRollAngle) {
-            sprite3D.renderable.angle = maxRollAngle;
+        if (sprite3D.renderable.angle > strafeMaxRollAngle) {
+            sprite3D.renderable.angle = strafeMaxRollAngle;
         }
     }
     
     private void rollRight(Sprite3DComponent sprite3D, float roll) {
         sprite3D.renderable.angle -= roll;
-        if (sprite3D.renderable.angle < -maxRollAngle) {
-            sprite3D.renderable.angle = -maxRollAngle;
+        if (sprite3D.renderable.angle < -strafeMaxRollAngle) {
+            sprite3D.renderable.angle = -strafeMaxRollAngle;
         }
     }
     
@@ -121,10 +124,10 @@ public class BarrelRollSystem extends IteratingSystem {
         
         switch (rollComp.dir) {
             case left:
-                sprite3D.renderable.angle = rollComp.animInterpolation.apply(MathUtils.PI2 * rollComp.revolutions, 0, rollComp.animationTimer.ratio());
+                sprite3D.renderable.angle = animInterpolation.apply(MathUtils.PI2 * rollComp.revolutions, 0, rollComp.animationTimer.ratio());
                 break;
             case right:
-                sprite3D.renderable.angle = rollComp.animInterpolation.apply(0, MathUtils.PI2 * rollComp.revolutions, rollComp.animationTimer.ratio());
+                sprite3D.renderable.angle = animInterpolation.apply(0, MathUtils.PI2 * rollComp.revolutions, rollComp.animationTimer.ratio());
                 break;
         }
     }
