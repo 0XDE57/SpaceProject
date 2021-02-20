@@ -19,31 +19,16 @@ public class ShieldSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         ShieldComponent shield = Mappers.shield.get(entity);
-        float shieldReactivateThreshold = 0.3f;
         
         switch (shield.state) {
             case off:
                 if (shield.defend) {
-                    //reactivate if still enough charge
-                    if (shield.animTimer.ratio() >= shieldReactivateThreshold) {
-                        shield.animTimer.flipRatio();
-                    } else {
-                        shield.animTimer.reset();
-                    }
-                    
-                    shield.state = ShieldComponent.State.charge;
+                    engage(shield);
                 }
                 break;
             case on:
                 if (!shield.defend) {
-                    shield.state = ShieldComponent.State.discharge;
-                    
-                    //destroy shield fixture
-                    Body body = entity.getComponent(PhysicsComponent.class).body;
-                    Fixture circleFixture = body.getFixtureList().get(body.getFixtureList().size - 1);
-                    body.destroyFixture(circleFixture);
-    
-                    shield.animTimer.flipRatio();
+                    disengage(entity, shield);
                 }
                 break;
             case charge:
@@ -52,11 +37,9 @@ public class ShieldSystem extends IteratingSystem {
                     break;
                 }
                 
-                //charge
+                //charge: gain energy
                 shield.radius = shield.maxRadius * shield.animTimer.ratio();
-                
-                //or if (shield.animTimer.canDoEvent())
-                if (shield.radius == shield.maxRadius) {
+                if (shield.radius == shield.maxRadius || shield.animTimer.canDoEvent()) {
                     shield.state = ShieldComponent.State.on;
                     
                     //add shield fixture to body for protection
@@ -66,25 +49,41 @@ public class ShieldSystem extends IteratingSystem {
                 break;
             case discharge:
                 if (shield.defend) {
-                    //reactivate
-                    if (shield.animTimer.ratio() >= shieldReactivateThreshold) {
-                        shield.animTimer.flipRatio();
-                    } else {
-                        shield.animTimer.reset();
-                    }
-                    
-                    shield.state = ShieldComponent.State.charge;
+                    engage(shield);
                     break;
                 }
                 
-                //discharge
+                //discharge: loose energy
                 shield.radius = shield.maxRadius * (1 - shield.animTimer.ratio());
-                
-                if (shield.radius <= 0) {
+                if (shield.radius <= 0  || shield.animTimer.canDoEvent()) {
                     shield.state = ShieldComponent.State.off;
                 }
                 break;
         }
+    }
+    
+    private void engage(ShieldComponent shield) {
+        float shieldReactivateThreshold = 0.3f;
+        
+        //reactivate if still enough charge
+        if (shield.animTimer.ratio() >= shieldReactivateThreshold) {
+            shield.animTimer.flipRatio();
+        } else {
+            shield.animTimer.reset();
+        }
+        
+        shield.state = ShieldComponent.State.charge;
+    }
+    
+    private void disengage(Entity entity, ShieldComponent shield) {
+        shield.state = ShieldComponent.State.discharge;
+        
+        //destroy shield fixture
+        Body body = entity.getComponent(PhysicsComponent.class).body;
+        Fixture circleFixture = body.getFixtureList().get(body.getFixtureList().size - 1);
+        body.destroyFixture(circleFixture);
+        
+        shield.animTimer.flipRatio();
     }
     
 }
