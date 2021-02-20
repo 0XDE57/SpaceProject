@@ -1,6 +1,7 @@
 package com.spaceproject.generation;
 
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
@@ -9,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.utility.Mappers;
 
 public class BodyFactory {
     
@@ -61,7 +63,8 @@ public class BodyFactory {
     }
     
     public static Body createPlayerBody(float x, float y, Entity entity) {
-        Body body = createRect(x, y, 0.4f, 0.4f, BodyDef.BodyType.DynamicBody);
+        Texture texture = Mappers.texture.get(entity).texture;
+        Body body = createRect(x, y, texture.getWidth() * engineCFG.bodyScale, texture.getHeight() * engineCFG.bodyScale, BodyDef.BodyType.DynamicBody);
         body.setLinearDamping(10f);
         body.setUserData(entity);
         return body;

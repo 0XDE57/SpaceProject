@@ -11,7 +11,8 @@ public class EngineConfig extends Config {
     public float viewportWidth;
     public float viewportHeight;
     
-    public float entityScale;
+    public float sprite2DScale;
+    public float sprite3DScale;
     public float bodyScale;
     public float meterPerUnit;
     public int pixelPerUnit;
@@ -34,7 +35,8 @@ public class EngineConfig extends Config {
         viewportWidth = 1280;
         viewportHeight = 720;
         
-        entityScale = 4.0f;
+        sprite2DScale = 0.1f;
+        sprite3DScale = 0.1f;
         bodyScale = 0.1f;
         meterPerUnit = 0.1f;
         pixelPerUnit = 2;

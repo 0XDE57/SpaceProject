@@ -11,7 +11,7 @@ public class BarrelRollComponent implements Component {
     
     public FlipDir dir;
     
-    public SimpleTimer rollTimer;
+    public SimpleTimer timeoutTimer;
     
     public SimpleTimer animationTimer;
     

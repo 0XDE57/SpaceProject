@@ -86,13 +86,13 @@ public class BarrelRollSystem extends IteratingSystem {
     }
     
     private void dodgeLeft(Entity entity, BarrelRollComponent roll) {
-        if (roll.rollTimer.tryEvent()) {
+        if (roll.timeoutTimer.tryEvent()) {
             applyDodgeImpulse(entity, roll, BarrelRollComponent.FlipDir.left);
         }
     }
     
     private void dodgeRight(Entity entity, BarrelRollComponent roll) {
-        if (roll.rollTimer.tryEvent()) {
+        if (roll.timeoutTimer.tryEvent()) {
             applyDodgeImpulse(entity, roll, BarrelRollComponent.FlipDir.right);
         }
     }

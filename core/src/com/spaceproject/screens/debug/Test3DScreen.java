@@ -57,7 +57,7 @@ public class Test3DScreen extends ScreenAdapter {
         Texture shipTop = TextureFactory.combineShip(body, wing);
         Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
         
-        ship3d = new Sprite3D(shipTop, shipBottom, engineCFG.entityScale);
+        ship3d = new Sprite3D(shipTop, shipBottom, 4);
     }
     
     
@@ -134,22 +134,6 @@ public class Test3DScreen extends ScreenAdapter {
         if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
             orthographicCam.zoom -= 1 * delta;
         }
-    }
-    
-    private void draw(Texture tex, int x, int y) {
-        float width = tex.getWidth();
-        float height = tex.getHeight();
-        float originX = width * 0.5f; //center
-        float originY = height * 0.5f; //center
-        float scale = engineCFG.entityScale;
-        
-        //draw texture
-        batch.draw(tex, (x - originX), (y - originY),
-                originX, originY,
-                width, height,
-                scale, scale,
-                0,
-                0, 0, (int) width, (int) height, false, false);
     }
     
     @Override

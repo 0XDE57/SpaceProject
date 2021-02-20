@@ -323,17 +323,17 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     }
     
     public Array<Entity> createBinarySystem(float x, float y, long seed) {
-        Entity anchorEntity = new Entity();
         
+        Entity anchorEntity = new Entity();
         SeedComponent seedComp = new SeedComponent();
         seedComp.seed = seed;
+        anchorEntity.add(seedComp);
         BarycenterComponent barycenter = new BarycenterComponent();
         barycenter.bodyType = BarycenterComponent.AstronomicalBodyType.multiStellar;
+        anchorEntity.add(barycenter);
         TransformComponent transform = new TransformComponent();
         transform.pos.set(x, y);
         anchorEntity.add(transform);
-        anchorEntity.add(barycenter);
-        anchorEntity.add(seedComp);
         
         
         //distance between planets
@@ -370,6 +370,5 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         Gdx.app.log(this.getClass().getSimpleName(), "Binary System: (" + x + ", " + y + ")");
         return entities;
     }
-    
     
 }

@@ -55,31 +55,30 @@ public class EntityFactory {
         TransformComponent transform = new TransformComponent();
         transform.pos.set(x, y);
         transform.zOrder = RenderOrder.CHARACTERS.getHierarchy();
+        entity.add(transform);
         
         TextureComponent texture = new TextureComponent();
         texture.texture = TextureFactory.generateCharacter();
-        texture.scale = 0.1f;
+        texture.scale = engineCFG.sprite2DScale;
+        entity.add(texture);
         
         PhysicsComponent physics = new PhysicsComponent();
         physics.body = BodyFactory.createPlayerBody(x, y, entity);
+        entity.add(physics);
         
         CharacterComponent character = new CharacterComponent();
         character.walkSpeed = entityCFG.characterWalkSpeed;
+        entity.add(character);
         
         HealthComponent health = new HealthComponent();
         health.maxHealth = entityCFG.characterHealth;
         health.health = health.maxHealth;
+        entity.add(health);
         
         ControllableComponent control = new ControllableComponent();
         control.timerVehicle = new SimpleTimer(entityCFG.controlTimerVehicle);
-        
-        entity.add(health);
         entity.add(control);
-        entity.add(physics);
-        entity.add(transform);
-        entity.add(texture);
-        entity.add(character);
-        
+
         return entity;
     }
     
@@ -145,7 +144,7 @@ public class EntityFactory {
         TextureComponent texture = new TextureComponent();
         int radius = MathUtils.random(celestCFG.minStarSize, celestCFG.maxStarSize);
         texture.texture = TextureFactory.generateStar(seed, radius);
-        texture.scale = engineCFG.entityScale;
+        texture.scale = 4;
         
         // set position
         TransformComponent transform = new TransformComponent();
@@ -338,17 +337,15 @@ public class EntityFactory {
         int shipSize = MathUtils.random(entityCFG.shipSizeMin, entityCFG.shipSizeMax) * 2;
         Texture shipTop = TextureFactory.generateShip(seed, shipSize);
         Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
-        float spriteScale = 0.025f;//TODO: better way to manage render scale (3d vs tex, relation to physics body)
-        float width = shipTop.getWidth() * engineCFG.bodyScale;
-        float height = shipTop.getHeight() * engineCFG.bodyScale;
         Sprite3DComponent sprite3DComp = new Sprite3DComponent();
-        sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom, engineCFG.entityScale);
-        sprite3DComp.renderable.scale.set(spriteScale, spriteScale, spriteScale);
+        sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom, engineCFG.sprite3DScale);
         entity.add(sprite3DComp);
         
         
         //collision detection
         PhysicsComponent physics = new PhysicsComponent();
+        float width = shipTop.getWidth() * engineCFG.bodyScale;
+        float height = shipTop.getHeight() * engineCFG.bodyScale;
         physics.body = BodyFactory.createShip(x, y, width, height, entity, inSpace);
         entity.add(physics);
         
@@ -414,7 +411,7 @@ public class EntityFactory {
         
         //barrel roll
         BarrelRollComponent barrelRoll = new BarrelRollComponent();
-        barrelRoll.rollTimer = new SimpleTimer(entityCFG.dodgeTimeout);
+        barrelRoll.timeoutTimer = new SimpleTimer(entityCFG.dodgeTimeout);
         barrelRoll.animationTimer = new SimpleTimer(entityCFG.dodgeAnimationTimer, true);
         barrelRoll.revolutions = 1;
         barrelRoll.dir = BarrelRollComponent.FlipDir.none;
