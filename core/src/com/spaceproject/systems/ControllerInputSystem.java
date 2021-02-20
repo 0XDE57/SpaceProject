@@ -18,6 +18,7 @@ import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HyperDriveComponent;
+import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.screens.GameScreen;
@@ -55,8 +56,11 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             handled = true;
         }
         if (buttonCode == Xbox.B) {
-            control.defend = buttonDown;
-            handled = true;
+            ShieldComponent shield = Mappers.shield.get(players.first());
+            if (shield != null) {
+                shield.defend = buttonDown;
+                handled = true;
+            }
         }
         if (buttonCode == Xbox.Y) {
             control.changeVehicle = buttonDown;

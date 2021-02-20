@@ -16,7 +16,6 @@ public class ControllableComponent implements Component {
     
     //actions
     public boolean attack;
-    public boolean defend;
     public boolean changeVehicle;
     public boolean transition;
     public boolean canTransition;

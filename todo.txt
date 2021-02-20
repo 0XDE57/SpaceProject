@@ -217,6 +217,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
     [...] grow cannon
         [x] tune damage
         [x] tune size
+        [ ] should be circle instead of rectangle?
         [ ] lock on nearest target when max
             [ ] visual in hudsystem for tracked entity
             [ ] predict angle to aim to hit based on pos and velocity
@@ -388,9 +389,10 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
     [?] 2D outline shader for ships and mouse over objects
         http://www.allpiper.com/2d-selection-outline-shader-in-libgdx/
         https://www.youtube.com/watch?v=1yuYUVFUOvI&list=PLqpawGIg6Qj5CvjOaCbB536z862XhjPQi&index=17
-    [?] consider merging rendering system (SpaceRendering & World rendering)?
+    [x] consider merging rendering system (SpaceRendering & World rendering)?
         probably keep separate because world may need special rendering for the torus wrapping effect
         also we don't necessarily need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not
+        resolved: separated 2d and 3d rendering systems
 
 
 [...] config

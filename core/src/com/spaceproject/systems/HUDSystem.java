@@ -141,7 +141,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
         if (drawHud) {
             if (GameScreen.inSpace()) {
-                drawOrbitPath(false);
+                drawOrbitPath(GameScreen.isDebugMode);
             }
         
             drawHUD();

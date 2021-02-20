@@ -13,6 +13,7 @@ import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HyperDriveComponent;
+import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.KeyConfig;
@@ -68,10 +69,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             control.alter = keyDown;
             handled = true;
         }
-        if (keycode == keyCFG.defend) {
-            control.defend = keyDown;
-            handled = true;
-        }
+        
         if (keycode == keyCFG.changeVehicle) {
             control.changeVehicle = keyDown;
             handled = true;
@@ -80,11 +78,21 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             control.transition = keyDown;
             handled = true;
         }
+    
         
+        if (keycode == keyCFG.activateShield) {
+            ShieldComponent shield = Mappers.shield.get(players.first());
+            if (shield != null) {
+                shield.defend = keyDown;
+                handled = true;
+            }
+        }
         if (keycode == keyCFG.activateHyperDrive) {
             HyperDriveComponent hyperDrive = Mappers.hyper.get(players.first());
-            hyperDrive.activate = keyDown;
-            handled = true;
+            if (hyperDrive != null) {
+                hyperDrive.activate = keyDown;
+                handled = true;
+            }
         }
         
         return handled;

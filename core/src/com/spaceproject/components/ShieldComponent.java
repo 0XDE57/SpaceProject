@@ -10,6 +10,8 @@ public class ShieldComponent implements Component {
     
     public State state = State.off;
     
+    public boolean defend;
+    
     public float defence;
     
     public float radius;

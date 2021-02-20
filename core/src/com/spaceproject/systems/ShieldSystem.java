@@ -5,7 +5,6 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.generation.BodyFactory;
@@ -14,20 +13,17 @@ import com.spaceproject.utility.Mappers;
 public class ShieldSystem extends IteratingSystem {
     
     public ShieldSystem() {
-        super(Family.all(ShieldComponent.class, ControllableComponent.class).get());
+        super(Family.all(ShieldComponent.class).get());
     }
     
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         ShieldComponent shield = Mappers.shield.get(entity);
-        ControllableComponent control = Mappers.controllable.get(entity);
-        
-        //shield.isCharging = control.defend;
         float shieldReactivateThreshold = 0.3f;
         
         switch (shield.state) {
             case off:
-                if (control.defend) {
+                if (shield.defend) {
                     //reactivate if still enough charge
                     if (shield.animTimer.ratio() >= shieldReactivateThreshold) {
                         shield.animTimer.flipRatio();
@@ -39,7 +35,7 @@ public class ShieldSystem extends IteratingSystem {
                 }
                 break;
             case on:
-                if (!control.defend) {
+                if (!shield.defend) {
                     shield.state = ShieldComponent.State.discharge;
                     
                     //destroy shield fixture
@@ -51,7 +47,7 @@ public class ShieldSystem extends IteratingSystem {
                 }
                 break;
             case charge:
-                if (!control.defend) {
+                if (!shield.defend) {
                     shield.state = ShieldComponent.State.discharge;
                     break;
                 }
@@ -69,7 +65,7 @@ public class ShieldSystem extends IteratingSystem {
                 }
                 break;
             case discharge:
-                if (control.defend) {
+                if (shield.defend) {
                     //reactivate
                     if (shield.animTimer.ratio() >= shieldReactivateThreshold) {
                         shield.animTimer.flipRatio();
