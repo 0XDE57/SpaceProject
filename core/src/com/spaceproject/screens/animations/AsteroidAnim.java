@@ -205,7 +205,7 @@ public class AsteroidAnim extends TitleAnimation {
         }
         
         public void renderBody(CustomShapeRenderer shape) {
-            shape.fillPolygon(hullPoly.getTransformedVertices(), 0, hullPoly.getVertices().length, Color.WHITE, Color.BLACK);
+            shape.fillPolygon(hullPoly.getTransformedVertices(), 0, hullPoly.getVertices().length, Color.WHITE);
         }
     }
     
