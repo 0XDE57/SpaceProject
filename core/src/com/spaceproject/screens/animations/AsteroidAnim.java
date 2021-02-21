@@ -1,6 +1,7 @@
 package com.spaceproject.screens.animations;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -23,27 +24,32 @@ import static com.spaceproject.screens.MyScreenAdapter.shape;
 public class AsteroidAnim extends TitleAnimation {
     
     Vector2 bullet = null;
-    float bulletAngle = 0;
+    float bulletAngle;
     Array<Asteroid> asteriods = new Array<Asteroid>();
     
     CustomShapeRenderer customShapeRenderer;
     
     public AsteroidAnim() {
-        asteriods.add(new Asteroid(new Vector2(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2), 200, 0, 0));
+        asteriods.add(new Asteroid(new Vector2(Gdx.graphics.getWidth() * MathUtils.random(), Gdx.graphics.getHeight() * MathUtils.random()), 200, 0, 0));
         customShapeRenderer = new CustomShapeRenderer(ShapeRenderer.ShapeType.Filled, shape.getRenderer());
     }
     
     
     @Override
     public void render(float delta, ShapeRenderer shape) {
+        Vector2 centerScreen = new Vector2(Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
+        Vector2 mousePos = new Vector2(Gdx.input.getX(),Gdx.graphics.getHeight()-Gdx.input.getY());
+        //Vector3 proj = new Vector3(mousePos, 0);
+        //cam.unproject(proj);
+        float mouseAngle = MyMath.angleTo(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, mousePos.x, mousePos.y) - (180 * MathUtils.degRad);
         
         if (bullet == null) {
-            if (Gdx.input.isTouched()) {
-                bullet = new Vector2(Gdx.graphics.getWidth() / 2, 1);
-                bulletAngle = MyMath.angleTo(new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()), bullet);
+            if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                bullet = centerScreen.cpy();
+                bulletAngle = mouseAngle;
             }
         } else {
-            if (bullet.x < 0 || bullet.y < 0 || bullet.x > Gdx.graphics.getWidth() || bullet.y > Gdx.graphics.getHeight()) {
+            if (bullet.x <= 0 || bullet.y <= 0 || bullet.x >= Gdx.graphics.getWidth() || bullet.y >= Gdx.graphics.getHeight()) {
                 bullet = null;
             }
         }
@@ -66,7 +72,7 @@ public class AsteroidAnim extends TitleAnimation {
                 if (a.equals(b)) continue;
                 if (a.hullPoly.getBoundingRectangle().overlaps(b.hullPoly.getBoundingRectangle())) {
                     a.angle -= 180 * MathUtils.degRad;
-                    b.angle -= 180 * MathUtils.degRad;
+                    //b.angle -= 180 * MathUtils.degRad;
                 }
             }
             
@@ -74,8 +80,8 @@ public class AsteroidAnim extends TitleAnimation {
                 if (a.hullPoly.contains(bullet)) {
                     if (a.hullPoly.area() > 600) {
                         int size = (int) (a.size * 0.65f);
-                        Asteroid asteroidA = new Asteroid(a.position.cpy(), size, bulletAngle + (MathUtils.random(0, 45) * MathUtils.degRad), MathUtils.random(20, 40));
-                        Asteroid asteroidB = new Asteroid(a.position.cpy(), size, bulletAngle - (MathUtils.random(0, 45) * MathUtils.degRad), MathUtils.random(20, 40));
+                        Asteroid asteroidA = new Asteroid(a.position.cpy(), size, mouseAngle + (MathUtils.random(0, 45) * MathUtils.degRad), MathUtils.random(20, 40));
+                        Asteroid asteroidB = new Asteroid(a.position.cpy(), size, mouseAngle - (MathUtils.random(0, 45) * MathUtils.degRad), MathUtils.random(20, 40));
                         while (asteroidA.hullPoly.getBoundingRectangle().overlaps(asteroidB.hullPoly.getBoundingRectangle())) {
                             asteroidA.position.sub(2, 0);
                             asteroidB.position.add(2, 0);
@@ -91,6 +97,11 @@ public class AsteroidAnim extends TitleAnimation {
                 }
             }
         }
+    
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
+            asteriods.add(new Asteroid(mousePos.cpy(), 200, 0, 0));
+        }
+        
         shape.end();
         
         shape.begin(ShapeRenderer.ShapeType.Filled);
@@ -98,7 +109,32 @@ public class AsteroidAnim extends TitleAnimation {
             bullet.add(MyMath.vector(bulletAngle, 300 * delta));
             shape.circle(bullet.x, bullet.y, 10);
         }
+        
+        // draw ship
+        setShape(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, mouseAngle);
+        for(int i = 0, j = shapeX.length - 1; i < shapeY.length; j = i++) {
+            shape.line(shapeX[i], shapeY[i], shapeX[j], shapeY[j]);
+        
+        }
+        //shape.triangle();
         shape.end();
+    }
+    
+    private float[] shapeX = new float[4];
+    private float[] shapeY = new float[4];
+    private void setShape(float x, float y, float radians) {
+        float scale = 40;
+        shapeX[0] = x + MathUtils.cos(radians) * scale;
+        shapeY[0] = y + MathUtils.sin(radians) * scale;
+        
+        shapeX[1] = x + MathUtils.cos(radians - 4 * 3.1415f / 5) * scale;
+        shapeY[1] = y + MathUtils.sin(radians - 4 * 3.1415f / 5) * scale;
+        
+        shapeX[2] = x + MathUtils.cos(radians + 3.1415f) * scale * (5.0f/8);
+        shapeY[2] = y + MathUtils.sin(radians + 3.1415f) * scale * (5.0f/8);
+        
+        shapeX[3] = x + MathUtils.cos(radians + 4 * 3.1415f / 5) * scale;
+        shapeY[3] = y + MathUtils.sin(radians + 4 * 3.1415f / 5) * scale;
     }
     
     @Override
@@ -118,7 +154,7 @@ public class AsteroidAnim extends TitleAnimation {
             this.size = size;
             this.angle = angle;
             this.velocity = velocity;
-            this.position = position;
+            this.position = position.sub(size/2, size/2);
             
             FloatArray points = new FloatArray();
             int numPoints = 20;

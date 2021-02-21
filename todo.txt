@@ -264,6 +264,14 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [?] new control?: hold shift to charge, then forward + release charge for boost: impulse
         [?] shield bash?: double tap forward(or direction) and hold to rush, then shield do shield action [B] within time window of dash, and hold
         [?] land take off could be hold instead of instant
+        [ ] getting into ship sometimes a little clunky, switch from distance check to sensor
+            add sensor to player
+                if contact has ship component, get in.
+            could also hand generic interactions if contact has interactable component, do whatever interact action
+            collision callback can also solve mobile ui for vehicle button:
+                BeginContact:vehicleButton.enable()
+                EndContact:vehicleButton.disable()
+            http://www.iforce2d.net/b2dtut/sensors
     [ ] add basic asteroids (arbitrary poly)
         [...] spec spawner for asteroid.
             [ ] belt - ring around barycenter component, orbit with flocking / group mechanic
