@@ -25,12 +25,12 @@ public class AsteroidAnim extends TitleAnimation {
     
     Vector2 bullet = null;
     float bulletAngle;
-    Array<Asteroid> asteriods = new Array<Asteroid>();
+    Array<Asteroid> asteroids = new Array<Asteroid>();
     
     CustomShapeRenderer customShapeRenderer;
     
     public AsteroidAnim() {
-        asteriods.add(new Asteroid(new Vector2(Gdx.graphics.getWidth() * MathUtils.random(), Gdx.graphics.getHeight() * MathUtils.random()), 200, 0, 0));
+        asteroids.add(new Asteroid(new Vector2(Gdx.graphics.getWidth() * MathUtils.random(), Gdx.graphics.getHeight() * MathUtils.random()), 200, 0, 0));
         customShapeRenderer = new CustomShapeRenderer(ShapeRenderer.ShapeType.Filled, shape.getRenderer());
     }
     
@@ -44,7 +44,7 @@ public class AsteroidAnim extends TitleAnimation {
         float mouseAngle = MyMath.angleTo(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, mousePos.x, mousePos.y) - (180 * MathUtils.degRad);
         
         if (bullet == null) {
-            if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
                 bullet = centerScreen.cpy();
                 bulletAngle = mouseAngle;
             }
@@ -56,19 +56,19 @@ public class AsteroidAnim extends TitleAnimation {
         
         
         customShapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        for (Asteroid a : asteriods) {
+        for (Asteroid a : asteroids) {
             a.renderBody(customShapeRenderer);
         }
         customShapeRenderer.end();
         
         
         shape.begin(ShapeRenderer.ShapeType.Line);
-        for (Iterator<Asteroid> asteroidIterator = new Array.ArrayIterator<Asteroid>(asteriods); asteroidIterator.hasNext(); ) {
+        for (Iterator<Asteroid> asteroidIterator = new Array.ArrayIterator<Asteroid>(asteroids); asteroidIterator.hasNext(); ) {
             Asteroid a = asteroidIterator.next();
             a.render(shape, delta);
             
             
-            for (Asteroid b : new Array.ArrayIterator<Asteroid>(asteriods)) {
+            for (Asteroid b : new Array.ArrayIterator<Asteroid>(asteroids)) {
                 if (a.equals(b)) continue;
                 if (a.hullPoly.getBoundingRectangle().overlaps(b.hullPoly.getBoundingRectangle())) {
                     a.angle -= 180 * MathUtils.degRad;
@@ -88,8 +88,8 @@ public class AsteroidAnim extends TitleAnimation {
                             asteroidA.hullPoly.setPosition(asteroidA.position.x, asteroidA.position.y);
                             asteroidB.hullPoly.setPosition(asteroidB.position.x, asteroidB.position.y);
                         }
-                        asteriods.add(asteroidA);
-                        asteriods.add(asteroidB);
+                        asteroids.add(asteroidA);
+                        asteroids.add(asteroidB);
                     }
                     
                     bullet = null;
@@ -99,7 +99,7 @@ public class AsteroidAnim extends TitleAnimation {
         }
     
         if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
-            asteriods.add(new Asteroid(mousePos.cpy(), 200, 0, 0));
+            asteroids.add(new Asteroid(mousePos.cpy(), 200, 0, 0));
         }
         
         shape.end();
@@ -111,6 +111,7 @@ public class AsteroidAnim extends TitleAnimation {
         }
         
         // draw ship
+        shape.setColor(Color.WHITE);
         setShape(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, mouseAngle);
         for(int i = 0, j = shapeX.length - 1; i < shapeY.length; j = i++) {
             shape.line(shapeX[i], shapeY[i], shapeX[j], shapeY[j]);
