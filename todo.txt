@@ -276,7 +276,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [...] spec spawner for asteroid.
             [ ] belt - ring around barycenter component, orbit with flocking / group mechanic
             [ ] field - randomly spawn while in space
-        [ ] begin make asteroid
+        [...] begin make asteroid
             see: AsteroidAnim.java for prototyped polygon and rendering
         [ ] attach box2D poly to match asteroid poly
         [ ] take damage when hit by shots

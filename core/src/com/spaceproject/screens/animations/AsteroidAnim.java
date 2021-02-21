@@ -3,35 +3,31 @@ package com.spaceproject.screens.animations;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.ConvexHull;
-import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
-import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.badlogic.gdx.utils.ShortArray;
+import com.spaceproject.utility.CustomShapeRenderer;
 import com.spaceproject.utility.MyMath;
 
 import java.util.Iterator;
-
-import static com.spaceproject.screens.MyScreenAdapter.shape;
 
 public class AsteroidAnim extends TitleAnimation {
     
     Vector2 bullet = null;
     float bulletAngle;
+    float bulletVelocity = 300;
     Array<Asteroid> asteroids = new Array<Asteroid>();
     
     CustomShapeRenderer customShapeRenderer;
     
     public AsteroidAnim() {
         asteroids.add(new Asteroid(new Vector2(Gdx.graphics.getWidth() * MathUtils.random(), Gdx.graphics.getHeight() * MathUtils.random()), 200, 0, 0));
-        customShapeRenderer = new CustomShapeRenderer(ShapeRenderer.ShapeType.Filled, shape.getRenderer());
+        customShapeRenderer = new CustomShapeRenderer(ShapeRenderer.ShapeType.Filled, new ShapeRenderer().getRenderer());
     }
     
     
@@ -41,7 +37,9 @@ public class AsteroidAnim extends TitleAnimation {
         Vector2 mousePos = new Vector2(Gdx.input.getX(),Gdx.graphics.getHeight()-Gdx.input.getY());
         //Vector3 proj = new Vector3(mousePos, 0);
         //cam.unproject(proj);
-        float mouseAngle = MyMath.angleTo(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, mousePos.x, mousePos.y) - (180 * MathUtils.degRad);
+        float mouseAngle = MyMath.angleTo(mousePos.x, mousePos.y, centerScreen.x, centerScreen.y);
+        //mouseAngle = MyMath.angle2(mousePos, centerScreen);
+        
         
         if (bullet == null) {
             if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
@@ -106,7 +104,8 @@ public class AsteroidAnim extends TitleAnimation {
         
         shape.begin(ShapeRenderer.ShapeType.Filled);
         if (bullet != null) {
-            bullet.add(MyMath.vector(bulletAngle, 300 * delta));
+            bullet.add(MyMath.vector(bulletAngle, bulletVelocity * delta));
+            shape.setColor(Color.BLACK);
             shape.circle(bullet.x, bullet.y, 10);
         }
         
@@ -171,7 +170,6 @@ public class AsteroidAnim extends TitleAnimation {
             hullPoly = new Polygon(hull);
             hullPoly.setOrigin(size / 2, size / 2);//should actually be center of mass//TODO: lookup center of mass for arbitrary poly
             
-            
         }
         
         public void render(ShapeRenderer shape, float delta) {
@@ -207,103 +205,8 @@ public class AsteroidAnim extends TitleAnimation {
         }
         
         public void renderBody(CustomShapeRenderer shape) {
-            shape.fillPolygon(hullPoly.getTransformedVertices(), 0, hullPoly.getVertices().length, Color.WHITE);
+            shape.fillPolygon(hullPoly.getTransformedVertices(), 0, hullPoly.getVertices().length, Color.WHITE, Color.BLACK);
         }
     }
     
-    //todo: move into on class
-    private class CustomShapeRenderer extends ShapeRenderer {
-        //stackoverflow.com/a/33076149
-        EarClippingTriangulator ear = new EarClippingTriangulator();
-        private ShapeType shapeType;
-        private final ImmediateModeRenderer renderer;
-        
-        public CustomShapeRenderer(ShapeType shapeType, ImmediateModeRenderer renderer) {
-            this.shapeType = shapeType;
-            this.renderer = renderer;
-        }
-        
-        
-        public void fillPolygon(float[] vertices, int offset, int count, Color color) {
-            if (shapeType != ShapeType.Filled && shapeType != ShapeType.Line)
-                throw new GdxRuntimeException("Must call begin(ShapeType.Filled) or begin(ShapeType.Line)");
-            if (count < 6)
-                throw new IllegalArgumentException("Polygons must contain at least 3 points.");
-            if (count % 2 != 0)
-                throw new IllegalArgumentException("Polygons must have an even number of vertices.");
-            
-            //check(shapeType, null, count);
-            
-            final float firstX = vertices[0];
-            final float firstY = vertices[1];
-            if (shapeType == ShapeType.Line) {
-                for (int i = offset, n = offset + count; i < n; i += 2) {
-                    final float x1 = vertices[i];
-                    final float y1 = vertices[i + 1];
-                    
-                    final float x2;
-                    final float y2;
-                    
-                    if (i + 2 >= count) {
-                        x2 = firstX;
-                        y2 = firstY;
-                    } else {
-                        x2 = vertices[i + 2];
-                        y2 = vertices[i + 3];
-                    }
-                    
-                    renderer.color(color);
-                    renderer.vertex(x1, y1, 0);
-                    renderer.color(color);
-                    renderer.vertex(x2, y2, 0);
-                    
-                }
-            } else {
-                ShortArray arrRes = ear.computeTriangles(vertices);
-                
-                for (int i = 0; i < arrRes.size - 2; i = i + 3) {
-                    float x1 = vertices[arrRes.get(i) * 2];
-                    float y1 = vertices[(arrRes.get(i) * 2) + 1];
-                    
-                    float x2 = vertices[(arrRes.get(i + 1)) * 2];
-                    float y2 = vertices[(arrRes.get(i + 1) * 2) + 1];
-                    
-                    float x3 = vertices[arrRes.get(i + 2) * 2];
-                    float y3 = vertices[(arrRes.get(i + 2) * 2) + 1];
-                    
-                    this.triangle(x1, y1, x2, y2, x3, y3);
-                }
-            }
-        }
-        
-        
-        /** @param other May be null. *
-        private void check (ShapeType preferred, ShapeType other, int newVertices) {
-        if (shapeType == null) throw new IllegalStateException("begin must be called first.");
-        
-        if (shapeType != preferred && shapeType != other) {
-        // Shape type is not valid.
-        if (!autoShapeType) {
-        if (other == null)
-        throw new IllegalStateException("Must call begin(ShapeType." + preferred + ").");
-        else
-        throw new IllegalStateException("Must call begin(ShapeType." + preferred + ") or begin(ShapeType." + other + ").");
-        }
-        end();
-        begin(preferred);
-        } else if (matrixDirty) {
-        // Matrix has been changed.
-        ShapeType type = shapeType;
-        end();
-        begin(type);
-        } else if (renderer.getMaxVertices() - renderer.getNumVertices() < newVertices) {
-        // Not enough space.
-        ShapeType type = shapeType;
-        end();
-        begin(type);
-        }
-        }
-         */
-        
-    }
 }

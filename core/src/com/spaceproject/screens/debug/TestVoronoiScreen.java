@@ -13,12 +13,12 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
+import com.spaceproject.utility.DelaunayCell;
 
 import java.util.ArrayList;
 
@@ -30,167 +30,6 @@ import java.util.ArrayList;
 //http://stackoverflow.com/questions/31021968/correct-use-of-polygon-triangulators-in-libgdx
 //https://github.com/mjholtzem/Unity-2D-Destruction
 
-class VoronoiCell {
-    
-    Polygon poly;
-    FloatArray verticies = new FloatArray();
-    
-    public void addVertex(Vector2 point) {
-        verticies.add(point.x);
-        verticies.add(point.y);
-        
-    }
-    
-    public void setVerticies() {
-		/*
-		FloatArray verts = verticies;
-		float[] floatArray = new float[verts.length];
-		
-		int i = 0;
-		for (Float f : verticies) {
-		    floatArray[i++] = (f != null ? f : Float.NaN);
-		}*/
-        
-        ConvexHull convex = new ConvexHull();
-        FloatArray hull = convex.computePolygon(verticies, false);
-        poly.setVertices(hull.toArray());
-    }
-    
-}
-
-class DelaunayCell {
-    Vector2 a, b, c;//vertex that define triangle
-    Vector2 midAB, midBC, midCA;//midpoints between vertex
-    DelaunayCell nAB, nBC, nCA;//neighbors (TODO: reference for now, index later)
-    Vector2 circumcenter;//center of circle that intersects each vertex a,b,c
-    float circumradius;//radius of circle that intersects each vertex a,b,c
-    
-    public DelaunayCell(Vector2 a, Vector2 b, Vector2 c) {
-        //set triangle points
-        this.a = a;
-        this.b = b;
-        this.c = c;
-        
-        //calculate midpoints
-        midAB = a.cpy().add(b).scl(0.5f);
-        midBC = b.cpy().add(c).scl(0.5f);
-        midCA = c.cpy().add(a).scl(0.5f);
-        
-        //calculate circumscribed circle
-        Vector3 circle = circumcircle2(a, b, c);
-        circumcenter = new Vector2(circle.x, circle.y);
-        circumradius = circle.z;
-    }
-    
-    /**
-     * Check if points are close enough together.
-     *
-     * @param midpoint
-     * @param other    cell containing midpoints
-     * @return true if midpoints overlap
-     */
-    private static boolean sharesMidpoint(Vector2 midpoint, DelaunayCell other) {
-        float epsilon = 0.01f;//error margin
-        return midpoint.epsilonEquals(other.midAB, epsilon) ||
-                midpoint.epsilonEquals(other.midBC, epsilon) ||
-                midpoint.epsilonEquals(other.midCA, epsilon);
-    }
-    
-    /**
-     * Check if two cells are neighbors, and sets cell reference to neighbors.
-     *
-     * @param cellA
-     * @param cellB
-     * @return true if cells are touching
-     */
-    public static boolean isNeighbor(DelaunayCell cellA, DelaunayCell cellB) {
-        if (sharesMidpoint(cellA.midAB, cellB)) {
-            cellA.nAB = cellB;
-            return true;
-        }
-        
-        if (sharesMidpoint(cellA.midBC, cellB)) {
-            cellA.nBC = cellB;
-            return true;
-        }
-        
-        if (sharesMidpoint(cellA.midCA, cellB)) {
-            cellA.nCA = cellB;
-            return true;
-        }
-        
-        return false;
-    }
-    
-    /**
-     * Check and set neighbor references for all cells in list of cells.
-     *
-     * @param dCells
-     */
-    public static void findNeighbors(ArrayList<DelaunayCell> dCells) {
-        //check each cell against each other
-        for (DelaunayCell cellA : dCells) {
-            for (DelaunayCell cellB : dCells) {
-                //skip check on self
-                if (cellA.circumcenter.epsilonEquals(cellB.circumcenter, 0.01f)) {
-                    continue;
-                }
-                //check and set neighbors
-                isNeighbor(cellA, cellB);
-            }
-        }
-    }
-    
-    /**
-     * Calculate smallest possible circle that intersects
-     * each vertex of a triangle defined by vertex a,b,c.
-     * https://gist.github.com/mutoo/5617691
-     *
-     * @param a
-     * @param b
-     * @param c
-     * @return circumcirle of triangle in a Vector3 with position in x,y and radius in z.
-     */
-    private static Vector3 circumcircle2(Vector2 a, Vector2 b, Vector2 c) {
-        float EPSILON = 1.0f / 1048576.0f;
-        
-        float fabsy1y2 = Math.abs(a.y - b.y),
-                fabsy2y3 = Math.abs(b.y - c.y),
-                xc, yc, m1, m2, mx1, mx2, my1, my2, dx, dy;
-        
-        /* Check for coincident points */
-        //if(fabsy1y2 < EPSILON && fabsy2y3 < EPSILON) throw new Error("Eek! Coincident points!");
-        
-        if (fabsy1y2 < EPSILON) {
-            m2 = -((c.x - b.x) / (c.y - b.y));
-            mx2 = (b.x + c.x) / 2.0f;
-            my2 = (b.y + c.y) / 2.0f;
-            xc = (b.x + a.x) / 2.0f;
-            yc = m2 * (xc - mx2) + my2;
-        } else if (fabsy2y3 < EPSILON) {
-            m1 = -((b.x - a.x) / (b.y - a.y));
-            mx1 = (a.x + b.x) / 2.0f;
-            my1 = (a.y + b.y) / 2.0f;
-            xc = (c.x + b.x) / 2.0f;
-            yc = m1 * (xc - mx1) + my1;
-        } else {
-            m1 = -((b.x - a.x) / (b.y - a.y));
-            m2 = -((c.x - b.x) / (c.y - b.y));
-            mx1 = (a.x + b.x) / 2.0f;
-            mx2 = (b.x + c.x) / 2.0f;
-            my1 = (a.y + b.y) / 2.0f;
-            my2 = (b.y + c.y) / 2.0f;
-            xc = (m1 * mx1 - m2 * mx2 + my2 - my1) / (m1 - m2);
-            yc = (fabsy1y2 > fabsy2y3) ? m1 * (xc - mx1) + my1 : m2 * (xc - mx2) + my2;
-        }
-        
-        dx = b.x - xc;
-        dy = b.y - yc;
-        float radius = (float) Math.sqrt(dx * dx + dy * dy);
-        return new Vector3(xc, yc, radius);
-    }
-}
-
 public class TestVoronoiScreen extends MyScreenAdapter {
     BitmapFont text = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 20);
     
@@ -200,7 +39,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     //triangulation
     DelaunayTriangulator delaunay = new DelaunayTriangulator();
     ShortArray triangles;
-    ArrayList<DelaunayCell> dCells = new ArrayList<DelaunayCell>();
+    ArrayList<com.spaceproject.utility.DelaunayCell> dCells = new ArrayList<com.spaceproject.utility.DelaunayCell>();
     
     //convex hull
     float[] hull;
@@ -238,7 +77,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     }
     
     /**
-     * Calculate trianglulation on points.
+     * Calculate triangulation on points.
      * Then create cells out of each triangle.
      * Calculate the convex hull based on outermost points.
      * Find and set neighbors for each cell.
@@ -356,7 +195,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
     }
     
-    private void drawIntersectingLines(DelaunayCell cell, Vector2 mid, Vector2 edgeA, Vector2 edgeB) {
+    private void drawIntersectingLines(com.spaceproject.utility.DelaunayCell cell, Vector2 mid, Vector2 edgeA, Vector2 edgeB) {
         Vector2 intersect = new Vector2();
         if (Intersector.intersectSegments(edgeA, edgeB, cell.circumcenter, mid, intersect)) {
             shape.setColor(Color.GREEN);

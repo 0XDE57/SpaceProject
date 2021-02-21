@@ -3,11 +3,7 @@ package com.spaceproject.utility;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.spaceproject.screens.GameScreen;
 
 import java.util.Random;
@@ -105,59 +101,6 @@ public abstract class MyMath {
         return String.format("%.2f%sB", (double) bytes / (1L << (z * 10)), " KMGTPE".charAt(z));
     }
     
-    
-    public static BoundingBox calculateBoundingBox(Body body) {
-        BoundingBox boundingBox = null;
-        
-        for (Fixture fixture : body.getFixtureList()) {
-            if (boundingBox == null) {
-                boundingBox = calculateBoundingBox(fixture);
-            } else {
-                boundingBox.ext(calculateBoundingBox(fixture));
-            }
-        }
-        
-        return boundingBox;
-    }
-    
-    /**
-     * Calculates a {@link BoundingBox} for the given {@link Fixture}. It will
-     * be in physics/world coordinates.
-     * credit: gist.github.com/nooone/8363982
-     */
-    public static BoundingBox calculateBoundingBox(Fixture fixture) {
-        BoundingBox boundingBox = new BoundingBox();
-        switch (fixture.getShape().getType()) {
-            case Polygon: {
-                PolygonShape shape = (PolygonShape) fixture.getShape();
-                
-                Vector2 tmp = new Vector2();
-                shape.getVertex(0, tmp);
-                tmp = fixture.getBody().getWorldPoint(tmp);
-                boundingBox = new BoundingBox(new Vector3(tmp, 0), new Vector3(tmp, 0));
-                for (int v = 1; v < shape.getVertexCount(); v++) {
-                    shape.getVertex(v, tmp);
-                    boundingBox.ext(new Vector3(fixture.getBody().getWorldPoint(tmp), 0));
-                }
-                
-                break;
-            }
-            case Circle:
-                // TODO implement
-                //fixture.getShape().getRadius()
-                break;
-            case Chain:
-                // TODO implement
-                break;
-            case Edge:
-                // TODO implement
-                break;
-        }
-        
-        return boundingBox;
-    }
- 
-    
     public static float getAngularImpulse(Body body, float targetAngle, float delta) {
         //https://www.iforce2d.net/b2dtut/rotate-to-angle
         float nextAngle = body.getAngle() + body.getAngularVelocity() * delta;
@@ -170,7 +113,6 @@ public abstract class MyMath {
         float impulse = body.getInertia() * desiredAngularVelocity;
         return impulse;
     }
-    
     
     public static long fibonacci(int n) {
         if (n == 0) {

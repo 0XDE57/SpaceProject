@@ -62,7 +62,7 @@ public class SystemsConfig extends Config {
         // - asteroid renderer -> shape render pre sprite
         // - sprite 2D renderer
         // - sprite 3D renderer
-        // - shield renderer -> shape render post sprite
+        // - shield renderer -> shape render post sprite (possible shader for glow? box2d-lights?)
         // - particle renderer -> post sprite
         //todo: split into particle update and particle render (particles should render on top of sprites, but updates logic before camera update to fix drift)
         //could have multilayer rendering if needed in rendering pipeline: particle layer pre sprite (under sprites), particle layer post sprite (over sprites)
@@ -78,9 +78,9 @@ public class SystemsConfig extends Config {
         
         systems.add(new SysCFG(ScreenTransitionSystem.class, 300, true, true, true, true, true));
         
-        systems.add(new SysCFG(ExpireSystem.class, 400, true, true, true, true, true));
+        systems.add(new SysCFG(ExpireSystem.class, 500, true, true, true, true, true));
         
-        systems.add(new SysCFG(DebugSystem.class, 500, false, true, true, true, true));
+        systems.add(new SysCFG(DebugSystem.class, 900, false, true, true, true, true));
         
         systems.add(new SysCFG(RemovalSystem.class, 1000, false, true, true, true, true));
     }
