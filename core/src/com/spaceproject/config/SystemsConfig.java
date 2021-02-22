@@ -14,7 +14,8 @@ public class SystemsConfig extends Config {
     @Override
     public void loadDefault() {
         //SysCFG(entitySystem, priority, haltOnGamePause, loadInSpace, loadInWorld, loadOnDesktop, loadOnMobile)
-        // sorted by priority. with gaps for easy insertion of new systems.
+        // sorted by priority. engine executes systems in order of priority from low value to high.
+        // gaps between values for easy insertion and of new systems and easy tuning/adjusting.
         // flags (handled by @SystemLoader and @GameScreen):
         // - priority: order of execution. order is important for logic and rendering.
         // - haltOnGamePause: if true, system stops processing when game is paused.
@@ -25,16 +26,20 @@ public class SystemsConfig extends Config {
         
         systems = new ArrayList<>();
         systems.add(new SysCFG(ClearScreenSystem.class, 0, false, true, true, true, true));
-        //RespawnSystem
         
         //---input---
         systems.add(new SysCFG(DesktopInputSystem.class, 10, true, true, true, true, false));
         systems.add(new SysCFG(ControllerInputSystem.class, 15, true, true, true, true, true));
         systems.add(new SysCFG(MobileInputSystem.class, 20, true, true, true, false, true));
-        systems.add(new SysCFG(AISystem.class, 30, true, true, true, true, true));
-        
+    
+        //---loading---
+        systems.add(new SysCFG(WorldLoadingSystem.class, 25, true, false, true, true, true));
+        systems.add(new SysCFG(SpaceLoadingSystem.class, 26, false, true, false, true, true));
+        //systems.add(new SysCFG(SpaceRespawnSystem.class, ??, true, true, false, true, true));
+        //systems.add(new SysCFG(PlanetarySystemEntitySpawner.class, ??, true, true, false, true, true));
         
         //---logic---
+        systems.add(new SysCFG(AISystem.class, 30, true, true, true, true, true));
         systems.add(new SysCFG(CharacterControlSystem.class, 40, true, true, true, true, true));
         systems.add(new SysCFG(ShipControlSystem.class, 50, true, true, true, true, true));
         
@@ -49,9 +54,8 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(OrbitSystem.class, 70, true, true, false, true, true));
         systems.add(new SysCFG(WorldWrapSystem.class, 80, true, false, true, true, true));
         
-        systems.add(new SysCFG(WorldLoadingSystem.class, 82, true, false, true, true, true));
-        systems.add(new SysCFG(SpaceLoadingSystem.class, 83, false, true, false, true, true));
-        //systems.add(new SysCFG(PlanetarySystemEntitySpawner.class, 160, true, true, false, true, true));
+        
+        
         
         
         //----render----

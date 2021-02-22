@@ -179,8 +179,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             return false;
         }
         
-        
-        if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
+        if (button == Input.Buttons.MIDDLE) {
             Entity player = players.first();
             CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
             if (cameraFocus != null) {

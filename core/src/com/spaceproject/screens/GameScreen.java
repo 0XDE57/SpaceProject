@@ -19,7 +19,6 @@ import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
-import com.spaceproject.components.SeedComponent;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.SysCFG;
 import com.spaceproject.config.SystemsConfig;
@@ -29,6 +28,7 @@ import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.Galaxy;
 import com.spaceproject.generation.noise.NoiseManager;
 import com.spaceproject.systems.ScreenTransitionSystem;
+import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
@@ -45,12 +45,14 @@ public class GameScreen extends MyScreenAdapter {
     //private static Engine persistenceEngine;//background state
     public static World box2dWorld;
     public static NoiseManager noiseManager;
+    
     private static long gameTimeCurrent, gameTimeStart, timePaused;
     private boolean isPaused = false;
     
-    private static long galaxySeed;
     private static boolean inSpace;
     private static Entity currentPlanet;
+    
+    private static long galaxySeed;
     public static Galaxy galaxy;
     
     private static Stage stage;
@@ -116,22 +118,25 @@ public class GameScreen extends MyScreenAdapter {
     //region system loading
     private void initSpace(Entity transitioningEntity) {
         inSpace = true;
-        currentPlanet = null;
         
         SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
         SystemLoader.loadSystems(this, engine, inSpace, systemsCFG);
         
-        //add player
         engine.addEntity(transitioningEntity);
+    
+        currentPlanet = null;
     }
     
     private void initWorld(Entity transitioningEntity, Entity planet) {
         inSpace = false;
         currentPlanet = planet;
         
-        Misc.printObjectFields(planet.getComponent(SeedComponent.class));
-        Misc.printObjectFields(planet.getComponent(PlanetComponent.class));
-        //Misc.printEntity(transitionComponent.transitioningEntity);
+        //Misc.printObjectFields(planet.getComponent(SeedComponent.class));
+        //Misc.printObjectFields(planet.getComponent(PlanetComponent.class));
+        Gdx.app.log(this.getClass().getSimpleName(), "Landing " + Misc.objString(transitioningEntity) + " on planet " + Misc.objString(planet));
+        DebugUtil.printEntity(transitioningEntity);
+        DebugUtil.printEntity(planet);
+        
     
         SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
         SystemLoader.loadSystems(this, engine, inSpace, systemsCFG);
@@ -171,7 +176,7 @@ public class GameScreen extends MyScreenAdapter {
         if (inSpace) {
             initWorld(transEntity, planet);
         } else {
-            Mappers.screenTrans.get(transEntity).planet = currentPlanet;
+            screenTrans.planet = currentPlanet;
             initSpace(transEntity);
         }
         ScreenTransitionSystem.nextStage(screenTrans);

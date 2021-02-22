@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.SysCFG;
 import com.spaceproject.config.SystemsConfig;
@@ -11,10 +12,10 @@ import com.spaceproject.screens.GameScreen;
 
 
 public abstract class SystemLoader {
+    
     private static String logSource = "SystemLoader";
     
     public static void loadSystems(GameScreen game, Engine engine, boolean inSpace, SystemsConfig cfg) {
-        
         Gdx.app.log(logSource, inSpace ? "==========SPACE==========" : "==========WORLD==========");
         
         long time = System.currentTimeMillis();
@@ -73,7 +74,7 @@ public abstract class SystemLoader {
         }
         
         engine.addSystem(systemToLoad);
-        Gdx.app.log(logSource, "Loaded: " + String.format("%-4d", systemToLoad.priority) + " " + systemToLoad.getClass().getName());
+        Gdx.app.log(logSource, "Loaded: " + String.format("%-4d ", systemToLoad.priority) + systemToLoad.getClass().getName());
     }
     
     private static void unLoad(Engine engine, EntitySystem systemInEngine) {
@@ -82,8 +83,13 @@ public abstract class SystemLoader {
             //when system is re-added / re-removed down the line, the families/listeners are broken
             engine.removeEntityListener((EntityListener) systemInEngine);
         }
+        if (systemInEngine instanceof Disposable) {
+            //clean up
+            ((Disposable)systemInEngine).dispose();
+        }
+        
         engine.removeSystem(systemInEngine);
-        Gdx.app.log(logSource, "Unloaded: " + systemInEngine.getClass().getName());
+        Gdx.app.log(logSource, "Unload: " + String.format("%-4d ", systemInEngine.priority) + systemInEngine.getClass().getName());
     }
     
     private void loadMods(){
@@ -109,4 +115,5 @@ public abstract class SystemLoader {
         //https://blog.jayway.com/2014/06/13/sandboxing-plugins-in-java/
         //https://docstore.mik.ua/orelly/java-ent/security/ch06_03.htm
     }
+
 }

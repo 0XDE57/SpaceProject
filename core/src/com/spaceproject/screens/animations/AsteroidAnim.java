@@ -61,17 +61,35 @@ public class AsteroidAnim extends TitleAnimation {
         
         
         shape.begin(ShapeRenderer.ShapeType.Line);
-        for (Iterator<Asteroid> asteroidIterator = new Array.ArrayIterator<Asteroid>(asteroids); asteroidIterator.hasNext(); ) {
+        for (Iterator<Asteroid> asteroidIterator = new Array.ArrayIterator<>(asteroids); asteroidIterator.hasNext(); ) {
             Asteroid a = asteroidIterator.next();
             a.render(shape, delta);
             
             
-            for (Asteroid b : new Array.ArrayIterator<Asteroid>(asteroids)) {
+            for (Asteroid b : new Array.ArrayIterator<>(asteroids)) {
                 if (a.equals(b)) continue;
+                
                 if (a.hullPoly.getBoundingRectangle().overlaps(b.hullPoly.getBoundingRectangle())) {
+                    /*
+                    while (a.hullPoly.getBoundingRectangle().overlaps(b.hullPoly.getBoundingRectangle())) {
+                       a.position.sub(2, 0);
+                       b.position.add(2, 0);
+                       a.hullPoly.setPosition(a.position.x, b.position.y);
+                       b.hullPoly.setPosition(a.position.x, b.position.y);
+                    }*/
+                    
                     a.angle -= 180 * MathUtils.degRad;
-                    //b.angle -= 180 * MathUtils.degRad;
+    
+                    //float angle = a.position.angleRad(b.position);
+                    //a.angle = -angle;
                 }
+                /*
+                while (a.hullPoly.getBoundingRectangle().overlaps(b.hullPoly.getBoundingRectangle())) {
+                    a.position.sub(2, 0);
+                    b.position.add(2, 0);
+                    a.hullPoly.setPosition(a.position.x, b.position.y);
+                    b.hullPoly.setPosition(a.position.x, b.position.y);
+                }*/
             }
             
             if (bullet != null) {
@@ -116,7 +134,6 @@ public class AsteroidAnim extends TitleAnimation {
             shape.line(shapeX[i], shapeY[i], shapeX[j], shapeY[j]);
         
         }
-        //shape.triangle();
         shape.end();
     }
     
@@ -149,7 +166,6 @@ public class AsteroidAnim extends TitleAnimation {
         Polygon hullPoly;
         int size;
         
-        
         public Asteroid(Vector2 position, int size, float angle, float velocity) {
             this.size = size;
             this.angle = angle;
@@ -169,7 +185,6 @@ public class AsteroidAnim extends TitleAnimation {
             float[] hull = convex.computePolygon(points, false).toArray();
             hullPoly = new Polygon(hull);
             hullPoly.setOrigin(size / 2, size / 2);//should actually be center of mass//TODO: lookup center of mass for arbitrary poly
-            
         }
         
         public void render(ShapeRenderer shape, float delta) {
@@ -184,6 +199,7 @@ public class AsteroidAnim extends TitleAnimation {
                 position.sub(0, 1);
                 angle = MathUtils.PI2 - angle;
             }
+        //shape.triangle();
             if (bounds.x <= 0) {
                 position.add(1, 0);
                 angle = MathUtils.PI - angle;
@@ -200,8 +216,9 @@ public class AsteroidAnim extends TitleAnimation {
             shape.setColor(Color.BLACK);
             shape.polyline(hullPoly.getTransformedVertices());
             
-            //shape.setColor(Color.RED);
-            //shape.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+            shape.setColor(Color.RED);
+            Rectangle rectangle = bounds;
+            shape.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         }
         
         public void renderBody(CustomShapeRenderer shape) {

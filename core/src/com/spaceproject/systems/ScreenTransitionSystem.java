@@ -252,16 +252,21 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     }
     
     private static void landOnPlanet(GameScreen gameContext, Entity entity, ScreenTransitionComponent screenTrans) {
-        //reset size to normal
+        //reset sprite scale to previous
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         sprite3D.renderable.scale.set(screenTrans.initialScale, screenTrans.initialScale, screenTrans.initialScale);
         
-        Mappers.physics.get(entity).body.setLinearVelocity(0, 0);
-    
+        //reset camera zoom
         CameraFocusComponent camFocus = entity.getComponent(CameraFocusComponent.class);
         if (camFocus != null) {
             camFocus.zoomTarget = SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle;
         }
+    
+        //stop movement
+        Mappers.physics.get(entity).body.setLinearVelocity(0, 0);
+        
+        //mark position landed in space so we can return to this location when take off
+        //screenTrans.lastKnownPosition = screenTrans.planet.getComponent(TransformComponent.class).pos;
         
         gameContext.switchScreen(entity, screenTrans.planet);
     }
@@ -280,7 +285,15 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     private void syncLoadPosition(Entity entity, ScreenTransitionComponent screenTrans) {
         long desiredSeed = screenTrans.planet.getComponent(SeedComponent.class).seed;
         Gdx.app.log(this.getClass().getSimpleName(), Misc.objString(entity) + " is waiting for " + desiredSeed);
+    
+        //set player position to last known planet position
+        Vector2 lastKnownPlanetPosition = Mappers.transform.get(screenTrans.planet).pos;
+        Mappers.transform.get(entity).pos.set(lastKnownPlanetPosition);
+        Mappers.physics.get(entity).body.setTransform(lastKnownPlanetPosition, MathUtils.random(MathUtils.PI2));
+        Gdx.app.log(this.getClass().getSimpleName(), "Set entity to last known planet position: " + lastKnownPlanetPosition.toString());
         
+        
+        //wait for planet to load (astronomical bodies are loaded by another system)
         Family astro = Family.all(AstronomicalComponent.class, SeedComponent.class).get();
         ImmutableArray<Entity> astroObjects = getEngine().getEntitiesFor(astro);
         for (Entity astroEnt : astroObjects) {
@@ -289,10 +302,14 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
                 
                 //sync entity position with planet that it is leaving from
                 OrbitComponent orbitComp = Mappers.orbit.get(astroEnt);
-                Vector2 orbitPos = OrbitSystem.getTimeSyncedPos(orbitComp, GameScreen.getGameTimeCurrent());
-                Body body = Mappers.physics.get(entity).body;
-                body.setTransform(orbitPos, body.getAngle());
-                body.setLinearVelocity(orbitComp.velocity);
+                if (orbitComp != null) {
+                    Vector2 orbitPos = OrbitSystem.getTimeSyncedPos(orbitComp, GameScreen.getGameTimeCurrent());
+                    //if (!orbitPos.epsilonEquals(lastKnownPlanetPosition, 1f)) { Gdx.app.log(this.getClass().getSimpleName(), "warning: double check orbit sync calculation..."); }
+                    Body body = Mappers.physics.get(entity).body;
+                    body.setTransform(orbitPos, body.getAngle());
+                    body.setLinearVelocity(orbitComp.velocity);
+                    Gdx.app.log(this.getClass().getSimpleName(), "Sync position " + orbitPos);
+                }
                 
                 nextStage(screenTrans);
                 break;

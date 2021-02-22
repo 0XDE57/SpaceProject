@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
+import com.badlogic.gdx.Gdx;
 
 import java.lang.reflect.Field;
 
@@ -30,7 +31,6 @@ public class DebugUtil {
         return "E: " + entities + " C: " + components + " S: " + systems;
     }
     
-    
     public static void printEntities(Engine eng) {
         for (Entity entity : eng.getEntities()) {
             printEntity(entity);
@@ -39,16 +39,16 @@ public class DebugUtil {
     
     
     public static void printEntity(Entity entity) {
-        System.out.println(entity.toString());
+        Gdx.app.debug("DebugUtil", entity.toString());
         for (Component c : entity.getComponents()) {
-            System.out.println("\t" + c.toString());
+            Gdx.app.debug("DebugUtil", "\t" + c.toString());
             for (Field f : c.getClass().getFields()) {
                 try {
-                    System.out.println(String.format("\t\t%-14s %s", f.getName(), f.get(c)));
+                    Gdx.app.debug("DebugUtil", String.format("\t\t%-14s %s", f.getName(), f.get(c)));
                 } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
+                    Gdx.app.error("DebugUtil", "failed to read fields", e);
                 } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                    Gdx.app.error("DebugUtil", "fail to read fields", e);
                 }
             }
         }
@@ -57,7 +57,7 @@ public class DebugUtil {
     
     public static void printSystems(Engine eng) {
         for (EntitySystem sys : eng.getSystems()) {
-            System.out.println(sys + " (" + sys.priority + ")");
+            Gdx.app.debug("DebugUtil", sys + " (" + sys.priority + ")");
         }
     }
     

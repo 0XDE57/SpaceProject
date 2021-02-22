@@ -187,6 +187,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
 End goal: make combat fun. make flight and movement fun. and look a little better -> JUICE! https://www.youtube.com/watch?v=Fy0aCDmgnxg
     [...] respawn
         [x] for now, just place back at origin 0, 0
+        [ ] make space station home base that orbits around a planet, player spawns from dock with basic ship
         [ ] move into own system
         [ ] how to handle death? start on planet back at base? start at a space station?
             [?] could have a "home planet" and just spawn from there like transitionsystem takeoff
@@ -201,6 +202,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
             and if other has HealthComponent, do damage using velocity as damage factor
             [ ] shield dash bash? high impulse forward, then activate shield to ram other objects and do damage to them
         [x] bug not render on planet
+        [ ] graphics: rotate shield polygon, possibly a shader to make edges glow
         [ ] should be unavailable during hyper drive
         [ ] should not activate during screen transition
         [ ] needs control for mobile
@@ -235,9 +237,11 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [x] particlesystem and emitter components
         [...] rendering is lagging behind camera "drift bug" -> refactor rendering/system order.
             [...] split into update and render?
+            [ ] bug now looks like one particle ahead (animation beginning in front of ship while at high velocity)
         [...] engine fire effect
+            [ ] should engine particle layer be affected bymmm
             [ ] could look better (tune colors and properties)
-            [ ] looks wrong when faceing direction opposite of velocity (relative?)
+            [ ] looks wrong when facing direction opposite of velocity (relative?)
             [ ] side to side engine
             [ ] rotate?
         [...] absorb effect when charging charge cannon
@@ -264,6 +268,15 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [?] new control?: hold shift to charge, then forward + release charge for boost: impulse
         [?] shield bash?: double tap forward(or direction) and hold to rush, then shield do shield action [B] within time window of dash, and hold
         [?] land take off could be hold instead of instant
+        [ ] landing should be easier, when in range of planet (larger radius than planet itself)
+            [ ] should not be relying on debug instant stop control, breaking needs to be better / smoother
+            - additional animation step, autopilot. instead of instant stop
+                - calculate () required angle and velocity to aim at center of planet
+                - automatically apply correct force to steer efficiently/accurately
+                - face opposite of velocity (aim for planet)
+                - hard engine blast to slow down fast, calculate relative velocity to apply correct force
+                -
+            - ensure AI can't overshoot
         [ ] getting into ship sometimes a little clunky, switch from distance check to sensor
             add sensor to player
                 if contact has ship component, get in.
@@ -357,9 +370,9 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
     [ ] ready / sync / load state. should all be in transition system?
     [x] finish transition animation, should have screen effect for polish and to hide loading/level change. goal feel a little more seamless
         (fade to white/pixelate shader during landing, load map (can wait here for a second if not finished generating, when generations finished start white then fade normal, continue)
-    [ ] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
+    [...] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
         see: ScreenTransitionSystem.syncLoadPosition()
-    [ ] bug: sometimes landing and take off unreliable
+    [...] bug: landing and take off unreliable for systems away from origin, location not saved / set when land
         cannot find seed
         cannot find seed
         cannot find seed
@@ -607,7 +620,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
 
 
 ---GAMEPLAY & DESIGN---
-[...] SHIPS
+[...] Space Ship
     [...] COMBAT
         [...] 3D roll animation for dodge / barrel roll
                 [...] scale bounding box during rotation
@@ -619,14 +632,23 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [ ] weapon types
             [x] basic cannon
             [x] grow cannon shoot circles/rectangles with radius relative to damage "weight" of projectile (damage = size * velocity * typeMultiplier)?
-            [ ] L cannon, touhou style multiple bullet cannon
-            [ ] Laser cannon
+            [OUT_OF_SCOPE] L cannon, touhou style multiple bullet cannon
+            [OUT_OF_SCOPE] Laser cannon
     [ ] engine mode:
             [x] local/combat (slow, for interacting with object near, landing planets, fighting)
             [...] travel/cruise (medium, for navigating within a system, planet to planet, avoid/escape, faster travel)
             [ ] hyper/warp   (fast, warp to other systems, can't turn, can't fight)
-
-    [ ] ship generation
+    [OUT_OF_SCOPE] might be cool to have a hover mode for floating around on planet:
+        - alternate flight scheme and feel, intended for traveling around the planet quickly
+        - only move when forward, back, left, right, hovers VTOL(vertical take-off and landing) style
+        - by default sits and floats with a mild bounce animation
+        - shadow underneath to give depth
+        - has friction, while not continually float indefinitely
+        - can roll the body on left right, and change pitch with forward and backward
+        - can fly over walls / obstacles (base infiltration)
+        - could be used in land and take off animation sequence
+            - take off -> player enter space ship
+    [OUT_OF_SCOPE] ship generation
         [ ] fix ship edges to use entire width of texture
 	    [...] wings
 	    [ ] engines
@@ -636,10 +658,108 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
 	    inspiration:
             http://davebollinger.org/works/pixelspaceships/
             https://www.reddit.com/r/gamedev/comments/2tavse/2d_procedural_spaceship_generator/
-
-
-
+[OUT_OF_SCOPE] Planetary Base Building
+    Player can spawn on, or land on a  planet. And walk around.
+    Give player character tools hammer / pickaxe for mining.
+    Ore / minerals / materials will be algorithmically dispersed throughout the planet.
+        - rock
+        - iron
+        - steel
+        - silver
+        - gold
+        - diamonds
+        - etc, added as needed
+    Player can use materials for building.
+    Can also be used for trading at space stations -> sell gold / diamonds for currency -> buy ships / upgrades.
+    Player tools: (for now player always has slege and pickaxe by default, can't drop, can use with click, switch equipped with hotkey)
+        sledge hammer   : breaking rock, destruction, attack(hit enemy, do damage, knockback force),
+        pickaxe         : mining minerals
+        sword           : damage
+    I really don't want to do a complex crafting system, keep it simple.
+    For now, the only items should be raw materials themselves.
+        eg: i dont want to have to build a wall item with rock and steel,
+            i should just be able to place if i have the raw materials cost
+            i don't want to hold onto a wall item.
+    - get rock / ore -> turn into items / entities
+        - walls (cost: rock, steel)
+            - blocks bullets, takes little to no damage from player
+        - landing pad (cost: rock)
+            - lays down a gravelly / paved sort of pad, and a places a flag(no cost) (which shows wind direction)
+            - when landing on planet, you will land at your home base pad (or last used pad if multiple)
+            - use: typically would make this the first step of picking your base location, then build walls around it
+        - gates (cost: rock, steel
+            - (walls with sliding block)
+            - can be manually open closed by player, (box2D sensor)
+            - powered component, open close requires power source
+        - roads: (cost: rock)
+            - gravelly paved path to walk / drive on
+            - probably just cosmetic, could perhaps have physics implications for vehicle
+        - bridge: to cross river
+        - terminal
+            - I/O cables and circuitry / scripting possibilities...way out of scope.
+[OUT_OF_SCOPE] Tank / rover
+    - a planetary exploration vehicle
+    - deploys (and stored in cargo bay) from ship
+    - player can enter or exit just same as space ship
+    - can drive up to ship, and dock in cargo bay (if ship has capacity & vehicle meets size constraints)
+    - could have mounted turret, or drill, or robot arm for interacting with things?
+[OUT_OF_SCOPE] Inverse Kinematic Hexapod
+    - a planetary exploration vehicle
+    - legs instead of wheels
+    - a body, then some leg joints and use IK for leg placement
+[OUT_OF_SCOPE] Box2D Train (feature creep... but I really want to do)
+    - player controlled train
+    - user places simple track tiles (straights, curve right, curve left, split/merge, etc)
+    - tracks cost steel + wood (obtained from mining / trees) (+ copper for electric transmission)
+    - user places individual train cars on track to build their train
+    - engine car would actually apply force, which will drag trailing cars
+    - cars can be arranged in any order, engine does not have to be at front
+    - engine type / power determines how many cars / how much cargo can be moved
+    - train would be stopped by closed gates and walls and other vehicles (natural physics collision)
+    - each car is a simple box2D rectangle
+    - revolute joint links between boxes to connect train cars
+    - track tiles are converted to minimal graph of connected points and junctions
+    - prismatitic joints (or some sort of magnetic style force) to keep train sliding along track graph
+    - player could manually open gate, or gates could auto open
+    - or if a turret car is mounted, can shoot gate to blow it open (same fire control as ship, click) (attack train for taking over enemy base?)
+    - would need bridges to cross rivers
+    - train car types:
+        [ engine ]: player controlled, forward reverse controls
+                    engine has hauling weight capacity (how many cars)
+                    multiple engines required for longer trains
+                    speed of train naturally controlled by engine power / weight (number of cars connected)
+        [ cargo  ]: generic hauling: large capacity for mine materials
+                    loading cargo could add physics weight / resistance to for engine
+        [ turret ]: rotating stationary turret, player controlled, each face mouse relative from its cart
+    - engines cost ?
+    - start with basic [engine] that simply player gets in and works moves forward on [W] and reverse [S]
+        [engine] - [cargo] - [cargo] - [cargo]
+        [engine] - [turret] - [cargo] - [cargo] - [cargo] - [turret]
+        [turret] - [engine] - [turret] - [cargo] - [cargo] - [cargo] - [engine] - [turret]
+    - coal train, must have coal in engine, engine has its own small engine capacity.
+        - engine can be automatically fed coal by having a cargo cart behind it that is carrying coal
+        [coal engine] - [cargo: coal] - [turret] - [cargo] - [cargo] - [cargo]
+    - electric train, must have
+        - can have on board solar and battery (will auto charge due to connected)
+            [electric engine] - [battery] - [solar] - [cargo] - [cargo] - [cargo]
+        - would not require onboard power car if tracks are connected to a power source (removing need to carry heavy battery or solar cars)
+            - powersource and powerline attached to rails
+                - solar panel (requires sun, not viable on dark rogue planets)
+                - hydro genenerator (requires water source)
+                - nuclear generator (requires nuclear fuel(rare and hard to obtain))
+            [electric engine: track powered] - [cargo] - [cargo] - [cargo] - [cargo] - [cargo] - [cargo] - [cargo] - [cargo]
+    - nuclear train, can run on its own and in harsh planet conditions (expensive high-tech, late game)
+            - requires nuclear fuel (rare and hard to obtain / expensive)
+            - when destroyed has large explosion destroying walls and other train cars (losing precious cargo)
+            [reactor engine] - [cargo: nuclear fuel source] - [cargo] - [turret]
+    - the toroidal 4D planet wrapping aspect could provide interesting scenario of a train track
+      that goes across the entire planet and eventually connects to itself. forming a straight single
+      track ring around the entire planet endlessly! this might have neat gameplay implications.
+      the same property would apply to walls. potentially having neat builds of largely divided / controlled territory
+      this comes at the cost of complexity, handling physics and rendering when reaching the end of
+      the map and when shifting world coordinates. i think i have a solution on paper...
 [...] planet generation
+    [ ] rivers
     [ ] add temperature variable to planet
         [ ] temperature determined by distance from star
         [ ] for now simple linear, close to planet = hot, far from planet = cold

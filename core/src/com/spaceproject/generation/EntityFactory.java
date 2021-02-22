@@ -184,10 +184,10 @@ public class EntityFactory {
         
         MathUtils.random.setSeed(seed);
         
+        Entity planet = createPlanet(seed, null, 0, MathUtils.randomBoolean());
+    
         BarycenterComponent barycenter = new BarycenterComponent();
         barycenter.bodyType = BarycenterComponent.AstronomicalBodyType.roguePlanet;
-        
-        Entity planet = createPlanet(seed, null, 0, MathUtils.randomBoolean());
         planet.add(barycenter);
         planet.getComponent(TransformComponent.class).pos.set(x, y);
     

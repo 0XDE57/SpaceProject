@@ -7,7 +7,7 @@ import com.spaceproject.generation.FontFactory;
 
 public class DebugTextRenderer {
     private BitmapFont fontSmall;
-    private Array<DebugText> debugTexts;
+    private Array<DebugText> debugTexts; //todo: profile, could probably be pooled rather than new and clear each loop
     
     public DebugTextRenderer() {
         debugTexts = new Array<>();
