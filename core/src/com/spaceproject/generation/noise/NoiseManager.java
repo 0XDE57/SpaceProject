@@ -25,7 +25,7 @@ public class NoiseManager implements INoiseGenListener, Disposable {
     
     public void generate(long seed, PlanetComponent planet) {
         if (loadedNoise.containsKey(seed)) {
-            Gdx.app.log(this.getClass().getSimpleName(), "noise for seed [" + seed + "] already exists. Ignoring.");
+            Gdx.app.debug(this.getClass().getSimpleName(), "noise for seed [" + seed + "] already exists. Ignoring.");
             return;
         }
         
@@ -42,11 +42,11 @@ public class NoiseManager implements INoiseGenListener, Disposable {
         NoiseBuffer noiseBuffer = getNoiseForSeed(seed);
         
         if (noiseBuffer == null) {
-            Gdx.app.log(this.getClass().getSimpleName(), "no noise found, generating: " + seed);
+            Gdx.app.debug(this.getClass().getSimpleName(), "no noise found, generating: " + seed);
             generate(seed, planet);
         } else {
             //push to queue for pickup by SpaceLoadingSystem
-            Gdx.app.log(this.getClass().getSimpleName(), "noise found, loading: " + seed);
+            Gdx.app.debug(this.getClass().getSimpleName(), "noise found, loading: " + seed);
             noiseBufferQueue.add(noiseBuffer);
         }
     }

@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
@@ -60,6 +61,14 @@ public class GameScreen extends MyScreenAdapter {
     public static boolean isDebugMode = true;
     
     public GameScreen() {
+        //LOG_NONE: mutes all logging.
+        //LOG_DEBUG: logs all messages.
+        //LOG_ERROR: logs only error messages.
+        //LOG_INFO: logs error and normal messages.
+        //Gdx.app.setLogLevel(Application.LOG_DEBUG);
+        Gdx.app.setLogLevel(Application.LOG_INFO);
+        
+        
         initUI();
         
         initCore();

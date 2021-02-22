@@ -12,13 +12,13 @@ public class ECSUtil {
     public static Component transferComponent(Entity fromEntity, Entity toEntity, Class<? extends Component> componentClass) {
         if (fromEntity.getComponent(componentClass) == null) {
             Gdx.app.debug("ECSUtil", "Warning: " + Misc.objString(fromEntity)
-                    + " has no: " + componentClass.getSimpleName()
+                    + " has no " + componentClass.getSimpleName()
                     + " to give to " + Misc.objString(toEntity));
             return null;
         }
     
         Component transferred = toEntity.addAndReturn(fromEntity.remove(componentClass));
-        Gdx.app.log("ECSUtil", "transferComponent: " + Misc.objString(transferred)
+        Gdx.app.debug("ECSUtil", "transferComponent: " + Misc.objString(transferred)
                 + ": " + Misc.objString(fromEntity) + " -> " + Misc.objString(toEntity));
         return transferred;
     }

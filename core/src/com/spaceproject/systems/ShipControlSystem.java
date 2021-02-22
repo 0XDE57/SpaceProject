@@ -156,11 +156,14 @@ public class ShipControlSystem extends IteratingSystem {
         //action timer
         if (!control.timerVehicle.tryEvent())
             return;
+        
         control.changeVehicle = false;
         
         Entity characterEntity = Mappers.vehicle.get(vehicleEntity).driver;
+        Gdx.app.log(this.getClass().getSimpleName(), Misc.objString(characterEntity)
+                + " exiting vehicle " + Misc.objString(vehicleEntity));
         
-        // create body and set position near vehicle
+        // re-create box2D body and set position near vehicle
         Vector2 vehiclePosition = Mappers.transform.get(vehicleEntity).pos;
         Vector2 playerPosition = vehiclePosition.add(MyMath.vector(MathUtils.random(360) * MathUtils.degRad, offsetDist));
         Body body = BodyFactory.createPlayerBody(0, 0, characterEntity);
@@ -177,7 +180,7 @@ public class ShipControlSystem extends IteratingSystem {
         ECSUtil.transferComponent(vehicleEntity, characterEntity, AIComponent.class);
         ECSUtil.transferComponent(vehicleEntity, characterEntity, ControllableComponent.class);
         
-        // remove reference
+        // remove driver reference from vehicle
         Mappers.vehicle.get(vehicleEntity).driver = null;
         
         // add player back into world
@@ -214,11 +217,12 @@ public class ShipControlSystem extends IteratingSystem {
     }
     
     private void beginLandOnPlanet(Entity entity, Entity planet) {
-        if (Mappers.screenTrans.get(entity) != null)
+        if (Mappers.screenTrans.get(entity) != null) {
+            Gdx.app.error(this.getClass().getSimpleName(), "transition already in progress, aborting.");
             return;
-        
+        }
         if (planet == null) {
-            Gdx.app.error(this.getClass().getSimpleName(), "can not land on null planet");
+            Gdx.app.error(this.getClass().getSimpleName(), "can not land on null planet.");
             return;
         }
         

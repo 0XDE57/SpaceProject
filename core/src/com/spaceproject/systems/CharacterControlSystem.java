@@ -28,7 +28,7 @@ public class CharacterControlSystem extends IteratingSystem {
     private EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     private ImmutableArray<Entity> vehicles;
     
-    private float offsetDist = 1.5f;//TODO: dynamic based on ship size
+    private float offsetDist = 1.5f;//TODO: replace with box2d sensor
     private float faceRotSpeed = 8f;//move to CharacterControlSystemConfig
     
     public CharacterControlSystem() {
@@ -82,8 +82,9 @@ public class CharacterControlSystem extends IteratingSystem {
             
             //skip vehicle is occupied
             if (Mappers.vehicle.get(vehicleEntity).driver != null) {
-                Gdx.app.log(this.getClass().getSimpleName(), "Vehicle [" + Misc.objString(vehicleEntity)
-                        + "] already has a driver [" + Misc.objString(Mappers.vehicle.get(vehicleEntity).driver) + "]!");
+                Gdx.app.log(this.getClass().getSimpleName(),
+                        Misc.objString(characterEntity) + " cannot enter " + Misc.objString(vehicleEntity)
+                        + " because " + Misc.objString(Mappers.vehicle.get(vehicleEntity).driver) + " is already driving.");
                 continue;
             }
             
@@ -98,6 +99,9 @@ public class CharacterControlSystem extends IteratingSystem {
     }
     
     private void enterVehicle(Entity characterEntity, Entity vehicle) {
+        Gdx.app.log(this.getClass().getSimpleName(), Misc.objString(characterEntity)
+                + " entering vehicle " + Misc.objString(vehicle));
+        
         //set reference
         Mappers.vehicle.get(vehicle).driver = characterEntity;
         
