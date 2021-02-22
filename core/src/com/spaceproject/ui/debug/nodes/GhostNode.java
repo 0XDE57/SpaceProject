@@ -1,11 +1,11 @@
-package com.spaceproject.ui.menu.debug.nodes;
+package com.spaceproject.ui.debug.nodes;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
-import com.spaceproject.ui.menu.debug.ECSExplorerWindow;
+import com.spaceproject.ui.debug.ECSExplorerWindow;
 import com.spaceproject.utility.SimpleTimer;
 
 import static com.spaceproject.generation.FontFactory.skinSmallFont;

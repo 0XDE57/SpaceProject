@@ -1,10 +1,11 @@
-package com.spaceproject.utility;
+package com.spaceproject.ui.debug;
 
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 public class DebugText {
+    
     public String text;
     public int x, y;
     public Color color;
@@ -25,6 +26,5 @@ public class DebugText {
         this.color = color;
         this.font = font;
     }
-    
     
 }

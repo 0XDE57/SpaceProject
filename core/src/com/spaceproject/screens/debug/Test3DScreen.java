@@ -20,7 +20,7 @@ import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 import com.spaceproject.ui.Sprite3D;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 
 
 public class Test3DScreen extends ScreenAdapter {

@@ -30,7 +30,7 @@ import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.SimpleTimer;
 
 

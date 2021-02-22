@@ -29,7 +29,7 @@ import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Tile;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.SimpleTimer;
 
 

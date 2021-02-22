@@ -43,7 +43,7 @@ import com.spaceproject.ui.menu.GameMenu;
 import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 
 
 public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener {

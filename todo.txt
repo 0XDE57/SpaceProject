@@ -716,9 +716,10 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
     - cars can be arranged in any order, engine does not have to be at front
     - engine type / power determines how many cars / how much cargo can be moved
     - train would be stopped by closed gates and walls and other vehicles (natural physics collision)
+    - split/merge junctions will have a track switcher that player can control while node is nearby train
     - each car is a simple box2D rectangle
     - revolute joint links between boxes to connect train cars
-    - track tiles are converted to minimal graph of connected points and junctions
+    - track tiles are converted to minimal graph of connected points and junctions for the train to ride
     - prismatitic joints (or some sort of magnetic style force) to keep train sliding along track graph
     - player could manually open gate, or gates could auto open
     - or if a turret car is mounted, can shoot gate to blow it open (same fire control as ship, click) (attack train for taking over enemy base?)

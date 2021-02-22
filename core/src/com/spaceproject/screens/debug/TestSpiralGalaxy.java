@@ -12,9 +12,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
-import com.spaceproject.utility.DebugTextRenderer;
+import com.spaceproject.ui.debug.DebugTextRenderer;
 import com.spaceproject.utility.Misc;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 
 public class TestSpiralGalaxy extends MyScreenAdapter {
     enum Direction {

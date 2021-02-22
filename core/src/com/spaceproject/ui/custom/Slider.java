@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.generation.TextureFactory;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 
 public class Slider {
     static Texture tex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));

@@ -34,13 +34,13 @@ import com.spaceproject.config.KeyConfig;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.ui.menu.debug.ECSExplorerWindow;
-import com.spaceproject.utility.DebugText;
+import com.spaceproject.ui.debug.ECSExplorerWindow;
+import com.spaceproject.ui.debug.DebugText;
 import com.spaceproject.utility.DebugUtil;
-import com.spaceproject.utility.DebugVec;
+import com.spaceproject.ui.debug.DebugVec;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

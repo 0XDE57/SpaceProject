@@ -1,4 +1,4 @@
-package com.spaceproject.ui.menu.debug;
+package com.spaceproject.ui.debug;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -22,11 +22,11 @@ import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.ui.menu.debug.nodes.EntityNode;
-import com.spaceproject.ui.menu.debug.nodes.GhostNode;
-import com.spaceproject.ui.menu.debug.nodes.MyNode;
-import com.spaceproject.ui.menu.debug.nodes.ReflectionNode;
-import com.spaceproject.ui.menu.debug.nodes.UpdateNode;
+import com.spaceproject.ui.debug.nodes.EntityNode;
+import com.spaceproject.ui.debug.nodes.GhostNode;
+import com.spaceproject.ui.debug.nodes.MyNode;
+import com.spaceproject.ui.debug.nodes.ReflectionNode;
+import com.spaceproject.ui.debug.nodes.UpdateNode;
 import com.spaceproject.utility.SimpleTimer;
 
 import java.util.Arrays;

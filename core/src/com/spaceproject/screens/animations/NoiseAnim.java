@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.generation.noise.OpenSimplexNoise;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 
 public class NoiseAnim extends TitleAnimation {
     float z;

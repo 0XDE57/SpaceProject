@@ -8,7 +8,7 @@ import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 
 public class HyperDriveSystem extends IteratingSystem {
     

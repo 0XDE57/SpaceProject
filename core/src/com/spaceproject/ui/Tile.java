@@ -2,7 +2,7 @@ package com.spaceproject.ui;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 
 import java.util.ArrayList;
 import java.util.Collections;

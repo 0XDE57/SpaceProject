@@ -1,4 +1,4 @@
-package com.spaceproject.utility;
+package com.spaceproject.ui.debug;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;

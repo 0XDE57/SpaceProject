@@ -20,7 +20,7 @@ import com.spaceproject.config.RenderOrder;
 import com.spaceproject.generation.BodyFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 
 public class ChargeCannonSystem extends IteratingSystem {
     

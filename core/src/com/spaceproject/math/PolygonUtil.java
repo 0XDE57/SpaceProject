@@ -1,4 +1,4 @@
-package com.spaceproject.utility;
+package com.spaceproject.math;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Circle;

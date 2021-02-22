@@ -40,8 +40,8 @@ import com.spaceproject.config.WorldConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Sprite3D;
 import com.spaceproject.utility.ECSUtil;
-import com.spaceproject.utility.MyMath;
-import com.spaceproject.utility.PolygonUtil;
+import com.spaceproject.math.MyMath;
+import com.spaceproject.math.PolygonUtil;
 import com.spaceproject.utility.SimpleTimer;
 
 

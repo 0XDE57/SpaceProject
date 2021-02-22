@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 
 public class TouchJoyStick {
     private Color color;

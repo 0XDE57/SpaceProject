@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
+import com.spaceproject.math.MyMath;
 
 import java.lang.reflect.Field;
 
@@ -37,7 +38,6 @@ public class DebugUtil {
         }
     }
     
-    
     public static void printEntity(Entity entity) {
         Gdx.app.debug("DebugUtil", entity.toString());
         for (Component c : entity.getComponents()) {
@@ -53,7 +53,6 @@ public class DebugUtil {
             }
         }
     }
-    
     
     public static void printSystems(Engine eng) {
         for (EntitySystem sys : eng.getSystems()) {

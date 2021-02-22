@@ -8,7 +8,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.generation.noise.OpenSimplexNoise;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Tile;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 
 import java.util.ArrayList;
 

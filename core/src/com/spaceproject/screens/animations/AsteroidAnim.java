@@ -11,8 +11,8 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
-import com.spaceproject.utility.CustomShapeRenderer;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.ui.CustomShapeRenderer;
+import com.spaceproject.math.MyMath;
 
 import java.util.Iterator;
 

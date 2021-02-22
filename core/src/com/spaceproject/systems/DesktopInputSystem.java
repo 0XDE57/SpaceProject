@@ -20,7 +20,7 @@ import com.spaceproject.config.KeyConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 
 public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     

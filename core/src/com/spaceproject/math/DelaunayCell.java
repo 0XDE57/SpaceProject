@@ -1,4 +1,4 @@
-package com.spaceproject.utility;
+package com.spaceproject.math;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;

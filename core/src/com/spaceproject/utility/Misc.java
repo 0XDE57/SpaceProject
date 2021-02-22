@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.math.MyMath;
 
 import java.lang.reflect.Field;
 
@@ -11,7 +12,6 @@ import java.lang.reflect.Field;
  * TODO: Misc is a terrible class name
  */
 public class Misc {
-    
     
     public static String objString(Object o) {
         if (o == null) {
@@ -48,7 +48,6 @@ public class Misc {
         }
     }
     
-    
     /**
      * https://stackoverflow.com/a/21701635
      */
@@ -66,11 +65,9 @@ public class Misc {
         return b.toString();
     }
     
-    
     public static void printSystemProperties() {
         System.getProperties().list(System.out);
     }
-    
     
     public static void printDisplayModes() {
         System.out.println(String.format("%s %s", Gdx.graphics.getPpiX(), Gdx.graphics.getPpiY()));
@@ -79,6 +76,5 @@ public class Misc {
         }
         System.out.println("-------------------------\n");
     }
-    
     
 }

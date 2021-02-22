@@ -18,7 +18,7 @@ import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
-import com.spaceproject.utility.DelaunayCell;
+import com.spaceproject.math.DelaunayCell;
 
 import java.util.ArrayList;
 
@@ -39,7 +39,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     //triangulation
     DelaunayTriangulator delaunay = new DelaunayTriangulator();
     ShortArray triangles;
-    ArrayList<com.spaceproject.utility.DelaunayCell> dCells = new ArrayList<com.spaceproject.utility.DelaunayCell>();
+    ArrayList<DelaunayCell> dCells = new ArrayList<DelaunayCell>();
     
     //convex hull
     float[] hull;
@@ -195,7 +195,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
     }
     
-    private void drawIntersectingLines(com.spaceproject.utility.DelaunayCell cell, Vector2 mid, Vector2 edgeA, Vector2 edgeB) {
+    private void drawIntersectingLines(DelaunayCell cell, Vector2 mid, Vector2 edgeA, Vector2 edgeB) {
         Vector2 intersect = new Vector2();
         if (Intersector.intersectSegments(edgeA, edgeB, cell.circumcenter, mid, intersect)) {
             shape.setColor(Color.GREEN);

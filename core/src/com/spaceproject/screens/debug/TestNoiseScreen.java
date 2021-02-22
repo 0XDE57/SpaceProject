@@ -19,7 +19,7 @@ import com.spaceproject.ui.Tile;
 import com.spaceproject.ui.custom.Button;
 import com.spaceproject.ui.custom.ColorProfile;
 import com.spaceproject.ui.custom.Slider;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 
 /* TODO:
  * -mapsize

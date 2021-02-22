@@ -1,4 +1,4 @@
-package com.spaceproject.utility;
+package com.spaceproject.ui;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer;

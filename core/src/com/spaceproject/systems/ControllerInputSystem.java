@@ -25,7 +25,7 @@ import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.menu.GameMenu;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.SimpleTimer;
 
 public class ControllerInputSystem extends EntitySystem implements ControllerListener {

@@ -1,4 +1,4 @@
-package com.spaceproject.ui.menu.debug.nodes;
+package com.spaceproject.ui.debug.nodes;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
@@ -6,7 +6,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.spaceproject.ui.menu.debug.ECSExplorerWindow;
+import com.spaceproject.ui.debug.ECSExplorerWindow;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.SimpleTimer;
 

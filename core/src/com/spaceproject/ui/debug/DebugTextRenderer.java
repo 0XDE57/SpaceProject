@@ -1,4 +1,4 @@
-package com.spaceproject.utility;
+package com.spaceproject.ui.debug;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.spaceproject.generation.FontFactory;
 
 public class DebugTextRenderer {
+    
     private BitmapFont fontSmall;
     private Array<DebugText> debugTexts; //todo: profile, could probably be pooled rather than new and clear each loop
     

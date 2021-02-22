@@ -2,7 +2,7 @@ package com.spaceproject.generation;
 
 
 import com.badlogic.gdx.math.Vector2;
-import com.spaceproject.utility.MyMath;
+import com.spaceproject.math.MyMath;
 
 public class AstroBody {
     public int x, y;
