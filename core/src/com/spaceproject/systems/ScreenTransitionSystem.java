@@ -284,14 +284,15 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     
     private void syncLoadPosition(Entity entity, ScreenTransitionComponent screenTrans) {
         long desiredSeed = screenTrans.planet.getComponent(SeedComponent.class).seed;
-        Gdx.app.log(this.getClass().getSimpleName(), Misc.objString(entity) + " is waiting for " + desiredSeed);
+        Gdx.app.debug(this.getClass().getSimpleName(), Misc.objString(entity) + " is looking for " + desiredSeed);
     
         //set player position to last known planet position
         Vector2 lastKnownPlanetPosition = Mappers.transform.get(screenTrans.planet).pos;
-        Mappers.transform.get(entity).pos.set(lastKnownPlanetPosition);
-        Mappers.physics.get(entity).body.setTransform(lastKnownPlanetPosition, MathUtils.random(MathUtils.PI2));
-        Gdx.app.log(this.getClass().getSimpleName(), "Set entity to last known planet position: " + lastKnownPlanetPosition.toString());
-        
+        TransformComponent playerTransform = Mappers.transform.get(entity);
+        Body playerBody = Mappers.physics.get(entity).body;
+        playerTransform.pos.set(lastKnownPlanetPosition);
+        playerBody.setTransform(lastKnownPlanetPosition, MathUtils.random(MathUtils.PI2));
+        Gdx.app.debug(this.getClass().getSimpleName(), "Set entity to last known planet position: " + lastKnownPlanetPosition);
         
         //wait for planet to load (astronomical bodies are loaded by another system)
         Family astro = Family.all(AstronomicalComponent.class, SeedComponent.class).get();
@@ -301,15 +302,16 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
                 Gdx.app.log(this.getClass().getSimpleName(), "FOUND SEED " + desiredSeed);
                 
                 //sync entity position with planet that it is leaving from
+                Vector2 syncPos = Mappers.transform.get(astroEnt).pos;
                 OrbitComponent orbitComp = Mappers.orbit.get(astroEnt);
-                if (orbitComp != null) {
-                    Vector2 orbitPos = OrbitSystem.getTimeSyncedPos(orbitComp, GameScreen.getGameTimeCurrent());
-                    //if (!orbitPos.epsilonEquals(lastKnownPlanetPosition, 1f)) { Gdx.app.log(this.getClass().getSimpleName(), "warning: double check orbit sync calculation..."); }
-                    Body body = Mappers.physics.get(entity).body;
-                    body.setTransform(orbitPos, body.getAngle());
-                    body.setLinearVelocity(orbitComp.velocity);
-                    Gdx.app.log(this.getClass().getSimpleName(), "Sync position " + orbitPos);
+                if (orbitComp != null && orbitComp.parent != null) {
+                    syncPos = OrbitSystem.getTimeSyncedPos(orbitComp, GameScreen.getGameTimeCurrent());
                 }
+                
+                playerBody.setTransform(syncPos, playerBody.getAngle());
+                playerBody.setLinearVelocity(orbitComp.velocity);
+                playerTransform.pos.set(syncPos);
+                Gdx.app.log(this.getClass().getSimpleName(), "Sync position " + syncPos);
                 
                 nextStage(screenTrans);
                 break;

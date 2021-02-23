@@ -28,12 +28,12 @@ import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.Galaxy;
 import com.spaceproject.generation.noise.NoiseManager;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
-import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.ResourceDisposer;
 import com.spaceproject.utility.SystemLoader;
 

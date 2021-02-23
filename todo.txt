@@ -368,11 +368,16 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
 
 [...] screen transition between world and space
     [ ] ready / sync / load state. should all be in transition system?
+        still a little messy, but working fairly reliably now
+    [ ] should not be loading system near origin, position needs to shift to last known planet BEFORE SpaceLoadingSystem picks it up
+        [SystemLoader] systems loaded in 1ms
+        [SpaceLoadingSystem] Planetary System: (1000.0, 1000.0) Objects: 8
+        [ScreenTransitionSystem] Animation Stage: sync for Entity@7440577b
     [x] finish transition animation, should have screen effect for polish and to hide loading/level change. goal feel a little more seamless
         (fade to white/pixelate shader during landing, load map (can wait here for a second if not finished generating, when generations finished start white then fade normal, continue)
-    [...] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
+    [x] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
         see: ScreenTransitionSystem.syncLoadPosition()
-    [...] bug: landing and take off unreliable for systems away from origin, location not saved / set when land
+    [x] bug: landing and take off unreliable for systems away from origin, location not saved / set when land
         cannot find seed
         cannot find seed
         cannot find seed

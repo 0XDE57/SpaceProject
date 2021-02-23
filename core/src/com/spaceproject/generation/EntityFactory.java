@@ -37,11 +37,11 @@ import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.EntityConfig;
 import com.spaceproject.config.RenderOrder;
 import com.spaceproject.config.WorldConfig;
+import com.spaceproject.math.MyMath;
+import com.spaceproject.math.PolygonUtil;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Sprite3D;
 import com.spaceproject.utility.ECSUtil;
-import com.spaceproject.math.MyMath;
-import com.spaceproject.math.PolygonUtil;
 import com.spaceproject.utility.SimpleTimer;
 
 
@@ -185,6 +185,7 @@ public class EntityFactory {
         MathUtils.random.setSeed(seed);
         
         Entity planet = createPlanet(seed, null, 0, MathUtils.randomBoolean());
+        planet.getComponent(OrbitComponent.class).tangentialSpeed = 0;
     
         BarycenterComponent barycenter = new BarycenterComponent();
         barycenter.bodyType = BarycenterComponent.AstronomicalBodyType.roguePlanet;
@@ -420,11 +421,13 @@ public class EntityFactory {
         barrelRoll.force = entityCFG.dodgeForce;
         entity.add(barrelRoll);
     
+        
         //particle
         ParticleComponent particle = new ParticleComponent();
         particle.type = ParticleComponent.EffectType.shipEngine;
         particle.offset = new Vector2(0, height + 0.2f);
         entity.add(particle);
+        
         
         //map
         MapComponent map = new MapComponent();

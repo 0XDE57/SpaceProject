@@ -44,7 +44,7 @@ public class EntityConfig extends Config {
         shipSizeMax = 36/2;
         shipHealth = 200;
         engineThrust = 200;
-        hyperSpeed = 1000;
+        hyperSpeed = 10000;
         dodgeTimeout = 500;
         dodgeAnimationTimer = 475;
         dodgeForce = 8f;
