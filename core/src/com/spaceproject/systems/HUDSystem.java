@@ -340,43 +340,43 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         drawGrowCannonAmmoBar(playerEntity, playerBarX, playerAmmoBarY, barWidth, barHeight);
     }
     
-    private void drawGrowCannonAmmoBar(Entity playerEntity, int playerBarX, int playerAmmoBarY, int barWidth, int barHeight) {
+    private void drawGrowCannonAmmoBar(Entity playerEntity, int playerBarX, int playerBarY, int barWidth, int barHeight) {
         ChargeCannonComponent chargeCannon = Mappers.chargeCannon.get(playerEntity);
         if (chargeCannon == null)  return;
         
         float ratioAmmo = chargeCannon.size / chargeCannon.maxSize;
         shape.setColor(uiCFG.entityHPbarBackground);
-        shape.rect(playerBarX, playerAmmoBarY, barWidth, barHeight);
+        shape.rect(playerBarX, playerBarY, barWidth, barHeight);
         if (chargeCannon.isCharging) {
             shape.setColor(uiCFG.playerAmmoBarRechargeColor);
             if (chargeCannon.size == chargeCannon.maxSize) {
                 shape.setColor(uiCFG.playerAmmoBarColor);
             }
-            shape.rect(playerBarX, playerAmmoBarY, barWidth * ratioAmmo, barHeight);
+            shape.rect(playerBarX, playerBarY, barWidth * ratioAmmo, barHeight);
         }
     }
     
-    private void drawCannonAmmoBar(Entity playerEntity, int playerBarX, int playerAmmoBarY, int barWidth, int barHeight) {
+    private void drawCannonAmmoBar(Entity playerEntity, int playerBarX, int playerBarY, int barWidth, int barHeight) {
         CannonComponent cannon = Mappers.cannon.get(playerEntity);
         if (cannon == null) return;
         
         float ratioAmmo = (float) cannon.curAmmo / (float) cannon.maxAmmo;
         shape.setColor(uiCFG.entityHPbarBackground);
-        shape.rect(playerBarX, playerAmmoBarY, barWidth, barHeight);
+        shape.rect(playerBarX, playerBarY, barWidth, barHeight);
         shape.setColor(uiCFG.playerAmmoBarColor);
-        shape.rect(playerBarX, playerAmmoBarY, barWidth * ratioAmmo, barHeight);
+        shape.rect(playerBarX, playerBarY, barWidth * ratioAmmo, barHeight);
         
         for (int i = 0; i < cannon.maxAmmo; i++) {
             int x = playerBarX + (i * barWidth / cannon.maxAmmo);
             //draw recharge bar
             if (i == cannon.curAmmo) {
                 shape.setColor(uiCFG.playerAmmoBarRechargeColor);
-                shape.rect(x, playerAmmoBarY, barWidth / cannon.maxAmmo * cannon.timerRechargeRate.ratio(), barHeight);
+                shape.rect(x, playerBarY, barWidth / cannon.maxAmmo * cannon.timerRechargeRate.ratio(), barHeight);
             }
             //draw divisions to mark individual ammo
             if (i > 0) {
                 shape.setColor(Color.BLACK);
-                shape.rectLine(x, playerAmmoBarY + barHeight, x, playerAmmoBarY, 3);
+                shape.rectLine(x, playerBarY + barHeight, x, playerBarY, 3);
             }
         }
         
@@ -385,7 +385,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 		if (cannon.curAmmo < cannon.maxAmmo) {
 			int rechargeBarHeight = 2;
 			shape.setColor(Color.SLATE);
-			shape.rect(playerBarX, playerAmmoBarY, barWidth * cannon.timerRechargeRate.ratio(), rechargeBarHeight);
+			shape.rect(playerBarX, playerBarY, barWidth * cannon.timerRechargeRate.ratio(), rechargeBarHeight);
 		}
 		*/
     
