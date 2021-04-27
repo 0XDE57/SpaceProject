@@ -212,8 +212,9 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     
         CameraFocusComponent camFocus = entity.getComponent(CameraFocusComponent.class);
         if (camFocus != null) {
-            if (GameScreen.cam.zoom > SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle) {
-                GameScreen.cam.zoom = SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle;
+            EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
+            if (GameScreen.cam.zoom > engineConfig.defaultZoomVehicle) {
+                GameScreen.cam.zoom = engineConfig.defaultZoomVehicle;
             }
         }
         if (MyScreenAdapter.cam.zoom <= 0.05f) {
@@ -222,8 +223,9 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     }
     
     private static void zoomOut(Entity entity, ScreenTransitionComponent screenTrans) {
-        entity.getComponent(CameraFocusComponent.class).zoomTarget = 1;
-        if (MyScreenAdapter.cam.zoom >= 1) {
+        EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
+        entity.getComponent(CameraFocusComponent.class).zoomTarget = engineConfig.defaultZoomVehicle;
+        if (MyScreenAdapter.cam.zoom >= engineConfig.defaultZoomVehicle) {
             screenTrans.timer.reset();
             nextStage(screenTrans);
         }
@@ -265,9 +267,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         //stop movement
         Mappers.physics.get(entity).body.setLinearVelocity(0, 0);
         
-        //mark position landed in space so we can return to this location when take off
-        //screenTrans.lastKnownPosition = screenTrans.planet.getComponent(TransformComponent.class).pos;
-        
+        //actually perform switch
         gameContext.switchScreen(entity, screenTrans.planet);
     }
     
@@ -280,11 +280,6 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         entity.getComponent(CameraFocusComponent.class).zoomTarget = SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle;
         
         gameContext.switchScreen(entity, null);
-    }
-    
-    private void syncLoadPosition(Entity entity, ScreenTransitionComponent screenTrans) {
-        long desiredSeed = screenTrans.planet.getComponent(SeedComponent.class).seed;
-        Gdx.app.debug(this.getClass().getSimpleName(), Misc.objString(entity) + " is looking for " + desiredSeed);
     
         //set player position to last known planet position
         Vector2 lastKnownPlanetPosition = Mappers.transform.get(screenTrans.planet).pos;
@@ -292,6 +287,21 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         Body playerBody = Mappers.physics.get(entity).body;
         playerTransform.pos.set(lastKnownPlanetPosition);
         playerBody.setTransform(lastKnownPlanetPosition, MathUtils.random(MathUtils.PI2));
+        MyScreenAdapter.cam.position.set(lastKnownPlanetPosition, MyScreenAdapter.cam.position.z);
+        Gdx.app.debug(this.getClass().getSimpleName(), "Set entity to last known planet position: " + lastKnownPlanetPosition);
+    }
+    
+    private void syncLoadPosition(Entity entity, ScreenTransitionComponent screenTrans) {
+        long desiredSeed = screenTrans.planet.getComponent(SeedComponent.class).seed;
+        Gdx.app.debug(this.getClass().getSimpleName(), Misc.objString(entity) + " is waiting for " + desiredSeed);
+    
+        //set player position to last known planet position
+        Vector2 lastKnownPlanetPosition = Mappers.transform.get(screenTrans.planet).pos;
+        TransformComponent playerTransform = Mappers.transform.get(entity);
+        Body playerBody = Mappers.physics.get(entity).body;
+        playerTransform.pos.set(lastKnownPlanetPosition);
+        playerBody.setTransform(lastKnownPlanetPosition, MathUtils.random(MathUtils.PI2));
+        MyScreenAdapter.cam.position.set(lastKnownPlanetPosition, MyScreenAdapter.cam.position.z);
         Gdx.app.debug(this.getClass().getSimpleName(), "Set entity to last known planet position: " + lastKnownPlanetPosition);
         
         //wait for planet to load (astronomical bodies are loaded by another system)
@@ -311,6 +321,8 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
                 playerBody.setTransform(syncPos, playerBody.getAngle());
                 playerBody.setLinearVelocity(orbitComp.velocity);
                 playerTransform.pos.set(syncPos);
+                MyScreenAdapter.cam.position.set(syncPos, MyScreenAdapter.cam.position.z);
+                
                 Gdx.app.log(this.getClass().getSimpleName(), "Sync position " + syncPos);
                 
                 nextStage(screenTrans);
