@@ -51,9 +51,9 @@ public class OrbitSystem extends IteratingSystem {
             
             syncOrbit(orbit, position);
     
-            OrbitComponent orbitComponent = Mappers.orbit.get(orbit.parent);
-            if (orbitComponent != null) {
-                orbit.velocity.add(orbitComponent.velocity);
+            OrbitComponent parentOrbit = Mappers.orbit.get(orbit.parent);
+            if (parentOrbit != null) {
+                orbit.velocity.add(parentOrbit.velocity);
             }
         }
         

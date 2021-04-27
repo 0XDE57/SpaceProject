@@ -11,14 +11,13 @@ import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.PhysicsContactListener;
 
 // based off:
 // http://gafferongames.com/game-physics/fix-your-timestep/
 // http://saltares.com/blog/games/fixing-your-timestep-in-libgdx-and-box2d/
-public class FixedPhysicsSystem extends EntitySystem implements IRequireGameContext {
+public class FixedPhysicsSystem extends EntitySystem {
     
     private EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     private final int velocityIterations = engineCFG.physicsVelocityIterations;
@@ -31,15 +30,11 @@ public class FixedPhysicsSystem extends EntitySystem implements IRequireGameCont
     private ImmutableArray<Entity> entities;
     
     @Override
-    public void initContext(GameScreen gameScreen) {
-        this.world = gameScreen.box2dWorld;
-    }
-    
-    @Override
     public void addedToEngine(Engine engine) {
         Family family = Family.all(PhysicsComponent.class, TransformComponent.class).get();
         entities = engine.getEntitiesFor(family);
     
+        world = GameScreen.box2dWorld;
         world.setContactListener(new PhysicsContactListener());
     }
     
@@ -47,14 +42,13 @@ public class FixedPhysicsSystem extends EntitySystem implements IRequireGameCont
     public void update(float deltaTime) {
         accumulator += deltaTime;
         while (accumulator >= timeStep) {
-            //System.out.println("update: " + deltaTime + ". " + accumulator);
             world.step(timeStep, velocityIterations, positionIterations);
             accumulator -= timeStep;
             
             updateTransform();
         }
         
-        interpolate(deltaTime, accumulator);
+        //interpolate(deltaTime, accumulator);
     }
     
     private void updateTransform() {
@@ -85,6 +79,5 @@ public class FixedPhysicsSystem extends EntitySystem implements IRequireGameCont
         //eg step of 60: 60 * 2 = 120,  max velocity = 120
         return 2 * engineCFG.physicsStepPerFrame;
     }
+    
 }
-
-

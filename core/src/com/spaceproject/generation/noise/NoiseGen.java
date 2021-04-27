@@ -12,11 +12,10 @@ import java.util.ArrayList;
 public class NoiseGen {
     
     public static float[][] generateWrappingNoise4D(long seed, int mapSize, float scale) {
-        float[][] map = new float[mapSize][mapSize];
-        
         OpenSimplexNoise noise = new OpenSimplexNoise(seed);
         
         //generate single layer map
+        float[][] map = new float[mapSize][mapSize];
         for (int y = 0; y < mapSize; ++y) {
             for (int x = 0; x < mapSize; ++x) {
                 
@@ -50,10 +49,9 @@ public class NoiseGen {
      * @return array holding noise
      */
     public static float[][] generateWrappingNoise4D(long seed, int size, double scale, int octaves, float persistence, float lacunarity) {
-        float[][] map = new float[size][size];
-        
         OpenSimplexNoise noise = new OpenSimplexNoise(seed);
         
+        float[][] map = new float[size][size];
         float minNoise = Float.MAX_VALUE;
         float maxNoise = Float.MIN_VALUE;
         

@@ -25,11 +25,11 @@ import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.generation.AstroBody;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Tile;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.SimpleTimer;
 
 
@@ -105,20 +105,6 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         Mappers.AI.get(aiTest3).state = AIComponent.State.landOnPlanet;
         //aiTest3.add(new CameraFocusComponent());
         engine.addEntity(aiTest3);
-
-
-		/*
-		Entity test3DEntity = EntityFactory.createShip3(0, -100);
-		Texture shipTop = TextureFactory.generateShip(123, 20);
-		Texture shipBottom = TextureFactory.generateShipUnderSide(123, 20);
-		Sprite3DComponent sprite3DComp = new Sprite3DComponent();
-		sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom);
-		test3DEntity.remove(TextureComponent.class);
-		test3DEntity.add(sprite3DComp);
-		engine.addEntity(test3DEntity);
-		*/
-    
-        //engine.addEntity(EntityFactory.createWall(5, 5));
     }
     
     @Override

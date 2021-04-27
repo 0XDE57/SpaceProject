@@ -31,33 +31,27 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(DesktopInputSystem.class, 10, true, true, true, true, false));
         systems.add(new SysCFG(ControllerInputSystem.class, 15, true, true, true, true, true));
         systems.add(new SysCFG(MobileInputSystem.class, 20, true, true, true, false, true));
-    
-        //---loading---
-        systems.add(new SysCFG(WorldLoadingSystem.class, 25, true, false, true, true, true));
-        systems.add(new SysCFG(SpaceLoadingSystem.class, 26, false, true, false, true, true));
-        //systems.add(new SysCFG(SpaceRespawnSystem.class, ??, true, true, false, true, true));
-        //systems.add(new SysCFG(PlanetarySystemEntitySpawner.class, ??, true, true, false, true, true));
+        
         
         //---logic---
         systems.add(new SysCFG(AISystem.class, 30, true, true, true, true, true));
+        
         systems.add(new SysCFG(CharacterControlSystem.class, 40, true, true, true, true, true));
+        
         systems.add(new SysCFG(ShipControlSystem.class, 50, true, true, true, true, true));
+        systems.add(new SysCFG(BarrelRollSystem.class, 52, true, true, true, true, true));
+        systems.add(new SysCFG(ShieldSystem.class, 53, true, true, true, true, true));
+        systems.add(new SysCFG(CannonSystem.class, 55, true, true, true, true, true));
+        systems.add(new SysCFG(ChargeCannonSystem.class, 56, true, true, true, true, true));
         
-        systems.add(new SysCFG(HyperDriveSystem.class, 55, true, true, true, true, true));
-        systems.add(new SysCFG(FixedPhysicsSystem.class, 60, true, true, true, true, true));
+        systems.add(new SysCFG(OrbitSystem.class, 60, true, true, false, true, true));
+        systems.add(new SysCFG(WorldWrapSystem.class, 65, true, false, true, true, true));
         
-        systems.add(new SysCFG(CannonSystem.class, 64, true, true, true, true, true));
-        systems.add(new SysCFG(ChargeCannonSystem.class, 65, true, true, true, true, true));
-        systems.add(new SysCFG(ShieldSystem.class, 66, true, true, true, true, true));
-        systems.add(new SysCFG(BarrelRollSystem.class, 69, true, true, true, true, true));
-        
-        systems.add(new SysCFG(OrbitSystem.class, 70, true, true, false, true, true));
-        systems.add(new SysCFG(WorldWrapSystem.class, 80, true, false, true, true, true));
-        
-        
-        
-        
-        
+        systems.add(new SysCFG(HyperDriveSystem.class, 69, true, true, true, true, true));
+        systems.add(new SysCFG(FixedPhysicsSystem.class, 70, true, true, true, true, true));
+    
+    
+    
         //----render----
         //todo: rendering pipeline
         // - screen clear
@@ -81,7 +75,14 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(HUDSystem.class, 200, false, true, true, true, true));
         
         systems.add(new SysCFG(ScreenTransitionSystem.class, 300, true, true, true, true, true));
-        
+        //---loading---
+        systems.add(new SysCFG(WorldLoadingSystem.class, 301, true, false, true, true, true));
+        systems.add(new SysCFG(SpaceLoadingSystem.class, 302, false, true, false, true, true));
+        //systems.add(new SysCFG(SpaceRespawnSystem.class, ??, true, true, false, true, true));
+        //systems.add(new SysCFG(PlanetarySystemEntitySpawner.class, ??, true, true, false, true, true));
+    
+    
+    
         systems.add(new SysCFG(ExpireSystem.class, 500, true, true, true, true, true));
         
         systems.add(new SysCFG(DebugSystem.class, 900, false, true, true, true, true));

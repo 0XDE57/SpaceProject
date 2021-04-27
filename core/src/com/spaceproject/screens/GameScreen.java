@@ -65,8 +65,8 @@ public class GameScreen extends MyScreenAdapter {
         //LOG_DEBUG: logs all messages.
         //LOG_ERROR: logs only error messages.
         //LOG_INFO: logs error and normal messages.
-        //Gdx.app.setLogLevel(Application.LOG_DEBUG);
-        Gdx.app.setLogLevel(Application.LOG_INFO);
+        Gdx.app.setLogLevel(Application.LOG_DEBUG);
+        //Gdx.app.setLogLevel(Application.LOG_INFO);
         
         
         initUI();
@@ -111,6 +111,7 @@ public class GameScreen extends MyScreenAdapter {
         
         Entity playerShip = EntityFactory.createPlayerShip(0, 0, inSpace);
         
+        
         //init systems
         if (inSpace) {
             initSpace(playerShip);
@@ -130,6 +131,17 @@ public class GameScreen extends MyScreenAdapter {
         
         SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
         SystemLoader.loadSystems(this, engine, inSpace, systemsCFG);
+    
+        /*
+        //set player position to last known planet position
+        Vector2 lastKnownPlanetPosition = Mappers.transform.get(currentPlanet).pos;
+        TransformComponent playerTransform = Mappers.transform.get(transitioningEntity);
+        Body playerBody = Mappers.physics.get(transitioningEntity).body;
+        playerTransform.pos.set(lastKnownPlanetPosition);
+        playerBody.setTransform(lastKnownPlanetPosition, MathUtils.random(MathUtils.PI2));
+        MyScreenAdapter.cam.position.set(lastKnownPlanetPosition, MyScreenAdapter.cam.position.z);
+        Gdx.app.debug(this.getClass().getSimpleName(), "Set entity to last known planet position: " + lastKnownPlanetPosition);
+        */
         
         engine.addEntity(transitioningEntity);
     

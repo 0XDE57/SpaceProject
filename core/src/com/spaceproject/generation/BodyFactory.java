@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.World;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.screens.GameScreen;
@@ -103,6 +104,34 @@ public class BodyFactory {
         
         PolygonShape poly = new PolygonShape();
         poly.setAsBox(scaledWidth, scaledHeight);
+        // Create a fixture definition to apply our shape to
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = poly;
+        fixtureDef.density = 0.5f;
+        fixtureDef.friction = 0.0f;
+        fixtureDef.restitution = 0.6f; // Make it bounce a little bit
+        // Create our fixture and attach it to the body
+        body.createFixture(fixtureDef);
+        // Remember to dispose of any shapes after you're done with them!
+        // BodyDef and FixtureDef don't need disposing, but shapes do.
+        poly.dispose();
+        return body;
+    }
+    
+    public static Body createPoly(float x, float y, float[] vertices, BodyDef.BodyType bodyType, World world) {
+        // * 0.5f is half-width / half-height required by setAsBox()
+        //float scaledWidth  = engineCFG.meterPerUnit * width * 0.5f;
+        //float scaledHeight = engineCFG.meterPerUnit * height * 0.5f;
+        
+        Body body;
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = bodyType;
+        bodyDef.position.set(x, y);
+        body = world.createBody(bodyDef);
+        
+        PolygonShape poly = new PolygonShape();
+        poly.set(vertices);
+        
         // Create a fixture definition to apply our shape to
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = poly;

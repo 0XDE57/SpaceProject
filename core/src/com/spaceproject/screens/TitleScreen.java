@@ -17,6 +17,7 @@ import com.kotcrab.vis.ui.util.dialog.Dialogs;
 import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.FontFactory;
+import com.spaceproject.screens.animations.AsteroidAnim;
 import com.spaceproject.screens.animations.DelaunayAnim;
 import com.spaceproject.screens.animations.DropAnim;
 import com.spaceproject.screens.animations.ForegroundAnimation;
@@ -47,7 +48,6 @@ public class TitleScreen extends MyScreenAdapter {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
         
-        edgePad = SpaceProject.isMobile() ? 20 : 10;
         
         //init fonts
         String titleFont = "titleFontLarge";
@@ -64,6 +64,7 @@ public class TitleScreen extends MyScreenAdapter {
         Table menuTable = TitleScreenMenu.buildMenu(game, stage, false);
         stage.addActor(menuTable);
         menuTable.pack();
+        edgePad = SpaceProject.isMobile() ? 20 : 10;
         menuTable.setPosition(edgePad, edgePad);
         
         
@@ -181,12 +182,11 @@ public class TitleScreen extends MyScreenAdapter {
             case crossNoise:
                 this.foregroundAnimation = new NoiseAnim(0, 0.01f, 3, 0.013f, true);
                 break;
-				/*
 			case asteroid:
 				this.foregroundAnimation = new AsteroidAnim();
 				break;
-				*/
         }
+        //this.foregroundAnimation = new AsteroidAnim();
         Gdx.app.log(this.getClass().getSimpleName(), "Animation: " + anim);
     }
     
