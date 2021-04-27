@@ -189,6 +189,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         uiCFG.orbitObjectColor.a = alpha;
         uiCFG.orbitSyncPosColor.a = alpha;
         
+        shape.setProjectionMatrix(cam.combined);
+        
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
