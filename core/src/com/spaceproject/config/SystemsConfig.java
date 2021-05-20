@@ -42,14 +42,13 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(BarrelRollSystem.class, 52, true, true, true, true, true));
         systems.add(new SysCFG(ShieldSystem.class, 53, true, true, true, true, true));
         systems.add(new SysCFG(CannonSystem.class, 55, true, true, true, true, true));
-        systems.add(new SysCFG(ChargeCannonSystem.class, 56, true, true, true, true, true));
         
         systems.add(new SysCFG(OrbitSystem.class, 60, true, true, false, true, true));
         systems.add(new SysCFG(WorldWrapSystem.class, 65, true, false, true, true, true));
         
         systems.add(new SysCFG(HyperDriveSystem.class, 69, true, true, true, true, true));
         systems.add(new SysCFG(FixedPhysicsSystem.class, 70, true, true, true, true, true));
-    
+        systems.add(new SysCFG(ChargeCannonSystem.class, 71, true, true, true, true, true));
     
     
         //----render----
