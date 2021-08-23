@@ -17,12 +17,12 @@ public class BodyFactory {
     
     private static EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     
-    public static Body createCircle(float x, float y, float radius) {
+    public static Body createCircle(float x, float y, float radius, World world) {
         Body body;
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(x, y);
-        body = GameScreen.box2dWorld.createBody(bodyDef);
+        body = world.createBody(bodyDef);
         
         CircleShape circle = new CircleShape();
         circle.setRadius(radius);
@@ -30,7 +30,7 @@ public class BodyFactory {
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = circle;
         fixtureDef.density = 0.5f;
-        fixtureDef.friction = 0.4f;
+        fixtureDef.friction = 0.0f;
         fixtureDef.restitution = 0.6f; // Make it bounce a little bit
         // Create our fixture and attach it to the body
         body.createFixture(fixtureDef);

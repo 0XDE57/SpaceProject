@@ -182,11 +182,12 @@ public class TitleScreen extends MyScreenAdapter {
             case crossNoise:
                 this.foregroundAnimation = new NoiseAnim(0, 0.01f, 3, 0.013f, true);
                 break;
+                /*
 			case asteroid:
 				this.foregroundAnimation = new AsteroidAnim();
-				break;
+				break;*/
         }
-        //this.foregroundAnimation = new AsteroidAnim();
+        this.foregroundAnimation = new AsteroidAnim();
         Gdx.app.log(this.getClass().getSimpleName(), "Animation: " + anim);
     }
     
