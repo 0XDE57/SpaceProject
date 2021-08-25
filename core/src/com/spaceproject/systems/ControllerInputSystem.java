@@ -9,10 +9,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
-import com.badlogic.gdx.controllers.PovDirection;
-import com.badlogic.gdx.controllers.mappings.Xbox;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
@@ -21,16 +18,23 @@ import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.EngineConfig;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.menu.GameMenu;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.math.MyMath;
-import com.spaceproject.utility.SimpleTimer;
 
 public class ControllerInputSystem extends EntitySystem implements ControllerListener {
     
+    private float leftStickHorAxis;
+    private float leftStickVertAxis;
+    private float rightStickHorAxis;
+    private float rightStickVertAxis;
+    private final float deadZone = 0.25f;
+    private final float camFocusMultiplier = 0.05f;
+    //private SimpleTimer doubleTap = new SimpleTimer(1000);
     private ImmutableArray<Entity> players;
+    
     
     public ControllerInputSystem() {
         Controllers.addListener(this);
@@ -40,8 +44,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         }
     }
     
-    private SimpleTimer doubleTap = new SimpleTimer(1000);
-    private boolean playerControls(int buttonCode, boolean buttonDown) {
+    private boolean playerControls(Controller controller, int buttonCode, boolean buttonDown) {
         Gdx.app.log(this.getClass().getSimpleName(), "button: " + buttonCode + ": " + buttonDown);
         
         if (players.size() == 0)
@@ -50,40 +53,40 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         boolean handled = false;
         
         ControllableComponent control = Mappers.controllable.get(players.first());
-    
-        if (buttonCode == Xbox.A) {
+        
+        if (buttonCode == controller.getMapping().buttonA) {
             control.attack = buttonDown;
             handled = true;
         }
-        if (buttonCode == Xbox.B) {
+        if (buttonCode == controller.getMapping().buttonB) {
             ShieldComponent shield = Mappers.shield.get(players.first());
             if (shield != null) {
                 shield.defend = buttonDown;
                 handled = true;
             }
         }
-        if (buttonCode == Xbox.Y) {
+        if (buttonCode == controller.getMapping().buttonY) {
             control.changeVehicle = buttonDown;
             handled = true;
         }
-        if (buttonCode == Xbox.X) {
+        if (buttonCode == controller.getMapping().buttonX) {
             control.alter = buttonDown;
             handled = true;
         }
     
-        if (buttonCode == Xbox.DPAD_UP) {
+        if (buttonCode == controller.getMapping().buttonDpadUp) {
             HyperDriveComponent hyperDrive = Mappers.hyper.get(players.first());
             if (hyperDrive != null) {
                 hyperDrive.activate = buttonDown;
                 handled = true;
             }
         }
-        if (buttonCode == Xbox.DPAD_DOWN) {
+        if (buttonCode == controller.getMapping().buttonDpadDown) {
             control.transition = buttonDown;
             handled = true;
         }
         
-        if (buttonCode == Xbox.R_BUMPER) {
+        if (buttonCode == controller.getMapping().buttonR1) {
             control.movementMultiplier = 1;
             control.moveRight = buttonDown;
             
@@ -106,16 +109,16 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             
             handled = true;
         }
-        if (buttonCode == Xbox.L_BUMPER) {
+        if (buttonCode == controller.getMapping().buttonL1) {
             control.movementMultiplier = 1;
             control.moveLeft = buttonDown;
             //control.alter = buttonDown;
             handled = true;
         }
         
-        if (buttonCode == Xbox.START) {
-            GameMenu menu = getEngine().getSystem(HUDSystem.class).getGameMenu();
+        if (buttonCode == controller.getMapping().buttonStart) {
             if (buttonDown) {
+                GameMenu menu = getEngine().getSystem(HUDSystem.class).getGameMenu();
                 if (!menu.isVisible()) {
                     menu.show();
                 } else {
@@ -126,26 +129,52 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             handled = true;
         }
         
-        if (buttonCode == Xbox.R_STICK) {
-            //reset cam
-            Entity player = players.first();
-            CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
-            if (cameraFocus != null) {
-                GameScreen.resetCamera();
-                EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
-                if (player.getComponent(VehicleComponent.class) != null) {
-                    cameraFocus.zoomTarget = engineConfig.defaultZoomVehicle;
-                } else {
-                    cameraFocus.zoomTarget = engineConfig.defaultZoomCharacter;
+        if ((buttonCode == controller.getMapping().buttonRightStick) && buttonDown) {
+                //reset cam
+                Entity player = players.first();
+                CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
+                if (cameraFocus != null) {
+                    GameScreen.resetCamera();
+                    EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
+                    if (player.getComponent(VehicleComponent.class) != null) {
+                        cameraFocus.zoomTarget = engineConfig.defaultZoomVehicle;
+                    } else {
+                        cameraFocus.zoomTarget = engineConfig.defaultZoomCharacter;
+                    }
+                    return true;
                 }
-                return true;
             }
-        }
-        
         
         return handled;
     }
     
+    @Override
+    public void update(float deltaTime) {
+        super.update(deltaTime);
+    
+        float dist = Math.abs(MyMath.distance(0, 0, leftStickHorAxis, leftStickVertAxis));
+        ControllableComponent control = Mappers.controllable.get(players.first());
+        if (dist >= deadZone) {
+            control.angleTargetFace = MyMath.angle2(0, 0, -leftStickVertAxis, leftStickHorAxis);
+            control.movementMultiplier = MathUtils.clamp(dist, 0, 1);
+            control.moveForward = true;
+        } else {
+            control.moveForward = false;
+        }
+        
+        if (Math.abs(rightStickVertAxis) >= deadZone) {
+            Gdx.app.log(this.getClass().getSimpleName(), rightStickVertAxis + " - right vert");
+        
+            if (players.size() != 0) {
+                Entity player = players.first();
+                CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
+                if (cameraFocus != null) {
+                    float scrollAmount = rightStickVertAxis * camFocusMultiplier * MyScreenAdapter.cam.zoom;
+                    cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
+                }
+            }
+        }
+    }
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -164,98 +193,37 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
 
     @Override
     public boolean buttonDown(Controller controller, int buttonCode) {
-        return playerControls(buttonCode, true);
+        return playerControls(controller, buttonCode, true);
     }
     
     @Override
     public boolean buttonUp(Controller controller, int buttonCode) {
-        return playerControls(buttonCode, false);
+        return playerControls(controller, buttonCode, false);
     }
-    
-    
-    float leftStickHorAxis;
-    float leftStickVertAxis;
-    float rightStickHorAxis;
-    float rightStickVertAxis;
-    float dist;
     
     @Override
     public boolean axisMoved(Controller controller, int axisCode, float value) {
         //Gdx.app.log(this.getClass().getSimpleName(), controller.getName() + ":" + axisCode + ": " + value);
-        float deadZone = 0.25f;
-        //controller.getMapping()
 
-        if (axisCode == Xbox.L_STICK_HORIZONTAL_AXIS) {
-            //if (value >= deadZone) {
-                leftStickHorAxis = value;
-            //}
+        if (axisCode == controller.getMapping().axisLeftX) {
+            leftStickHorAxis = value;
             Gdx.app.log(this.getClass().getSimpleName(), "left horizontal " + value);
         }
-        if (axisCode == Xbox.L_STICK_VERTICAL_AXIS) {
-            //if (value >= deadZone) {
-                leftStickVertAxis = value;
-            //}
+        if (axisCode == controller.getMapping().axisLeftY) {
+            leftStickVertAxis = value;
             Gdx.app.log(this.getClass().getSimpleName(), "left vertical " + value);
         }
-        
-        //Gdx.app.log(this.getClass().getSimpleName(), "d " + dist);
-        
     
-        dist = MyMath.distance(0, 0, leftStickHorAxis, leftStickVertAxis);
-        ControllableComponent control = Mappers.controllable.get(players.first());
-        if (dist >= deadZone) {
-            Gdx.app.log(this.getClass().getSimpleName(), controller.getName() + " left stick > deadZone: " + axisCode + ": " + value);
-            control.angleTargetFace = MyMath.angle2(0, 0, -leftStickVertAxis, leftStickHorAxis);
-            control.movementMultiplier = MathUtils.clamp(dist, 0, 1);
-            control.moveForward = true;
-        } else {
-            control.moveForward = false;
-        }
         
         
-        if (axisCode == Xbox.R_STICK_HORIZONTAL_AXIS) {
+        
+        if (axisCode == controller.getMapping().axisRightX) {
             rightStickHorAxis = value;
         }
-        if (axisCode == Xbox.R_STICK_VERTICAL_AXIS) {
+        if (axisCode == controller.getMapping().axisRightY) {
             rightStickVertAxis = value;
-            if (rightStickVertAxis >= deadZone) {
-                Gdx.app.log(this.getClass().getSimpleName(), rightStickVertAxis + " - right vert");
-    
-                if (players.size() != 0) {
-                    Entity player = players.first();
-                    CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
-                    if (cameraFocus != null) {
-                        float scrollAmount = rightStickHorAxis * MyScreenAdapter.cam.zoom / 2;
-                        //cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
-                    }
-                }
-            }
         }
-
-        return false;
-    }
-    
-    @Override
-    public boolean povMoved(Controller controller, int povCode, PovDirection value) {
-        //Gdx.app.log(this.getClass().getSimpleName(), povCode + " " + value);
-        return false;
-    }
-    
-    @Override
-    public boolean xSliderMoved(Controller controller, int sliderCode, boolean value) {
-        //Gdx.app.log(this.getClass().getSimpleName(), sliderCode + " " + value);
-        return false;
-    }
-    
-    @Override
-    public boolean ySliderMoved(Controller controller, int sliderCode, boolean value) {
-        //Gdx.app.log(this.getClass().getSimpleName(), sliderCode + " " + value);
-        return false;
-    }
-    
-    @Override
-    public boolean accelerometerMoved(Controller controller, int accelerometerCode, Vector3 value) {
-        //Gdx.app.log(this.getClass().getSimpleName(), accelerometerCode + " " + value);
+        
         return false;
     }
     

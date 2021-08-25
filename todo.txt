@@ -254,13 +254,15 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [ ] explosion effect on ship destroy
     [ ] controls
         [x] basic controller input
-            [ ] allow hot-plugging, multiplexer? and what about stage...
-            [ ] crashes title screen after return to menu from game, looks like systems still loaded (unhook listners?)
-            [...] basic Xbox 360 support
-                [ ] not detecting DPAD buttons
-                [ ] double tap right left bumpers for barrel roll
-                [...] right stick camera control, click to reset
-            [ ] move to getMapping() but seems im on an older lib?
+            [x] allow hot-plugging
+            [ ] multiplexer? and what about stage...
+            [x] crashes title screen after return to menu from game, looks like systems still loaded (unhook listners?)
+             cant repro, seems fixed
+            [x] basic Xbox 360 support
+                [x] not detecting DPAD buttons
+                [...] double tap right left bumpers for barrel roll
+                [x] right stick camera control, click to reset
+            [x] move to getMapping() but seems im on an older lib?
                 https://github.com/MrStahlfelge/gdx-controllerutils/wiki/Configurable-Game-Controller-Mappings
                 https://github.com/libgdx/gdx-controllers/wiki/Migrate-from-v1
             [?] right trigger boost, similar to roll impulse?
