@@ -48,8 +48,8 @@ public class KeyConfig extends Config {
         right = Keys.D;
         left = Keys.A;
         back = Keys.S;
-        alter = Keys.SHIFT_LEFT;
-        activateShield = Keys.SPACE;
+        alter = Keys.SPACE;
+        activateShield = Keys.SHIFT_LEFT;
         changeVehicle = Keys.G;
         land = Keys.T;
         activateHyperDrive = Keys.NUM_1;

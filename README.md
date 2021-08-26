@@ -55,8 +55,8 @@ Actively...and painfully slowly...in progress... It doesn't even have sound and 
 | Movement                       | WASD         | Left Joystick                            | Left Joystick      |
 | Aim                            | Mouse        | Left Joystick                            | Left Joystick      |
 | Attack / Shoot                 | Right-Click  | bottom right button                      | A                  |
-| Defense / Shield               | Space        | todo: needs button                       | B                  |
-| Defense / Dodge (Barrel Roll)  | Shift + A/D  | todo: swipe gesture?                     | Right/Left Bumper  |
+| Defense / Shield               | Shift        | todo: needs button                       | B                  |
+| Defense / Dodge (Barrel Roll)  | Space + A/D  | todo: swipe gesture?                     | Right/Left Bumper  |
 | Toggle HyperDrive              | 1            | todo: needs button                       | D-Pad Up           |
 | Land/Take Off                  | T            | top center when over planet              | D-Pad Down         |
 | Enter/Exit vehicle             | G            | bottom right small button when in/near vehicle | Y            |
