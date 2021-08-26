@@ -151,16 +151,6 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
-    
-        float dist = Math.abs(MyMath.distance(0, 0, leftStickHorAxis, leftStickVertAxis));
-        ControllableComponent control = Mappers.controllable.get(players.first());
-        if (dist >= deadZone) {
-            control.angleTargetFace = MyMath.angle2(0, 0, -leftStickVertAxis, leftStickHorAxis);
-            control.movementMultiplier = MathUtils.clamp(dist, 0, 1);
-            control.moveForward = true;
-        } else {
-            control.moveForward = false;
-        }
         
         if (Math.abs(rightStickVertAxis) >= deadZone) {
             Gdx.app.log(this.getClass().getSimpleName(), rightStickVertAxis + " - right vert");
@@ -214,7 +204,15 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             Gdx.app.log(this.getClass().getSimpleName(), "left vertical " + value);
         }
     
-        
+        ControllableComponent control = Mappers.controllable.get(players.first());
+        float dist = Math.abs(MyMath.distance(0, 0, leftStickHorAxis, leftStickVertAxis));
+        if (dist >= deadZone) {
+            control.angleTargetFace = MyMath.angle2(0, 0, -leftStickVertAxis, leftStickHorAxis);
+            control.movementMultiplier = MathUtils.clamp(dist, 0, 1);
+            control.moveForward = true;
+        } else {
+            control.moveForward = false;
+        }
         
         
         if (axisCode == controller.getMapping().axisRightX) {
