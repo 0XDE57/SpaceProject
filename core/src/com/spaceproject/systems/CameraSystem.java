@@ -14,8 +14,12 @@ public class CameraSystem extends IteratingSystem {
     
     private final OrthographicCamera cam;
     
-    private float zoomSpeed = 3;//todo: move to engine config
+    private final float zoomSpeed = 3;
     //private static float panSpeed/panTarget(lerp to entity)
+    private final float zoomSetThreshold = 0.2f;
+    private final float minZoom = 0.001f;
+    private final float maxZoom = 100000;
+    
     
     public CameraSystem() {
         super(Family.all(CameraFocusComponent.class, TransformComponent.class).get());
@@ -36,18 +40,17 @@ public class CameraSystem extends IteratingSystem {
     }
     
     private void animateZoom(float delta, float zoomTarget) {
-        //todo: pan / zoom speed, pan / zoom interpolation curve
         if (cam.zoom != zoomTarget) {
             //zoom in/out
             float scaleSpeed = zoomSpeed * delta;
             cam.zoom += (cam.zoom < zoomTarget) ? scaleSpeed : -scaleSpeed;
             
             //if zoom is close enough, just set it to target
-            if (Math.abs(cam.zoom - zoomTarget) < 0.2) {
+            if (Math.abs(cam.zoom - zoomTarget) < zoomSetThreshold) {
                 cam.zoom = zoomTarget;
             }
         }
-        cam.zoom = MathUtils.clamp(cam.zoom, 0.001f, 100000);
+        cam.zoom = MathUtils.clamp(cam.zoom, minZoom, maxZoom);
     }
     
     /**
