@@ -99,7 +99,7 @@ public class SystemsConfig extends Config {
     
     public SysCFG getConfig(String className) {
         for (SysCFG sys : systems) {
-            if (sys.getClassName() == className)
+            if (sys.getClassName().equals(className))
                 return sys;
         }
         
