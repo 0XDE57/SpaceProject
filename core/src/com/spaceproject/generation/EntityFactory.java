@@ -332,14 +332,12 @@ public class EntityFactory {
         seedComp.seed = seed;
         entity.add(seedComp);
         
-        
         //transform
         TransformComponent transform = new TransformComponent();
         transform.pos.set(x, y);
         transform.zOrder = RenderOrder.VEHICLES.getHierarchy();
         transform.rotation = (float) Math.PI / 2; //face upwards
         entity.add(transform);
-        
         
         //generate 3D sprite with random even size
         int shipSize = MathUtils.random(entityCFG.shipSizeMin, entityCFG.shipSizeMax) * 2;
@@ -349,7 +347,6 @@ public class EntityFactory {
         sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom, engineCFG.sprite3DScale);
         entity.add(sprite3DComp);
         
-        
         //collision detection
         PhysicsComponent physics = new PhysicsComponent();
         float width = shipTop.getWidth() * engineCFG.bodyScale;
@@ -357,20 +354,17 @@ public class EntityFactory {
         physics.body = BodyFactory.createShip(x, y, width, height, entity, inSpace);
         entity.add(physics);
         
-        
         //engine data and marks entity as drive-able
         VehicleComponent vehicle = new VehicleComponent();
         vehicle.driver = driver;
         vehicle.thrust = entityCFG.engineThrust;
         entity.add(vehicle);
         
-        
         //health
         HealthComponent health = new HealthComponent();
         health.maxHealth = entityCFG.shipHealth;
         health.health = health.maxHealth;
         entity.add(health);
-        
         
         //weapon
         if (MathUtils.randomBoolean()) {
@@ -398,14 +392,12 @@ public class EntityFactory {
             entity.add(chargeCannon);
         }
         
-        
         //hyper drive
         HyperDriveComponent hyperDrive = new HyperDriveComponent();
         hyperDrive.speed = entityCFG.hyperSpeed;
         hyperDrive.coolDownTimer = new SimpleTimer(entityCFG.controlTimerHyperCooldown, true);
         hyperDrive.coolDownTimer.setCanDoEvent();
         entity.add(hyperDrive);
-        
         
         //shield
         ShieldComponent shield = new ShieldComponent();
@@ -417,7 +409,6 @@ public class EntityFactory {
         shield.color = Color.BLUE;
         entity.add(shield);
         
-        
         //barrel roll
         BarrelRollComponent barrelRoll = new BarrelRollComponent();
         barrelRoll.timeoutTimer = new SimpleTimer(entityCFG.dodgeTimeout);
@@ -426,7 +417,12 @@ public class EntityFactory {
         barrelRoll.dir = BarrelRollComponent.FlipDir.none;
         barrelRoll.force = entityCFG.dodgeForce;
         entity.add(barrelRoll);
-    
+        
+        //dash
+        DashComponent dash = new DashComponent();
+        dash.dashSpeed = 10f;
+        dash.dashTimeout = new SimpleTimer(2000);
+        entity.add(dash);
         
         //particle
         ParticleComponent particle = new ParticleComponent();
@@ -434,13 +430,11 @@ public class EntityFactory {
         particle.offset = new Vector2(0, height + 0.2f);
         entity.add(particle);
         
-        
         //map
         MapComponent map = new MapComponent();
         map.color = new Color(1, 1, 1, 0.9f);
         map.distance = 3000;
         entity.add(map);
-        
         
         return entity;
     }

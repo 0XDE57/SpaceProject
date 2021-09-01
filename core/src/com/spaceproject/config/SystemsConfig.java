@@ -37,7 +37,7 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(AISystem.class, 30, true, true, true, true, true));
         
         systems.add(new SysCFG(CharacterControlSystem.class, 40, true, true, true, true, true));
-        systems.add(new SysCFG(DashSystem.class, 41, true, false, true, true, true));
+        systems.add(new SysCFG(DashSystem.class, 41, true, true, true, true, true));
         
         systems.add(new SysCFG(ShipControlSystem.class, 50, true, true, true, true, true));
         systems.add(new SysCFG(BarrelRollSystem.class, 52, true, true, true, true, true));

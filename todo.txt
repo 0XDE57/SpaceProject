@@ -216,6 +216,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [ ] should not activate while hyperdrive active
         [ ] should not activate during screen transition
         [ ] needs control for mobile
+    [x] dash
     [...] grow cannon
         [x] tune damage
         [x] tune size
@@ -239,6 +240,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
             [...] split into update and render?
             [ ] bug now looks like one particle ahead (animation beginning in front of ship while at high velocity)
         [...] engine fire effect
+            [ ] should be a large burst when dash and barrel roll activated
             [ ] should engine particle layer be affected bymmm
             [ ] could look better (tune colors and properties)
             [ ] looks wrong when facing direction opposite of velocity (relative?)
@@ -246,7 +248,8 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
             [ ] rotate?
         [...] absorb effect when charging charge cannon
             [ ] should not drift when rotating
-            [ ] should not drift when moving (absorb, locked to charge itself, not relative to ship movement)
+            [ ] should not drift when moving (absorb, locked to charge itself, not relative to ship movement?)
+                particle should chase bullet instead of moving towards spawn origin which is no longer the bullets location
         [ ] alternate engine particle effect when hyperdrive active
         [ ] absorb effect when charging shield
         [ ] charge burst effect when bullet destroyed (absorb reversed)
@@ -643,8 +646,12 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
             [OUT_OF_SCOPE] Laser cannon
     [ ] engine mode:
             [x] local/combat (slow, for interacting with object near, landing planets, fighting)
+                defined as max 60. over goes to cruise mode
             [...] travel/cruise (medium, for navigating within a system, planet to planet, avoid/escape, faster travel)
-            [ ] hyper/warp   (fast, warp to other systems, can't turn, can't fight)
+                defined as 60 - 120. 120 is box2d engine max with current physics settings.
+                use of shield or weapon should auto return you to combat speed
+            [x] hyper/warp   (fast, warp to other systems, can't turn, can't fight)
+                activated by [T]
     [OUT_OF_SCOPE] might be cool to have a hover mode for floating around on planet:
         - alternate flight scheme and feel, intended for traveling around the planet quickly
         - only move when forward, back, left, right, hovers VTOL(vertical take-off and landing) style
