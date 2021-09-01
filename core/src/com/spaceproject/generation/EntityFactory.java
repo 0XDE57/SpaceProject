@@ -19,6 +19,7 @@ import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.DashComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.MapComponent;
@@ -77,6 +78,11 @@ public class EntityFactory {
         health.maxHealth = entityCFG.characterHealth;
         health.health = health.maxHealth;
         entity.add(health);
+    
+        DashComponent dash = new DashComponent();
+        dash.dashSpeed = 3f;
+        dash.dashTimeout = new SimpleTimer(1000);
+        entity.add(dash);
         
         ControllableComponent control = new ControllableComponent();
         control.timerVehicle = new SimpleTimer(entityCFG.controlTimerVehicle);

@@ -12,6 +12,7 @@ import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DamageComponent;
+import com.spaceproject.components.DashComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.HyperDriveComponent;
@@ -41,6 +42,7 @@ public class Mappers {
     public static final ComponentMapper<ControlFocusComponent> controlFocus = ComponentMapper.getFor(ControlFocusComponent.class);
     public static final ComponentMapper<ControllableComponent> controllable = ComponentMapper.getFor(ControllableComponent.class);
     public static final ComponentMapper<DamageComponent> damage = ComponentMapper.getFor(DamageComponent.class);
+    public static final ComponentMapper<DashComponent> dash = ComponentMapper.getFor(DashComponent.class);
     public static final ComponentMapper<ExpireComponent> expire = ComponentMapper.getFor(ExpireComponent.class);
     public static final ComponentMapper<HealthComponent> health = ComponentMapper.getFor(HealthComponent.class);
     public static final ComponentMapper<HyperDriveComponent> hyper = ComponentMapper.getFor(HyperDriveComponent.class);

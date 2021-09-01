@@ -12,6 +12,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.DashComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.VehicleComponent;
@@ -79,6 +80,13 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             handled = true;
         }
     
+        if (keycode == keyCFG.dash) {
+            DashComponent dash = Mappers.dash.get(players.first());
+            if (dash != null) {
+                dash.activate = keyDown;
+                handled = true;
+            }
+        }
         
         if (keycode == keyCFG.activateShield) {
             ShieldComponent shield = Mappers.shield.get(players.first());
