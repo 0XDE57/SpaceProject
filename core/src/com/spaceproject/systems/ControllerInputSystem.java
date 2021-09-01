@@ -14,6 +14,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.DashComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.VehicleComponent;
@@ -32,6 +33,9 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     private float rightStickVertAxis;
     private final float deadZone = 0.25f;
     private final float camFocusMultiplier = 0.05f;
+    //4 & 5 don't seem to be in controller.getMapping()
+    private final int xboxControllerLeftTrigger = 4;
+    private final int xboxControllerRightTrigger = 5;
     //private SimpleTimer doubleTap = new SimpleTimer(1000);
     private ImmutableArray<Entity> players;
     
@@ -45,7 +49,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     }
     
     private boolean playerControls(Controller controller, int buttonCode, boolean buttonDown) {
-        Gdx.app.log(this.getClass().getSimpleName(), "button: " + buttonCode + ": " + buttonDown);
+        //Gdx.app.log(this.getClass().getSimpleName(), "button: " + buttonCode + ": " + buttonDown);
         
         if (players.size() == 0)
             return false;
@@ -54,9 +58,13 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         
         ControllableComponent control = Mappers.controllable.get(players.first());
         
+        
         if (buttonCode == controller.getMapping().buttonA) {
-            control.attack = buttonDown;
-            handled = true;
+            DashComponent dash = Mappers.dash.get(players.first());
+            if (dash != null) {
+                dash.activate = buttonDown;
+                handled = true;
+            }
         }
         if (buttonCode == controller.getMapping().buttonB) {
             ShieldComponent shield = Mappers.shield.get(players.first());
@@ -153,7 +161,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         super.update(deltaTime);
         
         if (Math.abs(rightStickVertAxis) >= deadZone) {
-            Gdx.app.log(this.getClass().getSimpleName(), rightStickVertAxis + " - right vert");
+            //Gdx.app.log(this.getClass().getSimpleName(), rightStickVertAxis + " - right vert");
         
             if (players.size() != 0) {
                 Entity player = players.first();
@@ -193,18 +201,22 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     
     @Override
     public boolean axisMoved(Controller controller, int axisCode, float value) {
-        //Gdx.app.log(this.getClass().getSimpleName(), controller.getName() + ":" + axisCode + ": " + value);
+        //Gdx.app.log(this.getClass().getSimpleName(), controller.getName() + ": " + axisCode + ": " + value);
 
         if (axisCode == controller.getMapping().axisLeftX) {
             leftStickHorAxis = value;
-            Gdx.app.log(this.getClass().getSimpleName(), "left horizontal " + value);
+            //Gdx.app.log(this.getClass().getSimpleName(), "left horizontal " + value);
         }
         if (axisCode == controller.getMapping().axisLeftY) {
             leftStickVertAxis = value;
-            Gdx.app.log(this.getClass().getSimpleName(), "left vertical " + value);
+            //Gdx.app.log(this.getClass().getSimpleName(), "left vertical " + value);
         }
     
         ControllableComponent control = Mappers.controllable.get(players.first());
+        if (axisCode == xboxControllerRightTrigger) {
+            control.attack = (value > 0);
+        }
+        
         float dist = Math.abs(MyMath.distance(0, 0, leftStickHorAxis, leftStickVertAxis));
         if (dist >= deadZone) {
             control.angleTargetFace = MyMath.angle2(0, 0, -leftStickVertAxis, leftStickHorAxis);
