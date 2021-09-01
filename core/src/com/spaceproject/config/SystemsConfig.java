@@ -87,6 +87,10 @@ public class SystemsConfig extends Config {
         
         systems.add(new SysCFG(DebugSystem.class, 900, false, true, true, true, true));
         
+        
+        //Should always be last system fired. This is where entities flagged with the removal component are removed from engine
+        //and resources are auto-disposed. Any systems processed after this should be careful if they rely
+        //on disposable data (eg: Textures) once an entity has been removed from the engine.
         systems.add(new SysCFG(RemovalSystem.class, 1000, false, true, true, true, true));
     }
     
