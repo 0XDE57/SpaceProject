@@ -7,7 +7,7 @@ import com.spaceproject.utility.SimpleTimer;
 public class DashComponent implements Component {
     
     public boolean activate;
-    public float dashSpeed;
+    public float impulse;
     public SimpleTimer dashTimeout;
     
 }

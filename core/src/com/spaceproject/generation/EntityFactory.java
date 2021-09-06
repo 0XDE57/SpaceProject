@@ -80,7 +80,7 @@ public class EntityFactory {
         entity.add(health);
     
         DashComponent dash = new DashComponent();
-        dash.dashSpeed = 3f;
+        dash.impulse = 3f;
         dash.dashTimeout = new SimpleTimer(1000);
         entity.add(dash);
         
@@ -420,7 +420,7 @@ public class EntityFactory {
         
         //dash
         DashComponent dash = new DashComponent();
-        dash.dashSpeed = 10f;
+        dash.impulse = 10f;
         dash.dashTimeout = new SimpleTimer(2000);
         entity.add(dash);
         

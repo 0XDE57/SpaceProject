@@ -24,7 +24,7 @@ public class DashSystem extends IteratingSystem {
             ControllableComponent control = Mappers.controllable.get(entity);
             Body body = Mappers.physics.get(entity).body;
             
-            Vector2 impulse = MyMath.vector(control.angleTargetFace, dash.dashSpeed);
+            Vector2 impulse = MyMath.vector(control.angleTargetFace, dash.impulse);
             body.applyLinearImpulse(impulse, body.getPosition(), true);
         }
     }
