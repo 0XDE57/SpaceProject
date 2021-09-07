@@ -14,7 +14,7 @@ import com.spaceproject.utility.Mappers;
 public class DashSystem extends IteratingSystem {
     
     public DashSystem() {
-        super(Family.all(DashComponent.class, PhysicsComponent.class).get());
+        super(Family.all(DashComponent.class, PhysicsComponent.class, ControllableComponent.class).get());
     }
     
     @Override
