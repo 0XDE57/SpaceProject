@@ -22,7 +22,6 @@ import com.spaceproject.utility.Mappers;
 public class ParticleSystem extends IteratingSystem implements EntityListener {
     
     SpriteBatch spriteBatch;
-    
     ParticleEffect fireEffect;
     ParticleEffectPool fireEffectPool;
     ParticleEffect chargeEffect;
@@ -61,65 +60,72 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
         }
         
         switch (particle.type) {
-            case shipEngine: {
-                ControllableComponent control = Mappers.controllable.get(entity);
-                if (control != null) {
-                    if (control.moveForward) {
-                        particle.pooledEffect.start();
-                    } else {
-                        particle.pooledEffect.allowCompletion();
-                    }
-                } else {
-                    particle.pooledEffect.allowCompletion();
-                }
+            case shipEngine:
+                updateEngineParticle(entity, particle);
+                break;
+            case bulletCharge:
+                updateChargeParticle(entity, particle);
+                break;
+        }
+        
+        particle.pooledEffect.draw(spriteBatch, deltaTime);
+    }
     
-                TransformComponent transform = Mappers.transform.get(entity);
-                Array<ParticleEmitter> emitters = particle.pooledEffect.getEmitters();
-                float engineRotation = transform.rotation * MathUtils.radDeg + 180;
-                for (int i = 0; i < emitters.size; i++) {
-                    ParticleEmitter.ScaledNumericValue val = emitters.get(i).getAngle();
-                    val.setHigh(engineRotation);
-                    val.setLow(engineRotation);
-                }
-                particle.offset.setAngleDeg(engineRotation);
-                particle.pooledEffect.setPosition(transform.pos.x + particle.offset.x, transform.pos.y + particle.offset.y);
-                break;
+    private void updateEngineParticle(Entity entity, ParticleComponent particle) {
+        ControllableComponent control = Mappers.controllable.get(entity);
+        if (control != null) {
+            if (control.moveForward) {
+                particle.pooledEffect.start();
+            } else {
+                particle.pooledEffect.allowCompletion();
             }
-            case bulletCharge: {
-                ChargeCannonComponent cannon = Mappers.chargeCannon.get(entity);
-                if (cannon != null) {
-                    if (cannon.isCharging) {
-                        particle.pooledEffect.start();
-                    } else {
-                        particle.pooledEffect.allowCompletion();
-                    }
-                }
-                
-                //ensure particles always drift towards current bullet location as if attracted by gravity
-                //using wind to modify velocity on the X axis, and gravity for the Y axis
-                //  velocityX += (particle.wind + particle.windDiff * windValue.getScale(percent)) * delta;
-                //  velocityY += (particle.gravity + particle.gravityDiff * gravityValue.getScale(percent)) * delta;
-                TransformComponent transform = Mappers.transform.get(entity);
-                Array<ParticleEmitter> emitters = particle.pooledEffect.getEmitters();
-                float magnitude = 30; // + (1 * physics.body.getLinearVelocity())?
-                float velX = (transform.pos.x - emitters.get(0).getX()) * magnitude;
-                float velY = (transform.pos.y - emitters.get(0).getY()) * magnitude;
-                
-                particle.pooledEffect.setPosition(transform.pos.x, transform.pos.y);
-                
-                ParticleEmitter.ScaledNumericValue gravity = emitters.get(0).getGravity();
-                gravity.setActive(true);
-                gravity.setHigh(velY);
-                gravity.setLow(velY);
-                
-                ParticleEmitter.ScaledNumericValue wind = emitters.get(0).getWind();
-                wind.setActive(true);
-                wind.setHigh(velX);
-                wind.setLow(velX);
-                break;
+        } else {
+            particle.pooledEffect.allowCompletion();
+        }
+        
+        TransformComponent transform = Mappers.transform.get(entity);
+        Array<ParticleEmitter> emitters = particle.pooledEffect.getEmitters();
+        float engineRotation = transform.rotation * MathUtils.radDeg + 180;
+        for (int i = 0; i < emitters.size; i++) {
+            ParticleEmitter.ScaledNumericValue val = emitters.get(i).getAngle();
+            val.setHigh(engineRotation);
+            val.setLow(engineRotation);
+        }
+        particle.offset.setAngleDeg(engineRotation);
+        particle.pooledEffect.setPosition(transform.pos.x + particle.offset.x, transform.pos.y + particle.offset.y);
+    }
+    
+    private void updateChargeParticle(Entity entity, ParticleComponent particle) {
+        ChargeCannonComponent cannon = Mappers.chargeCannon.get(entity);
+        if (cannon != null) {
+            if (cannon.isCharging) {
+                particle.pooledEffect.start();
+            } else {
+                particle.pooledEffect.allowCompletion();
             }
         }
-        particle.pooledEffect.draw(spriteBatch, deltaTime);
+        
+        //ensure particles always drift towards current bullet location as if attracted by gravity
+        //using wind to modify velocity on the X axis, and gravity for the Y axis
+        //  velocityX += (particle.wind + particle.windDiff * windValue.getScale(percent)) * delta;
+        //  velocityY += (particle.gravity + particle.gravityDiff * gravityValue.getScale(percent)) * delta;
+        TransformComponent transform = Mappers.transform.get(entity);
+        Array<ParticleEmitter> emitters = particle.pooledEffect.getEmitters();
+        float magnitude = 30; // + (1 * physics.body.getLinearVelocity())?
+        float velX = (transform.pos.x - emitters.get(0).getX()) * magnitude;
+        float velY = (transform.pos.y - emitters.get(0).getY()) * magnitude;
+        
+        particle.pooledEffect.setPosition(transform.pos.x, transform.pos.y);
+        
+        ParticleEmitter.ScaledNumericValue gravity = emitters.get(0).getGravity();
+        gravity.setActive(true);
+        gravity.setHigh(velY);
+        gravity.setLow(velY);
+        
+        ParticleEmitter.ScaledNumericValue wind = emitters.get(0).getWind();
+        wind.setActive(true);
+        wind.setHigh(velX);
+        wind.setLow(velX);
     }
     
     @Override
