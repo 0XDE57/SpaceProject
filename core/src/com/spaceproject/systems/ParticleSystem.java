@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ParticleComponent;
@@ -19,7 +20,7 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
-public class ParticleSystem extends IteratingSystem implements EntityListener {
+public class ParticleSystem extends IteratingSystem implements EntityListener, Disposable {
     
     SpriteBatch spriteBatch;
     ParticleEffect fireEffect;
@@ -109,20 +110,20 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
         //using wind to modify velocity on the X axis, and gravity for the Y axis
         //  velocityX += (particle.wind + particle.windDiff * windValue.getScale(percent)) * delta;
         //  velocityY += (particle.gravity + particle.gravityDiff * gravityValue.getScale(percent)) * delta;
+        ParticleEmitter emitter = particle.pooledEffect.getEmitters().get(0);
         TransformComponent transform = Mappers.transform.get(entity);
-        Array<ParticleEmitter> emitters = particle.pooledEffect.getEmitters();
         float magnitude = 30; // + (1 * physics.body.getLinearVelocity())?
-        float velX = (transform.pos.x - emitters.get(0).getX()) * magnitude;
-        float velY = (transform.pos.y - emitters.get(0).getY()) * magnitude;
+        float velX = (transform.pos.x - emitter.getX()) * magnitude;
+        float velY = (transform.pos.y - emitter.getY()) * magnitude;
         
         particle.pooledEffect.setPosition(transform.pos.x, transform.pos.y);
         
-        ParticleEmitter.ScaledNumericValue gravity = emitters.get(0).getGravity();
+        ParticleEmitter.ScaledNumericValue gravity = emitter.getGravity();
         gravity.setActive(true);
         gravity.setHigh(velY);
         gravity.setLow(velY);
         
-        ParticleEmitter.ScaledNumericValue wind = emitters.get(0).getWind();
+        ParticleEmitter.ScaledNumericValue wind = emitter.getWind();
         wind.setActive(true);
         wind.setHigh(velX);
         wind.setLow(velX);
@@ -162,4 +163,9 @@ public class ParticleSystem extends IteratingSystem implements EntityListener {
         }
     }
     
+    @Override
+    public void dispose() {
+        fireEffect.dispose();
+        chargeEffect.dispose();
+    }
 }

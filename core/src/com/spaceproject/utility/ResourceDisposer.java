@@ -3,6 +3,7 @@ package com.spaceproject.utility;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
@@ -26,6 +27,12 @@ public class ResourceDisposer {
         if (physics != null) {
             physics.body.getWorld().destroyBody(physics.body);
             Gdx.app.debug("ResourceDisposer", "body destroyed: " + Misc.objString(entity));
+        }
+    
+        ParticleComponent particle = Mappers.particle.get(entity);
+        if (particle != null) {
+            particle.pooledEffect.dispose();
+            Gdx.app.debug("ResourceDisposer", "particle released: " + Misc.objString(entity));
         }
     }
     
