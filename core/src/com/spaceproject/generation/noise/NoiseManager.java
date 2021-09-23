@@ -12,9 +12,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class NoiseManager implements INoiseGenListener, Disposable {
     
-    private NoiseThreadPoolExecutor noiseThreadPool;
-    private LinkedBlockingQueue<NoiseBuffer> noiseBufferQueue;
-    private HashMap<Long, NoiseBuffer> loadedNoise;
+    private final NoiseThreadPoolExecutor noiseThreadPool;
+    private final LinkedBlockingQueue<NoiseBuffer> noiseBufferQueue;
+    private final HashMap<Long, NoiseBuffer> loadedNoise;
     
     public NoiseManager(int maxThreads) {
         noiseThreadPool = new NoiseThreadPoolExecutor(maxThreads);
