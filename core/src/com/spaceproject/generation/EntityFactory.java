@@ -423,7 +423,7 @@ public class EntityFactory {
         attached.parentEntity = parent;
         entity.add(attached);
         
-        //EngineComponent->thrust
+        //EngineComponent->thrust?
         
         ParticleComponent particle = new ParticleComponent();
         particle.type = type;

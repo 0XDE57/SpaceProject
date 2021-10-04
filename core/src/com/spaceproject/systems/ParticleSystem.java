@@ -57,9 +57,6 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         ParticleComponent particle = Mappers.particle.get(entity);
-        if (particle.pooledEffect == null) {
-            return;
-        }
         
         switch (particle.type) {
             case shipEngineMain:

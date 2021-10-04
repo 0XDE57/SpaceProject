@@ -33,7 +33,6 @@ public class ChargeCannonSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         ChargeCannonComponent chargeCannon = Mappers.chargeCannon.get(entity);
-        
         if (chargeCannon.isCharging) {
             //update position to be in front of ship
             updateChargePosition(chargeCannon, entity);
