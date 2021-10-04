@@ -239,14 +239,6 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [x] particlesystem and emitter components
         [...] rendering is lagging behind camera "drift bug" -> refactor rendering/system order.
             [...] split into update and render?
-            [ ] bug now looks like one particle ahead (animation beginning in front of ship while at high velocity)
-        [...] engine fire effect
-            [ ] should be a large burst when dash and barrel roll activated
-            [ ] should engine particle layer be affected bymmm
-            [ ] could look better (tune colors and properties)
-            [ ] looks wrong when facing direction opposite of velocity (relative?)
-            [ ] side to side engine
-            [ ] rotate?
         [...] absorb effect when charging charge cannon
             [ ] should not drift when rotating
             [ ] should not drift when moving (absorb, locked to charge itself, not relative to ship movement?)
