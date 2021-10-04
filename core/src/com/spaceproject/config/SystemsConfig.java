@@ -43,32 +43,31 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(BarrelRollSystem.class, 52, true, true, true, true, true));
         systems.add(new SysCFG(ShieldSystem.class, 53, true, true, true, true, true));
         systems.add(new SysCFG(CannonSystem.class, 55, true, true, true, true, true));
+        systems.add(new SysCFG(ChargeCannonSystem.class, 56, true, true, true, true, true));
         
         systems.add(new SysCFG(OrbitSystem.class, 60, true, true, false, true, true));
         systems.add(new SysCFG(WorldWrapSystem.class, 65, true, false, true, true, true));
         
         systems.add(new SysCFG(HyperDriveSystem.class, 69, true, true, true, true, true));
         systems.add(new SysCFG(FixedPhysicsSystem.class, 70, true, true, true, true, true));
-        systems.add(new SysCFG(ChargeCannonSystem.class, 71, true, true, true, true, true));
+        
     
     
         //----render----
         //todo: rendering pipeline
         // - screen clear
-        // - particle logic update
         // - cam update
         // - asteroid renderer -> shape render pre sprite
         // - sprite 2D renderer
         // - sprite 3D renderer
         // - shield renderer -> shape render post sprite (possible shader for glow? box2d-lights?)
         // - particle renderer -> post sprite
-        //todo: split into particle update and particle render (particles should render on top of sprites, but updates logic before camera update to fix drift)
         //could have multilayer rendering if needed in rendering pipeline: particle layer pre sprite (under sprites), particle layer post sprite (over sprites)
-        systems.add(new SysCFG(SpaceParallaxSystem.class, 86, true, true, false, true, true));
-        systems.add(new SysCFG(WorldRenderingSystem.class, 87, false, false, true, true, true));
-        systems.add(new SysCFG(CameraSystem.class, 90, false, true, true, true, true));
-        systems.add(new SysCFG(Sprite2DRenderSystem.class, 95, false, true, true, true, true));
-        systems.add(new SysCFG(Sprite3DRenderSystem.class, 96, false, true, true, true, true));
+        systems.add(new SysCFG(CameraSystem.class, 80, false, true, true, true, true));
+        systems.add(new SysCFG(SpaceParallaxSystem.class, 85, true, true, false, true, true));
+        systems.add(new SysCFG(WorldRenderingSystem.class, 86, false, false, true, true, true));
+        systems.add(new SysCFG(Sprite2DRenderSystem.class, 90, false, true, true, true, true));
+        systems.add(new SysCFG(Sprite3DRenderSystem.class, 91, false, true, true, true, true));
         systems.add(new SysCFG(ShieldRenderSystem.class, 100, false, true, true, true, true));
         systems.add(new SysCFG(ParticleSystem.class, 110, true, true, true, true, true));
         systems.add(new SysCFG(HUDSystem.class, 200, false, true, true, true, true));
