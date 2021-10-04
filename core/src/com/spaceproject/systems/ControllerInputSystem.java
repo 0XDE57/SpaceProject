@@ -60,6 +60,9 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         
         
         if (buttonCode == controller.getMapping().buttonA) {
+            control.attack = buttonDown;
+            handled = true;
+            
             DashComponent dash = Mappers.dash.get(players.first());
             if (dash != null) {
                 dash.activate = buttonDown;
@@ -213,9 +216,9 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         }
     
         ControllableComponent control = Mappers.controllable.get(players.first());
-        if (axisCode == xboxControllerRightTrigger) {
+        /*if (axisCode == xboxControllerRightTrigger) {
             control.attack = (value > 0);
-        }
+        }*/
         
         float dist = Math.abs(MyMath.distance(0, 0, leftStickHorAxis, leftStickVertAxis));
         if (dist >= deadZone) {
