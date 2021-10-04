@@ -3,8 +3,6 @@ package com.spaceproject.screens;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
-import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -12,6 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
@@ -30,7 +29,7 @@ import com.spaceproject.generation.Galaxy;
 import com.spaceproject.generation.noise.NoiseManager;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.systems.ScreenTransitionSystem;
-import com.spaceproject.utility.DebugUtil;
+import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
@@ -108,55 +107,43 @@ public class GameScreen extends MyScreenAdapter {
         //init content and entities
         galaxySeed = MyMath.getNewGalaxySeed();
         galaxy = new Galaxy();
-        
-        Entity playerShip = EntityFactory.createPlayerShip(0, 0, inSpace);
-        
-        
+    
+        Array<Entity> playerShipCluster = EntityFactory.createPlayerShip(0, 0, inSpace);
         //init systems
         if (inSpace) {
-            initSpace(playerShip);
+            initSpace(playerShipCluster);
         } else {
             Entity planet = EntityFactory.createPlanet(0, new Entity(), 0, false);
             Gdx.app.log(this.getClass().getSimpleName(), "DEBUG PLANET LOADED");
             
-            initWorld(playerShip, planet);
+            initWorld(playerShipCluster, planet);
         }
         
         gameTimeStart = System.nanoTime();
     }
     
     //region system loading
-    private void initSpace(Entity transitioningEntity) {
+    private void initSpace(Array<Entity> transitioningEntityCluster) {
         inSpace = true;
         
         SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
         SystemLoader.loadSystems(this, engine, inSpace, systemsCFG);
-    
-        /*
-        //set player position to last known planet position
-        Vector2 lastKnownPlanetPosition = Mappers.transform.get(currentPlanet).pos;
-        TransformComponent playerTransform = Mappers.transform.get(transitioningEntity);
-        Body playerBody = Mappers.physics.get(transitioningEntity).body;
-        playerTransform.pos.set(lastKnownPlanetPosition);
-        playerBody.setTransform(lastKnownPlanetPosition, MathUtils.random(MathUtils.PI2));
-        MyScreenAdapter.cam.position.set(lastKnownPlanetPosition, MyScreenAdapter.cam.position.z);
-        Gdx.app.debug(this.getClass().getSimpleName(), "Set entity to last known planet position: " + lastKnownPlanetPosition);
-        */
         
-        engine.addEntity(transitioningEntity);
+        for (Entity entity : transitioningEntityCluster) {
+            engine.addEntity(entity);
+        }
     
         currentPlanet = null;
     }
     
-    private void initWorld(Entity transitioningEntity, Entity planet) {
+    private void initWorld(Array<Entity> transitioningEntityCluster, Entity planet) {
         inSpace = false;
         currentPlanet = planet;
         
-        //Misc.printObjectFields(planet.getComponent(SeedComponent.class));
-        //Misc.printObjectFields(planet.getComponent(PlanetComponent.class));
+        Entity transitioningEntity = transitioningEntityCluster.first();
         Gdx.app.log(this.getClass().getSimpleName(), "Landing " + Misc.objString(transitioningEntity) + " on planet " + Misc.objString(planet));
-        DebugUtil.printEntity(transitioningEntity);
-        DebugUtil.printEntity(planet);
+        //DebugUtil.printEntity(transitioningEntity);
+        //DebugUtil.printEntity(planet);
         
     
         SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
@@ -164,16 +151,27 @@ public class GameScreen extends MyScreenAdapter {
         
         
         // add player
-        //TODo: this player init stuff is part of transition, should be part of sync / load process
         WorldConfig worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
         int mapSize = planet.getComponent(PlanetComponent.class).mapSize;
         int position = mapSize * worldCFG.tileSize / 2;//set position to middle of planet
         Body body = transitioningEntity.getComponent(PhysicsComponent.class).body;
         body.setTransform(position, position, body.getAngle());
-        engine.addEntity(transitioningEntity);
+        for (Entity entity : transitioningEntityCluster) {
+            engine.addEntity(entity);
+        }
     }
     
     public void switchScreen(Entity transEntity, Entity planet) {
+        /* what is this doing and why?
+        ImmutableArray<Entity> transEntities = engine.getEntitiesFor(Family.all(AttachedToComponent.class).get());
+        for (Entity e : transEntities) {
+            AttachedToComponent attached = Mappers.attachedTo.get(e);
+            if (transEntity == attached.parentEntity) {
+                Gdx.app.log(this.getClass().getSimpleName(), "REMOVING: " + Misc.objString(transEntity));
+                transEntity.add(new RemoveComponent());
+            }
+        }*/
+        
         if (Mappers.AI.get(transEntity) != null) {
             Gdx.app.log(this.getClass().getSimpleName(), "REMOVING: " + Misc.objString(transEntity));
             transEntity.add(new RemoveComponent());
@@ -189,21 +187,22 @@ public class GameScreen extends MyScreenAdapter {
             return;
         }
         
-        ImmutableArray<Entity> transitioningEntities = engine.getEntitiesFor(Family.all(ScreenTransitionComponent.class).get());
-        ResourceDisposer.disposeAllExcept(engine.getEntities(), transitioningEntities);
+        Array<Entity> transEntityCluster = ECSUtil.getAttachedEntities(engine, transEntity);
+        
+        ResourceDisposer.disposeAllExcept(engine.getEntities(), transEntityCluster);
         engine.removeAllEntities();//to fix family references when entities added to new engine
         
         ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(transEntity);
         if (inSpace) {
-            initWorld(transEntity, planet);
+            initWorld(transEntityCluster, planet);
         } else {
             screenTrans.planet = currentPlanet;
-            initSpace(transEntity);
+            initSpace(transEntityCluster);
         }
         ScreenTransitionSystem.nextStage(screenTrans);
     
     
-        adjustPhysics(transitioningEntities);
+        adjustPhysics(transEntityCluster);
         
         /*TODO: persist
         for (Entity relevantEntity : backgroundEngine.getEntities()) {
@@ -214,17 +213,20 @@ public class GameScreen extends MyScreenAdapter {
         resetCamera();
     }
     
-    private void adjustPhysics(ImmutableArray<Entity> entities) {
-        for (Entity e : entities) {
-            Body body = e.getComponent(PhysicsComponent.class).body;
-            if (inSpace) {
-                //no friction in space
-                body.setLinearDamping(0);
-                body.setAngularDamping(0);
-            } else {
-                //todo: move to values to engine/world config
-                body.setAngularDamping(30);
-                body.setLinearDamping(45);
+    private void adjustPhysics(Array<Entity> entities) {
+        for (Entity entity : entities) {
+            PhysicsComponent physicsComponent = Mappers.physics.get(entity);
+            if (physicsComponent != null) {
+                Body body = physicsComponent.body;
+                if (inSpace) {
+                    //no friction in space
+                    body.setLinearDamping(0);
+                    body.setAngularDamping(0);
+                } else {
+                    //todo: move to values to engine/world config
+                    body.setAngularDamping(30);
+                    body.setLinearDamping(45);
+                }
             }
         }
     }
@@ -338,8 +340,10 @@ public class GameScreen extends MyScreenAdapter {
         
         // clean up after self
         for (EntitySystem sys : engine.getSystems()) {
-            if (sys instanceof Disposable)
+            if (sys instanceof Disposable) {
+                Gdx.app.log(this.getClass().getSimpleName(), "Disposing: " + sys.getClass().getSimpleName());
                 ((Disposable) sys).dispose();
+            }
         }
         
         ResourceDisposer.disposeAll(engine.getEntities());

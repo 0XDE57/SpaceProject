@@ -66,12 +66,11 @@ public class SystemsConfig extends Config {
         //could have multilayer rendering if needed in rendering pipeline: particle layer pre sprite (under sprites), particle layer post sprite (over sprites)
         systems.add(new SysCFG(SpaceParallaxSystem.class, 86, true, true, false, true, true));
         systems.add(new SysCFG(WorldRenderingSystem.class, 87, false, false, true, true, true));
-        systems.add(new SysCFG(ParticleSystem.class, 88, true, true, true, true, true));
         systems.add(new SysCFG(CameraSystem.class, 90, false, true, true, true, true));
         systems.add(new SysCFG(Sprite2DRenderSystem.class, 95, false, true, true, true, true));
         systems.add(new SysCFG(Sprite3DRenderSystem.class, 96, false, true, true, true, true));
         systems.add(new SysCFG(ShieldRenderSystem.class, 100, false, true, true, true, true));
-        //systems.add(new SysCFG(ParticleRenderSystem.class, 101, false, true, true, true, true));
+        systems.add(new SysCFG(ParticleSystem.class, 110, true, true, true, true, true));
         systems.add(new SysCFG(HUDSystem.class, 200, false, true, true, true, true));
         
         systems.add(new SysCFG(ScreenTransitionSystem.class, 300, true, true, true, true, true));

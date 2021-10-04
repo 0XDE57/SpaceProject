@@ -3,6 +3,7 @@ package com.spaceproject.utility;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.Sprite3DComponent;
@@ -36,11 +37,10 @@ public class ResourceDisposer {
         }
     }
     
-    public static void disposeAllExcept(ImmutableArray<Entity> entities, ImmutableArray<Entity> ignoreEntities) {
+    public static void disposeAllExcept(ImmutableArray<Entity> entities, Array<Entity> ignoreEntities) {
         for (Entity entity : entities) {
             if (ignoreEntities != null && ignoreEntities.contains(entity, false)) {
                 Gdx.app.debug("ResourceDisposer", "Did not dispose: " + Misc.objString(entity));
-                
                 continue;
             }
             

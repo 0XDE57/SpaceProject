@@ -7,6 +7,6 @@ public class VehicleComponent implements Component {
     
     public Entity driver;
     
-    public float thrust;
+    public float thrust; //move to engine component as sub entity for ship?
     
 }

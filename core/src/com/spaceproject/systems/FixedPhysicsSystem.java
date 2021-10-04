@@ -19,7 +19,7 @@ import com.spaceproject.utility.PhysicsContactListener;
 // http://saltares.com/blog/games/fixing-your-timestep-in-libgdx-and-box2d/
 public class FixedPhysicsSystem extends EntitySystem {
     
-    private EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
+    private final EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     private final int velocityIterations = engineCFG.physicsVelocityIterations;
     private final int positionIterations = engineCFG.physicsPositionIterations;
     private final float timeStep = 1 / (float) engineCFG.physicsStepPerFrame;
@@ -35,7 +35,7 @@ public class FixedPhysicsSystem extends EntitySystem {
         entities = engine.getEntitiesFor(family);
     
         world = GameScreen.box2dWorld;
-        world.setContactListener(new PhysicsContactListener());
+        world.setContactListener(new PhysicsContactListener(engine));
     }
     
     @Override

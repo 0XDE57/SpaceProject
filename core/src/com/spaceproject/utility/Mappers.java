@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AISpawnComponent;
 import com.spaceproject.components.AstronomicalComponent;
+import com.spaceproject.components.AttachedToComponent;
 import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.BarycenterComponent;
 import com.spaceproject.components.CannonComponent;
@@ -34,6 +35,7 @@ public class Mappers {
     public static final ComponentMapper<AIComponent> AI = ComponentMapper.getFor(AIComponent.class);
     public static final ComponentMapper<AISpawnComponent> spawn = ComponentMapper.getFor(AISpawnComponent.class);
     public static final ComponentMapper<AstronomicalComponent> astro = ComponentMapper.getFor(AstronomicalComponent.class);
+    public static final ComponentMapper<AttachedToComponent> attachedTo = ComponentMapper.getFor(AttachedToComponent.class);
     public static final ComponentMapper<BarrelRollComponent> barrelRoll = ComponentMapper.getFor(BarrelRollComponent.class);
     public static final ComponentMapper<BarycenterComponent> barycenter = ComponentMapper.getFor(BarycenterComponent.class);
     public static final ComponentMapper<CannonComponent> cannon = ComponentMapper.getFor(CannonComponent.class);

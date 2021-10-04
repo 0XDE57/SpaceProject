@@ -7,7 +7,9 @@ import com.badlogic.gdx.math.Vector2;
 public class ParticleComponent implements Component {
     
     public enum EffectType {
-        shipEngine,
+        shipEngineMain,
+        shipEngineLeft,
+        shipEngineRight,
         bulletCharge
     }
     
@@ -16,5 +18,7 @@ public class ParticleComponent implements Component {
     public ParticleEffectPool.PooledEffect pooledEffect;
     
     public Vector2 offset;
+    
+    public float angle;
 
 }

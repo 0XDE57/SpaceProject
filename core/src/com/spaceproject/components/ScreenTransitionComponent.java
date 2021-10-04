@@ -16,7 +16,7 @@ public class ScreenTransitionComponent implements Component {
         grow,
         end;
         
-        private static TakeOffAnimStage[] vals = values();
+        private static final TakeOffAnimStage[] vals = values();
         
         public TakeOffAnimStage next() {
             return vals[(this.ordinal() + 1) % vals.length];
@@ -34,7 +34,7 @@ public class ScreenTransitionComponent implements Component {
         exit,
         end;
         
-        private static LandAnimStage[] vals = values();
+        private static final LandAnimStage[] vals = values();
         
         public LandAnimStage next() {
             return vals[(this.ordinal() + 1) % vals.length];

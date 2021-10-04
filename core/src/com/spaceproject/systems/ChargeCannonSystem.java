@@ -40,14 +40,13 @@ public class ChargeCannonSystem extends IteratingSystem {
         
             //accumulate size
             growCharge(chargeCannon);
-        }
-        
-        //use of shield will cancel charge
-        ShieldComponent shieldComponent = Mappers.shield.get(entity);
-        if ((shieldComponent != null && shieldComponent.state != ShieldComponent.State.off) && chargeCannon.isCharging) {
-            //kill charge, cancel shot
-            deactivate(chargeCannon);
-            return;
+            
+            //use of shield will kill charge, cancel shot
+            ShieldComponent shieldComponent = Mappers.shield.get(entity);
+            if (shieldComponent != null && shieldComponent.state != ShieldComponent.State.off) {
+                deactivate(chargeCannon);
+                return;
+            }
         }
         
         ControllableComponent control = Mappers.controllable.get(entity);

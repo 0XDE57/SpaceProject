@@ -25,8 +25,8 @@ import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.generation.AstroBody;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureFactory;
-import com.spaceproject.math.MyMath;
 import com.spaceproject.generation.noise.NoiseBuffer;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Tile;
 import com.spaceproject.utility.Mappers;
@@ -84,13 +84,20 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     
     public void initTestDebugMobs(Engine engine) {
         hasInit = true;
+        
         //a placeholder to add dummy objects for now
-        
-        engine.addEntity(EntityFactory.createBasicShip(-20, 40, GameScreen.inSpace()));
-        engine.addEntity(EntityFactory.createBasicShip(-30, 40, GameScreen.inSpace()));
-        engine.addEntity(EntityFactory.createBasicShip(-40, 40, GameScreen.inSpace()));
-        engine.addEntity(EntityFactory.createBasicShip(-60, 40, GameScreen.inSpace()));
-        
+        for (Entity e : EntityFactory.createBasicShip(-20, 40, GameScreen.inSpace())) {
+            engine.addEntity(e);
+        }
+        for (Entity e : EntityFactory.createBasicShip(-30, 40, GameScreen.inSpace())) {
+            engine.addEntity(e);
+        }
+        for (Entity e : EntityFactory.createBasicShip(-40, 40, GameScreen.inSpace())) {
+            engine.addEntity(e);
+        }
+        for (Entity e : EntityFactory.createBasicShip(-60, 40, GameScreen.inSpace())) {
+            engine.addEntity(e);
+        }
         
         Entity aiTest = EntityFactory.createCharacterAI(0, 40);
         Mappers.AI.get(aiTest).state = AIComponent.State.dumbwander;
@@ -202,14 +209,14 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         
         switch (MathUtils.random(2)) {
             case 0:
-                return createPlanetarySystem(x, y, seed);
+                return createPlanetarySystem(x, y);
             case 1:
-                return createBinarySystem(x, y, seed);
+                return createBinarySystem(x, y);
             case 2:
-                return EntityFactory.createRoguePlanet(x, y, seed);
+                return createRoguePlanet(x, y);
         }
         
-        return createPlanetarySystem(x, y, seed);
+        return createPlanetarySystem(x, y);
     }
     
     public Array<Entity> createPlanetarySystem(float x, float y) {
@@ -272,7 +279,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
             entities.add(planet);
         }
         
-        Gdx.app.log(this.getClass().getSimpleName(), "Planetary System: (" + x + ", " + y + ") Objects: " + (numPlanets));
+        Gdx.app.log(this.getClass().getSimpleName(), "Planetary System: [" + seed + "](" + x + ", " + y + ") Objects: " + (numPlanets));
         
         return entities;
         
@@ -303,37 +310,64 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         }
     }
     
+    public Array<Entity> createRoguePlanet(float x, float y) {
+        long seed = MyMath.getSeed(x, y);
+        return createRoguePlanet(x, y, seed);
+    }
+    
+    public Array<Entity> createRoguePlanet(float x, float y, long seed) {
+        MathUtils.random.setSeed(seed);
+        Array<Entity> entities = new Array<>();
+        
+        Entity planet = EntityFactory.createPlanet(seed, null, 0, MathUtils.randomBoolean());
+        planet.getComponent(OrbitComponent.class).tangentialSpeed = 0;
+        
+        BarycenterComponent barycenter = new BarycenterComponent();
+        barycenter.bodyType = BarycenterComponent.AstronomicalBodyType.roguePlanet;
+        planet.add(barycenter);
+        planet.getComponent(TransformComponent.class).pos.set(x, y);
+        
+        //add moon
+        boolean hasMoon = MathUtils.randomBoolean();
+        if (hasMoon) {
+            float moonDist = planet.getComponent(TextureComponent.class).texture.getWidth() * planet.getComponent(TextureComponent.class).scale * 2;
+            boolean rotDir = MathUtils.randomBoolean();
+            Entity moon = EntityFactory.createMoon(MyMath.getSeed(x, y + moonDist), planet, moonDist, rotDir);
+            entities.add(moon);
+        }
+        
+        entities.add(planet);
+        Gdx.app.log(this.getClass().getSimpleName(), "Rogue Planet: [" + seed + "](" + x + ", " + y + ")");
+        return entities;
+    }
+    
     public Array<Entity> createBinarySystem(float x, float y) {
         long seed = MyMath.getSeed(x, y);
         return createBinarySystem(x, y, seed);
     }
     
     public Array<Entity> createBinarySystem(float x, float y, long seed) {
-        
         Entity anchorEntity = new Entity();
+        
         SeedComponent seedComp = new SeedComponent();
         seedComp.seed = seed;
         anchorEntity.add(seedComp);
+        
         BarycenterComponent barycenter = new BarycenterComponent();
         barycenter.bodyType = BarycenterComponent.AstronomicalBodyType.multiStellar;
         anchorEntity.add(barycenter);
+        
         TransformComponent transform = new TransformComponent();
         transform.pos.set(x, y);
         anchorEntity.add(transform);
-        
-        
-        //distance between planets
-        float distance = celestCFG.maxPlanetSize * 2 + celestCFG.maxPlanetDist * 2; //add distance between stars
-        
-        //rotation of system (orbits and spins)
-        boolean rotDir = MathUtils.randomBoolean();
-        
-        //collection of planets/stars
-        Array<Entity> entities = new Array<Entity>();
+    
         
         //add stars
+        float distance = celestCFG.maxPlanetSize * 2 + celestCFG.maxPlanetDist * 2;
+        boolean rotDir = MathUtils.randomBoolean();
         float startAngle = MathUtils.random(MathUtils.PI2);
         float tangentialSpeed = MathUtils.random(celestCFG.minPlanetTangentialSpeed, celestCFG.maxPlanetTangentialSpeed);
+        
         Entity starA = EntityFactory.createStar(MyMath.getSeed(x + distance, y), x + distance, y, rotDir);
         OrbitComponent orbitA = starA.getComponent(OrbitComponent.class);
         orbitA.parent = anchorEntity;
@@ -349,11 +383,12 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         orbitB.tangentialSpeed = tangentialSpeed;
         
         
+        Array<Entity> entities = new Array<Entity>();
         entities.add(anchorEntity);
         entities.add(starA);
         entities.add(starB);
         
-        Gdx.app.log(this.getClass().getSimpleName(), "Binary System: (" + x + ", " + y + ")");
+        Gdx.app.log(this.getClass().getSimpleName(), "Binary System: [" + seed + "](" + x + ", " + y + ")");
         return entities;
     }
     

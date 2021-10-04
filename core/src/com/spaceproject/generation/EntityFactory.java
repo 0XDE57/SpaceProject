@@ -1,7 +1,6 @@
 package com.spaceproject.generation;
 
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
@@ -11,8 +10,8 @@ import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AstronomicalComponent;
+import com.spaceproject.components.AttachedToComponent;
 import com.spaceproject.components.BarrelRollComponent;
-import com.spaceproject.components.BarycenterComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
@@ -106,36 +105,39 @@ public class EntityFactory {
         return character;
     }
     
-    public static Entity createPlayerShip(int x, int y, boolean inSpace) {
+    public static Array<Entity> createPlayerShip(int x, int y, boolean inSpace) {
         Entity player = createPlayer(x, y);
         
         PhysicsComponent physicsComponent = player.getComponent(PhysicsComponent.class);
         GameScreen.box2dWorld.destroyBody(physicsComponent.body);
         physicsComponent.body = null;
         
-        Entity playerShip = createBasicShip(x, y, 0, player, inSpace);
+        Array<Entity> playerShipCluster = createBasicShip(x, y, 0, player, inSpace);
+        Entity playerShip = playerShipCluster.first();
         
         ECSUtil.transferComponent(player, playerShip, ControlFocusComponent.class);
         ECSUtil.transferComponent(player, playerShip, ControllableComponent.class);
         CameraFocusComponent cameraFocus = (CameraFocusComponent)ECSUtil.transferComponent(player, playerShip, CameraFocusComponent.class);
         cameraFocus.zoomTarget = engineCFG.defaultZoomVehicle;
         
-        return playerShip;
+        return playerShipCluster;
     }
     
-    public static Entity createAIShip(float x, float y, boolean inSpace) {
+    public static Array<Entity> createAIShip(float x, float y, boolean inSpace) {
         Entity ai = createCharacterAI(x, y);
         
         PhysicsComponent physicsComponent = ai.getComponent(PhysicsComponent.class);
         GameScreen.box2dWorld.destroyBody(physicsComponent.body);
         physicsComponent.body = null;
         
-        Entity aiShip = createBasicShip(x, y, 0, ai, inSpace);
+        Array<Entity> aiShipCluster = createBasicShip(x, y, 0, ai, inSpace);
+        Entity aiShip = aiShipCluster.first();
         ECSUtil.transferComponent(ai, aiShip, AIComponent.class);
         ECSUtil.transferComponent(ai, aiShip, ControllableComponent.class);
-        return aiShip;
+        return aiShipCluster;
     }
     //endregion
+    
     
     //region Astronomical / Celestial objects and bodies
     public static Entity createStar(long seed, float x, float y, boolean rotationDir) {
@@ -180,42 +182,9 @@ public class EntityFactory {
         return entity;
     }
     
-    public static Array<Entity> createRoguePlanet(float x, float y) {
-        long seed = MyMath.getSeed(x, y);
-        return createRoguePlanet(x, y, seed);
-    }
-    
-    public static Array<Entity> createRoguePlanet(float x, float y, long seed) {
-        Array<Entity> entities = new Array<>();
-        
-        MathUtils.random.setSeed(seed);
-        
-        Entity planet = createPlanet(seed, null, 0, MathUtils.randomBoolean());
-        planet.getComponent(OrbitComponent.class).tangentialSpeed = 0;
-    
-        BarycenterComponent barycenter = new BarycenterComponent();
-        barycenter.bodyType = BarycenterComponent.AstronomicalBodyType.roguePlanet;
-        planet.add(barycenter);
-        planet.getComponent(TransformComponent.class).pos.set(x, y);
-    
-        //add moon
-        boolean hasMoon = MathUtils.randomBoolean();
-        if (hasMoon) {
-            float moonDist = planet.getComponent(TextureComponent.class).texture.getWidth() * planet.getComponent(TextureComponent.class).scale * 2;
-            boolean rotDir = MathUtils.randomBoolean();
-            Entity moon = createMoon(MyMath.getSeed(x, y + moonDist), planet, moonDist, rotDir);
-            entities.add(moon);
-        }
-        
-        entities.add(planet);
-        Gdx.app.log(EntityFactory.class.getSimpleName(), "Rogue Planet: (" + x + ", " + y + ")");
-        return entities;
-    }
-    
     public static Entity createPlanet(long seed, Entity parent, float radialDistance, boolean rotationDir) {
         MathUtils.random.setSeed(seed);
         Entity entity = new Entity();
-        
         
         SeedComponent seedComp = new SeedComponent();
         seedComp.seed = seed;
@@ -314,30 +283,32 @@ public class EntityFactory {
     }
     //endregion
     
+    
     //region ships
-    public static Entity createBasicShip(float x, float y, boolean inSpace) {
+    public static Array<Entity> createBasicShip(float x, float y, boolean inSpace) {
         return createBasicShip(x, y, null, inSpace);
     }
     
-    public static Entity createBasicShip(float x, float y, Entity driver, boolean inSpace) {
+    public static Array<Entity> createBasicShip(float x, float y, Entity driver, boolean inSpace) {
         return createBasicShip(x, y, MyMath.getSeed(x, y), driver, inSpace);
     }
     
-    public static Entity createBasicShip(float x, float y, long seed, Entity driver, boolean inSpace) {
-        Entity entity = new Entity();
+    public static Array<Entity> createBasicShip(float x, float y, long seed, Entity driver, boolean inSpace) {
+        Array<Entity> entityCluster = new Array<>();
+        Entity shipEntity = new Entity();
         
         //seed
         MathUtils.random.setSeed(seed);
         SeedComponent seedComp = new SeedComponent();
         seedComp.seed = seed;
-        entity.add(seedComp);
+        shipEntity.add(seedComp);
         
         //transform
         TransformComponent transform = new TransformComponent();
         transform.pos.set(x, y);
         transform.zOrder = RenderOrder.VEHICLES.getHierarchy();
         transform.rotation = (float) Math.PI / 2; //face upwards
-        entity.add(transform);
+        shipEntity.add(transform);
         
         //generate 3D sprite with random even size
         int shipSize = MathUtils.random(entityCFG.shipSizeMin, entityCFG.shipSizeMax) * 2;
@@ -345,26 +316,26 @@ public class EntityFactory {
         Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
         Sprite3DComponent sprite3DComp = new Sprite3DComponent();
         sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom, engineCFG.sprite3DScale);
-        entity.add(sprite3DComp);
+        shipEntity.add(sprite3DComp);
         
         //collision detection
         PhysicsComponent physics = new PhysicsComponent();
         float width = shipTop.getWidth() * engineCFG.bodyScale;
         float height = shipTop.getHeight() * engineCFG.bodyScale;
-        physics.body = BodyFactory.createShip(x, y, width, height, entity, inSpace);
-        entity.add(physics);
+        physics.body = BodyFactory.createShip(x, y, width, height, shipEntity, inSpace);
+        shipEntity.add(physics);
         
         //engine data and marks entity as drive-able
         VehicleComponent vehicle = new VehicleComponent();
         vehicle.driver = driver;
         vehicle.thrust = entityCFG.engineThrust;
-        entity.add(vehicle);
+        shipEntity.add(vehicle);
         
         //health
         HealthComponent health = new HealthComponent();
         health.maxHealth = entityCFG.shipHealth;
         health.health = health.maxHealth;
-        entity.add(health);
+        shipEntity.add(health);
         
         //weapon
         if (MathUtils.randomBoolean()) {
@@ -379,7 +350,7 @@ public class EntityFactory {
             cannon.anchorVec = new Vector2(width, 0);
             cannon.aimAngle = 0;
             cannon.timerRechargeRate = new SimpleTimer(entityCFG.cannonRechargeRate);
-            entity.add(cannon);
+            shipEntity.add(cannon);
         } else {
             ChargeCannonComponent chargeCannon = new ChargeCannonComponent();
             chargeCannon.anchorVec = new Vector2(width, 0);
@@ -389,7 +360,7 @@ public class EntityFactory {
             chargeCannon.minSize = 0.1f;
             chargeCannon.growRateTimer = new SimpleTimer(1500);
             chargeCannon.baseDamage = 8f;
-            entity.add(chargeCannon);
+            shipEntity.add(chargeCannon);
         }
         
         //hyper drive
@@ -397,7 +368,7 @@ public class EntityFactory {
         hyperDrive.speed = entityCFG.hyperSpeed;
         hyperDrive.coolDownTimer = new SimpleTimer(entityCFG.controlTimerHyperCooldown, true);
         hyperDrive.coolDownTimer.setCanDoEvent();
-        entity.add(hyperDrive);
+        shipEntity.add(hyperDrive);
         
         //shield
         ShieldComponent shield = new ShieldComponent();
@@ -407,7 +378,7 @@ public class EntityFactory {
         float radius = Math.max(boundingBox.getWidth(), boundingBox.getHeight());
         shield.maxRadius = radius;
         shield.color = Color.BLUE;
-        entity.add(shield);
+        shipEntity.add(shield);
         
         //barrel roll
         BarrelRollComponent barrelRoll = new BarrelRollComponent();
@@ -416,25 +387,49 @@ public class EntityFactory {
         barrelRoll.revolutions = 1;
         barrelRoll.dir = BarrelRollComponent.FlipDir.none;
         barrelRoll.force = entityCFG.dodgeForce;
-        entity.add(barrelRoll);
+        shipEntity.add(barrelRoll);
         
-        //dash
+        /*
+        //dash, shouldnt have this dash but should do same boost as barrel roll for forward
         DashComponent dash = new DashComponent();
         dash.impulse = 10f;
         dash.dashTimeout = new SimpleTimer(2000);
-        entity.add(dash);
-        
-        //particle
-        ParticleComponent particle = new ParticleComponent();
-        particle.type = ParticleComponent.EffectType.shipEngine;
-        particle.offset = new Vector2(0, height + 0.2f);
-        entity.add(particle);
+        shipEntity.add(dash);
+        */
         
         //map
         MapComponent map = new MapComponent();
         map.color = new Color(1, 1, 1, 0.9f);
         map.distance = 3000;
-        entity.add(map);
+        shipEntity.add(map);
+    
+        //engine particle effect
+        Entity mainEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineMain, new Vector2(0, height + 0.2f), 0);
+        Entity leftEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineLeft, new Vector2(width/2 - 0.2f, 0), -90);
+        Entity rightEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineRight, new Vector2(-(width/2 - 0.2f), 0), 90);
+        
+        entityCluster.add(shipEntity);
+        entityCluster.add(mainEngine);
+        entityCluster.add(leftEngine);
+        entityCluster.add(rightEngine);
+        
+        return entityCluster;
+    }
+    
+    public static Entity createEngine(Entity parent, ParticleComponent.EffectType type, Vector2 offset, float angle) {
+        Entity entity = new Entity();
+    
+        AttachedToComponent attached = new AttachedToComponent();
+        attached.parentEntity = parent;
+        entity.add(attached);
+        
+        //EngineComponent->thrust
+        
+        ParticleComponent particle = new ParticleComponent();
+        particle.type = type;
+        particle.offset = offset;
+        particle.angle = angle;
+        entity.add(particle);
         
         return entity;
     }
@@ -444,7 +439,10 @@ public class EntityFactory {
         Entity entity = new Entity();
         
         TextureComponent texture = new TextureComponent();
-        texture.texture = TextureFactory.generateWall(width * engineCFG.pixelPerUnit, height * engineCFG.pixelPerUnit, new Color(0.4f, 0.4f, 0.4f, 1));
+        texture.texture = TextureFactory.generateWall(
+                width * engineCFG.pixelPerUnit,
+                height * engineCFG.pixelPerUnit,
+                new Color(0.4f, 0.4f, 0.4f, 1));
         texture.scale = 0.05f;
         entity.add(texture);
     

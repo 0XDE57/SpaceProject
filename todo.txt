@@ -235,6 +235,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [ ] hyperdrive should be hold key to charge up instead of instant activate
         [ ] needs control for mobile
     [...] particle effects!
+        [x] particles need to render on top of planets. planets should be first rendered (low depth) in the render pipeline
         [x] particlesystem and emitter components
         [...] rendering is lagging behind camera "drift bug" -> refactor rendering/system order.
             [...] split into update and render?

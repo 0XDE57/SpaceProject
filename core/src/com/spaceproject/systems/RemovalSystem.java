@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.PlanetComponent;
@@ -17,11 +18,9 @@ import com.spaceproject.utility.ResourceDisposer;
 
 public class RemovalSystem extends IteratingSystem {
     
-    
     public RemovalSystem() {
         super(Family.one(RemoveComponent.class).get());
     }
-    
     
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
@@ -39,8 +38,10 @@ public class RemovalSystem extends IteratingSystem {
         if (controlFocusComp != null) {
             Gdx.app.log(this.getClass().getSimpleName(), "Controlled entity assumed to be player; respawning...");
             if (GameScreen.inSpace()) {
-                Entity newPlayer = EntityFactory.createPlayerShip(0, 0, true);
-                getEngine().addEntity(newPlayer);
+                Array<Entity> newPlayer = EntityFactory.createPlayerShip(0, 0, true);
+                for (Entity e : newPlayer) {
+                    getEngine().addEntity(e);
+                }
             } else {
                 WorldConfig worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
                 int mapSize = GameScreen.getCurrentPlanet().getComponent(PlanetComponent.class).mapSize;

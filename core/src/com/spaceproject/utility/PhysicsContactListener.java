@@ -1,11 +1,13 @@
 package com.spaceproject.utility;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
+import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.HealthComponent;
@@ -14,26 +16,28 @@ import com.spaceproject.components.ShieldComponent;
 
 public class PhysicsContactListener implements ContactListener {
     
+    private final Engine engine;
+    
+    public PhysicsContactListener(Engine engine) {
+        this.engine = engine;
+    }
+    
     @Override
     public void beginContact(Contact contact) {
         Object dataA = contact.getFixtureA().getBody().getUserData();
         Object dataB = contact.getFixtureB().getBody().getUserData();
         
-        //System.out.println("A: " + Misc.objString(dataA) + " - B: " + Misc.objString(dataB));
         onCollision((Entity)dataA, (Entity)dataB);
     }
     
     @Override
-    public void endContact(Contact contact) {
-    }
+    public void endContact(Contact contact) {}
     
     @Override
-    public void preSolve(Contact contact, Manifold oldManifold) {
-    }
+    public void preSolve(Contact contact, Manifold oldManifold) {}
     
     @Override
-    public void postSolve(Contact contact, ContactImpulse impulse) {
-    }
+    public void postSolve(Contact contact, ContactImpulse impulse) {}
     
     private void onCollision(Entity a, Entity b) {
         DamageComponent damageA = Mappers.damage.get(a);
@@ -49,11 +53,9 @@ public class PhysicsContactListener implements ContactListener {
         }
     }
     
-    
     private void onAttacked(Entity damageEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent healthComponent) {
-        //TODO: move this. collision/physics doesnt care about damage. a combat system should subscribe to this event.
         if (damageComponent.source == attackedEntity) {
-            return;
+            return; //ignore self-inflicted damage
         }
         
         //check if attacked entity was AI
@@ -61,7 +63,8 @@ public class PhysicsContactListener implements ContactListener {
         if (ai != null) {
             ai.attackTarget = damageComponent.source;
             ai.state = AIComponent.State.attack;
-            Gdx.app.log(this.getClass().getSimpleName(), "AI [" + Misc.objString(attackedEntity) + "] attacked by: [" + Misc.objString(damageComponent.source) + "]");
+            Gdx.app.log(this.getClass().getSimpleName(),
+                    "AI [" + Misc.objString(attackedEntity) + "] attacked by: [" + Misc.objString(damageComponent.source) + "]");
         }
         
         //check for shield
@@ -69,6 +72,8 @@ public class PhysicsContactListener implements ContactListener {
         if (shieldComp != null) {
             if (shieldComp.state == ShieldComponent.State.on) {
                 //shieldComp.state == ShieldComponent.State.break;??
+                //damageEntity.add(new RemoveComponent());
+                //return;
             }
             /*
             if (shieldComp.isActive) {
@@ -93,8 +98,13 @@ public class PhysicsContactListener implements ContactListener {
         
         //remove entity (kill)
         if (healthComponent.health <= 0) {
-            attackedEntity.add(new RemoveComponent());
-            Gdx.app.log(this.getClass().getSimpleName(), "[" + Misc.objString(attackedEntity) + "] killed by: [" + Misc.objString(damageComponent.source) + "]");
+            Array<Entity> cluster = ECSUtil.getAttachedEntities(engine, attackedEntity);
+            for (Entity e : cluster) {
+                e.add(new RemoveComponent());
+            }
+            //attackedEntity.add(new RemoveComponent());
+            Gdx.app.log(this.getClass().getSimpleName(),
+                    "[" + Misc.objString(attackedEntity) + "] killed by: [" + Misc.objString(damageComponent.source) + "]");
         }
         
         //remove missile

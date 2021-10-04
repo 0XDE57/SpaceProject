@@ -4,6 +4,7 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
+import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.PlanetComponent;
@@ -26,9 +27,15 @@ public class WorldLoadingSystem extends EntitySystem {
         
         // test ships
         int position = mapSize * worldCFG.tileSize / 2;//set  position to middle of planet
-        
-        engine.addEntity(EntityFactory.createBasicShip(position + 10, position + 10, GameScreen.inSpace()));
-        engine.addEntity(EntityFactory.createBasicShip(position - 10, position + 10, GameScreen.inSpace()));
+    
+        Array<Entity> basicShipCluster = EntityFactory.createBasicShip(position + 10, position + 10, GameScreen.inSpace());
+        for (Entity e : basicShipCluster) {
+            engine.addEntity(e);
+        }
+        Array<Entity> basicShipCluster2 = EntityFactory.createBasicShip(position - 10, position + 10, GameScreen.inSpace());
+        for (Entity e : basicShipCluster2) {
+            engine.addEntity(e);
+        }
         
         Entity aiTest = EntityFactory.createCharacterAI(position, position + 10);
         Mappers.AI.get(aiTest).state = AIComponent.State.dumbwander;

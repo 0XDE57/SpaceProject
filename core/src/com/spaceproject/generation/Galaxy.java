@@ -76,7 +76,7 @@ public class Galaxy {
         }
         
         if (GameScreen.isDebugMode) {
-            points.add(new Vector2(1000, 1000));//TODO: system near origin for debug, don't forget about me
+            points.add(new Vector2(1337, 420));//TODO: system near origin for debug, don't forget about me
         }
         
         return points;

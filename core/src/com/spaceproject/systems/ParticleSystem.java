@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.spaceproject.components.AttachedToComponent;
 import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ParticleComponent;
@@ -30,7 +31,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     
     
     public ParticleSystem() {
-        super(Family.all(ParticleComponent.class, TransformComponent.class).get());
+        super(Family.all(ParticleComponent.class).get());
         
         spriteBatch = new SpriteBatch();
     
@@ -61,8 +62,13 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         }
         
         switch (particle.type) {
-            case shipEngine:
-                updateEngineParticle(entity, particle);
+            case shipEngineMain:
+            case shipEngineLeft:
+            case shipEngineRight:
+                AttachedToComponent attached = Mappers.attachedTo.get(entity);
+                if (attached != null) {
+                    updateEngineParticle(attached.parentEntity, particle);
+                }
                 break;
             case bulletCharge:
                 updateChargeParticle(entity, particle);
@@ -75,10 +81,28 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     private void updateEngineParticle(Entity entity, ParticleComponent particle) {
         ControllableComponent control = Mappers.controllable.get(entity);
         if (control != null) {
-            if (control.moveForward) {
-                particle.pooledEffect.start();
-            } else {
-                particle.pooledEffect.allowCompletion();
+            switch (particle.type) {
+                case shipEngineMain:
+                    if (control.moveForward) {
+                        particle.pooledEffect.start();
+                    } else {
+                        particle.pooledEffect.allowCompletion();
+                    }
+                    break;
+                case shipEngineLeft:
+                    if (control.moveRight) {
+                        particle.pooledEffect.start();
+                    } else {
+                        particle.pooledEffect.allowCompletion();
+                    }
+                    break;
+                case shipEngineRight:
+                    if (control.moveLeft) {
+                        particle.pooledEffect.start();
+                    } else {
+                        particle.pooledEffect.allowCompletion();
+                    }
+                    break;
             }
         } else {
             particle.pooledEffect.allowCompletion();
@@ -86,7 +110,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         
         TransformComponent transform = Mappers.transform.get(entity);
         Array<ParticleEmitter> emitters = particle.pooledEffect.getEmitters();
-        float engineRotation = transform.rotation * MathUtils.radDeg + 180;
+        float engineRotation = particle.angle + (transform.rotation * MathUtils.radDeg + 180);
         for (int i = 0; i < emitters.size; i++) {
             ParticleEmitter.ScaledNumericValue val = emitters.get(i).getAngle();
             val.setHigh(engineRotation);
@@ -134,7 +158,9 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         ParticleComponent particle = Mappers.particle.get(entity);
         if (particle != null && particle.pooledEffect == null) {
             switch (particle.type) {
-                case shipEngine:
+                case shipEngineMain:
+                case shipEngineLeft:
+                case shipEngineRight:
                     particle.pooledEffect = fireEffectPool.obtain();
                     //start with emitter off
                     particle.pooledEffect.allowCompletion();
@@ -143,8 +169,8 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                     particle.pooledEffect = chargeEffectPool.obtain();
                     //start with emitter on
                     particle.pooledEffect.start();
+                    break;
             }
-            //Gdx.app.log(this.getClass().getSimpleName(), "obtained");
         }
     }
     
@@ -153,13 +179,15 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         ParticleComponent particle = Mappers.particle.get(entity);
         if (particle != null && particle.pooledEffect != null) {
             switch (particle.type) {
-                case shipEngine:
+                case shipEngineMain:
+                case shipEngineLeft:
+                case shipEngineRight:
                     fireEffectPool.free(particle.pooledEffect);
                     break;
                 case bulletCharge:
                     chargeEffectPool.free(particle.pooledEffect);
+                    break;
             }
-            //Gdx.app.log(this.getClass().getSimpleName(), "free");
         }
     }
     
@@ -168,4 +196,5 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         fireEffect.dispose();
         chargeEffect.dispose();
     }
+    
 }

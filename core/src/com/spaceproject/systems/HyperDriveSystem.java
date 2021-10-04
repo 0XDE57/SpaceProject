@@ -20,7 +20,9 @@ public class HyperDriveSystem extends IteratingSystem {
     protected void processEntity(Entity entity, float deltaTime) {
         HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
         
-        toggleHyperDrive(entity, hyperDrive);
+        if (hyperDrive.activate && hyperDrive.coolDownTimer.tryEvent()) {
+            toggleHyperDrive(entity, hyperDrive);
+        }
         
         if (hyperDrive.isActive) {
             TransformComponent transform = Mappers.transform.get(entity);
@@ -29,19 +31,17 @@ public class HyperDriveSystem extends IteratingSystem {
     }
     
     private void toggleHyperDrive(Entity entity, HyperDriveComponent hyperDrive) {
-        if (hyperDrive.activate && hyperDrive.coolDownTimer.tryEvent()) {
-            PhysicsComponent physicsComp = Mappers.physics.get(entity);
-            float bodyAngle = physicsComp.body.getAngle();
-            if (hyperDrive.isActive) {
-                hyperDrive.isActive = false;
-                physicsComp.body.setTransform(entity.getComponent(TransformComponent.class).pos, bodyAngle);
-                physicsComp.body.setActive(true);
-                physicsComp.body.setLinearVelocity(MyMath.vector(bodyAngle, 20));
-            } else {
-                hyperDrive.isActive = true;
-                hyperDrive.velocity.set(MyMath.vector(bodyAngle, hyperDrive.speed));
-                physicsComp.body.setActive(false);
-            }
+        PhysicsComponent physicsComp = Mappers.physics.get(entity);
+        float bodyAngle = physicsComp.body.getAngle();
+        if (hyperDrive.isActive) {
+            hyperDrive.isActive = false;
+            physicsComp.body.setTransform(entity.getComponent(TransformComponent.class).pos, bodyAngle);
+            physicsComp.body.setActive(true);
+            physicsComp.body.setLinearVelocity(MyMath.vector(bodyAngle, 20));
+        } else {
+            hyperDrive.isActive = true;
+            hyperDrive.velocity.set(MyMath.vector(bodyAngle, hyperDrive.speed));
+            physicsComp.body.setActive(false);
         }
     }
     

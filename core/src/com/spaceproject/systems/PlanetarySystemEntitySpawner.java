@@ -8,6 +8,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.AISpawnComponent;
@@ -59,7 +60,9 @@ public class PlanetarySystemEntitySpawner extends IteratingSystem implements Ent
     private void spawn(Entity entity, AISpawnComponent spawn) {
         //spawn ship at planets location
         TransformComponent transform = Mappers.transform.get(entity);
-        Entity aiShip = EntityFactory.createAIShip(transform.pos.x, transform.pos.y, GameScreen.inSpace());
+        Array<Entity> aiShipCluster = EntityFactory.createAIShip(transform.pos.x, transform.pos.y, GameScreen.inSpace());
+        Entity aiShip = aiShipCluster.first();
+        
         AIComponent aiComponent = aiShip.getComponent(AIComponent.class);
         aiComponent.state = spawn.state;
         switch (aiComponent.state) {
@@ -88,7 +91,9 @@ public class PlanetarySystemEntitySpawner extends IteratingSystem implements Ent
         }
         
         spawn.spawnCount++;
-        getEngine().addEntity(aiShip);
+        for (Entity ent : aiShipCluster) {
+            getEngine().addEntity(ent);
+        }
         Gdx.app.log(this.getClass().getSimpleName(), "spawned: " + Misc.objString(entity) + " source:" + Misc.objString(entity));
     
         //if i am another type of object, then do my own spawn rules. like maybe I am on a planet and want to spawn characters near the player
