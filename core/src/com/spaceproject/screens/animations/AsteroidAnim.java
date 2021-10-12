@@ -180,7 +180,7 @@ public class AsteroidAnim extends TitleAnimation {
             this.position = position.sub(size/2, size/2);
             
             FloatArray points = new FloatArray();
-            int numPoints = 8;
+            int numPoints = 7;//Box2D poly vert limit: Assertion `3 <= count && count <= 8' failed.
             for (int i = 0; i < numPoints * 2; i += 2) {
                 float x = MathUtils.random(size);
                 float y = MathUtils.random(size);
