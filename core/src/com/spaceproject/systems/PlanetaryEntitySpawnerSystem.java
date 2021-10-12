@@ -20,9 +20,9 @@ import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.SimpleTimer;
 
-public class PlanetarySystemEntitySpawner extends IteratingSystem implements EntityListener {
+public class PlanetaryEntitySpawnerSystem extends IteratingSystem implements EntityListener {
     
-    public PlanetarySystemEntitySpawner() {
+    public PlanetaryEntitySpawnerSystem() {
         super(Family.all(AISpawnComponent.class, TransformComponent.class).get());
     }
     
