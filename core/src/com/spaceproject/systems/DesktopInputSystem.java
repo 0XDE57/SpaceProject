@@ -8,6 +8,8 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
@@ -15,19 +17,22 @@ import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DashComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ShieldComponent;
+import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.KeyConfig;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.math.MyMath;
 
 public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     private ImmutableArray<Entity> players;
-
+    private final Vector3 tempVec = new Vector3();
+    private final Vector2 prevMousePos = new Vector2();
+    
     @Override
     public void addedToEngine(Engine engine) {
         players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
@@ -36,6 +41,14 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     @Override
     public void update(float delta) {
+        int x = Gdx.input.getX();
+        int y = Gdx.input.getY();
+        if (!prevMousePos.epsilonEquals(x, y)) {
+            //only update is mouse has moved, to allow controller input to override
+            //if a controller is present at the same time as MouseNKeys.
+            prevMousePos.set(x, y);
+            facePosition(x, y);
+        }
         debugCameraControls(delta);
     }
     
@@ -109,15 +122,14 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     private boolean facePosition(int x, int y) {
         if (players.size() == 0)
             return false;
-        
-        float angle = MyMath.angleTo(x, Gdx.graphics.getHeight() - y,
-                Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
-        
-        //todo: investigate strange -1.57f offset. projection?
-        //angle = MyMath.angle2(x, y, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
-        
+    
+        TransformComponent transform = Mappers.transform.get(players.first());
         ControllableComponent control = Mappers.controllable.get(players.first());
+        
+        Vector3 playerPos = GameScreen.cam.project(tempVec.set(transform.pos, 0));
+        float angle = MyMath.angleTo(x, Gdx.graphics.getHeight() - y, playerPos.x, playerPos.y);
         control.angleTargetFace = angle;
+        
         return true;
     }
     
@@ -131,8 +143,8 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         if (cameraFocus == null) {
             return;
         }
-    
-        float zoomSpeed = 0.001f;
+        
+        float zoomSpeed = 2f * delta;
         float angle = 5f * delta;
         
         if (Gdx.input.isKeyPressed(keyCFG.resetZoom)) {
@@ -186,6 +198,12 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         if (players.size() == 0) {
             return false;
         }
+    
+        if (button == Input.Buttons.LEFT) {
+            ControllableComponent control = Mappers.controllable.get(players.first());
+            control.attack = true;
+            return true;
+        }
         
         if (button == Input.Buttons.MIDDLE) {
             Entity player = players.first();
@@ -200,10 +218,6 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
                 }
                 return true;
             }
-        } else {
-            ControllableComponent control = Mappers.controllable.get(players.first());
-            control.attack = true;
-            return true;
         }
         
         return false;
@@ -226,7 +240,8 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        return facePosition(screenX, screenY);
+        //return facePosition(screenX, screenY);
+        return false;
     }
     
 }

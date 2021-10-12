@@ -32,10 +32,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     private float rightStickHorAxis;
     private float rightStickVertAxis;
     private final float deadZone = 0.25f;
-    private final float camFocusMultiplier = 0.05f;
-    //4 & 5 don't seem to be in controller.getMapping()
-    private final int xboxControllerLeftTrigger = 4;
-    private final int xboxControllerRightTrigger = 5;
+    private final float camZoomSpeed = 3f;
     //private SimpleTimer doubleTap = new SimpleTimer(1000);
     private ImmutableArray<Entity> players;
     
@@ -136,7 +133,6 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                     menu.close();
                 }
             }
-            
             handled = true;
         }
         
@@ -170,7 +166,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                 Entity player = players.first();
                 CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
                 if (cameraFocus != null) {
-                    float scrollAmount = rightStickVertAxis * camFocusMultiplier * MyScreenAdapter.cam.zoom;
+                    float scrollAmount = rightStickVertAxis * camZoomSpeed * MyScreenAdapter.cam.zoom * deltaTime;
                     cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
                 }
             }

@@ -7,6 +7,7 @@ import com.spaceproject.components.AstronomicalComponent;
 import com.spaceproject.components.AttachedToComponent;
 import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.BarycenterComponent;
+import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.ChargeCannonComponent;
@@ -38,6 +39,7 @@ public class Mappers {
     public static final ComponentMapper<AttachedToComponent> attachedTo = ComponentMapper.getFor(AttachedToComponent.class);
     public static final ComponentMapper<BarrelRollComponent> barrelRoll = ComponentMapper.getFor(BarrelRollComponent.class);
     public static final ComponentMapper<BarycenterComponent> barycenter = ComponentMapper.getFor(BarycenterComponent.class);
+    public static final ComponentMapper<CameraFocusComponent> camFocus = ComponentMapper.getFor(CameraFocusComponent.class);
     public static final ComponentMapper<CannonComponent> cannon = ComponentMapper.getFor(CannonComponent.class);
     public static final ComponentMapper<CharacterComponent> character = ComponentMapper.getFor(CharacterComponent.class);
     public static final ComponentMapper<ChargeCannonComponent> chargeCannon = ComponentMapper.getFor(ChargeCannonComponent.class);

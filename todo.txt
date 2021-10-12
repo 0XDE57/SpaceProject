@@ -42,8 +42,7 @@ Systems are dynamically loaded and unloaded per context. Space and World can hav
     eg: don't need an orbit system when on a planet.
 Mobile and Desktop can have different systems.
     eg: don't need to render touch control on desktop
-See SystemsConfig for defining system priories and loading properties such as when to load and
-if they should be active when paused.
+See SystemsConfig for defining system priories and properties.
 
 
 One goal is to have everything highly configurable. (and perhaps I have gone too far in this direction at the cost of complexity?)
@@ -184,7 +183,27 @@ Legend:
 
 ***the plan***: focus! i keep jumping between ideas and features and never finish anything
 Spaceship combat will be a core part of gameplay. So lets focus on cleaning that up first.
-End goal: make combat fun. make flight and movement fun. and look a little better -> JUICE! https://www.youtube.com/watch?v=Fy0aCDmgnxg
+End goal: make combat fun. make flight and movement fun, and look a little better.
+    [ ] JUICE!
+        https://www.youtube.com/watch?v=Fy0aCDmgnxg
+        https://www.youtube.com/watch?v=tu-Qe66AvtY
+        [x] lag camera behind movement a little for visual effect, especially when dodging for more visual impact
+            lerp
+        [ ] lerping is giving some jittering in the rendering when vsync on. not visible when vsync off.
+        [ ] fix camera: combat camera
+            right now manually zooming in an out when fighting is a bit clunky and jarring.
+            implement an auto lock on camera which will adjust the zoom to include both the player
+            and the enemy within frame, even have the camera back the player into the opposite side of the
+            screen relative to enemy, to keep more zoom and attention on the combat. focus!
+            if (in combat) {
+                enemyEntity.add(CombatFocusComponent)
+            }
+            camera systems looks for entities with CombatFocusComponent, auto adjust zoom so entity with combat focus
+            is within screen view.
+            consider multiple enemies, 3 on screen? include all will make zoom far and less focused, so probably some sort of
+            dynamic focus, maybe who gets shot last has focus? todo: study cam mechanics for smashbros / project m style combat
+            thresholds for how close to focus near the edge
+            still allow manual override with scroll, with perhaps a timer to focus back in, or when a new enemy joins
     [...] respawn
         [x] for now, just place back at origin 0, 0
         [ ] make space station home base that orbits around a planet, player spawns from dock with basic ship
@@ -207,8 +226,8 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [ ] should not activate during screen transition
         [ ] needs control for mobile
     [...] barrel roll
-        [x] decouple from ship control
         [...] adjust feel, impulse
+        [ ] apply forward force similar to dash with same impulse power
         [?] allow roll on other axis? could allow for front/backflips. also, could use other roll parameter for animation
             when hit by projectile, set the angles to roll opposite direction of hit angle, then the roll system will stabilize it back
             for impact feel
@@ -218,17 +237,13 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [ ] needs control for mobile
     [x] dash
     [...] grow cannon
-        [x] tune damage
-        [x] tune size
         [ ] should be circle instead of rectangle?
         [ ] lock on nearest target when max
             [ ] visual in hudsystem for tracked entity
             [ ] predict angle to aim to hit based on pos and velocity
             [ ] steering behavior AI?
-        [x] bullet jitter in front of ship when moving, not visible with vsync disabled. lerp?
         [?] could perhaps shrink "lose energy" over time and destroy self when smaller than threshold
             only maintains size when fully charged to max
-        [x] AI not detecting hit
         [ ] AI doesn't know to release grow cannon, only tuned for regular cannon
         [ ] should not fire during screen transition
     [ ] hyper drive
@@ -294,21 +309,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         [ ] break into smaller asteroids
             [ ] voronoi shatter
     [ ] fix AI a bit (lead shot)
-    [ ] lag camera behind movement a little for visual effect, especially when dodging for more visual impact
-    [ ] fix camera: combat camera
-        right now manually zooming in an out when fighting is a bit clunky and jarring.
-        implement an auto lock on camera which will adjust the zoom to include both the player
-        and the enemy within frame, even have the camera back the player into the opposite side of the
-        screen relative to enemy, to keep more zoom and attention on the combat. focus!
-        if (in combat) {
-            enemyEntity.add(CombatFocusComponent)
-        }
-        camera systems looks for entities with CombatFocusComponent, auto adjust zoom so entity with combat focus
-        is within screen view.
-        consider multiple enemies, 3 on screen? include all will make zoom far and less focused, so probably some sort of
-        dynamic focus, maybe who gets shot last has focus? todo: study cam mechanics for smashbros / project m style combat
-        thresholds for how close to focus near the edge
-        still allow manual override with scroll, with perhaps a timer to focus back in, or when a new enemy joins
+
     [...] fix background space rendering
         [...] POC star shader with fullscreen quad in separate project
             https://github.com/0XDE57/gdx-shadertoy
@@ -588,7 +589,7 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
     https://github.com/junkdog/entity-system-benchmarks#entity-system-benchmarks
 
 
-[ ] investigate possible bug in ashley.
+[...] investigate possible bug in ashley.
     Found 2 weird cases related to families / listeners.
     I would expect all references to a system/family membership to be when a system is removed from the engine.
     This may be intended behavior and I am using ashley wrong, need to reproduce these in a new project to confirm...
@@ -601,6 +602,8 @@ End goal: make combat fun. make flight and movement fun. and look a little bette
         4. add a new instance of system (SystemA) to engine that subscribes to a family.
         5. this new system will not pick up those entities in the family, where it should
         * solution: engine.removeAllEntities(); before re-instantiating engine and system. this resolves the issue.
+        Reproduced in ReproFamilyBugTest.class;
+
     [B] scenario B:
         1. create engine
         2. add a new instance of a system that is an entity listener
