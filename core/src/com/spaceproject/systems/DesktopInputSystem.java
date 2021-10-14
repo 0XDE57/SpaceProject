@@ -8,7 +8,6 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CameraFocusComponent;
@@ -18,7 +17,6 @@ import com.spaceproject.components.DashComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.math.MyMath;
@@ -31,7 +29,6 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     private ImmutableArray<Entity> players;
     private final Vector3 tempVec = new Vector3();
-    private final Vector2 prevMousePos = new Vector2();
     public boolean controllerHasFocus = false;
     
     @Override
@@ -209,7 +206,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             if (cameraFocus != null) {
                 GameScreen.resetCamera();
                 EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
-                if (player.getComponent(VehicleComponent.class) != null) {
+                if (Mappers.vehicle.get(player) != null) {
                     cameraFocus.zoomTarget = engineConfig.defaultZoomVehicle;
                 } else {
                     cameraFocus.zoomTarget = engineConfig.defaultZoomCharacter;
@@ -239,7 +236,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
         controllerHasFocus = false;
-        //return facePosition(screenX, screenY);
+        
         return false;
     }
     

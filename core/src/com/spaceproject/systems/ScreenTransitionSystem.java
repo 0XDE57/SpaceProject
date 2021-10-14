@@ -208,24 +208,22 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     }
     
     private void zoomIn(Entity entity, ScreenTransitionComponent screenTrans) {
-        CameraFocusComponent camFocus = Mappers.camFocus.get(entity);
-        //if (camFocus != null) {
-            camFocus.zoomTarget = 0.05f;
-            
-            EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
-            if (GameScreen.cam.zoom > engineConfig.defaultZoomVehicle) {
-                GameScreen.cam.zoom = engineConfig.defaultZoomVehicle;
-            }
-        //}
+        float zoomTarget = 0.05f;
+        Mappers.camFocus.get(entity).zoomTarget = zoomTarget;
         
-        if (MyScreenAdapter.cam.zoom <= 0.05f) {
+        EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
+        if (GameScreen.cam.zoom > engineConfig.defaultZoomVehicle) {
+            GameScreen.cam.zoom = engineConfig.defaultZoomVehicle;
+        }
+        
+        if (MyScreenAdapter.cam.zoom <= zoomTarget) {
             nextStage(screenTrans);
         }
     }
     
     private static void zoomOut(Entity entity, ScreenTransitionComponent screenTrans) {
         EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
-        entity.getComponent(CameraFocusComponent.class).zoomTarget = engineConfig.defaultZoomVehicle;
+        Mappers.camFocus.get(entity).zoomTarget = engineConfig.defaultZoomVehicle;
         if (MyScreenAdapter.cam.zoom >= engineConfig.defaultZoomVehicle) {
             screenTrans.timer.reset();
             nextStage(screenTrans);
