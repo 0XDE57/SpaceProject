@@ -32,6 +32,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     private ImmutableArray<Entity> players;
     private final Vector3 tempVec = new Vector3();
     private final Vector2 prevMousePos = new Vector2();
+    public boolean controllerHasFocus = false;
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -41,14 +42,10 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     @Override
     public void update(float delta) {
-        int x = Gdx.input.getX();
-        int y = Gdx.input.getY();
-        if (!prevMousePos.epsilonEquals(x, y)) {
-            //only update is mouse has moved, to allow controller input to override
-            //if a controller is present at the same time as MouseNKeys.
-            prevMousePos.set(x, y);
-            facePosition(x, y);
+        if (!controllerHasFocus) {
+            facePosition(Gdx.input.getX(), Gdx.input.getY());
         }
+        
         debugCameraControls(delta);
     }
     
@@ -57,8 +54,9 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             return false;
         
         boolean handled = false;
-        
-        ControllableComponent control = Mappers.controllable.get(players.first());
+    
+        Entity player = players.first();
+        ControllableComponent control = Mappers.controllable.get(player);
         
         //movement
         control.movementMultiplier = 1; // set multiplier to full power because a key switch is on or off
@@ -94,7 +92,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         }
     
         if (keycode == keyCFG.dash) {
-            DashComponent dash = Mappers.dash.get(players.first());
+            DashComponent dash = Mappers.dash.get(player);
             if (dash != null) {
                 dash.activate = keyDown;
                 handled = true;
@@ -102,14 +100,14 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         }
         
         if (keycode == keyCFG.activateShield) {
-            ShieldComponent shield = Mappers.shield.get(players.first());
+            ShieldComponent shield = Mappers.shield.get(player);
             if (shield != null) {
                 shield.defend = keyDown;
                 handled = true;
             }
         }
         if (keycode == keyCFG.activateHyperDrive) {
-            HyperDriveComponent hyperDrive = Mappers.hyper.get(players.first());
+            HyperDriveComponent hyperDrive = Mappers.hyper.get(player);
             if (hyperDrive != null) {
                 hyperDrive.activate = keyDown;
                 handled = true;
@@ -139,7 +137,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         }
         
         Entity player = players.first();
-        CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
+        CameraFocusComponent cameraFocus = Mappers.camFocus.get(player);
         if (cameraFocus == null) {
             return;
         }
@@ -168,7 +166,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     public boolean scrolled(float amountX, float amountY) {
         if (players.size() != 0) {
             Entity player = players.first();
-            CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
+            CameraFocusComponent cameraFocus = Mappers.camFocus.get(player);
             if (cameraFocus != null) {
                 float scrollAmount = amountY * MyScreenAdapter.cam.zoom / 2;
                 cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
@@ -207,7 +205,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         
         if (button == Input.Buttons.MIDDLE) {
             Entity player = players.first();
-            CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
+            CameraFocusComponent cameraFocus = Mappers.camFocus.get(player);
             if (cameraFocus != null) {
                 GameScreen.resetCamera();
                 EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
@@ -240,6 +238,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
+        controllerHasFocus = false;
         //return facePosition(screenX, screenY);
         return false;
     }

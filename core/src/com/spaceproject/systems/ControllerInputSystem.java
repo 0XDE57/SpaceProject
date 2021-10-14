@@ -17,7 +17,6 @@ import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DashComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
@@ -37,37 +36,56 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     private ImmutableArray<Entity> players;
     
     
-    public ControllerInputSystem() {
+    @Override
+    public void addedToEngine(Engine engine) {
         Controllers.addListener(this);
         
         for (Controller controller : Controllers.getControllers()) {
             Gdx.app.log(this.getClass().getSimpleName(), controller.getName());
         }
+        
+        players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
+    }
+    
+    @Override
+    public void update(float deltaTime) {
+        super.update(deltaTime);
+    
+        if (Math.abs(rightStickVertAxis) >= deadZone) {
+            //Gdx.app.log(this.getClass().getSimpleName(), rightStickVertAxis + " - right vert");
+            if (players.size() != 0) {
+                Entity player = players.first();
+                CameraFocusComponent cameraFocus = Mappers.camFocus.get(player);
+                if (cameraFocus != null) {
+                    float scrollAmount = rightStickVertAxis * camZoomSpeed * MyScreenAdapter.cam.zoom * deltaTime;
+                    cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
+                }
+            }
+        }
     }
     
     private boolean playerControls(Controller controller, int buttonCode, boolean buttonDown) {
-        //Gdx.app.log(this.getClass().getSimpleName(), "button: " + buttonCode + ": " + buttonDown);
-        
         if (players.size() == 0)
             return false;
         
         boolean handled = false;
         
-        ControllableComponent control = Mappers.controllable.get(players.first());
-        
+    
+        Entity player = players.first();
+        ControllableComponent control = Mappers.controllable.get(player);
         
         if (buttonCode == controller.getMapping().buttonA) {
             control.attack = buttonDown;
             handled = true;
             
-            DashComponent dash = Mappers.dash.get(players.first());
+            DashComponent dash = Mappers.dash.get(player);
             if (dash != null) {
                 dash.activate = buttonDown;
                 handled = true;
             }
         }
         if (buttonCode == controller.getMapping().buttonB) {
-            ShieldComponent shield = Mappers.shield.get(players.first());
+            ShieldComponent shield = Mappers.shield.get(player);
             if (shield != null) {
                 shield.defend = buttonDown;
                 handled = true;
@@ -83,7 +101,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         }
     
         if (buttonCode == controller.getMapping().buttonDpadUp) {
-            HyperDriveComponent hyperDrive = Mappers.hyper.get(players.first());
+            HyperDriveComponent hyperDrive = Mappers.hyper.get(player);
             if (hyperDrive != null) {
                 hyperDrive.activate = buttonDown;
                 handled = true;
@@ -138,44 +156,20 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         
         if ((buttonCode == controller.getMapping().buttonRightStick) && buttonDown) {
                 //reset cam
-                Entity player = players.first();
-                CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
+                CameraFocusComponent cameraFocus = Mappers.camFocus.get(player);
                 if (cameraFocus != null) {
                     GameScreen.resetCamera();
                     EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
-                    if (player.getComponent(VehicleComponent.class) != null) {
+                    if (Mappers.vehicle.get(player) != null) {
                         cameraFocus.zoomTarget = engineConfig.defaultZoomVehicle;
                     } else {
                         cameraFocus.zoomTarget = engineConfig.defaultZoomCharacter;
                     }
-                    return true;
+                    handled = true;
                 }
             }
         
         return handled;
-    }
-    
-    @Override
-    public void update(float deltaTime) {
-        super.update(deltaTime);
-        
-        if (Math.abs(rightStickVertAxis) >= deadZone) {
-            //Gdx.app.log(this.getClass().getSimpleName(), rightStickVertAxis + " - right vert");
-        
-            if (players.size() != 0) {
-                Entity player = players.first();
-                CameraFocusComponent cameraFocus = player.getComponent(CameraFocusComponent.class);
-                if (cameraFocus != null) {
-                    float scrollAmount = rightStickVertAxis * camZoomSpeed * MyScreenAdapter.cam.zoom * deltaTime;
-                    cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
-                }
-            }
-        }
-    }
-    
-    @Override
-    public void addedToEngine(Engine engine) {
-        players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
     }
     
     @Override
@@ -201,7 +195,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     @Override
     public boolean axisMoved(Controller controller, int axisCode, float value) {
         //Gdx.app.log(this.getClass().getSimpleName(), controller.getName() + ": " + axisCode + ": " + value);
-
+        
         if (axisCode == controller.getMapping().axisLeftX) {
             leftStickHorAxis = value;
             //Gdx.app.log(this.getClass().getSimpleName(), "left horizontal " + value);
@@ -221,6 +215,10 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             control.angleTargetFace = MyMath.angle2(0, 0, -leftStickVertAxis, leftStickHorAxis);
             control.movementMultiplier = MathUtils.clamp(dist, 0, 1);
             control.moveForward = true;
+    
+            //notify mouse that controller has current focus
+            getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus = true;
+            
         } else {
             control.moveForward = false;
         }
