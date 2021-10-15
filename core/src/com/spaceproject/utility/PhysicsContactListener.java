@@ -9,6 +9,7 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.AIComponent;
+import com.spaceproject.components.CamTargetComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.RemoveComponent;
@@ -61,10 +62,17 @@ public class PhysicsContactListener implements ContactListener {
         //check if attacked entity was AI
         AIComponent ai = Mappers.AI.get(attackedEntity);
         if (ai != null) {
+            //focus camera on target
+            attackedEntity.add(new CamTargetComponent());
+            
+            //focus ai on player
             ai.attackTarget = damageComponent.source;
             ai.state = AIComponent.State.attack;
             Gdx.app.log(this.getClass().getSimpleName(),
                     "AI [" + Misc.objString(attackedEntity) + "] attacked by: [" + Misc.objString(damageComponent.source) + "]");
+        } else if (Mappers.controlFocus.get(damageEntity) != null) {
+            //someone attacked player, focus on enemy
+            damageEntity.add(new CamTargetComponent());
         }
         
         //check for shield
@@ -102,7 +110,7 @@ public class PhysicsContactListener implements ContactListener {
             for (Entity e : cluster) {
                 e.add(new RemoveComponent());
             }
-            //attackedEntity.add(new RemoveComponent());
+            
             Gdx.app.log(this.getClass().getSimpleName(),
                     "[" + Misc.objString(attackedEntity) + "] killed by: [" + Misc.objString(damageComponent.source) + "]");
         }

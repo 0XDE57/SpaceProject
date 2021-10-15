@@ -16,6 +16,7 @@ import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.ChargeCannonComponent;
+import com.spaceproject.components.CamTargetComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DashComponent;
@@ -115,8 +116,15 @@ public class EntityFactory {
         Array<Entity> playerShipCluster = createBasicShip(x, y, 0, player, inSpace);
         Entity playerShip = playerShipCluster.first();
         
+        /*
+        ECSUtil.TransferControl(player, playerShip);
+        CameraFocusComponent cameraFocus = Mappers.camFocus.get(playerShip);
+        cameraFocus.zoomTarget = engineCFG.defaultZoomVehicle;
+         */
+        
         ECSUtil.transferComponent(player, playerShip, ControlFocusComponent.class);
         ECSUtil.transferComponent(player, playerShip, ControllableComponent.class);
+        ECSUtil.transferComponent(player, playerShip, CamTargetComponent.class);
         CameraFocusComponent cameraFocus = (CameraFocusComponent)ECSUtil.transferComponent(player, playerShip, CameraFocusComponent.class);
         cameraFocus.zoomTarget = engineCFG.defaultZoomVehicle;
         
@@ -134,6 +142,10 @@ public class EntityFactory {
         Entity aiShip = aiShipCluster.first();
         ECSUtil.transferComponent(ai, aiShip, AIComponent.class);
         ECSUtil.transferComponent(ai, aiShip, ControllableComponent.class);
+        ECSUtil.transferComponent(ai, aiShip, CamTargetComponent.class);
+    
+        //ECSUtil.TransferControl(player, playerShip);
+        
         return aiShipCluster;
     }
     //endregion

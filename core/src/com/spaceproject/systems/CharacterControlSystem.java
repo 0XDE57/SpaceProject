@@ -9,6 +9,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
+import com.spaceproject.components.CamTargetComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.ControlFocusComponent;
@@ -114,6 +115,7 @@ public class CharacterControlSystem extends IteratingSystem {
         ECSUtil.transferComponent(characterEntity, vehicle, ControllableComponent.class);
         ECSUtil.transferComponent(characterEntity, vehicle, AIComponent.class);
         ECSUtil.transferComponent(characterEntity, vehicle, ControlFocusComponent.class);
+        ECSUtil.transferComponent(characterEntity, vehicle, CamTargetComponent.class);
         
         // remove character
         getEngine().removeEntity(characterEntity);

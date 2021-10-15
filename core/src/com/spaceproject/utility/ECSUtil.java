@@ -9,22 +9,36 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AttachedToComponent;
+import com.spaceproject.components.CameraFocusComponent;
+import com.spaceproject.components.CamTargetComponent;
+import com.spaceproject.components.ControlFocusComponent;
+import com.spaceproject.components.ControllableComponent;
 
 public class ECSUtil {
     
     public static Component transferComponent(Entity fromEntity, Entity toEntity, Class<? extends Component> componentClass) {
-        if (fromEntity.getComponent(componentClass) == null) {
+        Component transferredComponent = fromEntity.remove(componentClass);
+        if (transferredComponent == null) {
             Gdx.app.debug("ECSUtil", "Warning: " + Misc.objString(fromEntity)
                     + " has no " + componentClass.getSimpleName()
                     + " to give to " + Misc.objString(toEntity));
             return null;
         }
     
-        Component transferred = toEntity.addAndReturn(fromEntity.remove(componentClass));
-        Gdx.app.debug("ECSUtil", "transferComponent: " + Misc.objString(transferred)
+        toEntity.add(transferredComponent);
+        Gdx.app.debug("ECSUtil", "transferComponent: " + Misc.objString(transferredComponent)
                 + ": " + Misc.objString(fromEntity) + " -> " + Misc.objString(toEntity));
-        return transferred;
+        return transferredComponent;
+    }
+    
+    public static void TransferControl(Entity fromEntity, Entity toEntity) {
+        ECSUtil.transferComponent(fromEntity, toEntity, CameraFocusComponent.class);
+        ECSUtil.transferComponent(fromEntity, toEntity, ControlFocusComponent.class);
+        ECSUtil.transferComponent(fromEntity, toEntity, AIComponent.class);
+        ECSUtil.transferComponent(fromEntity, toEntity, ControllableComponent.class);
+        ECSUtil.transferComponent(fromEntity, toEntity, CamTargetComponent.class);
     }
     
     public static Entity copyEntity(Entity entity) {

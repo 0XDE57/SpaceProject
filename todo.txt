@@ -188,22 +188,18 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         https://www.youtube.com/watch?v=Fy0aCDmgnxg
         https://www.youtube.com/watch?v=tu-Qe66AvtY
         [x] lag camera behind movement a little for visual effect, especially when dodging for more visual impact
-            lerp
-        [ ] lerping is giving some jittering in the rendering when vsync on. not visible when vsync off.
-        [ ] fix camera: combat camera
-            right now manually zooming in an out when fighting is a bit clunky and jarring.
-            implement an auto lock on camera which will adjust the zoom to include both the player
-            and the enemy within frame, even have the camera back the player into the opposite side of the
-            screen relative to enemy, to keep more zoom and attention on the combat. focus!
-            if (in combat) {
-                enemyEntity.add(CombatFocusComponent)
-            }
-            camera systems looks for entities with CombatFocusComponent, auto adjust zoom so entity with combat focus
-            is within screen view.
-            consider multiple enemies, 3 on screen? include all will make zoom far and less focused, so probably some sort of
+        [ ] lerping is giving some jittering in the rendering when vsync on. not visible when vsync off. not visible when lockedOn.
+        [...] camera: combat camera
+            manually zooming in an out when fighting is a bit clunky and jarring.
+            [x] implement an auto lock on camera which will adjust the zoom to include both the player
+                and the enemy within frame
+            [ ] always keep play in frame no matter what
+            [ ] tuning: when entities too far apart or too out of frame, return to focusing on player
+            [ ] tuning: lerp between locked on state and player focus
+            [ ] consider multiple enemies, 3 on screen? include all will make zoom far and less focused, so probably some sort of
             dynamic focus, maybe who gets shot last has focus? todo: study cam mechanics for smashbros / project m style combat
             thresholds for how close to focus near the edge
-            still allow manual override with scroll, with perhaps a timer to focus back in, or when a new enemy joins
+            [?] still allow manual override with scroll, with perhaps a timer to focus back in, or when a new enemy joins
     [...] respawn
         [x] for now, just place back at origin 0, 0
         [ ] make space station home base that orbits around a planet, player spawns from dock with basic ship

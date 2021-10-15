@@ -36,7 +36,7 @@ public class MiniMap {
     
     private MiniMapConfig miniMapCFG;
     private CelestialConfig celestCFG;
-    private MapState mapState = MapState.mini;
+    private MapState mapState = MapState.off;
     private Rectangle mapContainer;
     private BitmapFont font;
     private float mapScale;
@@ -160,7 +160,7 @@ public class MiniMap {
         if (player != null) {
             Body body = Mappers.physics.get(player).body;
             String playerInfo = ": " + MyMath.round(body.getLinearVelocity().len(), 1);
-            HyperDriveComponent hyper = player.getComponent(HyperDriveComponent.class);
+            HyperDriveComponent hyper = Mappers.hyper.get(player);
             if (hyper != null && hyper.isActive) {
                 playerInfo = ": " + MyMath.round(hyper.velocity.len(), 1);
             }
