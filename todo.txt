@@ -200,6 +200,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
             dynamic focus, maybe who gets shot last has focus? todo: study cam mechanics for smashbros / project m style combat
             thresholds for how close to focus near the edge
             [?] still allow manual override with scroll, with perhaps a timer to focus back in, or when a new enemy joins
+    [ ] when entity is killed/removed during charge, charge cannon and particle remain instead of being removed
     [...] respawn
         [x] for now, just place back at origin 0, 0
         [ ] make space station home base that orbits around a planet, player spawns from dock with basic ship

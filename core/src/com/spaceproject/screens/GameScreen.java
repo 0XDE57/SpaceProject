@@ -357,6 +357,8 @@ public class GameScreen extends MyScreenAdapter {
         galaxy = null;
         noiseManager.dispose();
         noiseManager = null;
+        
+        stage.dispose();
     }
     
 }

@@ -142,7 +142,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
         resetRotation();
     }
     
-    private static void resetRotation() {
+    public static void resetRotation() {
         cam.up.set(0, 1, 0);
         cam.rotate(0);
     }

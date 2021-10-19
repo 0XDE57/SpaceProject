@@ -21,9 +21,9 @@ public class CameraSystem extends IteratingSystem {
     
     private final OrthographicCamera cam;
     
-    private final float zoomSpeed = 3;
-    private final float zoomSetThreshold = 0.2f;
-    private final float minZoom = 0.001f;
+    private final float zoomSpeed = 2;
+    private final float zoomSetThreshold = 0.001f;
+    private final float minZoom = 0f;
     private final float maxZoom = 100000;
     private final float smoothFollowSpeed = 2f;
     private final float maxOffsetFromTarget = 9f;
@@ -57,8 +57,22 @@ public class CameraSystem extends IteratingSystem {
             //lockToTarget(playerPosition);
         }
     
-        animateZoom(cameraFocus.zoomTarget, delta);
+        
+        
+        //always keep player within viewport
+        int padding = 0;
+        Rectangle focalWindow = new Rectangle(padding, padding,
+                Gdx.graphics.getWidth()-padding, Gdx.graphics.getHeight()-padding);
+        Vector3 playerScreenPos = cam.project(new Vector3(playerPosition, 0));
+        if (!focalWindow.contains(playerScreenPos.x, playerScreenPos.y)) {
+            Gdx.app.debug(this.getClass().getSimpleName(), "entity out of window: " + focalWindow.toString());
+        
+            //cameraFocus.zoomTarget += 2f * delta;
+        }
     
+    
+        animateZoom(cameraFocus.zoomTarget, delta);
+        
         cam.update();
     }
     
@@ -80,6 +94,7 @@ public class CameraSystem extends IteratingSystem {
     }
     
     private void animateZoom(float zoomTarget, float delta) {
+        /*
         if (cam.zoom != zoomTarget) {
             //zoom in/out
             float scaleSpeed = zoomSpeed * delta;
@@ -89,7 +104,15 @@ public class CameraSystem extends IteratingSystem {
             if (Math.abs(cam.zoom - zoomTarget) < zoomSetThreshold) {
                 cam.zoom = zoomTarget;
             }
+        }*/
+        
+        cam.zoom = MathUtils.lerp(cam.zoom, zoomTarget, zoomSpeed * delta);
+    
+        //if zoom is close enough, just set it to target
+        if (Math.abs(cam.zoom - zoomTarget) < zoomSetThreshold) {
+            cam.zoom = zoomTarget;
         }
+        
         cam.zoom = MathUtils.clamp(cam.zoom, minZoom, maxZoom);
     }
     

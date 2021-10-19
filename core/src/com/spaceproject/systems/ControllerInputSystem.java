@@ -59,6 +59,24 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                 if (cameraFocus != null) {
                     float scrollAmount = rightStickVertAxis * camZoomSpeed * MyScreenAdapter.cam.zoom * deltaTime;
                     cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
+    
+                    
+                    //float scrollAmount = rightStickVertAxis * cameraFocus.zoomTarget * 0.5f;
+                    //cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
+    
+                    //cameraFocus.zoomTarget += Math.round(scrollAmount);
+                    /*
+                    float scrollAmount = amountY * cameraFocus.zoomTarget * 0.5f;
+                //cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
+                if (cameraFocus.zoomTarget <= 1) {
+                    if (scrollAmount <= 0) {
+                        cameraFocus.zoomTarget = 0.5f;
+                    } else {
+                        cameraFocus.zoomTarget = Math.max(1f, Math.round(scrollAmount));
+                    }
+                }
+                cameraFocus.zoomTarget += Math.round(scrollAmount);
+                    * */
                 }
             }
         }
@@ -158,7 +176,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                 //reset cam
                 CameraFocusComponent cameraFocus = Mappers.camFocus.get(player);
                 if (cameraFocus != null) {
-                    GameScreen.resetCamera();
+                    GameScreen.resetRotation();
                     EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
                     if (Mappers.vehicle.get(player) != null) {
                         cameraFocus.zoomTarget = engineConfig.defaultZoomVehicle;
