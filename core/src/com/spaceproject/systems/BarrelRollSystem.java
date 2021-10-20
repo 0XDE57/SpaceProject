@@ -45,7 +45,11 @@ public class BarrelRollSystem extends IteratingSystem {
             if (control.moveRight && control.alter) {
                 dodgeRight(entity, rollComp);
             }
+            if (control.moveForward && control.alter) {
+                boostForward(entity, rollComp);
+            }
         }
+        
         
         //strafe roll
         float rollAmount = strafeRollSpeed * deltaTime;
@@ -94,6 +98,16 @@ public class BarrelRollSystem extends IteratingSystem {
     private void dodgeRight(Entity entity, BarrelRollComponent roll) {
         if (roll.timeoutTimer.tryEvent()) {
             applyDodgeImpulse(entity, roll, BarrelRollComponent.FlipDir.right);
+        }
+    }
+    
+    private void boostForward(Entity entity, BarrelRollComponent roll) {
+        if (roll.timeoutTimer.tryEvent()) {
+            TransformComponent transform = Mappers.transform.get(entity);
+            Body body = Mappers.physics.get(entity).body;
+            body.applyLinearImpulse(MyMath.vector(transform.rotation, entityCFG.dodgeForce), body.getPosition(), true);
+    
+            roll.animationTimer.reset();
         }
     }
     

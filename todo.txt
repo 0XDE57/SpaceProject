@@ -30,7 +30,6 @@ and prototype systems.
 
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-todo...should start documenting and specking out the features and where its headed.
 It's half in notes, half in my head, and half in code.
 
 ***architecture***
@@ -784,6 +783,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
 	[...] moons/satellites
     [ ] research planet attributes //size, temperature, pressure, atmosphere/elements(https://en.wikipedia.org/wiki/Astronomical_spectroscopy)...etc
 	inspiration and references:
+	    Noise-Based RNG: https://www.youtube.com/watch?v=LWFzPP8ZbdU
 	    http://www.entropicparticles.com/6-days-of-creation/
 	    https://plaxdev.wordpress.com/2017/05/04/procedurally-generating-islands/
 	    https://www.reddit.com/search?q=%28perlin|simplex|opensimplex%29+noise&sort=new
