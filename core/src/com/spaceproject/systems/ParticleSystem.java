@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.AttachedToComponent;
+import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ParticleComponent;
@@ -28,6 +29,9 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     ParticleEffectPool fireEffectPool;
     ParticleEffect chargeEffect;
     ParticleEffectPool chargeEffectPool;
+    
+    float[] engineColor = {1, 0.34901962f, 0.047058824f};
+    float[] engineColorBoost = {0.047058824f, 0.34901962f, 1};
     
     
     public ParticleSystem() {
@@ -105,13 +109,24 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
             particle.pooledEffect.allowCompletion();
         }
         
+        //if (!particle.pooledEffect.isComplete()) {
         TransformComponent transform = Mappers.transform.get(entity);
+        BarrelRollComponent roll = Mappers.barrelRoll.get(entity);
         Array<ParticleEmitter> emitters = particle.pooledEffect.getEmitters();
         float engineRotation = particle.angle + (transform.rotation * MathUtils.radDeg + 180);
         for (int i = 0; i < emitters.size; i++) {
-            ParticleEmitter.ScaledNumericValue val = emitters.get(i).getAngle();
-            val.setHigh(engineRotation);
-            val.setLow(engineRotation);
+            ParticleEmitter.ScaledNumericValue angle = emitters.get(i).getAngle();
+            angle.setHigh(engineRotation);
+            angle.setLow(engineRotation);
+        
+            if (roll != null) {
+                ParticleEmitter.GradientColorValue tint = emitters.get(i).getTint();
+                if (roll.animationTimer.ratio() < 1) {
+                    tint.setColors(engineColorBoost);
+                } else {
+                    tint.setColors(engineColor);
+                }
+            }
         }
         particle.offset.setAngleDeg(engineRotation);
         particle.pooledEffect.setPosition(transform.pos.x + particle.offset.x, transform.pos.y + particle.offset.y);
