@@ -164,8 +164,10 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
             }
             physics.body.setTransform(physics.body.getPosition(), physics.body.getAngle() + screenTrans.rotation);
     
-            ////lock camera onto ship (bypass lerp)
-            GameScreen.cam.position.set(physics.body.getPosition().x, physics.body.getPosition().y, 0);
+            if (Mappers.camFocus.get(entity) != null) {
+                ////lock camera onto ship (bypass lerp)
+                GameScreen.cam.position.set(physics.body.getPosition().x, physics.body.getPosition().y, 0);
+            }
         }
         
         /*
@@ -205,9 +207,11 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
                 screenTrans.rotation = MathUtils.random(0.01f, -0.01f);
             }
             physics.body.setTransform(physics.body.getPosition(), physics.body.getAngle() + screenTrans.rotation);
-    
-            //lock cam to target
-            GameScreen.cam.position.set(physics.body.getPosition().x, physics.body.getPosition().y, 0);
+            
+            if (Mappers.camFocus.get(entity) != null) {
+                //lock cam to target
+                GameScreen.cam.position.set(physics.body.getPosition().x, physics.body.getPosition().y, 0);
+            }
         }
         
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
@@ -275,7 +279,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         sprite3D.renderable.scale.set(screenTrans.initialScale, screenTrans.initialScale, screenTrans.initialScale);
         
         //reset camera zoom
-        CameraFocusComponent camFocus = entity.getComponent(CameraFocusComponent.class);
+        CameraFocusComponent camFocus = Mappers.camFocus.get(entity);
         if (camFocus != null) {
             camFocus.zoomTarget = SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle;
         }
@@ -292,8 +296,8 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         screenTrans.initialScale = sprite3D.renderable.scale.x;
         sprite3D.renderable.scale.set(0, 0, 0);
-        
-        entity.getComponent(CameraFocusComponent.class).zoomTarget = SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle;
+    
+        Mappers.camFocus.get(entity).zoomTarget = SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle;
         
         gameContext.switchScreen(entity, null);
     
