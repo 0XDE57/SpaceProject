@@ -19,6 +19,21 @@ public abstract class MyMath {
         return ((long) x << 32) + y + GameScreen.getGalaxySeed();
     }
     
+    public static int test(int x, int y) {
+        int largePrime = 198491317;
+        return x + (largePrime * y);
+    }
+    
+    public static void testUnique() {
+        int distCheck = 10; //Integer.MAX_VALUE;
+        for (int x = 0; x <= distCheck; x++) {
+            for (int y = 0; y <= distCheck; x++) {
+                System.out.println(x + ", " + y + ": " + getSeed(x, y));
+                //System.out.println(x + ", " + y + ": " + test(x, y));
+            }
+        }
+    }
+    
     public static long getNewGalaxySeed() {
         long newSeed = new Random().nextLong();
         

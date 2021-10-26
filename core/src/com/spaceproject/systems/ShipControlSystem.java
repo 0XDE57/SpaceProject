@@ -12,10 +12,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.AIComponent;
-import com.spaceproject.components.CameraFocusComponent;
-import com.spaceproject.components.CamTargetComponent;
-import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
@@ -24,20 +20,18 @@ import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
-import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.EntityConfig;
 import com.spaceproject.generation.BodyFactory;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.Misc;
-import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.SimpleTimer;
 
 
 public class ShipControlSystem extends IteratingSystem {
     
-    private static EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     private static EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
     private ImmutableArray<Entity> planets;
     
@@ -173,22 +167,13 @@ public class ShipControlSystem extends IteratingSystem {
         Mappers.physics.get(characterEntity).body = body;
         
         //transfer focus and controls to character
-        CameraFocusComponent cameraFocus = (CameraFocusComponent) ECSUtil.transferComponent(vehicleEntity, characterEntity, CameraFocusComponent.class);
-        if (cameraFocus != null) {
-            cameraFocus.zoomTarget = engineCFG.defaultZoomCharacter;
-        }
-        ECSUtil.transferComponent(vehicleEntity, characterEntity, ControlFocusComponent.class);
-        ECSUtil.transferComponent(vehicleEntity, characterEntity, AIComponent.class);
-        ECSUtil.transferComponent(vehicleEntity, characterEntity, ControllableComponent.class);
-        ECSUtil.transferComponent(vehicleEntity, characterEntity, CamTargetComponent.class);
-    
-        /*
-        ECSUtil.TransferControl(vehicleEntity, characterEntity);
-        CameraFocusComponent cameraFocus = Mappers.camFocus.get(characterEntity);
-        if (cameraFocus != null) {
-            cameraFocus.zoomTarget = engineCFG.defaultZoomCharacter;
-        }*/
+        ECSUtil.transferControl(vehicleEntity, characterEntity);
         
+        //set camera
+        if (Mappers.camFocus.get(characterEntity) != null) {
+            CameraSystem cameraSystem = getEngine().getSystem(CameraSystem.class);
+            cameraSystem.setZoomToDefault(characterEntity);
+        }
         
         // remove driver reference from vehicle
         Mappers.vehicle.get(vehicleEntity).driver = null;

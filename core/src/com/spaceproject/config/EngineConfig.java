@@ -23,9 +23,6 @@ public class EngineConfig extends Config {
     
     public int maxNoiseGenThreads;
     
-    public float defaultZoomCharacter;
-    public float defaultZoomVehicle;
-    
     
     @Override
     public void loadDefault() {
@@ -47,8 +44,5 @@ public class EngineConfig extends Config {
         
         maxNoiseGenThreads = Gdx.app.getType() == Application.ApplicationType.Desktop ? 4 : 2;
         //maxNoiseGenThreads = Math.max(1, Runtime.getRuntime().availableProcessors()-2);
-        
-        defaultZoomCharacter = 0.5f;
-        defaultZoomVehicle = 1.0f;
     }
 }

@@ -10,19 +10,16 @@ import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.math.MathUtils;
-import com.spaceproject.SpaceProject;
-import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DashComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.config.EngineConfig;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.menu.GameMenu;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.SimpleTimer;
 
 public class ControllerInputSystem extends EntitySystem implements ControllerListener {
     
@@ -31,7 +28,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     private float rightStickHorAxis;
     private float rightStickVertAxis;
     private final float deadZone = 0.25f;
-    private final float camZoomSpeed = 3f;
+    private final SimpleTimer cameraDelay = new SimpleTimer(400);
     //private SimpleTimer doubleTap = new SimpleTimer(1000);
     private ImmutableArray<Entity> players;
     
@@ -53,30 +50,11 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     
         if (Math.abs(rightStickVertAxis) >= deadZone) {
             //Gdx.app.log(this.getClass().getSimpleName(), rightStickVertAxis + " - right vert");
-            if (players.size() != 0) {
-                Entity player = players.first();
-                CameraFocusComponent cameraFocus = Mappers.camFocus.get(player);
-                if (cameraFocus != null) {
-                    float scrollAmount = rightStickVertAxis * camZoomSpeed * MyScreenAdapter.cam.zoom * deltaTime;
-                    cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
-    
-                    
-                    //float scrollAmount = rightStickVertAxis * cameraFocus.zoomTarget * 0.5f;
-                    //cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
-    
-                    //cameraFocus.zoomTarget += Math.round(scrollAmount);
-                    /*
-                    float scrollAmount = amountY * cameraFocus.zoomTarget * 0.5f;
-                //cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
-                if (cameraFocus.zoomTarget <= 1) {
-                    if (scrollAmount <= 0) {
-                        cameraFocus.zoomTarget = 0.5f;
-                    } else {
-                        cameraFocus.zoomTarget = Math.max(1f, Math.round(scrollAmount));
-                    }
-                }
-                cameraFocus.zoomTarget += Math.round(scrollAmount);
-                    * */
+            if (cameraDelay.tryEvent()) {
+                if (rightStickVertAxis >= 0) {
+                    getEngine().getSystem(CameraSystem.class).zoomOut();
+                } else {
+                    getEngine().getSystem(CameraSystem.class).zoomIn();
                 }
             }
         }
@@ -160,6 +138,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             handled = true;
         }
         
+        //toggle menu
         if (buttonCode == controller.getMapping().buttonStart) {
             if (buttonDown) {
                 GameMenu menu = getEngine().getSystem(HUDSystem.class).getGameMenu();
@@ -172,20 +151,12 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             handled = true;
         }
         
+        //reset cam
         if ((buttonCode == controller.getMapping().buttonRightStick) && buttonDown) {
-                //reset cam
-                CameraFocusComponent cameraFocus = Mappers.camFocus.get(player);
-                if (cameraFocus != null) {
-                    GameScreen.resetRotation();
-                    EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
-                    if (Mappers.vehicle.get(player) != null) {
-                        cameraFocus.zoomTarget = engineConfig.defaultZoomVehicle;
-                    } else {
-                        cameraFocus.zoomTarget = engineConfig.defaultZoomCharacter;
-                    }
-                    handled = true;
-                }
-            }
+            GameScreen.resetRotation();
+            getEngine().getSystem(CameraSystem.class).setZoomToDefault(player);
+            handled = true;
+        }
         
         return handled;
     }

@@ -33,7 +33,7 @@ public class ECSUtil {
         return transferredComponent;
     }
     
-    public static void TransferControl(Entity fromEntity, Entity toEntity) {
+    public static void transferControl(Entity fromEntity, Entity toEntity) {
         ECSUtil.transferComponent(fromEntity, toEntity, CameraFocusComponent.class);
         ECSUtil.transferComponent(fromEntity, toEntity, ControlFocusComponent.class);
         ECSUtil.transferComponent(fromEntity, toEntity, AIComponent.class);

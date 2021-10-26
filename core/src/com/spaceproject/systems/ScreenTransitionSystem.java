@@ -8,10 +8,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AstronomicalComponent;
-import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PhysicsComponent;
@@ -19,7 +17,6 @@ import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.config.EngineConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.ScreenTransitionOverlay;
@@ -170,12 +167,6 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
             }
         }
         
-        /*
-        //lock camera onto ship (bypass lerp)
-        TransformComponent transform = Mappers.transform.get(entity);
-        GameScreen.cam.position.set(transform.pos.x, transform.pos.y, 0);
-         */
-        
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         if (screenTrans.initialScale == 0) {
             screenTrans.initialScale = sprite3D.renderable.scale.x;
@@ -208,8 +199,8 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
             }
             physics.body.setTransform(physics.body.getPosition(), physics.body.getAngle() + screenTrans.rotation);
             
+            //lock cam to target
             if (Mappers.camFocus.get(entity) != null) {
-                //lock cam to target
                 GameScreen.cam.position.set(physics.body.getPosition().x, physics.body.getPosition().y, 0);
             }
         }
@@ -225,27 +216,25 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     }
     
     private void zoomIn(Entity entity, ScreenTransitionComponent screenTrans) {
-        Mappers.camFocus.get(entity).zoomTarget = 0;
+        CameraSystem cameraSystem = getEngine().getSystem(CameraSystem.class);
+        cameraSystem.setZoomZero();
     
         //lock cam onto entity
         TransformComponent transform = Mappers.transform.get(entity);
         GameScreen.cam.position.set(transform.pos.x, transform.pos.y, 0);
         
-        /*if really zoomed out, snap back in
-        EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
-        if (GameScreen.cam.zoom > engineConfig.defaultZoomVehicle) {
-            GameScreen.cam.zoom = engineConfig.defaultZoomVehicle;
-        }*/
-        
+        //wait till zoomed all the way into or close enough
         if (MyScreenAdapter.cam.zoom <= 0.2f) {
             nextStage(screenTrans);
         }
     }
     
-    private static void zoomOut(Entity entity, ScreenTransitionComponent screenTrans) {
-        EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
-        Mappers.camFocus.get(entity).zoomTarget = engineConfig.defaultZoomVehicle;
-        if (MyScreenAdapter.cam.zoom >= engineConfig.defaultZoomVehicle) {
+    private void zoomOut(Entity entity, ScreenTransitionComponent screenTrans) {
+        //cam was 0 from take off, set zoom to proper default
+        float zoomTarget = getEngine().getSystem(CameraSystem.class).setZoomToDefault(entity);
+        
+        //when camera has reached target,
+        if (MyScreenAdapter.cam.zoom >= zoomTarget) {
             screenTrans.timer.reset();
             nextStage(screenTrans);
         }
@@ -273,15 +262,14 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         }
     }
     
-    private static void landOnPlanet(GameScreen gameContext, Entity entity, ScreenTransitionComponent screenTrans) {
+    private void landOnPlanet(GameScreen gameContext, Entity entity, ScreenTransitionComponent screenTrans) {
         //reset sprite scale to previous
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         sprite3D.renderable.scale.set(screenTrans.initialScale, screenTrans.initialScale, screenTrans.initialScale);
         
         //reset camera zoom
-        CameraFocusComponent camFocus = Mappers.camFocus.get(entity);
-        if (camFocus != null) {
-            camFocus.zoomTarget = SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle;
+        if (Mappers.camFocus.get(entity) != null) {
+            getEngine().getSystem(CameraSystem.class).setZoomToDefault(entity);
         }
     
         //stop movement
@@ -297,7 +285,8 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         screenTrans.initialScale = sprite3D.renderable.scale.x;
         sprite3D.renderable.scale.set(0, 0, 0);
     
-        Mappers.camFocus.get(entity).zoomTarget = SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle;
+        //Mappers.camFocus.get(entity).zoomTarget = SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle;
+        getEngine().getSystem(CameraSystem.class).setZoomToDefault(entity);
         
         gameContext.switchScreen(entity, null);
     

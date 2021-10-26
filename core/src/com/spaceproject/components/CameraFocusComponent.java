@@ -2,8 +2,4 @@ package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
 
-public class CameraFocusComponent implements Component {
-    
-    public float zoomTarget;
-    
-}
+public class CameraFocusComponent implements Component {}

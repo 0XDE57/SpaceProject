@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.components.CamTargetComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 
@@ -21,6 +22,8 @@ public class CameraSystem extends IteratingSystem {
     
     private final OrthographicCamera cam;
     
+    private byte zoomLevel = 2;
+    private float zoomTarget = 1;
     private final float zoomSpeed = 2;
     private final float zoomSetThreshold = 0.001f;
     private final float minZoom = 0f;
@@ -56,24 +59,106 @@ public class CameraSystem extends IteratingSystem {
             lerpToTarget(playerPosition, delta);
             //lockToTarget(playerPosition);
         }
-    
         
-        
+        /*
         //always keep player within viewport
         int padding = 0;
         Rectangle focalWindow = new Rectangle(padding, padding,
                 Gdx.graphics.getWidth()-padding, Gdx.graphics.getHeight()-padding);
         Vector3 playerScreenPos = cam.project(new Vector3(playerPosition, 0));
-        if (!focalWindow.contains(playerScreenPos.x, playerScreenPos.y)) {
-            Gdx.app.debug(this.getClass().getSimpleName(), "entity out of window: " + focalWindow.toString());
+        int edgeTop = Gdx.graphics.getWidth();
+        int edgeBottom = 0;
+        int edgeLeft = 0;
+        int edgeRight = Gdx.graphics.getHeight();
+        float distLeft = playerScreenPos.x - edgeLeft;
+        float distRight = playerScreenPos.x - edgeRight;
+        float distTop = playerScreenPos.y - edgeTop;
+        float distBottom = playerScreenPos.y - edgeBottom;
         
+        float closestEdge = distLeft;
+        if (Math.abs(closestEdge) > Math.abs(distRight)) {
+            closestEdge = distRight;
+        }
+        if (Math.abs(closestEdge) > Math.abs(distTop)) {
+            closestEdge = distTop;
+        }
+        if (Math.abs(closestEdge) > Math.abs(distBottom)) {
+            closestEdge = distBottom;
+        }
+        
+        if (playerScreenPos.x < focalWindow.x) {
+            cam.position.x += /*playerPosition.x -* (playerScreenPos.x - focalWindow.x);//playerPosition.x - (playerScreenPos.x - edgeLeft);
+        }
+        if (playerScreenPos.y < focalWindow.y) {
+            //cam.position.x = playerPosition.y - focalWindow.y;
+        }
+        if (playerScreenPos.x > focalWindow.width) {
+            //cam.position.x = playerPosition.x - focalWindow.width;
+        }
+        if (playerScreenPos.y > focalWindow.height) {
+            //cam.position.y = playerPosition.y - focalWindow.height;
+        }
+        
+        
+        if (!focalWindow.contains(playerScreenPos.x, playerScreenPos.y)) {
+            //Gdx.app.debug(this.getClass().getSimpleName(),
+            //        "x: " + playerScreenPos.x + " y: " + playerScreenPos.y);// +
+                            //" l: " + distLeft + " r: " +
+                           // distRight + " t: " + distTop + " b: " + distBottom);
+            Gdx.app.debug(this.getClass().getSimpleName(),
+                    "x: " + playerScreenPos.x + " y: " + playerScreenPos.y +
+                            " entity out of window: " + focalWindow.toString());
+            
             //cameraFocus.zoomTarget += 2f * delta;
         }
-    
-    
-        animateZoom(cameraFocus.zoomTarget, delta);
+    */
+        
+        animateZoom(delta);
         
         cam.update();
+    }
+    
+    public void zoomIn() {
+        if (zoomLevel <= 0) return;
+        zoomTarget = getZoom(--zoomLevel);
+        Gdx.app.debug(this.getClass().getSimpleName(), "zoomIn: " + zoomTarget + " : " + zoomLevel);
+    }
+    
+    public void zoomOut() {
+        if (zoomLevel >= 20) return;
+        zoomTarget = getZoom(++zoomLevel);
+        Gdx.app.debug(this.getClass().getSimpleName(), "zoomOut: " + zoomTarget + " : " + zoomLevel);
+    }
+    
+    public float setZoomToDefault(Entity entity) {
+        //EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
+        if (Mappers.vehicle.get(entity) != null) {
+            zoomLevel = 2;//-> 1f : engineConfig.defaultZoomVehicle;
+        } else {
+            zoomLevel = 1;//-> 0.5f : engineConfig.defaultZoomCharacter;
+        }
+        zoomTarget = getZoom(zoomLevel);
+        Gdx.app.debug(this.getClass().getSimpleName(), "default zoom: " + zoomTarget + " : " + zoomLevel);
+        return zoomTarget;
+    }
+    
+    public void setZoomZero() {
+        zoomLevel = -1;
+        zoomTarget = getZoom(zoomLevel);
+        Gdx.app.debug(this.getClass().getSimpleName(), "zoomMIN: " + zoomTarget + " : " + zoomLevel);
+    }
+    
+    /** iter: -1,    0,   1, 2, 3, 4, 5, 6,  7, 8...
+     *  fib:    ,    0,   1, 1, 2, 3, 5, 8, 13, 21..
+     *  out:   0, 0.25, 0.5, 1, 2, 3, 5, 8, 13, 21.. */
+    private static float getZoom(byte level) {
+        switch (level) {
+            case -1: return 0;
+            case 0: return 0.25f;
+            case 1: return 0.5f; //default character zoom
+            case 2: return 1.0f; //default vehicle zoom
+            default: return MyMath.fibonacci(level);
+        }
     }
     
     private void lerpToTarget(Vector2 pos, float delta) {
@@ -93,19 +178,7 @@ public class CameraSystem extends IteratingSystem {
         cam.position.y = pos.y;
     }
     
-    private void animateZoom(float zoomTarget, float delta) {
-        /*
-        if (cam.zoom != zoomTarget) {
-            //zoom in/out
-            float scaleSpeed = zoomSpeed * delta;
-            cam.zoom += (cam.zoom < zoomTarget) ? scaleSpeed : -scaleSpeed;
-            
-            //if zoom is close enough, just set it to target
-            if (Math.abs(cam.zoom - zoomTarget) < zoomSetThreshold) {
-                cam.zoom = zoomTarget;
-            }
-        }*/
-        
+    private void animateZoom(float delta) {
         cam.zoom = MathUtils.lerp(cam.zoom, zoomTarget, zoomSpeed * delta);
     
         //if zoom is close enough, just set it to target
@@ -162,7 +235,8 @@ public class CameraSystem extends IteratingSystem {
                 || !focalWindow.contains(targetScreenPos.x, targetScreenPos.y)) {
             Gdx.app.debug(this.getClass().getSimpleName(), "entity out of window: " + focalWindow.toString());
             
-            cameraFocus.zoomTarget += 1f * delta;
+            zoomTarget += 1f * delta;
+            //zoomOut();
         } else {
             if (cam.zoom > 1) {
                 Rectangle threshHoldWindow = new Rectangle(0, 0, focalWindow.width * percent, focalWindow.height * percent);
@@ -174,7 +248,8 @@ public class CameraSystem extends IteratingSystem {
                     Gdx.app.debug(this.getClass().getSimpleName(), "inner window: " + threshHoldWindow.toString());
         
                     //zoom in if target and player are closer together relative to camera
-                    cameraFocus.zoomTarget -= 1f * delta;
+                    zoomTarget -= 1f * delta;
+                   // zoomIn();
                 }
             }
         }

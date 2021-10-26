@@ -17,7 +17,6 @@ import com.spaceproject.components.DashComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
@@ -141,7 +140,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         
         float zoomSpeed = 2f * delta;
         float angle = 5f * delta;
-        
+        /*
         if (Gdx.input.isKeyPressed(keyCFG.resetZoom)) {
             cameraFocus.zoomTarget = 1;
         }
@@ -150,7 +149,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         }
         if (Gdx.input.isKeyPressed(keyCFG.zoomIn)) {
             cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom - zoomSpeed;
-        }
+        }*/
         if (Gdx.input.isKeyPressed(keyCFG.rotateRight)) {
             MyScreenAdapter.cam.rotate(angle);
         }
@@ -161,56 +160,13 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     @Override
     public boolean scrolled(float amountX, float amountY) {
-        if (players.size() != 0) {
-            Entity player = players.first();
-            CameraFocusComponent cameraFocus = Mappers.camFocus.get(player);
-            if (cameraFocus != null) {
-                float scrollAmount = amountY * cameraFocus.zoomTarget * 0.5f;
-                // a += Math.round(b * a * 0.5f);
-                // go nicely between 0.25, 0.5, 1, 2, 3, 5, 8, 12, 18, 27... but not quite 13, 21?
-                // it turns out to be strangely close to fib unintentionally,
-                // but also feels like a really nice spacing between zooms
-                // iter:    0,   1, 2, 3, 4, 5, 6,  7, 8...
-                // fib:     0,   1, 1, 2, 3, 5, 8, 13, 21..
-                // out:  0.25, 0.5, 1, 2, 3, 5, 8, 13, 21..
-                //todo: do it intentionally with fib, move it to camera class so controller input and mobile input set same targets
-                //for (int i = 0; i < 10; i++ ) { Gdx.app.debug("iter: " + i, MyMath.fibonacci(i) + ""); }
-                //if (amountY > 0) { iter++; } else { iter--; }
-                //cameraFocus.zoomTarget = getZoom(iter);
-                
-                if (amountY <= 0) {
-                    //zoom in
-                    if (cameraFocus.zoomTarget == 0.5f) {
-                        cameraFocus.zoomTarget = 0.25f;
-                    } else if (cameraFocus.zoomTarget == 1f) {
-                        cameraFocus.zoomTarget = 0.5f;
-                    } else {
-                        cameraFocus.zoomTarget += Math.round(scrollAmount);
-                    }
-                } else {
-                    //zoom out
-                    if (cameraFocus.zoomTarget == 0.25f) {
-                        cameraFocus.zoomTarget = 0.5f;
-                    } else if (cameraFocus.zoomTarget == 0.5f) {
-                        cameraFocus.zoomTarget = 1f;
-                    } else {
-                        cameraFocus.zoomTarget += Math.max(1, Math.round(scrollAmount));
-                    }
-                }
-            }
+        if (amountY <= 0) {
+            getEngine().getSystem(CameraSystem.class).zoomIn();
+        } else {
+            getEngine().getSystem(CameraSystem.class).zoomOut();
         }
         
         return false;
-    }
-    
-    static byte iter = 0;//126;test out of bound and negative
-    private static float getZoom(byte iter) {
-        switch (iter) {
-            case 0: return 0.25f;
-            case 1: return 0.5f; //default character zoom
-            case 2: return 1.0f; //default vehicle zoom
-            default: return MyMath.fibonacci(iter);
-        }
     }
     
     @Override
@@ -234,25 +190,18 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             return false;
         }
     
+        //primary attack
         if (button == Input.Buttons.LEFT) {
             ControllableComponent control = Mappers.controllable.get(players.first());
             control.attack = true;
             return true;
         }
         
+        //reset cam
         if (button == Input.Buttons.MIDDLE) {
-            Entity player = players.first();
-            CameraFocusComponent cameraFocus = Mappers.camFocus.get(player);
-            if (cameraFocus != null) {
-                GameScreen.resetRotation();
-                EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
-                if (Mappers.vehicle.get(player) != null) {
-                    cameraFocus.zoomTarget = engineConfig.defaultZoomVehicle;
-                } else {
-                    cameraFocus.zoomTarget = engineConfig.defaultZoomCharacter;
-                }
-                return true;
-            }
+            GameScreen.resetRotation();
+            getEngine().getSystem(CameraSystem.class).setZoomToDefault(players.first());
+            return true;
         }
         
         return false;
