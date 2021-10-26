@@ -24,7 +24,7 @@ public class BarrelRollSystem extends IteratingSystem {
     private final float strafeRollSpeed = 3f;
     
     public BarrelRollSystem() {
-        super(Family.all(Sprite3DComponent.class, ControllableComponent.class).get());
+        super(Family.all(Sprite3DComponent.class).get());
     }
     
     @Override
@@ -39,27 +39,32 @@ public class BarrelRollSystem extends IteratingSystem {
                 barrelRoll(sprite3D, rollComp);
                 return;
             }
-            if (control.moveLeft && control.alter) {
-                dodgeLeft(entity, rollComp);
-            }
-            if (control.moveRight && control.alter) {
-                dodgeRight(entity, rollComp);
-            }
-            if (control.moveForward && control.alter) {
-                boostForward(entity, rollComp);
+            if (control != null) {
+                if (control.moveLeft && control.alter) {
+                    dodgeLeft(entity, rollComp);
+                }
+                if (control.moveRight && control.alter) {
+                    dodgeRight(entity, rollComp);
+                }
+                if (control.moveForward && control.alter) {
+                    boostForward(entity, rollComp);
+                }
             }
         }
-        
         
         //strafe roll
         float rollAmount = strafeRollSpeed * deltaTime;
-        if (control.moveLeft) {
-            rollLeft(sprite3D, rollAmount);
-        }
-        if (control.moveRight) {
-            rollRight(sprite3D, rollAmount);
-        }
-        if (!control.moveLeft && !control.moveRight) {
+        if (control != null) {
+            if (control.moveLeft) {
+                rollLeft(sprite3D, rollAmount);
+            }
+            if (control.moveRight) {
+                rollRight(sprite3D, rollAmount);
+            }
+            if (!control.moveLeft && !control.moveRight) {
+                stabilizeRoll(sprite3D, rollAmount);
+            }
+        } else  {
             stabilizeRoll(sprite3D, rollAmount);
         }
     }

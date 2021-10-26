@@ -3,6 +3,7 @@ package com.spaceproject.utility;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
@@ -14,6 +15,7 @@ import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ShieldComponent;
+import com.spaceproject.components.Sprite3DComponent;
 
 public class PhysicsContactListener implements ContactListener {
     
@@ -58,6 +60,8 @@ public class PhysicsContactListener implements ContactListener {
         if (damageComponent.source == attackedEntity) {
             return; //ignore self-inflicted damage
         }
+        Gdx.app.log(this.getClass().getSimpleName(),
+                "[" + Misc.objString(attackedEntity) + "] attacked by: [" + Misc.objString(damageComponent.source) + "]");
         
         //check if attacked entity was AI
         AIComponent ai = Mappers.AI.get(attackedEntity);
@@ -68,8 +72,6 @@ public class PhysicsContactListener implements ContactListener {
             //focus ai on player
             ai.attackTarget = damageComponent.source;
             ai.state = AIComponent.State.attack;
-            Gdx.app.log(this.getClass().getSimpleName(),
-                    "AI [" + Misc.objString(attackedEntity) + "] attacked by: [" + Misc.objString(damageComponent.source) + "]");
         } else if (Mappers.controlFocus.get(damageEntity) != null) {
             //someone attacked player, focus on enemy
             damageEntity.add(new CamTargetComponent());
@@ -80,8 +82,8 @@ public class PhysicsContactListener implements ContactListener {
         if (shieldComp != null) {
             if (shieldComp.state == ShieldComponent.State.on) {
                 //shieldComp.state == ShieldComponent.State.break;??
-                //damageEntity.add(new RemoveComponent());
-                //return;
+                damageEntity.add(new RemoveComponent());
+                return;
             }
             /*
             if (shieldComp.isActive) {
@@ -100,6 +102,14 @@ public class PhysicsContactListener implements ContactListener {
                 attackedEntity.remove(shieldComp.getClass());
             }*/
         }
+    
+        //add roll to hit body
+        Sprite3DComponent sprite3D = Mappers.sprite3D.get(attackedEntity);
+        if (sprite3D != null) {
+            float roll = 50 * MathUtils.degRad;
+            sprite3D.renderable.angle += MathUtils.randomBoolean() ? roll : -roll;
+        }
+        
         
         //do damage
         healthComponent.health -= damageComponent.damage;
@@ -115,7 +125,7 @@ public class PhysicsContactListener implements ContactListener {
                     "[" + Misc.objString(attackedEntity) + "] killed by: [" + Misc.objString(damageComponent.source) + "]");
         }
         
-        //remove missile
+        //remove projectile
         damageEntity.add(new RemoveComponent());
     }
     
