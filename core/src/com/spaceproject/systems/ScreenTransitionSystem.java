@@ -160,9 +160,9 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
                 screenTrans.rotation = MathUtils.random(0.01f, -0.01f);
             }
             physics.body.setTransform(physics.body.getPosition(), physics.body.getAngle() + screenTrans.rotation);
-    
+            
+            //lock camera onto ship (bypass lerp)
             if (Mappers.camFocus.get(entity) != null) {
-                ////lock camera onto ship (bypass lerp)
                 GameScreen.cam.position.set(physics.body.getPosition().x, physics.body.getPosition().y, 0);
             }
         }
@@ -285,8 +285,9 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         screenTrans.initialScale = sprite3D.renderable.scale.x;
         sprite3D.renderable.scale.set(0, 0, 0);
     
-        //Mappers.camFocus.get(entity).zoomTarget = SpaceProject.configManager.getConfig(EngineConfig.class).defaultZoomVehicle;
-        getEngine().getSystem(CameraSystem.class).setZoomToDefault(entity);
+        if (Mappers.camFocus.get(entity) != null) {
+            getEngine().getSystem(CameraSystem.class).setZoomToDefault(entity);
+        }
         
         gameContext.switchScreen(entity, null);
     

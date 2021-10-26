@@ -42,7 +42,6 @@ public class GameScreen extends MyScreenAdapter {
     
     //core
     private static Engine engine;
-    //private static Engine persistenceEngine;//background state
     public static World box2dWorld;
     public static NoiseManager noiseManager;
     
@@ -129,9 +128,16 @@ public class GameScreen extends MyScreenAdapter {
         SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
         SystemLoader.loadSystems(this, engine, inSpace, systemsCFG);
         
+        if (currentPlanet != null) {
+            Vector2 position = Mappers.transform.get(currentPlanet).pos;
+            Entity transitioningEntity = transitioningEntityCluster.first();
+            Body body = transitioningEntity.getComponent(PhysicsComponent.class).body;
+            body.setTransform(position.x, position.y, body.getAngle());
+        }
         for (Entity entity : transitioningEntityCluster) {
             engine.addEntity(entity);
         }
+        adjustPhysics(transitioningEntityCluster);
     
         currentPlanet = null;
     }
@@ -142,13 +148,10 @@ public class GameScreen extends MyScreenAdapter {
         
         Entity transitioningEntity = transitioningEntityCluster.first();
         Gdx.app.log(this.getClass().getSimpleName(), "Landing " + Misc.objString(transitioningEntity) + " on planet " + Misc.objString(planet));
-        //DebugUtil.printEntity(transitioningEntity);
-        //DebugUtil.printEntity(planet);
-        
     
+        //load/unload relevant systems
         SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
         SystemLoader.loadSystems(this, engine, inSpace, systemsCFG);
-        
         
         // add player
         WorldConfig worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
@@ -159,56 +162,37 @@ public class GameScreen extends MyScreenAdapter {
         for (Entity entity : transitioningEntityCluster) {
             engine.addEntity(entity);
         }
+    
+        adjustPhysics(transitioningEntityCluster);
     }
     
     public void switchScreen(Entity transEntity, Entity planet) {
-        /* what is this doing and why?
-        ImmutableArray<Entity> transEntities = engine.getEntitiesFor(Family.all(AttachedToComponent.class).get());
-        for (Entity e : transEntities) {
-            AttachedToComponent attached = Mappers.attachedTo.get(e);
-            if (transEntity == attached.parentEntity) {
-                Gdx.app.log(this.getClass().getSimpleName(), "REMOVING: " + Misc.objString(transEntity));
-                transEntity.add(new RemoveComponent());
-            }
-        }*/
+        Array<Entity> transEntityCluster = ECSUtil.getAttachedEntities(engine, transEntity);
         
+        //if AI, remove it
         if (Mappers.AI.get(transEntity) != null) {
-            Gdx.app.log(this.getClass().getSimpleName(), "REMOVING: " + Misc.objString(transEntity));
-            transEntity.add(new RemoveComponent());
-			/*//TODO: persist
-			// what happens (in terms of persistence) to an entity in process of transitioning?
-			// eg: you land on planet and shortly after an AI also lands. you load before them. when we land, we want to see them land shortly after
-            //if important -> persist
-            //if same world (even if not important) -> persist (land on planet at same time as AI=where is AI)
-			if (Mappers.persist.get(e)) {
-				System.out.println("MOVED to background engine: " + Misc.objString(e));
-				persistenceEngine.addEntity(e);
-			}*/
+            Gdx.app.log(this.getClass().getSimpleName(), "REMOVING AI: " + Misc.objString(transEntity));
+            for (Entity e : transEntityCluster) {
+                e.add(new RemoveComponent());
+            }
             return;
         }
         
-        Array<Entity> transEntityCluster = ECSUtil.getAttachedEntities(engine, transEntity);
-        
+        //clean up resources
         ResourceDisposer.disposeAllExcept(engine.getEntities(), transEntityCluster);
         engine.removeAllEntities();//to fix family references when entities added to new engine
         
         ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(transEntity);
+        
+        //load/unload relevant systems
         if (inSpace) {
             initWorld(transEntityCluster, planet);
         } else {
             screenTrans.planet = currentPlanet;
             initSpace(transEntityCluster);
         }
-        ScreenTransitionSystem.nextStage(screenTrans);
-    
-    
-        adjustPhysics(transEntityCluster);
         
-        /*TODO: persist
-        for (Entity relevantEntity : backgroundEngine.getEntities()) {
-            //if landing on planet, and relevantEntity is on planet, add to engine, remove from backgroundEngine
-            //if going to space, and relevantEntity in space, add to engine, remove from backgroundEngine
-        }*/
+        ScreenTransitionSystem.nextStage(screenTrans);
         
         resetCamera();
     }
