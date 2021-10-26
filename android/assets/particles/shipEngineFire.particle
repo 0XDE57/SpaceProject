@@ -77,8 +77,8 @@ active: false
 active: true
 lowMin: 0.0
 lowMax: 0.0
-highMin: 100.0
-highMax: 100.0
+highMin: 500.0
+highMax: 500.0
 relative: false
 scalingCount: 1
 scaling0: 1.0
@@ -129,7 +129,7 @@ timeline1: 0.2
 timeline2: 0.8
 timeline3: 1.0
 - Options - 
-attached: false
+attached: true
 continuous: true
 aligned: false
 additive: true

@@ -111,14 +111,18 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         
         //if (!particle.pooledEffect.isComplete()) {
         TransformComponent transform = Mappers.transform.get(entity);
+        //PhysicsComponent physics = Mappers.physics.get(entity);
+        //float vel = (physics.body.getLinearVelocity().len() * 0.5f) + 10;
         BarrelRollComponent roll = Mappers.barrelRoll.get(entity);
         Array<ParticleEmitter> emitters = particle.pooledEffect.getEmitters();
         float engineRotation = particle.angle + (transform.rotation * MathUtils.radDeg + 180);
         for (int i = 0; i < emitters.size; i++) {
+            //set angle to always point out as engine exhaust
             ParticleEmitter.ScaledNumericValue angle = emitters.get(i).getAngle();
             angle.setHigh(engineRotation);
             angle.setLow(engineRotation);
         
+            //change color during boost
             if (roll != null) {
                 ParticleEmitter.GradientColorValue tint = emitters.get(i).getTint();
                 if (roll.animationTimer.ratio() < 1) {
@@ -127,6 +131,12 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                     tint.setColors(engineColor);
                 }
             }
+    
+            /*
+            //try to make velocity relative to ship
+            ParticleEmitter.ScaledNumericValue velocity = emitters.get(i).getVelocity();
+            velocity.setHigh(vel);
+            velocity.setLow(vel);*/
         }
         particle.offset.setAngleDeg(engineRotation);
         particle.pooledEffect.setPosition(transform.pos.x + particle.offset.x, transform.pos.y + particle.offset.y);
@@ -154,6 +164,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         
         particle.pooledEffect.setPosition(transform.pos.x, transform.pos.y);
         
+        /*
         ParticleEmitter.ScaledNumericValue gravity = emitter.getGravity();
         gravity.setActive(true);
         gravity.setHigh(velY);
@@ -163,6 +174,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         wind.setActive(true);
         wind.setHigh(velX);
         wind.setLow(velX);
+        */
     }
     
     @Override

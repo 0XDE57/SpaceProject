@@ -260,9 +260,12 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         [x] particlesystem and emitter components
         [...] rendering is lagging behind camera "drift bug" -> refactor rendering/system order.
             [...] split into update and render?
-        [...] absorb effect when charging charge cannon
-            [ ] should not drift when rotating
-            [ ] should not drift when moving (absorb, locked to charge itself, not relative to ship movement?)
+        [x] absorb effect when charging charge cannon
+            fixed! solution -> attached: true in *.particle
+                - Options -
+                attached: true
+            [x] should not drift when rotating
+            [x] should not drift when moving (absorb, locked to charge itself, not relative to ship movement?)
                 particle should chase bullet instead of moving towards spawn origin which is no longer the bullets location
         [ ] alternate engine particle effect when hyperdrive active
         [ ] absorb effect when charging shield
@@ -307,6 +310,13 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
                 BeginContact:vehicleButton.enable()
                 EndContact:vehicleButton.disable()
             http://www.iforce2d.net/b2dtut/sensors
+        [ ] scale engine particle emission by movement multiplier
+            - Emission -
+            lowMin: 0.0
+            lowMax: 0.0
+            highMin: 250.0
+            highMax: 250.0
+            relative: false
     [ ] add basic asteroids (arbitrary poly)
         [...] spec spawner for asteroid.
             [ ] belt - ring around barycenter component, orbit with flocking / group mechanic

@@ -122,7 +122,7 @@ timeline1: 0.19178082
 timeline2: 0.42465752
 timeline3: 0.5
 - Options - 
-attached: false
+attached: true
 continuous: true
 aligned: false
 additive: true
