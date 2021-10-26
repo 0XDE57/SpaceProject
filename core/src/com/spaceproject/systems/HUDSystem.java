@@ -181,10 +181,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     private void drawOrbitPath(boolean showSyncedPos) {
-        if (cam.zoom <= uiCFG.lodShowOrbitPath / uiCFG.orbitFadeFactor) {
-            return;
-        }
-        
         float alpha = MathUtils.clamp((cam.zoom / uiCFG.lodShowOrbitPath / uiCFG.orbitFadeFactor), 0, 1);
         uiCFG.orbitObjectColor.a = alpha;
         uiCFG.orbitSyncPosColor.a = alpha;

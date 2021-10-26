@@ -39,7 +39,7 @@ public class UIConfig extends Config {
         
         orbitObjectColor = new Color(1, 1, 1, 1);
         orbitSyncPosColor = new Color(1, 0, 0, 1);
-        lodShowOrbitPath = 500;
-        orbitFadeFactor = 6;
+        lodShowOrbitPath = 150;
+        orbitFadeFactor = 2;
     }
 }
