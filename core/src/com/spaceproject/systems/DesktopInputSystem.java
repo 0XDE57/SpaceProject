@@ -166,20 +166,51 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             CameraFocusComponent cameraFocus = Mappers.camFocus.get(player);
             if (cameraFocus != null) {
                 float scrollAmount = amountY * cameraFocus.zoomTarget * 0.5f;
-                //cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom += scrollAmount;
-                if (cameraFocus.zoomTarget <= 1) {
-                    if (scrollAmount <= 0) {
+                // a += Math.round(b * a * 0.5f);
+                // go nicely between 0.25, 0.5, 1, 2, 3, 5, 8, 12, 18, 27... but not quite 13, 21?
+                // it turns out to be strangely close to fib unintentionally,
+                // but also feels like a really nice spacing between zooms
+                // iter:    0,   1, 2, 3, 4, 5, 6,  7, 8...
+                // fib:     0,   1, 1, 2, 3, 5, 8, 13, 21..
+                // out:  0.25, 0.5, 1, 2, 3, 5, 8, 13, 21..
+                //todo: do it intentionally with fib, move it to camera class so controller input and mobile input set same targets
+                //for (int i = 0; i < 10; i++ ) { Gdx.app.debug("iter: " + i, MyMath.fibonacci(i) + ""); }
+                //if (amountY > 0) { iter++; } else { iter--; }
+                //cameraFocus.zoomTarget = getZoom(iter);
+                
+                if (amountY <= 0) {
+                    //zoom in
+                    if (cameraFocus.zoomTarget == 0.5f) {
+                        cameraFocus.zoomTarget = 0.25f;
+                    } else if (cameraFocus.zoomTarget == 1f) {
                         cameraFocus.zoomTarget = 0.5f;
                     } else {
-                        cameraFocus.zoomTarget = Math.max(1f, Math.round(scrollAmount));
+                        cameraFocus.zoomTarget += Math.round(scrollAmount);
+                    }
+                } else {
+                    //zoom out
+                    if (cameraFocus.zoomTarget == 0.25f) {
+                        cameraFocus.zoomTarget = 0.5f;
+                    } else if (cameraFocus.zoomTarget == 0.5f) {
+                        cameraFocus.zoomTarget = 1f;
+                    } else {
+                        cameraFocus.zoomTarget += Math.max(1, Math.round(scrollAmount));
                     }
                 }
-                
-                cameraFocus.zoomTarget += Math.round(scrollAmount);
             }
         }
         
         return false;
+    }
+    
+    static byte iter = 0;//126;test out of bound and negative
+    private static float getZoom(byte iter) {
+        switch (iter) {
+            case 0: return 0.25f;
+            case 1: return 0.5f; //default character zoom
+            case 2: return 1.0f; //default vehicle zoom
+            default: return MyMath.fibonacci(iter);
+        }
     }
     
     @Override
