@@ -136,6 +136,28 @@ public class ChargeCannonSystem extends IteratingSystem {
         expire.time = 5;
         chargeCannon.projectileEntity.add(expire);
         
+        
+        //particle -> stop absorbing effect
+        ParticleComponent oldParticle = (ParticleComponent) chargeCannon.projectileEntity.remove(ParticleComponent.class);
+        if (oldParticle != null && oldParticle.pooledEffect != null) {
+            oldParticle.pooledEffect.allowCompletion();
+        }
+        ParticleSystem particleSystem = getEngine().getSystem(ParticleSystem.class);
+        if (particleSystem != null) {
+            //particleSystem.freeParticleFromPool(oldParticle);
+            //particleSystem.chargeEffectPool.free(oldParticle.pooledEffect);
+            //oldParticle.pooledEffect.dispose();?
+        }
+        
+        //particle -> start trailing effect
+        ParticleComponent newParticle = new ParticleComponent();
+        newParticle.type = ParticleComponent.EffectType.projectileTrail;
+        newParticle.offset = new Vector2(0.75f,0);
+        if (particleSystem != null) {
+            particleSystem.initializeParticleFromPool(newParticle);
+        }
+        chargeCannon.projectileEntity.add(newParticle);
+        
         //release
         chargeCannon.projectileEntity = null;
     }

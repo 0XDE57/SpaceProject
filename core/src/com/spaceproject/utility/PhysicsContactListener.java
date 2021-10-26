@@ -11,6 +11,7 @@ import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.CamTargetComponent;
+import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.RemoveComponent;
@@ -120,7 +121,11 @@ public class PhysicsContactListener implements ContactListener {
             for (Entity e : cluster) {
                 e.add(new RemoveComponent());
             }
-            
+            ChargeCannonComponent chargeCannon = Mappers.chargeCannon.get(attackedEntity);
+            if (chargeCannon != null && chargeCannon.projectileEntity != null) {
+                //destroy or release
+                chargeCannon.projectileEntity.add(new RemoveComponent());
+            }
             Gdx.app.log(this.getClass().getSimpleName(),
                     "[" + Misc.objString(attackedEntity) + "] killed by: [" + Misc.objString(damageComponent.source) + "]");
         }

@@ -10,7 +10,8 @@ public class ParticleComponent implements Component {
         shipEngineMain,
         shipEngineLeft,
         shipEngineRight,
-        bulletCharge
+        bulletCharge,
+        projectileTrail
     }
     
     public EffectType type;

@@ -29,9 +29,11 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     ParticleEffectPool fireEffectPool;
     ParticleEffect chargeEffect;
     ParticleEffectPool chargeEffectPool;
+    ParticleEffect tailEffect;
+    ParticleEffectPool tailEffectPool;
     
-    float[] engineColor = {1, 0.34901962f, 0.047058824f};
-    float[] engineColorBoost = {0.047058824f, 0.34901962f, 1};
+    final float[] engineColor;
+    final float[] engineColorBoost;
     
     
     public ParticleSystem() {
@@ -39,15 +41,25 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         
         spriteBatch = new SpriteBatch();
     
+        //engine fire
         fireEffect = new ParticleEffect();
         fireEffect.load(Gdx.files.internal("particles/shipEngineFire.particle"), Gdx.files.internal("particles/"));
         fireEffect.scaleEffect(0.02f);
         fireEffectPool = new ParticleEffectPool(fireEffect, 20, 20);
+        engineColor = new float[]{ 1, 0.34901962f, 0.047058824f };
+        engineColorBoost = new float[]{ 0.047058824f, 0.34901962f, 1 };
         
+        //projectile charge
         chargeEffect = new ParticleEffect();
         chargeEffect.load(Gdx.files.internal("particles/absorb2.particle"), Gdx.files.internal("particles/"));
         chargeEffect.scaleEffect(0.02f);
         chargeEffectPool = new ParticleEffectPool(chargeEffect, 20, 20);
+        
+        //projectile tail
+        tailEffect = new ParticleEffect();
+        tailEffect.load(Gdx.files.internal("particles/tail4.particle"), Gdx.files.internal("particles/"));
+        tailEffect.scaleEffect(0.02f);
+        tailEffectPool = new ParticleEffectPool(tailEffect, 20, 20);
     }
     
     @Override
@@ -73,6 +85,9 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                 break;
             case bulletCharge:
                 updateChargeParticle(entity, particle);
+                break;
+            case projectileTrail:
+                updateTailParticle(entity, particle);
                 break;
         }
         
@@ -109,10 +124,8 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
             particle.pooledEffect.allowCompletion();
         }
         
-        //if (!particle.pooledEffect.isComplete()) {
+        
         TransformComponent transform = Mappers.transform.get(entity);
-        //PhysicsComponent physics = Mappers.physics.get(entity);
-        //float vel = (physics.body.getLinearVelocity().len() * 0.5f) + 10;
         BarrelRollComponent roll = Mappers.barrelRoll.get(entity);
         Array<ParticleEmitter> emitters = particle.pooledEffect.getEmitters();
         float engineRotation = particle.angle + (transform.rotation * MathUtils.radDeg + 180);
@@ -131,12 +144,6 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                     tint.setColors(engineColor);
                 }
             }
-    
-            /*
-            //try to make velocity relative to ship
-            ParticleEmitter.ScaledNumericValue velocity = emitters.get(i).getVelocity();
-            velocity.setHigh(vel);
-            velocity.setLow(vel);*/
         }
         particle.offset.setAngleDeg(engineRotation);
         particle.pooledEffect.setPosition(transform.pos.x + particle.offset.x, transform.pos.y + particle.offset.y);
@@ -152,49 +159,42 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
             }
         }
         
-        //ensure particles always drift towards current bullet location as if attracted by gravity
-        //using wind to modify velocity on the X axis, and gravity for the Y axis
-        //  velocityX += (particle.wind + particle.windDiff * windValue.getScale(percent)) * delta;
-        //  velocityY += (particle.gravity + particle.gravityDiff * gravityValue.getScale(percent)) * delta;
-        ParticleEmitter emitter = particle.pooledEffect.getEmitters().get(0);
         TransformComponent transform = Mappers.transform.get(entity);
-        float magnitude = 30; // + (1 * physics.body.getLinearVelocity())?
-        float velX = (transform.pos.x - emitter.getX()) * magnitude;
-        float velY = (transform.pos.y - emitter.getY()) * magnitude;
-        
         particle.pooledEffect.setPosition(transform.pos.x, transform.pos.y);
+    }
+    
+    private void updateTailParticle(Entity entity, ParticleComponent particle) {
+        TransformComponent transform = Mappers.transform.get(entity);
+        float rot = particle.angle + (transform.rotation * MathUtils.radDeg + 180);
+        float thicc = Mappers.texture.get(entity).scale * 2f;
         
-        /*
-        ParticleEmitter.ScaledNumericValue gravity = emitter.getGravity();
-        gravity.setActive(true);
-        gravity.setHigh(velY);
-        gravity.setLow(velY);
+        Array<ParticleEmitter> emitters = particle.pooledEffect.getEmitters();
+        for (int i = 0; i < emitters.size; i++) {
+            //set angle to always point out at tail of projectile
+            ParticleEmitter.ScaledNumericValue angle = emitters.get(i).getAngle();
+            angle.setHigh(rot);
+            angle.setLow(rot);
+            
+            //set rotation to always point out at tail of projectile
+            ParticleEmitter.ScaledNumericValue rotation = emitters.get(i).getRotation();
+            rotation.setHigh(rot);
+            rotation.setLow(rot);
+            
+            //set thickness to match texture
+            ParticleEmitter.ScaledNumericValue thickness = emitters.get(i).getYScale();
+            thickness.setHigh(thicc);
+            thickness.setLow(thicc);
+        }
         
-        ParticleEmitter.ScaledNumericValue wind = emitter.getWind();
-        wind.setActive(true);
-        wind.setHigh(velX);
-        wind.setLow(velX);
-        */
+        particle.offset.setAngleDeg(rot);
+        particle.pooledEffect.setPosition(transform.pos.x + particle.offset.x, transform.pos.y + particle.offset.y);
     }
     
     @Override
     public void entityAdded(Entity entity) {
         ParticleComponent particle = Mappers.particle.get(entity);
         if (particle != null && particle.pooledEffect == null) {
-            switch (particle.type) {
-                case shipEngineMain:
-                case shipEngineLeft:
-                case shipEngineRight:
-                    particle.pooledEffect = fireEffectPool.obtain();
-                    //start with emitter off
-                    particle.pooledEffect.allowCompletion();
-                    break;
-                case bulletCharge:
-                    particle.pooledEffect = chargeEffectPool.obtain();
-                    //start with emitter on
-                    particle.pooledEffect.start();
-                    break;
-            }
+            initializeParticleFromPool(particle);
         }
     }
     
@@ -202,16 +202,45 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     public void entityRemoved(Entity entity) {
         ParticleComponent particle = Mappers.particle.get(entity);
         if (particle != null && particle.pooledEffect != null) {
-            switch (particle.type) {
-                case shipEngineMain:
-                case shipEngineLeft:
-                case shipEngineRight:
-                    fireEffectPool.free(particle.pooledEffect);
-                    break;
-                case bulletCharge:
-                    chargeEffectPool.free(particle.pooledEffect);
-                    break;
-            }
+            freeParticleFromPool(particle);
+        }
+    }
+    
+    public void initializeParticleFromPool(ParticleComponent particle) {
+        switch (particle.type) {
+            case shipEngineMain:
+            case shipEngineLeft:
+            case shipEngineRight:
+                particle.pooledEffect = fireEffectPool.obtain();
+                //start with emitter off
+                particle.pooledEffect.allowCompletion();
+                break;
+            case bulletCharge:
+                particle.pooledEffect = chargeEffectPool.obtain();
+                //start with emitter on
+                particle.pooledEffect.start();
+                break;
+            case projectileTrail:
+                particle.pooledEffect = tailEffectPool.obtain();
+                //start with emitter on
+                particle.pooledEffect.start();
+                break;
+        }
+    }
+    
+    public void freeParticleFromPool(ParticleComponent particle) {
+        switch (particle.type) {
+            case shipEngineMain:
+            case shipEngineLeft:
+            case shipEngineRight:
+                fireEffectPool.free(particle.pooledEffect);
+                break;
+            case bulletCharge:
+                chargeEffectPool.free(particle.pooledEffect);
+                break;
+            case projectileTrail:
+                tailEffectPool.free(particle.pooledEffect);
+                break;
         }
     }
     
@@ -219,6 +248,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     public void dispose() {
         fireEffect.dispose();
         chargeEffect.dispose();
+        tailEffect.dispose();
     }
     
 }
