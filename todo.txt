@@ -187,19 +187,26 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         https://www.youtube.com/watch?v=Fy0aCDmgnxg
         https://www.youtube.com/watch?v=tu-Qe66AvtY
         [x] lag camera behind movement a little for visual effect, especially when dodging for more visual impact
-        [ ] lerping is giving some jittering in the rendering when vsync on. not visible when vsync off. not visible when lockedOn.
+        [ ] lerping camera movement is giving some jittering in the rendering when vsync on. less visible when vsync off. not visible when lockedOn.
+        [ ] change cursor to target
+        [ ] camera allow cursor to "extend view": pushing cursor to edge of screen pulls camera position at a point between player and mouse
+            [ ]
         [...] camera: combat camera
             manually zooming in an out when fighting is a bit clunky and jarring.
             [x] implement an auto lock on camera which will adjust the zoom to include both the player
                 and the enemy within frame
-            [ ] always keep play in frame no matter what
+            [ ] always keep player in frame no matter what
             [ ] tuning: when entities too far apart or too out of frame, return to focusing on player
             [ ] tuning: lerp between locked on state and player focus
             [ ] consider multiple enemies, 3 on screen? include all will make zoom far and less focused, so probably some sort of
             dynamic focus, maybe who gets shot last has focus? todo: study cam mechanics for smashbros / project m style combat
             thresholds for how close to focus near the edge
             [?] still allow manual override with scroll, with perhaps a timer to focus back in, or when a new enemy joins
-    [ ] when entity is killed/removed during charge, charge cannon and particle remain instead of being removed
+        [ ] when entity hit, needs to flash red or white -> shader
+        
+    [ ] BUG: when entity is killed/removed during charge, charge cannon and particle remain instead of being removed
+    [ ] while im no artist, i think picking a color palate might make it look a world and ui a little more consistent
+        http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
     [...] respawn
         [x] for now, just place back at origin 0, 0
         [ ] make space station home base that orbits around a planet, player spawns from dock with basic ship
@@ -224,7 +231,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     [...] barrel roll
         [...] adjust feel, impulse
         [ ] change engine particle effect color when dodging / boosting
-        [ ] apply forward force similar to dash with same impulse power
+        [x] apply forward force similar to dash with same impulse power
         [?] allow roll on other axis? could allow for front/backflips. also, could use other roll parameter for animation
             when hit by projectile, set the angles to roll opposite direction of hit angle, then the roll system will stabilize it back
             for impact feel
@@ -233,6 +240,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         [ ] should not activate during screen transition
         [ ] needs control for mobile
     [x] dash
+        [ ] some sort of visual elements to show speed / motion: eg dust cloud at feet or whooshy lines
     [...] grow cannon
         [ ] should be circle instead of rectangle?
         [ ] lock on nearest target when max
@@ -247,6 +255,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         [ ] hyperdrive should be hold key to charge up instead of instant activate
         [ ] needs control for mobile
     [...] particle effects!
+        [ ] projectile tails - simple rect or circle particle trailing bullets
         [x] particles need to render on top of planets. planets should be first rendered (low depth) in the render pipeline
         [x] particlesystem and emitter components
         [...] rendering is lagging behind camera "drift bug" -> refactor rendering/system order.
@@ -260,10 +269,14 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         [ ] charge burst effect when bullet destroyed (absorb reversed)
         [ ] shield burst effect when hit by bullet and shield destroyed
         [ ] explosion effect on ship destroy
+        [ ] some particles on projectile destroyed/removed
     [ ] controls
         [x] basic controller input
+            [ ] scene2d stage (main menu and pause menu) needs to support controller input. multiplexer?
+                https://github.com/MrStahlfelge/gdx-controllerutils/wiki/Button-operable-Scene2d
+            [ ] also keyboard navigation focusable items
+            [x] tested with xbox 360 wired and ps4 controller over usb
             [x] allow hot-plugging
-            [ ] multiplexer? and what about stage...
             [x] crashes title screen after return to menu from game, looks like systems still loaded (unhook listners?)
              cant repro, seems fixed
             [x] basic Xbox 360 support
@@ -275,7 +288,6 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
                 https://github.com/libgdx/gdx-controllers/wiki/Migrate-from-v1
             [?] right trigger boost, similar to roll impulse?
             [ ] left trigger for break / slow down
-        [?] new control?: hold shift to charge, then forward + release charge for boost: impulse
         [?] shield bash?: double tap forward(or direction) and hold to rush, then shield do shield action [B] within time window of dash, and hold
         [?] land take off could be hold instead of instant
         [ ] landing should be easier, when in range of planet (larger radius than planet itself)
@@ -307,40 +319,17 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
             [ ] voronoi shatter
     [ ] fix AI a bit (lead shot)
 
-    [...] fix background space rendering
-        [...] POC star shader with fullscreen quad in separate project
-            https://github.com/0XDE57/gdx-shadertoy
-            https://www.youtube.com/watch?v=rvDo9LvfoVE
-        [ ] bring into this project and replace old system
-    [...] detangle, some things are messy over time
-        [...] Ship control system doing too much
-            [x] move charge cannon to own system
-            [x] move normal cannon to own system
-            [x] move shield into own system
-                [x] fix shield not render on planet
-            [x] barrel roll and 3d sprite stuff into own system
-            [ ] can refactor stuff in control component into their respective components just like hyper?
-        [...] HUD system doing too much
-            [ ] shouldn't have mobileinput rendering
-                [ ] split into update and render, see render pipeline
-            [?] shouldn't have gamemenu and input listener?
-                could move up into GameScreen, or into own system. i think former
-        [ ] entity factory refactor into entity types
+
     [ ] orbit distance for moons should not have overlapping rings with previous orbit path, spacing needs to include children
     [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
             [ ] lol jk, sound will eventually exist
 
 
 
-
-
 ---ENGINE---
 [...] physics and movement
-    [...] move to box2d
-        [...] move logic to new physics
-            [...] space tile scale bad and tile loading broken
-                [x] fix load/unload and scale
-                [...] dust layer has render issue, tiles overlapping edges/gap
+    [x] move to box2d
+        [x] move logic to new physics
         [...] figure out scales and values that make sense and work with the b2d engine (consider scale of space)
             [ ] create unit/body scale helper
         [ ] move to filters?
@@ -365,10 +354,11 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
 [...] screen transition between world and space
     [ ] ready / sync / load state. should all be in transition system?
         still a little messy, but working fairly reliably now
-    [ ] should not be loading system near origin, position needs to shift to last known planet BEFORE SpaceLoadingSystem picks it up
+    [?] should not be loading system near origin, position needs to shift to last known planet BEFORE SpaceLoadingSystem picks it up
         [SystemLoader] systems loaded in 1ms
         [SpaceLoadingSystem] Planetary System: (1000.0, 1000.0) Objects: 8
         [ScreenTransitionSystem] Animation Stage: sync for Entity@7440577b
+        Forget the context of this bug, it is happening when leaving planet far from origin?
     [x] finish transition animation, should have screen effect for polish and to hide loading/level change. goal feel a little more seamless
         (fade to white/pixelate shader during landing, load map (can wait here for a second if not finished generating, when generations finished start white then fade normal, continue)
     [x] bug: had an instance where take off rogue planet ended up with no ship and seemingly wrong co'ords
@@ -381,6 +371,25 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
 
 
 [...] rendering system
+    [ ] fix space parallax system rendering
+        [ ] i think it needs to be rendered with a separate camera / viewport as to not zoom out with main camera
+            the background space image needs to be "very far away", give the illusion.
+        [ ] generating pixmaps on the fly is slow.
+        [?] option 2: replace with shader?
+            maybe something like this:
+            https://www.shadertoy.com/view/ltXSDN
+            https://www.shadertoy.com/view/ldKGDd
+            https://gamedev.stackexchange.com/questions/146098/2d-parallax-scrolling-through-glsl-shader
+            https://badlogicgames.com/forum/viewtopic.php?f=11&t=11419
+            or something like this:
+            https://wwwtyro.github.io/space-2d/
+            https://github.com/wwwtyro/space-2d
+
+            [...] POC star shader with fullscreen quad in separate project
+                https://github.com/0XDE57/gdx-shadertoy
+                https://www.youtube.com/watch?v=rvDo9LvfoVE
+        [x] background space color fade to black when zoom out (temporary until better space background approach is implemented)
+        [ ] experiment: can we make the background tiles just not zoom out? use a different batch perhaps?
     [...] fix render priority (z-order)
           [X] moved into separate variable
           [x] define proper heights for importance as current values are somewhat arbitrary
@@ -397,17 +406,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     [ ] better planet rendering
         inspiration: https://github.com/yurkth/astraea
     [...] WorldRenderingSystem shouldn't be responsible for loading map: loadMap().
-    [ ] fix space parallax system, generating pixmaps on the fly is slow, try to replace with shader
-            maybe something like this:
-                https://www.shadertoy.com/view/ltXSDN
-                https://www.shadertoy.com/view/ldKGDd
-                https://gamedev.stackexchange.com/questions/146098/2d-parallax-scrolling-through-glsl-shader
-                https://badlogicgames.com/forum/viewtopic.php?f=11&t=11419
-            or something like this:
-                https://wwwtyro.github.io/space-2d/
-                https://github.com/wwwtyro/space-2d
-        [x] background space color fade to black when zoom out (temporary until better space background approach is implemented)
-        [ ] experiment: can we make the background tiles just not zoom out? use a different batch perhaps?
+
     [?] 2D outline shader for ships and mouse over objects
         http://www.allpiper.com/2d-selection-outline-shader-in-libgdx/
         https://www.youtube.com/watch?v=1yuYUVFUOvI&list=PLqpawGIg6Qj5CvjOaCbB536z862XhjPQi&index=17
@@ -423,7 +422,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
             [...] nice way to view and edit configs
                 [ ] fix layout
                 [ ] hook up load save undo
-    [...] move more things to config
+    [OUT_OF_SCOPE] move more things to config
         [?] Ships are currently hardcoded by Entity factory
             can we find a way to generate entities from config.
                 - consider ranges,
@@ -645,16 +644,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
                 use of shield or weapon should auto return you to combat speed
             [x] hyper/warp   (fast, warp to other systems, can't turn, can't fight)
                 activated by [T]
-    [OUT_OF_SCOPE] might be cool to have a hover mode for floating around on planet:
-        - alternate flight scheme and feel, intended for traveling around the planet quickly
-        - only move when forward, back, left, right, hovers VTOL(vertical take-off and landing) style
-        - by default sits and floats with a mild bounce animation
-        - shadow underneath to give depth
-        - has friction, while not continually float indefinitely
-        - can roll the body on left right, and change pitch with forward and backward
-        - can fly over walls / obstacles (base infiltration)
-        - could be used in land and take off animation sequence
-            - take off -> player enter space ship
+
     [OUT_OF_SCOPE] ship generation
         [ ] fix ship edges to use entire width of texture
 	    [...] wings
@@ -704,68 +694,6 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         - bridge: to cross river
         - terminal
             - I/O cables and circuitry / scripting possibilities...way out of scope.
-[OUT_OF_SCOPE] Tank / rover
-    - a planetary exploration vehicle
-    - deploys (and stored in cargo bay) from ship
-    - player can enter or exit just same as space ship
-    - can drive up to ship, and dock in cargo bay (if ship has capacity & vehicle meets size constraints)
-    - could have mounted turret, or drill, or robot arm for interacting with things?
-[OUT_OF_SCOPE] Inverse Kinematic Hexapod
-    - a planetary exploration vehicle
-    - legs instead of wheels
-    - a body, then some leg joints and use IK for leg placement
-[OUT_OF_SCOPE] Box2D Train (feature creep... but I really want to do)
-    - player controlled train
-    - user places simple track tiles (straights, curve right, curve left, split/merge, etc)
-    - tracks cost steel + wood (obtained from mining / trees) (+ copper for electric transmission)
-    - user places individual train cars on track to build their train
-    - engine car would actually apply force, which will drag trailing cars
-    - cars can be arranged in any order, engine does not have to be at front
-    - engine type / power determines how many cars / how much cargo can be moved
-    - train would be stopped by closed gates and walls and other vehicles (natural physics collision)
-    - split/merge junctions will have a track switcher that player can control while node is nearby train
-    - each car is a simple box2D rectangle
-    - revolute joint links between boxes to connect train cars
-    - track tiles are converted to minimal graph of connected points and junctions for the train to ride
-    - prismatitic joints (or some sort of magnetic style force) to keep train sliding along track graph
-    - player could manually open gate, or gates could auto open
-    - or if a turret car is mounted, can shoot gate to blow it open (same fire control as ship, click) (attack train for taking over enemy base?)
-    - would need bridges to cross rivers
-    - train car types:
-        [ engine ]: player controlled, forward reverse controls
-                    engine has hauling weight capacity (how many cars)
-                    multiple engines required for longer trains
-                    speed of train naturally controlled by engine power / weight (number of cars connected)
-        [ cargo  ]: generic hauling: large capacity for mine materials
-                    loading cargo could add physics weight / resistance to for engine
-        [ turret ]: rotating stationary turret, player controlled, each face mouse relative from its cart
-    - engines cost ?
-    - start with basic [engine] that simply player gets in and works moves forward on [W] and reverse [S]
-        [engine] - [cargo] - [cargo] - [cargo]
-        [engine] - [turret] - [cargo] - [cargo] - [cargo] - [turret]
-        [turret] - [engine] - [turret] - [cargo] - [cargo] - [cargo] - [engine] - [turret]
-    - coal train, must have coal in engine, engine has its own small engine capacity.
-        - engine can be automatically fed coal by having a cargo cart behind it that is carrying coal
-        [coal engine] - [cargo: coal] - [turret] - [cargo] - [cargo] - [cargo]
-    - electric train, must have
-        - can have on board solar and battery (will auto charge due to connected)
-            [electric engine] - [battery] - [solar] - [cargo] - [cargo] - [cargo]
-        - would not require onboard power car if tracks are connected to a power source (removing need to carry heavy battery or solar cars)
-            - powersource and powerline attached to rails
-                - solar panel (requires sun, not viable on dark rogue planets)
-                - hydro genenerator (requires water source)
-                - nuclear generator (requires nuclear fuel(rare and hard to obtain))
-            [electric engine: track powered] - [cargo] - [cargo] - [cargo] - [cargo] - [cargo] - [cargo] - [cargo] - [cargo]
-    - nuclear train, can run on its own and in harsh planet conditions (expensive high-tech, late game)
-            - requires nuclear fuel (rare and hard to obtain / expensive)
-            - when destroyed has large explosion destroying walls and other train cars (losing precious cargo)
-            [reactor engine] - [cargo: nuclear fuel source] - [cargo] - [turret]
-    - the toroidal 4D planet wrapping aspect could provide interesting scenario of a train track
-      that goes across the entire planet and eventually connects to itself. forming a straight single
-      track ring around the entire planet endlessly! this might have neat gameplay implications.
-      the same property would apply to walls. potentially having neat builds of largely divided / controlled territory
-      this comes at the cost of complexity, handling physics and rendering when reaching the end of
-      the map and when shifting world coordinates. i think i have a solution on paper...
 [...] planet generation
     [ ] rivers
     [ ] add temperature variable to planet
@@ -899,7 +827,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
 	http://wwwtyro.net/2016/10/22/2D-space-scene-procgen.html
 
 
-http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
+
 
 
 
