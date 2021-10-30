@@ -53,7 +53,7 @@ public class EntityConfig extends Config {
         cannonDamage = 15;
         cannonFireRate = 200;
         cannonRechargeRate = 1000;
-        cannonVelocity = 60;
+        cannonVelocity = 80;
         cannonAcceleration = 200;
         shrinkGrowAnimTime = 2500;
     }
