@@ -45,24 +45,25 @@ Work in progress: scaffolding for what will hopefully one day be a game. The cod
 
 
 ### Controls
-| Control                        | Desktop      | Mobile (iOS, Android)                    | Controller/Gamepad |
-|------------------------------- | ------------ | ---------------------------------------- | ------------------ |
-| Movement                       | WASD         | Left Joystick                            | Left Joystick      |
-| Aim                            | Mouse        | Left Joystick                            | Left Joystick      |
-| Attack: Shoot                  | Right-Click  | bottom right button                      | A                  |
-| Defense: Shield                | Shift        | todo: needs button                       | B                  |
-| Defense: Dodge (Barrel Roll)   | Space + A/D  | todo: swipe gesture?                     | Right/Left Bumper  |
-| Toggle HyperDrive              | 1            | todo: needs button                       | D-Pad Up           |
-| Land/Take Off                  | T            | top center when over planet              | D-Pad Down         |
-| Enter/Exit vehicle             | G            | bottom right small button when in/near vehicle | Y            |
-| Zoom                           | Scroll Wheel | todo: Pinch Zoom                         | Right JoyStick |
-| Reset Zoom                     | Middle-Click | todo: double tap                         | Click in Right stick |
-| Toggle Map State               | M            | top left corner button                   |                    |
-| Full screen                    | F11          |                                          |                    |
-| Menu (Pause)                   | Escape       | top right corner button                  | Start              |
-| Vsync                          | F8           |                                          |                    |
-| ECS Debug Viewer               | F9           |                                          |                    |
-| Misc debug keys I am too lazy to document rn and won't be permanent anyway               |                    |
+| Control                        | Desktop       | Controller/Gamepad   | Mobile (iOS, Android)                   |
+|------------------------------- | ------------  | ------------------   | ----------------------------------------|
+| Movement                       | WASD          | Left Joystick        | Left Joystick                           |
+| Aim                            | Mouse         | Left Joystick        | Left Joystick                           |
+| Attack: Shoot                  | Right-Click   | A                    | bottom right button                     |
+| Defense: Shield                | Shift         | B                    | todo: needs button                      |
+| Defense: Dodge (Barrel Roll)   | Space + A/D   | Right/Left Bumper    | todo: swipe gesture?                    |
+| Toggle HyperDrive              | 1             | D-Pad Up             | todo: needs button                      |
+| Land/Take Off                  | T             | D-Pad Down           | top center when over planet             |
+| Enter/Exit vehicle             | G             | Y                    | bottom right small button when in/near vehicle |
+| Zoom                           | Scroll Wheel  | Right JoyStick       | todo: Pinch Zoom                        |
+| Reset Zoom                     | Middle-Click  | Click in Right stick | todo: double tap                        |
+| Toggle Map State               | M             |                      | top left corner button                  |
+| Toggle HUD                     | H             |                      |                                         |
+| Full screen                    | F11           |                      |                                         |
+| Menu (Pause)                   | Escape        | Start                | top right corner button                 |
+| Vsync                          | F8            |                      |                                         |
+| ECS Debug Viewer               | F9            |                      |                                         |
+| Misc debug keys I am too lazy to document rn and won't be permanent anyway |                                    |
 
 
 ## License
