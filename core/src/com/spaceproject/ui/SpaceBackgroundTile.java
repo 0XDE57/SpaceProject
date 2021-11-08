@@ -1,15 +1,13 @@
 package com.spaceproject.ui;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.spaceproject.SpaceProject;
-import com.spaceproject.config.EngineConfig;
 import com.spaceproject.generation.TextureFactory;
 
 public class SpaceBackgroundTile {
     public final float x;
     public final float y;
-    public final float tileX;
-    public final float tileY;
+    public final int tileX;
+    public final int tileY;
     public final float depth;
     public final int size;
     public final Texture tex;
@@ -32,12 +30,15 @@ public class SpaceBackgroundTile {
         switch (type) {
             case Stars:
                 tex = TextureFactory.generateSpaceBackgroundStars(tileX, tileY, tileSize, renderDepth);
-                scale = 1.0f / SpaceProject.configManager.getConfig(EngineConfig.class).renderScale;
+                scale = 1;
+                //scale = 1.0f / SpaceProject.configManager.getConfig(EngineConfig.class).renderScale;
                 break;
             case Dust:
-                int altScale = 4;
-                this.scale = altScale / SpaceProject.configManager.getConfig(EngineConfig.class).renderScale;
-                tileSize /= altScale;
+                //int altScale = 4;
+                //this.scale = altScale / SpaceProject.configManager.getConfig(EngineConfig.class).renderScale;
+                //tileSize /= altScale;
+                scale = 4;
+                tileSize /= scale;
                 tex = TextureFactory.generateSpaceBackgroundDust(tileX, tileY, tileSize);
                 break;
             default:

@@ -6,9 +6,9 @@ import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.generation.noise.OpenSimplexNoise;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Tile;
-import com.spaceproject.math.MyMath;
 
 import java.util.ArrayList;
 
@@ -70,11 +70,12 @@ public class TextureFactory {
             }
         }
         /*
+        //DEBUG - fill tile to visualize boundaries
         pixmap.setColor(MathUtils.random(), MathUtils.random(), MathUtils.random(), 0.5f);
         pixmap.fill();
-        */
         pixmap.setColor(1, 1, 1, 1);
         pixmap.drawPixel(0, 0);
+        */
         
         Texture tex = new Texture(pixmap);
         pixmap.dispose();
@@ -82,7 +83,7 @@ public class TextureFactory {
     }
     
     public static Texture generateSpaceBackgroundStars(int tileX, int tileY, int tileSize, float depth) {
-        MathUtils.random.setSeed((long) (MyMath.getSeed(tileX, tileY) * depth));
+        MathUtils.random.setSeed((long) (MyMath.getSeed(tileX, tileY) + (depth*1000)));
         
         //pixmap = new Pixmap(tileSize, tileSize, Format.RGB565);
         Pixmap pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
@@ -143,10 +144,8 @@ public class TextureFactory {
             // draw body
             if (yY == 0 || yY == width) {
                 // if first or last position of texture, "cap" it to complete the edging
-                //pixmap.setColor(0.7f, 0.7f, 0.7f, 1);
                 pixmap.setColor(Color.LIGHT_GRAY);
             } else {
-                //pixmap.setColor(0, 0.5f, 0, 1);
                 pixmap.setColor(Color.DARK_GRAY);
             }
             
@@ -155,7 +154,6 @@ public class TextureFactory {
             }
             
             // draw edging
-            //pixmap.setColor(0.7f, 0.7f, 0.7f, 1);
             pixmap.setColor(Color.LIGHT_GRAY);
             pixmap.drawPixel(yY, edge);// bottom edge
             pixmap.drawPixel(yY, height - edge);// top edge

@@ -184,6 +184,8 @@ Legend:
 Spaceship combat will be a core part of gameplay. So lets focus on cleaning that up first.
 End goal: make combat fun. make flight and movement fun, and look a little better.
 
+[ ] BUG! start game, leave to main menu, return to game: planets do not load
+
 [ ] JUICE!
     https://www.youtube.com/watch?v=Fy0aCDmgnxg
     https://www.youtube.com/watch?v=tu-Qe66AvtY
@@ -206,6 +208,8 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     [ ] when entity hit, needs to flash red or white -> shader
     [ ] while im no artist, i think picking a color palate might make it look a world and ui a little more consistent
         http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
+        [ ] the space ships need more contrast from space background
+
 [...] rendering system
     [...] fix space parallax system rendering
         [x] i think it needs to be rendered with a separate camera / viewport as to not zoom out with main camera
@@ -233,6 +237,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
               custom shape renderer?
               if we are doing too much batch flushing could use (bonus if could do outlined shapes, perhaps a job for a shader instead?):
               https://github.com/earlygrey/shapedrawer
+
 [...] respawn
     [x] for now, just place back at origin 0, 0
     [ ] make space station home base that orbits around a planet, player spawns from dock with basic ship
@@ -241,6 +246,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         [?] could have a "home planet" and just spawn from there like transitionsystem takeoff
         [?] base space station that has its own orbit around either planet or star. dock to space station
     [ ] notify AI that are stuck attacking nothing and should return to dumbwander or previous task
+
 [...] shield
     [...] if collide with bullet, shrink/destroy shield
     [x] fix radius is not consistent. rotation of body affects size of shield. don't trust calculateBoundingBox()?
@@ -254,8 +260,11 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     [ ] should be unavailable during hyper drive
     [ ] should not activate during screen transition
     [ ] needs control for mobile
+
 [...] barrel roll
-    [...] adjust feel, impulse, tuning
+    [ ] adjust feel, impulse, tuning
+        [ ] boost flame should be bigger than regular, maybe additional particles?
+        [ ] forward + side boost should make diagonal impulse 45 between engines
     [x] change engine particle effect color when dodging / boosting
         [ ] should only change for boosted engine, not all active, unless all boost
         [?] should boost forward and sideways add impulse from both axis
@@ -270,8 +279,10 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     [ ] should not activate while hyperdrive active
     [ ] should not activate during screen transition
     [ ] needs control for mobile
+
 [x] character dash
     [ ] some sort of visual elements to show speed / motion: eg dust cloud at feet or whooshy lines
+
 [...] grow cannon
     [ ] BUG: charge cannon should always fire when trying to fire instead of waiting for minimum charge (cooldown between shots instead of build up until can shoot)
     [x] BUG: when entity is killed/removed during charge, charge cannon and particle remain instead of being removed
@@ -284,9 +295,11 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         only maintains size when fully charged to max
     [ ] AI doesn't know to release grow cannon, only tuned for regular cannon
     [ ] should not fire during screen transition
+
 [ ] hyper drive
     [ ] hyperdrive should be hold key to charge up instead of instant activate
     [ ] needs control for mobile
+
 [...] particle effects!
     [ ] floaty dust particles to help visualize movement/speed (with a very slow wander)
         perhaps play with lod, different layers based on zoom
@@ -311,6 +324,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     [ ] shield burst effect when hit by bullet and shield destroyed
     [ ] explosion effect on ship destroy
     [ ] some particles on projectile destroyed/removed
+
 [ ] controls
     [x] basic controller input
         [ ] scene2d stage (main menu and pause menu) needs to support controller input. multiplexer?
@@ -355,6 +369,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         highMin: 250.0
         highMax: 250.0
         relative: false
+
 [ ] add basic asteroids (arbitrary poly)
     [...] spec spawner for asteroid.
         [ ] belt - ring around barycenter component, orbit with flocking / group mechanic
@@ -365,16 +380,26 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     [ ] take damage when hit by shots
     [ ] break into smaller asteroids
         [ ] voronoi shatter
-[ ] fix AI a bit (lead shot)
+
 [ ] orbit distance for moons should not have overlapping rings with previous orbit path, spacing needs to include children
+    also consider asteroid belts
+
+[ ] fix AI a bit (lead shot)
+
 [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
-        [ ] lol jk, sound will eventually exist
+    jk, sound will eventually exist
+
 [ ] edge map improvement, when entity facing a mapable component (with a few degree wide threshold)
     - make bigger as if focused
     - display distance
 
+[ ] warning when launch
+    WARNING: An illegal reflective access operation has occurred
+    WARNING: Illegal reflective access by org.lwjgl.LWJGLUtil$3 (file:/home/logica/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.3/3df168ac74e4a8c96562cdff24ad352e255bf89c/lwjgl-2.9.3.jar) to method java.lang.ClassLoader.findLibrary(java.lang.String)
+    WARNING: Please consider reporting this to the maintainers of org.lwjgl.LWJGLUtil$3
+    WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+    WARNING: All illegal access operations will be denied in a future release
 
----ENGINE---
 [...] physics and movement
     [x] move to box2d
         [x] move logic to new physics
@@ -400,7 +425,11 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
 
 [...] screen transition between world and space
     [ ] ready / sync / load state. should all be in transition system?
-        still a little messy, but working fairly reliably now
+        still a little coupled, but working reliably now
+    [ ] landing animation should center camera focus on planet rather than player
+    [ ] better take off animation
+        [ ] should have ship leave ground camera stays put, create a shadow sprite underneath for depth
+        [ ] ship can fly off screen, camera stays put, zoom out.
     [?] should not be loading system near origin, position needs to shift to last known planet BEFORE SpaceLoadingSystem picks it up
         [SystemLoader] systems loaded in 1ms
         [SpaceLoadingSystem] Planetary System: (1000.0, 1000.0) Objects: 8
@@ -531,20 +560,17 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     --- alternatively ---
     process entities from save files?, can have a system process important things from save
 
-
 [...] galaxy generation inspired by fibonacci spiral
     [...] test screen to generate spiral
     [ ] generate set of points that are concentrated near center, and near arms of spiral
     [ ] implement generation into game
     [ ] make a screen animation
 
-
 [...] fix texture / map loading
     [ ] save load noise so it doesnt have to be generated
     [ ] clean up star save/load
     [!] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
         ! actually for now this is a convenient bug for testing
-
 
 [ ] voronoi, for destructible asteroids and world generation (can be used for tectonic plates / countries / biomes)
     https://www.badlogicgames.com/forum/viewtopic.php?f=11&t=22784 (my old thread)
@@ -558,17 +584,13 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         https://www.emanueleferonato.com/2012/01/17/create-real-explosions-with-box2d-adding-textures/
         https://www.emanueleferonato.com/2012/03/05/breaking-objects-with-box2d-the-realistic-way/
 
-
 [...] wrap planets properly (LOCAL COORDINATE SPACE?)
     https://www.reddit.com/r/gamedev/comments/1gi6np/magic_carpet_style_infinite_wrapping_terrain/
     https://simonschreibt.de/gat/1nsane-carpet-2-repetitive-worlds/
 
-
 [ ] fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
     https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
     https://www.youtube.com/watch?v=mXTxQko-JH0&t=4m18s
-
-
 
 [ ] devmode and play mode
     [ ] DevMode
@@ -584,9 +606,6 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     [ ] one on one with an AI for prototyping combat and movement mechanics and feel
     [ ] AI vs AI?
 
-
-
-
 [ ] optimization
     https://github.com/libgdx/libgdx/wiki/Memory-management
     [ ] look at pooled engine/sprites
@@ -600,7 +619,6 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     http://t-machine.org/index.php/2014/03/08/data-structures-for-entity-systems-contiguous-memory/
     http://unseen-academy.de/snippet_component_system.html
     https://github.com/junkdog/entity-system-benchmarks#entity-system-benchmarks
-
 
 [...] investigate possible bug in ashley.
     Found 2 weird cases related to families / listeners.
@@ -634,16 +652,13 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
             	at com.badlogic.ashley.core.Engine.removeAllEntities(Engine.java:98)
         * Solution: engine.removeEntityListener(the system) when removing system
 
-
 [ ] i should prolly start making some unit tests at some point...
 
-
----GAMEPLAY & DESIGN---
 [...] Space Ship
     [...] COMBAT
         [...] 3D roll animation for dodge / barrel roll
                 [...] scale bounding box during rotation
-                [ ] adjust feel, it doesn't quite feel very dodgy, maybe try lagging the camera behind the roll
+                [x] adjust feel, it doesn't quite feel very dodgy, maybe try lagging the camera behind the roll
                 [ ] clean up: should move values to config
                 [ ] clean up: optimize rendering -> ModelCache
                 [ ] mobile/touch UI way of activating dodge, a swipe on the joystick may be intuitive
@@ -672,6 +687,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
 	    inspiration:
             http://davebollinger.org/works/pixelspaceships/
             https://www.reddit.com/r/gamedev/comments/2tavse/2d_procedural_spaceship_generator/
+
 [OUT_OF_SCOPE] Planetary Base Building
     Player can spawn on, or land on a  planet. And walk around.
     Give player character tools hammer / pickaxe for mining.
@@ -711,6 +727,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         - bridge: to cross river
         - terminal
             - I/O cables and circuitry / scripting possibilities...way out of scope.
+
 [...] planet generation
     [ ] rivers
     [ ] add temperature variable to planet
@@ -771,6 +788,9 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
                 /setcamfocus <entity>
                 /takecontrol <entity> (set control /input focus, if has AI, override (or maybe swap with player would be cool)
                 /transfercomponent <component> <entityFrom> <entityTo>
+    [ ] debug system internals need to go back to old rendering, the new DebugText is horrible on memory.
+        i originally did that to make it statically accessible from any system and render properly when called from systems in any priority
+        so leave that for external use, just do internals locally
     [...] engine viewer
         [...] arrow navigation and menu expansion
             [x] fix some edge cases on up and down and expansion of empty nodes
