@@ -20,7 +20,6 @@ public class SpaceBackgroundTile {
     }
     
     public SpaceBackgroundTile(int tileX, int tileY, float renderDepth, int tileSize, TileType type) {
-        
         this.tileX = tileX;
         this.tileY = tileY;
         this.type = type;
@@ -31,12 +30,8 @@ public class SpaceBackgroundTile {
             case Stars:
                 tex = TextureFactory.generateSpaceBackgroundStars(tileX, tileY, tileSize, renderDepth);
                 scale = 1;
-                //scale = 1.0f / SpaceProject.configManager.getConfig(EngineConfig.class).renderScale;
                 break;
             case Dust:
-                //int altScale = 4;
-                //this.scale = altScale / SpaceProject.configManager.getConfig(EngineConfig.class).renderScale;
-                //tileSize /= altScale;
                 scale = 4;
                 tileSize /= scale;
                 tex = TextureFactory.generateSpaceBackgroundDust(tileX, tileY, tileSize);
@@ -46,7 +41,6 @@ public class SpaceBackgroundTile {
                 scale = 1;
                 break;
         }
-        
         
         size = (int) (tileSize * scale);
         x = tileX * size;
