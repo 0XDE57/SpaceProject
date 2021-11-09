@@ -99,8 +99,8 @@ Data Directory (...\SpaceProject\android\assets)
             entities
 
 
-Space Background Rendering (broken)
-	Simple but effective (but also broken when zoom out):
+Space Background Rendering
+	Simple but effective:
 	3 parallax layers
 		stars close
 		stars far
