@@ -186,12 +186,44 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
 
 [ ] BUG! start game, leave to main menu, return to game: planets do not load
 
+[ ] needs frame of reference to judge speed and direction since parallax is so deep
+    [ ] floaty dust particles at same depth as player to help visualize movement/speed
+        perhaps play with lod, different layers based on zoom
+        maybe with a very slow wander
+    [ ] space debri, mostly inconsequential small irregular bodies
+
+
+[ ] add basic asteroids (arbitrary poly)
+    [...] spec spawner for asteroid.
+        [ ] belt - ring around barycenter component, orbit with flocking / group mechanic
+        [ ] field - randomly spawn while in space
+    [...] begin make asteroid
+        see: AsteroidAnim.java for prototyped polygon and rendering
+    [ ] attach box2D poly to match asteroid poly
+    [ ] take damage when hit by shots
+    [ ] break into smaller asteroids
+        [ ] voronoi shatter, for destructible asteroids.
+            (and world generation can be used for tectonic plates / countries / biomes)
+            https://www.badlogicgames.com/forum/viewtopic.php?f=11&t=22784 (my old thread)
+            https://github.com/mjholtzem/Unity-2D-Destruction
+        	http://www.alanzucconi.com/2015/02/24/to-voronoi-and-beyond/
+        	https://stackoverflow.com/questions/20104779/libgdx-create-texture-from-overlay-using-pixmap
+        	https://pvigier.github.io/2018/11/18/fortune-algorithm-details.html
+            http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/
+            https://leatherbee.org/index.php/2018/10/06/terrain-generation-3-voronoi-diagrams/
+            texture and create child bodies from parent:
+            https://www.emanueleferonato.com/2012/01/17/create-real-explosions-with-box2d-adding-textures/
+            https://www.emanueleferonato.com/2012/03/05/breaking-objects-with-box2d-the-realistic-way/
+
+
 [ ] JUICE!
     https://www.youtube.com/watch?v=Fy0aCDmgnxg
     https://www.youtube.com/watch?v=tu-Qe66AvtY
     [x] lag camera behind movement a little for visual effect, especially when dodging for more visual impact
-    [ ] lerping camera movement is giving some jittering in the rendering when vsync on. less visible when vsync off. not visible when lockedOn.
-    [ ] change cursor to target
+    [ ] lerping camera movement is giving some jittering in the rendering when vsync on.
+        less visible when vsync off. not visible when lockedOn.
+        look into interpolating physics, and investigate floating point errors
+    [ ] change cursor to a crosshair sprite
     [ ] camera allow cursor to "extend view": pushing cursor to edge of screen pulls camera position at a point between player and mouse
         [ ]
     [...] camera: combat camera
@@ -211,7 +243,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         [ ] the space ships need more contrast from space background
 
 [...] rendering system
-    [...] fix space parallax system rendering
+    [x] fix space parallax system rendering
         [x] i think it needs to be rendered with a separate camera / viewport as to not zoom out with main camera
             the background space image needs to be "very far away", give the illusion.
         [ ] generating pixmaps on the fly is slow.
@@ -240,7 +272,6 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
 
 [...] respawn
     [x] for now, just place back at origin 0, 0
-    [ ] make space station home base that orbits around a planet, player spawns from dock with basic ship
     [ ] move into own system
     [ ] how to handle death? start on planet back at base? start at a space station?
         [?] could have a "home planet" and just spawn from there like transitionsystem takeoff
@@ -301,8 +332,6 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     [ ] needs control for mobile
 
 [...] particle effects!
-    [ ] floaty dust particles to help visualize movement/speed (with a very slow wander)
-        perhaps play with lod, different layers based on zoom
     [ ] BUG: broken engine effects applying to other ships when land on planet
     [x] projectile tails - simple rect or circle particle trailing bullets
         [ ] apply to other cannon
@@ -370,16 +399,6 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         highMax: 250.0
         relative: false
 
-[ ] add basic asteroids (arbitrary poly)
-    [...] spec spawner for asteroid.
-        [ ] belt - ring around barycenter component, orbit with flocking / group mechanic
-        [ ] field - randomly spawn while in space
-    [...] begin make asteroid
-        see: AsteroidAnim.java for prototyped polygon and rendering
-    [ ] attach box2D poly to match asteroid poly
-    [ ] take damage when hit by shots
-    [ ] break into smaller asteroids
-        [ ] voronoi shatter
 
 [ ] orbit distance for moons should not have overlapping rings with previous orbit path, spacing needs to include children
     also consider asteroid belts
@@ -445,22 +464,22 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         cannot find seed
         this bug is driving me insane, but there's still some transition and loading details to work out
 
-    [ ] better star rendering
-        it's currently static just like planets, but I want it to shift the z, exactly like the title screen background
-            com.spaceproject.screens.animations.NoiseAnim
-        could be done on gpu even:
-            https://www.shadertoy.com/view/XscGzl
-    [ ] better planet rendering
-        inspiration: https://github.com/yurkth/astraea
-        [ ] nearby stars can be light sources, shade side not facing star
-    [...] WorldRenderingSystem shouldn't be responsible for loading map: loadMap().
-    [?] 2D outline shader for ships and mouse over objects
-        http://www.allpiper.com/2d-selection-outline-shader-in-libgdx/
-        https://www.youtube.com/watch?v=1yuYUVFUOvI&list=PLqpawGIg6Qj5CvjOaCbB536z862XhjPQi&index=17
-    [x] consider merging rendering system (SpaceRendering & World rendering)?
-        probably keep separate because world may need special rendering for the torus wrapping effect
-        also we don't necessarily need 3d in world view, won't be doing barrel rolls on land. (maybe we want some 3d buildings though? for depth? probably not
-        resolved: separated 2d and 3d rendering systems
+[ ] better star rendering
+    it's currently static just like planets, but I want it to shift the z, exactly like the title screen background
+        com.spaceproject.screens.animations.NoiseAnim
+    could be done on gpu even:
+        https://www.shadertoy.com/view/XscGzl
+
+[ ] better planet rendering
+    inspiration: https://github.com/yurkth/astraea
+    [ ] nearby stars can be light sources, shade side not facing star
+
+[...] WorldRenderingSystem shouldn't be responsible for loading map: loadMap().
+
+[?] 2D outline shader for ships and mouse over objects
+    http://www.allpiper.com/2d-selection-outline-shader-in-libgdx/
+    https://www.youtube.com/watch?v=1yuYUVFUOvI&list=PLqpawGIg6Qj5CvjOaCbB536z862XhjPQi&index=17
+
 
 [...] config
     [x] config manager, save and load all configs
@@ -468,7 +487,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
             [...] nice way to view and edit configs
                 [ ] fix layout
                 [ ] hook up load save undo
-    [OUT_OF_SCOPE] move more things to config
+    [OUT_OF_SCOPE] figure out serialization
         [?] Ships are currently hardcoded by Entity factory
             can we find a way to generate entities from config.
                 - consider ranges,
@@ -557,8 +576,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
 
         //if not important, remove from engine, forget about existence
     }
-    --- alternatively ---
-    process entities from save files?, can have a system process important things from save
+
 
 [...] galaxy generation inspired by fibonacci spiral
     [...] test screen to generate spiral
@@ -572,17 +590,6 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     [!] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
         ! actually for now this is a convenient bug for testing
 
-[ ] voronoi, for destructible asteroids and world generation (can be used for tectonic plates / countries / biomes)
-    https://www.badlogicgames.com/forum/viewtopic.php?f=11&t=22784 (my old thread)
-    https://github.com/mjholtzem/Unity-2D-Destruction
-	http://www.alanzucconi.com/2015/02/24/to-voronoi-and-beyond/
-	https://stackoverflow.com/questions/20104779/libgdx-create-texture-from-overlay-using-pixmap
-	https://pvigier.github.io/2018/11/18/fortune-algorithm-details.html
-    http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/
-    https://leatherbee.org/index.php/2018/10/06/terrain-generation-3-voronoi-diagrams/
-    texture and create child bodies from parent:
-        https://www.emanueleferonato.com/2012/01/17/create-real-explosions-with-box2d-adding-textures/
-        https://www.emanueleferonato.com/2012/03/05/breaking-objects-with-box2d-the-realistic-way/
 
 [...] wrap planets properly (LOCAL COORDINATE SPACE?)
     https://www.reddit.com/r/gamedev/comments/1gi6np/magic_carpet_style_infinite_wrapping_terrain/
