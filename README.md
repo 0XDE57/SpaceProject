@@ -25,7 +25,7 @@ Work in progress: scaffolding for what will hopefully one day be a game. The cod
 ## Features
 * Feature Creep and Unrealistic Scope!
 * Explore a random Galaxy in a spaceship
-* Discover various planetary systems and cellestial bodies
+* Discover various planetary systems and celestial bodies
 * Land on planets and explore
 * Fly different ships
 * Fight against other ship (in progress)
