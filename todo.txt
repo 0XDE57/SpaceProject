@@ -191,6 +191,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         perhaps play with lod, different layers based on zoom
         maybe with a very slow wander
     [ ] space debri, mostly inconsequential small irregular bodies
+    [ ] fog layer (particles, or white noise parallax at 1.0?)
 
 
 [ ] add basic asteroids (arbitrary poly)
@@ -234,13 +235,25 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         [ ] tuning: when entities too far apart or too out of frame, return to focusing on player
         [ ] tuning: lerp between locked on state and player focus
         [ ] consider multiple enemies, 3 on screen? include all will make zoom far and less focused, so probably some sort of
-        dynamic focus, maybe who gets shot last has focus? todo: study cam mechanics for smashbros / project m style combat
-        thresholds for how close to focus near the edge
+            dynamic focus, maybe who gets shot last has focus? todo: study cam mechanics for smashbros / project m style combat
+            thresholds for how close to focus near the edge
         [?] still allow manual override with scroll, with perhaps a timer to focus back in, or when a new enemy joins
     [ ] when entity hit, needs to flash red or white -> shader
     [ ] while im no artist, i think picking a color palate might make it look a world and ui a little more consistent
         http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
         [ ] the space ships need more contrast from space background
+    [ ] box2d lights https://github.com/libgdx/box2dlights
+        [ ] engine fire can be a light source
+        [ ] player eyes facing forward cone light
+        [ ] lava on planets can be a light source
+    [ ] better star rendering
+        it's currently static just like planets, but I want it to shift the z, exactly like the title screen background
+            com.spaceproject.screens.animations.NoiseAnim
+        could be done on gpu even:
+            https://www.shadertoy.com/view/XscGzl
+    [ ] better planet rendering
+        inspiration: https://github.com/yurkth/astraea
+        [ ] nearby stars can be light sources, shade side not facing star
 
 [...] rendering system
     [x] fix space parallax system rendering
@@ -259,6 +272,8 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
             [...] POC star shader with fullscreen quad in separate project
                 https://github.com/0XDE57/gdx-shadertoy
                 https://www.youtube.com/watch?v=rvDo9LvfoVE
+                [OUT_OF_SCOPE] Bonus would be reallly cool but overkill would be to feed audio track into
+                the shader so it can react to the music
         [x] background space color fade to black when zoom out (temporary until better space background approach is implemented)
         [x] experiment: can we make the background tiles just not zoom out? use a different batch perhaps?
     [...] fix render priority (z-order)
@@ -269,6 +284,11 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
               custom shape renderer?
               if we are doing too much batch flushing could use (bonus if could do outlined shapes, perhaps a job for a shader instead?):
               https://github.com/earlygrey/shapedrawer
+    [!] NOTE: cannot generate textures in another thread due to glContext...
+        https://github.com/libgdx/libgdx/wiki/Threading
+        https://www.opengl.org/wiki/OpenGL_and_multithreading
+        We can however generate noise for the textures on a separate thread and then feed that to the rendering thread.
+
 
 [...] respawn
     [x] for now, just place back at origin 0, 0
@@ -329,6 +349,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
 
 [ ] hyper drive
     [ ] hyperdrive should be hold key to charge up instead of instant activate
+    [ ] different color particle effect for fire. different from normal and boost. maybe purple or green?
     [ ] needs control for mobile
 
 [...] particle effects!
@@ -361,8 +382,8 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         [ ] also keyboard navigation focusable items
         [x] tested with xbox 360 wired and ps4 controller over usb
         [x] allow hot-plugging
-        [x] crashes title screen after return to menu from game, looks like systems still loaded (unhook listners?)
-         cant repro, seems fixed
+        [ ] crashes title screen after return to menu from game, looks like systems still loaded (unhook listners?)
+         cant repro, seems fixed. update: still crashes!!!
         [x] basic Xbox 360 support
             [x] not detecting DPAD buttons
             [...] double tap right left bumpers for barrel roll
@@ -407,17 +428,12 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
 
 [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
     jk, sound will eventually exist
+    https://github.com/libgdx/libgdx/wiki/Audio
 
 [ ] edge map improvement, when entity facing a mapable component (with a few degree wide threshold)
     - make bigger as if focused
     - display distance
 
-[ ] warning when launch
-    WARNING: An illegal reflective access operation has occurred
-    WARNING: Illegal reflective access by org.lwjgl.LWJGLUtil$3 (file:/home/logica/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.3/3df168ac74e4a8c96562cdff24ad352e255bf89c/lwjgl-2.9.3.jar) to method java.lang.ClassLoader.findLibrary(java.lang.String)
-    WARNING: Please consider reporting this to the maintainers of org.lwjgl.LWJGLUtil$3
-    WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
-    WARNING: All illegal access operations will be denied in a future release
 
 [...] physics and movement
     [x] move to box2d
@@ -445,6 +461,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
 [...] screen transition between world and space
     [ ] ready / sync / load state. should all be in transition system?
         still a little coupled, but working reliably now
+        [ ] WorldRenderingSystem shouldn't be responsible for loading map: loadMap().
     [ ] landing animation should center camera focus on planet rather than player
     [ ] better take off animation
         [ ] should have ship leave ground camera stays put, create a shadow sprite underneath for depth
@@ -464,17 +481,9 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         cannot find seed
         this bug is driving me insane, but there's still some transition and loading details to work out
 
-[ ] better star rendering
-    it's currently static just like planets, but I want it to shift the z, exactly like the title screen background
-        com.spaceproject.screens.animations.NoiseAnim
-    could be done on gpu even:
-        https://www.shadertoy.com/view/XscGzl
 
-[ ] better planet rendering
-    inspiration: https://github.com/yurkth/astraea
-    [ ] nearby stars can be light sources, shade side not facing star
 
-[...] WorldRenderingSystem shouldn't be responsible for loading map: loadMap().
+
 
 [?] 2D outline shader for ships and mouse over objects
     http://www.allpiper.com/2d-selection-outline-shader-in-libgdx/
@@ -546,6 +555,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     //    then AI gets TimedPersistenceComponent and will remain on planet for 5 minutes waiting for you, because angry!
     //    maybe they will come after you. this could be very simple. we can fake intelligence in a background system in persistence engine
     //
+    //    Think similar to skyrim, you attack someone in a house and leave they follow you out.
     eg:
     Engine persistenceEngine.
     if (player switch screen) {
@@ -609,9 +619,45 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         -load save
         -random seed
         -no hardcoded entities. entities should come from spawning systems instead
+
 [ ] new CombatTest debug screen
     [ ] one on one with an AI for prototyping combat and movement mechanics and feel
     [ ] AI vs AI?
+
+[?] legal. im not sure what I have to care about. i dont want to hire a lawyer...research
+    https://www.youtube.com/watch?v=8eAW-7Js7NA
+    https://www.youtube.com/watch?v=t8UFJ3obm-Q
+    https://www.youtube.com/watch?v=ePQcAjuiSEo
+
+[...] android launch broken!
+    [x] Build fails with:
+        Manifest merger failed : uses-sdk:minSdkVersion 9 cannot be smaller than version 16 declared in library ...
+        	Suggestion: use a compatible library with a minSdk of at most 9,
+        		or increase this project's minSdk version to at least 16,
+        		or use tools:overrideLibrary="com.badlogicgames.gdx.controllers" to force usage (may lead to runtime failures)
+    [ ] So we bumped to 16. Now:
+        Build file '/home/logica/Documents/GitHub/SpaceProject/android/build.gradle' line: 51
+        Execution failed for task ':android:copyAndroidNatives'.
+        > Could not resolve all files for configuration ':android:natives'.
+           > Could not find gdx-platform-1.10.0-natives-armeabi.jar (com.badlogicgames.gdx:gdx-platform:1.10.0).
+             Searched in the following locations:
+                 https://repo.maven.apache.org/maven2/com/badlogicgames/gdx/gdx-platform/1.10.0/gdx-platform-1.10.0-natives-armeabi.jar
+           > Could not find gdx-box2d-platform-1.10.0-natives-armeabi.jar (com.badlogicgames.gdx:gdx-box2d-platform:1.10.0).
+             Searched in the following locations:
+                 https://repo.maven.apache.org/maven2/com/badlogicgames/gdx/gdx-box2d-platform/1.10.0/gdx-box2d-platform-1.10.0-natives-armeabi.jar
+           > Could not find gdx-freetype-platform-1.10.0-natives-armeabi.jar (com.badlogicgames.gdx:gdx-freetype-platform:1.10.0).
+             Searched in the following locations:
+                 https://repo.maven.apache.org/maven2/com/badlogicgames/gdx/gdx-freetype-platform/1.10.0/gdx-freetype-platform-1.10.0-natives-armeabi.jar
+
+[ ] warning when launch
+    WARNING: An illegal reflective access operation has occurred
+    WARNING: Illegal reflective access by org.lwjgl.LWJGLUtil$3 (file:/home/logica/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.3/3df168ac74e4a8c96562cdff24ad352e255bf89c/lwjgl-2.9.3.jar) to method java.lang.ClassLoader.findLibrary(java.lang.String)
+    WARNING: Please consider reporting this to the maintainers of org.lwjgl.LWJGLUtil$3
+    WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+    WARNING: All illegal access operations will be denied in a future release
+
+[?] move to LWJGL 3?
+    https://libgdx.com/news/2021/07/devlog-7-lwjgl3
 
 [ ] optimization
     https://github.com/libgdx/libgdx/wiki/Memory-management
@@ -626,6 +672,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     http://t-machine.org/index.php/2014/03/08/data-structures-for-entity-systems-contiguous-memory/
     http://unseen-academy.de/snippet_component_system.html
     https://github.com/junkdog/entity-system-benchmarks#entity-system-benchmarks
+[ ] i should prolly start making some unit tests at some point...
 
 [...] investigate possible bug in ashley.
     Found 2 weird cases related to families / listeners.
@@ -658,8 +705,6 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
             	at com.badlogic.ashley.core.EntityManager.removeAllEntities(EntityManager.java:72)
             	at com.badlogic.ashley.core.Engine.removeAllEntities(Engine.java:98)
         * Solution: engine.removeEntityListener(the system) when removing system
-
-[ ] i should prolly start making some unit tests at some point...
 
 [...] Space Ship
     [...] COMBAT
@@ -871,7 +916,8 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
 	http://wwwtyro.net/2016/10/22/2D-space-scene-procgen.html
 
 
-
+extra resources
+https://github.com/rafaskb/awesome-libgdx#readme
 
 
 
