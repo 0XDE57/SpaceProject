@@ -192,7 +192,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         maybe with a very slow wander
     [ ] space debri, mostly inconsequential small irregular bodies
     [ ] fog layer (particles, or white noise parallax at 1.0?)
-
+        what about a basic noise shader rendered to a quad on a layer above player?
 
 [ ] add basic asteroids (arbitrary poly)
     [...] spec spawner for asteroid.
@@ -273,7 +273,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
                 https://github.com/0XDE57/gdx-shadertoy
                 https://www.youtube.com/watch?v=rvDo9LvfoVE
                 [OUT_OF_SCOPE] Bonus would be reallly cool but overkill would be to feed audio track into
-                the shader so it can react to the music
+                the shader so it can react to the music. apply FFT -> visualizer. pulse stars to the beat?
         [x] background space color fade to black when zoom out (temporary until better space background approach is implemented)
         [x] experiment: can we make the background tiles just not zoom out? use a different batch perhaps?
     [...] fix render priority (z-order)
@@ -624,11 +624,6 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     [ ] one on one with an AI for prototyping combat and movement mechanics and feel
     [ ] AI vs AI?
 
-[?] legal. im not sure what I have to care about. i dont want to hire a lawyer...research
-    https://www.youtube.com/watch?v=8eAW-7Js7NA
-    https://www.youtube.com/watch?v=t8UFJ3obm-Q
-    https://www.youtube.com/watch?v=ePQcAjuiSEo
-
 [...] android launch broken!
     [x] Build fails with:
         Manifest merger failed : uses-sdk:minSdkVersion 9 cannot be smaller than version 16 declared in library ...
@@ -672,7 +667,8 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     http://t-machine.org/index.php/2014/03/08/data-structures-for-entity-systems-contiguous-memory/
     http://unseen-academy.de/snippet_component_system.html
     https://github.com/junkdog/entity-system-benchmarks#entity-system-benchmarks
-[ ] i should prolly start making some unit tests at some point...
+
+[ ] untested on 4k, my machines are all 1080p.
 
 [...] investigate possible bug in ashley.
     Found 2 weird cases related to families / listeners.
@@ -916,14 +912,50 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
 	http://wwwtyro.net/2016/10/22/2D-space-scene-procgen.html
 
 
+
+
+2D, 3D, 4D, non-euclidean. Fun to think about and inspiration:
+Designing a 4D World: The Technology behind Miegakure [Hide&Reveal]: https://www.youtube.com/watch?v=vZp0ETdD37E
+Non-Euclidean Geometry Explained - Hyperbolica Devlog #1: https://www.youtube.com/watch?v=zQo_S3yNa2w
+http://gamelab.mit.edu/games/a-slower-speed-of-light/
+Visualizing quaternions (4d numbers) with stereographic projection: https://www.youtube.com/watch?v=d4EgbgTm0Bg
+Marble Marcher - A Fractal Physics Game: https://www.youtube.com/watch?v=9U0XVdvQwAI
+How Computers Draw Weird Shapes: https://www.youtube.com/watch?v=6oMZb3yP_H8
+
 extra resources
 https://github.com/rafaskb/awesome-libgdx#readme
 
+Controller icons! All of the assets are in the public domain under Creative Commons 0 (CC0)
+    https://thoseawesomeguys.com/prompts/
+Kenney Assets - High quality assets for your game, from 2D and 3D art to sound effects.
+    https://kenney.nl/
+OpenGameArt.org - Repository offering a variety of open content assets.
+    https://opengameart.org/
+Game-Icons.net - Repository containing heaps of cool game related graphics.
+    https://game-icons.net/
+freesound.org - Huge collaborative database of audio snippets, samples, recordings, bleeps.
+    https://freesound.org/
+fonts
+    http://www.fontsquirrel.com/
 
 
-//fonts
-http://www.fontsquirrel.com/
-
-
-
+[...] legal crap...and selling on steam. not sure what I have to care about.
+    https://www.youtube.com/watch?v=8eAW-7Js7NA
+    https://www.youtube.com/watch?v=t8UFJ3obm-Q
+    https://www.youtube.com/watch?v=ePQcAjuiSEo
+    Business model? Open source but you still pay for it on steam and itch.io
+    	https://fossa.com/blog/which-open-source-license-is-the-best-for-commercialization/
+    Found an example of open source but paid for on steam, they are gpl. Todo: find more examples.
+    How to fund dev? Patreon if theres interest. Would accept crypto. Itch.io has pay what you want.
+    Whats required to publish on steam? Wishlist? Greenlight? Do I need a rating thingy?
+    I collect no data so shouldn't need any sort of privacy policy right?
+    How do I handle contract for hiring musician? Are contracts required?
+    Taxes?
+    todo: research copyright. I don't really want to hire a lawyer...but I don't know what I'm doing.
+[ ] devops n website n crap
+    [ ] need an icon. its still the default libgdx logo...
+    [ ] make a page for website spaceproject.xyz
+        [ ] dev blog thingy?
+    [ ] wiki n documentation
+    [ ] should prolly make some unit tests at some point...
 
