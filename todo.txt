@@ -898,13 +898,13 @@ fonts
 [ ] wiki n documentation
 [ ] should prolly make some unit tests at some point...
 
-[...] android launch broken!
+[x] android launch broken!
     [x] Build fails with:
         Manifest merger failed : uses-sdk:minSdkVersion 9 cannot be smaller than version 16 declared in library ...
         	Suggestion: use a compatible library with a minSdk of at most 9,
         		or increase this project's minSdk version to at least 16,
         		or use tools:overrideLibrary="com.badlogicgames.gdx.controllers" to force usage (may lead to runtime failures)
-    [ ] So we bumped to 16. Now:
+    [x] So we bumped to 16. Now:
         Build file '/home/logica/Documents/GitHub/SpaceProject/android/build.gradle' line: 51
         Execution failed for task ':android:copyAndroidNatives'.
         > Could not resolve all files for configuration ':android:natives'.
@@ -917,7 +917,10 @@ fonts
            > Could not find gdx-freetype-platform-1.10.0-natives-armeabi.jar (com.badlogicgames.gdx:gdx-freetype-platform:1.10.0).
              Searched in the following locations:
                  https://repo.maven.apache.org/maven2/com/badlogicgames/gdx/gdx-freetype-platform/1.10.0/gdx-freetype-platform-1.10.0-natives-armeabi.jar
-
+    [x] FIXED! by removing natives: Android ARMv5 (armeabi) support has been dropped.
+        Remove any dependency with the natives-armeabi qualifier (but not natives-armeabi-v7a!) from your gradle build files.
+        This applies to gdx-platform, gdx-bullet-platform, gdx-freetype-platform and gdx-box2d-platform.
+        https://libgdx.com/news/2021/04/the-ultimate-migration-guide
 [ ] warning when launch
     WARNING: An illegal reflective access operation has occurred
     WARNING: Illegal reflective access by org.lwjgl.LWJGLUtil$3 (file:/home/logica/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.3/3df168ac74e4a8c96562cdff24ad352e255bf89c/lwjgl-2.9.3.jar) to method java.lang.ClassLoader.findLibrary(java.lang.String)
