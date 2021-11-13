@@ -39,9 +39,6 @@ Work in progress: scaffolding for what will hopefully one day be a game. The cod
 * Cross-Platform Desktop and Mobile Support
   * Windows, OSX, Linux, Android, IOS
 * Developer Tools (in progress)
-* Open Source bruh!
-* No Nonsense
-   * DRM-Free! Ad-Free! Telemetry-Free! Cloud-Free! Microtransaction-Free! Bloated-Launcher-Free! Lootbox-Free! NTF-Free!
 
 
 ### Controls
