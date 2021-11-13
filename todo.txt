@@ -84,8 +84,7 @@ Data Directory (...\SpaceProject\android\assets)
                     effect3.wav
                 effect b
                 effect c
-    \skin: (not implemented, proposed) scene 2d skin
-    \save: (todo) save game files
+    \save: (todo) serialization
         todo: figure out a sensible structure
         https://github.com/libgdx/libgdx/wiki/Saved-game-serialization
         save/<galaxy seed>/galaxy?
@@ -120,9 +119,6 @@ Noise Generation
 Screen transition logic/stages overview
 One of the trickier parts of the engine. Animation states for transition, and dynamic system loading/unloading.
 When animation hits transition state, it calls the system loader and loads/unloads relevant systems based on SystemsConfig
-TODO: should make a proper sequence diagram for this.
-TODO: consider breaking up states into different components?
-    eg: ShrinkComponent,GrowComponent for sprite + body
 
 	Transition action (key press, virtual button on mobile)
 	ControlSystem()
@@ -624,51 +620,6 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     [ ] one on one with an AI for prototyping combat and movement mechanics and feel
     [ ] AI vs AI?
 
-[...] android launch broken!
-    [x] Build fails with:
-        Manifest merger failed : uses-sdk:minSdkVersion 9 cannot be smaller than version 16 declared in library ...
-        	Suggestion: use a compatible library with a minSdk of at most 9,
-        		or increase this project's minSdk version to at least 16,
-        		or use tools:overrideLibrary="com.badlogicgames.gdx.controllers" to force usage (may lead to runtime failures)
-    [ ] So we bumped to 16. Now:
-        Build file '/home/logica/Documents/GitHub/SpaceProject/android/build.gradle' line: 51
-        Execution failed for task ':android:copyAndroidNatives'.
-        > Could not resolve all files for configuration ':android:natives'.
-           > Could not find gdx-platform-1.10.0-natives-armeabi.jar (com.badlogicgames.gdx:gdx-platform:1.10.0).
-             Searched in the following locations:
-                 https://repo.maven.apache.org/maven2/com/badlogicgames/gdx/gdx-platform/1.10.0/gdx-platform-1.10.0-natives-armeabi.jar
-           > Could not find gdx-box2d-platform-1.10.0-natives-armeabi.jar (com.badlogicgames.gdx:gdx-box2d-platform:1.10.0).
-             Searched in the following locations:
-                 https://repo.maven.apache.org/maven2/com/badlogicgames/gdx/gdx-box2d-platform/1.10.0/gdx-box2d-platform-1.10.0-natives-armeabi.jar
-           > Could not find gdx-freetype-platform-1.10.0-natives-armeabi.jar (com.badlogicgames.gdx:gdx-freetype-platform:1.10.0).
-             Searched in the following locations:
-                 https://repo.maven.apache.org/maven2/com/badlogicgames/gdx/gdx-freetype-platform/1.10.0/gdx-freetype-platform-1.10.0-natives-armeabi.jar
-
-[ ] warning when launch
-    WARNING: An illegal reflective access operation has occurred
-    WARNING: Illegal reflective access by org.lwjgl.LWJGLUtil$3 (file:/home/logica/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.3/3df168ac74e4a8c96562cdff24ad352e255bf89c/lwjgl-2.9.3.jar) to method java.lang.ClassLoader.findLibrary(java.lang.String)
-    WARNING: Please consider reporting this to the maintainers of org.lwjgl.LWJGLUtil$3
-    WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
-    WARNING: All illegal access operations will be denied in a future release
-
-[?] move to LWJGL 3?
-    https://libgdx.com/news/2021/07/devlog-7-lwjgl3
-
-[ ] optimization
-    https://github.com/libgdx/libgdx/wiki/Memory-management
-    [ ] look at pooled engine/sprites
-        [ ] eg bullets. current cannon creates new sprite for each shot. bad!
-    [ ] model cache / renderable for 3d sprites
-        https://xoppa.github.io/blog/a-simple-card-game/#reduce-the-number-of-render-calls
-    [ ] planets are rendered offscreen needlessly -> cull frustum
-    [ ] something is funny with the memory, it climbs then resets in a cyclical fashion
-        I have a feeling this is a poor use of 'new' somewhere and when the memory resets its the GC cleaning it up
-    [ ] fonts should all be in skin, ensure fonts are not duplicated/loaded twice
-    http://t-machine.org/index.php/2014/03/08/data-structures-for-entity-systems-contiguous-memory/
-    http://unseen-academy.de/snippet_component_system.html
-    https://github.com/junkdog/entity-system-benchmarks#entity-system-benchmarks
-
-[ ] untested on 4k, my machines are all 1080p.
 
 [...] investigate possible bug in ashley.
     Found 2 weird cases related to families / listeners.
@@ -756,7 +707,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
     I really don't want to do a complex crafting system, keep it simple.
     For now, the only items should be raw materials themselves.
         eg: i dont want to have to build a wall item with rock and steel,
-            i should just be able to place if i have the raw materials cost
+            i should just be able to place a wall if i have the raw materials cost
             i don't want to hold onto a wall item.
     - get rock / ore -> turn into items / entities
         - walls (cost: rock, steel)
@@ -939,23 +890,58 @@ fonts
     http://www.fontsquirrel.com/
 
 
-[...] legal crap...and selling on steam. not sure what I have to care about.
-    https://www.youtube.com/watch?v=8eAW-7Js7NA
-    https://www.youtube.com/watch?v=t8UFJ3obm-Q
-    https://www.youtube.com/watch?v=ePQcAjuiSEo
-    Business model? Open source but you still pay for it on steam and itch.io
-    	https://fossa.com/blog/which-open-source-license-is-the-best-for-commercialization/
-    Found an example of open source but paid for on steam, they are gpl. Todo: find more examples.
-    How to fund dev? Patreon if theres interest. Would accept crypto. Itch.io has pay what you want.
-    Whats required to publish on steam? Wishlist? Greenlight? Do I need a rating thingy?
-    I collect no data so shouldn't need any sort of privacy policy right?
-    How do I handle contract for hiring musician? Are contracts required?
-    Taxes?
-    todo: research copyright. I don't really want to hire a lawyer...but I don't know what I'm doing.
+
 [ ] devops n website n crap
-    [ ] need an icon. its still the default libgdx logo...
-    [ ] make a page for website spaceproject.xyz
-        [ ] dev blog thingy?
-    [ ] wiki n documentation
-    [ ] should prolly make some unit tests at some point...
+[ ] need an icon. its still the default libgdx logo...
+[ ] make a page for website spaceproject.xyz
+    [ ] dev blog thingy?
+[ ] wiki n documentation
+[ ] should prolly make some unit tests at some point...
+
+[...] android launch broken!
+    [x] Build fails with:
+        Manifest merger failed : uses-sdk:minSdkVersion 9 cannot be smaller than version 16 declared in library ...
+        	Suggestion: use a compatible library with a minSdk of at most 9,
+        		or increase this project's minSdk version to at least 16,
+        		or use tools:overrideLibrary="com.badlogicgames.gdx.controllers" to force usage (may lead to runtime failures)
+    [ ] So we bumped to 16. Now:
+        Build file '/home/logica/Documents/GitHub/SpaceProject/android/build.gradle' line: 51
+        Execution failed for task ':android:copyAndroidNatives'.
+        > Could not resolve all files for configuration ':android:natives'.
+           > Could not find gdx-platform-1.10.0-natives-armeabi.jar (com.badlogicgames.gdx:gdx-platform:1.10.0).
+             Searched in the following locations:
+                 https://repo.maven.apache.org/maven2/com/badlogicgames/gdx/gdx-platform/1.10.0/gdx-platform-1.10.0-natives-armeabi.jar
+           > Could not find gdx-box2d-platform-1.10.0-natives-armeabi.jar (com.badlogicgames.gdx:gdx-box2d-platform:1.10.0).
+             Searched in the following locations:
+                 https://repo.maven.apache.org/maven2/com/badlogicgames/gdx/gdx-box2d-platform/1.10.0/gdx-box2d-platform-1.10.0-natives-armeabi.jar
+           > Could not find gdx-freetype-platform-1.10.0-natives-armeabi.jar (com.badlogicgames.gdx:gdx-freetype-platform:1.10.0).
+             Searched in the following locations:
+                 https://repo.maven.apache.org/maven2/com/badlogicgames/gdx/gdx-freetype-platform/1.10.0/gdx-freetype-platform-1.10.0-natives-armeabi.jar
+
+[ ] warning when launch
+    WARNING: An illegal reflective access operation has occurred
+    WARNING: Illegal reflective access by org.lwjgl.LWJGLUtil$3 (file:/home/logica/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.3/3df168ac74e4a8c96562cdff24ad352e255bf89c/lwjgl-2.9.3.jar) to method java.lang.ClassLoader.findLibrary(java.lang.String)
+    WARNING: Please consider reporting this to the maintainers of org.lwjgl.LWJGLUtil$3
+    WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+    WARNING: All illegal access operations will be denied in a future release
+
+[?] move to LWJGL 3?
+    https://libgdx.com/news/2021/07/devlog-7-lwjgl3
+
+[ ] optimization
+    https://github.com/libgdx/libgdx/wiki/Memory-management
+    [ ] look at pooled engine/sprites
+        [ ] eg bullets. current cannon creates new sprite for each shot. bad!
+    [ ] model cache / renderable for 3d sprites
+        https://xoppa.github.io/blog/a-simple-card-game/#reduce-the-number-of-render-calls
+    [ ] planets are rendered offscreen needlessly -> cull frustum
+    [ ] something is funny with the memory, it climbs then resets in a cyclical fashion
+        I have a feeling this is a poor use of 'new' somewhere and when the memory resets its the GC cleaning it up
+    [ ] fonts should all be in skin, ensure fonts are not duplicated/loaded twice
+    http://t-machine.org/index.php/2014/03/08/data-structures-for-entity-systems-contiguous-memory/
+    http://unseen-academy.de/snippet_component_system.html
+    https://github.com/junkdog/entity-system-benchmarks#entity-system-benchmarks
+
+[ ] untested on 4k, my machines are all 1080p.
+
 
