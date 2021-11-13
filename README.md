@@ -32,16 +32,16 @@ Work in progress: scaffolding for what will hopefully one day be a game. The cod
 * Destroy asteroids (todo)
 * Mining and base-building on planets (todo)
 * Controller support (works in game but not menus)
-* Developer Tools & Mod Support (in progress)
 * Multiplayer
-  * haha, just kidding. submit a pull request. do I have to do everything around here?
+  * nope! would love to one day but out of scope for now...
 * Unit Tests
   * pfft...jk. my code is perfect, the first time. every time.
-* Open Source bruh!
 * Cross-Platform Desktop and Mobile Support
   * Windows, OSX, Linux, Android, IOS
+* Developer Tools (in progress)
+* Open Source bruh!
 * No Nonsense
-   * DRM-Free! Ad-Free! Telemetry-Free! Cloud-Free! Microtransaction-Free! Bloated-Launcher-Free!
+   * DRM-Free! Ad-Free! Telemetry-Free! Cloud-Free! Microtransaction-Free! Bloated-Launcher-Free! Lootbox-Free! NTF-Free!
 
 
 ### Controls
