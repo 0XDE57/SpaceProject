@@ -11,7 +11,6 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.spaceproject.SpaceProject;
@@ -323,12 +322,7 @@ public class GameScreen extends MyScreenAdapter {
         Gdx.app.log(this.getClass().getSimpleName(), "Disposing: " + this.getClass().getSimpleName());
         
         // clean up after self
-        for (EntitySystem sys : engine.getSystems()) {
-            if (sys instanceof Disposable) {
-                Gdx.app.log(this.getClass().getSimpleName(), "Disposing: " + sys.getClass().getSimpleName());
-                ((Disposable) sys).dispose();
-            }
-        }
+        SystemLoader.unLoadAll(engine);
         
         ResourceDisposer.disposeAll(engine.getEntities());
         

@@ -78,6 +78,7 @@ public abstract class SystemLoader {
     }
     
     private static void unLoad(Engine engine, EntitySystem systemInEngine) {
+        //auto unhook and cleanup
         if (systemInEngine instanceof EntityListener) {
             //listener must be removed, otherwise a reference is kept in engine (i think?)
             //when system is re-added / re-removed down the line, the families/listeners are broken
@@ -90,6 +91,12 @@ public abstract class SystemLoader {
         
         engine.removeSystem(systemInEngine);
         Gdx.app.log(logSource, "Unload: " + String.format("%-4d ", systemInEngine.priority) + systemInEngine.getClass().getName());
+    }
+    
+    public static void unLoadAll(Engine engine) {
+        for (EntitySystem system : engine.getSystems()) {
+            unLoad(engine, system);
+        }
     }
     
     private void loadMods(){

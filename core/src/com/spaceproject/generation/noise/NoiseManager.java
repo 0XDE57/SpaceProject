@@ -96,13 +96,15 @@ public class NoiseManager implements INoiseGenListener, Disposable {
     @Override
     public void dispose() {
         Gdx.app.log(this.getClass().getSimpleName(), "Dispose: " + noiseThreadPool.getActiveCount());
-        loadedNoise.clear();
-        noiseBufferQueue.clear();
+        noiseThreadPool.purge();
         for (Runnable thread : noiseThreadPool.getQueue()) {
             ((NoiseThread) thread).stop();//kindly stop
         }
-        noiseThreadPool.purge();
-        //noiseThreadPool.shutdown();???????????
+        noiseThreadPool.shutdown();
+        
+        loadedNoise.clear();
+        noiseBufferQueue.clear();
+        
         /*
         try {
             if (noiseThreadPool.awaitTermination(10, TimeUnit.SECONDS)) {

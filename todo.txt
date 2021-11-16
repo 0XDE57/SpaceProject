@@ -183,7 +183,10 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
 
 
 
-[ ] BUG! start game, leave to main menu, return to game: planets do not load
+[...] BUG! start game, leave to main menu, return to game: planets do not load
+    [x] clean up, dispose and unload systems properly when return to main menu
+    [ ] things will load now, but there seems to be a strange delay...
+        -start game, leave to main menu, start game again = empty until move around for a bit then loads
 
 [ ] needs frame of reference to judge speed and direction since parallax is so deep
     [ ] floaty dust particles at same depth as player to help visualize movement/speed
@@ -326,6 +329,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [x] when hit by projectile, roll the body a bit, then the roll system will stabilize it back
         for impact feel
     [x] should not activate while using shield
+        [?] should allow while shield is discharging? might feel more responsive
     [ ] should not activate while hyperdrive active
     [ ] should not activate during screen transition
     [ ] needs control for mobile
@@ -381,8 +385,8 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         [ ] also keyboard navigation focusable items
         [x] tested with xbox 360 wired and ps4 controller over usb
         [x] allow hot-plugging
-        [ ] crashes title screen after return to menu from game, looks like systems still loaded (unhook listners?)
-         cant repro, seems fixed. update: still crashes!!!
+        [x] crashes title screen after return to menu from game, looks like systems still loaded (unhook listeners?)
+         cant repro, seems fixed. update: still crashes!!! update: fixed again.
         [x] basic Xbox 360 support
             [x] not detecting DPAD buttons
             [...] double tap right left bumpers for barrel roll

@@ -45,6 +45,12 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     }
     
     @Override
+    public void removedFromEngine(Engine engine) {
+        Controllers.removeListener(this);
+        Gdx.app.debug(this.getClass().getSimpleName(), "removed controller listener");
+    }
+    
+    @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
     
