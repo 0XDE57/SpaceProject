@@ -9,6 +9,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.EntityConfig;
@@ -31,6 +32,15 @@ public class BarrelRollSystem extends IteratingSystem {
     protected void processEntity(Entity entity, float deltaTime) {
         Sprite3DComponent sprite3D = Mappers.sprite3D.get(entity);
         ControllableComponent control = Mappers.controllable.get(entity);
+    
+        float rollAmount = strafeRollSpeed * deltaTime;
+        
+        //don't allow dodging while shield is active
+        ShieldComponent shield = Mappers.shield.get(entity);
+        if (shield != null && shield.state != ShieldComponent.State.off) {
+            stabilizeRoll(sprite3D, rollAmount);
+            return;
+        }
         
         //barrel roll
         BarrelRollComponent rollComp = Mappers.barrelRoll.get(entity);
@@ -53,7 +63,6 @@ public class BarrelRollSystem extends IteratingSystem {
         }
         
         //strafe roll
-        float rollAmount = strafeRollSpeed * deltaTime;
         if (control != null) {
             if (control.moveLeft) {
                 rollLeft(sprite3D, rollAmount);

@@ -367,7 +367,7 @@ public class EntityFactory {
         
         //shield
         ShieldComponent shield = new ShieldComponent();
-        shield.animTimer = new SimpleTimer(300, true);
+        shield.animTimer = new SimpleTimer(200, true);
         shield.defence = 100f;
         BoundingBox boundingBox = PolygonUtil.calculateBoundingBox(physics.body);
         float radius = Math.max(boundingBox.getWidth(), boundingBox.getHeight());
@@ -383,14 +383,6 @@ public class EntityFactory {
         barrelRoll.dir = BarrelRollComponent.FlipDir.none;
         barrelRoll.force = entityCFG.dodgeForce;
         shipEntity.add(barrelRoll);
-        
-        /*
-        //dash, shouldnt have this dash but should do same boost as barrel roll for forward
-        DashComponent dash = new DashComponent();
-        dash.impulse = 10f;
-        dash.dashTimeout = new SimpleTimer(2000);
-        shipEntity.add(dash);
-        */
         
         //map
         MapComponent map = new MapComponent();

@@ -307,12 +307,12 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         [ ] shield dash bash? high impulse forward, then activate shield to ram other objects and do damage to them
     [x] bug not render on planet
     [ ] graphics: rotate shield polygon, possibly a shader to make edges glow
-    [ ] should be unavailable during hyper drive
+    [x] should be unavailable during hyper drive
     [ ] should not activate during screen transition
     [ ] needs control for mobile
 
 [...] barrel roll
-    [ ] adjust feel, impulse, tuning
+    [...] adjust feel, impulse, tuning
         [ ] boost flame should be bigger than regular, maybe additional particles?
         [ ] forward + side boost should make diagonal impulse 45 between engines
     [x] change engine particle effect color when dodging / boosting
@@ -325,7 +325,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [?] allow roll on other axis? could allow for front/backflips. also, could use other roll parameter for animation
     [x] when hit by projectile, roll the body a bit, then the roll system will stabilize it back
         for impact feel
-    [ ] should not activate while using shield
+    [x] should not activate while using shield
     [ ] should not activate while hyperdrive active
     [ ] should not activate during screen transition
     [ ] needs control for mobile

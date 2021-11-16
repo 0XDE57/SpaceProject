@@ -33,6 +33,8 @@ public class ChargeCannonSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         ChargeCannonComponent chargeCannon = Mappers.chargeCannon.get(entity);
+        ShieldComponent shieldComponent = Mappers.shield.get(entity);
+        
         if (chargeCannon.isCharging) {
             //update position to be in front of ship
             updateChargePosition(chargeCannon, entity);
@@ -41,7 +43,6 @@ public class ChargeCannonSystem extends IteratingSystem {
             growCharge(chargeCannon);
             
             //use of shield will kill charge, cancel shot
-            ShieldComponent shieldComponent = Mappers.shield.get(entity);
             if (shieldComponent != null && shieldComponent.state != ShieldComponent.State.off) {
                 deactivate(chargeCannon);
                 return;
@@ -50,7 +51,7 @@ public class ChargeCannonSystem extends IteratingSystem {
         
         ControllableComponent control = Mappers.controllable.get(entity);
         if (control.attack) {
-            if (!chargeCannon.isCharging) {
+            if (!chargeCannon.isCharging && (shieldComponent != null && shieldComponent.state == ShieldComponent.State.off)) {
                 activate(chargeCannon);
             }
         } else {

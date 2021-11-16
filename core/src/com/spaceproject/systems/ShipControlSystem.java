@@ -17,6 +17,7 @@ import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
+import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
@@ -66,8 +67,16 @@ public class ShipControlSystem extends IteratingSystem {
             applyDebugControls(entity, transformComp, physicsComp);
         }
         
+        //rotate ship
         faceTarget(control, physicsComp, delta);
+    
+        //don't allow engine activation while shield is active
+        ShieldComponent shield = Mappers.shield.get(entity);
+        if (shield != null && shield.state != ShieldComponent.State.off) {
+            return;
+        }
         
+        //movement
         if (control.moveForward) {
             accelerate(control, physicsComp.body, vehicle, delta);
         }
@@ -81,7 +90,6 @@ public class ShipControlSystem extends IteratingSystem {
             strafeRight(vehicle, control, physicsComp, delta);
         }
         
-        
         //exit vehicle
         if (control.changeVehicle) {
             boolean canExit = !GameScreen.inSpace();
@@ -93,7 +101,6 @@ public class ShipControlSystem extends IteratingSystem {
                 exitVehicle(entity, control);
             }
         }
-        
         
         //transition or take off from planet
         if (GameScreen.inSpace()) {

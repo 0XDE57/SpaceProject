@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
+import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.generation.BodyFactory;
@@ -19,6 +20,16 @@ public class ShieldSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         ShieldComponent shield = Mappers.shield.get(entity);
+        
+        //don't allow shield activation while hyperdrive active
+        HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
+        if (hyperDrive != null && hyperDrive.isActive) {
+            if (shield.state == ShieldComponent.State.on) {
+                disengage(entity, shield);
+            }
+            shield.radius = 0;
+            shield.state = ShieldComponent.State.off;
+        }
         
         switch (shield.state) {
             case off:

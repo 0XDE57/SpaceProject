@@ -18,6 +18,7 @@ import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ParticleComponent;
+import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
@@ -96,7 +97,9 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     
     private void updateEngineParticle(Entity entity, ParticleComponent particle) {
         ControllableComponent control = Mappers.controllable.get(entity);
-        if (control != null) {
+        ShieldComponent shield = Mappers.shield.get(entity);
+        
+        if (control != null && (shield != null && shield.state == ShieldComponent.State.off)) {
             switch (particle.type) {
                 case shipEngineMain:
                     if (control.moveForward) {
@@ -123,7 +126,6 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         } else {
             particle.pooledEffect.allowCompletion();
         }
-        
         
         TransformComponent transform = Mappers.transform.get(entity);
         BarrelRollComponent roll = Mappers.barrelRoll.get(entity);
