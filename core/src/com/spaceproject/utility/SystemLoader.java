@@ -32,7 +32,7 @@ public abstract class SystemLoader {
     private static void loadUnloadSystems(GameScreen game, Engine engine, boolean inSpace, SysCFG sysCFG) {
         boolean correctPlatform = (SpaceProject.isMobile() && sysCFG.isLoadOnMobile()) || (!SpaceProject.isMobile() && sysCFG.isLoadOnDesktop());
         if (!correctPlatform) {
-            Gdx.app.log(logSource, "Skip: " + sysCFG.getClassName());
+            Gdx.app.log(logSource, "Skip:   " +  String.format("%-4d ", sysCFG.getPriority()) + sysCFG.getClassName());
             return;
         }
         

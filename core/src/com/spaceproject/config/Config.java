@@ -19,41 +19,45 @@ public abstract class Config {
     public void saveToJson(boolean prettyPrint) {
         Json json = new Json();
         json.setUsePrototypes(false);
-        
-        if (prettyPrint) {
-            Gdx.app.debug(this.getClass().getSimpleName(), json.prettyPrint(json.toJson(this)));
-        } else {
-            Gdx.app.debug(this.getClass().getSimpleName(), json.toJson(this));
-        }
+        String jsonString = json.toJson(this);
         
         FileHandle keyFile = Gdx.files.local(fileName);
+        
         try {
             if (prettyPrint) {
-                keyFile.writeString(json.prettyPrint(json.toJson(this)), false);
+                keyFile.writeString(json.prettyPrint(jsonString), false);
             } else {
-                keyFile.writeString(json.toJson(this), false);
+                keyFile.writeString(jsonString, false);
             }
             Gdx.app.log(this.getClass().getSimpleName(), "Saved: " + fileName);
+            if (prettyPrint) {
+                Gdx.app.debug(this.getClass().getSimpleName(), json.prettyPrint(jsonString));
+            } else {
+                Gdx.app.debug(this.getClass().getSimpleName(), jsonString);
+            }
         } catch (GdxRuntimeException ex) {
-            Gdx.app.log(this.getClass().getSimpleName(), "Could not save file: " + fileName + "\n" + ex.getMessage());
+            Gdx.app.error(this.getClass().getSimpleName(), "Could not save file: " + fileName + "\n" + ex.getMessage());
         }
     }
     
     public Config loadFromJson() {
         FileHandle keyFile = Gdx.files.local(fileName);
-        String logSource = this.getClass().getSimpleName();
+        String objectName = this.getClass().getSimpleName();
+        
         try {
             if (keyFile.exists()) {
                 Json json = new Json();
                 json.setUsePrototypes(false);
                 
                 Config config = json.fromJson(this.getClass(), keyFile.readString());
-                Gdx.app.log(logSource, "Loaded " + logSource + " from " + keyFile.path());
-                Gdx.app.log(logSource, json.toJson(config));
+                Gdx.app.log(objectName, "Loaded " + objectName + " from " + keyFile.path());
+                Gdx.app.debug(objectName, json.toJson(config));
                 return config;
+            } else {
+                Gdx.app.log(objectName, "Could not find file: " + fileName);
             }
         } catch (SerializationException e) {
-            Gdx.app.error(logSource, "Could not load: " + fileName, e);
+            Gdx.app.error(objectName, "Could not load: " + fileName, e);
             //todo: handle missing field
             //com.badlogic.gdx.utils.SerializationException: Field not found: scale
             //if (e.detailMessage.contains(Field not found:) {
@@ -63,9 +67,10 @@ public abstract class Config {
             //if (extra field) {
             //  dont load field?
         } catch (Exception e) {
-            Gdx.app.error(logSource, "Could not load: " + fileName, e);
+            Gdx.app.error(objectName, "Could not load: " + fileName, e);
         }
         
         return null;
     }
+    
 }

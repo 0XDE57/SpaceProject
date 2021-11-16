@@ -176,9 +176,12 @@ Legend:
     [ ! ] = notes
     [ * ] = exceptions
 
-***the plan***: focus! i keep jumping between ideas and features and never finish anything
+***the plan***: make combat fun. make flight and movement fun, and look a little better.
+Dear dairy: why is procrastination so addicting?
+focus! i keep jumping between ideas and features and never finish anything
 Spaceship combat will be a core part of gameplay. So lets focus on cleaning that up first.
-End goal: make combat fun. make flight and movement fun, and look a little better.
+
+
 
 [ ] BUG! start game, leave to main menu, return to game: planets do not load
 
@@ -400,6 +403,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
             - hard engine blast to slow down fast, calculate relative velocity to apply correct force
             -
         - ensure AI can't overshoot
+        https://github.com/libgdx/gdx-ai/wiki/Steering-Behaviors#arrive
     [ ] getting into ship sometimes a little clunky, switch from distance check to sensor
         add sensor to player
             if contact has ship component, get in.
@@ -408,14 +412,13 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
             BeginContact:vehicleButton.enable()
             EndContact:vehicleButton.disable()
         http://www.iforce2d.net/b2dtut/sensors
-    [ ] scale engine particle emission by movement multiplier
+    [ ] scale engine particle emission or velocity by movement multiplier
         - Emission -
         lowMin: 0.0
         lowMax: 0.0
         highMin: 250.0
         highMax: 250.0
         relative: false
-
 
 [ ] orbit distance for moons should not have overlapping rings with previous orbit path, spacing needs to include children
     also consider asteroid belts
@@ -454,6 +457,7 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         https://github.com/0XDE57/SpaceProject/blob/1a764f9aaa405ba18341ad35c2a75b4ecd02a535/core/src/com/spaceproject/systems/CollisionSystem.java
         [ ] todo: confirm that im not crazy? because i spent a lot of time moving to box2d if this is true lol.... thats ok.
 
+
 [...] screen transition between world and space
     [ ] ready / sync / load state. should all be in transition system?
         still a little coupled, but working reliably now
@@ -476,9 +480,6 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
         cannot find seed
         cannot find seed
         this bug is driving me insane, but there's still some transition and loading details to work out
-
-
-
 
 
 [?] 2D outline shader for ships and mouse over objects
@@ -864,15 +865,6 @@ End goal: make combat fun. make flight and movement fun, and look a little bette
 
 
 
-
-2D, 3D, 4D, non-euclidean. Fun to think about and inspiration:
-Designing a 4D World: The Technology behind Miegakure [Hide&Reveal]: https://www.youtube.com/watch?v=vZp0ETdD37E
-Non-Euclidean Geometry Explained - Hyperbolica Devlog #1: https://www.youtube.com/watch?v=zQo_S3yNa2w
-http://gamelab.mit.edu/games/a-slower-speed-of-light/
-Visualizing quaternions (4d numbers) with stereographic projection: https://www.youtube.com/watch?v=d4EgbgTm0Bg
-Marble Marcher - A Fractal Physics Game: https://www.youtube.com/watch?v=9U0XVdvQwAI
-How Computers Draw Weird Shapes: https://www.youtube.com/watch?v=6oMZb3yP_H8
-
 extra resources
 https://github.com/rafaskb/awesome-libgdx#readme
 
@@ -893,7 +885,7 @@ fonts
 
 [ ] devops n website n crap
 [ ] need an icon. its still the default libgdx logo...
-[ ] make a page for website spaceproject.xyz
+[ ] make a page for website spaceproject.xyz or make a github io?
     [ ] dev blog thingy?
 [ ] wiki n documentation
 [ ] should prolly make some unit tests at some point...
@@ -948,3 +940,4 @@ fonts
 [ ] untested on 4k, my machines are all 1080p.
 
 
+https://opensource.org/faq#profit

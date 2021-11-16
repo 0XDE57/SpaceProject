@@ -54,7 +54,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         }
         
         // load and unload tiles
-        updateTiles(delta);
+        updateTiles();
         
         spriteBatch.begin();
         drawParallaxTiles();
@@ -79,7 +79,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         }
     }
     
-    private void updateTiles(float delta) {
+    private void updateTiles() {
         dustCenterTile = updateLayer(dustCenterTile, dustTileDepth, SpaceBackgroundTile.TileType.Dust);
         bgCenterTile = updateLayer(bgCenterTile, bgTileDepth, SpaceBackgroundTile.TileType.Stars);
         fgCenterTile = updateLayer(fgCenterTile, fgTileDepth, SpaceBackgroundTile.TileType.Stars);
@@ -168,7 +168,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
                 
                 // create and add tile if doesn't exist
                 if (!isTileLoaded) {
-                    Gdx.app.debug(this.getClass().getSimpleName(), "Load " + type + " tile: [" + depth + "]: " + tX + ", " + tY);
+                    //Gdx.app.debug(this.getClass().getSimpleName(), "Load " + type + " tile: [" + depth + "]: " + tX + ", " + tY);
                     tiles.add(new SpaceBackgroundTile(tX, tY, depth, tileSize, type));
                 }
             }
@@ -185,7 +185,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         for (int index = 0; index < tiles.size(); ++index) {
             SpaceBackgroundTile tile = tiles.get(index);
             if (tile.depth == depth && !tileIsNear(centerTile, tile)) {
-                Gdx.app.debug(this.getClass().getSimpleName(), "Unload " + tile.type + " tile: [" + depth + "]: " + tile.tileX + ", " + tile.tileY);
+                //Gdx.app.debug(this.getClass().getSimpleName(), "Unload " + tile.type + " tile: [" + depth + "]: " + tile.tileX + ", " + tile.tileY);
                 
                 // dispose the texture so it doesn't eat up memory
                 tile.tex.dispose();

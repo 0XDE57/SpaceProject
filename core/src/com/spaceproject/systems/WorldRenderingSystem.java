@@ -13,11 +13,10 @@ import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.generation.noise.NoiseBuffer;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Tile;
-import com.spaceproject.utility.IRequireGameContext;
 
 import java.util.ArrayList;
 
-public class WorldRenderingSystem extends EntitySystem implements IRequireGameContext {
+public class WorldRenderingSystem extends EntitySystem {
     
     private final OrthographicCamera cam;
     private final SpriteBatch spriteBatch;
@@ -54,7 +53,7 @@ public class WorldRenderingSystem extends EntitySystem implements IRequireGameCo
         // add noise buffer to planetcomponent?
     
         long seed = GameScreen.getCurrentPlanet().getComponent(SeedComponent.class).seed;
-        Gdx.app.log(this.getClass().getSimpleName(), "World loader looking for " + seed);
+        Gdx.app.debug(this.getClass().getSimpleName(), "World loader looking for " + seed);
         
         long time = System.currentTimeMillis();
         long timeout = 10000;
@@ -62,7 +61,7 @@ public class WorldRenderingSystem extends EntitySystem implements IRequireGameCo
             noiseMap = GameScreen.noiseManager.getNoiseForSeed(seed);
             
             if ((System.currentTimeMillis() - time) > timeout) {
-                Gdx.app.log(this.getClass().getSimpleName(), "TIMED OUT: could not find seed for noise: " + seed);
+                Gdx.app.error(this.getClass().getSimpleName(), "TIMED OUT: could not find seed for noise: " + seed);
                 //TODO: if not cached and if not in process of being generated, only then generate. but this should probably never happen?
                 //GameScreen.noiseManager.loadOrCreateNoiseFor(seed, PlanetComponent);
             }
@@ -91,7 +90,6 @@ public class WorldRenderingSystem extends EntitySystem implements IRequireGameCo
         // how many tiles to draw around the camera
         int surroundX = 60;
         int surroundY = 30;
-        
         
         // calculate tile that the camera is in
         int centerX = (int) (cam.position.x / tileSize);
@@ -124,8 +122,4 @@ public class WorldRenderingSystem extends EntitySystem implements IRequireGameCo
         }
     }
     
-    @Override
-    public void initContext(GameScreen gameScreen) {
-        //IRequireGameContext obsolete?
-    }
 }
