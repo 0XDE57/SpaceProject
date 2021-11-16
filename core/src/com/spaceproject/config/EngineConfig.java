@@ -42,7 +42,12 @@ public class EngineConfig extends Config {
         physicsPositionIterations = 2;
         physicsStepPerFrame = 60;
         
-        maxNoiseGenThreads = Gdx.app.getType() == Application.ApplicationType.Desktop ? 4 : 2;
-        //maxNoiseGenThreads = Math.max(1, Runtime.getRuntime().availableProcessors()-2);
+        maxNoiseGenThreads = 2;// Gdx.app.getType() == Application.ApplicationType.Desktop ? 4 : 2;
+        if (Gdx.app.getType() == Application.ApplicationType.Desktop) {
+            int availableCPU = Runtime.getRuntime().availableProcessors();
+            if (availableCPU >= 8) {
+                maxNoiseGenThreads = Math.max(4, availableCPU - 2);
+            }
+        }
     }
 }
