@@ -36,7 +36,7 @@ public abstract class Config {
                 Gdx.app.debug(this.getClass().getSimpleName(), jsonString);
             }
         } catch (GdxRuntimeException ex) {
-            Gdx.app.error(this.getClass().getSimpleName(), "Could not save file: " + fileName + "\n" + ex.getMessage());
+            Gdx.app.error(this.getClass().getSimpleName(), "Could not save file: " + fileName , ex);
         }
     }
     
