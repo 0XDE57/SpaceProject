@@ -15,7 +15,7 @@ public class ResourceDisposer {
         TextureComponent tex = Mappers.texture.get(entity);
         if (tex != null) {
             tex.texture.dispose();
-            Gdx.app.debug("ResourceDisposer", "texture released: " + DebugUtil.objString(entity));
+            Gdx.app.debug("ResourceDisposer", "texture released:    " + DebugUtil.objString(entity));
         }
         
         Sprite3DComponent s3d = Mappers.sprite3D.get(entity);
@@ -27,13 +27,13 @@ public class ResourceDisposer {
         PhysicsComponent physics = Mappers.physics.get(entity);
         if (physics != null) {
             physics.body.getWorld().destroyBody(physics.body);
-            Gdx.app.debug("ResourceDisposer", "body destroyed: " + DebugUtil.objString(entity));
+            Gdx.app.debug("ResourceDisposer", "body destroyed:      " + DebugUtil.objString(entity));
         }
     
         ParticleComponent particle = Mappers.particle.get(entity);
         if (particle != null) {
             particle.pooledEffect.dispose();
-            Gdx.app.debug("ResourceDisposer", "particle released: " + DebugUtil.objString(entity));
+            Gdx.app.debug("ResourceDisposer", "particle released:   " + DebugUtil.objString(entity));
         }
     }
     
