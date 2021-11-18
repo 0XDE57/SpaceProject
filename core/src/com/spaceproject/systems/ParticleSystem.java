@@ -97,9 +97,12 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     
     private void updateEngineParticle(Entity entity, ParticleComponent particle) {
         ControllableComponent control = Mappers.controllable.get(entity);
+        TransformComponent transform = Mappers.transform.get(entity);
+        BarrelRollComponent roll = Mappers.barrelRoll.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
         
-        if (control != null && (shield != null && shield.state == ShieldComponent.State.off)) {
+        boolean shieldIsOff = shield != null && shield.state == ShieldComponent.State.off;
+        if (control != null && shieldIsOff) {
             switch (particle.type) {
                 case shipEngineMain:
                     if (control.moveForward) {
@@ -109,14 +112,14 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                     }
                     break;
                 case shipEngineLeft:
-                    if (control.moveRight) {
+                    if (control.moveRight || roll.flipState == BarrelRollComponent.FlipState.right) {
                         particle.pooledEffect.start();
                     } else {
                         particle.pooledEffect.allowCompletion();
                     }
                     break;
                 case shipEngineRight:
-                    if (control.moveLeft) {
+                    if (control.moveLeft || roll.flipState == BarrelRollComponent.FlipState.left) {
                         particle.pooledEffect.start();
                     } else {
                         particle.pooledEffect.allowCompletion();
@@ -127,8 +130,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
             particle.pooledEffect.allowCompletion();
         }
         
-        TransformComponent transform = Mappers.transform.get(entity);
-        BarrelRollComponent roll = Mappers.barrelRoll.get(entity);
+        //update emitters
         Array<ParticleEmitter> emitters = particle.pooledEffect.getEmitters();
         float engineRotation = particle.angle + (transform.rotation * MathUtils.radDeg + 180);
         for (int i = 0; i < emitters.size; i++) {
@@ -140,7 +142,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
             //change color during boost
             if (roll != null) {
                 ParticleEmitter.GradientColorValue tint = emitters.get(i).getTint();
-                if (roll.animationTimer.ratio() < 1) {
+                if (roll.flipState != BarrelRollComponent.FlipState.off) {
                     tint.setColors(engineColorBoost);
                 } else {
                     tint.setColors(engineColor);

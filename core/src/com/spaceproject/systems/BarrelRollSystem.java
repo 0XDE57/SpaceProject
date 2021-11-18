@@ -38,6 +38,7 @@ public class BarrelRollSystem extends IteratingSystem {
         //don't allow dodging while shield is active
         ShieldComponent shield = Mappers.shield.get(entity);
         if (shield != null && shield.state != ShieldComponent.State.off) {
+            //continue to stabilize while shield active
             stabilizeRoll(sprite3D, rollAmount);
             return;
         }
@@ -45,10 +46,11 @@ public class BarrelRollSystem extends IteratingSystem {
         //barrel roll
         BarrelRollComponent rollComp = Mappers.barrelRoll.get(entity);
         if (rollComp != null) {
-            if (rollComp.dir != BarrelRollComponent.FlipDir.none) {
+            if (rollComp.flipState != BarrelRollComponent.FlipState.off) {
                 barrelRoll(sprite3D, rollComp);
                 return;
             }
+            
             if (control != null) {
                 if (control.moveLeft && control.alter) {
                     dodgeLeft(entity, rollComp);
@@ -103,29 +105,25 @@ public class BarrelRollSystem extends IteratingSystem {
         }
     }
     
-    private void dodgeLeft(Entity entity, BarrelRollComponent roll) {
+    public static void dodgeLeft(Entity entity, BarrelRollComponent roll) {
         if (roll.timeoutTimer.tryEvent()) {
-            applyDodgeImpulse(entity, roll, BarrelRollComponent.FlipDir.left);
+            applyDodgeImpulse(entity, roll, BarrelRollComponent.FlipState.left);
         }
     }
     
-    private void dodgeRight(Entity entity, BarrelRollComponent roll) {
+    public static void dodgeRight(Entity entity, BarrelRollComponent roll) {
         if (roll.timeoutTimer.tryEvent()) {
-            applyDodgeImpulse(entity, roll, BarrelRollComponent.FlipDir.right);
+            applyDodgeImpulse(entity, roll, BarrelRollComponent.FlipState.right);
         }
     }
     
     private void boostForward(Entity entity, BarrelRollComponent roll) {
         if (roll.timeoutTimer.tryEvent()) {
-            TransformComponent transform = Mappers.transform.get(entity);
-            Body body = Mappers.physics.get(entity).body;
-            body.applyLinearImpulse(MyMath.vector(transform.rotation, entityCFG.dodgeForce), body.getPosition(), true);
-    
-            roll.animationTimer.reset();
+            applyDodgeImpulse(entity, roll, BarrelRollComponent.FlipState.forward);
         }
     }
     
-    private void applyDodgeImpulse(Entity entity, BarrelRollComponent roll, BarrelRollComponent.FlipDir flipDir) {
+    private static void applyDodgeImpulse(Entity entity, BarrelRollComponent roll, BarrelRollComponent.FlipState flipState) {
         //snap to angle to bypass rotation lerp to make dodge feel better/more responsive
         TransformComponent transform = Mappers.transform.get(entity);
         ControllableComponent control = Mappers.controllable.get(entity);
@@ -135,22 +133,33 @@ public class BarrelRollSystem extends IteratingSystem {
         body.setTransform(body.getPosition(), transform.rotation);
         
         //apply left or right impulse
-        float direction = (flipDir == BarrelRollComponent.FlipDir.left) ? transform.rotation + MathUtils.PI / 2 : transform.rotation - MathUtils.PI / 2;
-        body.applyLinearImpulse(MyMath.vector(direction, entityCFG.dodgeForce), body.getPosition(), true);
+        float direction = transform.rotation;
+        switch (flipState) {
+            case left:
+                direction += MathUtils.PI / 2;
+                break;
+            case right:
+                direction -= MathUtils.PI / 2;
+                break;
+        }
+        //float direction = (flipState == BarrelRollComponent.FlipState.left) ? transform.rotation + MathUtils.PI / 2 : transform.rotation - MathUtils.PI / 2;
+        body.applyLinearImpulse(MyMath.vector(direction, roll.force), body.getPosition(), true);
     
         //set roll animation
-        roll.dir = flipDir;
+        roll.flipState = flipState;
         roll.animationTimer.reset();
     }
     
     private void barrelRoll(Sprite3DComponent sprite3D, BarrelRollComponent rollComp) {
         //reset
         if (rollComp.animationTimer.canDoEvent()) {
-            rollComp.dir = BarrelRollComponent.FlipDir.none;
+            rollComp.flipState = BarrelRollComponent.FlipState.off;
+            //rollComp.activate = false;
             sprite3D.renderable.angle = 0;
+            return;
         }
         
-        switch (rollComp.dir) {
+        switch (rollComp.flipState) {
             case left:
                 sprite3D.renderable.angle = animInterpolation.apply(MathUtils.PI2 * rollComp.revolutions, 0, rollComp.animationTimer.ratio());
                 break;

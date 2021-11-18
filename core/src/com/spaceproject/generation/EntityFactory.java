@@ -367,7 +367,7 @@ public class EntityFactory {
         
         //shield
         ShieldComponent shield = new ShieldComponent();
-        shield.animTimer = new SimpleTimer(200, true);
+        shield.animTimer = new SimpleTimer(250, true);
         shield.defence = 100f;
         BoundingBox boundingBox = PolygonUtil.calculateBoundingBox(physics.body);
         float radius = Math.max(boundingBox.getWidth(), boundingBox.getHeight());
@@ -380,7 +380,7 @@ public class EntityFactory {
         barrelRoll.timeoutTimer = new SimpleTimer(entityCFG.dodgeTimeout);
         barrelRoll.animationTimer = new SimpleTimer(entityCFG.dodgeAnimationTimer, true);
         barrelRoll.revolutions = 1;
-        barrelRoll.dir = BarrelRollComponent.FlipDir.none;
+        barrelRoll.flipState = BarrelRollComponent.FlipState.off;
         barrelRoll.force = entityCFG.dodgeForce;
         shipEntity.add(barrelRoll);
         

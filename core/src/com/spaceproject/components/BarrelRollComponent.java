@@ -5,13 +5,11 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class BarrelRollComponent implements Component {
     
-    public enum FlipDir {
-        none, left, right
+    public enum FlipState {
+        off, left, right, forward
     }
     
-    public FlipDir dir;
-    
-    public boolean activate;
+    public FlipState flipState;
     
     public SimpleTimer timeoutTimer;
     

@@ -136,7 +136,9 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                     tapCounterRight = 0;
     
                     BarrelRollComponent barrelRoll = Mappers.barrelRoll.get(player);
-                    barrelRoll.activate = true;
+                    if (barrelRoll != null) {
+                        BarrelRollSystem.dodgeRight(player, barrelRoll);
+                    }
                 }
             }
             //timeout
@@ -162,7 +164,9 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                     tapCounterLeft = 0;
     
                     BarrelRollComponent barrelRoll = Mappers.barrelRoll.get(player);
-                    barrelRoll.activate = true;
+                    if (barrelRoll != null) {
+                        BarrelRollSystem.dodgeLeft(player, barrelRoll);
+                    }
                 }
             }
             //timeout
