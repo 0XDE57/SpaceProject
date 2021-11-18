@@ -10,6 +10,8 @@ import com.spaceproject.config.SysCFG;
 import com.spaceproject.config.SystemsConfig;
 import com.spaceproject.screens.GameScreen;
 
+import java.lang.reflect.InvocationTargetException;
+
 
 public abstract class SystemLoader {
     
@@ -51,17 +53,14 @@ public abstract class SystemLoader {
                     unLoad(engine, systemInEngine);
                 }
             }
-        } catch (ClassNotFoundException e) {
-            Gdx.app.error(logSource, "Could not find " + sysCFG.getClassName(), e);
-        } catch (InstantiationException e) {
-            Gdx.app.error(logSource, "Could not instantiate " + sysCFG.getClassName(), e);
         } catch (Exception e) {
-            Gdx.app.error(logSource, "Could not load " + sysCFG.getClassName(), e);
+            Gdx.app.error(logSource, "Could not load system " + sysCFG.getClassName(), e);
         }
     }
     
-    private static void load(GameScreen game, Engine engine, int priority, Class<? extends EntitySystem> systemClass) throws InstantiationException, IllegalAccessException {
-        EntitySystem systemToLoad = systemClass.newInstance();
+    private static void load(GameScreen game, Engine engine, int priority, Class<? extends EntitySystem> systemClass)
+            throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        EntitySystem systemToLoad = systemClass.getDeclaredConstructor().newInstance();
         systemToLoad.priority = priority;
         
         //auto-hookup interfaces
