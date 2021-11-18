@@ -20,9 +20,9 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.ScreenTransitionOverlay;
+import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.Misc;
 
 //todo: consider separating into separate LandOnPlanetSystem and LeavePlanetSystem
 public class ScreenTransitionSystem extends IteratingSystem implements IRequireGameContext {
@@ -67,7 +67,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     
     private void processLanding(Entity entity, ScreenTransitionComponent screenTrans) {
         if (screenTrans.curLandStage == null || screenTrans.curLandStage != screenTrans.landStage) {
-            Gdx.app.log(this.getClass().getSimpleName(), "Animation Stage: " + screenTrans.landStage + " for " + Misc.objString(entity));
+            Gdx.app.log(this.getClass().getSimpleName(), "Animation Stage: " + screenTrans.landStage + " for " + DebugUtil.objString(entity));
             screenTrans.curLandStage = screenTrans.landStage;
         }
         switch (screenTrans.landStage) {
@@ -94,7 +94,8 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
                 break;
             case end:
                 entity.remove(ScreenTransitionComponent.class);
-                Gdx.app.log(this.getClass().getSimpleName(), "Animation complete. Removed ScreenTransitionComponent for " + Misc.objString(entity));
+                Gdx.app.log(this.getClass().getSimpleName(),
+                        "Animation complete. Removed ScreenTransitionComponent for " + DebugUtil.objString(entity));
                 break;
             default:
                 try {
@@ -108,7 +109,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     
     private void processTakeOff(Entity entity, ScreenTransitionComponent screenTrans) {
         if (screenTrans.curTakeOffStage == null || screenTrans.curTakeOffStage != screenTrans.takeOffStage) {
-            Gdx.app.log(this.getClass().getSimpleName(), "Animation Stage: " + screenTrans.takeOffStage + " for " + Misc.objString(entity));
+            Gdx.app.log(this.getClass().getSimpleName(), "Animation Stage: " + screenTrans.takeOffStage + " for " + DebugUtil.objString(entity));
             screenTrans.curTakeOffStage = screenTrans.takeOffStage;
         }
         switch (screenTrans.takeOffStage) {
@@ -132,7 +133,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
                 break;
             case end:
                 entity.remove(screenTrans.getClass());
-                Gdx.app.log(this.getClass().getSimpleName(), "Animation complete. Removed ScreenTransitionComponent from " + Misc.objString(entity));
+                Gdx.app.log(this.getClass().getSimpleName(), "Animation complete. Removed ScreenTransitionComponent from " + DebugUtil.objString(entity));
                 break;
             default:
                 try {
@@ -303,7 +304,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
     
     private void syncLoadPosition(Entity entity, ScreenTransitionComponent screenTrans) {
         long desiredSeed = screenTrans.planet.getComponent(SeedComponent.class).seed;
-        Gdx.app.debug(this.getClass().getSimpleName(), Misc.objString(entity) + " is waiting for " + desiredSeed);
+        Gdx.app.debug(this.getClass().getSimpleName(), DebugUtil.objString(entity) + " is waiting for " + desiredSeed);
     
         //set player position to last known planet position
         Vector2 lastKnownPlanetPosition = Mappers.transform.get(screenTrans.planet).pos;

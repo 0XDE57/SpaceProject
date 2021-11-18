@@ -10,14 +10,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.AIComponent;
-import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.AISpawnComponent;
+import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.SimpleTimer;
 
 public class PlanetaryEntitySpawnerSystem extends IteratingSystem implements EntityListener {
@@ -94,7 +94,7 @@ public class PlanetaryEntitySpawnerSystem extends IteratingSystem implements Ent
         for (Entity ent : aiShipCluster) {
             getEngine().addEntity(ent);
         }
-        Gdx.app.log(this.getClass().getSimpleName(), "spawned: " + Misc.objString(entity) + " source:" + Misc.objString(entity));
+        Gdx.app.log(this.getClass().getSimpleName(), "spawned: " + DebugUtil.objString(entity) + " source:" + DebugUtil.objString(entity));
     
         //if i am another type of object, then do my own spawn rules. like maybe I am on a planet and want to spawn characters near the player
         //TransformComponent transform = Mappers.transform.get(entity);

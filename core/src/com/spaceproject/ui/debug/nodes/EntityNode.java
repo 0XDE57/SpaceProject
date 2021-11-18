@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.spaceproject.ui.debug.ECSExplorerWindow;
-import com.spaceproject.utility.Misc;
+import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.SimpleTimer;
 
 import static com.spaceproject.generation.FontFactory.skinSmallFont;
@@ -21,7 +21,7 @@ public class EntityNode extends UpdateNode {
     private SimpleTimer newTimer;
     
     public EntityNode(Entity entity, Skin skin) {
-        super(new Label(Misc.objString(entity), skin, skinSmallFont, Color.WHITE), entity);
+        super(new Label(DebugUtil.objString(entity), skin, skinSmallFont, Color.WHITE), entity);
     }
     
     public EntityNode(Entity entity, Skin skin, boolean markNew) {
@@ -87,6 +87,6 @@ public class EntityNode extends UpdateNode {
         if (getValue() == null)
             return super.toString();
         
-        return Misc.objString(getEntity()) + " [" + getEntity().getComponents().size() + "]";
+        return DebugUtil.objString(getEntity()) + " [" + getEntity().getComponents().size() + "]";
     }
 }

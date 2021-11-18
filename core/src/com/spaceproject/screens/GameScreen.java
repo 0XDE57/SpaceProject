@@ -25,13 +25,13 @@ import com.spaceproject.config.WorldConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.Galaxy;
-import com.spaceproject.noise.NoiseManager;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.noise.NoiseManager;
 import com.spaceproject.systems.ScreenTransitionSystem;
+import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.ResourceDisposer;
 import com.spaceproject.utility.SystemLoader;
 
@@ -146,7 +146,7 @@ public class GameScreen extends MyScreenAdapter {
         currentPlanet = planet;
         
         Entity transitioningEntity = transitioningEntityCluster.first();
-        Gdx.app.log(this.getClass().getSimpleName(), "Landing " + Misc.objString(transitioningEntity) + " on planet " + Misc.objString(planet));
+        Gdx.app.log(this.getClass().getSimpleName(), "Landing " + DebugUtil.objString(transitioningEntity) + " on planet " + DebugUtil.objString(planet));
     
         //load/unload relevant systems
         SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
@@ -170,7 +170,7 @@ public class GameScreen extends MyScreenAdapter {
         
         //if AI, remove it
         if (Mappers.AI.get(transEntity) != null) {
-            Gdx.app.log(this.getClass().getSimpleName(), "REMOVING AI: " + Misc.objString(transEntity));
+            Gdx.app.log(this.getClass().getSimpleName(), "REMOVING AI: " + DebugUtil.objString(transEntity));
             for (Entity e : transEntityCluster) {
                 e.add(new RemoveComponent());
             }

@@ -18,15 +18,12 @@ import com.badlogic.gdx.utils.Disposable;
 
 
 //based on: xoppa.github.io/blog/a-simple-card-game/
-//also thanks to LiquidNitrogen in freenode: #libgdx
 public class Sprite3D extends Renderable implements Disposable {
-    
     
     public final Vector3 position = new Vector3();
     public final Quaternion rotation = new Quaternion();
     public final Vector3 scale = new Vector3(1, 1, 1);
     public float angle;
-    
     
     public Sprite3D(Texture frontTex, Texture backTex, float renderScale) {
         //combine textures: Sprites loaded into material texture must come from same texture
@@ -67,7 +64,9 @@ public class Sprite3D extends Renderable implements Disposable {
         Pixmap pixmap = new Pixmap(textureA.getWidth(), textureA.getHeight() * 2, Pixmap.Format.RGBA8888);
         pixmap.drawPixmap(textureA.getTextureData().consumePixmap(), 0, 0);
         pixmap.drawPixmap(textureB.getTextureData().consumePixmap(), 0, textureA.getHeight());
-        return new Texture(pixmap);
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+        return texture;
     }
     
     private static float[] convert(float[] front, float[] back) {
@@ -91,6 +90,5 @@ public class Sprite3D extends Renderable implements Disposable {
     @Override
     public void dispose() {
         meshPart.mesh.dispose();
-        //TODO: do i also need to dispose the texture used? material
     }
 }

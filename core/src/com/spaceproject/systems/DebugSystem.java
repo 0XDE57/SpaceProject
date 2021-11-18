@@ -33,14 +33,14 @@ import com.spaceproject.config.DebugConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.TextureFactory;
-import com.spaceproject.screens.GameScreen;
-import com.spaceproject.ui.debug.ECSExplorerWindow;
-import com.spaceproject.ui.debug.DebugText;
-import com.spaceproject.utility.DebugUtil;
-import com.spaceproject.ui.debug.DebugVec;
-import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.Misc;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.screens.GameScreen;
+import com.spaceproject.ui.debug.DebugText;
+import com.spaceproject.ui.debug.DebugVec;
+import com.spaceproject.ui.debug.ECSExplorerWindow;
+import com.spaceproject.utility.DebugUtil;
+import com.spaceproject.utility.ECSUtil;
+import com.spaceproject.utility.Mappers;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -178,10 +178,10 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     
     private void updateKeyToggles() {
         if (Gdx.input.isKeyPressed(Input.Keys.NUM_8)) {
-            GameScreen.adjustGameTime(1000);
+            GameScreen.adjustGameTime(2000);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.NUM_9)) {
-            GameScreen.adjustGameTime(-1000);
+            GameScreen.adjustGameTime(-2000);
         }
         
     
@@ -319,7 +319,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         String memory = DebugUtil.getMemory();
         
         //entity/component count
-        String count = DebugUtil.getECSString(getEngine());
+        String count = ECSUtil.getECSString(getEngine());
         
         //threads
         Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
@@ -333,7 +333,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         debugTexts.add(new DebugText(memory + threads, x, y - (lineHeight * linePos++), fontLarge));
         debugTexts.add(new DebugText(camera, x, y - (lineHeight * linePos++), fontLarge));
         debugTexts.add(new DebugText(
-                "time: " + Misc.formatDuration(GameScreen.getGameTimeCurrent()) + " (" + GameScreen.getGameTimeCurrent() + ")",
+                "time: " + MyMath.formatDuration(GameScreen.getGameTimeCurrent()) + " (" + GameScreen.getGameTimeCurrent() + ")",
                 Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10, fontLarge));
         debugTexts.add(new DebugText("seed: " + GameScreen.getGalaxySeed(), Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight, fontLarge));
         if (!GameScreen.inSpace()) {

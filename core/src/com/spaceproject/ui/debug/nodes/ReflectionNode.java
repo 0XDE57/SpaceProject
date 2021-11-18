@@ -4,23 +4,21 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.kotcrab.vis.ui.VisUI;
 import com.spaceproject.ui.debug.ECSExplorerWindow;
-import com.spaceproject.utility.Misc;
+import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.SimpleTimer;
 
 import java.lang.reflect.Field;
 
 import static com.spaceproject.generation.FontFactory.skinSmallFont;
 
-/**
- * Created by Whilow Schock on 25/09/2019.
- */
+
 public class ReflectionNode extends UpdateNode {
     
     boolean isNew = false;
     private SimpleTimer newTimer;
     
     public ReflectionNode(Object object) {
-        super(new Label(Misc.objString(object), VisUI.getSkin(), skinSmallFont, Color.WHITE), object);
+        super(new Label(DebugUtil.objString(object), VisUI.getSkin(), skinSmallFont, Color.WHITE), object);
         init();
     }
     
@@ -61,6 +59,6 @@ public class ReflectionNode extends UpdateNode {
         if (getValue() == null)
             return super.toString();
         
-        return Misc.objString(getValue());
+        return DebugUtil.objString(getValue());
     }
 }

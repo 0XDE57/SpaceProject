@@ -24,11 +24,10 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.MiniMapConfig;
 import com.spaceproject.generation.FontFactory;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.Misc;
-import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.SimpleTimer;
 
 
@@ -169,7 +168,7 @@ public class MiniMap {
         font.draw(batch, mapString, textPosX, textPosY - lineHeight);
         if (mapState == MapState.full) {
             //draw game time
-            font.draw(batch, Misc.formatDuration(GameScreen.getGameTimeCurrent()), textPosX, textPosY - lineHeight * 2);
+            font.draw(batch, MyMath.formatDuration(GameScreen.getGameTimeCurrent()), textPosX, textPosY - lineHeight * 2);
             //draw seed
             long seed = GameScreen.getGalaxySeed();
             if (!GameScreen.inSpace()) {

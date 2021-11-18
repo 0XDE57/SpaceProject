@@ -10,11 +10,10 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 import com.spaceproject.ui.debug.DebugTextRenderer;
-import com.spaceproject.utility.Misc;
-import com.spaceproject.math.MyMath;
 
 public class TestSpiralGalaxy extends MyScreenAdapter {
     enum Direction {
@@ -105,7 +104,7 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
                 System.out.format(format,
                         iter,
                         fib,
-                        Misc.vecString(newVec, 2),
+                        MyMath.vecString(newVec, 2),
                         MyMath.round(newVec.len(), 2),
                         MyMath.round(newVec.angle(), 2),
                         "(" + dir + ") "+ direction,
@@ -273,8 +272,8 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
         int c = 0;
         for (Vector2 p : points) {
             Vector2 v1 = p.cpy().scl(scale).add(center);
-            debugText.add(Misc.vecString(p, 1), v1.x, v1.y);
-            debugText.add(Misc.vecString(v1, 1), v1.x, v1.y + debugText.getFontHeight());
+            debugText.add(MyMath.vecString(p, 1), v1.x, v1.y);
+            debugText.add(MyMath.vecString(v1, 1), v1.x, v1.y + debugText.getFontHeight());
             if (c > 0) {
                 Vector2 v2 = points.get(c-1).cpy().scl(scale).add(center);
                 shape.line(v1, v2);

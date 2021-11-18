@@ -4,6 +4,7 @@ package com.spaceproject.utility;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
@@ -16,20 +17,22 @@ import com.spaceproject.components.CamTargetComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 
+import java.lang.reflect.Field;
+
 public class ECSUtil {
     
     public static Component transferComponent(Entity fromEntity, Entity toEntity, Class<? extends Component> componentClass) {
         Component transferredComponent = fromEntity.remove(componentClass);
         if (transferredComponent == null) {
-            Gdx.app.debug("ECSUtil", "Warning: " + Misc.objString(fromEntity)
+            Gdx.app.debug("ECSUtil", "Warning: " + DebugUtil.objString(fromEntity)
                     + " has no " + componentClass.getSimpleName()
-                    + " to give to " + Misc.objString(toEntity));
+                    + " to give to " + DebugUtil.objString(toEntity));
             return null;
         }
     
         toEntity.add(transferredComponent);
-        Gdx.app.debug("ECSUtil", "transferComponent: " + Misc.objString(transferredComponent)
-                + ": " + Misc.objString(fromEntity) + " -> " + Misc.objString(toEntity));
+        Gdx.app.debug("ECSUtil", "transferComponent: " + DebugUtil.objString(transferredComponent)
+                + ": " + DebugUtil.objString(fromEntity) + " -> " + DebugUtil.objString(toEntity));
         return transferredComponent;
     }
     
@@ -93,5 +96,43 @@ public class ECSUtil {
             //return getAttachedEntities(engine, attached.parentEntity);?
         }
     }*/
+    
+    public static String getECSString(Engine engine) {
+        int entities = engine.getEntities().size();
+        int components = 0;
+        for (Entity ent : engine.getEntities()) {
+            components += ent.getComponents().size();
+        }
+        int systems = engine.getSystems().size();
+        return "E: " + entities + " C: " + components + " S: " + systems;
+    }
+    
+    public static void printSystems(Engine eng) {
+        for (EntitySystem sys : eng.getSystems()) {
+            Gdx.app.debug("DebugUtil", sys + " (" + sys.priority + ")");
+        }
+    }
+    
+    public static void printEntities(Engine eng) {
+        for (Entity entity : eng.getEntities()) {
+            printEntity(entity);
+        }
+    }
+    
+    public static void printEntity(Entity entity) {
+        Gdx.app.debug("DebugUtil", entity.toString());
+        for (Component c : entity.getComponents()) {
+            Gdx.app.debug("DebugUtil", "\t" + c.toString());
+            for (Field f : c.getClass().getFields()) {
+                try {
+                    Gdx.app.debug("DebugUtil", String.format("\t\t%-14s %s", f.getName(), f.get(c)));
+                } catch (IllegalArgumentException e) {
+                    Gdx.app.error("DebugUtil", "failed to read fields", e);
+                } catch (IllegalAccessException e) {
+                    Gdx.app.error("DebugUtil", "fail to read fields", e);
+                }
+            }
+        }
+    }
     
 }

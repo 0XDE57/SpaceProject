@@ -1,11 +1,8 @@
 package com.spaceproject.utility;
 
 
-import com.badlogic.ashley.core.Component;
-import com.badlogic.ashley.core.Engine;
-import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
 import com.spaceproject.math.MyMath;
 
 import java.lang.reflect.Field;
@@ -22,42 +19,43 @@ public class DebugUtil {
         return "Mem: " + MyMath.formatBytes(used);
     }
     
-    public static String getECSString(Engine engine) {
-        int entities = engine.getEntities().size();
-        int components = 0;
-        for (Entity ent : engine.getEntities()) {
-            components += ent.getComponents().size();
+    public static String objString(Object o) {
+        if (o == null) {
+            return "null";
         }
-        int systems = engine.getSystems().size();
-        return "E: " + entities + " C: " + components + " S: " + systems;
+        
+        //a shorter version to getSimpleName() and hashcode
+        return o.getClass().getSimpleName() + "@" + Integer.toHexString(o.hashCode());
     }
     
-    public static void printEntities(Engine eng) {
-        for (Entity entity : eng.getEntities()) {
-            printEntity(entity);
+    public static void printObjectFields(Object o) {
+        if (o == null) {
+            System.out.println("OBJECT IS NULL");
+            return;
         }
-    }
-    
-    public static void printEntity(Entity entity) {
-        Gdx.app.debug("DebugUtil", entity.toString());
-        for (Component c : entity.getComponents()) {
-            Gdx.app.debug("DebugUtil", "\t" + c.toString());
-            for (Field f : c.getClass().getFields()) {
-                try {
-                    Gdx.app.debug("DebugUtil", String.format("\t\t%-14s %s", f.getName(), f.get(c)));
-                } catch (IllegalArgumentException e) {
-                    Gdx.app.error("DebugUtil", "failed to read fields", e);
-                } catch (IllegalAccessException e) {
-                    Gdx.app.error("DebugUtil", "fail to read fields", e);
-                }
+        
+        System.out.println(o.getClass());
+        for (Field f : o.getClass().getFields()) {
+            try {
+                System.out.println(String.format("\t%-14s %s", f.getName(), f.get(o)));
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
             }
         }
     }
     
-    public static void printSystems(Engine eng) {
-        for (EntitySystem sys : eng.getSystems()) {
-            Gdx.app.debug("DebugUtil", sys + " (" + sys.priority + ")");
+    public static void printSystemProperties() {
+        System.getProperties().list(System.out);
+    }
+    
+    public static void printDisplayModes() {
+        System.out.println(String.format("%s %s", Gdx.graphics.getPpiX(), Gdx.graphics.getPpiY()));
+        for (Graphics.DisplayMode mode : Gdx.graphics.getDisplayModes()) {
+            System.out.println(String.format("%s %s %s %s", mode.width, mode.height, mode.bitsPerPixel, mode.refreshRate));
         }
+        System.out.println("-------------------------\n");
     }
     
 }

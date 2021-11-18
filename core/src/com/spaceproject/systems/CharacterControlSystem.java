@@ -16,9 +16,9 @@ import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.Misc;
 
 public class CharacterControlSystem extends IteratingSystem {
     
@@ -80,8 +80,8 @@ public class CharacterControlSystem extends IteratingSystem {
             //skip vehicle is occupied
             if (Mappers.vehicle.get(vehicleEntity).driver != null) {
                 Gdx.app.log(this.getClass().getSimpleName(),
-                        Misc.objString(characterEntity) + " cannot enter " + Misc.objString(vehicleEntity)
-                        + " because " + Misc.objString(Mappers.vehicle.get(vehicleEntity).driver) + " is already driving.");
+                        DebugUtil.objString(characterEntity) + " cannot enter " + DebugUtil.objString(vehicleEntity)
+                        + " because " + DebugUtil.objString(Mappers.vehicle.get(vehicleEntity).driver) + " is already driving.");
                 continue;
             }
             
@@ -96,8 +96,8 @@ public class CharacterControlSystem extends IteratingSystem {
     }
     
     private void enterVehicle(Entity characterEntity, Entity vehicleEntity) {
-        Gdx.app.log(this.getClass().getSimpleName(), Misc.objString(characterEntity)
-                + " entering vehicle " + Misc.objString(vehicleEntity));
+        Gdx.app.log(this.getClass().getSimpleName(), DebugUtil.objString(characterEntity)
+                + " entering vehicle " + DebugUtil.objString(vehicleEntity));
         
         //set reference
         Mappers.vehicle.get(vehicleEntity).driver = characterEntity;

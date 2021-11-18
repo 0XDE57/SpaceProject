@@ -62,7 +62,7 @@ public class PhysicsContactListener implements ContactListener {
             return; //ignore self-inflicted damage
         }
         Gdx.app.log(this.getClass().getSimpleName(),
-                "[" + Misc.objString(attackedEntity) + "] attacked by: [" + Misc.objString(damageComponent.source) + "]");
+                "[" + DebugUtil.objString(attackedEntity) + "] attacked by: [" + DebugUtil.objString(damageComponent.source) + "]");
         
         //check if attacked entity was AI
         AIComponent ai = Mappers.AI.get(attackedEntity);
@@ -127,7 +127,7 @@ public class PhysicsContactListener implements ContactListener {
                 chargeCannon.projectileEntity.add(new RemoveComponent());
             }
             Gdx.app.log(this.getClass().getSimpleName(),
-                    "[" + Misc.objString(attackedEntity) + "] killed by: [" + Misc.objString(damageComponent.source) + "]");
+                    "[" + DebugUtil.objString(attackedEntity) + "] killed by: [" + DebugUtil.objString(damageComponent.source) + "]");
         }
         
         //remove projectile

@@ -1,7 +1,7 @@
 package com.spaceproject.ui.debug.nodes;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.spaceproject.utility.Misc;
+import com.spaceproject.utility.DebugUtil;
 
 
 public abstract class UpdateNode extends MyNode {
@@ -10,7 +10,7 @@ public abstract class UpdateNode extends MyNode {
         super(actor);
         this.setValue(obj);
         if (obj != null) {
-            getActor().setName(Misc.objString(obj));
+            getActor().setName(DebugUtil.objString(obj));
         }
     }
     

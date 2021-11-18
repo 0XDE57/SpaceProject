@@ -3,6 +3,7 @@ package com.spaceproject.math;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.spaceproject.screens.GameScreen;
 
@@ -10,6 +11,7 @@ import java.util.Random;
 
 public abstract class MyMath {
     
+    //region seed
     public static long getSeed(float x, float y) {
         return getSeed((int) x, (int) y);
     }
@@ -44,9 +46,10 @@ public abstract class MyMath {
         
         return newSeed;
     }
+    //endregion
     
-    static final Vector2 TEMP_VEC = new Vector2();
-    
+    //region vectors and angles
+    private static final Vector2 TEMP_VEC = new Vector2();
     public static Vector2 vector(float direction, float magnitude) {
         float dx = MathUtils.cos(direction) * magnitude;
         float dy = MathUtils.sin(direction) * magnitude;
@@ -78,17 +81,19 @@ public abstract class MyMath {
         return angle2(a.x, a.y, b.x, b.y);
     }
     
-    /**
-     * Round value with specified precision.
-     *
-     * @param value
-     * @param precision number of decimal points
-     * @return rounded value
-     */
-    public static double round(double value, int precision) {
-        int scale = (int) Math.pow(10, precision);
-        return (double) Math.round(value * scale) / scale;
+    public static float getAngularImpulse(Body body, float targetAngle, float delta) {
+        //https://www.iforce2d.net/b2dtut/rotate-to-angle
+        float nextAngle = body.getAngle() + body.getAngularVelocity() * delta;
+        float totalRotation = targetAngle - nextAngle;
+        while (totalRotation < -180 * MathUtils.degRad) totalRotation += 360 * MathUtils.degRad;
+        while (totalRotation >  180 * MathUtils.degRad) totalRotation -= 360 * MathUtils.degRad;
+        float desiredAngularVelocity = totalRotation * 60;
+        float change = 50 * MathUtils.degRad; //max degrees of rotation per time step
+        desiredAngularVelocity = Math.min(change, Math.max(-change, desiredAngularVelocity));
+        float impulse = body.getInertia() * desiredAngularVelocity;
+        return impulse;
     }
+    //endregion
     
     /**
      * Returns the percentage of the range max-min that corresponds to value.
@@ -102,8 +107,9 @@ public abstract class MyMath {
         return (value - min) / (max - min);
     }
     
-    /**
-     * Convert bytes to a human readable format.
+    
+    //region formatting
+    /** Convert bytes to a human readable format.
      * Eg: 26673720 -> 25.44MB
      * Credit: icza, stackoverflow.com/questions/3758606/#24805871
      *
@@ -116,18 +122,44 @@ public abstract class MyMath {
         return String.format("%.2f%sB", (double) bytes / (1L << (z * 10)), " KMGTPE".charAt(z));
     }
     
-    public static float getAngularImpulse(Body body, float targetAngle, float delta) {
-        //https://www.iforce2d.net/b2dtut/rotate-to-angle
-        float nextAngle = body.getAngle() + body.getAngularVelocity() * delta;
-        float totalRotation = targetAngle - nextAngle;
-        while (totalRotation < -180 * MathUtils.degRad) totalRotation += 360 * MathUtils.degRad;
-        while (totalRotation >  180 * MathUtils.degRad) totalRotation -= 360 * MathUtils.degRad;
-        float desiredAngularVelocity = totalRotation * 60;
-        float change = 50 * MathUtils.degRad; //max degrees of rotation per time step
-        desiredAngularVelocity = Math.min(change, Math.max(-change, desiredAngularVelocity));
-        float impulse = body.getInertia() * desiredAngularVelocity;
-        return impulse;
+    /** Convert milliseconds to hours, minutes, seconds
+     * https://stackoverflow.com/a/21701635
+     */
+    public static String formatDuration(final long millis) {
+        long seconds = (millis / 1000) % 60;
+        long minutes = (millis / (1000 * 60)) % 60;
+        long hours = millis / (1000 * 60 * 60);
+        
+        StringBuilder b = new StringBuilder();
+        b.append(hours == 0 ? "00" : hours < 10 ? "0" + hours : hours);
+        b.append(":");
+        b.append(minutes == 0 ? "00" : minutes < 10 ? "0" + minutes : minutes);
+        b.append(":");
+        b.append(seconds == 0 ? "00" : seconds < 10 ? "0" + seconds : seconds);
+        return b.toString();
     }
+    
+    public static String vecString(Vector2 vec, int decimal) {
+        return round(vec.x, decimal) + ", " + round(vec.y, decimal);
+    }
+    
+    public static String vecString(Vector3 vec, int decimal) {
+        return round(vec.x, decimal) + ", " + round(vec.y, decimal) + ", " + round(vec.z, decimal);
+    }
+    /**
+     * Round value with specified precision.
+     *
+     * @param value
+     * @param precision number of decimal points
+     * @return rounded value
+     */
+    public static double round(double value, int precision) {
+        int scale = (int) Math.pow(10, precision);
+        return (double) Math.round(value * scale) / scale;
+    }
+    
+    //endregion
+    
     
     public static long fibonacci(int n) {
         if (n == 0) {

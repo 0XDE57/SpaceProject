@@ -25,9 +25,9 @@ import com.spaceproject.config.EntityConfig;
 import com.spaceproject.generation.BodyFactory;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.Misc;
 import com.spaceproject.utility.SimpleTimer;
 
 
@@ -162,8 +162,8 @@ public class ShipControlSystem extends IteratingSystem {
         control.changeVehicle = false;
         
         Entity characterEntity = Mappers.vehicle.get(vehicleEntity).driver;
-        Gdx.app.log(this.getClass().getSimpleName(), Misc.objString(characterEntity)
-                + " exiting vehicle " + Misc.objString(vehicleEntity));
+        Gdx.app.log(this.getClass().getSimpleName(), DebugUtil.objString(characterEntity)
+                + " exiting vehicle " + DebugUtil.objString(vehicleEntity));
         
         // re-create box2D body and set position near vehicle
         Vector2 vehiclePosition = Mappers.transform.get(vehicleEntity).pos;
@@ -215,7 +215,7 @@ public class ShipControlSystem extends IteratingSystem {
         screenTrans.animInterpolation = Interpolation.pow2;
         entity.add(screenTrans);
         
-        Gdx.app.log(this.getClass().getSimpleName(), "takeOffPlanet: " + Misc.objString(entity));
+        Gdx.app.log(this.getClass().getSimpleName(), "takeOffPlanet: " + DebugUtil.objString(entity));
     }
     
     private void beginLandOnPlanet(Entity entity, Entity planet) {
@@ -235,7 +235,7 @@ public class ShipControlSystem extends IteratingSystem {
         screenTrans.animInterpolation = Interpolation.sineIn;
         entity.add(screenTrans);
         
-        Gdx.app.log(this.getClass().getSimpleName(), "beginLandOnPlanet: " + Misc.objString(entity));
+        Gdx.app.log(this.getClass().getSimpleName(), "beginLandOnPlanet: " + DebugUtil.objString(entity));
     }
     
     private Entity getPlanetNearPosition(Vector2 pos) {
