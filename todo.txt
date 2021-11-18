@@ -85,28 +85,16 @@ Data Directory (...\SpaceProject\android\assets)
                 effect b
                 effect c
     \save: (todo) serialization
-        todo: figure out a sensible structure
         https://github.com/libgdx/libgdx/wiki/Saved-game-serialization
-        save/<galaxy seed>/galaxy?
-            /points of interest?
-            /celestialBodies?
-            /body/<planetseed>?
-        save/<seed>/entities?
-        save/<seed>/planet
-            heightmap
-            world properties
-            entities
 
 
 Space Background Rendering
-	Simple but effective:
-	3 parallax layers
+	Simple but effective: 3 parallax layers
 		stars close
 		stars far
 		noise far
 	Background color is set based on camera positioning.
 		Just some combinations and ratios of red, blue and green that I played around with until it looked nice.
-
 
 Noise Generation
 	Noise is heavy to generate at runtime so it's done in background threads.
@@ -114,7 +102,10 @@ Noise Generation
 	You can specify how many simultaneous threads you would like to allow in EngineConfig.
 	Todo: save textures/noise so it's only generated the first time. Load from disk.
 	For dev purposes, just generate ad-hoc for now.
-
+    [!] NOTE: cannot generate textures in another thread due to glContext...
+        https://github.com/libgdx/libgdx/wiki/Threading
+        https://www.opengl.org/wiki/OpenGL_and_multithreading
+        We can however generate noise for the textures on a separate thread and then feed that to the rendering thread.
 
 Screen transition logic/stages overview
 One of the trickier parts of the engine. Animation states for transition, and dynamic system loading/unloading.
@@ -168,6 +159,11 @@ And much more....problems for later.
 
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+***the plan***: make combat fun. make flight and movement fun, and look a little better.
+Dear dairy: why is procrastination so addicting?
+focus! i keep jumping between ideas and features and never finish anything
+Spaceship combat will be a core part of gameplay. So lets focus on cleaning that up first.
+
 Legend:
     [   ] = not started
     [...] = in progress
@@ -176,17 +172,13 @@ Legend:
     [ ! ] = notes
     [ * ] = exceptions
 
-***the plan***: make combat fun. make flight and movement fun, and look a little better.
-Dear dairy: why is procrastination so addicting?
-focus! i keep jumping between ideas and features and never finish anything
-Spaceship combat will be a core part of gameplay. So lets focus on cleaning that up first.
-
 
 
 [...] BUG! start game, leave to main menu, return to game: planets do not load
     [x] clean up, dispose and unload systems properly when return to main menu
     [ ] things will load now, but there seems to be a strange delay...
         -start game, leave to main menu, start game again = empty until move around for a bit then loads
+        I believe this is to do with the noise threads shutting down?
 
 [ ] needs frame of reference to judge speed and direction since parallax is so deep
     [ ] floaty dust particles at same depth as player to help visualize movement/speed
@@ -218,7 +210,6 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             https://www.emanueleferonato.com/2012/01/17/create-real-explosions-with-box2d-adding-textures/
             https://www.emanueleferonato.com/2012/03/05/breaking-objects-with-box2d-the-realistic-way/
 
-
 [ ] JUICE!
     https://www.youtube.com/watch?v=Fy0aCDmgnxg
     https://www.youtube.com/watch?v=tu-Qe66AvtY
@@ -228,7 +219,6 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         look into interpolating physics, and investigate floating point errors
     [ ] change cursor to a crosshair sprite
     [ ] camera allow cursor to "extend view": pushing cursor to edge of screen pulls camera position at a point between player and mouse
-        [ ]
     [...] camera: combat camera
         manually zooming in an out when fighting is a bit clunky and jarring.
         [x] implement an auto lock on camera which will adjust the zoom to include both the player
@@ -240,7 +230,6 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             dynamic focus, maybe who gets shot last has focus? todo: study cam mechanics for smashbros / project m style combat
             thresholds for how close to focus near the edge
         [?] still allow manual override with scroll, with perhaps a timer to focus back in, or when a new enemy joins
-    [ ] when entity hit, needs to flash red or white -> shader
     [ ] while im no artist, i think picking a color palate might make it look a world and ui a little more consistent
         http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
         [ ] the space ships need more contrast from space background
@@ -256,6 +245,18 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [ ] better planet rendering
         inspiration: https://github.com/yurkth/astraea
         [ ] nearby stars can be light sources, shade side not facing star
+    [ ] SHADERS!!!
+        [ ] when entity hit, sprite needs to flash red or white -> shader
+        [?] 2D outline shader for ships and mouse over objects
+            http://www.allpiper.com/2d-selection-outline-shader-in-libgdx/
+            https://www.youtube.com/watch?v=1yuYUVFUOvI&list=PLqpawGIg6Qj5CvjOaCbB536z862XhjPQi&index=17
+    	https://github.com/mattdesl/lwjgl-basics/wiki/Shaders
+    	https://github.com/mattdesl/lwjgl-basics/wiki
+    	https://www.shadertoy.com/view/XscGzl <--use for stars
+    	http://www.alanzucconi.com/2015/07/01/vertex-and-fragment-shaders-in-unity3d/
+    	http://www.alanzucconi.com/2016/01/27/arrays-shaders-heatmaps-in-unity3d/
+    	http://wwwtyro.net/2016/10/22/2D-space-scene-procgen.html
+
 
 [...] rendering system
     [x] fix space parallax system rendering
@@ -286,11 +287,6 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
               custom shape renderer?
               if we are doing too much batch flushing could use (bonus if could do outlined shapes, perhaps a job for a shader instead?):
               https://github.com/earlygrey/shapedrawer
-    [!] NOTE: cannot generate textures in another thread due to glContext...
-        https://github.com/libgdx/libgdx/wiki/Threading
-        https://www.opengl.org/wiki/OpenGL_and_multithreading
-        We can however generate noise for the textures on a separate thread and then feed that to the rendering thread.
-
 
 [...] respawn
     [x] for now, just place back at origin 0, 0
@@ -356,14 +352,15 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [ ] needs control for mobile
 
 [...] particle effects!
+    https://github.com/rockbite/talos
     [ ] BUG: broken engine effects applying to other ships when land on planet
     [x] projectile tails - simple rect or circle particle trailing bullets
         [ ] apply to other cannon
     [x] particles need to render on top of planets. planets should be first rendered (low depth) in the render pipeline
     [x] particlesystem and emitter components
-    [...] rendering is lagging behind camera "drift bug" -> refactor rendering/system order.
+    [x] rendering is lagging behind camera "drift bug" -> refactor rendering/system order.
         looks fixed when vsync off
-        [...] split into update and render?
+        [x] split into update and render? fixed!
     [x] absorb effect when charging charge cannon
         fixed! solution -> attached: true in *.particle
             - Options -
@@ -377,8 +374,15 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [ ] shield burst effect when hit by bullet and shield destroyed
     [ ] explosion effect on ship destroy
     [ ] some particles on projectile destroyed/removed
+    [ ] scale engine particle emission or velocity by movement multiplier
+        - Emission -
+        lowMin: 0.0
+        lowMax: 0.0
+        highMin: 250.0
+        highMax: 250.0
+        relative: false
 
-[ ] controls
+[ ] controls and input
     [x] basic controller input
         [ ] scene2d stage (main menu and pause menu) needs to support controller input. multiplexer?
             https://github.com/MrStahlfelge/gdx-controllerutils/wiki/Button-operable-Scene2d
@@ -396,6 +400,20 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             https://github.com/libgdx/gdx-controllers/wiki/Migrate-from-v1
         [?] right trigger boost, similar to roll impulse?
         [ ] left trigger for break / slow down
+    [ ] keyboard navigation for menus
+            [...] debug menu
+            [...] main menu
+                [x] hotkeys
+                [ ] navigation and selection
+            [ ] title menu
+    [ ] mobile
+        [ ] if player bounds overlap vehicle, show enter button on touchUI/hud
+        [ ] if in vehicle show exit button (if can get out? must be over platform/spacestation? jetpack?)
+        [ ] pinch-pull to zoom in-out on touch
+        [ ] test touchUI on different screen sizes/resolutions
+        [ ] set engine speed max to multiplier on android?
+        http://libgdx.badlogicgames.com/nightlies/docs/api/com/badlogic/gdx/input/GestureDetector.html
+        http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.html
     [?] shield bash?: double tap forward(or direction) and hold to rush, then shield do shield action [B] within time window of dash, and hold
     [?] land take off could be hold instead of instant
     [ ] landing should be easier, when in range of planet (larger radius than planet itself)
@@ -416,27 +434,19 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             BeginContact:vehicleButton.enable()
             EndContact:vehicleButton.disable()
         http://www.iforce2d.net/b2dtut/sensors
-    [ ] scale engine particle emission or velocity by movement multiplier
-        - Emission -
-        lowMin: 0.0
-        lowMax: 0.0
-        highMin: 250.0
-        highMax: 250.0
-        relative: false
 
-[ ] orbit distance for moons should not have overlapping rings with previous orbit path, spacing needs to include children
-    also consider asteroid belts
-
-[ ] fix AI a bit (lead shot)
+[ ] AI
+    [ ] lead shot, projectile prediction
 
 [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
     jk, sound will eventually exist
-    https://github.com/libgdx/libgdx/wiki/Audio
-
-[ ] edge map improvement, when entity facing a mapable component (with a few degree wide threshold)
-    - make bigger as if focused
-    - display distance
-
+        https://github.com/libgdx/libgdx/wiki/Audio
+    Apparently audio on android sucks?
+        https://github.com/barsoosayque/libgdx-oboe
+    More advanced audio:
+        https://github.com/Hangman/TuningFork
+        https://github.com/rafaskb/Parrot
+        https://github.com/rafaskb/Boom
 
 [...] physics and movement
     [x] move to box2d
@@ -461,7 +471,6 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         https://github.com/0XDE57/SpaceProject/blob/1a764f9aaa405ba18341ad35c2a75b4ecd02a535/core/src/com/spaceproject/systems/CollisionSystem.java
         [ ] todo: confirm that im not crazy? because i spent a lot of time moving to box2d if this is true lol.... thats ok.
 
-
 [...] screen transition between world and space
     [ ] ready / sync / load state. should all be in transition system?
         still a little coupled, but working reliably now
@@ -484,17 +493,13 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         cannot find seed
         cannot find seed
         this bug is driving me insane, but there's still some transition and loading details to work out
-
-
-[?] 2D outline shader for ships and mouse over objects
-    http://www.allpiper.com/2d-selection-outline-shader-in-libgdx/
-    https://www.youtube.com/watch?v=1yuYUVFUOvI&list=PLqpawGIg6Qj5CvjOaCbB536z862XhjPQi&index=17
+        fixed!...but keep and eye on it.
 
 
 [...] config
     [x] config manager, save and load all configs
     [...] config UI
-            [...] nice way to view and edit configs
+            [OUT_OF_SCOPE] nice way to view and edit configs
                 [ ] fix layout
                 [ ] hook up load save undo
     [OUT_OF_SCOPE] figure out serialization
@@ -589,22 +594,12 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     }
 
 
-[...] galaxy generation inspired by fibonacci spiral
-    [...] test screen to generate spiral
-    [ ] generate set of points that are concentrated near center, and near arms of spiral
-    [ ] implement generation into game
-    [ ] make a screen animation
-
 [...] fix texture / map loading
     [ ] save load noise so it doesnt have to be generated
     [ ] clean up star save/load
     [!] bug: when play with generation settings in TestNoiseScreen, seems to effect map/tile generation in game
         ! actually for now this is a convenient bug for testing
 
-
-[...] wrap planets properly (LOCAL COORDINATE SPACE?)
-    https://www.reddit.com/r/gamedev/comments/1gi6np/magic_carpet_style_infinite_wrapping_terrain/
-    https://simonschreibt.de/gat/1nsane-carpet-2-repetitive-worlds/
 
 [ ] fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
     https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
@@ -620,10 +615,9 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
         -load save
         -random seed
         -no hardcoded entities. entities should come from spawning systems instead
-
-[ ] new CombatTest debug screen
-    [ ] one on one with an AI for prototyping combat and movement mechanics and feel
-    [ ] AI vs AI?
+    [ ] new CombatTest debug screen for prototyping combat and movement mechanics and feel
+        [ ] player vs AI
+        [ ] AI vs AI
 
 
 [...] investigate possible bug in ashley.
@@ -733,21 +727,29 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
             - I/O cables and circuitry / scripting possibilities...way out of scope.
 
 [...] planet generation
-    [ ] rivers
-    [ ] add temperature variable to planet
-        [ ] temperature determined by distance from star
+    [ ] research planet attributes //size, temperature, pressure, atmosphere/elements(https://en.wikipedia.org/wiki/Astronomical_spectroscopy)...etc
+        https://en.wikipedia.org/wiki/Circumstellar_habitable_zone
+        [ ] add temperature variable to planet determined by distance from star
         [ ] for now simple linear, close to planet = hot, far from planet = cold
         [ ] if want more advanced, have star temperature based of distance from galaxy center
             then that would also affect star temperature.
             for inspiration see:
+                https://beltoforion.de/en/spiral_galaxy_renderer/spiral-galaxy-renderer.html
                 https://beltoforion.de/article.php?a=spiral_galaxy_renderer
                 https://github.com/beltoforion/Galaxy-Renderer
         [ ] hot planets can be lava / deserts, cold planets can be ice n snow.
             stuff in between can be "normal" (green, water, etc)
-        https://en.wikipedia.org/wiki/Circumstellar_habitable_zone
-	[ ] rings around planets? (like saturn)
-	[...] moons/satellites
-    [ ] research planet attributes //size, temperature, pressure, atmosphere/elements(https://en.wikipedia.org/wiki/Astronomical_spectroscopy)...etc
+        [ ] sand planet with sandworms, like dune.
+    [ ] rivers and other terrain features
+    [ ] biomes
+	[ ] rings around planets (like saturn)
+	[...] moons
+	    [ ] orbit distance for moons should not have overlapping rings with previous orbit path, spacing needs to include children
+            also consider asteroid belts
+	[ ] satellites
+	[...] wrap planets properly (LOCAL COORDINATE SPACE?)
+        https://www.reddit.com/r/gamedev/comments/1gi6np/magic_carpet_style_infinite_wrapping_terrain/
+        https://simonschreibt.de/gat/1nsane-carpet-2-repetitive-worlds/
 	inspiration and references:
 	    Noise-Based RNG: https://www.youtube.com/watch?v=LWFzPP8ZbdU
 	    http://www.entropicparticles.com/6-days-of-creation/
@@ -778,9 +780,29 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
 	    https://www.shadertoy.com/view/ltBGWh
 	[ ] dust/noise
 	[ ] light specs/debris,details
+    [...] galaxy generation inspired by fibonacci spiral
+        [...] test screen to generate spiral
+        [ ] generate set of points that are concentrated near center, and near arms of spiral
+        [ ] implement generation into game
+        [ ] make a screen animation
 
 
----DEBUG---
+[ ] UI
+    [ ] edge map improvement, when entity facing a mapable component (with a few degree wide threshold)
+        - make bigger as if focused
+        - display distance
+    [...] map
+        needs more details, select planets and get info, set way points
+        [ ] minimap should show heightmap of world when on planet
+            (fog of war) start out with grayscale pixelated version, when area visited then render full map and color
+    [...] menu menu
+        [x] pause / freeze game
+        [...] settings and config
+    [ ] player manager/inventory/shipbuilder thingy
+    [ ] career event timeline stats
+
+
+[ ] DEBUG
     [ ] in game console
         https://github.com/StrongJoshua/libGDX-inGameConsole
         [ ] show debug output
@@ -792,7 +814,7 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
                 /setcamfocus <entity>
                 /takecontrol <entity> (set control /input focus, if has AI, override (or maybe swap with player would be cool)
                 /transfercomponent <component> <entityFrom> <entityTo>
-    [ ] debug system internals need to go back to old rendering, the new DebugText is horrible on memory.
+    [x] debug system internals need to go back to old rendering, the new DebugText is horrible on memory.
         i originally did that to make it statically accessible from any system and render properly when called from systems in any priority
         so leave that for external use, just do internals locally
     [...] engine viewer
@@ -822,101 +844,6 @@ Spaceship combat will be a core part of gameplay. So lets focus on cleaning that
     [ ] FPS,memory,entity graph
         [ ] profiler: https://github.com/libgdx/ashley/pull/215
 
-
----INPUT---
-    [ ] keyboard navigation for menus
-        [...] debug menu
-        [...] main menu
-            [x] hotkeys
-            [ ] navigation and selection
-        [ ] title menu
-    [ ] controller/gamepad input support
-        https://github.com/libgdx/libgdx/wiki/Controllers
-	    https://gist.github.com/nhydock/dc0501f34f89686ddf34
-    [ ] mobile
-        [ ] if player bounds overlap vehicle, show enter button on touchUI/hud
-        [ ] if in vehicle show exit button (if can get out? must be over platform/spacestation? jetpack?)
-        [ ] pinch-pull to zoom in-out on touch
-        [ ] test touchUI on different screen sizes/resolutions
-        [ ] set engine speed max to multiplier on android?
-        http://libgdx.badlogicgames.com/nightlies/docs/api/com/badlogic/gdx/input/GestureDetector.html
-        http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.html
-
-
----UI---
-    [...] map
-        needs more details, select planets and get info, set way points
-        [ ] minimap should show heightmap of world when on planet
-            (fog of war) start out with grayscale pixelated version, when area visited then render full map and color
-
-    [...] menu menu
-        [x] pause / freeze game
-        [...] settings and config
-    [ ] player manager/inventory/shipbuilder thingy
-    [ ] career event timeline stats
-
-
----GRAPHICS---
-[ ] particles
-    https://github.com/rockbite/talos
-[ ] shaders
-	https://github.com/mattdesl/lwjgl-basics/wiki/Shaders
-	https://github.com/mattdesl/lwjgl-basics/wiki
-	https://www.shadertoy.com/view/XscGzl <--use for stars
-	http://www.alanzucconi.com/2015/07/01/vertex-and-fragment-shaders-in-unity3d/
-	http://www.alanzucconi.com/2016/01/27/arrays-shaders-heatmaps-in-unity3d/
-	http://wwwtyro.net/2016/10/22/2D-space-scene-procgen.html
-
-
-
-extra resources
-https://github.com/rafaskb/awesome-libgdx#readme
-
-Controller icons! All of the assets are in the public domain under Creative Commons 0 (CC0)
-    https://thoseawesomeguys.com/prompts/
-Kenney Assets - High quality assets for your game, from 2D and 3D art to sound effects.
-    https://kenney.nl/
-OpenGameArt.org - Repository offering a variety of open content assets.
-    https://opengameart.org/
-Game-Icons.net - Repository containing heaps of cool game related graphics.
-    https://game-icons.net/
-freesound.org - Huge collaborative database of audio snippets, samples, recordings, bleeps.
-    https://freesound.org/
-fonts
-    http://www.fontsquirrel.com/
-
-
-
-[ ] devops n website n crap
-[ ] need an icon. its still the default libgdx logo...
-[ ] make a page for website spaceproject.xyz or make a github io?
-    [ ] dev blog thingy?
-[ ] wiki n documentation
-[ ] should prolly make some unit tests at some point...
-
-[x] android launch broken!
-    [x] Build fails with:
-        Manifest merger failed : uses-sdk:minSdkVersion 9 cannot be smaller than version 16 declared in library ...
-        	Suggestion: use a compatible library with a minSdk of at most 9,
-        		or increase this project's minSdk version to at least 16,
-        		or use tools:overrideLibrary="com.badlogicgames.gdx.controllers" to force usage (may lead to runtime failures)
-    [x] So we bumped to 16. Now:
-        Build file '/home/logica/Documents/GitHub/SpaceProject/android/build.gradle' line: 51
-        Execution failed for task ':android:copyAndroidNatives'.
-        > Could not resolve all files for configuration ':android:natives'.
-           > Could not find gdx-platform-1.10.0-natives-armeabi.jar (com.badlogicgames.gdx:gdx-platform:1.10.0).
-             Searched in the following locations:
-                 https://repo.maven.apache.org/maven2/com/badlogicgames/gdx/gdx-platform/1.10.0/gdx-platform-1.10.0-natives-armeabi.jar
-           > Could not find gdx-box2d-platform-1.10.0-natives-armeabi.jar (com.badlogicgames.gdx:gdx-box2d-platform:1.10.0).
-             Searched in the following locations:
-                 https://repo.maven.apache.org/maven2/com/badlogicgames/gdx/gdx-box2d-platform/1.10.0/gdx-box2d-platform-1.10.0-natives-armeabi.jar
-           > Could not find gdx-freetype-platform-1.10.0-natives-armeabi.jar (com.badlogicgames.gdx:gdx-freetype-platform:1.10.0).
-             Searched in the following locations:
-                 https://repo.maven.apache.org/maven2/com/badlogicgames/gdx/gdx-freetype-platform/1.10.0/gdx-freetype-platform-1.10.0-natives-armeabi.jar
-    [x] FIXED! by removing natives: Android ARMv5 (armeabi) support has been dropped.
-        Remove any dependency with the natives-armeabi qualifier (but not natives-armeabi-v7a!) from your gradle build files.
-        This applies to gdx-platform, gdx-bullet-platform, gdx-freetype-platform and gdx-box2d-platform.
-        https://libgdx.com/news/2021/04/the-ultimate-migration-guide
 [ ] warning when launch
     WARNING: An illegal reflective access operation has occurred
     WARNING: Illegal reflective access by org.lwjgl.LWJGLUtil$3 (file:/home/logica/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.3/3df168ac74e4a8c96562cdff24ad352e255bf89c/lwjgl-2.9.3.jar) to method java.lang.ClassLoader.findLibrary(java.lang.String)
@@ -926,6 +853,8 @@ fonts
 
 [?] move to LWJGL 3?
     https://libgdx.com/news/2021/07/devlog-7-lwjgl3
+
+[!] untested on 4k or ultra wide, my machines are all 1080p.
 
 [ ] optimization
     https://github.com/libgdx/libgdx/wiki/Memory-management
@@ -941,7 +870,31 @@ fonts
     http://unseen-academy.de/snippet_component_system.html
     https://github.com/junkdog/entity-system-benchmarks#entity-system-benchmarks
 
-[ ] untested on 4k, my machines are all 1080p.
+[ ] devops n website n crap
+    [ ] need an icon. its still the default libgdx logo...
+    [ ] make a page for website spaceproject.xyz or make a github io?
+        [ ] dev blog thingy?
+    [ ] wiki n documentation
+    [ ] should prolly make some unit tests at some point...
 
+
+
+~~~~~~~~~~~~~~~~~~~~RESOURCES!!!~~~~~~~~~~~~~~~~~~~~
+https://github.com/rafaskb/awesome-libgdx#readme
+
+Controller icons! All of the assets are in the public domain under Creative Commons 0 (CC0)
+    https://thoseawesomeguys.com/prompts/
+Kenney Assets - High quality assets for your game, from 2D and 3D art to sound effects.
+    https://kenney.nl/
+OpenGameArt.org - Repository offering a variety of open content assets.
+    https://opengameart.org/
+Game-Icons.net - Repository containing heaps of cool game related graphics.
+    https://game-icons.net/
+freesound.org - Huge collaborative database of audio snippets, samples, recordings, bleeps.
+    https://freesound.org/
+fonts
+    http://www.fontsquirrel.com/
 
 https://opensource.org/faq#profit
+
+
