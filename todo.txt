@@ -334,7 +334,7 @@ Legend:
     [ ] some sort of visual elements to show speed / motion: eg dust cloud at feet or whooshy lines
 
 [...] grow cannon
-    [ ] BUG: charge cannon should always fire when trying to fire instead of waiting for minimum charge (cooldown between shots instead of build up until can shoot)
+    [x] BUG: charge cannon should always fire when trying to fire instead of waiting for minimum charge (cooldown between shots instead of build up until can shoot)
     [x] BUG: when entity is killed/removed during charge, charge cannon and particle remain instead of being removed
     [ ] should be circle instead of rectangle?
     [ ] lock on nearest target when max

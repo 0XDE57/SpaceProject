@@ -26,5 +26,7 @@ public class ChargeCannonComponent implements Component {
     
     public SimpleTimer growRateTimer;
     
+    //public SimpleTimer cooldownTimer;//between shots?
+    
     public boolean isCharging;
 }

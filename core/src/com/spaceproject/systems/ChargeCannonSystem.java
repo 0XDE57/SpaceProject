@@ -24,8 +24,6 @@ import com.spaceproject.math.MyMath;
 
 public class ChargeCannonSystem extends IteratingSystem {
     
-    final int fireRateMinChargeMS = 60;
-    
     public ChargeCannonSystem() {
         super(Family.all(ChargeCannonComponent.class, ControllableComponent.class).get());
     }
@@ -51,18 +49,14 @@ public class ChargeCannonSystem extends IteratingSystem {
         
         ControllableComponent control = Mappers.controllable.get(entity);
         if (control.attack) {
+            //charge
             if (!chargeCannon.isCharging && (shieldComponent != null && shieldComponent.state == ShieldComponent.State.off)) {
                 activate(chargeCannon);
             }
         } else {
             //release
-            if (chargeCannon.growRateTimer.timeSinceLastEvent() < fireRateMinChargeMS) {
-                //kill charge, cancel shot
-                deactivate(chargeCannon);
-            } else {
-                if (chargeCannon.isCharging) {
-                    releaseProjectile(chargeCannon, entity);
-                }
+            if (chargeCannon.isCharging) {
+                releaseProjectile(chargeCannon, entity);
             }
         }
     }
