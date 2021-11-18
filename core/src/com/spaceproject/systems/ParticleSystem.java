@@ -142,7 +142,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
             //change color during boost
             if (roll != null) {
                 ParticleEmitter.GradientColorValue tint = emitters.get(i).getTint();
-                if (roll.flipState != BarrelRollComponent.FlipState.off) {
+                if (roll.flipState != BarrelRollComponent.FlipState.off || (control != null && control.moveForward && control.alter)) {
                     tint.setColors(engineColorBoost);
                 } else {
                     tint.setColors(engineColor);

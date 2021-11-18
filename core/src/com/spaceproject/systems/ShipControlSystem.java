@@ -33,14 +33,12 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class ShipControlSystem extends IteratingSystem {
     
-    private static EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
-    private ImmutableArray<Entity> planets;
+    private final float offsetDist = 1.5f;//TODO: dynamic based on ship size
+    private final float faceRotSpeed = 8f;
+    private static final float boostMultiplier = 3.0f;
     
-    private float offsetDist = 1.5f;//TODO: dynamic based on ship size
-    //TODO: move values to config
-    private float maxRollAngle = 40 * MathUtils.degRad;
-    private float strafeRot = 3f;
-    private float faceRotSpeed = 8f;
+    private final EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
+    private ImmutableArray<Entity> planets;
     
     public ShipControlSystem() {
         super(Family.all(ControllableComponent.class, TransformComponent.class, VehicleComponent.class).exclude(ScreenTransitionComponent.class).get());
@@ -125,6 +123,9 @@ public class ShipControlSystem extends IteratingSystem {
     
     private static void accelerate(ControllableComponent control, Body body, VehicleComponent vehicle, float delta) {
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
+        if (control.alter) {
+            thrust *= boostMultiplier;//booost!
+        }
         body.applyForceToCenter(MyMath.vector(body.getAngle(), thrust), true);
     }
     

@@ -6,12 +6,12 @@ import com.spaceproject.utility.SimpleTimer;
 public class BarrelRollComponent implements Component {
     
     public enum FlipState {
-        off, left, right, forward
+        off, left, right
     }
     
     public FlipState flipState;
     
-    public SimpleTimer timeoutTimer;
+    public SimpleTimer cooldownTimer;
     
     public SimpleTimer animationTimer;
     

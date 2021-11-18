@@ -6,19 +6,15 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.config.EntityConfig;
-import com.spaceproject.utility.Mappers;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.utility.Mappers;
 
 public class BarrelRollSystem extends IteratingSystem {
-    
-    private final EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
     
     private final Interpolation animInterpolation = Interpolation.pow2;
     private final float strafeMaxRollAngle = 40 * MathUtils.degRad;
@@ -57,9 +53,6 @@ public class BarrelRollSystem extends IteratingSystem {
                 }
                 if (control.moveRight && control.alter) {
                     dodgeRight(entity, rollComp);
-                }
-                if (control.moveForward && control.alter) {
-                    boostForward(entity, rollComp);
                 }
             }
         }
@@ -106,20 +99,14 @@ public class BarrelRollSystem extends IteratingSystem {
     }
     
     public static void dodgeLeft(Entity entity, BarrelRollComponent roll) {
-        if (roll.timeoutTimer.tryEvent()) {
+        if (roll.cooldownTimer.tryEvent()) {
             applyDodgeImpulse(entity, roll, BarrelRollComponent.FlipState.left);
         }
     }
     
     public static void dodgeRight(Entity entity, BarrelRollComponent roll) {
-        if (roll.timeoutTimer.tryEvent()) {
+        if (roll.cooldownTimer.tryEvent()) {
             applyDodgeImpulse(entity, roll, BarrelRollComponent.FlipState.right);
-        }
-    }
-    
-    private void boostForward(Entity entity, BarrelRollComponent roll) {
-        if (roll.timeoutTimer.tryEvent()) {
-            applyDodgeImpulse(entity, roll, BarrelRollComponent.FlipState.forward);
         }
     }
     
@@ -133,7 +120,7 @@ public class BarrelRollSystem extends IteratingSystem {
         body.setTransform(body.getPosition(), transform.rotation);
         
         //apply left or right impulse
-        float direction = transform.rotation;
+        float direction = transform.rotation;//forward
         switch (flipState) {
             case left:
                 direction += MathUtils.PI / 2;
@@ -142,7 +129,6 @@ public class BarrelRollSystem extends IteratingSystem {
                 direction -= MathUtils.PI / 2;
                 break;
         }
-        //float direction = (flipState == BarrelRollComponent.FlipState.left) ? transform.rotation + MathUtils.PI / 2 : transform.rotation - MathUtils.PI / 2;
         body.applyLinearImpulse(MyMath.vector(direction, roll.force), body.getPosition(), true);
     
         //set roll animation

@@ -377,7 +377,7 @@ public class EntityFactory {
         
         //barrel roll
         BarrelRollComponent barrelRoll = new BarrelRollComponent();
-        barrelRoll.timeoutTimer = new SimpleTimer(entityCFG.dodgeTimeout);
+        barrelRoll.cooldownTimer = new SimpleTimer(entityCFG.dodgeCooldown);
         barrelRoll.animationTimer = new SimpleTimer(entityCFG.dodgeAnimationTimer, true);
         barrelRoll.revolutions = 1;
         barrelRoll.flipState = BarrelRollComponent.FlipState.off;
