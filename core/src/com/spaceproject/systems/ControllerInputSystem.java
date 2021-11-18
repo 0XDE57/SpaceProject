@@ -10,6 +10,7 @@ import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.math.MathUtils;
+import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DashComponent;
@@ -28,10 +29,16 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     private float rightStickHorAxis;
     private float rightStickVertAxis;
     private final float deadZone = 0.25f;
-    private final SimpleTimer cameraDelay = new SimpleTimer(400);
-    //private SimpleTimer doubleTap = new SimpleTimer(1000);
-    private ImmutableArray<Entity> players;
     
+    private final SimpleTimer cameraDelayTimer = new SimpleTimer(400);
+    
+    private final long doubleTapTime = 300;
+    private final SimpleTimer doubleTapLeft = new SimpleTimer(doubleTapTime);
+    private final SimpleTimer doubleTapRight = new SimpleTimer(doubleTapTime);
+    private int tapCounterLeft = 0;
+    private int tapCounterRight = 0;
+    
+    private ImmutableArray<Entity> players;
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -56,7 +63,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     
         if (Math.abs(rightStickVertAxis) >= deadZone) {
             //Gdx.app.log(this.getClass().getSimpleName(), rightStickVertAxis + " - right vert");
-            if (cameraDelay.tryEvent()) {
+            if (cameraDelayTimer.tryEvent()) {
                 if (rightStickVertAxis >= 0) {
                     getEngine().getSystem(CameraSystem.class).zoomOut();
                 } else {
@@ -118,29 +125,52 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             control.movementMultiplier = 1;
             control.moveRight = buttonDown;
             
-            /* //todo: double tap for dodge
-            if (buttonDown) {
-                if (doubleTap.getLastEvent() != 0 && doubleTap.canDoEvent()) {
-                    Gdx.app.log("", "double tap unlatch");
-                    doubleTap.setLastEvent(0);
+            //check double tap
+            if (!buttonDown) {
+                tapCounterRight++;
+                if (tapCounterRight == 1) {
+                    //single tap
+                    doubleTapRight.reset();
+                } else {
+                    Gdx.app.debug(this.getClass().getSimpleName(),"DOUBLE TAP RIGHT!!!!!!!!");
+                    tapCounterRight = 0;
+    
+                    BarrelRollComponent barrelRoll = Mappers.barrelRoll.get(player);
+                    barrelRoll.activate = true;
                 }
-                if (doubleTap.getLastEvent() == 0) {
-                    Gdx.app.log("", "double tap begin latch");
-                    doubleTap.reset();
-                } else if (!doubleTap.canDoEvent()) {
-                    Gdx.app.log("", "double tap activate");
-                    control.alter = true;
-                }
-            } else {
-                control.alter = false;
-            }*/
+            }
+            //timeout
+            if (doubleTapRight.canDoEvent()) {
+                tapCounterRight = 0;
+                //Gdx.app.debug(this.getClass().getSimpleName(),"double right timeout");
+            }
             
             handled = true;
         }
         if (buttonCode == controller.getMapping().buttonL1) {
             control.movementMultiplier = 1;
             control.moveLeft = buttonDown;
-            //control.alter = buttonDown;
+    
+            //check double tap
+            if (!buttonDown) {
+                tapCounterLeft++;
+                if (tapCounterLeft == 1) {
+                    //single tap
+                    doubleTapLeft.reset();
+                } else {
+                    Gdx.app.debug(this.getClass().getSimpleName(),"DOUBLE TAP LEFT!!!!!!!!");
+                    tapCounterLeft = 0;
+    
+                    BarrelRollComponent barrelRoll = Mappers.barrelRoll.get(player);
+                    barrelRoll.activate = true;
+                }
+            }
+            //timeout
+            if (doubleTapLeft.canDoEvent()) {
+                tapCounterLeft = 0;
+                //Gdx.app.debug(this.getClass().getSimpleName(),"double left timeout");
+            }
+            
             handled = true;
         }
         

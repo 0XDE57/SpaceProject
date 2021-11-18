@@ -10,6 +10,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
@@ -22,6 +23,7 @@ import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.SimpleTimer;
 
 public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
@@ -29,6 +31,12 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     private ImmutableArray<Entity> players;
     private final Vector3 tempVec = new Vector3();
     public boolean controllerHasFocus = false;
+    
+    private final long doubleTapTime = 300;
+    private final SimpleTimer doubleTapLeft = new SimpleTimer(doubleTapTime);
+    private final SimpleTimer doubleTapRight = new SimpleTimer(doubleTapTime);
+    private int tapCounterLeft = 0;
+    private int tapCounterRight = 0;
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -62,10 +70,52 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         }
         if (keycode == keyCFG.right) {
             control.moveRight = keyDown;
+    
+            //check double tap
+            if (!keyDown) {
+                tapCounterRight++;
+                if (tapCounterRight == 1) {
+                    //single tap
+                    doubleTapRight.reset();
+                } else {
+                    Gdx.app.debug(this.getClass().getSimpleName(),"DOUBLE TAP RIGHT!!!!!!!!");
+                    tapCounterRight = 0;
+            
+                    BarrelRollComponent barrelRoll = Mappers.barrelRoll.get(player);
+                    barrelRoll.activate = true;
+                }
+            }
+            //timeout
+            if (doubleTapRight.canDoEvent()) {
+                tapCounterRight = 0;
+                //Gdx.app.debug(this.getClass().getSimpleName(),"double right timeout");
+            }
+            
             handled = true;
         }
         if (keycode == keyCFG.left) {
             control.moveLeft = keyDown;
+    
+            //check double tap
+            if (!keyDown) {
+                tapCounterLeft++;
+                if (tapCounterLeft == 1) {
+                    //single tap
+                    doubleTapLeft.reset();
+                } else {
+                    Gdx.app.debug(this.getClass().getSimpleName(),"DOUBLE TAP LEFT!!!!!!!!");
+                    tapCounterLeft = 0;
+            
+                    BarrelRollComponent barrelRoll = Mappers.barrelRoll.get(player);
+                    barrelRoll.activate = true;
+                }
+            }
+            //timeout
+            if (doubleTapLeft.canDoEvent()) {
+                tapCounterLeft = 0;
+                //Gdx.app.debug(this.getClass().getSimpleName(),"double left timeout");
+            }
+            
             handled = true;
         }
         if (keycode == keyCFG.back) {
