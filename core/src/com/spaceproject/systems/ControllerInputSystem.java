@@ -62,7 +62,6 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         super.update(deltaTime);
     
         if (Math.abs(rightStickVertAxis) >= deadZone) {
-            //Gdx.app.log(this.getClass().getSimpleName(), rightStickVertAxis + " - right vert");
             if (cameraDelayTimer.tryEvent()) {
                 if (rightStickVertAxis >= 0) {
                     getEngine().getSystem(CameraSystem.class).zoomOut();
@@ -79,7 +78,6 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         
         boolean handled = false;
         
-    
         Entity player = players.first();
         ControllableComponent control = Mappers.controllable.get(player);
         
@@ -93,6 +91,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                 handled = true;
             }
         }
+        
         if (buttonCode == controller.getMapping().buttonB) {
             ShieldComponent shield = Mappers.shield.get(player);
             if (shield != null) {
@@ -100,10 +99,12 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                 handled = true;
             }
         }
+        
         if (buttonCode == controller.getMapping().buttonY) {
             control.changeVehicle = buttonDown;
             handled = true;
         }
+        
         if (buttonCode == controller.getMapping().buttonX) {
             control.alter = buttonDown;
             handled = true;
@@ -116,6 +117,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                 handled = true;
             }
         }
+        
         if (buttonCode == controller.getMapping().buttonDpadDown) {
             control.transition = buttonDown;
             handled = true;
@@ -147,6 +149,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             
             handled = true;
         }
+        
         if (buttonCode == controller.getMapping().buttonL1) {
             control.movementMultiplier = 1;
             control.moveLeft = buttonDown;
@@ -219,36 +222,12 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     
     @Override
     public boolean axisMoved(Controller controller, int axisCode, float value) {
-        //Gdx.app.log(this.getClass().getSimpleName(), controller.getName() + ": " + axisCode + ": " + value);
-        
         if (axisCode == controller.getMapping().axisLeftX) {
             leftStickHorAxis = value;
-            //Gdx.app.log(this.getClass().getSimpleName(), "left horizontal " + value);
         }
         if (axisCode == controller.getMapping().axisLeftY) {
             leftStickVertAxis = value;
-            //Gdx.app.log(this.getClass().getSimpleName(), "left vertical " + value);
         }
-    
-        ControllableComponent control = Mappers.controllable.get(players.first());
-        /*if (axisCode == xboxControllerRightTrigger) {
-            control.attack = (value > 0);
-        }*/
-        
-        float dist = Math.abs(MyMath.distance(0, 0, leftStickHorAxis, leftStickVertAxis));
-        if (dist >= deadZone) {
-            control.angleTargetFace = MyMath.angle2(0, 0, -leftStickVertAxis, leftStickHorAxis);
-            control.movementMultiplier = MathUtils.clamp(dist, 0, 1);
-            control.moveForward = true;
-    
-            //notify mouse that controller has current focus
-            getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus = true;
-            
-        } else {
-            control.moveForward = false;
-        }
-        
-        
         if (axisCode == controller.getMapping().axisRightX) {
             rightStickHorAxis = value;
         }
@@ -256,6 +235,20 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             rightStickVertAxis = value;
         }
         
+        ControllableComponent control = Mappers.controllable.get(players.first());
+        float dist = Math.abs(MyMath.distance(0, 0, leftStickHorAxis, leftStickVertAxis));
+        if (dist >= deadZone) {
+            //face stick direction
+            control.angleTargetFace = MyMath.angle2(0, 0, -leftStickVertAxis, leftStickHorAxis);
+            control.movementMultiplier = MathUtils.clamp(dist, 0, 1);
+            control.moveForward = true;
+    
+            //notify mouse that controller has current focus
+            getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus = true;
+        } else {
+            control.moveForward = false;
+        }
+
         return false;
     }
     
