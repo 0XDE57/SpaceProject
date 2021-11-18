@@ -15,7 +15,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -48,36 +47,37 @@ import java.util.Set;
 
 public class DebugSystem extends IteratingSystem implements Disposable {
     
-    private DebugConfig debugCFG;
-    private KeyConfig keyCFG;
+    private static final DebugConfig debugCFG = SpaceProject.configManager.getConfig(DebugConfig.class);
+    private static final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
+    
     private ECSExplorerWindow engineView;
-    private Box2DDebugRenderer debugRenderer;
     
     //rendering
     private static OrthographicCamera cam;
-    private SpriteBatch batch;
-    private ShapeRenderer shape;
-    private BitmapFont fontSmall, fontLarge;
-    private Matrix4 projectionMatrix = new Matrix4();
+    private final SpriteBatch batch;
+    private final ShapeRenderer shape;
+    private final Matrix4 projectionMatrix;
+    private final BitmapFont fontSmall, fontLarge;
+    private final Box2DDebugRenderer debugRenderer;
     
     //textures
-    private Texture texCompBack = TextureFactory.createTile(Color.GRAY);
-    private Texture texCompSeparator = TextureFactory.createTile(Color.RED);
+    private final Texture texCompBack = TextureFactory.createTile(Color.GRAY);
+    private final Texture texCompSeparator = TextureFactory.createTile(Color.RED);
     
     //entity storage
-    private Array<Entity> objects;
+    private final Array<Entity> objects;
     
-    private static ArrayList<DebugText> debugTexts = new ArrayList<DebugText>();
-    private static ArrayList<DebugVec> debugVecs = new ArrayList<DebugVec>();
+    private static final ArrayList<DebugText> debugTexts = new ArrayList<DebugText>();
+    private static final ArrayList<DebugVec> debugVecs = new ArrayList<DebugVec>();
     
     
     public DebugSystem() {
         super(Family.all(TransformComponent.class).get());
-        debugCFG = SpaceProject.configManager.getConfig(DebugConfig.class);
-        keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
+        
         cam = GameScreen.cam;
         batch = GameScreen.batch;
         shape = GameScreen.shape;
+        projectionMatrix = new Matrix4();
         fontSmall = FontFactory.createFont(FontFactory.fontBitstreamVM, 10);
         fontLarge = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 20);
         objects = new Array<>();
@@ -110,7 +110,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
 
-        engineView = new ECSExplorerWindow(getEngine());
+        engineView = new ECSExplorerWindow(engine);
     }
     
     @Override
@@ -146,24 +146,28 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         //draw diagnostic info
         int diagnosticX = 15;
         int diagnosticY = Gdx.graphics.getHeight() - 15;
-        if (debugCFG.drawFPS)  drawFPS(diagnosticX, diagnosticY);
-        
-        if (debugCFG.drawDiagnosticInfo) drawDiagnosticInfo(diagnosticX, diagnosticY);
-        
-        if (debugCFG.drawPos) drawPos();
-        
-        if (debugCFG.drawMousePos) drawMousePos();
-        
-        if (debugCFG.drawEntityList) drawEntityList();
         
         batch.begin();
         {
+            if (debugCFG.drawFPS)
+                drawFPS(diagnosticX, diagnosticY);
+    
+            if (debugCFG.drawDiagnosticInfo)
+                drawDiagnosticInfo(diagnosticX, diagnosticY);
+    
+            if (debugCFG.drawPos)
+                drawEntityPositions();
+    
+            if (debugCFG.drawMousePos)
+                drawMousePos();
+    
+            if (debugCFG.drawEntityList)
+                drawEntityList();
             
-            //draw components on entity
             if (debugCFG.drawComponentList)
                 drawComponentList();
             
-            
+            //render debug called from other systems
             drawDebugTexts(batch);
         }
         batch.end();
@@ -171,10 +175,13 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         if (debugCFG.box2DDebugRender)
             debugRenderer.render(GameScreen.box2dWorld, GameScreen.cam.combined);
         
-        
         objects.clear();
     }
     
+    @Override
+    public void processEntity(Entity entity, float deltaTime) {
+        objects.add(entity);
+    }
     
     private void updateKeyToggles() {
         if (Gdx.input.isKeyPressed(Input.Keys.NUM_8)) {
@@ -251,65 +258,12 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         debugRenderer.setDrawContacts(debugCFG.drawContacts);
     }
     
-    
-    /**
-     * Draw lines to represent speed and direction of entity
-     */
-    private void drawVelocityVectors() {
-        for (Entity entity : objects) {
-            //get entities position and list of components
-            PhysicsComponent t = Mappers.physics.get(entity);
-            if (t != null && t.body != null) {
-                float scale = 2.0f; //how long to make vectors (higher number is longer line)
-                Vector2 end = MyMath.logVec(t.body.getLinearVelocity(), scale).add(t.body.getPosition());
-    
-                //draw line to represent movement
-                debugVecs.add(new DebugVec(t.body.getPosition(), end, Color.RED, Color.MAGENTA));
-            }
-        }
+    private void drawFPS(int x, int y) {
+        int fps = Gdx.graphics.getFramesPerSecond();
+        Color fpsColor = fps >= 120 ? Color.SKY : fps > 45 ? Color.WHITE : fps > 30 ? Color.YELLOW : Color.RED;
+        fontLarge.setColor(fpsColor);
+        fontLarge.draw(batch, Integer.toString(fps), x, y);
     }
-    
-    /**
-     * Draw orbit path, a ring to visualize objects orbit
-     */
-    private void drawOrbitPath(boolean showSyncedPos) {
-        Color orbitObjectColor = new Color(1, 1, 1, 1);
-        Color orbitSyncPosColor = new Color(1, 0, 0, 1);
-        
-        for (Entity entity : objects) {
-            
-            OrbitComponent orbit = Mappers.orbit.get(entity);
-            if (orbit != null) {
-                TransformComponent entityPos = Mappers.transform.get(entity);
-                
-                if (orbit.parent != null) {
-                    TransformComponent parentPos = Mappers.transform.get(orbit.parent);
-                    
-                    if (showSyncedPos) {
-                        //synced orbit position (where the object should be)
-                        Vector2 orbitPos = OrbitSystem.getTimeSyncedPos(orbit, GameScreen.getGameTimeCurrent());
-                        shape.setColor(orbitSyncPosColor);
-                        shape.line(parentPos.pos.x, parentPos.pos.y, orbitPos.x, orbitPos.y);
-                    }
-                    
-                    //actual position
-                    shape.setColor(orbitObjectColor);
-                    shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
-                    shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
-                }
-                
-                TextureComponent tex = Mappers.texture.get(entity);
-                if (tex != null) {
-                    float radius = tex.texture.getWidth() * 0.5f * tex.scale;
-                    Vector2 orientation = MyMath.vector(entityPos.rotation, radius).add(entityPos.pos);
-                    shape.line(entityPos.pos.x, entityPos.pos.y, orientation.x, orientation.y);
-                    shape.circle(entityPos.pos.x, entityPos.pos.y, radius);
-                }
-            }
-            
-        }
-    }
-    
     
     private void drawDiagnosticInfo(int x, int y) {
         //camera position
@@ -329,51 +283,45 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         
         int linePos = 1;
         float lineHeight = fontLarge.getLineHeight();
-        debugTexts.add(new DebugText(count, x, y - (lineHeight * linePos++), fontLarge));
-        debugTexts.add(new DebugText(memory + threads, x, y - (lineHeight * linePos++), fontLarge));
-        debugTexts.add(new DebugText(camera, x, y - (lineHeight * linePos++), fontLarge));
-        debugTexts.add(new DebugText(
-                "time: " + MyMath.formatDuration(GameScreen.getGameTimeCurrent()) + " (" + GameScreen.getGameTimeCurrent() + ")",
-                Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10, fontLarge));
-        debugTexts.add(new DebugText("seed: " + GameScreen.getGalaxySeed(), Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight, fontLarge));
+        fontLarge.setColor(Color.WHITE);
+        fontLarge.draw(batch, count, x, y - (lineHeight * linePos++));
+        fontLarge.draw(batch, memory + threads, x, y - (lineHeight * linePos++));
+        fontLarge.draw(batch, camera, x, y - (lineHeight * linePos++));
+        fontLarge.draw(batch, "time: " + MyMath.formatDuration(GameScreen.getGameTimeCurrent())
+                        + " (" + GameScreen.getGameTimeCurrent() + ")", Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10);
+        fontLarge.draw(batch, "seed: " + GameScreen.getGalaxySeed(), Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight);
+        
         if (!GameScreen.inSpace()) {
-            debugTexts.add(new DebugText("planet: " + GameScreen.getPlanetSeed(),
-                    Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight * 2, fontLarge));
+            fontLarge.draw(batch, "planet: " + GameScreen.getPlanetSeed(),
+                    Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight * 2);
         }
+        
         //view threads
         String noisePool = GameScreen.noiseManager.getNoiseThreadPool().toString();
-        debugTexts.add(new DebugText(noisePool, x, y - (lineHeight * linePos++)));
-        
+        fontSmall.draw(batch, noisePool, x, y - (lineHeight * linePos++));
         for (Thread t : threadSet) {
-            debugTexts.add(new DebugText(t.toString(), x, y - (lineHeight * linePos++)));
+            fontSmall.draw(batch, t.toString(), x, y - (lineHeight * linePos++));
         }
     }
 
-    
-    private void drawFPS(int x, int y) {
-        int fps = Gdx.graphics.getFramesPerSecond();
-        Color fpsColor = fps >= 120 ? Color.SKY : fps > 45 ? Color.WHITE : fps > 30 ? Color.YELLOW : Color.RED;
-        debugTexts.add(new DebugText(Integer.toString(fps), x, y, fpsColor, fontLarge));
-    }
-    
     private void drawEntityList() {
         float fontHeight = fontSmall.getLineHeight();
         int x = 30;
         int y = 30;
         int i = 0;
         for (Entity entity : getEngine().getEntities()) {
-            debugTexts.add(new DebugText(Integer.toHexString(entity.hashCode()), x, y + (fontHeight * i++)));
+            fontSmall.draw(batch, Integer.toHexString(entity.hashCode()), x, y + (fontHeight * i++));
         }
     }
     
-    /**
-     * Draw all Entity components and fields.
-     */
+    /** Draw all Entity components and fields */
     private void drawComponentList() {
+        // todo: this is a very heavy method, consider frustrum culling: if object is offscreen do not render!
+        
         float fontHeight = fontSmall.getLineHeight();
         int backWidth = 400;//width of background
         
-        //fontSmall.setColor(1, 1, 1, 1);
+        fontSmall.setColor(1, 1, 1, 1);
         
         for (Entity entity : objects) {
             //get entities position and list of components
@@ -427,10 +375,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         
     }
     
-    /**
-     * Draw position and speed of entity.
-     */
-    private void drawPos() {
+    private void drawEntityPositions() {
         fontSmall.setColor(1, 1, 1, 1);
         for (Entity entity : objects) {
             TransformComponent t = Mappers.transform.get(entity);
@@ -439,8 +384,8 @@ public class DebugSystem extends IteratingSystem implements Disposable {
             String info = MyMath.round(t.pos.x, 1) + "," + MyMath.round(t.pos.y, 1);
             
             Vector3 screenPos = cam.project(new Vector3(t.pos.cpy(), 0));
-            debugTexts.add(new DebugText(Integer.toHexString(entity.hashCode()), screenPos.x, screenPos.y));
-            debugTexts.add(new DebugText(info, screenPos.x, screenPos.y-10));
+            fontSmall.draw(batch, Integer.toHexString(entity.hashCode()), screenPos.x, screenPos.y);
+            fontSmall.draw(batch, info, screenPos.x, screenPos.y-10);
         }
     }
     
@@ -449,14 +394,14 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         int y = Gdx.graphics.getHeight() - Gdx.input.getY();
         
         String localPos = x + "," + y;
-        debugTexts.add(new DebugText(localPos, x, y));
+        fontSmall.draw(batch, localPos, x, y);
     
         Vector3 worldPos = cam.unproject(new Vector3(x, y, 0));
         long seed = MyMath.getSeed(worldPos.x, worldPos.y);
-        debugTexts.add(new DebugText((int) worldPos.x + "," + (int) worldPos.y + " (" + seed + ")", x, y + fontSmall.getLineHeight()));
+        fontSmall.draw(batch, (int) worldPos.x + "," + (int) worldPos.y + " (" + seed + ")", x, y + fontSmall.getLineHeight());
     
-        float angle = MyMath.angleTo(Gdx.input.getX(), Gdx.input.getY(), Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
-        debugTexts.add(new DebugText(MyMath.round(angle,3) + " / " + MyMath.round(angle * MathUtils.radDeg, 3), x, y + (int) fontSmall.getLineHeight()*2));
+        //float angle = MyMath.angleTo(Gdx.input.getX(), Gdx.input.getY(), Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+        //fontSmall.draw(batch, MyMath.round(angle,3) + " / " + MyMath.round(angle * MathUtils.radDeg, 3), x, y + (int) fontSmall.getLineHeight()*2);
     }
     
     private void drawMouseLine() {
@@ -471,6 +416,61 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         shape.line(worldPos.x + crossHairSize, worldPos.y, worldPos.x - crossHairSize, worldPos.y);
     }
     
+    /** Draw lines to represent speed and direction of entity */
+    private void drawVelocityVectors() {
+        for (Entity entity : objects) {
+            //get entities position and list of components
+            PhysicsComponent t = Mappers.physics.get(entity);
+            if (t != null && t.body != null) {
+                float scale = 2.0f; //how long to make vectors (higher number is longer line)
+                Vector2 end = MyMath.logVec(t.body.getLinearVelocity(), scale).add(t.body.getPosition());
+                
+                //draw line to represent movement
+                debugVecs.add(new DebugVec(t.body.getPosition(), end, Color.RED, Color.MAGENTA));
+            }
+        }
+    }
+    
+    /** Draw orbit path, a ring to visualize objects orbit  */
+    private void drawOrbitPath(boolean showSyncedPos) {
+        Color orbitObjectColor = new Color(1, 1, 1, 1);
+        Color orbitSyncPosColor = new Color(1, 0, 0, 1);
+        
+        for (Entity entity : objects) {
+            
+            OrbitComponent orbit = Mappers.orbit.get(entity);
+            if (orbit != null) {
+                TransformComponent entityPos = Mappers.transform.get(entity);
+                
+                if (orbit.parent != null) {
+                    TransformComponent parentPos = Mappers.transform.get(orbit.parent);
+                    
+                    if (showSyncedPos) {
+                        //synced orbit position (where the object should be)
+                        Vector2 orbitPos = OrbitSystem.getTimeSyncedPos(orbit, GameScreen.getGameTimeCurrent());
+                        shape.setColor(orbitSyncPosColor);
+                        shape.line(parentPos.pos.x, parentPos.pos.y, orbitPos.x, orbitPos.y);
+                    }
+                    
+                    //actual position
+                    shape.setColor(orbitObjectColor);
+                    shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
+                    shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
+                }
+                
+                TextureComponent tex = Mappers.texture.get(entity);
+                if (tex != null) {
+                    float radius = tex.texture.getWidth() * 0.5f * tex.scale;
+                    Vector2 orientation = MyMath.vector(entityPos.rotation, radius).add(entityPos.pos);
+                    shape.line(entityPos.pos.x, entityPos.pos.y, orientation.x, orientation.y);
+                    shape.circle(entityPos.pos.x, entityPos.pos.y, radius);
+                }
+            }
+            
+        }
+    }
+    
+    //region external debug util
     public static void addDebugVec(Vector2 pos, Vector2 vec, Color color) {
         float scale = 20; //how long to make vectors (higher number is longer line)
         Vector2 end = MyMath.logVec(vec, scale).add(pos);
@@ -509,12 +509,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         }
         debugTexts.clear();
     }
-    
-    @Override
-    public void processEntity(Entity entity, float deltaTime) {
-        objects.add(entity);
-    }
-    
+    //endregion
     
     @Override
     public void dispose() {
