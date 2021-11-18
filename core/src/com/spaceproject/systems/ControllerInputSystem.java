@@ -132,9 +132,8 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                     //single tap
                     doubleTapRight.reset();
                 } else {
-                    Gdx.app.debug(this.getClass().getSimpleName(),"DOUBLE TAP RIGHT!!!!!!!!");
+                    //double tap
                     tapCounterRight = 0;
-    
                     BarrelRollComponent barrelRoll = Mappers.barrelRoll.get(player);
                     if (barrelRoll != null) {
                         BarrelRollSystem.dodgeRight(player, barrelRoll);
@@ -144,7 +143,6 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             //timeout
             if (doubleTapRight.canDoEvent()) {
                 tapCounterRight = 0;
-                //Gdx.app.debug(this.getClass().getSimpleName(),"double right timeout");
             }
             
             handled = true;
@@ -160,9 +158,8 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                     //single tap
                     doubleTapLeft.reset();
                 } else {
-                    Gdx.app.debug(this.getClass().getSimpleName(),"DOUBLE TAP LEFT!!!!!!!!");
+                    //double tap
                     tapCounterLeft = 0;
-    
                     BarrelRollComponent barrelRoll = Mappers.barrelRoll.get(player);
                     if (barrelRoll != null) {
                         BarrelRollSystem.dodgeLeft(player, barrelRoll);
@@ -172,7 +169,6 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             //timeout
             if (doubleTapLeft.canDoEvent()) {
                 tapCounterLeft = 0;
-                //Gdx.app.debug(this.getClass().getSimpleName(),"double left timeout");
             }
             
             handled = true;
