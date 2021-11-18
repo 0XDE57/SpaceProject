@@ -60,6 +60,7 @@ public abstract class SystemLoader {
     
     private static void load(GameScreen game, Engine engine, int priority, Class<? extends EntitySystem> systemClass)
             throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        
         EntitySystem systemToLoad = systemClass.getDeclaredConstructor().newInstance();
         systemToLoad.priority = priority;
         
