@@ -1,4 +1,4 @@
-package com.spaceproject.generation.noise;
+package com.spaceproject.noise;
 
 public class NoiseBuffer {
     //TODO: use a byte instead of float and int

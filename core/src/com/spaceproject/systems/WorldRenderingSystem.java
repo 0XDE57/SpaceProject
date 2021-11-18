@@ -10,7 +10,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.config.WorldConfig;
 import com.spaceproject.generation.TextureFactory;
-import com.spaceproject.generation.noise.NoiseBuffer;
+import com.spaceproject.noise.NoiseBuffer;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Tile;
 

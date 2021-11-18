@@ -25,7 +25,7 @@ import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.generation.AstroBody;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureFactory;
-import com.spaceproject.generation.noise.NoiseBuffer;
+import com.spaceproject.noise.NoiseBuffer;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Tile;

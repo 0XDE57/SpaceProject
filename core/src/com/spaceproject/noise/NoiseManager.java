@@ -1,4 +1,4 @@
-package com.spaceproject.generation.noise;
+package com.spaceproject.noise;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Disposable;

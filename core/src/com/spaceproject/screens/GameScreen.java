@@ -25,7 +25,7 @@ import com.spaceproject.config.WorldConfig;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.Galaxy;
-import com.spaceproject.generation.noise.NoiseManager;
+import com.spaceproject.noise.NoiseManager;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.utility.ECSUtil;

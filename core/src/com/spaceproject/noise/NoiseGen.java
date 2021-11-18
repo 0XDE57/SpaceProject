@@ -1,4 +1,4 @@
-package com.spaceproject.generation.noise;
+package com.spaceproject.noise;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
