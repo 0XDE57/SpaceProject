@@ -354,6 +354,7 @@ Legend:
 [...] particle effects!
     https://github.com/rockbite/talos
     [ ] BUG: broken engine effects applying to other ships when land on planet
+        [ ] BUG: related, when take off again particles are wack!
     [x] projectile tails - simple rect or circle particle trailing bullets
         [ ] apply to other cannon
     [x] particles need to render on top of planets. planets should be first rendered (low depth) in the render pipeline

@@ -8,8 +8,15 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class ScreenTransitionOverlay {
     
-    private SimpleTimer fadeTimer;
+    public enum FadeState {
+        off,
+        fadeIn,
+        fadeOut,
+        on
+    }
+    
     private FadeState fadeState;
+    private SimpleTimer fadeTimer;
     private int fadeTime;
     private Color fadeColor;
     private ShapeRenderer shape;
