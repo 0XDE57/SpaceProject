@@ -125,18 +125,19 @@ public abstract class MyMath {
     /** Convert milliseconds to hours, minutes, seconds
      * https://stackoverflow.com/a/21701635
      */
+    static StringBuilder builder = new StringBuilder();
     public static String formatDuration(final long millis) {
         long seconds = (millis / 1000) % 60;
         long minutes = (millis / (1000 * 60)) % 60;
         long hours = millis / (1000 * 60 * 60);
         
-        StringBuilder b = new StringBuilder();
-        b.append(hours == 0 ? "00" : hours < 10 ? "0" + hours : hours);
-        b.append(":");
-        b.append(minutes == 0 ? "00" : minutes < 10 ? "0" + minutes : minutes);
-        b.append(":");
-        b.append(seconds == 0 ? "00" : seconds < 10 ? "0" + seconds : seconds);
-        return b.toString();
+        builder.setLength(0);//clear
+        builder.append(hours == 0 ? "00" : hours < 10 ? "0" + hours : hours);
+        builder.append(":");
+        builder.append(minutes == 0 ? "00" : minutes < 10 ? "0" + minutes : minutes);
+        builder.append(":");
+        builder.append(seconds == 0 ? "00" : seconds < 10 ? "0" + seconds : seconds);
+        return builder.toString();
     }
     
     public static String vecString(Vector2 vec, int decimal) {
