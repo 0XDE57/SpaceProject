@@ -3,11 +3,13 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TransformComponent;
@@ -36,6 +38,12 @@ public class BarrelRollSystem extends IteratingSystem {
         if (shield != null && shield.state != ShieldComponent.State.off) {
             //continue to stabilize while shield active
             stabilizeRoll(sprite3D, rollAmount);
+            return;
+        }
+        //don't allow roll or dodge while hyperdrive active
+        HyperDriveComponent hyper = Mappers.hyper.get(entity);
+        if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
+            sprite3D.renderable.angle = 0; //force no roll
             return;
         }
         
@@ -111,6 +119,13 @@ public class BarrelRollSystem extends IteratingSystem {
     }
     
     private static void applyDodgeImpulse(Entity entity, BarrelRollComponent roll, BarrelRollComponent.FlipState flipState) {
+        //don't allow roll or dodge while hyperdrive active
+        HyperDriveComponent hyper = Mappers.hyper.get(entity);
+        if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
+            Gdx.app.debug(BarrelRollSystem.class.getSimpleName(), "barrel roll cancelled due to hyperdrive");
+            return;
+        }
+        
         //snap to angle to bypass rotation lerp to make dodge feel better/more responsive
         TransformComponent transform = Mappers.transform.get(entity);
         ControllableComponent control = Mappers.controllable.get(entity);

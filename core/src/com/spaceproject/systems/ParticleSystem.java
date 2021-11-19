@@ -17,6 +17,7 @@ import com.spaceproject.components.AttachedToComponent;
 import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TransformComponent;
@@ -35,7 +36,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     
     final float[] engineColor;
     final float[] engineColorBoost;
-    
+    final float[] engineColorHyper;
     
     public ParticleSystem() {
         super(Family.all(ParticleComponent.class).get());
@@ -49,6 +50,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         fireEffectPool = new ParticleEffectPool(fireEffect, 20, 20);
         engineColor = new float[]{ 1, 0.34901962f, 0.047058824f };
         engineColorBoost = new float[]{ 0.047058824f, 0.34901962f, 1 };
+        engineColorHyper = new float[]{ 1, 0.047058824f, 0.34901962f };
         
         //projectile charge
         chargeEffect = new ParticleEffect();
@@ -100,26 +102,29 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         TransformComponent transform = Mappers.transform.get(entity);
         BarrelRollComponent roll = Mappers.barrelRoll.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
+        HyperDriveComponent hyper = Mappers.hyper.get(entity);
         
         boolean shieldIsOff = shield != null && shield.state == ShieldComponent.State.off;
+        boolean hyperdriveIsActive = hyper != null && hyper.state == HyperDriveComponent.State.on;
+        
         if (control != null && shieldIsOff) {
             switch (particle.type) {
                 case shipEngineMain:
-                    if (control.moveForward) {
+                    if (control.moveForward || hyperdriveIsActive) {
                         particle.pooledEffect.start();
                     } else {
                         particle.pooledEffect.allowCompletion();
                     }
                     break;
                 case shipEngineLeft:
-                    if (control.moveRight || roll.flipState == BarrelRollComponent.FlipState.right) {
+                    if ((control.moveRight || roll.flipState == BarrelRollComponent.FlipState.right) && !hyperdriveIsActive) {
                         particle.pooledEffect.start();
                     } else {
                         particle.pooledEffect.allowCompletion();
                     }
                     break;
                 case shipEngineRight:
-                    if (control.moveLeft || roll.flipState == BarrelRollComponent.FlipState.left) {
+                    if ((control.moveLeft || roll.flipState == BarrelRollComponent.FlipState.left) && !hyperdriveIsActive) {
                         particle.pooledEffect.start();
                     } else {
                         particle.pooledEffect.allowCompletion();
@@ -140,12 +145,17 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
             angle.setLow(engineRotation);
         
             //change color during boost
-            if (roll != null) {
+            if (hyperdriveIsActive) {
                 ParticleEmitter.GradientColorValue tint = emitters.get(i).getTint();
-                if (roll.flipState != BarrelRollComponent.FlipState.off || (control != null && control.moveForward && control.alter)) {
-                    tint.setColors(engineColorBoost);
-                } else {
-                    tint.setColors(engineColor);
+                tint.setColors(engineColorHyper);
+            } else {
+                if (roll != null) {
+                    ParticleEmitter.GradientColorValue tint = emitters.get(i).getTint();
+                    if (roll.flipState != BarrelRollComponent.FlipState.off || (control != null && control.moveForward && control.alter)) {
+                        tint.setColors(engineColorBoost);
+                    } else {
+                        tint.setColors(engineColor);
+                    }
                 }
             }
         }

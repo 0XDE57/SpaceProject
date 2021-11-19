@@ -326,7 +326,7 @@ Legend:
         for impact feel
     [x] should not activate while using shield
         [?] should allow while shield is discharging? might feel more responsive
-    [ ] should not activate while hyperdrive active
+    [x] should not activate while hyperdrive active
     [ ] should not activate during screen transition
     [ ] needs control for mobile
 

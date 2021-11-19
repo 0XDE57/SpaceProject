@@ -64,16 +64,13 @@ public class ShipControlSystem extends IteratingSystem {
         if (GameScreen.isDebugMode) {
             applyDebugControls(entity, transformComp, physicsComp);
         }
+    
+        if (!canControlShip(entity))
+            return;
         
         //rotate ship
         faceTarget(control, physicsComp, delta);
     
-        //don't allow engine activation while shield is active
-        ShieldComponent shield = Mappers.shield.get(entity);
-        if (shield != null && shield.state != ShieldComponent.State.off) {
-            return;
-        }
-        
         //movement
         if (control.moveForward) {
             accelerate(control, physicsComp.body, vehicle, delta);
@@ -187,6 +184,21 @@ public class ShipControlSystem extends IteratingSystem {
         
         // add player back into world
         getEngine().addEntity(characterEntity);
+    }
+    
+    private boolean canControlShip(Entity entity) {
+        //don't allow engine activation while shield is active
+        ShieldComponent shield = Mappers.shield.get(entity);
+        if (shield != null && shield.state != ShieldComponent.State.off) {
+            return false;
+        }
+        //don't allow engine activation while hypderdrive is active
+        HyperDriveComponent hyperdrive = Mappers.hyper.get(entity);
+        if (hyperdrive != null && hyperdrive.state == HyperDriveComponent.State.on) {
+            return false;
+        }
+        
+        return true;
     }
     
     private void applyDebugControls(Entity entity, TransformComponent transformComp, PhysicsComponent physicsComp) {
