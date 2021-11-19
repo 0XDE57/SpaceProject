@@ -148,7 +148,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         if (keycode == keyCFG.activateShield) {
             ShieldComponent shield = Mappers.shield.get(player);
             if (shield != null) {
-                shield.defend = keyDown;
+                shield.activate = keyDown;
                 handled = true;
             }
         }

@@ -19,30 +19,67 @@ public class HyperDriveSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
-        
-        if (hyperDrive.activate && hyperDrive.coolDownTimer.tryEvent()) {
-            toggleHyperDrive(entity, hyperDrive);
-        }
-        
-        if (hyperDrive.isActive) {
-            TransformComponent transform = Mappers.transform.get(entity);
-            transform.pos.add(hyperDrive.velocity.cpy().scl(deltaTime));
+    
+        switch (hyperDrive.state) {
+            case off:
+                // charge up
+                if (hyperDrive.activate) {
+                    hyperDrive.state = HyperDriveComponent.State.charging;
+                    hyperDrive.chargeTimer.reset();
+                }
+                break;
+            case on:
+                // override box2d physics with our velocity
+                TransformComponent transform = Mappers.transform.get(entity);
+                transform.pos.add(hyperDrive.velocity.cpy().scl(deltaTime));
+    
+                // turn off
+                if (hyperDrive.activate && hyperDrive.graceTimer.tryEvent()) {
+                    disengageHyperDrive(entity, hyperDrive);
+                }
+                break;
+            case charging:
+                //cancel charge
+                if (!hyperDrive.activate) {
+                    hyperDrive.state = HyperDriveComponent.State.off;
+                }
+                
+                //engage
+                if (hyperDrive.chargeTimer.tryEvent()) {
+                    engageHyperDrive(entity, hyperDrive);
+                }
+                break;
+            case cooldown:
+                //reset
+                if (hyperDrive.coolDownTimer.canDoEvent()) {
+                    hyperDrive.state = HyperDriveComponent.State.off;
+                }
+                break;
         }
     }
     
-    private void toggleHyperDrive(Entity entity, HyperDriveComponent hyperDrive) {
+    private void engageHyperDrive(Entity entity, HyperDriveComponent hyperDrive) {
+        // disable physics body to override velocity
+        PhysicsComponent physicsComp = Mappers.physics.get(entity);
+        physicsComp.body.setActive(false);
+        
+        // enable hyper
+        hyperDrive.state = HyperDriveComponent.State.on;
+        hyperDrive.velocity.set(MyMath.vector(physicsComp.body.getAngle(), hyperDrive.speed));
+        hyperDrive.graceTimer.reset();
+    }
+    
+    private void disengageHyperDrive(Entity entity, HyperDriveComponent hyperDrive) {
+        // disable hyper
+        hyperDrive.state = HyperDriveComponent.State.cooldown;
+        hyperDrive.coolDownTimer.reset();
+        
+        // re-enable physics body
         PhysicsComponent physicsComp = Mappers.physics.get(entity);
         float bodyAngle = physicsComp.body.getAngle();
-        if (hyperDrive.isActive) {
-            hyperDrive.isActive = false;
-            physicsComp.body.setTransform(entity.getComponent(TransformComponent.class).pos, bodyAngle);
-            physicsComp.body.setActive(true);
-            physicsComp.body.setLinearVelocity(MyMath.vector(bodyAngle, 20));
-        } else {
-            hyperDrive.isActive = true;
-            hyperDrive.velocity.set(MyMath.vector(bodyAngle, hyperDrive.speed));
-            physicsComp.body.setActive(false);
-        }
+        physicsComp.body.setTransform(entity.getComponent(TransformComponent.class).pos, bodyAngle);
+        physicsComp.body.setActive(true);
+        physicsComp.body.setLinearVelocity(MyMath.vector(bodyAngle, 10));
     }
     
 }

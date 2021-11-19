@@ -160,7 +160,7 @@ public class MiniMap {
             Body body = Mappers.physics.get(player).body;
             String playerInfo = ": " + MyMath.round(body.getLinearVelocity().len(), 1);
             HyperDriveComponent hyper = Mappers.hyper.get(player);
-            if (hyper != null && hyper.isActive) {
+            if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
                 playerInfo = ": " + MyMath.round(hyper.velocity.len(), 1);
             }
             mapString += playerInfo;
@@ -191,7 +191,7 @@ public class MiniMap {
             Vector2 velocity = body.getLinearVelocity();
             
             HyperDriveComponent hyperComp = Mappers.hyper.get(player);
-            if (hyperComp != null && hyperComp.isActive) {
+            if (hyperComp != null && hyperComp.state == HyperDriveComponent.State.on) {
                 velocity = hyperComp.velocity;
             }
             

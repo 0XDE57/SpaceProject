@@ -6,14 +6,23 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class HyperDriveComponent implements Component {
     
-    public boolean activate;
+    public enum State { off, on, charging, cooldown }
     
-    public boolean isActive;
+    public State state = State.off;
+    
+    public boolean activate;
     
     public float speed;
     
     public final Vector2 velocity = new Vector2();
     
+    //time it takes to activate
+    public SimpleTimer chargeTimer;
+    
+    //time it takes before can de-activate from active state
+    public SimpleTimer graceTimer;
+    
+    //time it takes to cooldown before can activate again
     public SimpleTimer coolDownTimer;
     
 }

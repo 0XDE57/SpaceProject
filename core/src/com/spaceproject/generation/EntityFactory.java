@@ -361,8 +361,9 @@ public class EntityFactory {
         //hyper drive
         HyperDriveComponent hyperDrive = new HyperDriveComponent();
         hyperDrive.speed = entityCFG.hyperSpeed;
-        hyperDrive.coolDownTimer = new SimpleTimer(entityCFG.controlTimerHyperCooldown, true);
-        hyperDrive.coolDownTimer.setCanDoEvent();
+        hyperDrive.coolDownTimer = new SimpleTimer(1000);
+        hyperDrive.chargeTimer = new SimpleTimer(500);
+        hyperDrive.graceTimer = new SimpleTimer(1000);
         shipEntity.add(hyperDrive);
         
         //shield

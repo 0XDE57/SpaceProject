@@ -23,7 +23,7 @@ public class ShieldSystem extends IteratingSystem {
         
         //don't allow shield activation while hyperdrive active
         HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
-        if (hyperDrive != null && hyperDrive.isActive) {
+        if (hyperDrive != null && hyperDrive.state == HyperDriveComponent.State.on) {
             if (shield.state == ShieldComponent.State.on) {
                 disengage(entity, shield);
             }
@@ -33,17 +33,17 @@ public class ShieldSystem extends IteratingSystem {
         
         switch (shield.state) {
             case off:
-                if (shield.defend) {
+                if (shield.activate) {
                     engage(shield);
                 }
                 break;
             case on:
-                if (!shield.defend) {
+                if (!shield.activate) {
                     disengage(entity, shield);
                 }
                 break;
             case charge:
-                if (!shield.defend) {
+                if (!shield.activate) {
                     shield.state = ShieldComponent.State.discharge;
                     break;
                 }
@@ -59,7 +59,7 @@ public class ShieldSystem extends IteratingSystem {
                 }
                 break;
             case discharge:
-                if (shield.defend) {
+                if (shield.activate) {
                     engage(shield);
                     break;
                 }

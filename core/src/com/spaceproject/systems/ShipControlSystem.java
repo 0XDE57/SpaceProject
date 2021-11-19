@@ -131,7 +131,6 @@ public class ShipControlSystem extends IteratingSystem {
     
     private static void decelerate(Body body, float delta) {
         float stopThreshold = 0.2f;
-        
         if (body.getLinearVelocity().len() <= stopThreshold) {
             //completely stop if moving really slowly
             body.setLinearVelocity(0, 0);
@@ -198,7 +197,7 @@ public class ShipControlSystem extends IteratingSystem {
             physicsComp.body.setTransform(transformComp.pos, transformComp.rotation);
             
             HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
-            hyperDrive.isActive = false;
+            hyperDrive.state = HyperDriveComponent.State.off;
         }
         if (Gdx.input.isKeyJustPressed(Keys.Z)) {
             physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(physicsComp.body.getLinearVelocity()));

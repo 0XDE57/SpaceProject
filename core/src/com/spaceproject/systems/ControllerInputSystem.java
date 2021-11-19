@@ -95,7 +95,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         if (buttonCode == controller.getMapping().buttonB) {
             ShieldComponent shield = Mappers.shield.get(player);
             if (shield != null) {
-                shield.defend = buttonDown;
+                shield.activate = buttonDown;
                 handled = true;
             }
         }

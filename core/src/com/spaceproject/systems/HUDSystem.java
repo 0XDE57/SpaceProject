@@ -393,12 +393,19 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             return;
         }
     
-        shape.setColor(Color.BLUE);//blue cuz blueshift, todo: should move to ui config
-        if (hyperDrive.isActive) {
-            shape.rect(playerBarX, playerHyperBarY, barWidth, barHeight);
-        } else {
-            float ratio = MathUtils.clamp(0, (1 - hyperDrive.coolDownTimer.ratio()) * barWidth, barWidth);
-            shape.rect(playerBarX, playerHyperBarY, ratio, barHeight);
+        shape.setColor(Color.BLUE);//blue cuz blueshift?
+        switch (hyperDrive.state) {
+            case on:
+                shape.rect(playerBarX, playerHyperBarY, barWidth, barHeight);
+                break;
+            case charging:
+                float charge = MathUtils.clamp(0, hyperDrive.chargeTimer.ratio() * barWidth, barWidth);
+                shape.rect(playerBarX, playerHyperBarY, charge, barHeight);
+                break;
+            case cooldown:
+                float cooldown = MathUtils.clamp(0, (1 - hyperDrive.coolDownTimer.ratio()) * barWidth, barWidth);
+                shape.rect(playerBarX, playerHyperBarY, cooldown, barHeight);
+                break;
         }
     }
     //endregion

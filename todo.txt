@@ -347,9 +347,8 @@ Legend:
     [ ] should not fire during screen transition
 
 [ ] hyper drive
-    [ ] hyperdrive should be hold key to charge up instead of instant activate
+    [x] hyperdrive should be hold key to charge up instead of instant activate
     [ ] different color particle effect for fire. different from normal and boost. maybe purple or green?
-    [ ] needs control for mobile
 
 [...] particle effects!
     https://github.com/rockbite/talos
@@ -413,6 +412,8 @@ Legend:
         [ ] pinch-pull to zoom in-out on touch
         [ ] test touchUI on different screen sizes/resolutions
         [ ] set engine speed max to multiplier on android?
+        [ ] hyperdrive needs control for mobile
+        [ ] dodge/barrelroll needs control for mobile
         http://libgdx.badlogicgames.com/nightlies/docs/api/com/badlogic/gdx/input/GestureDetector.html
         http://tutorial-libgdx-android.blogspot.com/2014/02/inputs-handling-1st-part.html
     [?] shield bash?: double tap forward(or direction) and hold to rush, then shield do shield action [B] within time window of dash, and hold
