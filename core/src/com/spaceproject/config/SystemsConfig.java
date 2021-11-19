@@ -63,8 +63,8 @@ public class SystemsConfig extends Config {
         // - shield renderer -> shape render post sprite (possible shader for glow? box2d-lights?)
         // - particle renderer -> post sprite
         //could have multilayer rendering if needed in rendering pipeline: particle layer pre sprite (under sprites), particle layer post sprite (over sprites)
-        systems.add(new SysCFG(CameraSystem.class, 80, false, true, true, true, true));
-        systems.add(new SysCFG(SpaceParallaxSystem.class, 85, true, true, false, true, true));
+        systems.add(new SysCFG(CameraSystem.class, 80, true, true, true, true, true));
+        systems.add(new SysCFG(SpaceParallaxSystem.class, 85, false, true, false, true, true));
         systems.add(new SysCFG(WorldRenderingSystem.class, 86, false, false, true, true, true));
         systems.add(new SysCFG(Sprite2DRenderSystem.class, 90, false, true, true, true, true));
         systems.add(new SysCFG(Sprite3DRenderSystem.class, 91, false, true, true, true, true));
