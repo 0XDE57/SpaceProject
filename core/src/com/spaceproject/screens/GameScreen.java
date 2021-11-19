@@ -5,6 +5,8 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -83,6 +85,16 @@ public class GameScreen extends MyScreenAdapter {
     
         stage = new Stage(new ScreenViewport());
         getInputMultiplexer().addProcessor(0, stage);
+        
+        //cursor
+        Pixmap cursorImage = new Pixmap(Gdx.files.internal("cursor/simple-01-hit.png"));
+        Pixmap scaled = new Pixmap(64, 64, cursorImage.getFormat());
+        scaled.drawPixmap(cursorImage,
+                0, 0, cursorImage.getWidth(), cursorImage.getHeight(),
+                0, 0, scaled.getWidth(), scaled.getHeight());
+        Cursor cursor = Gdx.graphics.newCursor(scaled, (int) (scaled.getWidth() * 0.5f)+1, (int) (scaled.getHeight() * 0.5f)+1);
+        Gdx.graphics.setCursor(cursor);
+        cursorImage.dispose();
     }
     
     private void initCore() {
