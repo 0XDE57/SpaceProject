@@ -95,6 +95,7 @@ public class GameScreen extends MyScreenAdapter {
         Cursor cursor = Gdx.graphics.newCursor(scaled, (int) (scaled.getWidth() * 0.5f)+1, (int) (scaled.getHeight() * 0.5f)+1);
         Gdx.graphics.setCursor(cursor);
         cursorImage.dispose();
+        scaled.dispose();
     }
     
     private void initCore() {
