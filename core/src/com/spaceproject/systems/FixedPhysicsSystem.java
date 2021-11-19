@@ -19,7 +19,7 @@ import com.spaceproject.utility.PhysicsContactListener;
 // http://saltares.com/blog/games/fixing-your-timestep-in-libgdx-and-box2d/
 public class FixedPhysicsSystem extends EntitySystem {
     
-    private final EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
+    private static final EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     private final int velocityIterations = engineCFG.physicsVelocityIterations;
     private final int positionIterations = engineCFG.physicsPositionIterations;
     private final float timeStep = 1 / (float) engineCFG.physicsStepPerFrame;
@@ -74,7 +74,8 @@ public class FixedPhysicsSystem extends EntitySystem {
         }*/
     }
     
-    private int getMovementLimit() {
+    public static int getVelocityLimit() {
+        //Box2D uses MKS (meters, kilograms, and seconds) units and radians for angles
         //movement limit = 2 * units per step
         //eg step of 60: 60 * 2 = 120,  max velocity = 120
         return 2 * engineCFG.physicsStepPerFrame;

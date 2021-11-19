@@ -30,6 +30,7 @@ import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.OrbitComponent;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
@@ -291,6 +292,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         drawPlayerHealth(playerEntity, playerBarX, playerHPBarY, barWidth, barHeight);
         drawPlayerShield(playerEntity, playerBarX, playerHPBarY, barWidth, barHeight);
         drawPlayerAmmoBar(playerEntity, playerBarX, playerAmmoBarY, barWidth, barHeight);
+        drawPlayerVelocity(playerEntity, playerBarX, playerHyperBarY, barWidth, barHeight);
         drawHyperDriveBar(playerEntity, playerBarX, playerHyperBarY, barWidth, barHeight);
 
 		/*
@@ -387,6 +389,17 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     }
     
+    private void drawPlayerVelocity(Entity playerEntity, int playerBarX, int playerHyperBarY, int barWidth, int barHeight) {
+        PhysicsComponent physics = Mappers.physics.get(playerEntity);
+        if (physics == null) {
+            return;
+        }
+        
+        shape.setColor(Color.PURPLE);
+        float velocity = MathUtils.clamp(0, (physics.body.getLinearVelocity().len() / FixedPhysicsSystem.getVelocityLimit()) * barWidth, barWidth);
+        shape.rect(playerBarX, playerHyperBarY, velocity, barHeight);
+    }
+
     private void drawHyperDriveBar(Entity playerEntity, int playerBarX, int playerHyperBarY, int barWidth, int barHeight) {
         HyperDriveComponent hyperDrive = Mappers.hyper.get(playerEntity);
         if (hyperDrive == null) {
