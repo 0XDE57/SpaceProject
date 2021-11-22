@@ -19,9 +19,6 @@ public class ClearScreenSystem extends EntitySystem {
         Color color = backgroundColor(GameScreen.cam);
         Gdx.gl20.glClearColor(color.r, color.g, color.b, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-  
-        //cam update? instead of CameraSystem? test drift bug
-        //GameScreen.cam.update();
     }
     
     private Color backgroundColor(OrthographicCamera cam) {
