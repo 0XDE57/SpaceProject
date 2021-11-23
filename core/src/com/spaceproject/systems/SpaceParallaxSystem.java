@@ -2,7 +2,6 @@ package com.spaceproject.systems;
 
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -43,15 +42,6 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     public void update(float delta) {
         cam.position.x = GameScreen.cam.position.x;
         cam.position.y = GameScreen.cam.position.y;
-    
-        //debug
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_9)) {
-            surround++;
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_8)) {
-            surround--;
-            if (surround < 0) surround = 0;
-        }
         
         // load and unload tiles
         updateTiles();

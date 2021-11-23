@@ -17,7 +17,6 @@ import com.kotcrab.vis.ui.util.dialog.Dialogs;
 import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.FontFactory;
-import com.spaceproject.screens.animations.AsteroidAnim;
 import com.spaceproject.screens.animations.DelaunayAnim;
 import com.spaceproject.screens.animations.DropAnim;
 import com.spaceproject.screens.animations.ForegroundAnimation;
@@ -187,7 +186,7 @@ public class TitleScreen extends MyScreenAdapter {
 				this.foregroundAnimation = new AsteroidAnim();
 				break;*/
         }
-        this.foregroundAnimation = new AsteroidAnim();
+        //this.foregroundAnimation = new AsteroidAnim();
         Gdx.app.log(this.getClass().getSimpleName(), "Animation: " + anim);
     }
     

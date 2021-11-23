@@ -219,7 +219,7 @@ public class GameScreen extends MyScreenAdapter {
                     body.setLinearDamping(0);
                     body.setAngularDamping(0);
                 } else {
-                    //todo: move to values to engine/world config
+                    //add friction on planet
                     body.setAngularDamping(30);
                     body.setLinearDamping(45);
                 }
