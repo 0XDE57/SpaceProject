@@ -64,13 +64,13 @@ public class ShipControlSystem extends IteratingSystem {
         if (GameScreen.isDebugMode) {
             applyDebugControls(entity, transformComp, physicsComp);
         }
-    
-        if (!canControlShip(entity))
-            return;
         
         //rotate ship
         faceTarget(control, physicsComp, delta);
     
+        if (!canControlShip(entity))
+            return;
+        
         //movement
         if (control.moveForward) {
             accelerate(control, physicsComp.body, vehicle, delta);
