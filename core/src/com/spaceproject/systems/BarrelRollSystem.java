@@ -35,7 +35,7 @@ public class BarrelRollSystem extends IteratingSystem {
         
         //don't allow dodging while shield is active
         ShieldComponent shield = Mappers.shield.get(entity);
-        if (shield != null && shield.state != ShieldComponent.State.off) {
+        if (shield != null && shield.state == ShieldComponent.State.on) {
             //continue to stabilize while shield active
             stabilizeRoll(sprite3D, rollAmount);
             return;

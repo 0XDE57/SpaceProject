@@ -104,7 +104,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         ShieldComponent shield = Mappers.shield.get(entity);
         HyperDriveComponent hyper = Mappers.hyper.get(entity);
         
-        boolean shieldIsOff = shield != null && shield.state == ShieldComponent.State.off;
+        boolean shieldIsOff = shield != null && shield.state != ShieldComponent.State.on;
         boolean hyperdriveIsActive = hyper != null && hyper.state == HyperDriveComponent.State.on;
         
         if (control != null && shieldIsOff) {

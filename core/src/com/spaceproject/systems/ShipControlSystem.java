@@ -189,7 +189,7 @@ public class ShipControlSystem extends IteratingSystem {
     private boolean canControlShip(Entity entity) {
         //don't allow engine activation while shield is active
         ShieldComponent shield = Mappers.shield.get(entity);
-        if (shield != null && shield.state != ShieldComponent.State.off) {
+        if (shield != null && shield.state == ShieldComponent.State.on) {
             return false;
         }
         //don't allow engine activation while hypderdrive is active
