@@ -46,6 +46,7 @@ Work in progress: scaffolding for what will hopefully one day be a game. The cod
 |------------------------------- | ------------  | ------------------    | ----------------------------------------|
 | Movement                       | WASD          | Left Joystick + L1/R1 | Left Joystick                           |
 | Aim                            | Mouse         | Left Joystick         | Left Joystick                           |
+| Boost                          | Space         | X                     | todo: needs button                      |
 | Attack: Shoot                  | Right-Click   | A                     | bottom right button                     |
 | Defense: Shield                | Shift         | B                     | todo: needs button                      |
 | Defense: Dodge (Barrel Roll)   | A/D + Space (or) Double Tap A/D | Double Tap R1/L1 | todo: swipe gesture?       |
