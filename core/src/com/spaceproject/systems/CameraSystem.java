@@ -58,9 +58,21 @@ public class CameraSystem extends IteratingSystem {
                 //inCombat = false;
             }
         } else {
+            //Vector3 targetPos = GameScreen.cam.unproject(new Vector3(Gdx.input.getX()/* + Gdx.graphics.getWidth() * 0.5f*/, Gdx.input.getY() - Gdx.graphics.getHeight() * 0.5f, 0));
+            Vector2 targetPos = new Vector2(Gdx.input.getX() /*+ Gdx.graphics.getWidth() * 0.5f */, Gdx.input.getY() + Gdx.graphics.getHeight() * 0.5f);
+            
+            Vector2 midpoint = new Vector2(targetPos.x, targetPos.y);//.scl(0.5f);//.clamp(0, 20);
+            //DebugSystem.addDebugText(MyMath.formatVector2(midpoint, 1) + "", 500, 500);
+    
+            //set camera to focal point between targets, lock once acquired.
+            //lockToTarget(playerPosition);
+            //lerpToTarget(playerPosition.cpy().add(midpoint), delta);
+            
+            
             //set camera position to entity
             lerpToTarget(playerPosition, delta);
             //lockToTarget(playerPosition);
+            
             if (focalPoints.size() > 0) {
                 //inCombat = true;
             }
@@ -228,13 +240,13 @@ public class CameraSystem extends IteratingSystem {
     public void zoomIn() {
         if (zoomLevel <= 0) return;
         zoomTarget = getZoomForLevel(--zoomLevel);
-        Gdx.app.debug(this.getClass().getSimpleName(), "zoomIn: " + zoomTarget + " : " + zoomLevel);
+        //Gdx.app.debug(this.getClass().getSimpleName(), "zoomIn: " + zoomTarget + " : " + zoomLevel);
     }
     
     public void zoomOut() {
         if (zoomLevel >= 17) return;
         zoomTarget = getZoomForLevel(++zoomLevel);
-        Gdx.app.debug(this.getClass().getSimpleName(), "zoomOut: " + zoomTarget + " : " + zoomLevel);
+        //Gdx.app.debug(this.getClass().getSimpleName(), "zoomOut: " + zoomTarget + " : " + zoomLevel);
     }
     
     /** iter: -1,    0,   1, 2, 3, 4, 5, 6,  7, 8...

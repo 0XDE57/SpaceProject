@@ -5,8 +5,8 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
-import com.spaceproject.noise.OpenSimplexNoise;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.noise.OpenSimplexNoise;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Tile;
 
@@ -14,6 +14,9 @@ import java.util.ArrayList;
 
 public class TextureFactory {
     
+    static OpenSimplexNoise opacityGen = new OpenSimplexNoise(GameScreen.getGalaxySeed());
+    static OpenSimplexNoise redGen = new OpenSimplexNoise(GameScreen.getGalaxySeed() + 1);
+    static OpenSimplexNoise blueGen = new OpenSimplexNoise(GameScreen.getGalaxySeed() + 2);
 
     public static Texture createTile(Color c) {
         Pixmap pixmap;
@@ -37,10 +40,6 @@ public class TextureFactory {
         pixmap.dispose();
         return tex;
     }
-    
-    static OpenSimplexNoise opacityGen = new OpenSimplexNoise(GameScreen.getGalaxySeed());
-    static OpenSimplexNoise redGen = new OpenSimplexNoise(GameScreen.getGalaxySeed() + 1);
-    static OpenSimplexNoise blueGen = new OpenSimplexNoise(GameScreen.getGalaxySeed() + 2);
     
     public static Texture generateSpaceBackgroundDust(int tX, int tY, int tileSize) {
         Pixmap pixmap = new Pixmap(tileSize, tileSize, Format.RGBA8888);
@@ -82,20 +81,57 @@ public class TextureFactory {
         return tex;
     }
     
+    public static Texture generateSpaceDust(int tX, int tY, int tileSize) {
+        Pixmap pixmap = new Pixmap(tileSize, tileSize, Format.RGBA8888);
+        /*
+        float[][] heightMap = NoiseGen.generateWrappingNoise4D(seed, tileSize, scale, octaves, persistence, lacunarity);
+        for (int y = 0; y < pixmap.getHeight(); ++y) {
+            for (int x = 0; x < pixmap.getHeight(); ++x) {
+                float value = heightMap[x][y];
+                pixmap.setColor(value, value, value, 1);
+                pixmap.drawPixel(x, y);
+            }
+        }*/
+        
+        double featureSize = 100;
+        for (int y = 0; y < pixmap.getHeight(); y++) {
+            for (int x = 0; x < pixmap.getWidth(); x++) {
+                //position
+                double nX = (x + (tX * tileSize)) / featureSize;
+                double nY = (y + (tY * tileSize)) / featureSize;
+
+                //green
+                float green = (float)redGen.eval(nX, nY, 0);
+                green = (green * 0.5f) + 0.5f;
+    
+                //blue
+                float blue = (float)blueGen.eval(nX, nY, 0);
+                blue = (blue * 0.5f) + 0.5f;
+                
+                //draw
+                pixmap.setColor(new Color(0, green, blue, blue));
+                pixmap.drawPixel(x, pixmap.getHeight() - 1 - y);
+            }
+        }
+        
+        Texture tex = new Texture(pixmap);
+        pixmap.dispose();
+        return tex;
+    }
+    
     public static Texture generateSpaceBackgroundStars(int tileX, int tileY, int tileSize, float depth) {
+        //todo: add some color for stars. should have some red and blue
         MathUtils.random.setSeed((long) (MyMath.getSeed(tileX, tileY) + (depth*1000)));
         
         //pixmap = new Pixmap(tileSize, tileSize, Format.RGB565);
         Pixmap pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
         
-        int numStars = 300;
+        int numStars = 200;
         for (int i = 0; i < numStars; ++i) {
-            
             int newX = MathUtils.random(tileSize);
             int newY = MathUtils.random(tileSize);
             pixmap.setColor(1, 1, 1, MathUtils.random(0.1f, 1f));
             pixmap.drawPixel(newX, newY);
-            //pixmap.drawPixel(newX, newY, Color.rgba8888(MathUtils.random(1), MathUtils.random(1), MathUtils.random(1), 1));
         }
 		
 		/*
@@ -351,47 +387,14 @@ public class TextureFactory {
         return t;
     }
     
-    public static Texture generatePlanet(int mapSize, int chunkSize) {
-		/*
-		float scale = 100; //scale of noise = 40;
-		int octaves = 4;
-		float persistence = 0.68f;//0 - 1
-		float lacunarity = 2.6f;//1 - x
-		
-		NoiseThread noise = new NoiseThread(scale, octaves, persistence, lacunarity, seed, mapSize, tiles);
-		Thread createNoise = new Thread(noise);
-		createNoise.start();
-		*/
-		/*
-		
-		//int mapSize = 256; //size of world
-		float[][] heightMap = NoiseGen.generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity);
-		int[][] tileMap = NoiseGen.createTileMap(heightMap, tiles);	
-		int[][] pixelatedTileMap = NoiseGen.createPixelatedTileMap(tileMap, tiles);
-		
-		
-		int s = pixelatedTileMap.length;
-		Pixmap pixmap = new Pixmap(pixelatedTileMap.length, pixelatedTileMap.length, Format.RGBA4444);
-		 */
-        
+    public static Texture generatePlanetPlaceholder(int mapSize, int chunkSize) {
         int size = mapSize / chunkSize;//SIZE = chunks = tileMap.length/chunkSize
         Pixmap pixmap = new Pixmap(size, size, Format.RGBA4444);
         
         // draw circle for planet
         pixmap.setColor(1, 1, 1, 1);
         pixmap.fillCircle(size / 2, size / 2, size / 2 - 1);
-		/*
-		//draw noise
-		for (int y = 0; y < s; ++y) {
-			for (int x = 0; x < s; ++x) {
-				//only draw on circle
-				if (pixmap.getPixel(x, y) != 0) {					
-					pixmap.setColor(tiles.get(pixelatedTileMap[x][y]).getColor());
-					pixmap.drawPixel(x, y);
-				}				
-			}
-		}*/
-        
+
         Texture t = new Texture(pixmap);
         pixmap.dispose();
         return t;

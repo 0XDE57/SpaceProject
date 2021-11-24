@@ -140,13 +140,14 @@ public abstract class MyMath {
         return builder.toString();
     }
     
-    public static String vecString(Vector2 vec, int decimal) {
+    public static String formatVector2(Vector2 vec, int decimal) {
         return round(vec.x, decimal) + ", " + round(vec.y, decimal);
     }
     
-    public static String vecString(Vector3 vec, int decimal) {
+    public static String formatVector3(Vector3 vec, int decimal) {
         return round(vec.x, decimal) + ", " + round(vec.y, decimal) + ", " + round(vec.z, decimal);
     }
+    
     /**
      * Round value with specified precision.
      *

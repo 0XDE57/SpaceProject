@@ -193,7 +193,7 @@ public class EntityFactory {
         TextureComponent texture = new TextureComponent();
         int chunkSize = SpaceProject.configManager.getConfig(WorldConfig.class).chunkSize;
         int planetSize = (int) Math.pow(2, MathUtils.random(7, 10));
-        texture.texture = TextureFactory.generatePlanet(planetSize, chunkSize);
+        texture.texture = TextureFactory.generatePlanetPlaceholder(planetSize, chunkSize);
         texture.scale = 16;
         entity.add(texture);
         
@@ -249,7 +249,7 @@ public class EntityFactory {
         TextureComponent texture = new TextureComponent();
         int size = (int) Math.pow(2, MathUtils.random(5, 7));
         int chunkSize = SpaceProject.configManager.getConfig(WorldConfig.class).chunkSize;
-        texture.texture = TextureFactory.generatePlanet(size, chunkSize);
+        texture.texture = TextureFactory.generatePlanetPlaceholder(size, chunkSize);
         texture.scale = 16;
         entity.add(texture);
         

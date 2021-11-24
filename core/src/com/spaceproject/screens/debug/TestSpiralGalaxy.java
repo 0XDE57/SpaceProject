@@ -104,7 +104,7 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
                 System.out.format(format,
                         iter,
                         fib,
-                        MyMath.vecString(newVec, 2),
+                        MyMath.formatVector2(newVec, 2),
                         MyMath.round(newVec.len(), 2),
                         MyMath.round(newVec.angle(), 2),
                         "(" + dir + ") "+ direction,
@@ -272,8 +272,8 @@ public class TestSpiralGalaxy extends MyScreenAdapter {
         int c = 0;
         for (Vector2 p : points) {
             Vector2 v1 = p.cpy().scl(scale).add(center);
-            debugText.add(MyMath.vecString(p, 1), v1.x, v1.y);
-            debugText.add(MyMath.vecString(v1, 1), v1.x, v1.y + debugText.getFontHeight());
+            debugText.add(MyMath.formatVector2(p, 1), v1.x, v1.y);
+            debugText.add(MyMath.formatVector2(v1, 1), v1.x, v1.y + debugText.getFontHeight());
             if (c > 0) {
                 Vector2 v2 = points.get(c-1).cpy().scl(scale).add(center);
                 shape.line(v1, v2);

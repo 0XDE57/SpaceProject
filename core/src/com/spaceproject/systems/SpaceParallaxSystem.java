@@ -22,13 +22,15 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     
     // multiplier for parallax position of tile
     private static float dustTileDepth = 0.01f;
-    private static float bgTileDepth = 0.02f; // background
-    private static float fgTileDepth = 0.018f; // foreground
+    private static float star1TileDepth = 0.02f;
+    private static float star2TileDepth = 0.018f;
+    private static float star3TileDepth = 0.2f;
     
     // center tile to check for tile change
     private Vector2 dustCenterTile;
-    private Vector2 bgCenterTile; // background
-    private Vector2 fgCenterTile; // foreground
+    private Vector2 star1CenterTile;
+    private Vector2 star2CenterTile;
+    private Vector2 star3CenterTile;
     
     private static final int tileSize = 512;//1024;
     private int surround = 2;// how many tiles to load around center tile
@@ -71,8 +73,9 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     
     private void updateTiles() {
         dustCenterTile = updateLayer(dustCenterTile, dustTileDepth, SpaceBackgroundTile.TileType.Dust);
-        bgCenterTile = updateLayer(bgCenterTile, bgTileDepth, SpaceBackgroundTile.TileType.Stars);
-        fgCenterTile = updateLayer(fgCenterTile, fgTileDepth, SpaceBackgroundTile.TileType.Stars);
+        star1CenterTile = updateLayer(star1CenterTile, star1TileDepth, SpaceBackgroundTile.TileType.Stars);
+        star2CenterTile = updateLayer(star2CenterTile, star2TileDepth, SpaceBackgroundTile.TileType.Stars);
+        star3CenterTile = updateLayer(star3CenterTile, star3TileDepth, SpaceBackgroundTile.TileType.Stars);
     }
     
     /**

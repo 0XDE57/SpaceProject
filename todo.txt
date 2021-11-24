@@ -180,13 +180,13 @@ Legend:
         -start game, leave to main menu, start game again = empty until move around for a bit then loads
         I believe this is to do with the noise threads shutting down?
 
-[ ] needs frame of reference to judge speed and direction since parallax is so deep
+[...] needs frame of reference to judge speed and direction since parallax is so deep
     [ ] floaty dust particles at same depth as player to help visualize movement/speed
         perhaps play with lod, different layers based on zoom
         maybe with a very slow wander
     [ ] space debri, mostly inconsequential small irregular bodies
-    [ ] fog layer (particles, or white noise parallax at 1.0?)
-        what about a basic noise shader rendered to a quad on a layer above player?
+    [x] fog layer (particles, or white noise parallax at 1.0?)
+        [?] what about a basic noise shader rendered to a quad on a layer above player?
 
 [ ] add basic asteroids (arbitrary poly)
     [...] spec spawner for asteroid.
@@ -218,7 +218,7 @@ Legend:
         less visible when vsync off. not visible when lockedOn.
         look into interpolating physics, and investigate floating point errors
     [ ] change cursor to a crosshair sprite
-    [ ] camera allow cursor to "extend view": pushing cursor to edge of screen pulls camera position at a point between player and mouse
+    [...] camera allow cursor to "extend view": pushing cursor to edge of screen pulls camera position at a point between player and mouse
     [...] camera: combat camera
         manually zooming in an out when fighting is a bit clunky and jarring.
         [x] implement an auto lock on camera which will adjust the zoom to include both the player

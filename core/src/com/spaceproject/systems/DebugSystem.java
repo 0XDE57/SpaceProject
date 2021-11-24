@@ -82,7 +82,13 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         fontLarge = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 20);
         objects = new Array<>();
     
-        debugRenderer = new Box2DDebugRenderer(debugCFG.drawBodies, debugCFG.drawJoints, debugCFG.drawAABBs, debugCFG.drawInactiveBodies, debugCFG.drawVelocities, debugCFG.drawContacts);
+        debugRenderer = new Box2DDebugRenderer(
+                debugCFG.drawBodies,
+                debugCFG.drawJoints,
+                debugCFG.drawAABBs,
+                debugCFG.drawInactiveBodies,
+                debugCFG.drawVelocities,
+                debugCFG.drawContacts);
         
         GameScreen.getStage().addListener(new InputListener() {
             @Override
@@ -484,15 +490,15 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         debugVecs.clear();
     }
     
-    public static void addDebugText(String text, float x, float y, boolean project) {
-        addDebugText(text, (int) x, (int) y, project);
+    public static void addDebugText(String text, float x, float y) {
+        addDebugText(text, x, y, false);
     }
     
-    public static void addDebugText(String text, int x, int y, boolean project) {
+    public static void addDebugText(String text, float x, float y, boolean project) {
         if (project) {
             Vector3 screenPos = cam.project(new Vector3(x, y, 0));
-            x = (int) screenPos.x;
-            y = (int) screenPos.y;
+            x = screenPos.x;
+            y = screenPos.y;
         }
         debugTexts.add(new DebugText(text, x, y));
     }
