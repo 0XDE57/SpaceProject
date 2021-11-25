@@ -117,14 +117,24 @@ public class TextureFactory {
         float[][] heightMap = NoiseGen.generateWrappingNoise4D(seed, tileSize, scale, 1, 1, 1);
         for (int y = 0; y < pixmap.getHeight(); ++y) {
             for (int x = 0; x < pixmap.getHeight(); ++x) {
-                float value = heightMap[x][y];
 
-                pixmap.setColor(0, value, value, value);
+                int gX = (x + 100) % tileSize;
+                int gY = (y + 100) % tileSize;
+                float green = heightMap[gX][gY];
+
+                int bX = (x + 25) % tileSize;
+                int bY = (y + 25) % tileSize;
+                float blue = heightMap[bX][bY];
+                
+                float height = heightMap[x][y];
+                pixmap.setColor(0, green, blue, height);
                 pixmap.drawPixel(x, y);
             }
         }
 
         Texture tex = new Texture(pixmap);
+        //linear filtering samples neighboring cells = smoother (individual texels less obvious)
+        tex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         pixmap.dispose();
         return tex;
     }
@@ -133,7 +143,6 @@ public class TextureFactory {
         //todo: add some color for stars. should have some red and blue
         MathUtils.random.setSeed((long) (MyMath.getSeed(tileX, tileY) + (depth*1000)));
         
-        //pixmap = new Pixmap(tileSize, tileSize, Format.RGB565);
         Pixmap pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
         
         int numStars = 200;

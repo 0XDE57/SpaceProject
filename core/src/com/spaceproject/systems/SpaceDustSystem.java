@@ -2,9 +2,11 @@ package com.spaceproject.systems;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntitySystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -16,11 +18,15 @@ import java.util.ArrayList;
 
 public class SpaceDustSystem extends EntitySystem implements Disposable {
     
-    // TODO: apply shader and shift Z to bring dust to life?!?
+    // apply shader and shift Z to bring dust to life!
     // something along the lines of pixel = (1-value) * time
+    // this could be done entirely in a shader, but I can't figure out how to implement properly
+    // eg: https://www.shadertoy.com/view/XsX3zB
+    // this is CC / MIT so I could "steal" it
     
     private OrthographicCamera cam;
     private SpriteBatch spriteBatch;
+    private ShaderProgram shader;
     private Texture dustTexture;
     
     private ArrayList<Vector2> tiles;
@@ -30,13 +36,27 @@ public class SpaceDustSystem extends EntitySystem implements Disposable {
     private int surround = 4;// how many tiles to load around center tile
     private float zoomFade = CameraSystem.getZoomForLevel((byte)11);
     
+    private float shift = 0;
+    private final float shiftSpeed = 0.05f;
+    
     @Override
     public void addedToEngine(Engine engine) {
         cam = GameScreen.cam;
         spriteBatch = new SpriteBatch();
         
-        dustTexture = TextureFactory.generateSpaceDust2(MathUtils.random(Long.MAX_VALUE), tileSize, 50);
-        dustTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        ShaderProgram.pedantic = false;
+        shader = new ShaderProgram(Gdx.files.internal("shaders/heightShift.vsh"), Gdx.files.internal("shaders/heightShift.fsh"));
+        if (shader.isCompiled()) {
+            spriteBatch.setShader(shader);
+            Gdx.app.log(this.getClass().getSimpleName(), "shader compiled successfully!");
+        } else {
+            Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + shader.getLog());
+        }
+        
+        dustTexture = TextureFactory.generateSpaceDust2(MathUtils.random(Long.MAX_VALUE), tileSize, 200);
+        //dustTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        //todo: is it possible to use GL_REPEAT and make the draw space take up the screen instead of drawing the same texture repeatedly?
+        dustTexture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
     
         tiles = new ArrayList<>();
     }
@@ -44,28 +64,26 @@ public class SpaceDustSystem extends EntitySystem implements Disposable {
     @Override
     public void update(float delta) {
         //fade out when zoom out
-        float alpha = Interpolation.pow3In.apply(0, 1, 1 - (cam.zoom / zoomFade));
-        if (cam.zoom <= 1) {
-            alpha = 1;
-        } else if (cam.zoom >= zoomFade) {
-            alpha = 0;
-        }
+        float alpha = Interpolation.pow3In.apply(0, 0.6f, 1 - (cam.zoom / zoomFade));
         
-        if (alpha != 0) {
-            //update layer
+        //update and render
+        if (cam.zoom <= zoomFade) {
             centerTile = updateLayer(centerTile);
-    
-            //render
-            drawTiles(alpha);
+            drawTiles(alpha, delta);
         }
     }
-    
-    private void drawTiles(float alpha) {
-        spriteBatch.setColor(1, 1, 1, alpha);
+
+    private void drawTiles(float alpha, float delta) {
+        //shift shader
+        shift += shiftSpeed * delta;
+        shader.bind();
+        shader.setUniformf("u_shift", shift);
         
         //render
+        spriteBatch.setColor(1, 1, 1, alpha);
         spriteBatch.setProjectionMatrix(cam.combined);
         spriteBatch.begin();
+        
         for (Vector2 tile : tiles) {
             float drawX = (tile.x * tileSize);
             float drawY = (tile.y * tileSize);
