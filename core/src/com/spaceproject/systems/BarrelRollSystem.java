@@ -155,7 +155,6 @@ public class BarrelRollSystem extends IteratingSystem {
         //reset
         if (rollComp.animationTimer.canDoEvent()) {
             rollComp.flipState = BarrelRollComponent.FlipState.off;
-            //rollComp.activate = false;
             sprite3D.renderable.angle = 0;
             return;
         }
