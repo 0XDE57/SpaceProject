@@ -252,7 +252,7 @@ public class CameraSystem extends IteratingSystem {
     /** iter: -1,    0,   1, 2, 3, 4, 5, 6,  7, 8...
      *  fib:    ,    0,   1, 1, 2, 3, 5, 8, 13, 21..
      *  out:   0, 0.25, 0.5, 1, 2, 3, 5, 8, 13, 21.. */
-    private static float getZoomForLevel(byte level) {
+    public static float getZoomForLevel(byte level) {
         switch (level) {
             case -1: return 0;
             case 0: return 0.25f;

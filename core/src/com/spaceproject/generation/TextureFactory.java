@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.noise.NoiseGen;
 import com.spaceproject.noise.OpenSimplexNoise;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Tile;
@@ -83,17 +84,8 @@ public class TextureFactory {
     
     public static Texture generateSpaceDust(int tX, int tY, int tileSize) {
         Pixmap pixmap = new Pixmap(tileSize, tileSize, Format.RGBA8888);
-        /*
-        float[][] heightMap = NoiseGen.generateWrappingNoise4D(seed, tileSize, scale, octaves, persistence, lacunarity);
-        for (int y = 0; y < pixmap.getHeight(); ++y) {
-            for (int x = 0; x < pixmap.getHeight(); ++x) {
-                float value = heightMap[x][y];
-                pixmap.setColor(value, value, value, 1);
-                pixmap.drawPixel(x, y);
-            }
-        }*/
         
-        double featureSize = 100;
+        double featureSize = 50;
         for (int y = 0; y < pixmap.getHeight(); y++) {
             for (int x = 0; x < pixmap.getWidth(); x++) {
                 //position
@@ -114,6 +106,24 @@ public class TextureFactory {
             }
         }
         
+        Texture tex = new Texture(pixmap);
+        pixmap.dispose();
+        return tex;
+    }
+    
+    public static Texture generateSpaceDust2(long seed, int tileSize, float scale) {
+        Pixmap pixmap = new Pixmap(tileSize, tileSize, Format.RGBA8888);
+        
+        float[][] heightMap = NoiseGen.generateWrappingNoise4D(seed, tileSize, scale, 1, 1, 1);
+        for (int y = 0; y < pixmap.getHeight(); ++y) {
+            for (int x = 0; x < pixmap.getHeight(); ++x) {
+                float value = heightMap[x][y];
+
+                pixmap.setColor(0, value, value, value);
+                pixmap.drawPixel(x, y);
+            }
+        }
+
         Texture tex = new Texture(pixmap);
         pixmap.dispose();
         return tex;
