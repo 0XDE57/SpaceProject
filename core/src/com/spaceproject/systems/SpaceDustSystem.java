@@ -163,6 +163,7 @@ public class SpaceDustSystem extends EntitySystem implements Disposable {
     @Override
     public void dispose() {
         dustTexture.dispose();
+        spriteBatch.dispose();
     }
     
 }
