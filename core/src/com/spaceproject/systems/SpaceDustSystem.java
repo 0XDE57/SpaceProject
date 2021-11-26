@@ -53,7 +53,7 @@ public class SpaceDustSystem extends EntitySystem implements Disposable {
             Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + shader.getLog());
         }
         
-        dustTexture = TextureFactory.generateSpaceDust2(MathUtils.random(Long.MAX_VALUE), tileSize, 200);
+        dustTexture = TextureFactory.generateSpaceDust(MathUtils.random(Long.MAX_VALUE), tileSize, 200);
         //dustTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         //todo: is it possible to use GL_REPEAT and make the draw space take up the screen instead of drawing the same texture repeatedly?
         dustTexture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
