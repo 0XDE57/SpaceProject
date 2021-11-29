@@ -9,10 +9,10 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.spaceproject.components.AIComponent;
-import com.spaceproject.components.AstronomicalComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PhysicsComponent;
+import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.Sprite3DComponent;
@@ -316,7 +316,7 @@ public class ScreenTransitionSystem extends IteratingSystem implements IRequireG
         Gdx.app.debug(this.getClass().getSimpleName(), "Set entity to last known planet position: " + lastKnownPlanetPosition);
         
         //wait for planet to load (astronomical bodies are loaded by another system)
-        Family astro = Family.all(AstronomicalComponent.class, SeedComponent.class).get();
+        Family astro = Family.all(PlanetComponent.class, SeedComponent.class).get();
         ImmutableArray<Entity> astroObjects = getEngine().getEntitiesFor(astro);
         for (Entity astroEnt : astroObjects) {
             if (Mappers.seed.get(astroEnt).seed == desiredSeed) {

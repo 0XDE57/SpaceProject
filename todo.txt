@@ -179,7 +179,6 @@ And much more....problems for later.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ***the plan***: make combat fun. make flight and movement fun, and look a little better.
-Dear dairy: why is procrastination so addicting?
 focus! i keep jumping between ideas and features and never finish anything
 Spaceship combat will be a core part of gameplay. So lets focus on cleaning that up first.
 
@@ -205,6 +204,7 @@ Legend:
         maybe with a very slow wander
     [ ] space debri, mostly inconsequential small irregular bodies
     [x] fog layer (particles, or white noise parallax at 1.0?)
+        [ ] could have different layers that fade in and out at different depths when zoom out
         [ ] fog layer could use some more octaves. possible shader can just render another layer on top
             with some movement and multiply the layers together
         [?] what about a basic noise shader rendered to a quad on a layer above player?
@@ -230,6 +230,7 @@ Legend:
             texture and create child bodies from parent:
             https://www.emanueleferonato.com/2012/01/17/create-real-explosions-with-box2d-adding-textures/
             https://www.emanueleferonato.com/2012/03/05/breaking-objects-with-box2d-the-realistic-way/
+            https://thebookofshaders.com/12/
 
 [ ] JUICE!
     https://www.youtube.com/watch?v=Fy0aCDmgnxg
@@ -310,6 +311,7 @@ Legend:
     	http://www.alanzucconi.com/2015/07/01/vertex-and-fragment-shaders-in-unity3d/
     	http://www.alanzucconi.com/2016/01/27/arrays-shaders-heatmaps-in-unity3d/
     	http://wwwtyro.net/2016/10/22/2D-space-scene-procgen.html
+    	https://thebookofshaders.com/
 
 
 [...] rendering system
@@ -407,7 +409,12 @@ Legend:
 
 [ ] hyper drive
     [x] hyperdrive should be hold key to charge up instead of instant activate
-    [ ] different color particle effect for fire. different from normal and boost. maybe purple or green?
+    [ ] different bigger particle effect for when active
+        [x] different color particle effect for fire. different from normal and boost. maybe purple or green?
+    [ ] blur passing by background stars as if not clearing screen between frames: streaks
+    [ ] tune feel: give more impact
+        [ ] maybe some screen shake during
+        [ ] potential for playing with some shaders
 
 [...] particle effects!
     https://github.com/rockbite/talos
@@ -555,59 +562,6 @@ Legend:
         cannot find seed
         this bug is driving me insane, but there's still some transition and loading details to work out
         fixed!...but keep and eye on it.
-
-
-[...] config
-    [x] config manager, save and load all configs
-    [...] config UI
-            [OUT_OF_SCOPE] nice way to view and edit configs
-                [ ] fix layout
-                [ ] hook up load save undo
-    [OUT_OF_SCOPE] figure out serialization
-        [?] Ships are currently hardcoded by Entity factory
-            can we find a way to generate entities from config.
-                - consider ranges,
-                - consider space vs planet differences (eg: physics)...
-                - consider mobile vs desktop? maybe?
-            eg:
-            Ship {
-                SeedComponent{},
-                TransformComponent {
-
-                },
-                Sprite3DComponent {
-                    shipSize = rand range(x,y)
-                }
-                PhysicsComponent {
-                    linearDamping, (when on planet, will be 0 in space)
-                    angularDamping (when on planet, will be 0 in space)
-                }
-                CannonComponent {
-                    ammo,
-                    damage,
-                    fireRate,
-                    cannonSize,
-                    cannonVelocity,
-                },
-                HealthComponent {
-                    maxHealth
-                },
-                MapComponent {
-                    color,
-                    distance
-                }
-            }
-
-            and what about multi entity groups? eg System
-            createPlanetarySystem {
-                numPlanets = range(0,10),
-                distFromBarycenter = range(0, 10),
-                distFromNextEntity = range()
-            }
-
-            or in theory allow scripting?
-            lets not reinvent this wheel.
-            stop brain. this is getting ridiculous.
 
 
 [OUT_OF_SCOPE] "Persistence Engine" what to do with rest of universe when on a planet? or stuff going on on planets when we are in space?
@@ -839,7 +793,13 @@ Legend:
 
 [!] untested on 4k or ultra wide, my machines are all 1080p.
 
-[ ] devops n website n crap
+[ ] devops n website n legal crap n misc
+    [  ] prepare to branch and have a dev stream and "stable stream"
+        i need to learn git properly, im lazy just click the button
+        https://ohshitgit.com/
+    [ ] what are requirements to release on Steam?
+        [ ] do I need to trademark / copyright anything?
+        [ ] do I need to that ersb rating thingy?
     [?] move to LWJGL 3?
         https://libgdx.com/news/2021/07/devlog-7-lwjgl3
     [ ] move this todo list thingy to a trello or something?
@@ -848,6 +808,60 @@ Legend:
         [ ] dev blog thingy?
     [ ] wiki n documentation
     [ ] should prolly make some unit tests at some point...
+
+
+[...] config
+    [x] config manager, save and load all configs
+    [...] config UI
+            [OUT_OF_SCOPE] nice way to view and edit configs
+                [ ] fix layout
+                [ ] hook up load save undo
+    [OUT_OF_SCOPE] figure out serialization
+        [?] Ships are currently hardcoded by Entity factory
+            can we find a way to generate entities from config.
+                - consider ranges,
+                - consider space vs planet differences (eg: physics)...
+                - consider mobile vs desktop? maybe?
+            eg:
+            Ship {
+                SeedComponent{},
+                TransformComponent {
+
+                },
+                Sprite3DComponent {
+                    shipSize = rand range(x,y)
+                }
+                PhysicsComponent {
+                    linearDamping, (when on planet, will be 0 in space)
+                    angularDamping (when on planet, will be 0 in space)
+                }
+                CannonComponent {
+                    ammo,
+                    damage,
+                    fireRate,
+                    cannonSize,
+                    cannonVelocity,
+                },
+                HealthComponent {
+                    maxHealth
+                },
+                MapComponent {
+                    color,
+                    distance
+                }
+            }
+
+            and what about multi entity groups? eg System
+            createPlanetarySystem {
+                numPlanets = range(0,10),
+                distFromBarycenter = range(0, 10),
+                distFromNextEntity = range()
+            }
+
+            or in theory allow scripting?
+            lets not reinvent this wheel.
+            stop brain. this is getting ridiculous.
+
 
 [ ] DEBUG
     [ ] in game console

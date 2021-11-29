@@ -11,8 +11,10 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.ShaderComponent;
+import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
@@ -81,7 +83,8 @@ public class Sprite2DShaderRenderSystem extends IteratingSystem {
         //shift shader
         shift += shiftSpeed * deltaTime;
         starShader.bind();
-        starShader.setUniformf("u_shift", shift);
+        starShader.setUniformf("u_shift", (float) Math.sin(shift));
+        DebugSystem.addDebugText(MyMath.round(shift, 2) + " shifted -> " + MyMath.round(Math.sin(shift), 2), 500, 500);
         
         //render
         spriteBatch.setProjectionMatrix(cam.combined);
@@ -104,6 +107,16 @@ public class Sprite2DShaderRenderSystem extends IteratingSystem {
                 }
                 Gdx.app.debug(this.getClass().getSimpleName(), "shader set to: " + currentActiveShader);
             }
+    
+            StarComponent star = Mappers.star.get(entity);
+            if (star != null) {
+                //starShader.bind();
+                starShader.setUniformf("u_colorTemp",
+                        star.colorTemp[0],  // red
+                        star.colorTemp[1],  // green
+                        star.colorTemp[2]); // blue
+            }
+            
             
             render(entity);
             

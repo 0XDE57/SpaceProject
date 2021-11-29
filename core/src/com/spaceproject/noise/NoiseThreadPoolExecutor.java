@@ -21,8 +21,9 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
         
         listeners = new Array<>();
         activeTasks = Collections.synchronizedList(new ArrayList<Runnable>());
-        
-        Gdx.app.log(this.getClass().getSimpleName(), "NoiseThreadPool with " + getMaximumPoolSize() + " threads");
+    
+        Gdx.app.log(this.getClass().getSimpleName(), "Detected " + Runtime.getRuntime().availableProcessors() + " available CPUs");
+        Gdx.app.log(this.getClass().getSimpleName(), "Created ThreadPool with " + getMaximumPoolSize() + " threads");
     }
     
     

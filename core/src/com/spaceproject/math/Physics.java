@@ -17,6 +17,7 @@ import java.util.Arrays;
  *      https://en.wikipedia.org/wiki/CIE_1931_color_space#Color_matching_functions
  *
  *      Wolfram Alpha for testing and confirming formulas and values.
+ *      https://www.wolframalpha.com/widgets/view.jsp?id=5072e9b72faacd73c9a4e4cb36ad08d
  */
 public class Physics {
     
@@ -35,31 +36,6 @@ public class Physics {
     
     // G: Gravitational constant: 6.674×10−11 Nm^2 / kg^2 (newton square meters per kilogram squared)
     public static final double gravitationalConstant = 6.674 * (10 ^ -11);
-    // ---------------------------------
-    
-    
-    class Sun {
-        public static final String spectralClass = "GV2 (main sequence)";
-        
-        //mass: nominal solar mass parameter: GM⊙ = 1.3271244 × 10^20 m3 s−2 or 1.9885 × 10^30 kg.
-        public static final double mass = 1.9885 * (10 ^ 30);//kg
-    
-        //radius: nominal solar radius 	R⊙ = 6.957 × 10^8 m
-        public static final double radius = 6.957 * (10 ^ 8);//m
-        
-        //effective temperature
-        public static final double kelvin = 5772; //K
-        
-        //luminosity: 1 sol -> L⊙ = nominal solar luminosity: 	L⊙ = 3.828 × 10^26 W
-        public static final double luminosity = 3.828 * (10 ^ 26); //Watts
-    
-        //public static final age = 4.78 billion years
-        
-        //AU Astronomical unit: roughly the distance from Earth to the Sun ~1.495978707 × 10^11 m
-        public static final long astronomicalUnit = 149597870700L;
-    }
-    
-    
     
     /** Wien's displacement law: λₘT = b
      * Hotter things - peak at shorter wavelengths - bluer
@@ -103,64 +79,6 @@ public class Physics {
      */
     public static double frequencyToPhotonEnergy(double frequency) {
         return planckConstant * frequency;
-    }
-    
-    
-    public static void test() {
-        /* Black Body Radiation!
-         * Common color temperatures:
-         *      1900	Candle flame
-         *      2000	Sunlight at sunset
-         *      2800	Tungsten bulb—60 watt
-         *      2900	Tungsten bulb—200 watt
-         *      3300	Tungsten/halogen lamp
-         *      3780	Carbon arc lamp
-         *      5500	Sunlight plus skylight
-         *      5772    Sun "effective temperature"
-         *      6000	Xenon strobe light
-         *      6500	Overcast sky
-         *      7500	North sky light
-         */
-        double kelvin = 5772;
-        double wavelength = 502; // 597.2 terahertz | 2.47 eV
-        Gdx.app.debug("PhysicsDebug",kelvin + " K = " + MyMath.round(temperatureToWavelength(kelvin) * 1000000, 1) + " nm");
-        Gdx.app.debug("PhysicsDebug",wavelength+ " nm = " + MyMath.round(wavelengthToTemperature(wavelength) * 1000000, 1) + " K");
-        Gdx.app.debug("PhysicsDebug","temp(wave(" + kelvin + ")) = " + wavelengthToTemperature(temperatureToWavelength(kelvin)));
-        Gdx.app.debug("PhysicsDebug","wave(temp(" + wavelength +")) = " + temperatureToWavelength(wavelengthToTemperature(wavelength)));
-    
-        Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + MyMath.round(wavelengthToFrequency(wavelength) / 1000, 1) + " THz");
-        //todo: photon energy calculations are returning -1.7410894895E8 eV, expecting 2.47 eV
-        //bug: planck is coming out as -291.54400000000004. expected: 6.626 * (10 ^ -34)
-        //looks like we have hit the Double.MIN_EXPONENT...
-        Gdx.app.debug("PhysicsDebug",
-                "double: [" + Double.MIN_VALUE + " to " + Double.MAX_VALUE +
-                "] exp: [" + Double.MIN_EXPONENT + " to " + Double.MAX_EXPONENT + "]");
-        Gdx.app.debug("PhysicsDebug", "planck: " + planckConstant);
-        Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + MyMath.round(frequencyToPhotonEnergy(wavelengthToFrequency(wavelength)),2) + " eV");
-        Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + MyMath.round(wavelengthToPhotonEnergy((wavelength)),2) + " eV");
-        
-        /* Tristimulus values: The human eye with normal vision has three kinds of cone cells that sense light, having peaks of spectral sensitivity in
-         *      short   420 nm – 440 nm
-         *      middle  530 nm – 540 nm
-         *      long    560 nm – 580 nm
-         *
-         * Typical color ranges:
-         *      Color   Wavelength(nm) Frequency(THz)
-         *      Red     620-750        484-400
-         *      Orange  590-620        508-484
-         *      Yellow  570-590        526-508
-         *      Green   495-570        606-526
-         *      Blue    450-495        668-606
-         *      Violet  380-450        789-668
-         */
-        double gamma = 0.8;
-        int red = 650;
-        int green = 540;
-        int blue = 470;
-        Gdx.app.debug("PhysicsDebug",  wavelength + " -> " + Arrays.toString(wavelengthToRGB(wavelength, gamma)));
-        Gdx.app.debug("PhysicsDebug",  red + " -> " + Arrays.toString(wavelengthToRGB(red, gamma)));//red-ish
-        Gdx.app.debug("PhysicsDebug",  green + " -> " + Arrays.toString(wavelengthToRGB(green, gamma)));//green-ish
-        Gdx.app.debug("PhysicsDebug",  blue + "  -> " + Arrays.toString(wavelengthToRGB(blue, gamma)));//blue-ish
     }
     
     /** approximate RGB [0-255] values for wavelengths between 380 nm and 780 nm
@@ -220,4 +138,94 @@ public class Physics {
         rgb[2] = blue  == 0.0 ? 0 : (int)Math.round(intensityMax * Math.pow(blue * factor, gamma));
         return rgb;
     }
+    
+    /** approximate RGB [0-255] values for wavelengths between 380 nm and 780 nm with a default gamma of 0.8 */
+    public static int[] wavelengthToRGB(double wavelength) {
+        return wavelengthToRGB(wavelength, 0.8);
+    }
+    
+    public static void test() {
+        /* Black Body Radiation!
+         * Common color temperatures:
+         *      1900	Candle flame
+         *      2000	Sunlight at sunset
+         *      2800	Tungsten bulb—60 watt
+         *      2900	Tungsten bulb—200 watt
+         *      3300	Tungsten/halogen lamp
+         *      3780	Carbon arc lamp
+         *      5500	Sunlight plus skylight
+         *      5772    Sun "effective temperature"
+         *      6000	Xenon strobe light
+         *      6500	Overcast sky
+         *      7500	North sky light
+         */
+        double kelvin = 5772;
+        double wavelength = 502; // 597.2 terahertz | 2.47 eV
+        Gdx.app.debug("PhysicsDebug",kelvin + " K = " + MyMath.round(temperatureToWavelength(kelvin) * 1000000, 1) + " nm");
+        Gdx.app.debug("PhysicsDebug",wavelength+ " nm = " + MyMath.round(wavelengthToTemperature(wavelength) * 1000000, 1) + " K");
+        Gdx.app.debug("PhysicsDebug","temp(wave(" + kelvin + ")) = " + wavelengthToTemperature(temperatureToWavelength(kelvin)));
+        Gdx.app.debug("PhysicsDebug","wave(temp(" + wavelength +")) = " + temperatureToWavelength(wavelengthToTemperature(wavelength)));
+        
+        Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + MyMath.round(wavelengthToFrequency(wavelength) / 1000, 1) + " THz");
+        //todo: photon energy calculations are returning -1.7410894895E8 eV, expecting 2.47 eV
+        //bug: planck is coming out as -291.54400000000004. expected: 6.626 * (10 ^ -34)
+        //looks like we have hit the Double.MIN_EXPONENT...
+        Gdx.app.debug("PhysicsDebug",
+                "double: [" + Double.MIN_VALUE + " to " + Double.MAX_VALUE +
+                        "] exp: [" + Double.MIN_EXPONENT + " to " + Double.MAX_EXPONENT + "]");
+        Gdx.app.debug("PhysicsDebug", "planck: " + planckConstant);
+        Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + MyMath.round(frequencyToPhotonEnergy(wavelengthToFrequency(wavelength)),2) + " eV");
+        Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + MyMath.round(wavelengthToPhotonEnergy((wavelength)),2) + " eV");
+        
+        /* Tristimulus values: The human eye with normal vision has three kinds of cone cells that sense light, having peaks of spectral sensitivity in
+         *      short   420 nm – 440 nm
+         *      middle  530 nm – 540 nm
+         *      long    560 nm – 580 nm
+         *
+         * Typical color ranges:
+         *      Color   Wavelength(nm) Frequency(THz)
+         *      Red     620-750        484-400
+         *      Orange  590-620        508-484
+         *      Yellow  570-590        526-508
+         *      Green   495-570        606-526
+         *      Blue    450-495        668-606
+         *      Violet  380-450        789-668
+         */
+        double gamma = 0.8;
+        int red = 650;
+        int green = 540;
+        int blue = 470;
+        Gdx.app.debug("PhysicsDebug",  wavelength + " -> " + Arrays.toString(wavelengthToRGB(wavelength, gamma)));
+        Gdx.app.debug("PhysicsDebug",  red + " -> " + Arrays.toString(wavelengthToRGB(red, gamma)));//red-ish
+        Gdx.app.debug("PhysicsDebug",  green + " -> " + Arrays.toString(wavelengthToRGB(green, gamma)));//green-ish
+        Gdx.app.debug("PhysicsDebug",  blue + "  -> " + Arrays.toString(wavelengthToRGB(blue, gamma)));//blue-ish
+    }
+    
+    public static class Sun {
+        public static final String spectralClass = "GV2 (main sequence)";
+        
+        //mass: nominal solar mass parameter: GM⊙ = 1.3271244 × 10^20 m3 s−2 or 1.9885 × 10^30 kg.
+        public static final double mass = 1.9885 * (10 ^ 30);//kg
+        
+        //radius: nominal solar radius 	R⊙ = 6.957 × 10^8 m
+        public static final double radius = 6.957 * (10 ^ 8);//m
+        
+        //effective temperature
+        public static final double kelvin = 5772; //K
+        
+        //5772K = 502nm = 597 THz = green light
+        //so wait...is the sun peak wavelength actually green? why it look yellow
+        //
+        //https://www.e-education.psu.edu/meteo300/node/683
+        public static final double peakWavelength = temperatureToWavelength(kelvin) * 1000000;
+        
+        //luminosity: 1 sol -> L⊙ = nominal solar luminosity: 	L⊙ = 3.828 × 10^26 W
+        public static final double luminosity = 3.828 * (10 ^ 26); //Watts
+        
+        //public static final age = 4.78 billion years
+        
+        //AU Astronomical unit: roughly the distance from Earth to the Sun ~1.495978707 × 10^11 m
+        public static final long astronomicalUnit = 149597870700L;
+    }
+    
 }
