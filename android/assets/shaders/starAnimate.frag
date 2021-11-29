@@ -15,6 +15,7 @@ void main() {
 	// incoming image is assumed to be black and white.
 	// so only need to check one channel because the r,g,b values are equal.
 	// if had color would require average. eg: average = (color.r + color.g + color.b) / 3.0;
+	// todo: calculate color from black body radiation
 	if (shiftedColor.r > 0.5) {
 		//set to shades of yellow
 		shiftedColor.b = 0.0;
@@ -24,6 +25,13 @@ void main() {
 		shiftedColor.g = 0.0;
 		shiftedColor.b = 0.0;
 	}
+
+	//todo: smooth edges, something along the lines of
+	//vec2 st = gl_FragCoord.xy/u_resolution;
+	//float dist = distance(st, vec2(0.5));
+	//float radius = half texture width/height
+	//float fade = 1.0 - smoothstep(0.0, radius, dist);
+	//color.a = color.a * fade
 
 	gl_FragColor = vec4(shiftedColor, color.a);
 }

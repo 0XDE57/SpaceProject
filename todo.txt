@@ -205,6 +205,8 @@ Legend:
         maybe with a very slow wander
     [ ] space debri, mostly inconsequential small irregular bodies
     [x] fog layer (particles, or white noise parallax at 1.0?)
+        [ ] fog layer could use some more octaves. possible shader can just render another layer on top
+            with some movement and multiply the layers together
         [?] what about a basic noise shader rendered to a quad on a layer above player?
 
 [ ] add basic asteroids (arbitrary poly)
@@ -257,6 +259,9 @@ Legend:
         [ ] player eyes facing forward cone light
         [ ] lava on planets can be a light source
     [...] better star rendering
+        [ ] smooth out image
+            could extend the source star radius on texture (or simply full rectangle), then simply set the alpha drop off in the shader
+        [ ] could shift the noise vertically and horizontally
         [ ] shift should go continually outward, not roll back inward (sinewave)
         [ ] better colors
             [ ] give stars random temperature between: 1000 - 50,000 Kelvin
@@ -273,12 +278,12 @@ Legend:
                 N 	1,300–2,000 K 	    red
                 S 	1,300–2,000 K 	    red
                 https://simple.wikipedia.org/wiki/Stellar_classification
-            [ ] Make function to convert temperature to color
+            [x] Make function to convert temperature to color
                 Wien's Law: tells us that objects of different temperatures emit spectra with peaks at different wavelengths.
                     Hotter things - peak at shorter wavelengths - bluer
                     Cooler things - peak at longer wavelengths - redder
             [ ] luminosity?
-        [ ] could add more noise layers
+        [ ] could add more noise layers: octaves
         [ ] needs flares!!!
             [ ] some sort of texture / shader to make firery splines
             [ ] outward firing firery particles
@@ -310,6 +315,8 @@ Legend:
 [...] rendering system
     [ ] decouple HUD from stage -> move scene2D stage out of HUD into own system
     [x] fix space parallax system rendering
+        [ ] background layer stars are just white currently
+            give them a random temperature then convert wavelength to rgb: Black body radiation!
         [x] i think it needs to be rendered with a separate camera / viewport as to not zoom out with main camera
             the background space image needs to be "very far away", give the illusion.
         [ ] generating pixmaps on the fly is slow.

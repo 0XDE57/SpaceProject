@@ -28,6 +28,7 @@ import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.generation.Galaxy;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.math.Physics;
 import com.spaceproject.noise.NoiseManager;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.utility.DebugUtil;
@@ -67,6 +68,8 @@ public class GameScreen extends MyScreenAdapter {
         Gdx.app.setLogLevel(Application.LOG_DEBUG);
         //Gdx.app.setLogLevel(Application.LOG_INFO);
         
+        //test
+        Physics.test();
         
         initUI();
         
