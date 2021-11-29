@@ -49,8 +49,8 @@ public class CelestialConfig extends Config {
         //star gen
         minStarSize = 60;
         maxStarSize = 250;
-        minStarRot = 0.002f;
-        maxStarRot = 0.06f;
+        minStarRot = 0.0002f;
+        maxStarRot = 0.006f;
         
         //planet gen
         minPlanetSize = 20;

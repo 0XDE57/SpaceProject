@@ -45,7 +45,7 @@ public class SpaceDustSystem extends EntitySystem implements Disposable {
         spriteBatch = new SpriteBatch();
         
         ShaderProgram.pedantic = false;
-        shader = new ShaderProgram(Gdx.files.internal("shaders/heightShift.vsh"), Gdx.files.internal("shaders/heightShift.fsh"));
+        shader = new ShaderProgram(Gdx.files.internal("shaders/heightShift.vert"), Gdx.files.internal("shaders/heightShift.frag"));
         if (shader.isCompiled()) {
             spriteBatch.setShader(shader);
             Gdx.app.log(this.getClass().getSimpleName(), "shader compiled successfully!");

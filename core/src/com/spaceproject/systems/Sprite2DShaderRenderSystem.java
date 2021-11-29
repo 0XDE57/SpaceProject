@@ -48,7 +48,7 @@ public class Sprite2DShaderRenderSystem extends IteratingSystem {
     
         //load shaders
         ShaderProgram.pedantic = false;
-        starShader = new ShaderProgram(Gdx.files.internal("shaders/starAnimate.vsh"), Gdx.files.internal("shaders/starAnimate.fsh"));
+        starShader = new ShaderProgram(Gdx.files.internal("shaders/starAnimate.vert"), Gdx.files.internal("shaders/starAnimate.frag"));
         if (starShader.isCompiled()) {
             //load by default for now
             spriteBatch.setShader(starShader);
@@ -57,7 +57,7 @@ public class Sprite2DShaderRenderSystem extends IteratingSystem {
             Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + starShader.getLog());
         }
         
-        grayscaleShader = new ShaderProgram(Gdx.files.internal("shaders/grayscale.vsh"), Gdx.files.internal("shaders/grayscale.fsh"));
+        grayscaleShader = new ShaderProgram(Gdx.files.internal("shaders/grayscale.vert"), Gdx.files.internal("shaders/grayscale.frag"));
         if (starShader.isCompiled()) {
             //spriteBatch.setShader(starShader);
             Gdx.app.log(this.getClass().getSimpleName(), "shader compiled successfully!");

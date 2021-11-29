@@ -66,7 +66,26 @@ Data Directory (...\SpaceProject\android\assets)
             MinimapConfig: define colors and behaviors for minimap
             UIConfig: define ui element colors and positions
     \fonts: fonts for UI
-    \shaders: not really used yet, just playing around
+        .tff   : True Type Fonts
+    \shaders: GLSL shader files (name convention: reference GLSL compiler extensions)
+
+        .vert  : vertex shader
+        .tesc  : tessellation control shader
+        .tese  : tessellation evaluation shader
+        .geom  : geometry shader
+        .frag  : fragment shader
+        .comp  : compute shader
+        .mesh  : mesh shader
+        .task  : task shader
+        .rgen  : ray generation shader
+        .rint  : ray intersection shader
+        .rahit : ray any hit shader
+        .rchit : ray closest hit shader
+        .rmiss : ray miss shader
+        .rcall : ray callable shader
+        .glsl  : .vert.glsl, .tesc.glsl, ..., .comp.glsl compound suffixes
+        .hlsl  : .vert.hlsl, .tesc.hlsl, ..., .comp.hlsl compound suffixes
+
     \sounds: (todo)
         each sound effect gets it's own folder.
             if no sound in folder, dont play
@@ -237,7 +256,37 @@ Legend:
         [ ] engine fire can be a light source
         [ ] player eyes facing forward cone light
         [ ] lava on planets can be a light source
-    [ ] better star rendering
+    [...] better star rendering
+        [ ] shift should go continually outward, not roll back inward (sinewave)
+        [ ] better colors
+            [ ] give stars random temperature between: 1000 - 50,000 Kelvin
+                "Stars vary in surface temperature from about 2,000 to 40,000 kelvin"
+                Harvard spectral classification
+                O	≥ 33,000 K 	        blue
+                B 	10,000–33,000 K 	blue white
+                A 	7,500–10,000 K 	    white
+                F 	6,000–7,500 K 	    yellow white
+                G 	5,200–6,000 K 	    yellow
+                K 	3,700–5,200 K 	    orange
+                M 	2,000–3,700 K 	    red
+                R 	1,300–2,000 K 	    red
+                N 	1,300–2,000 K 	    red
+                S 	1,300–2,000 K 	    red
+                https://simple.wikipedia.org/wiki/Stellar_classification
+            [ ] Make function to convert temperature to color
+                Wien's Law: tells us that objects of different temperatures emit spectra with peaks at different wavelengths.
+                    Hotter things - peak at shorter wavelengths - bluer
+                    Cooler things - peak at longer wavelengths - redder
+            [ ] luminosity?
+        [ ] could add more noise layers
+        [ ] needs flares!!!
+            [ ] some sort of texture / shader to make firery splines
+            [ ] outward firing firery particles
+        [ ] varying brightness, twinkle by increasing decreasing brightness pseudo-random sine wave, or rather 1d noise
+        [ ] lighting. sun as source of light lighting up planets and ships around it
+            [ ] apply shadow on side of planets not facing star
+                [ ] could even do eclipse if another planet / moon in between star
+            [ ] apply light source on 3D models would make 3D barrel roll rotation more clear with shadowing
         it's currently static just like planets, but I want it to shift the z, exactly like the title screen background
             com.spaceproject.screens.animations.NoiseAnim
         could be done on gpu even:
@@ -259,6 +308,7 @@ Legend:
 
 
 [...] rendering system
+    [ ] decouple HUD from stage -> move scene2D stage out of HUD into own system
     [x] fix space parallax system rendering
         [x] i think it needs to be rendered with a separate camera / viewport as to not zoom out with main camera
             the background space image needs to be "very far away", give the illusion.
@@ -274,6 +324,8 @@ Legend:
             https://github.com/wwwtyro/space-2d
             [...] POC star shader with fullscreen quad in separate project
                 https://github.com/0XDE57/gdx-shadertoy
+                    helpful for porting shadertoys to libgdx:
+                                    https://gamedev.stackexchange.com/questions/186477/why-dont-shadertoy-shaders-work-with-libgdx
                 https://www.youtube.com/watch?v=rvDo9LvfoVE
                 [OUT_OF_SCOPE] Bonus would be reallly cool but overkill would be to feed audio track into
                 the shader so it can react to the music. apply FFT -> visualizer. pulse stars to the beat?
@@ -551,7 +603,7 @@ Legend:
             stop brain. this is getting ridiculous.
 
 
-[?] "Persistence Engine" what to do with rest of universe when on a planet? or stuff going on on planets when we are in space?
+[OUT_OF_SCOPE] "Persistence Engine" what to do with rest of universe when on a planet? or stuff going on on planets when we are in space?
     genericize and make work land and take off work for AI, system doesn't support non-player world switching
     dumb loop where AI lands on planet, kept in some kind of background
     processing state/alt engine, wait a second then take off to test all is working correctly
@@ -621,38 +673,6 @@ Legend:
         [ ] player vs AI
         [ ] AI vs AI
 
-
-[...] investigate possible bug in ashley.
-    Found 2 weird cases related to families / listeners.
-    I would expect all references to a system/family membership to be when a system is removed from the engine.
-    This may be intended behavior and I am using ashley wrong, need to reproduce these in a new project to confirm...
-    In the context of this game, both occurrences where triggered when going transitioning between space/world which involves loading and unloading specific systems.
-    https://github.com/0XDE57/SpaceProject/commit/012bd0bdea4ef5c95b6f8b9454e96a7007d4c7ac
-    [A] scenario A:
-        1. create engine.
-        2. add a new instance of system (SystemA) to engine that subscribes to a family
-        3. create a new engine (re-instantiate the original)
-        4. add a new instance of system (SystemA) to engine that subscribes to a family.
-        5. this new system will not pick up those entities in the family, where it should
-        * solution: engine.removeAllEntities(); before re-instantiating engine and system. this resolves the issue.
-        Reproduced in ReproFamilyBugTest.class;
-
-    [B] scenario B:
-        1. create engine
-        2. add a new instance of a system that is an entity listener
-        3. remove that system
-        4. add a new instance of that system
-        5. remove again = crash on System.entityRemoved() when Engine.removeAllEntities():
-            Exception in thread "LWJGL Application" java.lang.NullPointerException
-            	at com.spaceproject.systems.SpaceLoadingSystem.entityRemoved(SpaceLoadingSystem.java:91)
-            	at com.badlogic.ashley.core.FamilyManager.updateFamilyMembership(FamilyManager.java:117)
-            	at com.badlogic.ashley.core.Engine.removeEntityInternal(Engine.java:223)
-            	at com.badlogic.ashley.core.Engine$EngineEntityListener.entityRemoved(Engine.java:257)
-            	at com.badlogic.ashley.core.EntityManager.removeEntityInternal(EntityManager.java:110)
-            	at com.badlogic.ashley.core.EntityManager.removeEntity(EntityManager.java:53)
-            	at com.badlogic.ashley.core.EntityManager.removeAllEntities(EntityManager.java:72)
-            	at com.badlogic.ashley.core.Engine.removeAllEntities(Engine.java:98)
-        * Solution: engine.removeEntityListener(the system) when removing system
 
 [...] Space Ship
     [...] COMBAT
@@ -803,6 +823,24 @@ Legend:
     [ ] player manager/inventory/shipbuilder thingy
     [ ] career event timeline stats
 
+[ ] warning when launch
+    WARNING: An illegal reflective access operation has occurred
+    WARNING: Illegal reflective access by org.lwjgl.LWJGLUtil$3 (file:/home/logica/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.3/3df168ac74e4a8c96562cdff24ad352e255bf89c/lwjgl-2.9.3.jar) to method java.lang.ClassLoader.findLibrary(java.lang.String)
+    WARNING: Please consider reporting this to the maintainers of org.lwjgl.LWJGLUtil$3
+    WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+    WARNING: All illegal access operations will be denied in a future release
+
+[!] untested on 4k or ultra wide, my machines are all 1080p.
+
+[ ] devops n website n crap
+    [?] move to LWJGL 3?
+        https://libgdx.com/news/2021/07/devlog-7-lwjgl3
+    [ ] move this todo list thingy to a trello or something?
+    [ ] need an icon. its still the default libgdx logo...
+    [ ] make a page for website spaceproject.xyz or make a github io?
+        [ ] dev blog thingy?
+    [ ] wiki n documentation
+    [ ] should prolly make some unit tests at some point...
 
 [ ] DEBUG
     [ ] in game console
@@ -846,18 +884,6 @@ Legend:
     [ ] FPS,memory,entity graph
         [ ] profiler: https://github.com/libgdx/ashley/pull/215
 
-[ ] warning when launch
-    WARNING: An illegal reflective access operation has occurred
-    WARNING: Illegal reflective access by org.lwjgl.LWJGLUtil$3 (file:/home/logica/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.3/3df168ac74e4a8c96562cdff24ad352e255bf89c/lwjgl-2.9.3.jar) to method java.lang.ClassLoader.findLibrary(java.lang.String)
-    WARNING: Please consider reporting this to the maintainers of org.lwjgl.LWJGLUtil$3
-    WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
-    WARNING: All illegal access operations will be denied in a future release
-
-[?] move to LWJGL 3?
-    https://libgdx.com/news/2021/07/devlog-7-lwjgl3
-
-[!] untested on 4k or ultra wide, my machines are all 1080p.
-
 [ ] optimization
     https://github.com/libgdx/libgdx/wiki/Memory-management
     [ ] look at pooled engine/sprites
@@ -872,12 +898,37 @@ Legend:
     http://unseen-academy.de/snippet_component_system.html
     https://github.com/junkdog/entity-system-benchmarks#entity-system-benchmarks
 
-[ ] devops n website n crap
-    [ ] need an icon. its still the default libgdx logo...
-    [ ] make a page for website spaceproject.xyz or make a github io?
-        [ ] dev blog thingy?
-    [ ] wiki n documentation
-    [ ] should prolly make some unit tests at some point...
+[...] investigate possible bug in ashley.
+    Found 2 weird cases related to families / listeners.
+    I would expect all references to a system/family membership to be when a system is removed from the engine.
+    This may be intended behavior and I am using ashley wrong, need to reproduce these in a new project to confirm...
+    In the context of this game, both occurrences where triggered when going transitioning between space/world which involves loading and unloading specific systems.
+    https://github.com/0XDE57/SpaceProject/commit/012bd0bdea4ef5c95b6f8b9454e96a7007d4c7ac
+    [A] scenario A:
+        1. create engine.
+        2. add a new instance of system (SystemA) to engine that subscribes to a family
+        3. create a new engine (re-instantiate the original)
+        4. add a new instance of system (SystemA) to engine that subscribes to a family.
+        5. this new system will not pick up those entities in the family, where it should
+        * solution: engine.removeAllEntities(); before re-instantiating engine and system. this resolves the issue.
+        Reproduced in ReproFamilyBugTest.class;
+
+    [B] scenario B:
+        1. create engine
+        2. add a new instance of a system that is an entity listener
+        3. remove that system
+        4. add a new instance of that system
+        5. remove again = crash on System.entityRemoved() when Engine.removeAllEntities():
+            Exception in thread "LWJGL Application" java.lang.NullPointerException
+            	at com.spaceproject.systems.SpaceLoadingSystem.entityRemoved(SpaceLoadingSystem.java:91)
+            	at com.badlogic.ashley.core.FamilyManager.updateFamilyMembership(FamilyManager.java:117)
+            	at com.badlogic.ashley.core.Engine.removeEntityInternal(Engine.java:223)
+            	at com.badlogic.ashley.core.Engine$EngineEntityListener.entityRemoved(Engine.java:257)
+            	at com.badlogic.ashley.core.EntityManager.removeEntityInternal(EntityManager.java:110)
+            	at com.badlogic.ashley.core.EntityManager.removeEntity(EntityManager.java:53)
+            	at com.badlogic.ashley.core.EntityManager.removeAllEntities(EntityManager.java:72)
+            	at com.badlogic.ashley.core.Engine.removeAllEntities(Engine.java:98)
+        * Solution: engine.removeEntityListener(the system) when removing system
 
 
 
