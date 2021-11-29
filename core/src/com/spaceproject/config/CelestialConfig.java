@@ -56,7 +56,7 @@ public class CelestialConfig extends Config {
         minPlanetSize = 20;
         maxPlanetSize = 200;
         minPlanetRot = 0.015f;
-        maxPlanetRot = 0.09f;
+        maxPlanetRot = 0.03f;
         minPlanetTangentialSpeed = 1f;
         maxPlanetTangentialSpeed = 15;
         //maxPlanetTangentialSpeed = minPlanetTangentialSpeed = 10000;//debug force high speed
