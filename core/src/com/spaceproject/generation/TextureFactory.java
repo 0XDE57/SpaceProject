@@ -169,7 +169,38 @@ public class TextureFactory {
         return t;
     }
     
-    public static Texture generateStar(long seed, int radius) {
+    /** generate circular grayscale heightmap to represent star and features */
+    public static Texture generateStar(long seed, int radius, double scale) {
+        OpenSimplexNoise noise = new OpenSimplexNoise(seed);
+        //Pixmap pixmap = new Pixmap(radius * 2, radius * 2, Format.RGBA4444);
+        Pixmap pixmap = new Pixmap(radius * 2, radius * 2, Format.RGBA8888);
+        
+        // draw circle
+        pixmap.setColor(0.5f, 0.5f, 0.5f, 1);
+        pixmap.fillCircle(radius, radius, radius - 1);
+        
+        //add layer of noise
+        for (int y = 0; y < pixmap.getHeight(); ++y) {
+            for (int x = 0; x < pixmap.getWidth(); ++x) {
+                //only draw on circle
+                if (pixmap.getPixel(x, y) != 0) {
+                    double nx = x / scale, ny = y / scale;
+                    float i = (float)noise.eval(nx, ny, 0);
+                    i = (i * 0.5f) + 0.5f; //normalize from range [-1:1] to [0:1]
+                    pixmap.setColor(i, i, i, 1);
+                    pixmap.drawPixel(x, y);
+                }
+            }
+        }
+        
+        Texture texture = new Texture(pixmap);
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        pixmap.dispose();
+        return texture;
+    }
+    
+    /** old style hard coded color */
+    public static Texture generateStaticStar(long seed, int radius) {
         OpenSimplexNoise noise = new OpenSimplexNoise(seed);
         Pixmap pixmap = new Pixmap(radius * 2, radius * 2, Format.RGBA4444);
         
@@ -185,21 +216,23 @@ public class TextureFactory {
                 //only draw on circle
                 if (pixmap.getPixel(x, y) != 0) {
                     double nx = x / scale, ny = y / scale;
-                    double i = noise.eval(nx, ny, 0);
-                    i = (i * 0.5) + 0.5; //convert from range [-1:1] to [0:1]
+                    float i = (float)noise.eval(nx, ny, 0);
+                    i = (i * 0.5f) + 0.5f; //normalized from range [-1:1] to [0:1]
+                    
                     if (i > 0.5f) {
-                        pixmap.setColor(new Color(1, 1, 0, (float) i));
+                        pixmap.setColor(1, 1, 0, i);
                     } else {
-                        pixmap.setColor(new Color(1, 0, 0, (float) (1 - i)));
+                        pixmap.setColor(1, 0, 0, (1 - i));
                     }
+                    pixmap.setColor(i, i, i, 1);
                     pixmap.drawPixel(x, y);
                 }
             }
         }
         
-        Texture t = new Texture(pixmap);
+        Texture texture = new Texture(pixmap);
         pixmap.dispose();
-        return t;
+        return texture;
     }
     //endregion
     

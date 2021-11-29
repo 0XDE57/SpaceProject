@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
+import com.spaceproject.components.ShaderComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
@@ -31,7 +32,7 @@ public class Sprite2DRenderSystem extends IteratingSystem {
     
     
     public Sprite2DRenderSystem() {
-        super(Family.all(TextureComponent.class, TransformComponent.class).get());
+        super(Family.all(TextureComponent.class, TransformComponent.class).exclude(ShaderComponent.class).get());
     
         cam = GameScreen.cam;
         spriteBatch = new SpriteBatch();

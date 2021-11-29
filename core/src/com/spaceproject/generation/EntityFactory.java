@@ -27,6 +27,7 @@ import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.SeedComponent;
+import com.spaceproject.components.ShaderComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
@@ -150,9 +151,14 @@ public class EntityFactory {
         // create star texture
         TextureComponent texture = new TextureComponent();
         int radius = MathUtils.random(celestCFG.minStarSize, celestCFG.maxStarSize);
-        texture.texture = TextureFactory.generateStar(seed, radius);
+        texture.texture = TextureFactory.generateStar(seed, radius, 20);
         texture.scale = 4;
         entity.add(texture);
+        
+        // shader
+        ShaderComponent shader = new ShaderComponent();
+        shader.shaderType = ShaderComponent.ShaderType.star;
+        entity.add(shader);
         
         // set position
         TransformComponent transform = new TransformComponent();

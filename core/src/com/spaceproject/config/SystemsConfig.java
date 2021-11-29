@@ -27,7 +27,7 @@ public class SystemsConfig extends Config {
         systems = new ArrayList<>();
         systems.add(new SysCFG(ClearScreenSystem.class, 0, false, true, true, true, true));
         
-        //---input---
+        //---user input---
         systems.add(new SysCFG(DesktopInputSystem.class, 10, true, true, true, true, false));
         systems.add(new SysCFG(ControllerInputSystem.class, 15, true, true, true, true, true));
         systems.add(new SysCFG(MobileInputSystem.class, 20, true, true, true, false, true));
@@ -50,36 +50,43 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(WorldWrapSystem.class, 65, true, false, true, true, true));
         
         systems.add(new SysCFG(FixedPhysicsSystem.class, 70, true, true, true, true, true));
+    
+        //---loading---
+        systems.add(new SysCFG(WorldLoadingSystem.class, 90, true, false, true, true, true));
+        systems.add(new SysCFG(SpaceLoadingSystem.class, 91, false, true, false, true, true));
+        //systems.add(new SysCFG(SpaceRespawnSystem.class, ??, true, true, false, true, true));
+        //systems.add(new SysCFG(PlanetarySystemEntitySpawner.class, ??, true, true, false, true, true));
         
     
-    
         //----render----
-        //todo: rendering pipeline
-        // - screen clear
-        // - cam update
-        // - asteroid renderer -> shape render pre sprite
-        // - sprite 2D renderer
-        // - sprite 3D renderer
+        // Rendering Pipeline: render order (priority) is important for which layer draws on top of which layer.
+        //  [?] could have multilayer rendering if needed:
+        //      eg: particle layer pre sprite (under sprites), particle layer post sprite (over sprites)
+        // - clear screen -> repaint between frames to clear display
+        // - cam update -> update, zoom and move camera
+        // - sprite 2D renderer -> render regular textures no shader
+        // - sprite 2D shader renderer -> render textures with shader applied
+        // - todo: asteroid renderer -> poly shape render
+        // - sprite 3D renderer -> render 3d meshes with no shader
+        // - todo: sprite 3D shader renderer -> render 3d meshes with shader applied
         // - shield renderer -> shape render post sprite (possible shader for glow? box2d-lights?)
-        // - particle renderer -> post sprite
-        //could have multilayer rendering if needed in rendering pipeline: particle layer pre sprite (under sprites), particle layer post sprite (over sprites)
-        systems.add(new SysCFG(CameraSystem.class, 80, true, true, true, true, true));
-        systems.add(new SysCFG(SpaceParallaxSystem.class, 85, false, true, false, true, true));
-        systems.add(new SysCFG(SpaceDustSystem.class, 86, false, true, false, true, true));
-        systems.add(new SysCFG(WorldRenderingSystem.class, 87, false, false, true, true, true));
-        systems.add(new SysCFG(Sprite2DRenderSystem.class, 90, false, true, true, true, true));
-        systems.add(new SysCFG(Sprite3DRenderSystem.class, 91, false, true, true, true, true));
-        systems.add(new SysCFG(ShieldRenderSystem.class, 100, false, true, true, true, true));
-        systems.add(new SysCFG(ParticleSystem.class, 110, true, true, true, true, true));
+        // - particle renderer -> render particles on to of sprites
+        // - hud system -> render player info, minimap, healthbars, and in game Menu when paused
+        // - todo: touchcontrolrendersystem: should decouple from hud
+        // - screen transition system -> renders full screen white out animation between game states and handles transition logic
+        // - debug system -> render debug and diagnostic info: should always be last so we can see debug info at all times, hence high-value priority to make execute near end of frame
+        systems.add(new SysCFG(CameraSystem.class, 100, true, true, true, true, true));
+        systems.add(new SysCFG(SpaceParallaxSystem.class, 105, false, true, false, true, true));
+        systems.add(new SysCFG(SpaceDustSystem.class, 106, false, true, false, true, true));
+        systems.add(new SysCFG(WorldRenderingSystem.class, 110, false, false, true, true, true));
+        systems.add(new SysCFG(Sprite2DRenderSystem.class, 120, false, true, true, true, true));
+        systems.add(new SysCFG(Sprite2DShaderRenderSystem.class, 121, false, true, true, true, true));
+        systems.add(new SysCFG(Sprite3DRenderSystem.class, 123, false, true, true, true, true));
+        systems.add(new SysCFG(ShieldRenderSystem.class, 125, false, true, true, true, true));
+        systems.add(new SysCFG(ParticleSystem.class, 130, true, true, true, true, true));
         systems.add(new SysCFG(HUDSystem.class, 200, false, true, true, true, true));
         
         systems.add(new SysCFG(ScreenTransitionSystem.class, 300, true, true, true, true, true));
-        //---loading---
-        systems.add(new SysCFG(WorldLoadingSystem.class, 301, true, false, true, true, true));
-        systems.add(new SysCFG(SpaceLoadingSystem.class, 302, false, true, false, true, true));
-        //systems.add(new SysCFG(SpaceRespawnSystem.class, ??, true, true, false, true, true));
-        //systems.add(new SysCFG(PlanetarySystemEntitySpawner.class, ??, true, true, false, true, true));
-    
     
     
         systems.add(new SysCFG(ExpireSystem.class, 500, true, true, true, true, true));
