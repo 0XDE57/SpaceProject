@@ -9,11 +9,10 @@ void main() {
 
 	float shift = sin(u_shift);
 	vec3 shiftedColor = color.rgb + shift;
-	shiftedColor.r = 0;
+	shiftedColor.r = 0.0;
 	
 	/*
 	vec4 mod = mod(color.rgba + shift, vec4(1.0));
-
 	if (shiftedColor.r > 1.0) {
 		shiftedColor.r = 1.0 - mod.r;
 	}
