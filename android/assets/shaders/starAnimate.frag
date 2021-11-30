@@ -53,8 +53,12 @@ void main() {
 		fireColor.g = 0.0;
 		fireColor.b = 0.0;
 	}
-	shiftedColor = mix(shiftedColor, fireColor, 0.5);
-
+	//if black body just black, override with fire
+	if (shiftedColor == vec3(0.0)) {
+		shiftedColor = fireColor;
+	} else {
+		shiftedColor = mix(shiftedColor, fireColor, 0.5);
+	}
 
 	/*
 	vec3 additionalColor = shiftedColor;

@@ -10,17 +10,17 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.ShaderComponent;
 import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
 import java.util.Comparator;
 
-public class Sprite2DShaderRenderSystem extends IteratingSystem {
+public class Sprite2DShaderRenderSystem extends IteratingSystem implements Disposable {
     
     private final OrthographicCamera cam;
     private final SpriteBatch spriteBatch;
@@ -84,7 +84,7 @@ public class Sprite2DShaderRenderSystem extends IteratingSystem {
         shift += shiftSpeed * deltaTime;
         starShader.bind();
         starShader.setUniformf("u_shift", (float) Math.sin(shift));
-        DebugSystem.addDebugText(MyMath.round(shift, 2) + " shifted -> " + MyMath.round(Math.sin(shift), 2), 500, 500);
+        //DebugSystem.addDebugText(MyMath.round(shift, 2) + " shifted -> " + MyMath.round(Math.sin(shift), 2), 500, 500);
         
         //render
         spriteBatch.setProjectionMatrix(cam.combined);
@@ -117,9 +117,7 @@ public class Sprite2DShaderRenderSystem extends IteratingSystem {
                         star.colorTemp[2]); // blue
             }
             
-            
             render(entity);
-            
         }
         spriteBatch.end();
         
@@ -144,4 +142,10 @@ public class Sprite2DShaderRenderSystem extends IteratingSystem {
                 0, 0, (int) width, (int) height, false, false);
     }
     
+    @Override
+    public void dispose() {
+        spriteBatch.dispose();
+        starShader.dispose();
+        grayscaleShader.dispose();
+    }
 }

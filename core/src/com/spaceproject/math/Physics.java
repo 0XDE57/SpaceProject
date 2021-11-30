@@ -3,6 +3,8 @@ package com.spaceproject.math;
 
 import com.badlogic.gdx.Gdx;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 
 /**
@@ -23,13 +25,19 @@ public class Physics {
     
     // ------ Universal Constants ------
     // c: Speed of light: 299,792,458 (meters per second)
-    public static final double speedOfLight = 299792458; //m/s
+    public static final long speedOfLight = 299792458; //m/s
     
     // h: Planck's constant: 6.626 × 10^-34 (Joule seconds)
     public static final double planckConstant = 6.626 * (10 ^ -34); //Js
+    public static final BigDecimal planckBig = new BigDecimal("6.62607015").movePointLeft(34);
+    
+    // h*c: precalculated planckConstant * speedOfLight = 1.98644586...× 10^−25 J⋅m
+    public static final BigDecimal hcBig = new BigDecimal("1.98644586").movePointLeft(25);
+    public static final BigDecimal hcCalculated = planckBig.multiply(new BigDecimal(speedOfLight));
     
     // k: Boltzmann constant: 1.380649 × 10^-23 J⋅K (Joules per Kelvin)
     public static final double boltzmannConstant = 1.380649 * (10 ^ -23); //JK
+    public static final BigDecimal boltzmannBig = new BigDecimal("1.380649").movePointLeft(23); //JK
     
     // b: Wien's displacement constant: 2.897771955 × 10−3 m⋅K,[1] or b ≈ 2898 μm⋅K
     public static final double wiensDisplacementConstant = 2.8977719; //mK
@@ -68,8 +76,9 @@ public class Physics {
      * h = planck constant
      * c = speed of light
      */
-    public static double wavelengthToPhotonEnergy(double wavelength) {
-        return (planckConstant * speedOfLight) / wavelength;
+    public static BigDecimal wavelengthToPhotonEnergy(double wavelength) {
+        //energy = (planckConstant * speedOfLight) / wavelength;
+        return hcCalculated.divide(new BigDecimal(wavelength), hcCalculated.scale(), RoundingMode.HALF_UP);
     }
     
     /** E = hv
@@ -77,8 +86,9 @@ public class Physics {
      * v = frequency (hertz)
      * h = planck constant
      */
-    public static double frequencyToPhotonEnergy(double frequency) {
-        return planckConstant * frequency;
+    public static BigDecimal frequencyToPhotonEnergy(double frequency) {
+        //energy = planckConstant * frequency;
+        return planckBig.multiply(new BigDecimal(frequency));
     }
     
     /** approximate RGB [0-255] values for wavelengths between 380 nm and 780 nm
@@ -162,22 +172,37 @@ public class Physics {
         double kelvin = 5772;
         double wavelength = 502; // 597.2 terahertz | 2.47 eV
         Gdx.app.debug("PhysicsDebug",kelvin + " K = " + MyMath.round(temperatureToWavelength(kelvin) * 1000000, 1) + " nm");
-        Gdx.app.debug("PhysicsDebug",wavelength+ " nm = " + MyMath.round(wavelengthToTemperature(wavelength) * 1000000, 1) + " K");
+        Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + MyMath.round(wavelengthToTemperature(wavelength) * 1000000, 1) + " K");
         Gdx.app.debug("PhysicsDebug","temp(wave(" + kelvin + ")) = " + wavelengthToTemperature(temperatureToWavelength(kelvin)));
         Gdx.app.debug("PhysicsDebug","wave(temp(" + wavelength +")) = " + temperatureToWavelength(wavelengthToTemperature(wavelength)));
-        
         Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + MyMath.round(wavelengthToFrequency(wavelength) / 1000, 1) + " THz");
+        
         //todo: photon energy calculations are returning -1.7410894895E8 eV, expecting 2.47 eV
         //bug: planck is coming out as -291.54400000000004. expected: 6.626 * (10 ^ -34)
         //looks like we have hit the Double.MIN_EXPONENT...
-        Gdx.app.debug("PhysicsDebug",
-                "double: [" + Double.MIN_VALUE + " to " + Double.MAX_VALUE +
-                        "] exp: [" + Double.MIN_EXPONENT + " to " + Double.MAX_EXPONENT + "]");
-        Gdx.app.debug("PhysicsDebug", "planck: " + planckConstant);
-        Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + MyMath.round(frequencyToPhotonEnergy(wavelengthToFrequency(wavelength)),2) + " eV");
-        Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + MyMath.round(wavelengthToPhotonEnergy((wavelength)),2) + " eV");
+        Gdx.app.debug("PhysicsDebug", "planck double: " + planckConstant);
+        Gdx.app.debug("PhysicsDebug", "size of double: [" + Double.MIN_VALUE + " to " + Double.MAX_VALUE
+                + "] exp: [" + Double.MIN_EXPONENT + " to " + Double.MAX_EXPONENT + "]");
         
-        /* Tristimulus values: The human eye with normal vision has three kinds of cone cells that sense light, having peaks of spectral sensitivity in
+        
+        Gdx.app.debug("PhysicsDebug","h * c def:  " + hcBig.toPlainString()
+                        + " | precision: " + hcBig.precision() + "  - scale: " + hcBig.scale());
+        Gdx.app.debug("PhysicsDebug","h * c calc: " + hcCalculated.toString() + " -> " + hcCalculated.toPlainString()
+                + " | precision: " + hcCalculated.precision() + "  - scale: " + hcCalculated.scale());
+        Gdx.app.debug("PhysicsDebug","planck: " + planckBig.toString() + " -> " + planckBig.toPlainString()
+                + " | precision: " + planckBig.precision() + "  - scale: " + planckBig.scale());
+        //todo: big decimal is much closer but we are still not at the expected ouput
+        //frequencyToPhotonEnergy:  502.0 nm = 3.9570634604560330026360810734331607818603515625E-28 eV
+        //wavelengthToPhotonEnergy: 502.0 nm = 3.95706346613546E-28 eV
+        //expected: 2.47 eV
+        BigDecimal photonEnergy = frequencyToPhotonEnergy(wavelengthToFrequency(wavelength));
+        Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + photonEnergy.toString() + " eV" +  " | precision: " + photonEnergy.precision() + "  - scale: " + photonEnergy.scale());
+        Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + wavelengthToPhotonEnergy(wavelength) + " eV");
+    
+    
+    
+        /* A typical human eye will respond to wavelengths from about 380 to about 750 nanometers.
+         * Tristimulus values: The human eye with normal vision has three kinds of cone cells that sense light, having peaks of spectral sensitivity in
          *      short   420 nm – 440 nm
          *      middle  530 nm – 540 nm
          *      long    560 nm – 580 nm

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.math.Physics;
 import com.spaceproject.noise.NoiseGen;
 import com.spaceproject.noise.OpenSimplexNoise;
 import com.spaceproject.screens.GameScreen;
@@ -106,15 +107,27 @@ public class TextureFactory {
     }
     
     public static Texture generateSpaceBackgroundStars(int tileX, int tileY, int tileSize, float depth) {
-        //todo: add some color for stars. should have some red and blue
-        MathUtils.random.setSeed((long) (MyMath.getSeed(tileX, tileY) + (depth*1000)));
+        MathUtils.random.setSeed((long) (MyMath.getSeed(tileX, tileY) * (depth * 1000)));
         Pixmap pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
         
         int numStars = 200;
         for (int i = 0; i < numStars; ++i) {
             int newX = MathUtils.random(tileSize);
             int newY = MathUtils.random(tileSize);
-            pixmap.setColor(1, 1, 1, MathUtils.random(0.1f, 1f));
+    
+            //calculate black body radiation to color star
+            double temperature = MathUtils.random(2000, 40000); //typically (2,000K - 40,000K)
+            double peakWavelength = Physics.temperatureToWavelength(temperature) * 1000000;
+            int[] colorTemp = Physics.wavelengthToRGB(peakWavelength);
+            pixmap.setColor(
+                    colorTemp[0] / 255.0f, // red
+                    colorTemp[1] / 255.0f, // green
+                    colorTemp[2] / 255.0f, // blue
+                    1);//MathUtils.random(0.1f, 1f)
+            if (colorTemp[0] == 0 && colorTemp[1] == 0 && colorTemp[2] == 0) {
+                //override bodies outside the visible spectrum and just render white
+                pixmap.setColor(1, 1, 1, MathUtils.random(0.1f, 1f));
+            }
             pixmap.drawPixel(newX, newY);
         }
 		

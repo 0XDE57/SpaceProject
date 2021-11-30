@@ -148,7 +148,7 @@ public class EntityFactory {
         //star properties
         StarComponent star = new StarComponent();
         star.temperature = MathUtils.random(1000, 50000); //typically (2,000K - 40,000K)
-        //star.temperature = Physics.Sun.kelvin;test sun color
+        //star.temperature = Physics.Sun.kelvin;//test sun color
         star.peakWavelength = Physics.temperatureToWavelength(star.temperature) * 1000000;
         int[] colorTemp = Physics.wavelengthToRGB(star.peakWavelength);
         //convert from [0 to 255] -> [0 - 1]
