@@ -93,7 +93,7 @@ public class Physics {
     
     /** approximate RGB [0-255] values for wavelengths between 380 nm and 780 nm
      * Ported from: RGB VALUES FOR VISIBLE WAVELENGTHS by Dan Bruton (astro@tamu.edu)
-     *      http://www.physics.sfasu.edu/astro/color/spectra.html
+     * http://www.physics.sfasu.edu/astro/color/spectra.html
      */
     public static int[] wavelengthToRGB(double wavelength, double gamma) {
         double factor;
@@ -154,9 +154,10 @@ public class Physics {
         return wavelengthToRGB(wavelength, 0.8);
     }
     
+    
     public static void test() {
         /* Black Body Radiation!
-         * Common color temperatures:
+         * Common color temperatures (Kelvin):
          *      1900	Candle flame
          *      2000	Sunlight at sunset
          *      2800	Tungsten bulb—60 watt
@@ -169,13 +170,14 @@ public class Physics {
          *      6500	Overcast sky
          *      7500	North sky light
          */
-        double kelvin = 5772;
+        double kelvin = Sun.kelvin; //5772;
         double wavelength = 502; // 597.2 terahertz | 2.47 eV
-        Gdx.app.debug("PhysicsDebug",kelvin + " K = " + MyMath.round(temperatureToWavelength(kelvin) * 1000000, 1) + " nm");
-        Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + MyMath.round(wavelengthToTemperature(wavelength) * 1000000, 1) + " K");
-        Gdx.app.debug("PhysicsDebug","temp(wave(" + kelvin + ")) = " + wavelengthToTemperature(temperatureToWavelength(kelvin)));
-        Gdx.app.debug("PhysicsDebug","wave(temp(" + wavelength +")) = " + temperatureToWavelength(wavelengthToTemperature(wavelength)));
-        Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + MyMath.round(wavelengthToFrequency(wavelength) / 1000, 1) + " THz");
+        Gdx.app.debug("PhysicsDebug", kelvin + " K = " + MyMath.round(temperatureToWavelength(kelvin) * 1000000, 1) + " nm");
+        Gdx.app.debug("PhysicsDebug", wavelength + " nm = " + MyMath.round(wavelengthToTemperature(wavelength) * 1000000, 1) + " K");
+        Gdx.app.debug("PhysicsDebug", "temp(wave(" + kelvin + ")) = " + wavelengthToTemperature(temperatureToWavelength(kelvin)));
+        Gdx.app.debug("PhysicsDebug", "wave(temp(" + wavelength +")) = " + temperatureToWavelength(wavelengthToTemperature(wavelength)));
+        Gdx.app.debug("PhysicsDebug", wavelength + " nm = " + MyMath.round(wavelengthToFrequency(wavelength) / 1000, 1) + " THz");
+        
         
         //todo: photon energy calculations are returning -1.7410894895E8 eV, expecting 2.47 eV
         //bug: planck is coming out as -291.54400000000004. expected: 6.626 * (10 ^ -34)
@@ -185,21 +187,25 @@ public class Physics {
                 + "] exp: [" + Double.MIN_EXPONENT + " to " + Double.MAX_EXPONENT + "]");
         
         
+        //high precision big decimals
         Gdx.app.debug("PhysicsDebug","h * c def:  " + hcBig.toPlainString()
                         + " | precision: " + hcBig.precision() + "  - scale: " + hcBig.scale());
         Gdx.app.debug("PhysicsDebug","h * c calc: " + hcCalculated.toString() + " -> " + hcCalculated.toPlainString()
                 + " | precision: " + hcCalculated.precision() + "  - scale: " + hcCalculated.scale());
         Gdx.app.debug("PhysicsDebug","planck: " + planckBig.toString() + " -> " + planckBig.toPlainString()
                 + " | precision: " + planckBig.precision() + "  - scale: " + planckBig.scale());
-        //todo: big decimal is much closer but we are still not at the expected ouput
+        
+        
+        //todo: big decimal is much closer but we are still not at the expected output 2.47 eV
         //frequencyToPhotonEnergy:  502.0 nm = 3.9570634604560330026360810734331607818603515625E-28 eV
         //wavelengthToPhotonEnergy: 502.0 nm = 3.95706346613546E-28 eV
         //expected: 2.47 eV
+        ////is there a precision bug or is my math wrong?
+        //photonEnergy 0.000000000000000000000000198644586 precision: 47  - scale: 74
         BigDecimal photonEnergy = frequencyToPhotonEnergy(wavelengthToFrequency(wavelength));
-        Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + photonEnergy.toString() + " eV" +  " | precision: " + photonEnergy.precision() + "  - scale: " + photonEnergy.scale());
-        Gdx.app.debug("PhysicsDebug",wavelength + " nm = " + wavelengthToPhotonEnergy(wavelength) + " eV");
-    
-    
+        Gdx.app.debug("PhysicsDebug", wavelength + " nm = " + photonEnergy.toString() + " eV -> " + hcBig.toPlainString() +  " | precision: " + photonEnergy.precision() + "  - scale: " + photonEnergy.scale());
+        Gdx.app.debug("PhysicsDebug", wavelength + " nm = " + wavelengthToPhotonEnergy(wavelength) + " eV");
+        
     
         /* A typical human eye will respond to wavelengths from about 380 to about 750 nanometers.
          * Tristimulus values: The human eye with normal vision has three kinds of cone cells that sense light, having peaks of spectral sensitivity in
@@ -224,6 +230,17 @@ public class Physics {
         Gdx.app.debug("PhysicsDebug",  red + " -> " + Arrays.toString(wavelengthToRGB(red, gamma)));//red-ish
         Gdx.app.debug("PhysicsDebug",  green + " -> " + Arrays.toString(wavelengthToRGB(green, gamma)));//green-ish
         Gdx.app.debug("PhysicsDebug",  blue + "  -> " + Arrays.toString(wavelengthToRGB(blue, gamma)));//blue-ish
+        
+        //wavelengthToRGB() approximates 380 nm and 780 nm
+        int rgbMinWavelength = 380;
+        int rgbMaxWavelength = 780;
+        double lowestVisibleTemperature = wavelengthToTemperature(rgbMinWavelength);
+        double highestVisibleTemperature = wavelengthToTemperature(rgbMaxWavelength);
+        Gdx.app.debug("PhysicsDebug", "380nm to 780nm = " + MyMath.round(lowestVisibleTemperature * 1000000, 1)
+                + "K" + " to " + MyMath.round(highestVisibleTemperature * 1000000, 1) + "K");
+        Gdx.app.debug("PhysicsDebug",  rgbMinWavelength + "nm " + MyMath.round(lowestVisibleTemperature, 1) + "K -> " + Arrays.toString(wavelengthToRGB(rgbMinWavelength, gamma)));
+        Gdx.app.debug("PhysicsDebug",  rgbMaxWavelength + "nm " + MyMath.round(highestVisibleTemperature, 1) + "K -> " + Arrays.toString(wavelengthToRGB(rgbMaxWavelength, gamma)));
+    
     }
     
     public static class Sun {

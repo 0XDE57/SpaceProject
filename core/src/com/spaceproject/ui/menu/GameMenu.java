@@ -100,7 +100,7 @@ public class GameMenu extends VisWindow {
     }
     
     private void addTestTabs() {
-        Tab customRenderTab = new MyTab("test custom render");
+        Tab customRenderTab = new MyTab("Debug spectrum render");
         ShapeRenderActor shapeRenderActor = new ShapeRenderActor();
         customRenderTab.getContentTable().add(shapeRenderActor).grow();
         //TODO: something about the .grow (and also .expand().fill()) is breaking the window resizing

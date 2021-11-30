@@ -123,7 +123,7 @@ public class TextureFactory {
                     colorTemp[0] / 255.0f, // red
                     colorTemp[1] / 255.0f, // green
                     colorTemp[2] / 255.0f, // blue
-                    1);//MathUtils.random(0.1f, 1f)
+                    MathUtils.random(0.1f, 1f));
             if (colorTemp[0] == 0 && colorTemp[1] == 0 && colorTemp[2] == 0) {
                 //override bodies outside the visible spectrum and just render white
                 pixmap.setColor(1, 1, 1, MathUtils.random(0.1f, 1f));
