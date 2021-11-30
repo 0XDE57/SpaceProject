@@ -50,7 +50,7 @@ public class TextureFactory {
                 
                 //opacity
                 double opacity = opacityGen.eval(nX, nY, 0);
-                opacity = (opacity * 0.5) + 0.5; //convert from range [-1:1] to [0:1]
+                opacity = (opacity * 0.5) + 0.5; //normalize from range [-1:1] to [0:1]
                 
                 //red
                 double red = redGen.eval(nX, nY, 0);
@@ -112,8 +112,8 @@ public class TextureFactory {
         
         int numStars = 200;
         for (int i = 0; i < numStars; ++i) {
-            int newX = MathUtils.random(tileSize);
-            int newY = MathUtils.random(tileSize);
+            int x = MathUtils.random(tileSize);
+            int y = MathUtils.random(tileSize);
     
             //calculate black body radiation to color star
             double temperature = MathUtils.random(2000, 40000); //typically (2,000K - 40,000K)
@@ -128,7 +128,7 @@ public class TextureFactory {
                 //override bodies outside the visible spectrum and just render white
                 pixmap.setColor(1, 1, 1, MathUtils.random(0.1f, 1f));
             }
-            pixmap.drawPixel(newX, newY);
+            pixmap.drawPixel(x, y);
         }
 		
 		/*
