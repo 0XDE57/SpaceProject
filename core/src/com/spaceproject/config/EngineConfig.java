@@ -1,7 +1,7 @@
 package com.spaceproject.config;
 
-import com.badlogic.gdx.Application;
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.MathUtils;
+import com.spaceproject.SpaceProject;
 
 public class EngineConfig extends Config {
     
@@ -42,12 +42,18 @@ public class EngineConfig extends Config {
         physicsPositionIterations = 2;
         physicsStepPerFrame = 60;
         
-        maxNoiseGenThreads = 2;// Gdx.app.getType() == Application.ApplicationType.Desktop ? 4 : 2;
-        if (Gdx.app.getType() == Application.ApplicationType.Desktop) {
-            int availableCPU = Runtime.getRuntime().availableProcessors();
+        int availableCPU = Runtime.getRuntime().availableProcessors();
+        if (SpaceProject.isMobile()) {
+            // default 2 threads on mobile as phones have limited resources
+            maxNoiseGenThreads = 2;
             if (availableCPU >= 8) {
-                maxNoiseGenThreads = Math.max(4, availableCPU - 2);
+                maxNoiseGenThreads = 4;
             }
+        } else {
+            // assume desktop can use at least 4 threads
+            // dynamically choose number of available cores
+            // but leave some threads for other applications (don't be greedy)
+            maxNoiseGenThreads = MathUtils.clamp(availableCPU - 2, 4, 10);
         }
     }
 }
