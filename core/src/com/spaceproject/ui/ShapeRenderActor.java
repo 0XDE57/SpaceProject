@@ -35,8 +35,7 @@ public class ShapeRenderActor extends Actor {
         
         coords.set(getX(), getY());
         localToStageCoordinates(coords);
-        
-        /*
+        /*debug corners
         shape.setColor(Color.GREEN);
         shape.circle(coords.x + getWidth() / 2, coords.y + getHeight() / 2, 10);
         shape.circle(coords.x, coords.y, 10);
@@ -44,7 +43,6 @@ public class ShapeRenderActor extends Actor {
         shape.circle(coords.x + getWidth(), coords.y, 10);
         shape.circle(coords.x + getWidth(), coords.y + getHeight(), 10);
         */
-        
         
         //debug black body radiation, color temperature
         float x = coords.x + 50;
@@ -59,8 +57,22 @@ public class ShapeRenderActor extends Actor {
     
         float y2 = y + 250;
         renderSpectrum(x, y2, width, height, lowestVisibleTemp, highestVisibleTemp, lowestVisibleTemp, highestVisibleTemp);
-    
-    
+        
+        //TODO: plot power spectrum for wavelength
+        //for temperature k, draw spectrum plot
+        double kelvin = Physics.Sun.kelvin;//5772k
+        int wavelengthStart = 480; int wavelengthEnd = 780;
+        double[] spectrum = new double[(wavelengthEnd - wavelengthStart)];
+        int index = 0;
+        for (int wavelength = wavelengthStart; wavelength < wavelengthEnd; wavelength++) {
+            spectrum[index] = Physics.calcSpectralRadiance(wavelength, kelvin);
+            index ++;
+        }
+        /*
+        for (double value : spectrum) {
+            Gdx.app.debug("plot", value + "");
+        }*/
+        
         //4. end our shape
         shape.end();
         //5. we must begin the batch again for actors that are drawn after us
@@ -68,16 +80,14 @@ public class ShapeRenderActor extends Actor {
     }
     
     private void renderSpectrum(float x, float y, float width, float height, float lowestVisibleTemp, float highestVisibleTemp, float fromKelvin, float toKelvin) {
+        int border = 4;
         
         for (int i = 0; i < width; i++) {
             float percent = (float) i / width;
-            int border = 4;
-            //shape.setColor(percent, percent, percent, 1);
-            //shape.line(x + i, y - border, x + i, y + height + border);
-            
             double temperature = MathUtils.lerp(fromKelvin, toKelvin, percent);
-            //temperature = MathUtils.lerp(lowestVisibleTemp, highestVisibleTemp, percent);
+            double wavelength = Physics.temperatureToWavelength(temperature) * 1000000;
             
+            //border
             if (temperature <= lowestVisibleTemp && temperature >= highestVisibleTemp) {
                 //within visible range
                 shape.setColor(1, 1, 1,1);
@@ -85,10 +95,8 @@ public class ShapeRenderActor extends Actor {
                 shape.setColor(0,0,0,1);
             }
             shape.line(x + i, y - border, x + i, y + height + border);
-            //temperature = MathUtils.lerp(lowestVisibleTemp, highestVisibleTemp, percent);
-            double wavelength = Physics.temperatureToWavelength(temperature) * 1000000;
-            //wavelength = MathUtils.lerp(lowestVisibleTemp, highestVisibleTemp, percent) * 1000000;
             
+            //spectrum
             int[] colorTemp = Physics.wavelengthToRGB(wavelength);
             shape.setColor(
                     colorTemp[0] / 255.0f, // red
@@ -98,4 +106,5 @@ public class ShapeRenderActor extends Actor {
             shape.line(x + i, y, x + i, y + height);
         }
     }
+    
 }

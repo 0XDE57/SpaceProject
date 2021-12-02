@@ -2,6 +2,7 @@ package com.spaceproject.math;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.MathUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -10,9 +11,11 @@ import java.util.Arrays;
 /**
  * Disclaimer: I am not a physicist. There may be errata but I will do my best.
  * Sources:
- *      https://en.wikipedia.org/wiki/Wien%27s_displacement_law
  *      https://en.wikipedia.org/wiki/Black-body_radiation
  *      https://en.wikipedia.org/wiki/Planck%27s_law
+ *      https://en.wikipedia.org/wiki/Wien%27s_displacement_law
+ *      https://en.wikipedia.org/wiki/Rayleigh%E2%80%93Jeans_law
+ *      https://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
  *      https://en.wikipedia.org/wiki/Stellar_classification
  *
  *      https://www.fourmilab.ch/documents/specrend/
@@ -20,6 +23,9 @@ import java.util.Arrays;
  *
  *      Wolfram Alpha for testing and confirming formulas and values.
  *      https://www.wolframalpha.com/widgets/view.jsp?id=5072e9b72faacd73c9a4e4cb36ad08d
+ *
+ *      Also found a tool that simulates:
+ *      https://phet.colorado.edu/sims/html/blackbody-spectrum/latest/blackbody-spectrum_en.html
  */
 public class Physics {
     
@@ -28,7 +34,7 @@ public class Physics {
     public static final long speedOfLight = 299792458; //m/s
     
     // h: Planck's constant: 6.626 × 10^-34 (Joule seconds)
-    public static final double planckConstant = 6.626 * (10 ^ -34); //Js
+    public static final double planckConstant = 6.626 * Math.pow(10, -34); //Js
     public static final BigDecimal planckBig = new BigDecimal("6.62607015").movePointLeft(34);
     
     // h*c: precalculated planckConstant * speedOfLight = 1.98644586...× 10^−25 J⋅m
@@ -36,14 +42,17 @@ public class Physics {
     public static final BigDecimal hcCalculated = planckBig.multiply(new BigDecimal(speedOfLight));
     
     // k: Boltzmann constant: 1.380649 × 10^-23 J⋅K (Joules per Kelvin)
-    public static final double boltzmannConstant = 1.380649 * (10 ^ -23); //JK
+    public static final double boltzmannConstant = 1.380649 * Math.pow(10, -23); //JK
     public static final BigDecimal boltzmannBig = new BigDecimal("1.380649").movePointLeft(23); //JK
     
     // b: Wien's displacement constant: 2.897771955 × 10−3 m⋅K,[1] or b ≈ 2898 μm⋅K
-    public static final double wiensDisplacementConstant = 2.8977719; //mK
+    public static final double wiensConstant = 2.8977719; //mK
     
     // G: Gravitational constant: 6.674×10−11 Nm^2 / kg^2 (newton square meters per kilogram squared)
-    public static final double gravitationalConstant = 6.674 * (10 ^ -11);
+    public static final double gravitationalConstant = 6.674 * Math.pow(10, -11);
+    
+    // ? : not sure what to call this, but it doesn't change so we can precalculate it
+    //public static final double unnamedConstant = (2 * planckConstant * Math.pow(speedOfLight, 2));
     
     /** Wien's displacement law: λₘT = b
      * Hotter things - peak at shorter wavelengths - bluer
@@ -53,12 +62,12 @@ public class Physics {
      * b  = Wein’s Constant: 2.88 x 10-3 m-K or 0.288 cm-K
      */
     public static double temperatureToWavelength(double kelvin) {
-        return wiensDisplacementConstant / kelvin;
+        return wiensConstant / kelvin;
     }
     
     /** T = b / λₘ */
     public static double wavelengthToTemperature(double wavelength) {
-        return wiensDisplacementConstant / wavelength;
+        return wiensConstant / wavelength;
     }
     
     /** ν = c / λ
@@ -89,6 +98,95 @@ public class Physics {
     public static BigDecimal frequencyToPhotonEnergy(double frequency) {
         //energy = planckConstant * frequency;
         return planckBig.multiply(new BigDecimal(frequency));
+    }
+    
+    
+    /** Rayleigh–Jeans law: uν = (8 * π * (ν^2) * k * T) / (c^2)
+     * Note: formula fits low frequencies but fails increasingly for higher frequencies.
+     * see: "ultraviolet catastrophe"
+     * uν =
+     * v = frequency (hertz)
+     * k = Boltzmann's constant
+     * T = is the absolute temperature of the radiating bod
+     * c = speed of light
+     */
+    public static double RayleighJeansLaw(int wavelength) {
+        double frequency = wavelengthToFrequency(wavelength);
+        double temperature = wavelengthToTemperature(wavelength);
+        return (8 * Math.PI * Math.pow(frequency, 2) * boltzmannConstant * temperature) / Math.pow(speedOfLight, 2);
+    }
+    
+    /** Planck's law of black-body radiation: L(λ) = (2 h c^2) / (λ^5 (e^((h c)/(λ k T)) - 1))
+     * L(λ) = spectral radiance as function of wavelength
+     * λ = wavelength
+     * T = temperature of the body Kelvin
+     * h = Planck constant (≈ 6.626×10^-34 J s)
+     * c = speed of light (≈ 2.998×10^8 m/s)
+     * k  Boltzmann constant (≈ 1.381×10^-23 J/K)
+     */
+    public static double calcSpectralRadiance(int wavelength, double temperature) {
+        //L(λ) = (2 h c^2) / (λ^5 (e^((h c)/(λ k T)) - 1))
+        //L = (2 * planckConstant * (speedOfLight ^ 2)) /
+        //((wavelength ^ 5) * (Math.E ^ ( ((planckConstant * speedOfLight) / (wavelength * boltzmannConstant * temperature)) - 1)));
+        
+        //break down
+        double unnamedConstant = (2.0 * planckConstant * Math.pow(speedOfLight, 2));
+        double hc = planckConstant * speedOfLight;
+        double a = wavelength * boltzmannConstant * temperature;
+        double b = Math.exp(hc / a) - 1; //(e^((h c)/(λ k T)) - 1)
+        return unnamedConstant / ((Math.pow(wavelength, 5) * b));
+    }
+    
+    public static BigDecimal calcSpectralRadianceBig(int wavelength) {
+        //todo: wrong...
+        //just testing accuracy with big decimal. not sure if we actually need the precision.
+        
+        //double unnamedConstant = (2 * planckConstant * Math.pow(speedOfLight, 2));
+        BigDecimal unnamedPrecise = planckBig.multiply(BigDecimal.valueOf(2 * Math.pow(speedOfLight, 2)));
+        
+        double temperature = wavelengthToTemperature(wavelength);//Kelvin
+        
+        //(hc / (wavelength * boltzmannConstant * temperature)) - 1;
+        BigDecimal aSimplified = boltzmannBig.multiply(BigDecimal.valueOf(wavelength * temperature));
+        BigDecimal bSimplified = hcBig.divide(aSimplified, hcBig.scale(), RoundingMode.HALF_UP).subtract(BigDecimal.valueOf(1));
+        //Math.E ^ (bSimplified)
+        double cSimplified = Math.pow(Math.E, bSimplified.doubleValue());
+        //unnamedConst / ((wavelength ^ 5)
+        return unnamedPrecise.divide(BigDecimal.valueOf(Math.pow(wavelength, 5) * cSimplified), bSimplified.scale(), RoundingMode.HALF_UP);
+    }
+    
+    public static void calculateBlackBody(int wavelengthStart, int wavelengthEnd, double temperature) {
+        //double temperature = 5772;// wavelengthToTemperature(502);
+        
+        for (int wavelength = wavelengthStart; wavelength <= wavelengthEnd; wavelength++) {
+            //we can kinda ignore rayleigh jean as we know it will produce incorrect values, just testing
+            //double r = RayleighJeansLaw(wavelength);
+            //Gdx.app.debug("Raleigh Jean    ", String.format("%s - %g", wavelength, r));
+            
+            double spectralRadiance = calcSpectralRadiance(wavelength, temperature);
+            Gdx.app.debug("spectralRadiance", String.format("%s - %g", wavelength, spectralRadiance));
+            
+            //just a test: i don't think we have a precision issue...
+            //BigDecimal spectralBigDecimal = calcSpectralRadianceBig(wavelength);
+            //Gdx.app.debug("spectral precise", wavelength + " - " + spectralBigDecimal.toPlainString());
+        }
+        //expected output: 2.19308090702e+13
+        // 5772k, 502nm
+        // Radiant emittance: 	    6.29403e+07 W/m2
+        // Radiance: 	            2.00345e+07 W/m2/sr
+        // Peak spectral radiance:  2.19308090702e+13 (W*sr-1*m-3)
+        //                          26239737.802334465 (W/m2-sr-um)
+        // Spectral Radiance: 	4207.38 W/m2/sr/µm  (5.03412e+19 photons/J)
+        //
+        
+        //current broken outputs:
+        //  [Raleigh Jean    ] 502 - 7.94834e-30
+        //  [spectralRadiance] 502 - 1.01051e-29
+        //  [spectral precise] 502 - 0.000000000000000000000000000010105
+        //502 - 1.17864e+13
+        //1.01051e-29
+        //7.50587e-28
+        //7.52394e-22
     }
     
     /** approximate RGB [0-255] values for wavelengths between 380 nm and 780 nm
@@ -170,22 +268,37 @@ public class Physics {
          *      6500	Overcast sky
          *      7500	North sky light
          */
-        double kelvin = Sun.kelvin; //5772;
-        double wavelength = 502; // 597.2 terahertz | 2.47 eV
-        Gdx.app.debug("PhysicsDebug", kelvin + " K = " + MyMath.round(temperatureToWavelength(kelvin) * 1000000, 1) + " nm");
-        Gdx.app.debug("PhysicsDebug", wavelength + " nm = " + MyMath.round(wavelengthToTemperature(wavelength) * 1000000, 1) + " K");
-        Gdx.app.debug("PhysicsDebug", "temp(wave(" + kelvin + ")) = " + wavelengthToTemperature(temperatureToWavelength(kelvin)));
-        Gdx.app.debug("PhysicsDebug", "wave(temp(" + wavelength +")) = " + temperatureToWavelength(wavelengthToTemperature(wavelength)));
-        Gdx.app.debug("PhysicsDebug", wavelength + " nm = " + MyMath.round(wavelengthToFrequency(wavelength) / 1000, 1) + " THz");
+    
+        //Known sun values: 5772K | 502nm | 597.2 terahertz | 2.47 eV
+        double kelvin = Sun.kelvin; //5772
+        double expectedWavelength = 502;
+        double expectedFrequency = 597.2;
+        double expectedEnergy = 2.47;
+        double calculatedWavelength = temperatureToWavelength(kelvin);
+        double calculatedTemperature = wavelengthToTemperature(expectedWavelength);
+        double calculatedFrequency = wavelengthToFrequency(expectedWavelength);
+        Gdx.app.debug("PhysicsDebug", kelvin + " K = " + MyMath.round(calculatedWavelength * 1000000, 1) + " nm");
+        Gdx.app.debug("PhysicsDebug", expectedWavelength + " nm = " + MyMath.round(calculatedTemperature * 1000000, 1) + " K");
+        Gdx.app.debug("PhysicsDebug", "temp(wave(" + kelvin + ")) = " + wavelengthToTemperature(calculatedWavelength));
+        Gdx.app.debug("PhysicsDebug", "wave(temp(" + expectedWavelength +")) = " + temperatureToWavelength(calculatedTemperature));
+        Gdx.app.debug("PhysicsDebug", expectedWavelength + " nm = " + MyMath.round(calculatedFrequency / 1000, 1) + " THz");
+        
+        Gdx.app.debug("PhysicsDebug", "wavelength expected: " + MathUtils.isEqual((float)calculatedWavelength * 1000000, (float) expectedWavelength, 0.1f));
+        Gdx.app.debug("PhysicsDebug", "temperature expected: " + MathUtils.isEqual((float)calculatedTemperature * 1000000, (float) kelvin, 0.5f));
+        //Gdx.app.debug("PhysicsDebug", "frequency expected: " + MathUtils.isEqual((float)calculatedFrequency , (float) expectedFrequency, 0.1f));
         
         
-        //todo: photon energy calculations are returning -1.7410894895E8 eV, expecting 2.47 eV
-        //bug: planck is coming out as -291.54400000000004. expected: 6.626 * (10 ^ -34)
-        //looks like we have hit the Double.MIN_EXPONENT...
+        //todo: photon energy calculations are returning 3.95706346613546E-28, expecting 2.47 eV
+        // bug: planck is coming out as -291.54400000000004. expected: 6.626 * (10 ^ -34)
+        // update, turns out i need to use math.pow, not ^ [^ = Bitwise exclusive OR] ....i'm a little rusty
+        // have we hit the Double.MIN_EXPONENT...is there a precision bug or is my math wrong?
+        // frequencyToPhotonEnergy:  502.0 nm = 3.9570634604560330026360810734331607818603515625E-28 eV
+        // wavelengthToPhotonEnergy: 502.0 nm = 3.95706346613546E-28 eV
+        // expected: 2.47 eV
+        // photonEnergy 0.000000000000000000000000198644586 precision: 47  - scale: 74
         Gdx.app.debug("PhysicsDebug", "planck double: " + planckConstant);
         Gdx.app.debug("PhysicsDebug", "size of double: [" + Double.MIN_VALUE + " to " + Double.MAX_VALUE
                 + "] exp: [" + Double.MIN_EXPONENT + " to " + Double.MAX_EXPONENT + "]");
-        
         
         //high precision big decimals
         Gdx.app.debug("PhysicsDebug","h * c def:  " + hcBig.toPlainString()
@@ -195,16 +308,9 @@ public class Physics {
         Gdx.app.debug("PhysicsDebug","planck: " + planckBig.toString() + " -> " + planckBig.toPlainString()
                 + " | precision: " + planckBig.precision() + "  - scale: " + planckBig.scale());
         
-        
-        //todo: big decimal is much closer but we are still not at the expected output 2.47 eV
-        //frequencyToPhotonEnergy:  502.0 nm = 3.9570634604560330026360810734331607818603515625E-28 eV
-        //wavelengthToPhotonEnergy: 502.0 nm = 3.95706346613546E-28 eV
-        //expected: 2.47 eV
-        ////is there a precision bug or is my math wrong?
-        //photonEnergy 0.000000000000000000000000198644586 precision: 47  - scale: 74
-        BigDecimal photonEnergy = frequencyToPhotonEnergy(wavelengthToFrequency(wavelength));
-        Gdx.app.debug("PhysicsDebug", wavelength + " nm = " + photonEnergy.toString() + " eV -> " + hcBig.toPlainString() +  " | precision: " + photonEnergy.precision() + "  - scale: " + photonEnergy.scale());
-        Gdx.app.debug("PhysicsDebug", wavelength + " nm = " + wavelengthToPhotonEnergy(wavelength) + " eV");
+        BigDecimal photonEnergy = frequencyToPhotonEnergy(calculatedFrequency);
+        Gdx.app.debug("PhysicsDebug", expectedWavelength + " nm = " + photonEnergy.toString() + " eV -> " + hcBig.toPlainString() +  " | precision: " + photonEnergy.precision() + "  - scale: " + photonEnergy.scale());
+        Gdx.app.debug("PhysicsDebug", expectedWavelength + " nm = " + wavelengthToPhotonEnergy(expectedWavelength) + " eV");
         
     
         /* A typical human eye will respond to wavelengths from about 380 to about 750 nanometers.
@@ -226,7 +332,7 @@ public class Physics {
         int red = 650;
         int green = 540;
         int blue = 470;
-        Gdx.app.debug("PhysicsDebug",  wavelength + " -> " + Arrays.toString(wavelengthToRGB(wavelength, gamma)));
+        Gdx.app.debug("PhysicsDebug",  expectedWavelength + " -> " + Arrays.toString(wavelengthToRGB(expectedWavelength, gamma)));
         Gdx.app.debug("PhysicsDebug",  red + " -> " + Arrays.toString(wavelengthToRGB(red, gamma)));//red-ish
         Gdx.app.debug("PhysicsDebug",  green + " -> " + Arrays.toString(wavelengthToRGB(green, gamma)));//green-ish
         Gdx.app.debug("PhysicsDebug",  blue + "  -> " + Arrays.toString(wavelengthToRGB(blue, gamma)));//blue-ish
@@ -241,6 +347,9 @@ public class Physics {
         Gdx.app.debug("PhysicsDebug",  rgbMinWavelength + "nm " + MyMath.round(lowestVisibleTemperature, 1) + "K -> " + Arrays.toString(wavelengthToRGB(rgbMinWavelength, gamma)));
         Gdx.app.debug("PhysicsDebug",  rgbMaxWavelength + "nm " + MyMath.round(highestVisibleTemperature, 1) + "K -> " + Arrays.toString(wavelengthToRGB(rgbMaxWavelength, gamma)));
     
+        
+        calculateBlackBody(rgbMinWavelength, rgbMaxWavelength, kelvin);
+        //calculateBlackBody(380, 400);
     }
     
     public static class Sun {
@@ -256,9 +365,6 @@ public class Physics {
         public static final double kelvin = 5772; //K
         
         //5772K = 502nm = 597 THz = green light
-        //so wait...is the sun peak wavelength actually green? why it look yellow
-        //
-        //https://www.e-education.psu.edu/meteo300/node/683
         public static final double peakWavelength = temperatureToWavelength(kelvin) * 1000000;
         
         //luminosity: 1 sol -> L⊙ = nominal solar luminosity: 	L⊙ = 3.828 × 10^26 W

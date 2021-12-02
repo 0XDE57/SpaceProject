@@ -3,9 +3,8 @@ package com.spaceproject.ui.menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.TableUtils;
@@ -28,6 +27,7 @@ import com.spaceproject.ui.menu.tabs.MyTab;
 
 
 public class GameMenu extends VisWindow {
+    
     private GameScreen game;
     
     private final TabbedPane tabbedPane;
@@ -35,7 +35,6 @@ public class GameMenu extends VisWindow {
     private final Tab mainMenuTab;
     private final Tab keyConfigTab;
     
-    //todo: move behaviors to config
     private boolean pauseOnMenuOpen = true;
     private boolean alwaysHideOnEscape = false;
     private boolean retainPositionOnOpen = true;
@@ -103,12 +102,15 @@ public class GameMenu extends VisWindow {
         Tab customRenderTab = new MyTab("Debug spectrum render");
         ShapeRenderActor shapeRenderActor = new ShapeRenderActor();
         customRenderTab.getContentTable().add(shapeRenderActor).grow();
+        customRenderTab.getContentTable().row();
+        Slider sliderGamma = new Slider(0, 1, 0.1f, false,VisUI.getSkin());
+        customRenderTab.getContentTable().add(sliderGamma);
         //TODO: something about the .grow (and also .expand().fill()) is breaking the window resizing
         //customRender.getContentTable().add(new Actor()).grow();
         //customRender.getContentTable().add(new Actor()).expand().fill();
         tabbedPane.add(customRenderTab);
         
-        
+        /*
         Tab placeholderBTab = new MyTab("Color Text Test");
         //test rainbow text
         BitmapFont font = VisUI.getSkin().get("default-font", BitmapFont.class);
@@ -118,19 +120,7 @@ public class GameMenu extends VisWindow {
         placeholderBTab.getContentTable().row();
         placeholderBTab.getContentTable().add(new Label("[RED]This[BLUE] is a [GREEN]test!", VisUI.getSkin()));
         tabbedPane.add(placeholderBTab);
-            
-            
-             /*
-             Tab testConfigTab = new ConfigTab(this, SpaceProject.celestCFG);
-             tabbedPane.add(testConfigTab);
-             
-             tabbedPane.add(new ConfigTab(this, "MiniMp", SpaceProject.configManager.getConfig(MiniMapConfig.class)));
-             tabbedPane.add(new ConfigTab(this, SpaceProject.keyCFG));*/
-        //tabbedPane.add(new ConfigManagerTab(this));
-        //tabbedPane.add(new ConfigVeiwerTab(getStage(), SpaceProject.configManager.getConfigs()));
-        
-        
-        //tabbedPane.add(createConfigTab(new TestConfig()));
+        */
     }
     
     //region menu controls
