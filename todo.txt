@@ -673,6 +673,8 @@ Legend:
 	    inspiration:
             http://davebollinger.org/works/pixelspaceships/
             https://www.reddit.com/r/gamedev/comments/2tavse/2d_procedural_spaceship_generator/
+        [ ? ] do we give up on proc gen and modular ships and go with something like:
+            https://livingtheindie.itch.io/pixel-art-spaceships-for-shmup
 
 [OUT_OF_SCOPE] Planetary Base Building
     Player can spawn on, or land on a  planet. And walk around.
@@ -911,6 +913,7 @@ Legend:
         [ ] profiler: https://github.com/libgdx/ashley/pull/215
 
 [ ] optimization
+    https://github.com/libgdx/libgdx/wiki/Profiling
     https://github.com/libgdx/libgdx/wiki/Memory-management
     [ ] look at pooled engine/sprites
         [ ] eg bullets. current cannon creates new sprite for each shot. bad!
@@ -973,6 +976,8 @@ freesound.org - Huge collaborative database of audio snippets, samples, recordin
     https://freesound.org/
 fonts
     http://www.fontsquirrel.com/
+
+https://itch.io/game-assets/free/tag-16-bit
 
 https://opensource.org/faq#profit
 

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -19,7 +20,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.screens.animations.DelaunayAnim;
 import com.spaceproject.screens.animations.DropAnim;
-import com.spaceproject.screens.animations.ForegroundAnimation;
+import com.spaceproject.screens.animations.NBodyGravityAnim;
 import com.spaceproject.screens.animations.NoiseAnim;
 import com.spaceproject.screens.animations.OrbitAnim;
 import com.spaceproject.screens.animations.TitleAnimation;
@@ -36,6 +37,13 @@ public class TitleScreen extends MyScreenAdapter {
     private Matrix4 projectionMatrix = new Matrix4();
     private TitleAnimation foregroundAnimation, backgroundAnimation;
     
+    enum ForegroundAnimation {
+        tree, delaunay, orbit, drop, crossNoise, nbody;/*, asteroid*/;
+        
+        public static ForegroundAnimation random() {
+            return ForegroundAnimation.values()[MathUtils.random(ForegroundAnimation.values().length - 1)];
+        }
+    }
     
     public TitleScreen(SpaceProject spaceProject) {
         this.game = spaceProject;
@@ -176,17 +184,20 @@ public class TitleScreen extends MyScreenAdapter {
                 this.foregroundAnimation = new OrbitAnim();
                 break;
             case drop:
-                this.foregroundAnimation = new DropAnim();
+                this.foregroundAnimation = new DropAnim();//this one is kinda lame, may remove
                 break;
             case crossNoise:
                 this.foregroundAnimation = new NoiseAnim(0, 0.01f, 3, 0.013f, true);
                 break;
+            case nbody:
+                this.foregroundAnimation = new NBodyGravityAnim();
+                break;
                 /*
-			case asteroid:
+			case asteroid: /
 				this.foregroundAnimation = new AsteroidAnim();
 				break;*/
+        
         }
-        //this.foregroundAnimation = new AsteroidAnim();
         Gdx.app.log(this.getClass().getSimpleName(), "Animation: " + anim);
     }
     
