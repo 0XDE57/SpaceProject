@@ -34,9 +34,9 @@ public class TextureFactory {
     }
     
     //region space background dust n stars
-    static OpenSimplexNoise opacityGen = new OpenSimplexNoise(GameScreen.getGalaxySeed());
-    static OpenSimplexNoise redGen = new OpenSimplexNoise(GameScreen.getGalaxySeed() + 1);
-    static OpenSimplexNoise blueGen = new OpenSimplexNoise(GameScreen.getGalaxySeed() + 2);
+    static OpenSimplexNoise alphaNoise = new OpenSimplexNoise(GameScreen.getGalaxySeed());
+    static OpenSimplexNoise redNoise = new OpenSimplexNoise(GameScreen.getGalaxySeed() + 1);
+    static OpenSimplexNoise blueNoise = new OpenSimplexNoise(GameScreen.getGalaxySeed() + 2);
     
     public static Texture generateSpaceBackgroundDust(int tX, int tY, int tileSize) {
         Pixmap pixmap = new Pixmap(tileSize, tileSize, Format.RGBA8888);
@@ -49,15 +49,15 @@ public class TextureFactory {
                 double nY = (y + (tY * tileSize)) / featureSize;
                 
                 //opacity
-                double opacity = opacityGen.eval(nX, nY, 0);
+                double opacity = alphaNoise.eval(nX, nY, 0);
                 opacity = (opacity * 0.5) + 0.5; //normalize from range [-1:1] to [0:1]
                 
                 //red
-                double red = redGen.eval(nX, nY, 0);
+                double red = redNoise.eval(nX, nY, 0);
                 red = (red * 0.5) + 0.5;
                 
                 //blue
-                double blue = blueGen.eval(nX, nY, 0);
+                double blue = blueNoise.eval(nX, nY, 0);
                 blue = (blue * 0.5) + 0.5;
                 
                 //draw
@@ -119,14 +119,15 @@ public class TextureFactory {
             double temperature = MathUtils.random(2000, 40000); //typically (2,000K - 40,000K)
             double peakWavelength = Physics.temperatureToWavelength(temperature) * 1000000;
             int[] colorTemp = Physics.wavelengthToRGB(peakWavelength);
-            pixmap.setColor(
-                    colorTemp[0] / 255.0f, // red
-                    colorTemp[1] / 255.0f, // green
-                    colorTemp[2] / 255.0f, // blue
-                    MathUtils.random(0.1f, 1f));
             if (colorTemp[0] == 0 && colorTemp[1] == 0 && colorTemp[2] == 0) {
                 //override bodies outside the visible spectrum and just render white
                 pixmap.setColor(1, 1, 1, MathUtils.random(0.1f, 1f));
+            } else {
+                pixmap.setColor(
+                        colorTemp[0] / 255.0f, // red
+                        colorTemp[1] / 255.0f, // green
+                        colorTemp[2] / 255.0f, // blue
+                        MathUtils.random(0.1f, 1f));
             }
             pixmap.drawPixel(x, y);
         }
