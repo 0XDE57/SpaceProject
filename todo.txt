@@ -317,7 +317,7 @@ Legend:
 [...] rendering system
     [ ] decouple HUD from stage -> move scene2D stage out of HUD into own system
     [x] fix space parallax system rendering
-        [ ] background layer stars are just white currently
+        [x] background layer stars are just white currently
             give them a random temperature then convert wavelength to rgb: Black body radiation!
         [x] i think it needs to be rendered with a separate camera / viewport as to not zoom out with main camera
             the background space image needs to be "very far away", give the illusion.
@@ -451,6 +451,10 @@ Legend:
 
 [ ] controls and input
     [x] basic controller input
+        [?] should separate look from movement? meaning movement left stick, aim/look right stick
+            might make sense for on foot character (could separate look and movement on MnK too)
+            this would displace the camera zoom control. we could let it modify camera with a modifier? eg: d-pad left + right stick
+            would probably make mobile control more difficult (two virtual sticks)
         [ ] scene2d stage (main menu and pause menu) needs to support controller input. multiplexer?
             https://github.com/MrStahlfelge/gdx-controllerutils/wiki/Button-operable-Scene2d
         [ ] also keyboard navigation focusable items
@@ -460,7 +464,7 @@ Legend:
          cant repro, seems fixed. update: still crashes!!! update: fixed again.
         [x] basic Xbox 360 support
             [x] not detecting DPAD buttons
-            [...] double tap right left bumpers for barrel roll
+            [x] double tap right left bumpers for barrel roll
             [x] right stick camera control, click to reset
         [x] move to getMapping() but seems im on an older lib?
             https://github.com/MrStahlfelge/gdx-controllerutils/wiki/Configurable-Game-Controller-Mappings
