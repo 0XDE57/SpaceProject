@@ -131,15 +131,27 @@ public class TitleScreen extends MyScreenAdapter {
         }
         
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            Dialogs.showOptionDialog(stage, "Exit", "goodbye?", Dialogs.OptionDialogType.YES_NO, new OptionDialogAdapter() {
-                @Override
-                public void yes() {
-                    Gdx.app.exit();
-                }
-            });
+            if (!exitPromptUp) {
+                exitPromptUp = true;
+                Dialogs.showOptionDialog(stage, "exit", "goodbye?", Dialogs.OptionDialogType.YES_NO, new OptionDialogAdapter() {
+                    @Override
+                    public void yes() {
+                        Gdx.app.exit();
+                    }
+                    @Override
+                    public void no () {
+                        exitPromptUp = false;
+                    }
+    
+                    @Override
+                    public void cancel () {
+                        exitPromptUp = false;
+                    }
+                });
+            }
         }
-        
     }
+    boolean exitPromptUp = false;
     
     @Override
     public void resize(int width, int height) {
@@ -198,7 +210,7 @@ public class TitleScreen extends MyScreenAdapter {
 				break;*/
         
         }
-        Gdx.app.log(this.getClass().getSimpleName(), "Animation: " + anim);
+        Gdx.app.debug(this.getClass().getSimpleName(), "Animation: " + anim);
     }
     
     public void dispose() {
