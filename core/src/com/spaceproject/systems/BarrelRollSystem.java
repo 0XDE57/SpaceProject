@@ -56,10 +56,10 @@ public class BarrelRollSystem extends IteratingSystem {
             }
             
             if (control != null) {
-                if (control.moveLeft && control.alter) {
+                if (control.moveLeft && control.boost) {
                     dodgeLeft(entity, rollComp);
                 }
-                if (control.moveRight && control.alter) {
+                if (control.moveRight && control.boost) {
                     dodgeRight(entity, rollComp);
                 }
             }

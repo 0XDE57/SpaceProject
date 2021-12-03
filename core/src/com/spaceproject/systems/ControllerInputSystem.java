@@ -106,7 +106,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         }
         
         if (buttonCode == controller.getMapping().buttonX) {
-            control.alter = buttonDown;
+            control.boost = buttonDown;
             handled = true;
         }
     

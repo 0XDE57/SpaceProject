@@ -120,7 +120,7 @@ public class ShipControlSystem extends IteratingSystem {
     
     private static void accelerate(ControllableComponent control, Body body, VehicleComponent vehicle, float delta) {
         float thrust = vehicle.thrust * control.movementMultiplier * delta;
-        if (control.alter) {
+        if (control.boost) {
             thrust *= boostMultiplier;//booost!
         }
         body.applyForceToCenter(MyMath.vector(body.getAngle(), thrust), true);

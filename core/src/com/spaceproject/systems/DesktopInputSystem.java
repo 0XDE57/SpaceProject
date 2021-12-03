@@ -41,7 +41,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     @Override
     public void addedToEngine(Engine engine) {
         players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
-        MyScreenAdapter.getInputMultiplexer().addProcessor(this);
+        GameScreen.getInputMultiplexer().addProcessor(this);
     }
     
     @Override
@@ -123,8 +123,8 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             handled = true;
         }
         
-        if (keycode == keyCFG.alter) {
-            control.alter = keyDown;
+        if (keycode == keyCFG.boost) {
+            control.boost = keyDown;
             handled = true;
         }
         

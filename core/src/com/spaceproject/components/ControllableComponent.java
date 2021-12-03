@@ -19,7 +19,7 @@ public class ControllableComponent implements Component {
     public boolean changeVehicle;
     public boolean transition;
     public boolean canTransition;
-    public boolean alter;
+    public boolean boost;
     
     //timers
     public SimpleTimer timerVehicle;

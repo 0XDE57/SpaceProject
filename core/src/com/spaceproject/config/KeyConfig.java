@@ -10,7 +10,7 @@ public class KeyConfig extends Config {
     public int right;
     public int left;
     public int back;
-    public int alter;
+    public int boost;
     public int dash;
     public int activateShield;
     public int changeVehicle;
@@ -49,7 +49,7 @@ public class KeyConfig extends Config {
         right = Keys.D;
         left = Keys.A;
         back = Keys.S;
-        alter = Keys.SPACE;
+        boost = Keys.SPACE;
         dash = Keys.SPACE;
         activateShield = Keys.SHIFT_LEFT;
         changeVehicle = Keys.G;
