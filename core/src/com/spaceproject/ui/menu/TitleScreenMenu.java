@@ -2,6 +2,7 @@ package com.spaceproject.ui.menu;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -81,6 +82,8 @@ public class TitleScreenMenu {
         btnOption.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                // todo: open settings panel with key mapping and such
+                // todo: make settings panel
                 Dialogs.showOKDialog(stage, "options", "not implemented yet");
             }
         });
@@ -100,7 +103,7 @@ public class TitleScreenMenu {
         btnExit.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Dialogs.showOptionDialog(stage, "Exit", "goodbye?", Dialogs.OptionDialogType.YES_NO, new OptionDialogAdapter() {
+                Dialogs.showOptionDialog(stage, "exit", "goodbye?", Dialogs.OptionDialogType.YES_NO, new OptionDialogAdapter() {
                     @Override
                     public void yes() {
                         Gdx.app.exit();
@@ -168,6 +171,8 @@ public class TitleScreenMenu {
             }
         });
         
+        
+        
         table.add(btnSpiral).fillX().row();
         table.add(btnVoronoi).fillX().row();
         table.add(btnNoise).fillX().row();
@@ -175,16 +180,13 @@ public class TitleScreenMenu {
         table.add(btnShip).fillX().row();
     }
     
-    
-    /**
-     * kindly leave this part alone please. everything else is fair game ;)
-     */
     private static VisDialog showAboutDialog(Stage stage) {
-        final VisDialog dialog = new VisDialog("");
+        final VisDialog dialog = new VisDialog("this is a prototype.");
         dialog.closeOnEscape();
         dialog.centerWindow();
         
-        dialog.text("this is a prototype.\nyou can fly ships to explore space, land on planets.\ncurrent state: a neat little engine with little to no content at this time. stay tuned.\n\nDeveloped with <3 by Whilow Schock");
+        dialog.text("you can fly ships to explore space, land on planets.\ncurrent state: a neat little engine with little to no content at this time. stay tuned.\n\nDeveloped with <3");
+        
         LinkLabel link = new LinkLabel("https://github.com/0xDE57/SpaceProject");
         link.setListener(new LinkLabel.LinkLabelListener() {
             @Override
@@ -192,15 +194,14 @@ public class TitleScreenMenu {
                 Gdx.net.openURI(url);
             }
         });
-        
-        dialog.row();
-        dialog.add(link).pad(10);
-        //todo: button should be below link
+        dialog.getContentTable().row();
+        dialog.getContentTable().add(link);
+
         dialog.button(ButtonBar.ButtonType.OK.getText()).padBottom(3.0F);
         
         dialog.addListener(new InputListener() {
             public boolean keyDown(InputEvent event, int keycode) {
-                if (keycode == 66) {
+                if (keycode == Input.Keys.ESCAPE) {
                     dialog.fadeOut();
                     return true;
                 } else {
@@ -208,11 +209,7 @@ public class TitleScreenMenu {
                 }
             }
         });
-    
-        
-        
-        
-        
+
         dialog.pack();
         
         stage.addActor(dialog.fadeIn());
