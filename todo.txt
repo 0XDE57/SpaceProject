@@ -192,6 +192,9 @@ Legend:
     [ * ] = exceptions
 
 
+[ ] terrible BUG! lerping camera movement is giving some jittering in the rendering when vsync on.
+        less visible when vsync off. not visible when lockedOn.
+        look into interpolating physics, and investigate floating point errors
 
 [...] BUG! start game, leave to main menu, return to game: planets do not load
     [x] clean up, dispose and unload systems properly when return to main menu
@@ -237,9 +240,7 @@ Legend:
     https://www.youtube.com/watch?v=Fy0aCDmgnxg
     https://www.youtube.com/watch?v=tu-Qe66AvtY
     [x] lag camera behind movement a little for visual effect, especially when dodging for more visual impact
-    [ ] lerping camera movement is giving some jittering in the rendering when vsync on.
-        less visible when vsync off. not visible when lockedOn.
-        look into interpolating physics, and investigate floating point errors
+
     [x] change cursor to a crosshair sprite
     [...] camera allow cursor to "extend view": pushing cursor to edge of screen pulls camera position at a point between player and mouse
     [...] camera: combat camera
