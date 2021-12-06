@@ -76,7 +76,7 @@ public class ShipControlSystem extends IteratingSystem {
             accelerate(control, physicsComp.body, vehicle, delta);
         }
         if (control.moveBack) {
-            decelerate(physicsComp.body, delta);
+            decelerate(control, physicsComp.body, vehicle, delta);
         }
         if (control.moveLeft) {
             strafeLeft(vehicle, control, physicsComp, delta);
@@ -126,7 +126,13 @@ public class ShipControlSystem extends IteratingSystem {
         body.applyForceToCenter(MyMath.vector(body.getAngle(), thrust), true);
     }
     
-    private static void decelerate(Body body, float delta) {
+    private static void decelerate(ControllableComponent control, Body body, VehicleComponent vehicle, float delta) {
+        float thrust = vehicle.thrust * control.movementMultiplier * delta;
+        if (control.boost) {
+            thrust *= boostMultiplier;//booost!
+        }
+        body.applyForceToCenter(MyMath.vector(body.getAngle()-(180*MathUtils.degreesToRadians), thrust), true);
+        /*
         float stopThreshold = 0.2f;
         if (body.getLinearVelocity().len() <= stopThreshold) {
             //completely stop if moving really slowly
@@ -136,7 +142,7 @@ public class ShipControlSystem extends IteratingSystem {
             float thrust = body.getLinearVelocity().len() * 20 * delta;
             float angle = body.getLinearVelocity().angleRad() - 180 * MathUtils.degRad;
             body.applyForceToCenter(MyMath.vector(angle, thrust), true);
-        }
+        }*/
     }
     
     private void strafeRight(VehicleComponent vehicle, ControllableComponent control, PhysicsComponent physicsComp, float delta) {

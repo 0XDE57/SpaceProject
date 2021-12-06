@@ -117,14 +117,14 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                     }
                     break;
                 case shipEngineLeft:
-                    if ((control.moveRight || roll.flipState == BarrelRollComponent.FlipState.right) && !hyperdriveIsActive) {
+                    if ((control.moveRight || roll.flipState == BarrelRollComponent.FlipState.right || control.moveBack) && !hyperdriveIsActive) {
                         particle.pooledEffect.start();
                     } else {
                         particle.pooledEffect.allowCompletion();
                     }
                     break;
                 case shipEngineRight:
-                    if ((control.moveLeft || roll.flipState == BarrelRollComponent.FlipState.left) && !hyperdriveIsActive) {
+                    if ((control.moveLeft || roll.flipState == BarrelRollComponent.FlipState.left || control.moveBack) && !hyperdriveIsActive) {
                         particle.pooledEffect.start();
                     } else {
                         particle.pooledEffect.allowCompletion();
@@ -141,8 +141,16 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         for (int i = 0; i < emitters.size; i++) {
             //set angle to always point out as engine exhaust
             ParticleEmitter.ScaledNumericValue angle = emitters.get(i).getAngle();
-            angle.setHigh(engineRotation);
-            angle.setLow(engineRotation);
+            float relativeAngle = engineRotation;
+            if (control != null && control.moveBack) {
+                ///point side engines forward
+                switch (particle.type) {
+                    case shipEngineLeft:  relativeAngle -= 45 * MathUtils.radDeg; break;
+                    case shipEngineRight: relativeAngle += 45 * MathUtils.radDeg; break;
+                }
+            }
+            angle.setHigh(relativeAngle);
+            angle.setLow(relativeAngle);
         
             //change color during boost
             if (hyperdriveIsActive) {
@@ -151,7 +159,9 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
             } else {
                 if (roll != null) {
                     ParticleEmitter.GradientColorValue tint = emitters.get(i).getTint();
-                    if (roll.flipState != BarrelRollComponent.FlipState.off || (control != null && control.moveForward && control.boost)) {
+                    boolean boostActive = roll.flipState != BarrelRollComponent.FlipState.off ||
+                            (control != null && ((control.moveForward && control.boost) || (control.moveBack && control.boost)));
+                    if (boostActive) {
                         tint.setColors(engineColorBoost);
                     } else {
                         tint.setColors(engineColor);
@@ -159,6 +169,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                 }
             }
         }
+        
         particle.offset.setAngleDeg(engineRotation);
         particle.pooledEffect.setPosition(transform.pos.x + particle.offset.x, transform.pos.y + particle.offset.y);
     }

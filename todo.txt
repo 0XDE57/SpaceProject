@@ -108,8 +108,9 @@ Data Directory (...\SpaceProject\android\assets)
 
 
 Space Background Rendering
-	Simple but effective: 3 parallax layers
+	Simple but effective: 4 parallax layers
 		stars close
+		stars far
 		stars far
 		noise far
 	Background color is set based on camera positioning.
@@ -239,7 +240,7 @@ Legend:
     [ ] lerping camera movement is giving some jittering in the rendering when vsync on.
         less visible when vsync off. not visible when lockedOn.
         look into interpolating physics, and investigate floating point errors
-    [ ] change cursor to a crosshair sprite
+    [x] change cursor to a crosshair sprite
     [...] camera allow cursor to "extend view": pushing cursor to edge of screen pulls camera position at a point between player and mouse
     [...] camera: combat camera
         manually zooming in an out when fighting is a bit clunky and jarring.
@@ -257,6 +258,7 @@ Legend:
         [ ] the space ships need more contrast from space background
     [ ] box2d lights https://github.com/libgdx/box2dlights
         [ ] engine fire can be a light source
+        [ ] shield can be a light source
         [ ] player eyes facing forward cone light
         [ ] lava on planets can be a light source
     [...] better star rendering
@@ -450,8 +452,11 @@ Legend:
         relative: false
 
 [ ] controls and input
+    [...] need a better slow down / stop. perhaps a reverse force, and point side engines forward 45
+        [ ] this control should also exit hyper drive
+        [ ] how does this feel with controller? needs moveBack control
     [x] basic controller input
-        [?] should separate look from movement? meaning movement left stick, aim/look right stick
+        [?] should separate look from movemwent? meaning movement left stick, aim/look right stick
             might make sense for on foot character (could separate look and movement on MnK too)
             this would displace the camera zoom control. we could let it modify camera with a modifier? eg: d-pad left + right stick
             would probably make mobile control more difficult (two virtual sticks)
