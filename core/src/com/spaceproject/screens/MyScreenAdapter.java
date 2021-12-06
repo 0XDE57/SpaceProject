@@ -30,7 +30,6 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
     
     private EngineConfig engineCFG;
     private KeyConfig keyCFG;
-    boolean debugTestShader = false;
     
     
     public MyScreenAdapter() {
@@ -51,10 +50,6 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
         viewport = new ExtendViewport(viewportWidth, viewportHeight, cam);
         viewport.apply();
         
-        if (debugTestShader) {
-            initShader();
-        }
-        
         resetCamera();
         
         //set this as input processor for mouse wheel scroll events
@@ -64,22 +59,6 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
         
         //debug
         toggleVsync();
-    }
-    
-    private void initShader() {
-        //playing with shaders
-        
-        //shader = new ShaderProgram(Gdx.files.internal("shaders/quadRotation.vsh"), Gdx.files.internal("shaders/quadRotation.fsh"));
-        //shader = new ShaderProgram(Gdx.files.internal("shaders/passthrough.vsh"), Gdx.files.internal("shaders/passthrough.fsh"));
-        //shader = new ShaderProgram(Gdx.files.internal("shaders/invert.vsh"), Gdx.files.internal("shaders/invert.fsh"));
-        shader = new ShaderProgram(Gdx.files.internal("shaders/grayscale.vsh"), Gdx.files.internal("shaders/grayscale.fsh"));
-        ShaderProgram.pedantic = false;
-        Gdx.app.log(this.getClass().getSimpleName(), "Shader compiled: " + shader.isCompiled() + ": " + shader.getLog());
-        if (shader.isCompiled()) {
-            batch.setShader(shader);
-            shape = new ShapeRenderer(5000, shader);//5000 = default
-        }
-        
     }
     
     @Override
@@ -112,7 +91,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
         if (Gdx.graphics.isFullscreen()) {
             //set window to previous window size
             Gdx.graphics.setWindowedMode(prevWindowWidth, prevWindowHeight);
-            Gdx.app.log(MyScreenAdapter.class.getSimpleName(), "Set to windowed.");
+            Gdx.app.log(this.getClass().getSimpleName(), "Set to windowed.");
         } else {
             //save window size
             prevWindowWidth = Gdx.graphics.getWidth();
@@ -121,9 +100,9 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
             //set to fullscreen
             if (Gdx.graphics.supportsDisplayModeChange()) {
                 Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-                Gdx.app.log(MyScreenAdapter.class.getSimpleName(), "Set to fullscreen.");
+                Gdx.app.log(this.getClass().getSimpleName(), "Set to fullscreen.");
             } else {
-                Gdx.app.log(MyScreenAdapter.class.getSimpleName(), "DisplayModeChange not supported.");
+                Gdx.app.log(this.getClass().getSimpleName(), "DisplayModeChange not supported.");
             }
         }
     }
