@@ -5,7 +5,6 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.spaceproject.SpaceProject;
@@ -23,7 +22,6 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
     public static ExtendViewport viewport;
     public static SpriteBatch batch;
     public static ShapeRenderer shape;
-    public static ShaderProgram shader;
     //save window size for switching between fullscreen and windowed
     private int prevWindowWidth;
     private int prevWindowHeight;
