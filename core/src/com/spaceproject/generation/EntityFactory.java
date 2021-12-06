@@ -396,6 +396,13 @@ public class EntityFactory {
         map.color = new Color(1, 1, 1, 0.9f);
         map.distance = 3000;
         shipEntity.add(map);
+        
+        //shield particle effect
+        ParticleComponent particle = new ParticleComponent();
+        particle.type = ParticleComponent.EffectType.shieldCharge;
+        particle.offset = new Vector2();
+        particle.angle = 0;
+        shipEntity.add(particle);
     
         //engine particle effect
         Entity mainEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineMain, new Vector2(0, height + 0.2f), 0);

@@ -92,6 +92,9 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
             case projectileTrail:
                 updateTailParticle(entity, particle);
                 break;
+            case shieldCharge:
+                updateShieldChargeParticle(entity, particle);
+                break;
         }
         
         particle.pooledEffect.draw(spriteBatch, deltaTime);
@@ -176,12 +179,22 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     
     private void updateChargeParticle(Entity entity, ParticleComponent particle) {
         ChargeCannonComponent cannon = Mappers.chargeCannon.get(entity);
-        if (cannon != null) {
-            if (cannon.isCharging) {
-                particle.pooledEffect.start();
-            } else {
-                particle.pooledEffect.allowCompletion();
-            }
+        if (cannon != null && cannon.isCharging) {
+            particle.pooledEffect.start();
+        } else {
+            particle.pooledEffect.allowCompletion();
+        }
+        
+        TransformComponent transform = Mappers.transform.get(entity);
+        particle.pooledEffect.setPosition(transform.pos.x, transform.pos.y);
+    }
+    
+    private void updateShieldChargeParticle(Entity entity, ParticleComponent particle) {
+        ShieldComponent shield = Mappers.shield.get(entity);
+        if (shield != null && shield.state == ShieldComponent.State.charge) {
+            particle.pooledEffect.start();
+        } else {
+            particle.pooledEffect.allowCompletion();
         }
         
         TransformComponent transform = Mappers.transform.get(entity);
@@ -241,6 +254,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                 particle.pooledEffect.allowCompletion();
                 break;
             case bulletCharge:
+            case shieldCharge:
                 particle.pooledEffect = chargeEffectPool.obtain();
                 //start with emitter on
                 particle.pooledEffect.start();
@@ -261,6 +275,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                 fireEffectPool.free(particle.pooledEffect);
                 break;
             case bulletCharge:
+            case shieldCharge:
                 chargeEffectPool.free(particle.pooledEffect);
                 break;
             case projectileTrail:

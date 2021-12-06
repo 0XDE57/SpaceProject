@@ -11,6 +11,7 @@ public class ParticleComponent implements Component {
         shipEngineLeft,
         shipEngineRight,
         bulletCharge,
+        shieldCharge,
         projectileTrail
     }
     
