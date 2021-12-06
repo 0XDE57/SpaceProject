@@ -26,7 +26,11 @@ public class NBodyGravityAnim extends TitleAnimation {
             vel = new Vector2();
             accel = new Vector2();
             this.radius = radius;
-            mass = (float) (radius * radius * Math.PI);
+            
+            //basic model all bodies assume same density
+            //mass = (float) (radius * radius * Math.PI);
+            //float density = random 0 to 1?
+            calculateMass();
             
             //init tail: pre-allocate vectors
             tail = new Vector2[tailSize];
@@ -34,6 +38,10 @@ public class NBodyGravityAnim extends TitleAnimation {
                 tail[index] = new Vector2();
             }
             tailIndex = 0;//start at beginning
+        }
+        
+        public void calculateMass() {
+            mass = (float) (radius * radius * Math.PI);
         }
         
         public void updateTail() {
@@ -54,6 +62,11 @@ public class NBodyGravityAnim extends TitleAnimation {
     
     Array<SimpleBody> bodies = new Array<>();
     SimpleBody ghostBody = null;
+    
+    boolean isDrag = false;
+    SimpleBody selectedBody = null;
+    int releaseMS = 200;
+    long dragTime;
     
     public NBodyGravityAnim() {
         resetInitialBodies();
@@ -77,6 +90,11 @@ public class NBodyGravityAnim extends TitleAnimation {
         physicsStep(delta * simulationSpeed);
         timeAccumulator += delta;
     
+        
+        //mouse position
+        int x = Gdx.input.getX();
+        int y = Gdx.graphics.getHeight() - Gdx.input.getY();
+    
         //add new body
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             if (ghostBody == null) {
@@ -85,37 +103,68 @@ public class NBodyGravityAnim extends TitleAnimation {
             }
         } else {
             if (ghostBody != null) {
+                ghostBody.calculateMass();//recalc mass due to radius change
                 bodies.add(ghostBody);
+                Gdx.app.log(this.getClass().getSimpleName(), "added body.(" + ghostBody.mass + ") total: " + bodies.size);
                 ghostBody = null;
-                Gdx.app.log(this.getClass().getSimpleName(), "added body. total: " + bodies.size);
             }
         }
     
-        //hold-drag, release fling
+        
         if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
-            //todo: hold toggle
-            
-            
+            //hold-drag
+            if (!isDrag) {
+                for (SimpleBody body : bodies) {
+                    Circle circle = new Circle(body.pos, body.radius);
+                    if (circle.contains(x, y)) {
+                        isDrag = true;
+                        selectedBody = body;
+                        dragTime = System.currentTimeMillis();
+                        Gdx.app.log(this.getClass().getSimpleName(), "selected body: (" + body.mass + ")  " + body.pos);
+                        break;
+                    }
+                }
+            } else {
+                Vector2 deltaMouse = selectedBody.pos.cpy().sub(x, y);
+                selectedBody.vel.sub(deltaMouse.scl(deltaMouse.len() * 0.0001f * delta));
+            }
         } else {
-            //if holdToggle
-            //
+            //release: fling
+            if (isDrag) {
+                isDrag = false;
+                
+                //remove body if release was quick, and still in body
+                if (System.currentTimeMillis() - dragTime <= releaseMS) {
+                    //bodies.removeValue(selectedBody, true);
+                    Circle circle = new Circle(selectedBody.pos, selectedBody.radius);
+                    if (circle.contains(x, y)) {
+                        bodies.removeValue(selectedBody, true);
+                        Gdx.app.log(this.getClass().getSimpleName(), "removed body. (" + selectedBody.mass + ")  " + selectedBody.pos + " total: " + bodies.size);
+                    }
+                } else {
+                    //fling
+                    //selectedBody.vel.sub(selectedBody.pos.cpy().sub(x, y).scl(0.05f));
+                }
+    
+                selectedBody = null;
+            }
         }
         
+        /*
         //remove body
         if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             //if not holdToggle
-            
-            int x = Gdx.input.getX();
-            int y = Gdx.graphics.getHeight() - Gdx.input.getY();
-            for (SimpleBody body : bodies) {
-                Circle circle = new Circle(body.pos, body.radius);
-                if (circle.contains(x, y)) {
-                    bodies.removeValue(body, true);
-                    Gdx.app.log(this.getClass().getSimpleName(), "removed body. total: " + bodies.size);
-                    break;
+            if (!isDrag) {
+                for (SimpleBody body : bodies) {
+                    Circle circle = new Circle(body.pos, body.radius);
+                    if (circle.contains(x, y)) {
+                        bodies.removeValue(body, true);
+                        Gdx.app.log(this.getClass().getSimpleName(), "removed body. total: " + bodies.size);
+                        break;
+                    }
                 }
             }
-        }
+        }*/
     
         //reset to initial conditions
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
@@ -140,6 +189,10 @@ public class NBodyGravityAnim extends TitleAnimation {
                 shape.point(tail.x, tail.y, 0);
                 //shape.circle(tail.x, tail.y, 2);
             }
+        }
+        
+        if (isDrag) {
+            shape.line(x, y, selectedBody.pos.x, selectedBody.pos.y);
         }
         
         //render and update new ghost body
