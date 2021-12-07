@@ -57,7 +57,6 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
     private Tree tree;
     private Node systemNodes, entityNodes;
     
-    //todo: move values to config
     private static int refreshRate = 1000;
     public static int newTime = 1000;
     public static int removeTime = 1000;
@@ -109,9 +108,10 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
         
         
         final ScrollPane scrollPane = new ScrollPane(tree);
-        //scrollPane.setFlickScroll(false);
-        scrollPane.setFadeScrollBars(false);
-        scrollPane.setScrollbarsOnTop(true);
+        scrollPane.setScrollbarsVisible(true);//why no scroll bar show?
+        //scrollPane.setFadeScrollBars(true);
+        //scrollPane.setScrollbarsOnTop(true);
+        //scrollPane.setForceScroll(false, true);
         //scrollPane.scrol
         contents.add(scrollPane).expand().fill();
         add(contents).expand().fill();
