@@ -213,15 +213,18 @@ Legend:
             with some movement and multiply the layers together
         [?] what about a basic noise shader rendered to a quad on a layer above player?
 
-[ ] add basic asteroids (arbitrary poly)
-    [...] spec spawner for asteroid.
-        [ ] belt - ring around barycenter component, orbit with flocking / group mechanic
-        [ ] field - randomly spawn while in space
+[x] add basic asteroids (arbitrary poly)
+    [x] spec spawner for asteroid.
+    [...] belt - ring around barycenter component
+        [ ] orbit with flocking / group mechanic
+    [ ] unload asteroids when system unloaded
+    [ ] field - randomly spawn while in space
     [...] begin make asteroid
         see: AsteroidAnim.java for prototyped polygon and rendering
-    [ ] attach box2D poly to match asteroid poly
-    [ ] take damage when hit by shots
-    [ ] break into smaller asteroids
+        [...] attach box2D poly to match asteroid poly
+            [ ] fix center of gravity
+        [x] take damage when hit by shots
+    [...] break into smaller asteroids
         [ ] voronoi shatter, for destructible asteroids.
             (and world generation can be used for tectonic plates / countries / biomes)
             https://www.badlogicgames.com/forum/viewtopic.php?f=11&t=22784 (my old thread)
