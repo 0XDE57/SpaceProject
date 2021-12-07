@@ -105,11 +105,10 @@ public class CannonSystem extends IteratingSystem {
         float bodyHeight = texture.texture.getHeight() * texture.scale;
         
         PhysicsComponent physics = new PhysicsComponent();
-        physics.body = BodyFactory.createRect(spawnPos.x, spawnPos.y, bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody);
+        physics.body = BodyFactory.createRect(spawnPos.x, spawnPos.y, bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody, entity);
         physics.body.setTransform(spawnPos, rot);
         physics.body.setLinearVelocity(projectileVel);
         physics.body.setBullet(true);//turn on CCD
-        physics.body.setUserData(entity);
         
         //transform
         TransformComponent transform = new TransformComponent();

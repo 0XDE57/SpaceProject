@@ -15,6 +15,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AISpawnComponent;
 import com.spaceproject.components.BarycenterComponent;
+import com.spaceproject.components.CircumstellarDiscComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.RemoveComponent;
@@ -168,6 +169,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     }
     
     private void loadCloseEntities(float loadDistance) {
+        //todo...
         for (AstroBody astroBodies : GameScreen.galaxy.objects) {
             //check if point is close enough to be loaded
             if (Vector2.dst2(astroBodies.x, astroBodies.y, GameScreen.cam.position.x, GameScreen.cam.position.y) < loadDistance) {
@@ -244,7 +246,14 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         BarycenterComponent barycenter = new BarycenterComponent();
         barycenter.bodyType = numPlanets == 0 ? BarycenterComponent.AstronomicalBodyType.loneStar : BarycenterComponent.AstronomicalBodyType.uniStellar;
         star.add(barycenter);
+    
+        
+        CircumstellarDiscComponent circumstellarDisc = new CircumstellarDiscComponent();
+        circumstellarDisc.radius = 1500;
+        circumstellarDisc.width = 200; //how wide of band centered on radius, concentrated at radius
+        star.add(circumstellarDisc);
         entities.add(star);
+        
         
         //create planets around star
         for (int i = 0; i < numPlanets; ++i) {

@@ -107,7 +107,7 @@ public class ChargeCannonSystem extends IteratingSystem {
         damageComponent.source = parentEntity;
         damageComponent.damage = chargeCannon.baseDamage + (10 * (chargeCannon.size / chargeCannon.maxSize) * chargeCannon.baseDamage);
         if (chargeCannon.size >= chargeCannon.maxSize) {
-            damageComponent.damage *= 1.15;//bonus damage for maxed out
+            damageComponent.damage *= 1.20;//bonus damage for maxed out
         }
         chargeCannon.projectileEntity.add(damageComponent);
         
@@ -117,18 +117,18 @@ public class ChargeCannonSystem extends IteratingSystem {
         float bodyHeight = textureComponent.texture.getHeight() * textureComponent.scale;
         TransformComponent transformComponent = Mappers.transform.get(chargeCannon.projectileEntity);
         PhysicsComponent physics = new PhysicsComponent();
-        physics.body = BodyFactory.createRect(transformComponent.pos.x, transformComponent.pos.y, bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody);
+        physics.body = BodyFactory.createRect(transformComponent.pos.x, transformComponent.pos.y,
+                bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody, chargeCannon.projectileEntity);
         physics.body.setTransform(transformComponent.pos, transformComponent.rotation);
         
         Body parentBody = Mappers.physics.get(parentEntity).body;
         Vector2 projectileVel = MyMath.vector(transformComponent.rotation, chargeCannon.velocity).add(parentBody.getLinearVelocity());
         physics.body.setLinearVelocity(projectileVel);
         physics.body.setBullet(true);//turn on CCD
-        physics.body.setUserData(chargeCannon.projectileEntity);
         chargeCannon.projectileEntity.add(physics);
         
         ExpireComponent expire = new ExpireComponent();
-        expire.time = 5;
+        expire.time = 8;
         chargeCannon.projectileEntity.add(expire);
         
         

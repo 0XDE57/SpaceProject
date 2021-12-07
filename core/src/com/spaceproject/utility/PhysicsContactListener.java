@@ -31,7 +31,9 @@ public class PhysicsContactListener implements ContactListener {
         Object dataA = contact.getFixtureA().getBody().getUserData();
         Object dataB = contact.getFixtureB().getBody().getUserData();
         
-        onCollision((Entity)dataA, (Entity)dataB);
+        if (dataA != null && dataB != null) {
+            onCollision((Entity) dataA, (Entity) dataB);
+        }
     }
     
     @Override
@@ -44,6 +46,7 @@ public class PhysicsContactListener implements ContactListener {
     public void postSolve(Contact contact, ContactImpulse impulse) {}
     
     private void onCollision(Entity a, Entity b) {
+        //todo: collision filtering: http://www.iforce2d.net/b2dtut/collision-filtering
         DamageComponent damageA = Mappers.damage.get(a);
         DamageComponent damageB = Mappers.damage.get(b);
         HealthComponent healthA = Mappers.health.get(a);
