@@ -7,6 +7,7 @@ public class CircumstellarDiscComponent implements Component {
     //distance from parent body
     public float radius;
     
+    //width of band centered on radius
     public float width;
     
 }

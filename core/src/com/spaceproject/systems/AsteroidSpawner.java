@@ -29,7 +29,7 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     // - asteroid source B: "field" / cluster
     //   random group out in the depths of space
     //      pocket size: how many to spawn in group
-    //      direction:
+    //      direction: which way headed
     // - asteroid source c: rogue rock "odd ball"
     //      just a single rock of random size, going in a random direction
     // - if any asteroid is too far from player, unload
@@ -56,9 +56,9 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
             if (asteroids.size() <= maxSpawn) {
                 //if (lastSpawnedTimer.tryEvent()) {
                 Vector2 pos = Mappers.transform.get(parentEntity).pos.cpy();
-                float offset = MathUtils.random(-disk.width/2, disk.width/2);
+                float bandwidthOffset = MathUtils.random(-disk.width/2, disk.width/2);//todo, should bias towards middle and taper off edges
                 float d = MathUtils.random(MathUtils.PI2);
-                pos.add(MyMath.vector(d, disk.radius + offset));
+                pos.add(MyMath.vector(d, disk.radius + bandwidthOffset));
                 //todo: apply gravity to keep them rotating around star
                 Vector2 velocity = MyMath.vector((float) (d + Math.PI/2), 20);
                 spawnAsteroid(pos.x, pos.y, velocity.x, velocity.y);
@@ -98,27 +98,40 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     
     @Override
     public void entityRemoved(Entity entity) {
+        //todo: consider adding a removal flag? what happens if we try to remove all asteroids
+        // eg: shatter vs cleanup. to prevent intentional removal from continually spawning children
+        
         AsteroidComponent asteroid = Mappers.asteroid.get(entity);
         if (asteroid != null) {
-            float minAsteroidSize = 14; //anything smaller than this will not create
-            if (asteroid.size >= minAsteroidSize) {
-                //todo: size = previousSize / numChildren?
-                
-                TransformComponent parentTransform = Mappers.transform.get(entity);
-                float x = parentTransform.pos.x;
-                float y = parentTransform.pos.y;
-                float size = asteroid.size * 0.4f;
-                long seed = MyMath.getSeed(x, y);
-                float spread = 45;
-                Vector2 parentVelocity = entity.getComponent(PhysicsComponent.class).body.getLinearVelocity().rotateDeg(spread);
-                Vector2 vel2 = parentVelocity.cpy().rotateDeg(-spread*2);
-                
-                //create two children
-                Entity childAsteroidA = EntityFactory.createAsteroid(seed, x, y, parentVelocity.x, parentVelocity.y, size);
-                Entity childAsteroidB = EntityFactory.createAsteroid(seed+1, x, y, vel2.x, vel2.y, size);
-                getEngine().addEntity(childAsteroidA);
-                getEngine().addEntity(childAsteroidB);
-            }
+            spawnChildren(entity, asteroid);
+        }
+    }
+    
+    public void spawnChildren(Entity parentAsteroid, AsteroidComponent asteroid) {
+        //todo: how should shatter mechanics handle? what if pass down extra damage to children.
+        // eg: asteroid has 100 hp, breaks into 2 = 50hp children
+        //   damage 110 = -10 hp, breaks into 2 minus 5 each = 45hp
+        //   damage 200 = -100 hp, breaks into 2 minus 50 = 0hp = don't spawn children -> instant destruction
+        //  could play with different rules and ratios, find what feels good
+        //
+        float minAsteroidSize = 14; //anything smaller than this will not create more
+        if (asteroid.size >= minAsteroidSize) {
+            //todo: size = previousSize / numChildren?
+            
+            TransformComponent parentTransform = Mappers.transform.get(parentAsteroid);
+            float x = parentTransform.pos.x;
+            float y = parentTransform.pos.y;
+            float size = asteroid.size * 0.4f;
+            long seed = MyMath.getSeed(x, y);
+            float spread = 45;
+            Vector2 parentVelocity = parentAsteroid.getComponent(PhysicsComponent.class).body.getLinearVelocity().rotateDeg(spread);
+            Vector2 vel2 = parentVelocity.cpy().rotateDeg(-spread*2);
+            
+            //create two children
+            Entity childAsteroidA = EntityFactory.createAsteroid(seed, x, y, parentVelocity.x, parentVelocity.y, size);
+            Entity childAsteroidB = EntityFactory.createAsteroid(seed+1, x, y, vel2.x, vel2.y, size);
+            getEngine().addEntity(childAsteroidA);
+            getEngine().addEntity(childAsteroidB);
         }
     }
     

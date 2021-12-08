@@ -51,17 +51,21 @@ public class CameraSystem extends IteratingSystem {
     public void processEntity(Entity entity, float delta) {
         Vector2 playerPosition = Mappers.transform.get(entity).pos;
     
-        inCombat = focalPoints.size() > 0;
-        if (inCombat) {
-            focusCombatCamera(playerPosition, delta);
-            if (focalPoints.size() == 0) {
-                //inCombat = false;
-            }
-        } else {
+        lerpToTarget(playerPosition, delta);
+    
+        
+        //if (focalPoints.size() > 0) {
+        //    //todo: broken, need smooth transition between states
+        //    //focusCombatCamera(playerPosition, delta);
+        //    if (focalPoints.size() == 0) {
+        //        //inCombat = false;
+        //    }
+        //} else {
+            //todo: push camera out towards cursor, as if to extend your focus there
             //Vector3 targetPos = GameScreen.cam.unproject(new Vector3(Gdx.input.getX()/* + Gdx.graphics.getWidth() * 0.5f*/, Gdx.input.getY() - Gdx.graphics.getHeight() * 0.5f, 0));
-            Vector2 targetPos = new Vector2(Gdx.input.getX() /*+ Gdx.graphics.getWidth() * 0.5f */, Gdx.input.getY() + Gdx.graphics.getHeight() * 0.5f);
+            //Vector2 targetPos = new Vector2(Gdx.input.getX() /*+ Gdx.graphics.getWidth() * 0.5f */, Gdx.input.getY() + Gdx.graphics.getHeight() * 0.5f);
             
-            Vector2 midpoint = new Vector2(targetPos.x, targetPos.y);//.scl(0.5f);//.clamp(0, 20);
+            //Vector2 midpoint = new Vector2(targetPos.x, targetPos.y);//.scl(0.5f);//.clamp(0, 20);
             //DebugSystem.addDebugText(MyMath.formatVector2(midpoint, 1) + "", 500, 500);
     
             //set camera to focal point between targets, lock once acquired.
@@ -70,16 +74,16 @@ public class CameraSystem extends IteratingSystem {
             
             
             //set camera position to entity
-            lerpToTarget(playerPosition, delta);
+            //lerpToTarget(playerPosition, delta);
             //lockToTarget(playerPosition);
             
-            if (focalPoints.size() > 0) {
+            //if (focalPoints.size() > 0) {
                 //inCombat = true;
-            }
-        }
-        //lockToTarget(playerPosition);
+            //}
+        //}
+    
         /*
-        //always keep player within viewport
+        //todo: always keep player within viewport
         int padding = 0;
         Rectangle focalWindow = new Rectangle(padding, padding,
                 Gdx.graphics.getWidth()-padding, Gdx.graphics.getHeight()-padding);

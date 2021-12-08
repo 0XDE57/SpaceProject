@@ -7,8 +7,8 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.utility.Mappers;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.utility.Mappers;
 
 public class HyperDriveSystem extends IteratingSystem {
     
@@ -69,7 +69,7 @@ public class HyperDriveSystem extends IteratingSystem {
         hyperDrive.graceTimer.reset();
     }
     
-    private void disengageHyperDrive(Entity entity, HyperDriveComponent hyperDrive) {
+    public static void disengageHyperDrive(Entity entity, HyperDriveComponent hyperDrive) {
         // disable hyper
         hyperDrive.state = HyperDriveComponent.State.cooldown;
         hyperDrive.coolDownTimer.reset();

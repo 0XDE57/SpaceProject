@@ -120,15 +120,19 @@ public class PhysicsContactListener implements ContactListener {
         
         //remove entity (kill)
         if (healthComponent.health <= 0) {
+            //if entity was part of a cluster, remove all entities attached to cluster
             Array<Entity> cluster = ECSUtil.getAttachedEntities(engine, attackedEntity);
             for (Entity e : cluster) {
                 e.add(new RemoveComponent());
             }
+            
+            //if entity was charging a projectile, make sure the projectile entity is also removed
             ChargeCannonComponent chargeCannon = Mappers.chargeCannon.get(attackedEntity);
             if (chargeCannon != null && chargeCannon.projectileEntity != null) {
                 //destroy or release
                 chargeCannon.projectileEntity.add(new RemoveComponent());
             }
+            
             Gdx.app.log(this.getClass().getSimpleName(),
                     "[" + DebugUtil.objString(attackedEntity) + "] killed by: [" + DebugUtil.objString(damageComponent.source) + "]");
         }

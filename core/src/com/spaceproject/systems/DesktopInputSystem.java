@@ -120,6 +120,14 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         }
         if (keycode == keyCFG.back) {
             control.moveBack = keyDown;
+            
+            if (control.moveBack) {
+                //cancel hyperdrive if active
+                HyperDriveComponent hyper = Mappers.hyper.get(player);
+                if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
+                    HyperDriveSystem.disengageHyperDrive(player, hyper);
+                }
+            }
             handled = true;
         }
         

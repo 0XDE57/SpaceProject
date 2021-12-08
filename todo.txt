@@ -457,7 +457,7 @@ Legend:
 
 [ ] controls and input
     [...] need a better slow down / stop. perhaps a reverse force, and point side engines forward 45
-        [ ] this control should also exit hyper drive
+        [x] this control should also exit hyper drive
         [ ] how does this feel with controller? needs moveBack control
     [x] basic controller input
         [?] should separate look from movemwent? meaning movement left stick, aim/look right stick
