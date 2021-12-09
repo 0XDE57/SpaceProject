@@ -31,13 +31,15 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     //      pocket size: how many to spawn in group
     //      direction: which way headed
     // - asteroid source c: rogue rock "odd ball"
-    //      just a single rock of random size, going in a random direction
+    //      just a single rock of random size maybe larger than usual, going in a random direction
     // - if any asteroid is too far from player, unload
     
     private ImmutableArray<Entity> asteroids;
     private ImmutableArray<Entity> spawnDisk;
-    SimpleTimer lastSpawnedTimer = new SimpleTimer(300);
-    int maxSpawn = 100;
+    SimpleTimer lastSpawnedTimer = new SimpleTimer(1000);
+    int maxSpawn = 200;
+    
+    
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -51,23 +53,6 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     public void update(float deltaTime) {
         //super.update(deltaTime);
         
-        for (Entity parentEntity : spawnDisk) {
-            CircumstellarDiscComponent disk = Mappers.circumstellar.get(parentEntity);
-            if (asteroids.size() <= maxSpawn) {
-                //if (lastSpawnedTimer.tryEvent()) {
-                Vector2 pos = Mappers.transform.get(parentEntity).pos.cpy();
-                float bandwidthOffset = MathUtils.random(-disk.width/2, disk.width/2);//todo, should bias towards middle and taper off edges
-                float d = MathUtils.random(MathUtils.PI2);
-                pos.add(MyMath.vector(d, disk.radius + bandwidthOffset));
-                //todo: apply gravity to keep them rotating around star
-                Vector2 velocity = MyMath.vector((float) (d + Math.PI/2), 20);
-                spawnAsteroid(pos.x, pos.y, velocity.x, velocity.y);
-                //}
-            } else {
-                lastSpawnedTimer.reset();
-            }
-        }
-        
         /*
         if (asteroids.size() <= maxSpawn) {
             if (lastSpawnedTimer.tryEvent()) {
@@ -76,20 +61,69 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
         } else {
             lastSpawnedTimer.reset();
         }*/
+    
         
+        if (asteroids.size() <= maxSpawn) {
+            if (lastSpawnedTimer.tryEvent()) {
+                spawnAsteroidField(-1000, -1000);
+                lastSpawnedTimer.reset();
+            }
+        }
+        
+        spawnAsteroidDisk();
     }
     
-    private void spawnAsteroid() {
+    private void spawnAsteroidDisk() {
+        for (Entity parentEntity : spawnDisk) {
+            CircumstellarDiscComponent disk = Mappers.circumstellar.get(parentEntity);
+            if (asteroids.size() <= maxSpawn) {
+                //if (lastSpawnedTimer.tryEvent()) {
+                Vector2 pos = Mappers.transform.get(parentEntity).pos.cpy();
+                float bandwidthOffset = MathUtils.random(-disk.width/2, disk.width/2);//todo, should bias towards middle and taper off edges
+                //alternatively could be a 1D noise from inner to outer with different concentrations?
+                float d = MathUtils.random(MathUtils.PI2);
+                pos.add(MyMath.vector(d, disk.radius + bandwidthOffset));
+                //todo: apply gravity to keep them rotating around star
+                // problem: we want asteroids to spawn in rings and stay in rings generally, but allow player to shoot them out of belt.
+                // I can't let the bodies float around freely with a simple n body sim as they are not stable.
+                // the system will just tear itself apart. even if a "stable" orbit is found it will become unstable as the player starts interacting with it
+                // currently this is why planets are locked in an elliptical orbit to sort of fake gravity.
+                // do I lock the asteroids in orbit similar to the planets? maybe interpolate to where they "should" be, pulling them back into the ring
+                // maybe once hit or disturbed, loses orbit component and floats freely?
+                // basically it comes down to how "arcadey" vs "simulator" does it need to be fun?
+                // currently there is no friction and we have conservation of momentum
+                
+                // plan of attack: i think i will start off with a lie, lock them in orbit when spawn.
+                // once disturbed or interacted with by an outside force, unlock the orbit and let gravity take over
+                // allow belt to "chain react" collapse / disperse and see what that plays like
+                Vector2 velocity = MyMath.vector((float) (d + Math.PI/2), 20);
+                spawnAsteroid(pos.x, pos.y, velocity.x, velocity.y);
+                //}
+            } else {
+                lastSpawnedTimer.reset();
+            }
+        }
+    }
+    
+    private void spawnAsteroidField(float x, float y) {
+        float d = MathUtils.random(MathUtils.PI2);
+        Vector2 vel = MyMath.vector(d, MathUtils.random(1, 50));
         float range = 500.0f;
-        //spawnAsteroid(MathUtils.random(-range, range), MathUtils.random(-range, range));
+        int clusterSize = 20;//MathUtils.random(1, 20);
+        for (int i = 0; i < clusterSize; i++) {
+            float newX = MathUtils.random(x-range, x+range);
+            float newY = MathUtils.random(y-range, y+range);
+            spawnAsteroid(newX, newY, vel.x, vel.x);
+        }
+        Gdx.app.log(this.getClass().getSimpleName(), "spawn field: " + clusterSize);
     }
     
     private void spawnAsteroid(float x, float y, float velX, float velY) {
-        int size = MathUtils.random(14, 80);
+        int size = MathUtils.random(14, 120);
         long seed = MyMath.getSeed(x, y);
         Entity asteroid = EntityFactory.createAsteroid(seed, x, y, velX, velY, size);
         getEngine().addEntity(asteroid);
-        Gdx.app.debug(this.getClass().getSimpleName(), "spawned: " + x + ", " + y);
+        //Gdx.app.debug(this.getClass().getSimpleName(), "spawned: " + x + ", " + y);
     }
     
     @Override

@@ -339,6 +339,7 @@ Legend:
             https://github.com/wwwtyro/space-2d
             [...] POC star shader with fullscreen quad in separate project
                 https://github.com/0XDE57/gdx-shadertoy
+                should I render to a square fbo? then the fbo texture can scale to the viewport without distortion?
                     helpful for porting shadertoys to libgdx:
                                     https://gamedev.stackexchange.com/questions/186477/why-dont-shadertoy-shaders-work-with-libgdx
                 https://www.youtube.com/watch?v=rvDo9LvfoVE
@@ -365,12 +366,16 @@ Legend:
 
 [...] shield
     [...] if collide with bullet, shrink/destroy shield
-    [x] fix radius is not consistent. rotation of body affects size of shield. don't trust calculateBoundingBox()?
-    [x] shield growth overrides and cancels charge cannon
-    [ ] grow/shrink body with shield. looks like cant resize bodies in box2d? destroy and recreate each frame seems inefficient likely
+    [ ] shield should protect from high impact collisions. otherwise do damage relative to how hard impact.
+        eg: ram ship into an asteroid at high velocity could destroy ship, use shield before impact to bounce off
+        if hit is hard enough, break shield
     [ ] if collide with another body with significant difference in velocity
         and if other has HealthComponent, do damage using velocity as damage factor
         [ ] shield dash bash? high impulse forward, then activate shield to ram other objects and do damage to them
+    [x] fix radius is not consistent. rotation of body affects size of shield. don't trust calculateBoundingBox()?
+    [x] shield growth overrides and cancels charge cannon
+    [ ] grow/shrink body with shield. looks like cant resize bodies in box2d? destroy and recreate each frame seems inefficient likely
+
     [x] bug not render on planet
     [ ] graphics: rotate shield polygon, possibly a shader to make edges glow
     [x] should be unavailable during hyper drive
