@@ -21,9 +21,9 @@ public class NBodyGravityAnim extends TitleAnimation {
         Vector2[] tail;
         int tailIndex;
         
-        public SimpleBody(float x, float y, float radius) {
+        public SimpleBody(float x, float y, float velX, float velY, float radius) {
             pos = new Vector2(x, y);
-            vel = new Vector2();
+            vel = new Vector2(velX, velY);
             accel = new Vector2();
             this.radius = radius;
             
@@ -40,6 +40,10 @@ public class NBodyGravityAnim extends TitleAnimation {
             tailIndex = 0;//start at beginning
         }
         
+        public SimpleBody(float x, float y, float radius) {
+            this(x, y, 0, 0, radius);
+        }
+        
         public void calculateMass() {
             mass = (float) (radius * radius * Math.PI);
         }
@@ -52,12 +56,18 @@ public class NBodyGravityAnim extends TitleAnimation {
                 tailIndex = 0;
             }
         }
-        
+    
+        public void merge(SimpleBody bodyB) {
+            radius += bodyB.radius;//absorb mass
+            calculateMass();
+            //vel.crs(bodyB.vel);//merge velocity
+            //pos.add(pos.cpy().sub(bodyB.pos));//split the difference
+        }
     }
     
-    float timeAccumulator = 0;
-    float simulationSpeed = 15.0f;
-    float gravity = 0.5f;
+    float timeAccumulator;
+    float simulationSpeed;
+    float gravity;
     int tailSize = 200;
     
     Array<SimpleBody> bodies = new Array<>();
@@ -74,14 +84,34 @@ public class NBodyGravityAnim extends TitleAnimation {
     
     private void resetInitialBodies() {
         bodies.clear();
-        //todo: set initial bodies to "stable" figure 8 shape
-        // initial conditions = ?
-        // https://www.youtube.com/watch?v=et7XvBenEo8
-        // https://www.youtube.com/watch?v=otRtUiCcCh4
-        // https://www.youtube.com/watch?v=8_RRZcqBEAc
-        bodies.add(new SimpleBody(800, 500, 50));
-        bodies.add(new SimpleBody(400, 400, 50));
-        bodies.add(new SimpleBody(600, 250, 50));
+        //classic stable figure 8
+        //initial condition computed by Carles Sim ́o
+        //x1=−x2=0.97000436−0.24308753i,x3=0; ~V =  ̇x3=−2  ̇x1=−2  ̇x2=−0.93240737−0.86473146i
+        Vector2 x1 = new Vector2(-0.97000436f, 0.24308753f);
+        x1.scl(300);//make bigger to fill screen
+        Vector2 x2 = new Vector2(-x1.x, -x1.y);
+        Vector2 x3 = new Vector2(0, 0); //center body
+        
+        Vector2 vx3 = new Vector2(0.93240737f, 0.86473146f);
+        vx3.scl(4);//todo: not accurate scaling: not stable
+        Vector2 vx2 = new Vector2(-vx3.x / 2, -vx3.y / 2);
+        Vector2 vx1 = new Vector2(vx2.x, vx2.y);
+    
+        //center bodies on screen
+        x1.add(Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
+        x2.add(Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
+        x3.add(Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
+        
+        float radius = 40;//somewhat magic number
+        bodies.add(new SimpleBody(x1.x, x1.y, vx1.x, vx1.y, radius));
+        bodies.add(new SimpleBody(x2.x, x2.y, vx2.x, vx2.y, radius));
+        bodies.add(new SimpleBody(x3.x, x3.y, vx3.x, vx3.y, radius));
+        
+        //reset simulation parameters
+        gravity = 1f;
+        simulationSpeed = 15.0f;
+    
+        Gdx.app.log(this.getClass().getSimpleName(), "reset initial bodies. initial settings: " + gravity );
     }
     
     @Override
@@ -90,6 +120,31 @@ public class NBodyGravityAnim extends TitleAnimation {
         physicsStep(delta * simulationSpeed);
         timeAccumulator += delta;
     
+        //input
+        if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+            gravity += 0.1f;
+            Gdx.app.log(this.getClass().getSimpleName(), "gravity: " + gravity );
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+            gravity -= 0.1f;
+            if (gravity <= 0.1f) {
+                gravity = 0.1f;
+            }
+            Gdx.app.log(this.getClass().getSimpleName(), "gravity: " + gravity );
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            simulationSpeed -= 0.2f;
+            Gdx.app.log(this.getClass().getSimpleName(), "sim speed: " + simulationSpeed);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            simulationSpeed += 0.2f;
+            Gdx.app.log(this.getClass().getSimpleName(), "sim speed: " + simulationSpeed);
+        }
+        
+        //reset to initial conditions
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            resetInitialBodies();
+        }
         
         //mouse position
         int x = Gdx.input.getX();
@@ -98,7 +153,7 @@ public class NBodyGravityAnim extends TitleAnimation {
         //add new body
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             if (ghostBody == null) {
-                ghostBody = new SimpleBody(0, 0, 10);
+                ghostBody = new SimpleBody(0, 0, 5);
                 timeAccumulator = 0;
             }
         } else {
@@ -109,7 +164,6 @@ public class NBodyGravityAnim extends TitleAnimation {
                 ghostBody = null;
             }
         }
-    
         
         if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
             //hold-drag
@@ -139,37 +193,15 @@ public class NBodyGravityAnim extends TitleAnimation {
                     Circle circle = new Circle(selectedBody.pos, selectedBody.radius);
                     if (circle.contains(x, y)) {
                         bodies.removeValue(selectedBody, true);
-                        Gdx.app.log(this.getClass().getSimpleName(), "removed body. (" + selectedBody.mass + ")  " + selectedBody.pos + " total: " + bodies.size);
+                        Gdx.app.log(this.getClass().getSimpleName(),
+                                "removed body. (" + selectedBody.mass + ")  " + selectedBody.pos + " total: " + bodies.size);
                     }
-                } else {
-                    //fling
-                    //selectedBody.vel.sub(selectedBody.pos.cpy().sub(x, y).scl(0.05f));
                 }
     
                 selectedBody = null;
             }
         }
         
-        /*
-        //remove body
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
-            //if not holdToggle
-            if (!isDrag) {
-                for (SimpleBody body : bodies) {
-                    Circle circle = new Circle(body.pos, body.radius);
-                    if (circle.contains(x, y)) {
-                        bodies.removeValue(body, true);
-                        Gdx.app.log(this.getClass().getSimpleName(), "removed body. total: " + bodies.size);
-                        break;
-                    }
-                }
-            }
-        }*/
-    
-        //reset to initial conditions
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            resetInitialBodies();
-        }
         
         shape.begin(ShapeRenderer.ShapeType.Filled);
         shape.setColor(0, 0, 0, 1);
@@ -197,8 +229,8 @@ public class NBodyGravityAnim extends TitleAnimation {
         
         //render and update new ghost body
         if (ghostBody != null) {
-            ghostBody.pos.x = Gdx.input.getX();
-            ghostBody.pos.y = Gdx.graphics.getHeight() - Gdx.input.getY();
+            ghostBody.pos.x = x;
+            ghostBody.pos.y = y;
             ghostBody.radius += Math.sin(timeAccumulator) * 0.5f;
             
             shape.setColor(1, 1, 1, 1);
@@ -206,9 +238,10 @@ public class NBodyGravityAnim extends TitleAnimation {
         }
         
         shape.end();
+
     }
     
-    /** Verlet integration */
+    /** integration */
     private void physicsStep(float delta) {
         float step = 0.5f * delta;
         
@@ -229,11 +262,42 @@ public class NBodyGravityAnim extends TitleAnimation {
         for (SimpleBody body : bodies) {
             body.pos.set(body.pos.cpy().add(body.vel.x * step, body.vel.y * step));
         }
+        
+        /*
+        //collision, merge if touching and velocity difference is low enough
+        boolean absorb;
+        do {
+            absorb = false;
+            for (int index = 0; index < bodies.size && absorb == false; index++) {
+                SimpleBody bodyA = bodies.get(index);
+                for (int indexB = 0; indexB < index; indexB++) {
+                    SimpleBody bodyB = bodies.get(indexB);
+                    float length = bodyA.pos.cpy().sub(bodyB.pos).len();
+                    float rad = bodyA.radius + bodyB.radius;
+                    if (rad >= length) {
+                        float dotVelocity = bodyA.vel.cpy().dot(bodyB.vel);
+                        float deltaAccel = bodyA.accel.cpy().sub(bodyB.accel).len();
+                        float deltaVel = bodyA.vel.cpy().sub(bodyB.vel).len();
+                        float dotAccel = bodyA.accel.cpy().dot(bodyB.accel);
+                        if (MathUtils.isEqual(dotVelocity, 0f, 0.1f)) {
+                            Gdx.app.log("", "merge!");
+                            if (bodyA.radius - bodyB.radius > 0) {
+                                bodyA.merge(bodyB);
+                                bodies.removeValue(bodyB, true);
+                            } else {
+                                bodyB.merge(bodyA);
+                                bodies.removeValue(bodyA, true);
+                            }
+                            absorb = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } while (absorb);
+        */
     }
     
-    /**
-     *
-     */
     private void calculateForces() {
         for (int index = 0; index < bodies.size; index++) {
             SimpleBody bodyA = bodies.get(index);
