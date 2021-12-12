@@ -67,7 +67,7 @@ public class SystemsConfig extends Config {
         // - cam update -> update, zoom and move camera
         // - sprite 2D renderer -> render regular textures no shader
         // - sprite 2D shader renderer -> render textures with shader applied
-        // - todo: asteroid renderer -> poly shape render
+        // - asteroid renderer -> poly shape render
         // - sprite 3D renderer -> render 3d meshes with no shader
         // - todo: sprite 3D shader renderer -> render 3d meshes with shader applied
         // - shield renderer -> shape render post sprite (possible shader for glow? box2d-lights?)

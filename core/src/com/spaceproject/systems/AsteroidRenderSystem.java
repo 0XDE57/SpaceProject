@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.TransformComponent;
@@ -36,15 +37,8 @@ public class AsteroidRenderSystem extends IteratingSystem {
         TransformComponent transform = Mappers.transform.get(entity);
         
         Polygon polygon = asteroid.polygon;
-        
-        /*
-        PhysicsComponent physics = Mappers.physics.get(entity);
-        polygon.setPosition(physics.body.getPosition().x, physics.body.getPosition().y);
-        polygon.setRotation(physics.body.getAngle());*/
-        
+        polygon.setRotation(transform.rotation * MathUtils.radiansToDegrees);
         polygon.setPosition(transform.pos.x, transform.pos.y);
-        polygon.setRotation(transform.rotation);
-        
         shapeRenderer.fillPolygon(polygon.getTransformedVertices(), 0, polygon.getVertices().length, Color.WHITE);
     }
     
