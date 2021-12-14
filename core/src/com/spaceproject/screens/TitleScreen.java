@@ -19,7 +19,6 @@ import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.FontFactory;
 import com.spaceproject.screens.animations.DelaunayAnim;
-import com.spaceproject.screens.animations.DropAnim;
 import com.spaceproject.screens.animations.NBodyGravityAnim;
 import com.spaceproject.screens.animations.NoiseAnim;
 import com.spaceproject.screens.animations.OrbitAnim;
@@ -38,7 +37,7 @@ public class TitleScreen extends MyScreenAdapter {
     private TitleAnimation foregroundAnimation, backgroundAnimation;
     
     enum ForegroundAnimation {
-        tree, delaunay, orbit, drop, crossNoise, nbody;/*, asteroid*/;
+        tree, delaunay, orbit, crossNoise, nbody;/*, asteroid*/;
         
         public static ForegroundAnimation random() {
             return ForegroundAnimation.values()[MathUtils.random(ForegroundAnimation.values().length - 1)];
@@ -194,9 +193,6 @@ public class TitleScreen extends MyScreenAdapter {
                 break;
             case orbit:
                 this.foregroundAnimation = new OrbitAnim();
-                break;
-            case drop:
-                this.foregroundAnimation = new DropAnim();//this one is kinda lame, may remove
                 break;
             case crossNoise:
                 this.foregroundAnimation = new NoiseAnim(0, 0.01f, 3, 0.013f, true);

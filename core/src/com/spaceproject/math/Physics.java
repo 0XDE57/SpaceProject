@@ -38,6 +38,7 @@ public class Physics {
     public static final BigDecimal planckBig = new BigDecimal("6.62607015").movePointLeft(34);
     
     // h*c: precalculated planckConstant * speedOfLight = 1.98644586...× 10^−25 J⋅m
+    public static final double hc = planckConstant * speedOfLight;
     public static final BigDecimal hcBig = new BigDecimal("1.98644586").movePointLeft(25);
     public static final BigDecimal hcCalculated = planckBig.multiply(new BigDecimal(speedOfLight));
     
@@ -52,7 +53,7 @@ public class Physics {
     public static final double gravitationalConstant = 6.674 * Math.pow(10, -11);
     
     // ? : not sure what to call this, but it doesn't change so we can precalculate it
-    //public static final double unnamedConstant = (2 * planckConstant * Math.pow(speedOfLight, 2));
+    public static final double unnamedConstant = (2 * planckConstant * Math.pow(speedOfLight, 2));
     
     /** Wien's displacement law: λₘT = b
      * Hotter things - peak at shorter wavelengths - bluer
@@ -85,9 +86,10 @@ public class Physics {
      * h = planck constant
      * c = speed of light
      */
-    public static BigDecimal wavelengthToPhotonEnergy(double wavelength) {
+    public static double wavelengthToPhotonEnergy(double wavelength) {
         //energy = (planckConstant * speedOfLight) / wavelength;
-        return hcCalculated.divide(new BigDecimal(wavelength), hcCalculated.scale(), RoundingMode.HALF_UP);
+        return hc / wavelength;
+        //return hcCalculated.divide(BigDecimal.valueOf(wavelength), hcCalculated.scale(), RoundingMode.HALF_UP);
     }
     
     /** E = hv
@@ -95,9 +97,10 @@ public class Physics {
      * v = frequency (hertz)
      * h = planck constant
      */
-    public static BigDecimal frequencyToPhotonEnergy(double frequency) {
+    public static double frequencyToPhotonEnergy(double frequency) {
         //energy = planckConstant * frequency;
-        return planckBig.multiply(new BigDecimal(frequency));
+        return  planckConstant * frequency;
+        //return planckBig.multiply(BigDecimal.valueOf(frequency));
     }
     
     
@@ -130,12 +133,13 @@ public class Physics {
         //((wavelength ^ 5) * (Math.E ^ ( ((planckConstant * speedOfLight) / (wavelength * boltzmannConstant * temperature)) - 1)));
         
         //break down
-        double unnamedConstant = (2.0 * planckConstant * Math.pow(speedOfLight, 2));
-        double hc = planckConstant * speedOfLight;
+        //double unnamedConstant = (2.0 * planckConstant * Math.pow(speedOfLight, 2));//(2 h c^2)
+        //double hc = planckConstant * speedOfLight;
         double a = wavelength * boltzmannConstant * temperature;
         double b = Math.exp(hc / a) - 1; //(e^((h c)/(λ k T)) - 1)
-        return unnamedConstant / ((Math.pow(wavelength, 5) * b));
+        return unnamedConstant / (Math.pow(wavelength, 5) * b);
     }
+    
     
     public static BigDecimal calcSpectralRadianceBig(int wavelength) {
         //todo: wrong...
@@ -267,6 +271,18 @@ public class Physics {
          *      6000	Xenon strobe light
          *      6500	Overcast sky
          *      7500	North sky light
+         *
+         *  Harvard spectral classification
+         *      O	≥ 33,000 K 	        blue
+         *      B 	10,000–33,000 K 	blue white
+         *      A 	7,500–10,000 K 	    white
+         *      F 	6,000–7,500 K 	    yellow white
+         *      G 	5,200–6,000 K 	    yellow
+         *      K 	3,700–5,200 K 	    orange
+         *      M 	2,000–3,700 K 	    red
+         *      R 	1,300–2,000 K 	    red
+         *      N 	1,300–2,000 K 	    red
+         *      S 	1,300–2,000 K 	    red
          */
     
         //Known sun values: 5772K | 502nm | 597.2 terahertz | 2.47 eV
@@ -299,17 +315,19 @@ public class Physics {
         Gdx.app.debug("PhysicsDebug", "planck double: " + planckConstant);
         Gdx.app.debug("PhysicsDebug", "size of double: [" + Double.MIN_VALUE + " to " + Double.MAX_VALUE
                 + "] exp: [" + Double.MIN_EXPONENT + " to " + Double.MAX_EXPONENT + "]");
-        
         //high precision big decimals
+        Gdx.app.debug("PhysicsDebug","planck bigdecimal: " + planckBig.toString() + " -> " + planckBig.toPlainString()
+                + " | precision: " + planckBig.precision() + "  - scale: " + planckBig.scale());
         Gdx.app.debug("PhysicsDebug","h * c def:  " + hcBig.toPlainString()
                         + " | precision: " + hcBig.precision() + "  - scale: " + hcBig.scale());
         Gdx.app.debug("PhysicsDebug","h * c calc: " + hcCalculated.toString() + " -> " + hcCalculated.toPlainString()
                 + " | precision: " + hcCalculated.precision() + "  - scale: " + hcCalculated.scale());
-        Gdx.app.debug("PhysicsDebug","planck: " + planckBig.toString() + " -> " + planckBig.toPlainString()
-                + " | precision: " + planckBig.precision() + "  - scale: " + planckBig.scale());
         
-        BigDecimal photonEnergy = frequencyToPhotonEnergy(calculatedFrequency);
-        Gdx.app.debug("PhysicsDebug", expectedWavelength + " nm = " + photonEnergy.toString() + " eV -> " + hcBig.toPlainString() +  " | precision: " + photonEnergy.precision() + "  - scale: " + photonEnergy.scale());
+        
+        //BigDecimal photonEnergy = frequencyToPhotonEnergy(calculatedFrequency);
+        //Gdx.app.debug("PhysicsDebug", expectedWavelength + " nm = " + photonEnergy.toString() + " eV -> " + hcBig.toPlainString() +  " | precision: " + photonEnergy.precision() + "  - scale: " + photonEnergy.scale());
+        double photonEnergy = frequencyToPhotonEnergy(calculatedFrequency);
+        Gdx.app.debug("PhysicsDebug", expectedWavelength + " nm = " + photonEnergy + " eV ");
         Gdx.app.debug("PhysicsDebug", expectedWavelength + " nm = " + wavelengthToPhotonEnergy(expectedWavelength) + " eV");
         
     
@@ -356,10 +374,10 @@ public class Physics {
         public static final String spectralClass = "GV2 (main sequence)";
         
         //mass: nominal solar mass parameter: GM⊙ = 1.3271244 × 10^20 m3 s−2 or 1.9885 × 10^30 kg.
-        public static final double mass = 1.9885 * (10 ^ 30);//kg
+        public static final double mass = 1.9885 * Math.pow(10, 30);//kg
         
         //radius: nominal solar radius 	R⊙ = 6.957 × 10^8 m
-        public static final double radius = 6.957 * (10 ^ 8);//m
+        public static final double radius = 6.957 * Math.pow(10, 8);//m
         
         //effective temperature
         public static final double kelvin = 5772; //K
@@ -368,7 +386,7 @@ public class Physics {
         public static final double peakWavelength = temperatureToWavelength(kelvin) * 1000000;
         
         //luminosity: 1 sol -> L⊙ = nominal solar luminosity: 	L⊙ = 3.828 × 10^26 W
-        public static final double luminosity = 3.828 * (10 ^ 26); //Watts
+        public static final double luminosity = 3.828 * Math.pow(10, 26); //Watts
         
         //public static final age = 4.78 billion years
         

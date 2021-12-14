@@ -77,10 +77,6 @@ public abstract class MyMath {
         return (float) Math.atan2(x2 - x1, y2 - y1);
     }
     
-    public static float angle2(Vector2 a, Vector2 b) {
-        return angle2(a.x, a.y, b.x, b.y);
-    }
-    
     public static float getAngularImpulse(Body body, float targetAngle, float delta) {
         //https://www.iforce2d.net/b2dtut/rotate-to-angle
         float nextAngle = body.getAngle() + body.getAngularVelocity() * delta;
@@ -159,7 +155,6 @@ public abstract class MyMath {
         int scale = (int) Math.pow(10, precision);
         return (double) Math.round(value * scale) / scale;
     }
-    
     //endregion
     
     
