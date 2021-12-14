@@ -3,6 +3,7 @@ package com.spaceproject.math;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -256,7 +257,6 @@ public class Physics {
         return wavelengthToRGB(wavelength, 0.8);
     }
     
-    
     public static void test() {
         /* Black Body Radiation!
          * Common color temperatures (Kelvin):
@@ -366,8 +366,25 @@ public class Physics {
         Gdx.app.debug("PhysicsDebug",  rgbMaxWavelength + "nm " + MyMath.round(highestVisibleTemperature, 1) + "K -> " + Arrays.toString(wavelengthToRGB(rgbMaxWavelength, gamma)));
     
         
-        calculateBlackBody(rgbMinWavelength, rgbMaxWavelength, kelvin);
+        //calculateBlackBody(rgbMinWavelength, rgbMaxWavelength, kelvin);
         //calculateBlackBody(380, 400);
+        
+        BlackBodyColorSpectrum.test();
+    
+        // 5772 K   -> xyz 0.3266 0.3359 0.3376     -> rgb 1.000 0.867 0.813
+        Vector3 spectrum = BlackBodyColorSpectrum.spectrumToXYZ(kelvin);
+        Vector3 color = BlackBodyColorSpectrum.xyzToRGB(BlackBodyColorSpectrum.SMPTEsystem, spectrum.x, spectrum.y, spectrum.z);
+        String xyzTemp = String.format("  %5.0f K      %.4f %.4f %.4f   ", kelvin, spectrum.x, spectrum.y, spectrum.z);
+        if (BlackBodyColorSpectrum.constrainRGB(color)) {
+            Vector3 normal = BlackBodyColorSpectrum.normRGB(color.x, color.y, color.z);
+            Gdx.app.log("PhysicsDebug", xyzTemp + String.format("%.3f %.3f %.3f (Approximation)", normal.x, normal.y, normal.z));
+            //Gdx.app.log(this.getClass().getSimpleName(), xyzTemp + String.format("%.3f %.3f %.3f (Approximation)", color.z, color.y, color.z));
+        } else {
+            Vector3 normal = BlackBodyColorSpectrum.normRGB(color.x, color.y, color.z);
+            //Gdx.app.log(this.getClass().getSimpleName(), xyzTemp + String.format("%.3f %.3f %.3f", color.x, color.y, color.z));
+            Gdx.app.log("PhysicsDebug", xyzTemp + String.format("%.3f %.3f %.3f", normal.x, normal.y, normal.z));
+        }
+        
     }
     
     public static class Sun {
