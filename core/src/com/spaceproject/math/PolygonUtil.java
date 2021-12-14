@@ -163,4 +163,25 @@ public class PolygonUtil {
         return new Vector3(xc, yc, radius);
     }
     
+    /** calculate centroid "center of mass" for non-self intersecting polygon */
+    public static Vector2 centerOfPoly(float[] vertices) {
+        int numPoints = vertices.length/2;
+        float twiceArea = 0.0f;
+        Vector2 sum = new Vector2();
+    
+        Vector2 p1 = new Vector2();
+        Vector2 p2 = new Vector2();
+        for (int i = 0; i <= numPoints; i+=2) {
+            p1.set(vertices[i], vertices[i+1]);
+            p2.set(vertices[(i + 2) % vertices.length], vertices[(i + 3) % vertices.length]);
+            
+            float cross = p1.crs(p2);
+            twiceArea += cross;
+            sum.add((p1.x + p2.x) * cross, (p1.y + p2.y) * cross);
+        }
+    
+        float z = 1.0f / (3.0f * twiceArea);
+        return sum.scl(z);
+    }
+    
 }

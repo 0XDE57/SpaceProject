@@ -55,7 +55,7 @@ public class AsteroidAnim extends TitleAnimation {
     public AsteroidAnim() {
         Asteroid asteroid = new Asteroid(new Vector2(Gdx.graphics.getWidth() * MathUtils.random(), Gdx.graphics.getHeight() * MathUtils.random()), 200, 0, 0);
         asteroids.add(asteroid);
-        customShapeRenderer = new CustomShapeRenderer(ShapeRenderer.ShapeType.Filled, new ShapeRenderer().getRenderer());
+        customShapeRenderer = new CustomShapeRenderer();
         
         world = new World(new Vector2(), true);
         box2DDebugRenderer = new Box2DDebugRenderer(true, true, true, true, true, true);

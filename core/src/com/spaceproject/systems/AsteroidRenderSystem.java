@@ -19,14 +19,17 @@ public class AsteroidRenderSystem extends IteratingSystem {
     
     public AsteroidRenderSystem() {
         super(Family.all(AsteroidComponent.class, TransformComponent.class).get());
-        
-        ShapeRenderer shapeRenderer = new ShapeRenderer();
-        this.shapeRenderer = new CustomShapeRenderer(ShapeRenderer.ShapeType.Filled, shapeRenderer.getRenderer());
+        shapeRenderer = new CustomShapeRenderer();
     }
     @Override
     public void update(float deltaTime) {
         shapeRenderer.setProjectionMatrix(GameScreen.cam.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        super.update(deltaTime);
+        shapeRenderer.end();
+    
+        //debug double render, render polygon triangle mesh outline
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         super.update(deltaTime);
         shapeRenderer.end();
     }
@@ -39,7 +42,8 @@ public class AsteroidRenderSystem extends IteratingSystem {
         Polygon polygon = asteroid.polygon;
         polygon.setRotation(transform.rotation * MathUtils.radiansToDegrees);
         polygon.setPosition(transform.pos.x, transform.pos.y);
-        shapeRenderer.fillPolygon(polygon.getTransformedVertices(), 0, polygon.getVertices().length, Color.WHITE);
+        shapeRenderer.fillPolygon(polygon.getTransformedVertices(), 0, polygon.getVertices().length,
+                shapeRenderer.getCurrentType() == ShapeRenderer.ShapeType.Filled ? Color.WHITE : asteroid.color);
     }
     
 }

@@ -7,8 +7,11 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.DelaunayTriangulator;
+import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.CircumstellarDiscComponent;
 import com.spaceproject.components.PhysicsComponent;
@@ -39,13 +42,14 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     SimpleTimer lastSpawnedTimer = new SimpleTimer(1000);
     int maxSpawn = 200;
     
-    
+    ShortArray triangles;
+    DelaunayTriangulator delaunay = new DelaunayTriangulator();
+    EarClippingTriangulator earClip = new EarClippingTriangulator();
     
     @Override
     public void addedToEngine(Engine engine) {
         asteroids = engine.getEntitiesFor(Family.all(AsteroidComponent.class, TransformComponent.class).get());
         spawnDisk = engine.getEntitiesFor(Family.all(CircumstellarDiscComponent.class).get());
-        //stars = engine.getEntitiesFor(Family.all(StarComponent.class, TransformComponent.class).get());
         lastSpawnedTimer.setCanDoEvent();
     }
     
@@ -71,6 +75,15 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
         }
         
         spawnAsteroidDisk();
+        
+        /*todo: orbit asteroids around parent body, currently just flings everything out into universe.. ;p
+        for (Entity entity : asteroids) {
+            AsteroidComponent asteroid = Mappers.asteroid.get(entity);
+            if (asteroid.type == AsteroidComponent.Type.orbitLocked) {
+                PhysicsComponent physics = Mappers.physics.get(entity);
+                //physics.body.setLinearVelocity(); o
+            }
+        }*/
     }
     
     private void spawnAsteroidDisk() {
@@ -156,16 +169,38 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
             float x = parentTransform.pos.x;
             float y = parentTransform.pos.y;
             float size = asteroid.size * 0.4f;
-            long seed = MyMath.getSeed(x, y);
-            float spread = 45;
-            Vector2 parentVelocity = parentAsteroid.getComponent(PhysicsComponent.class).body.getLinearVelocity().rotateDeg(spread);
-            Vector2 vel2 = parentVelocity.cpy().rotateDeg(-spread*2);
-            
-            //create two children
-            Entity childAsteroidA = EntityFactory.createAsteroid(seed, x, y, parentVelocity.x, parentVelocity.y, size);
-            Entity childAsteroidB = EntityFactory.createAsteroid(seed+1, x, y, vel2.x, vel2.y, size);
-            getEngine().addEntity(childAsteroidA);
-            getEngine().addEntity(childAsteroidB);
+            //long seed = MyMath.getSeed(x, y);
+            Vector2 parentVelocity = parentAsteroid.getComponent(PhysicsComponent.class).body.getLinearVelocity();
+    
+            float[] vertices = asteroid.polygon.getVertices();
+            triangles = earClip.computeTriangles(vertices);
+            //triangles = delaunay.computeTriangles(vertices, true);
+        
+            //create cells for each triangle
+            for (int index = 0; index < triangles.size; index += 3) {
+                int p1 = triangles.get(index) * 2;
+                int p2 = triangles.get(index + 1) * 2;
+                int p3 = triangles.get(index + 2) * 2;
+                float[] hull = new float[] {
+                        vertices[p1], vertices[p1 + 1],
+                        vertices[p2], vertices[p2 + 1],
+                        vertices[p3], vertices[p3 + 1]
+                };
+    
+                Gdx.app.debug(this.getClass().getSimpleName(),
+                        MyMath.round(hull[0],1) + ", " + MyMath.round(hull[1],1)
+                                + " | " + MyMath.round(hull[2],1) + ", " + MyMath.round(hull[3],1)
+                                + " | " + MyMath.round(hull[4],1) + ", " + MyMath.round(hull[5],1));
+                if (hull[0] == hull[2] || hull[0] == hull[4] || hull[2] == hull[4]) {
+                    if (hull[1] == hull[3] || hull[1] == hull[5] || hull[3] == hull[5]) {
+                        Gdx.app.error(this.getClass().getSimpleName(), "Duplicate point! Discarding triangle");
+                        continue;
+                    }
+                }
+                Entity childAsteroid = EntityFactory.createAsteroid((long) (Math.random() * Long.MAX_VALUE), x, y, parentVelocity.x, parentVelocity.y, size, hull);
+                getEngine().addEntity(childAsteroid);
+                //java: ../Box2D/Collision/Shapes/b2PolygonShape.cpp:158: void b2PolygonShape::Set(const b2Vec2*, int32): Assertion `false' failed.
+            }
         }
     }
     

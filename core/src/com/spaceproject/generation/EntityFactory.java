@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.collision.BoundingBox;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
@@ -289,7 +288,7 @@ public class EntityFactory {
         return entity;
     }
     
-    public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float size) {
+    public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float size, float[] hull) {
         MathUtils.random.setSeed(seed);
         Entity entity = new Entity();
     
@@ -301,32 +300,17 @@ public class EntityFactory {
         transform.pos.set(x, y);
         entity.add(transform);
     
-        //generate points
-        FloatArray points = new FloatArray();
-        int numPoints = 7;//Box2D poly vert limit: Assertion `3 <= count && count <= 8' failed.
-        for (int i = 0; i < numPoints * 2; i += 2) {
-            float pX = MathUtils.random(size);
-            float pY = MathUtils.random(size);
-            points.add(pX);
-            points.add(pY);
-        }
-        //generate hull poly
-        ConvexHull convex = new ConvexHull();
-        float[] hull = convex.computePolygon(points, false).toArray();
         AsteroidComponent asteroid = new AsteroidComponent();
         asteroid.polygon = new Polygon(hull);
-        //TODO: lookup center of mass for arbitrary poly (average of total points?)
-        asteroid.polygon.setOrigin(size / 2, size / 2);
+        asteroid.color = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
         asteroid.size = size;
         entity.add(asteroid);
     
         PhysicsComponent physics = new PhysicsComponent();
-        Body body = BodyFactory.createPoly(transform.pos.x, transform.pos.y,
+        physics.body = BodyFactory.createPoly(transform.pos.x, transform.pos.y,
                 asteroid.polygon.getVertices(), BodyDef.BodyType.DynamicBody,
                 GameScreen.box2dWorld, entity);
-        physics.body = body;
         physics.body.setLinearVelocity(velX, velY);
-    
         entity.add(physics);
         
         HealthComponent health = new HealthComponent();
@@ -335,6 +319,29 @@ public class EntityFactory {
         entity.add(health);
         
         return entity;
+    }
+    
+    public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float size) {
+        //create random set of points
+        int numPoints = 7;//Box2D poly vert limit is 8: Assertion `3 <= count && count <= 8' failed.
+        FloatArray points = new FloatArray();
+        for (int i = 0; i < numPoints * 2; i += 2) {
+            float pX = MathUtils.random(size);
+            float pY = MathUtils.random(size);
+            points.add(pX);
+            points.add(pY);
+        }
+        //generate hull poly from random points
+        ConvexHull convex = new ConvexHull();
+        float[] hull = convex.computePolygon(points, false).toArray();
+        /*
+        Vector2 centerOfMass = PolygonUtil.centerOfPoly(hull);
+        //centerOfMass.set(10, 10);
+        for (int index = 0; index < hull.length/2; index += 2) {
+            //hull[index] -= centerOfMass.x;
+            //hull[index + 1] -= centerOfMass.y;
+        }*/
+        return createAsteroid(seed, x, y, velX, velY, size, hull);
     }
     //endregion
     
@@ -489,6 +496,7 @@ public class EntityFactory {
         return entity;
     }
     //endregion
+    
     
     public static Entity createWall(int x, int y, int width, int height) {
         Entity entity = new Entity();
