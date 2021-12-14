@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.math.BlackBodyColorSpectrum;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.math.Physics;
 import com.spaceproject.noise.NoiseGen;
@@ -119,6 +121,13 @@ public class TextureFactory {
             double temperature = MathUtils.random(2000, 40000); //typically (2,000K - 40,000K)
             double peakWavelength = Physics.temperatureToWavelength(temperature) * 1000000;
             int[] colorTemp = Physics.wavelengthToRGB(peakWavelength);
+            
+            Vector3 spectrum = BlackBodyColorSpectrum.spectrumToXYZ(temperature);
+            Vector3 color = BlackBodyColorSpectrum.xyzToRGB(BlackBodyColorSpectrum.SMPTEsystem, spectrum.x, spectrum.y, spectrum.z);
+            BlackBodyColorSpectrum.constrainRGB(color);
+            Vector3 normal = BlackBodyColorSpectrum.normRGB(color.x, color.y, color.z);
+            pixmap.setColor(normal.x, normal.y, normal.z, 1);
+            /*
             if (colorTemp[0] == 0 && colorTemp[1] == 0 && colorTemp[2] == 0) {
                 //override bodies outside the visible spectrum and just render white
                 pixmap.setColor(1, 1, 1, MathUtils.random(0.1f, 1f));
@@ -128,7 +137,7 @@ public class TextureFactory {
                         colorTemp[1] / 255.0f, // green
                         colorTemp[2] / 255.0f, // blue
                         MathUtils.random(0.1f, 1f));
-            }
+            }*/
             pixmap.drawPixel(x, y);
         }
 		

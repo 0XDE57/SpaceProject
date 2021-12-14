@@ -42,7 +42,7 @@ import com.badlogic.gdx.math.Vector3;
  *  ported from C to Java, with some minor tweaks to fit the engine and style.
  */
 
-class BlackBodyColorSpectrum {
+public class BlackBodyColorSpectrum {
     
     /** A colour system is defined by the CIE x and y coordinates of
      *  its three primary illuminants and the x and y coordinates of
@@ -81,17 +81,17 @@ class BlackBodyColorSpectrum {
      */
     static double GAMMA_REC709 = 0; /* Rec. 709 */
     
-    ColorSystem NTSCsystem   = new ColorSystem(
+    public static ColorSystem NTSCsystem   = new ColorSystem(
             "NTSC", 0.67, 0.33, 0.21, 0.71, 0.14, 0.08, xIlluminantC, yIlluminantC, GAMMA_REC709);
-    ColorSystem EBUsystem    = new ColorSystem(
+    public static ColorSystem EBUsystem    = new ColorSystem(
             "EBU (PAL/SECAM)", 0.64, 0.33, 0.29, 0.60, 0.15, 0.06, xIlluminantD65, yIlluminantD65, GAMMA_REC709);
-    static ColorSystem SMPTEsystem  = new ColorSystem(
+    public static ColorSystem SMPTEsystem  = new ColorSystem(
             "SMPTE", 0.630,  0.340,  0.310,  0.595,  0.155,  0.070,  xIlluminantD65, yIlluminantD65,  GAMMA_REC709);
-    ColorSystem HDTVsystem   = new ColorSystem(
+    public static ColorSystem HDTVsystem   = new ColorSystem(
             "HDTV",  0.670,  0.330,  0.210,  0.710,  0.150,  0.060,  xIlluminantD65, yIlluminantD65, GAMMA_REC709);
-    ColorSystem CIEsystem    = new ColorSystem(
+    public static ColorSystem CIEsystem    = new ColorSystem(
             "CIE", 0.7355, 0.2645, 0.2658, 0.7243, 0.1669, 0.0085, xIlluminantE, yIlluminantE, GAMMA_REC709);
-    ColorSystem Rec709system = new ColorSystem(
+    public static ColorSystem Rec709system = new ColorSystem(
             "CIE REC 709", 0.64, 0.33, 0.30, 0.60, 0.15,0.06, xIlluminantD65, yIlluminantD65, GAMMA_REC709);
 
     
@@ -126,7 +126,7 @@ class BlackBodyColorSpectrum {
      *  the available gamut and/or norm_rgb to normalise the RGB
      *  components so the largest nonzero component has value 1.
      */
-    static Vector3 xyzToRGB(ColorSystem cs, double xc, double yc, double zc) {
+    public static Vector3 xyzToRGB(ColorSystem cs, double xc, double yc, double zc) {
         double xr, yr, zr, xg, yg, zg, xb, yb, zb;
         double xw, yw, zw;
         double rx, ry, rz, gx, gy, gz, bx, by, bz;
@@ -178,7 +178,7 @@ class BlackBodyColorSpectrum {
      * to make RGB all positive.  The function returns 1 if the
      * components were modified, zero otherwise.
      */
-    static boolean constrainRGB(Vector3 color) {
+    public static boolean constrainRGB(Vector3 color) {
         double r = color.x;
         double g = color.y;
         double b = color.z;
@@ -238,7 +238,7 @@ class BlackBodyColorSpectrum {
     /** NORM_RGB
      * Normalise RGB components so the most intense (unless all are zero) has a value of 1.
      */
-    static Vector3 normRGB(double r, double g, double b) {
+    public static Vector3 normRGB(double r, double g, double b) {
         double greatest = Math.max(r, Math.max(g, b));
         
         if (greatest > 0) {
@@ -261,7 +261,7 @@ class BlackBodyColorSpectrum {
      *
      *         x + y + z = 1.
      */
-    static Vector3 spectrumToXYZ(double temp) {
+    public static Vector3 spectrumToXYZ(double temp) {
         int i;
         double wavelength, X = 0, Y = 0, Z = 0, XYZ;
 
