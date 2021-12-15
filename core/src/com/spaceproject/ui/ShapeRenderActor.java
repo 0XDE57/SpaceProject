@@ -4,7 +4,9 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.spaceproject.math.BlackBodyColorSpectrum;
 import com.spaceproject.math.Physics;
 
 public class ShapeRenderActor extends Actor {
@@ -53,10 +55,15 @@ public class ShapeRenderActor extends Actor {
         float highestVisibleTemp = (float) Physics.wavelengthToTemperature(780) * 1000000;
         int fromKelvin = 1000;
         int toKelvin = 50000;
+        
+        //render full with black bars outside vision
         renderSpectrum(x, y, width, height, lowestVisibleTemp, highestVisibleTemp, fromKelvin, toKelvin);
-    
-        float y2 = y + 250;
-        renderSpectrum(x, y2, width, height, lowestVisibleTemp, highestVisibleTemp, lowestVisibleTemp, highestVisibleTemp);
+        //render visible only
+        float y2 = y + height + 10;
+        renderSpectrum(x, y2, width, height, lowestVisibleTemp, highestVisibleTemp, highestVisibleTemp, lowestVisibleTemp);
+        //render blackbody specrend
+        float y3 = y2 + height + 10;
+        renderSpectrum(x, y3, width, height, fromKelvin, toKelvin);
         
         //TODO: plot power spectrum for wavelength
         //for temperature k, draw spectrum plot
@@ -103,6 +110,27 @@ public class ShapeRenderActor extends Actor {
                     colorTemp[1] / 255.0f, // green
                     colorTemp[2] / 255.0f,  // blue
                     1); //alpha
+            shape.line(x + i, y, x + i, y + height);
+        }
+    }
+    
+    private void renderSpectrum(float x, float y, float width, float height, float fromKelvin, float toKelvin) {
+        int border = 4;
+        
+        for (int i = 0; i < width; i++) {
+            float percent = (float) i / width;
+            double temperature = MathUtils.lerp(fromKelvin, toKelvin, percent);
+            
+            //border
+            shape.setColor(1, 1, 1,1);
+            shape.line(x + i, y - border, x + i, y + height + border);
+            
+            //spectrum
+            Vector3 spectrum = BlackBodyColorSpectrum.spectrumToXYZ(temperature);
+            Vector3 color = BlackBodyColorSpectrum.xyzToRGB(BlackBodyColorSpectrum.SMPTEsystem, spectrum.x, spectrum.y, spectrum.z);
+            BlackBodyColorSpectrum.constrainRGB(color);
+            Vector3 normal = BlackBodyColorSpectrum.normRGB(color.x, color.y, color.z);
+            shape.setColor(normal.x, normal.y, normal.z, 1);
             shape.line(x + i, y, x + i, y + height);
         }
     }
