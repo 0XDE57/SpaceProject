@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.math.BlackBodyColorSpectrum;
 import com.spaceproject.math.MyMath;
-import com.spaceproject.math.Physics;
 import com.spaceproject.noise.NoiseGen;
 import com.spaceproject.noise.OpenSimplexNoise;
 import com.spaceproject.screens.GameScreen;
@@ -117,20 +116,22 @@ public class TextureFactory {
             int x = MathUtils.random(tileSize);
             int y = MathUtils.random(tileSize);
     
-            //calculate black body radiation to color star
-            double temperature = MathUtils.random(2000, 40000); //typically (2,000K - 40,000K)
-            double peakWavelength = Physics.temperatureToWavelength(temperature) * 1000000;
-            int[] colorTemp = Physics.wavelengthToRGB(peakWavelength);
+            //give star a random temperature
+            double temperature = MathUtils.random(1000, 40000); //kelvin
             
+            //calculate black body radiation color for temperature
             Vector3 spectrum = BlackBodyColorSpectrum.spectrumToXYZ(temperature);
             Vector3 color = BlackBodyColorSpectrum.xyzToRGB(BlackBodyColorSpectrum.SMPTEsystem, spectrum.x, spectrum.y, spectrum.z);
             BlackBodyColorSpectrum.constrainRGB(color);
             Vector3 normal = BlackBodyColorSpectrum.normRGB(color.x, color.y, color.z);
             pixmap.setColor(normal.x, normal.y, normal.z, 1);
+            
             /*
+            double peakWavelength = Physics.temperatureToWavelength(temperature) * 1000000;
+            int[] colorTemp = Physics.wavelengthToRGB(peakWavelength);
             if (colorTemp[0] == 0 && colorTemp[1] == 0 && colorTemp[2] == 0) {
                 //override bodies outside the visible spectrum and just render white
-                pixmap.setColor(1, 1, 1, MathUtils.random(0.1f, 1f));
+                //pixmap.setColor(1, 1, 1, MathUtils.random(0.1f, 1f));
             } else {
                 pixmap.setColor(
                         colorTemp[0] / 255.0f, // red
@@ -138,6 +139,7 @@ public class TextureFactory {
                         colorTemp[2] / 255.0f, // blue
                         MathUtils.random(0.1f, 1f));
             }*/
+            
             pixmap.drawPixel(x, y);
         }
 		
@@ -148,9 +150,9 @@ public class TextureFactory {
 		*/
         
         //create texture and dispose pixmap to prevent memory leak
-        Texture t = new Texture(pixmap);
+        Texture texture = new Texture(pixmap);
         pixmap.dispose();
-        return t;
+        return texture;
     }
     //endregion
     

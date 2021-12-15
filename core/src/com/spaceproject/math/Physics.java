@@ -6,7 +6,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Arrays;
 
 /**
@@ -90,7 +89,6 @@ public class Physics {
     public static double wavelengthToPhotonEnergy(double wavelength) {
         //energy = (planckConstant * speedOfLight) / wavelength;
         return hc / wavelength;
-        //return hcCalculated.divide(BigDecimal.valueOf(wavelength), hcCalculated.scale(), RoundingMode.HALF_UP);
     }
     
     /** E = hv
@@ -101,7 +99,6 @@ public class Physics {
     public static double frequencyToPhotonEnergy(double frequency) {
         //energy = planckConstant * frequency;
         return  planckConstant * frequency;
-        //return planckBig.multiply(BigDecimal.valueOf(frequency));
     }
     
     
@@ -141,24 +138,6 @@ public class Physics {
         return unnamedConstant / (Math.pow(wavelength, 5) * b);
     }
     
-    
-    public static BigDecimal calcSpectralRadianceBig(int wavelength) {
-        //todo: wrong...
-        //just testing accuracy with big decimal. not sure if we actually need the precision.
-        
-        //double unnamedConstant = (2 * planckConstant * Math.pow(speedOfLight, 2));
-        BigDecimal unnamedPrecise = planckBig.multiply(BigDecimal.valueOf(2 * Math.pow(speedOfLight, 2)));
-        
-        double temperature = wavelengthToTemperature(wavelength);//Kelvin
-        
-        //(hc / (wavelength * boltzmannConstant * temperature)) - 1;
-        BigDecimal aSimplified = boltzmannBig.multiply(BigDecimal.valueOf(wavelength * temperature));
-        BigDecimal bSimplified = hcBig.divide(aSimplified, hcBig.scale(), RoundingMode.HALF_UP).subtract(BigDecimal.valueOf(1));
-        //Math.E ^ (bSimplified)
-        double cSimplified = Math.pow(Math.E, bSimplified.doubleValue());
-        //unnamedConst / ((wavelength ^ 5)
-        return unnamedPrecise.divide(BigDecimal.valueOf(Math.pow(wavelength, 5) * cSimplified), bSimplified.scale(), RoundingMode.HALF_UP);
-    }
     
     public static void calculateBlackBody(int wavelengthStart, int wavelengthEnd, double temperature) {
         //double temperature = 5772;// wavelengthToTemperature(502);
