@@ -312,6 +312,10 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
     @Override
     public void entityRemoved(Entity entity) {
         Node node = entityNodes.findNode(entity);
+        if (node == null) {
+            Gdx.app.error(this.getClass().getSimpleName(), "node for entity null!");
+            return;
+        }
         if (showHistory) {
             ((UpdateNode) node).removeAndCreateGhost(includeChildren);
         } else {
