@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.AIComponent;
+import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.CamTargetComponent;
 import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.DamageComponent;
@@ -21,6 +22,8 @@ import com.spaceproject.components.Sprite3DComponent;
 public class PhysicsContactListener implements ContactListener {
     
     private final Engine engine;
+    final int highImpactThreshold = 15000;
+    float peakImpulse = 0;
     
     public PhysicsContactListener(Engine engine) {
         this.engine = engine;
@@ -43,7 +46,58 @@ public class PhysicsContactListener implements ContactListener {
     public void preSolve(Contact contact, Manifold oldManifold) {}
     
     @Override
-    public void postSolve(Contact contact, ContactImpulse impulse) {}
+    public void postSolve(Contact contact, ContactImpulse impulse) {
+        float maxImpulse = 0;
+        for (float normal : impulse.getNormalImpulses()) {
+            maxImpulse = Math.max(maxImpulse, normal);
+        }
+        peakImpulse = Math.max(maxImpulse, peakImpulse);
+        
+        if (maxImpulse > highImpactThreshold) {
+            onHighImpulseImpact(contact, maxImpulse);
+        }
+    }
+    
+    private void onHighImpulseImpact(Contact contact, float maxImpulse) {
+        Gdx.app.debug(this.getClass().getSimpleName(), "collide " + maxImpulse + " : " + peakImpulse);
+        
+        Object dataA = contact.getFixtureA().getBody().getUserData();
+        Object dataB = contact.getFixtureB().getBody().getUserData();
+        if (dataA != null && dataB != null) {
+            Entity entityA = (Entity) dataA;
+            Entity entityB = (Entity) dataB;
+            AsteroidComponent asteroidA = Mappers.asteroid.get(entityA);
+            AsteroidComponent asteroidB = Mappers.asteroid.get(entityB);
+            if (asteroidA != null && asteroidB != null) {
+                
+                //calc damage relative to size of bodies and impact impulse
+                float damage = maxImpulse * 0.1f;
+                float total = asteroidA.area + asteroidB.area;
+                float damageA = damage * (asteroidA.area / total);
+                float damageB = damage * (asteroidB.area / total);
+
+                //todo: how should shatter mechanics handle? what if pass down extra damage to children.
+                // eg: asteroid has 100 hp, breaks into 2 = 50hp children
+                //   damage 110 = -10 hp, breaks into 2 minus 5 each = 45hp
+                //   damage 200 = -100 hp, breaks into 2 minus 50 = 0hp = don't spawn children -> instant destruction
+                //  could play with different rules and ratios, find what feels good
+                
+                HealthComponent healthA = Mappers.health.get(entityA);
+                HealthComponent healthB = Mappers.health.get(entityB);
+                healthA.health -= damageA;
+                healthB.health -= damageB;
+                
+                if (healthA.health <= 0) {
+                    entityA.add(new RemoveComponent());
+                    Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID A break down" + maxImpulse + " : " + damageA);
+                }
+                if (healthB.health <= 0) {
+                    entityB.add(new RemoveComponent());
+                    Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID B break down" + maxImpulse + " : " + damageB);
+                }
+            }
+        }
+    }
     
     private void onCollision(Entity a, Entity b) {
         //todo: collision filtering: http://www.iforce2d.net/b2dtut/collision-filtering
@@ -64,7 +118,7 @@ public class PhysicsContactListener implements ContactListener {
         if (damageComponent.source == attackedEntity) {
             return; //ignore self-inflicted damage
         }
-        Gdx.app.log(this.getClass().getSimpleName(),
+        Gdx.app.debug(this.getClass().getSimpleName(),
                 "[" + DebugUtil.objString(attackedEntity) + "] attacked by: [" + DebugUtil.objString(damageComponent.source) + "]");
         
         //check if attacked entity was AI

@@ -9,6 +9,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.EarClippingTriangulator;
+import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ShortArray;
@@ -40,7 +41,7 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     private ImmutableArray<Entity> asteroids;
     private ImmutableArray<Entity> spawnDisk;
     SimpleTimer lastSpawnedTimer = new SimpleTimer(1000);
-    int maxSpawn = 200;
+    int maxSpawn = 100;
     
     ShortArray triangles;
     DelaunayTriangulator delaunay = new DelaunayTriangulator();
@@ -55,26 +56,16 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     
     @Override
     public void update(float deltaTime) {
-        //super.update(deltaTime);
-        
-        /*
-        if (asteroids.size() <= maxSpawn) {
-            if (lastSpawnedTimer.tryEvent()) {
-                spawnAsteroid();
-            }
-        } else {
-            lastSpawnedTimer.reset();
-        }*/
-    
         
         if (asteroids.size() <= maxSpawn) {
             if (lastSpawnedTimer.tryEvent()) {
                 spawnAsteroidField(-1000, -1000);
-                lastSpawnedTimer.reset();
+                //lastSpawnedTimer.reset();
             }
         }
         
         spawnAsteroidDisk();
+        
         
         /*todo: orbit asteroids around parent body, currently just flings everything out into universe.. ;p
         for (Entity entity : asteroids) {
@@ -120,7 +111,7 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     
     private void spawnAsteroidField(float x, float y) {
         float d = MathUtils.random(MathUtils.PI2);
-        Vector2 vel = MyMath.vector(d, MathUtils.random(1, 50));
+        Vector2 vel = MyMath.vector(d, 70 /*MathUtils.random(1, 50)*/);
         float range = 500.0f;
         int clusterSize = 20;//MathUtils.random(1, 20);
         for (int i = 0; i < clusterSize; i++) {
@@ -140,8 +131,7 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     }
     
     @Override
-    public void entityAdded(Entity entity) {
-    }
+    public void entityAdded(Entity entity) { }
     
     @Override
     public void entityRemoved(Entity entity) {
@@ -155,26 +145,40 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     }
     
     public void spawnChildren(Entity parentAsteroid, AsteroidComponent asteroid) {
-        //todo: how should shatter mechanics handle? what if pass down extra damage to children.
-        // eg: asteroid has 100 hp, breaks into 2 = 50hp children
-        //   damage 110 = -10 hp, breaks into 2 minus 5 each = 45hp
-        //   damage 200 = -100 hp, breaks into 2 minus 50 = 0hp = don't spawn children -> instant destruction
-        //  could play with different rules and ratios, find what feels good
-        //
-        float minAsteroidSize = 14; //anything smaller than this will not create more
-        if (asteroid.size >= minAsteroidSize) {
-            //todo: size = previousSize / numChildren?
-            
-            TransformComponent parentTransform = Mappers.transform.get(parentAsteroid);
-            float x = parentTransform.pos.x;
-            float y = parentTransform.pos.y;
-            float size = asteroid.size * 0.4f;
-            //long seed = MyMath.getSeed(x, y);
+        float minAsteroidSize = 100; //anything smaller than this will not create more
+        if (asteroid.area >= minAsteroidSize) {
+    
+            Vector2 parentPos = Mappers.transform.get(parentAsteroid).pos;
             Vector2 parentVelocity = parentAsteroid.getComponent(PhysicsComponent.class).body.getLinearVelocity();
     
             float[] vertices = asteroid.polygon.getVertices();
+            
+            
+            /*
+            //todo:add interior verticies for deeper shatter
+            int numPoints = (int)(asteroid.area / 500.0);
+            Vector2 subShatter = new Vector2();
+            if (vertices.length == 6) { //3 points
+                //Vector2 center = new Vector2();
+                //GeometryUtils.polygonCentroid(hull, 0, hull.length, center);
+                do {
+                    //asteroid.polygon.getBoundingRectangle();
+                    float x = MathUtils.random();
+                    float y = MathUtils.random();
+                    subShatter.set(x, y);
+                } while (asteroid.polygon.contains(subShatter));
+            }*/
+            
+            //todo:broken rotation when shattering some polygons rotate and jump instead of simply separating in place
+            
+            
             triangles = earClip.computeTriangles(vertices);
             //triangles = delaunay.computeTriangles(vertices, true);
+            /*
+            NOTE: Box2D expects Polygons vertices are stored with a counter clockwise winding (CCW).
+            We must be careful because the notion of CCW is with respect to a right-handed
+            coordinate system with the z-axis pointing out of the plane.
+            */
         
             //create cells for each triangle
             for (int index = 0; index < triangles.size; index += 3) {
@@ -182,24 +186,33 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                 int p2 = triangles.get(index + 1) * 2;
                 int p3 = triangles.get(index + 2) * 2;
                 float[] hull = new float[] {
-                        vertices[p1], vertices[p1 + 1],
-                        vertices[p2], vertices[p2 + 1],
-                        vertices[p3], vertices[p3 + 1]
+                        vertices[p1], vertices[p1 + 1], // xy: 0, 1
+                        vertices[p2], vertices[p2 + 1], // xy: 2, 3
+                        vertices[p3], vertices[p3 + 1]  // xy: 4, 5
                 };
-    
-                Gdx.app.debug(this.getClass().getSimpleName(),
-                        MyMath.round(hull[0],1) + ", " + MyMath.round(hull[1],1)
-                                + " | " + MyMath.round(hull[2],1) + ", " + MyMath.round(hull[3],1)
-                                + " | " + MyMath.round(hull[4],1) + ", " + MyMath.round(hull[5],1));
-                if (hull[0] == hull[2] || hull[0] == hull[4] || hull[2] == hull[4]) {
-                    if (hull[1] == hull[3] || hull[1] == hull[5] || hull[3] == hull[5]) {
-                        Gdx.app.error(this.getClass().getSimpleName(), "Duplicate point! Discarding triangle");
-                        continue;
-                    }
+                
+                //discard duplicate points
+                if ((hull[0] == hull[2] && hull[1] == hull[3]) || // p1 == p2
+                    (hull[0] == hull[4] && hull[1] == hull[5]) || // p1 == p3
+                    (hull[2] == hull[4] && hull[3] == hull[5])) { // p2 == p3
+                    
+                    Gdx.app.error(this.getClass().getSimpleName(), "Duplicate point! Discarding triangle");
+                    Gdx.app.debug(this.getClass().getSimpleName(),
+                            MyMath.round(hull[0],1) + ", " + MyMath.round(hull[1],1) + " | " +
+                            MyMath.round(hull[2],1) + ", " + MyMath.round(hull[3],1) + " | " +
+                            MyMath.round(hull[4],1) + ", " + MyMath.round(hull[5],1));
+                    Gdx.app.debug(this.getClass().getSimpleName(), GeometryUtils.isClockwise(hull, 0, hull.length) + "");
+                    //duplicate points result in crash:
+                    //java: ../b2PolygonShape.cpp:158: void b2PolygonShape::Set(const b2Vec2*, int32): Assertion `false' failed.
+                    continue;
                 }
-                Entity childAsteroid = EntityFactory.createAsteroid((long) (Math.random() * Long.MAX_VALUE), x, y, parentVelocity.x, parentVelocity.y, size, hull);
+                
+                //Vector2 center = new Vector2();
+                //GeometryUtils.polygonCentroid(hull, 0, hull.length, center);
+                Entity childAsteroid = EntityFactory.createAsteroid((long) (Math.random() * Long.MAX_VALUE),
+                        parentPos.x, parentPos.y,
+                        parentVelocity.x, parentVelocity.y, hull);
                 getEngine().addEntity(childAsteroid);
-                //java: ../Box2D/Collision/Shapes/b2PolygonShape.cpp:158: void b2PolygonShape::Set(const b2Vec2*, int32): Assertion `false' failed.
             }
         }
     }

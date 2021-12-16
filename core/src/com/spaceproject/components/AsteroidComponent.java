@@ -18,6 +18,6 @@ public class AsteroidComponent implements Component {
     
     public Color color; //temporary rendering color
     
-    public float size;
+    public float area;
     
 }

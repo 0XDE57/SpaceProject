@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.ConvexHull;
+import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
@@ -288,7 +289,7 @@ public class EntityFactory {
         return entity;
     }
     
-    public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float size, float[] hull) {
+    public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float[] hull) {
         MathUtils.random.setSeed(seed);
         Entity entity = new Entity();
     
@@ -300,10 +301,20 @@ public class EntityFactory {
         transform.pos.set(x, y);
         entity.add(transform);
     
+        /*
+        NOTE! Box2D expects Polygons vertices are stored with a counter clockwise winding (CCW).
+        We must be careful because the notion of CCW is with respect to a right-handed coordinate
+        system with the z-axis pointing out of the plane.
+        */
         AsteroidComponent asteroid = new AsteroidComponent();
-        asteroid.polygon = new Polygon(hull);
+        Polygon polygon = new Polygon(hull);
+        Vector2 center = new Vector2();
+        GeometryUtils.polygonCentroid(polygon.getVertices(), 0, polygon.getVertices().length, center);
+        float area = Math.abs(GeometryUtils.polygonArea(polygon.getVertices(), 0, polygon.getVertices().length));
+        //polygon.setOrigin(center.x, center.y);
+        asteroid.polygon = polygon;
+        asteroid.area = area;
         asteroid.color = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
-        asteroid.size = size;
         entity.add(asteroid);
     
         PhysicsComponent physics = new PhysicsComponent();
@@ -314,7 +325,7 @@ public class EntityFactory {
         entity.add(physics);
         
         HealthComponent health = new HealthComponent();
-        health.maxHealth = size * 10;
+        health.maxHealth = area * 0.1f;
         health.health = health.maxHealth;
         entity.add(health);
         
@@ -341,7 +352,7 @@ public class EntityFactory {
             //hull[index] -= centerOfMass.x;
             //hull[index + 1] -= centerOfMass.y;
         }*/
-        return createAsteroid(seed, x, y, velX, velY, size, hull);
+        return createAsteroid(seed, x, y, velX, velY, hull);
     }
     //endregion
     
