@@ -37,11 +37,11 @@ public class ECSUtil {
     }
     
     public static void transferControl(Entity fromEntity, Entity toEntity) {
-        ECSUtil.transferComponent(fromEntity, toEntity, CameraFocusComponent.class);
-        ECSUtil.transferComponent(fromEntity, toEntity, ControlFocusComponent.class);
-        ECSUtil.transferComponent(fromEntity, toEntity, AIComponent.class);
-        ECSUtil.transferComponent(fromEntity, toEntity, ControllableComponent.class);
-        ECSUtil.transferComponent(fromEntity, toEntity, CamTargetComponent.class);
+        transferComponent(fromEntity, toEntity, CameraFocusComponent.class);
+        transferComponent(fromEntity, toEntity, ControlFocusComponent.class);
+        transferComponent(fromEntity, toEntity, AIComponent.class);
+        transferComponent(fromEntity, toEntity, ControllableComponent.class);
+        transferComponent(fromEntity, toEntity, CamTargetComponent.class);
     }
     
     public static Entity copyEntity(Entity entity) {
