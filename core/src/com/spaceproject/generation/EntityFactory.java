@@ -289,7 +289,7 @@ public class EntityFactory {
         return entity;
     }
     
-    public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float[] vertices) {
+    public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float angle, float[] vertices) {
         MathUtils.random.setSeed(seed);
         Entity entity = new Entity();
     
@@ -317,7 +317,7 @@ public class EntityFactory {
         PhysicsComponent physics = new PhysicsComponent();
         float density = 0.5f;
         physics.body = BodyFactory.createPoly(transform.pos.x, transform.pos.y,
-                polygon.getVertices(), BodyDef.BodyType.DynamicBody, density,
+                polygon.getVertices(), angle, density, BodyDef.BodyType.DynamicBody,
                 GameScreen.box2dWorld, entity);
         asteroid.centerOfMass = physics.body.getLocalCenter();
         physics.body.setLinearVelocity(velX, velY);
@@ -359,7 +359,7 @@ public class EntityFactory {
             hull[index + 1] -= center.y;
         }
         
-        return createAsteroid(seed, x, y, velX, velY, hull);
+        return createAsteroid(seed, x, y, velX, velY, 0, hull);
     }
     //endregion
     

@@ -14,10 +14,10 @@ import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.CircumstellarDiscComponent;
-import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.math.MyMath;
@@ -161,11 +161,14 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
         if (asteroid.area >= minAsteroidSize) {
     
             Vector2 parentPos = Mappers.transform.get(parentAsteroid).pos;
-            Vector2 parentVelocity = parentAsteroid.getComponent(PhysicsComponent.class).body.getLinearVelocity();
+            Body body = Mappers.physics.get(parentAsteroid).body;
+            Vector2 parentVelocity = body.getLinearVelocity();
     
             float[] vertices = asteroid.polygon.getVertices();
-            
+    
             /*
+            int s = vertices.length;
+            float[] newPoly = new float[s + 2];
             //todo:add interior vertices for deeper shatter
             int numPoints = 1;//(int)(asteroid.area / 500.0);
             Vector2 subShatter = new Vector2();
@@ -176,10 +179,9 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                 if (!asteroid.polygon.contains(center)) {
                     Gdx.app.error(this.getClass().getSimpleName(), "incorrect point!");
                 }
-                int s = vertices.length;
-                float[] newPoly = new float[s + 2];
-                newPoly[s + 1] = center.x;
-                newPoly[s + 2] = center.y;
+                
+                newPoly[s] = center.x;
+                newPoly[s + 1] = center.y;
                 
                 /*
                 do {
@@ -188,8 +190,8 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                     float y = MathUtils.random();
                     subShatter.set(x, y);
                 } while (asteroid.polygon.contains(subShatter));*
-            }
-            */
+            }*/
+            
             //todo:broken rotation when shattering some polygons rotate and jump instead of simply separating in place
             
             
@@ -229,11 +231,25 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                 }
                 Gdx.app.debug(this.getClass().getSimpleName(), "triangle quality? "
                         + GeometryUtils.triangleQuality(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5]));
-                
+    
+                /*
+                //1. find minX minY
+                //2. shift vertices to be centered around 0,0 relatively
+                Vector2 center = new Vector2();
+                GeometryUtils.polygonCentroid(hull, 0, hull.length, center);
+                center.add(minX, minY);
+                for (int i = 0; i < hull.length; i += 2) {
+                    hull[i] -= center.x;
+                    hull[i + 1] -= center.y;
+                }
+                //3. push by center offset so vertices are correct position relative to parent
+                Vector2 newPos = parentPos.copy().add(center);
+                */
                 
                 Entity childAsteroid = EntityFactory.createAsteroid((long) (Math.random() * Long.MAX_VALUE),
                         parentPos.x, parentPos.y,
-                        parentVelocity.x, parentVelocity.y, hull);
+                        parentVelocity.x, parentVelocity.y, body.getAngle(), hull);
+                Mappers.physics.get(childAsteroid).body.setAngularVelocity(body.getAngularVelocity());
                 getEngine().addEntity(childAsteroid);
             }
         }

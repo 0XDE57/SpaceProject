@@ -58,8 +58,8 @@ public class PhysicsContactListener implements ContactListener {
         }
     }
     
-    private void onHighImpulseImpact(Contact contact, float maxImpulse) {
-        Gdx.app.debug(this.getClass().getSimpleName(), "collide " + maxImpulse + " : " + peakImpulse);
+    private void onHighImpulseImpact(Contact contact, float impulse) {
+        Gdx.app.debug(this.getClass().getSimpleName(), "collide " + impulse + " : " + peakImpulse);
         
         Object dataA = contact.getFixtureA().getBody().getUserData();
         Object dataB = contact.getFixtureB().getBody().getUserData();
@@ -71,7 +71,7 @@ public class PhysicsContactListener implements ContactListener {
             if (asteroidA != null && asteroidB != null) {
                 
                 //calc damage relative to size of bodies and impact impulse
-                float damage = maxImpulse * 0.1f;
+                float damage = impulse * 0.1f;
                 float total = asteroidA.area + asteroidB.area;
                 float damageA = damage * (asteroidA.area / total);
                 float damageB = damage * (asteroidB.area / total);
@@ -89,11 +89,11 @@ public class PhysicsContactListener implements ContactListener {
                 
                 if (healthA.health <= 0) {
                     entityA.add(new RemoveComponent());
-                    Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID A break down " + maxImpulse + " : " + damageA);
+                    Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID A break down " + impulse + " : " + damageA);
                 }
                 if (healthB.health <= 0) {
                     entityB.add(new RemoveComponent());
-                    Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID B break down " + maxImpulse + " : " + damageB);
+                    Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID B break down " + impulse + " : " + damageB);
                 }
             }
         }

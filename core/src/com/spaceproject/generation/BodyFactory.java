@@ -125,11 +125,12 @@ public class BodyFactory {
         return body;
     }
     
-    public static Body createPoly(float x, float y, float[] vertices, BodyDef.BodyType bodyType, float density, World world, Entity entity) {
+    public static Body createPoly(float x, float y, float[] vertices, float angle, float density, BodyDef.BodyType bodyType,  World world, Entity entity) {
         Body body;
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = bodyType;
         bodyDef.position.set(x, y);
+        bodyDef.angle = angle;
         body = world.createBody(bodyDef);
         
         PolygonShape poly = new PolygonShape();
