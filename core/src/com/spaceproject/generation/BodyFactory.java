@@ -125,16 +125,7 @@ public class BodyFactory {
         return body;
     }
     
-    /*
-    public static Body createPoly(float x, float y, float[] vertices, BodyDef.BodyType bodyType, World world) {
-        return createPoly(x, y, vertices, bodyType, world, null);//null, user will set data
-    }*/
-    
-    public static Body createPoly(float x, float y, float[] vertices, BodyDef.BodyType bodyType, World world, Entity entity) {
-        // * 0.5f is half-width / half-height required by setAsBox()
-        //float scaledWidth  = engineCFG.meterPerUnit * width * 0.5f;
-        //float scaledHeight = engineCFG.meterPerUnit * height * 0.5f;
-        
+    public static Body createPoly(float x, float y, float[] vertices, BodyDef.BodyType bodyType, float density, World world, Entity entity) {
         Body body;
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = bodyType;
@@ -147,7 +138,7 @@ public class BodyFactory {
         // Create a fixture definition to apply our shape to
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = poly;
-        fixtureDef.density = 0.5f;
+        fixtureDef.density = density;
         fixtureDef.friction = 0.0f;
         fixtureDef.restitution = 0.6f; // Make it bounce a little bit
         // Create our fixture and attach it to the body
@@ -166,7 +157,7 @@ public class BodyFactory {
         circle.setRadius(size);
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = circle;
-        fixtureDef.density = 0.5f;
+        fixtureDef.density = 0.8f;
         fixtureDef.friction = 0.0f;
         fixtureDef.restitution = 0.6f;
         body.createFixture(fixtureDef);

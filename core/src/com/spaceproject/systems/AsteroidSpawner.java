@@ -7,11 +7,13 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.CircumstellarDiscComponent;
@@ -19,6 +21,7 @@ import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
@@ -66,13 +69,22 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
         
         spawnAsteroidDisk();
         
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
+            Vector3 projected = GameScreen.cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+            spawnAsteroid(projected.x, projected.y, 0, 0);
+            //EntityFactory.createWall(projected.x, projected.y, 10, 10);
+        }
         
-        /*todo: orbit asteroids around parent body, currently just flings everything out into universe.. ;p
+        
+        //todo: orbit asteroids around parent body, currently just flings everything out into universe...
+        //for (Entity parentEntity : spawnDisk) {
+        /*
         for (Entity entity : asteroids) {
             AsteroidComponent asteroid = Mappers.asteroid.get(entity);
             if (asteroid.type == AsteroidComponent.Type.orbitLocked) {
                 PhysicsComponent physics = Mappers.physics.get(entity);
-                //physics.body.setLinearVelocity(); o
+                physics.body.g
+                //physics.body.setLinearVelocity();
             }
         }*/
     }
@@ -153,22 +165,31 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     
             float[] vertices = asteroid.polygon.getVertices();
             
-            
             /*
-            //todo:add interior verticies for deeper shatter
-            int numPoints = (int)(asteroid.area / 500.0);
+            //todo:add interior vertices for deeper shatter
+            int numPoints = 1;//(int)(asteroid.area / 500.0);
             Vector2 subShatter = new Vector2();
             if (vertices.length == 6) { //3 points
-                //Vector2 center = new Vector2();
-                //GeometryUtils.polygonCentroid(hull, 0, hull.length, center);
+                Vector2 center = new Vector2();
+                GeometryUtils.polygonCentroid(vertices, 0, vertices.length, center);
+    
+                if (!asteroid.polygon.contains(center)) {
+                    Gdx.app.error(this.getClass().getSimpleName(), "incorrect point!");
+                }
+                int s = vertices.length;
+                float[] newPoly = new float[s + 2];
+                newPoly[s + 1] = center.x;
+                newPoly[s + 2] = center.y;
+                
+                /*
                 do {
                     //asteroid.polygon.getBoundingRectangle();
                     float x = MathUtils.random();
                     float y = MathUtils.random();
                     subShatter.set(x, y);
-                } while (asteroid.polygon.contains(subShatter));
-            }*/
-            
+                } while (asteroid.polygon.contains(subShatter));*
+            }
+            */
             //todo:broken rotation when shattering some polygons rotate and jump instead of simply separating in place
             
             
@@ -192,8 +213,8 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                 };
                 
                 //discard duplicate points
-                if ((hull[0] == hull[2] && hull[1] == hull[3]) || // p1 == p2
-                    (hull[0] == hull[4] && hull[1] == hull[5]) || // p1 == p3
+                if ((hull[0] == hull[2] && hull[1] == hull[3]) || // p1 == p2 or
+                    (hull[0] == hull[4] && hull[1] == hull[5]) || // p1 == p3 or
                     (hull[2] == hull[4] && hull[3] == hull[5])) { // p2 == p3
                     
                     Gdx.app.error(this.getClass().getSimpleName(), "Duplicate point! Discarding triangle");
@@ -206,9 +227,10 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                     //java: ../b2PolygonShape.cpp:158: void b2PolygonShape::Set(const b2Vec2*, int32): Assertion `false' failed.
                     continue;
                 }
+                Gdx.app.debug(this.getClass().getSimpleName(), "triangle quality? "
+                        + GeometryUtils.triangleQuality(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5]));
                 
-                //Vector2 center = new Vector2();
-                //GeometryUtils.polygonCentroid(hull, 0, hull.length, center);
+                
                 Entity childAsteroid = EntityFactory.createAsteroid((long) (Math.random() * Long.MAX_VALUE),
                         parentPos.x, parentPos.y,
                         parentVelocity.x, parentVelocity.y, hull);

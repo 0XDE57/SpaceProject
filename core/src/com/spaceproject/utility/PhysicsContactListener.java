@@ -22,8 +22,8 @@ import com.spaceproject.components.Sprite3DComponent;
 public class PhysicsContactListener implements ContactListener {
     
     private final Engine engine;
-    final int highImpactThreshold = 15000;
-    float peakImpulse = 0;
+    private final int highImpactThreshold = 15000;
+    private float peakImpulse = 0;
     
     public PhysicsContactListener(Engine engine) {
         this.engine = engine;
@@ -89,11 +89,11 @@ public class PhysicsContactListener implements ContactListener {
                 
                 if (healthA.health <= 0) {
                     entityA.add(new RemoveComponent());
-                    Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID A break down" + maxImpulse + " : " + damageA);
+                    Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID A break down " + maxImpulse + " : " + damageA);
                 }
                 if (healthB.health <= 0) {
                     entityB.add(new RemoveComponent());
-                    Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID B break down" + maxImpulse + " : " + damageB);
+                    Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID B break down " + maxImpulse + " : " + damageB);
                 }
             }
         }

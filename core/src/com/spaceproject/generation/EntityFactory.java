@@ -289,7 +289,7 @@ public class EntityFactory {
         return entity;
     }
     
-    public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float[] hull) {
+    public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float[] vertices) {
         MathUtils.random.setSeed(seed);
         Entity entity = new Entity();
     
@@ -307,20 +307,19 @@ public class EntityFactory {
         system with the z-axis pointing out of the plane.
         */
         AsteroidComponent asteroid = new AsteroidComponent();
-        Polygon polygon = new Polygon(hull);
-        Vector2 center = new Vector2();
-        GeometryUtils.polygonCentroid(polygon.getVertices(), 0, polygon.getVertices().length, center);
+        Polygon polygon = new Polygon(vertices);
         float area = Math.abs(GeometryUtils.polygonArea(polygon.getVertices(), 0, polygon.getVertices().length));
-        //polygon.setOrigin(center.x, center.y);
         asteroid.polygon = polygon;
         asteroid.area = area;
         asteroid.color = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
         entity.add(asteroid);
     
         PhysicsComponent physics = new PhysicsComponent();
+        float density = 0.5f;
         physics.body = BodyFactory.createPoly(transform.pos.x, transform.pos.y,
-                asteroid.polygon.getVertices(), BodyDef.BodyType.DynamicBody,
+                polygon.getVertices(), BodyDef.BodyType.DynamicBody, density,
                 GameScreen.box2dWorld, entity);
+        asteroid.centerOfMass = physics.body.getLocalCenter();
         physics.body.setLinearVelocity(velX, velY);
         entity.add(physics);
         
@@ -336,22 +335,30 @@ public class EntityFactory {
         //create random set of points
         int numPoints = 7;//Box2D poly vert limit is 8: Assertion `3 <= count && count <= 8' failed.
         FloatArray points = new FloatArray();
+        float minX = size;
+        float minY = size;
         for (int i = 0; i < numPoints * 2; i += 2) {
             float pX = MathUtils.random(size);
             float pY = MathUtils.random(size);
             points.add(pX);
             points.add(pY);
+            minX = Math.min(minX, pX);
+            minY = Math.min(minY, pY);
         }
+        
         //generate hull poly from random points
         ConvexHull convex = new ConvexHull();
         float[] hull = convex.computePolygon(points, false).toArray();
-        /*
-        Vector2 centerOfMass = PolygonUtil.centerOfPoly(hull);
-        //centerOfMass.set(10, 10);
-        for (int index = 0; index < hull.length/2; index += 2) {
-            //hull[index] -= centerOfMass.x;
-            //hull[index + 1] -= centerOfMass.y;
-        }*/
+        
+        //shift vertices to be centered around 0,0 relatively
+        Vector2 center = new Vector2();
+        GeometryUtils.polygonCentroid(hull, 0, hull.length, center);
+        center.add(minX, minY);
+        for (int index = 0; index < hull.length; index += 2) {
+            hull[index] -= center.x;
+            hull[index + 1] -= center.y;
+        }
+        
         return createAsteroid(seed, x, y, velX, velY, hull);
     }
     //endregion
@@ -509,7 +516,7 @@ public class EntityFactory {
     //endregion
     
     
-    public static Entity createWall(int x, int y, int width, int height) {
+    public static Entity createWall(float x, float y, int width, int height) {
         Entity entity = new Entity();
         
         TextureComponent texture = new TextureComponent();

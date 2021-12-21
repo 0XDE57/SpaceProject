@@ -60,7 +60,7 @@ public class AsteroidAnim extends TitleAnimation {
         world = new World(new Vector2(), true);
         box2DDebugRenderer = new Box2DDebugRenderer(true, true, true, true, true, true);
         
-        Body body = BodyFactory.createPoly(200, 200, asteroid.hullPoly.getVertices(), BodyDef.BodyType.DynamicBody, world, null);
+        Body body = BodyFactory.createPoly(200, 200, asteroid.hullPoly.getVertices(), BodyDef.BodyType.DynamicBody, 0.5f, world, null);
         body.applyForceToCenter(10,1,true);
         body.applyAngularImpulse(200, true);
         

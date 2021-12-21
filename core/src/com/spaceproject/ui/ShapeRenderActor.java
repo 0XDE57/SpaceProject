@@ -65,7 +65,9 @@ public class ShapeRenderActor extends Actor {
         float y3 = y2 + height + 10;
         renderSpectrum(x, y3, width, height, fromKelvin, toKelvin);
         
+        
         //TODO: plot power spectrum for wavelength
+        /*
         //for temperature k, draw spectrum plot
         double kelvin = Physics.Sun.kelvin;//5772k
         int wavelengthStart = 480; int wavelengthEnd = 780;
@@ -74,11 +76,8 @@ public class ShapeRenderActor extends Actor {
         for (int wavelength = wavelengthStart; wavelength < wavelengthEnd; wavelength++) {
             spectrum[index] = Physics.calcSpectralRadiance(wavelength, kelvin);
             index ++;
-        }
-        /*
-        for (double value : spectrum) {
-            Gdx.app.debug("plot", value + "");
         }*/
+
         
         //4. end our shape
         shape.end();
@@ -108,7 +107,7 @@ public class ShapeRenderActor extends Actor {
             shape.setColor(
                     colorTemp[0] / 255.0f, // red
                     colorTemp[1] / 255.0f, // green
-                    colorTemp[2] / 255.0f,  // blue
+                    colorTemp[2] / 255.0f, // blue
                     1); //alpha
             shape.line(x + i, y, x + i, y + height);
         }
@@ -119,17 +118,23 @@ public class ShapeRenderActor extends Actor {
         
         for (int i = 0; i < width; i++) {
             float percent = (float) i / width;
+            
+            //calculate spectrum
             double temperature = MathUtils.lerp(fromKelvin, toKelvin, percent);
-            
-            //border
-            shape.setColor(1, 1, 1,1);
-            shape.line(x + i, y - border, x + i, y + height + border);
-            
-            //spectrum
             Vector3 spectrum = BlackBodyColorSpectrum.spectrumToXYZ(temperature);
             Vector3 color = BlackBodyColorSpectrum.xyzToRGB(BlackBodyColorSpectrum.SMPTEsystem, spectrum.x, spectrum.y, spectrum.z);
-            BlackBodyColorSpectrum.constrainRGB(color);
+            boolean constrained = BlackBodyColorSpectrum.constrainRGB(color);
             Vector3 normal = BlackBodyColorSpectrum.normRGB(color.x, color.y, color.z);
+    
+            //draw border
+            if (constrained) {
+                shape.setColor(0, 0, 0, 1);
+            } else {
+                shape.setColor(1, 1, 1, 1);
+            }
+            shape.line(x + i, y - border, x + i, y + height + border);
+            
+            //draw spectrum
             shape.setColor(normal.x, normal.y, normal.z, 1);
             shape.line(x + i, y, x + i, y + height);
         }
