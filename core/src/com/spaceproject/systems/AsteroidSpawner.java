@@ -9,7 +9,6 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.DelaunayTriangulator;
-import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -48,7 +47,6 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     
     ShortArray triangles;
     DelaunayTriangulator delaunay = new DelaunayTriangulator();
-    EarClippingTriangulator earClip = new EarClippingTriangulator();
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -72,7 +70,6 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
         if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             Vector3 projected = GameScreen.cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
             spawnAsteroid(projected.x, projected.y, 0, 0);
-            //EntityFactory.createWall(projected.x, projected.y, 10, 10);
         }
         
         
@@ -123,7 +120,7 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     
     private void spawnAsteroidField(float x, float y) {
         float d = MathUtils.random(MathUtils.PI2);
-        Vector2 vel = MyMath.vector(d, 70 /*MathUtils.random(1, 50)*/);
+        Vector2 vel = MyMath.vector(d, 80 /*MathUtils.random(1, 50)*/);
         float range = 500.0f;
         int clusterSize = 20;//MathUtils.random(1, 20);
         for (int i = 0; i < clusterSize; i++) {
@@ -147,11 +144,8 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     
     @Override
     public void entityRemoved(Entity entity) {
-        //todo: consider adding a removal flag? what happens if we try to remove all asteroids
-        // eg: shatter vs cleanup. to prevent intentional removal from continually spawning children
-        
         AsteroidComponent asteroid = Mappers.asteroid.get(entity);
-        if (asteroid != null) {
+        if (asteroid != null && asteroid.doShatter) {
             spawnChildren(entity, asteroid);
         }
     }
@@ -166,7 +160,7 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     
             float[] vertices = asteroid.polygon.getVertices();
             
-            if (vertices.length == 6) { //3 points
+            if (vertices.length == 6) { //3 points: triangle
                 Vector2 center = new Vector2();
                 GeometryUtils.polygonCentroid(vertices, 0, vertices.length, center);
                 if (!asteroid.centerOfMass.epsilonEquals(center)) {
@@ -177,7 +171,7 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                     Gdx.app.debug(this.getClass().getSimpleName(), "WARNING: triangleCentroid disagreement");
                 }
                 
-                //create new poly from triangle + addition center point to "sub shatter" into smaller triangle shards
+                //create new polygons from triangle + center point to "sub shatter" into smaller triangle shards
                 int length = vertices.length;
                 float[] newPoly = new float[length + 2];
                 System.arraycopy(vertices, 0, newPoly, 0, vertices.length);
@@ -185,22 +179,18 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                 newPoly[length] = center.x;
                 newPoly[length + 1] = center.y;
                 
-                triangles = delaunay.computeTriangles(newPoly, false);
-                subShatter(parentPos, body, parentVelocity, newPoly);
-            } else {
-                triangles = delaunay.computeTriangles(vertices, false);
-                subShatter(parentPos, body, parentVelocity, vertices);
+                vertices = newPoly;
             }
+    
+            triangles = delaunay.computeTriangles(vertices, false);
+            subShatter(parentPos, body, parentVelocity, vertices);
         }
     }
     
     private void subShatter(Vector2 parentPos, Body body, Vector2 parentVelocity, float[] vertices) {
-        //todo:broken rotation when shattering some polygons rotate and jump instead of simply separating in place
-        /*
-        NOTE: Box2D expects Polygons vertices are stored with a counter clockwise winding (CCW).
+        /* NOTE: Box2D expects Polygons vertices are stored with a counter clockwise winding (CCW).
         We must be careful because the notion of CCW is with respect to a right-handed
-        coordinate system with the z-axis pointing out of the plane.
-        */
+        coordinate system with the z-axis pointing out of the plane. */
         
         //create cells for each triangle
         for (int index = 0; index < triangles.size; index += 3) {
@@ -213,7 +203,7 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                     vertices[p3], vertices[p3 + 1]  // xy: 4, 5
             };
 
-            Gdx.app.debug(this.getClass().getSimpleName(), "Clockise: " + GeometryUtils.isClockwise(hull, 0, hull.length)
+            Gdx.app.debug(this.getClass().getSimpleName(), "Clockwise: " + GeometryUtils.isClockwise(hull, 0, hull.length)
                     + " | quality: " + GeometryUtils.triangleQuality(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5]));
             Gdx.app.debug(this.getClass().getSimpleName(),
                     MyMath.round(hull[0],1) + ", " + MyMath.round(hull[1],1) + " | " +
@@ -231,9 +221,9 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                 //java: ../b2PolygonShape.cpp:158: void b2PolygonShape::Set(const b2Vec2*, int32): Assertion `false' failed.
                 continue;
             }
-            
-
-            /*
+    
+            //todo: broken rotation when shattering some polygons rotate and jump instead of simply separating in place
+            /* todo: fix triangle origin to be center
             //1. find minX minY
             //2. shift vertices to be centered around 0,0 relatively
             Vector2 center = new Vector2();

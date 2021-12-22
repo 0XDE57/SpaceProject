@@ -69,6 +69,8 @@ public class PhysicsContactListener implements ContactListener {
             AsteroidComponent asteroidA = Mappers.asteroid.get(entityA);
             AsteroidComponent asteroidB = Mappers.asteroid.get(entityB);
             if (asteroidA != null && asteroidB != null) {
+                asteroidA.doShatter = true;
+                asteroidB.doShatter = true;
                 
                 //calc damage relative to size of bodies and impact impulse
                 float damage = impulse * 0.1f;
@@ -137,28 +139,11 @@ public class PhysicsContactListener implements ContactListener {
         
         //check for shield
         ShieldComponent shieldComp = Mappers.shield.get(attackedEntity);
-        if (shieldComp != null) {
-            if (shieldComp.state == ShieldComponent.State.on) {
-                //shieldComp.state == ShieldComponent.State.break;??
-                damageEntity.add(new RemoveComponent());
-                return;
-            }
-            /*
-            if (shieldComp.isActive) {
-                //Body body = attackedEntity.getComponent(PhysicsComponent.class).body;
-                //Fixture circleFixture = body.getFixtureList().get(body.getFixtureList().size - 1);
-                //body.destroyFixture(circleFixture);//cant remove mid collision
-                //attackedEntity.remove(ShieldComponent.class);
-                shieldComp.radius = -1f;
-                //shieldComp.animTimer.reset();
-                
-                damageEntity.add(new RemoveComponent());
-                return;
-            } else {
-                //destroy shield if it isn't fully activated.
-                //todo: "premature break effect", sound effect here, maybe particle effect
-                attackedEntity.remove(shieldComp.getClass());
-            }*/
+        if ((shieldComp != null) && (shieldComp.state == ShieldComponent.State.on)) {
+            //todo: "break effect", sound effect, particle effect
+            //shieldComp.state == ShieldComponent.State.break;??
+            damageEntity.add(new RemoveComponent());
+            return;
         }
     
         //add roll to hit body
@@ -185,6 +170,12 @@ public class PhysicsContactListener implements ContactListener {
             if (chargeCannon != null && chargeCannon.projectileEntity != null) {
                 //destroy or release
                 chargeCannon.projectileEntity.add(new RemoveComponent());
+            }
+    
+            //if entity was asteroid, shatter
+            AsteroidComponent asteroidA = Mappers.asteroid.get(attackedEntity);
+            if (asteroidA != null) {
+                asteroidA.doShatter = true;
             }
             
             Gdx.app.log(this.getClass().getSimpleName(),

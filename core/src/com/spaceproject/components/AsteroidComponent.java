@@ -23,4 +23,6 @@ public class AsteroidComponent implements Component {
     
     public Color color; //temporary rendering color
     
+    public boolean doShatter = false;
+    
 }
