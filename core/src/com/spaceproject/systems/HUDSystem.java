@@ -21,6 +21,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.ChargeCannonComponent;
@@ -132,7 +133,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     public void addedToEngine(Engine engine) {
         mapableEntities = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
         players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
-        killableEntities = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(ControlFocusComponent.class).get());
+        killableEntities = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(
+                ControlFocusComponent.class, AsteroidComponent.class).get());
         orbitEntities = engine.getEntitiesFor(Family.all(TransformComponent.class).get());
     }
     
