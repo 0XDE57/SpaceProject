@@ -159,99 +159,99 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     public void spawnChildren(Entity parentAsteroid, AsteroidComponent asteroid) {
         float minAsteroidSize = 100; //anything smaller than this will not create more
         if (asteroid.area >= minAsteroidSize) {
-    
+            
             Vector2 parentPos = Mappers.transform.get(parentAsteroid).pos;
             Body body = Mappers.physics.get(parentAsteroid).body;
             Vector2 parentVelocity = body.getLinearVelocity();
     
             float[] vertices = asteroid.polygon.getVertices();
-    
-            /*
-            int s = vertices.length;
-            float[] newPoly = new float[s + 2];
-            //todo:add interior vertices for deeper shatter
-            int numPoints = 1;//(int)(asteroid.area / 500.0);
-            Vector2 subShatter = new Vector2();
+            
             if (vertices.length == 6) { //3 points
                 Vector2 center = new Vector2();
                 GeometryUtils.polygonCentroid(vertices, 0, vertices.length, center);
-    
-                if (!asteroid.polygon.contains(center)) {
-                    Gdx.app.error(this.getClass().getSimpleName(), "incorrect point!");
+                if (!asteroid.centerOfMass.epsilonEquals(center)) {
+                    Gdx.app.debug(this.getClass().getSimpleName(), "WARNING: polygonCentroid disagreement");
+                }
+                GeometryUtils.triangleCentroid(vertices[0], vertices[1], vertices[2], vertices[3], vertices[4], vertices[5], center);
+                if (!asteroid.centerOfMass.epsilonEquals(center)) {
+                    Gdx.app.debug(this.getClass().getSimpleName(), "WARNING: triangleCentroid disagreement");
                 }
                 
-                newPoly[s] = center.x;
-                newPoly[s + 1] = center.y;
+                //create new poly from triangle + addition center point to "sub shatter" into smaller triangle shards
+                int length = vertices.length;
+                float[] newPoly = new float[length + 2];
+                System.arraycopy(vertices, 0, newPoly, 0, vertices.length);
+                //add new point in center of triangle
+                newPoly[length] = center.x;
+                newPoly[length + 1] = center.y;
                 
-                /*
-                do {
-                    //asteroid.polygon.getBoundingRectangle();
-                    float x = MathUtils.random();
-                    float y = MathUtils.random();
-                    subShatter.set(x, y);
-                } while (asteroid.polygon.contains(subShatter));*
-            }*/
-            
-            //todo:broken rotation when shattering some polygons rotate and jump instead of simply separating in place
-            
-            
-            triangles = earClip.computeTriangles(vertices);
-            //triangles = delaunay.computeTriangles(vertices, true);
-            /*
-            NOTE: Box2D expects Polygons vertices are stored with a counter clockwise winding (CCW).
-            We must be careful because the notion of CCW is with respect to a right-handed
-            coordinate system with the z-axis pointing out of the plane.
-            */
+                triangles = delaunay.computeTriangles(newPoly, false);
+                subShatter(parentPos, body, parentVelocity, newPoly);
+            } else {
+                triangles = delaunay.computeTriangles(vertices, false);
+                subShatter(parentPos, body, parentVelocity, vertices);
+            }
+        }
+    }
+    
+    private void subShatter(Vector2 parentPos, Body body, Vector2 parentVelocity, float[] vertices) {
+        //todo:broken rotation when shattering some polygons rotate and jump instead of simply separating in place
+        /*
+        NOTE: Box2D expects Polygons vertices are stored with a counter clockwise winding (CCW).
+        We must be careful because the notion of CCW is with respect to a right-handed
+        coordinate system with the z-axis pointing out of the plane.
+        */
         
-            //create cells for each triangle
-            for (int index = 0; index < triangles.size; index += 3) {
-                int p1 = triangles.get(index) * 2;
-                int p2 = triangles.get(index + 1) * 2;
-                int p3 = triangles.get(index + 2) * 2;
-                float[] hull = new float[] {
-                        vertices[p1], vertices[p1 + 1], // xy: 0, 1
-                        vertices[p2], vertices[p2 + 1], // xy: 2, 3
-                        vertices[p3], vertices[p3 + 1]  // xy: 4, 5
-                };
-                
-                //discard duplicate points
-                if ((hull[0] == hull[2] && hull[1] == hull[3]) || // p1 == p2 or
-                    (hull[0] == hull[4] && hull[1] == hull[5]) || // p1 == p3 or
-                    (hull[2] == hull[4] && hull[3] == hull[5])) { // p2 == p3
-                    
-                    Gdx.app.error(this.getClass().getSimpleName(), "Duplicate point! Discarding triangle");
-                    Gdx.app.debug(this.getClass().getSimpleName(),
-                            MyMath.round(hull[0],1) + ", " + MyMath.round(hull[1],1) + " | " +
+        //create cells for each triangle
+        for (int index = 0; index < triangles.size; index += 3) {
+            int p1 = triangles.get(index) * 2;
+            int p2 = triangles.get(index + 1) * 2;
+            int p3 = triangles.get(index + 2) * 2;
+            float[] hull = new float[] {
+                    vertices[p1], vertices[p1 + 1], // xy: 0, 1
+                    vertices[p2], vertices[p2 + 1], // xy: 2, 3
+                    vertices[p3], vertices[p3 + 1]  // xy: 4, 5
+            };
+
+            Gdx.app.debug(this.getClass().getSimpleName(), "Clockise: " + GeometryUtils.isClockwise(hull, 0, hull.length)
+                    + " | quality: " + GeometryUtils.triangleQuality(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5]));
+            Gdx.app.debug(this.getClass().getSimpleName(),
+                    MyMath.round(hull[0],1) + ", " + MyMath.round(hull[1],1) + " | " +
                             MyMath.round(hull[2],1) + ", " + MyMath.round(hull[3],1) + " | " +
                             MyMath.round(hull[4],1) + ", " + MyMath.round(hull[5],1));
-                    Gdx.app.debug(this.getClass().getSimpleName(), GeometryUtils.isClockwise(hull, 0, hull.length) + "");
-                    //duplicate points result in crash:
-                    //java: ../b2PolygonShape.cpp:158: void b2PolygonShape::Set(const b2Vec2*, int32): Assertion `false' failed.
-                    continue;
-                }
-                Gdx.app.debug(this.getClass().getSimpleName(), "triangle quality? "
-                        + GeometryUtils.triangleQuality(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5]));
-    
-                /*
-                //1. find minX minY
-                //2. shift vertices to be centered around 0,0 relatively
-                Vector2 center = new Vector2();
-                GeometryUtils.polygonCentroid(hull, 0, hull.length, center);
-                center.add(minX, minY);
-                for (int i = 0; i < hull.length; i += 2) {
-                    hull[i] -= center.x;
-                    hull[i + 1] -= center.y;
-                }
-                //3. push by center offset so vertices are correct position relative to parent
-                Vector2 newPos = parentPos.copy().add(center);
-                */
+            
+            //discard duplicate points
+            if ((hull[0] == hull[2] && hull[1] == hull[3]) || // p1 == p2 or
+                (hull[0] == hull[4] && hull[1] == hull[5]) || // p1 == p3 or
+                (hull[2] == hull[4] && hull[3] == hull[5])) { // p2 == p3
                 
-                Entity childAsteroid = EntityFactory.createAsteroid((long) (Math.random() * Long.MAX_VALUE),
-                        parentPos.x, parentPos.y,
-                        parentVelocity.x, parentVelocity.y, body.getAngle(), hull);
-                Mappers.physics.get(childAsteroid).body.setAngularVelocity(body.getAngularVelocity());
-                getEngine().addEntity(childAsteroid);
+                Gdx.app.error(this.getClass().getSimpleName(), "Duplicate point! Discarding triangle");
+                
+                //duplicate points result in crash:
+                //java: ../b2PolygonShape.cpp:158: void b2PolygonShape::Set(const b2Vec2*, int32): Assertion `false' failed.
+                continue;
             }
+            
+
+            /*
+            //1. find minX minY
+            //2. shift vertices to be centered around 0,0 relatively
+            Vector2 center = new Vector2();
+            GeometryUtils.polygonCentroid(hull, 0, hull.length, center);
+            center.add(minX, minY);
+            for (int i = 0; i < hull.length; i += 2) {
+                hull[i] -= center.x;
+                hull[i + 1] -= center.y;
+            }
+            //3. push by center offset so vertices are correct position relative to parent
+            Vector2 newPos = parentPos.copy().add(center);
+            */
+            
+            Entity childAsteroid = EntityFactory.createAsteroid((long) (Math.random() * Long.MAX_VALUE),
+                    parentPos.x, parentPos.y,
+                    parentVelocity.x, parentVelocity.y, body.getAngle(), hull);
+            Mappers.physics.get(childAsteroid).body.setAngularVelocity(body.getAngularVelocity());
+            getEngine().addEntity(childAsteroid);
         }
     }
     

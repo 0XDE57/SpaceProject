@@ -68,21 +68,8 @@ Data Directory (...\SpaceProject\android\assets)
     \fonts: fonts for UI
         .tff   : True Type Fonts
     \shaders: GLSL shader files (name convention: reference GLSL compiler extensions)
-
         .vert  : vertex shader
-        .tesc  : tessellation control shader
-        .tese  : tessellation evaluation shader
-        .geom  : geometry shader
         .frag  : fragment shader
-        .comp  : compute shader
-        .mesh  : mesh shader
-        .task  : task shader
-        .rgen  : ray generation shader
-        .rint  : ray intersection shader
-        .rahit : ray any hit shader
-        .rchit : ray closest hit shader
-        .rmiss : ray miss shader
-        .rcall : ray callable shader
         .glsl  : .vert.glsl, .tesc.glsl, ..., .comp.glsl compound suffixes
         .hlsl  : .vert.hlsl, .tesc.hlsl, ..., .comp.hlsl compound suffixes
 
@@ -217,14 +204,24 @@ Legend:
     [x] spec spawner for asteroid.
     [...] belt - ring around barycenter component
         [ ] orbit with flocking / group mechanic
-    [ ] unload asteroids when system unloaded
-    [ ] field - randomly spawn while in space
-    [...] begin make asteroid
-        see: AsteroidAnim.java for prototyped polygon and rendering
-        [...] attach box2D poly to match asteroid poly
-            [ ] fix center of gravity
+            currently broken: flings out into space
+    [x] field - randomly spawn while in space
+    [x] begin make asteroid
+        [x] attach box2D poly to match asteroid poly
+            [x] fix center of gravity
         [x] take damage when hit by shots
+    [ ] better rendering. currently just debug render with modified shaperenderer
+        [ ] set a texture to take up the dimension of an arbitrary poly
+        [ ] sub shatter texture to child polygons scissors?
     [...] break into smaller asteroids
+        [ ] tune!
+            -shatter difficulty: how many shots to break, how hard impact to break
+            -density: weight and feel of how bodies impact eachother and player
+        [ ] should not display health bar on asteroids, but some visual feedback like cracks would be nice
+        [ ] polygon slicing! ability to cast ray through asteroid and have it split on intersection
+            would be useful for
+        [x] basic triangle shatter
+            [ ] broken rotation when shattering some polygons rotate and jump instead of simply separating in place
         [ ] voronoi shatter, for destructible asteroids.
             (and world generation can be used for tectonic plates / countries / biomes)
             https://www.badlogicgames.com/forum/viewtopic.php?f=11&t=22784 (my old thread)
@@ -270,8 +267,8 @@ Legend:
             could extend the source star radius on texture (or simply full rectangle), then simply set the alpha drop off in the shader
         [ ] could shift the noise vertically and horizontally
         [ ] shift should go continually outward, not roll back inward (sinewave)
-        [ ] better colors
-            [ ] give stars random temperature between: 1000 - 50,000 Kelvin
+        [...] better colors
+            [x] give stars random temperature between: 1000 - 50,000 Kelvin
                 "Stars vary in surface temperature from about 2,000 to 40,000 kelvin"
                 Harvard spectral classification
                 O	≥ 33,000 K 	        blue
@@ -727,7 +724,7 @@ Legend:
             - gravelly paved path to walk / drive on
             - probably just cosmetic, could perhaps have physics implications for vehicle
         - bridge: to cross river
-        - terminal
+        - terminal (base computer)
             - I/O cables and circuitry / scripting possibilities...way out of scope.
 
 [...] planet generation
