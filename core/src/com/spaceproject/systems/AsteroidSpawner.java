@@ -57,15 +57,16 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     
     @Override
     public void update(float deltaTime) {
+        spawnAsteroidDisk();
         
-        if (asteroids.size() <= maxSpawn) {
-            if (lastSpawnedTimer.tryEvent()) {
-                spawnAsteroidField(-1000, -1000);
+        if (asteroids.size() < maxSpawn) {
+            if (lastSpawnedTimer.canDoEvent()) {
+                //spawnAsteroidField(-1000, -1000);
                 //lastSpawnedTimer.reset();
             }
         }
         
-        spawnAsteroidDisk();
+        
         
         if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             Vector3 projected = GameScreen.cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
@@ -119,14 +120,14 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     }
     
     private void spawnAsteroidField(float x, float y) {
-        float d = MathUtils.random(MathUtils.PI2);
-        Vector2 vel = MyMath.vector(d, 80 /*MathUtils.random(1, 50)*/);
-        float range = 500.0f;
+        float angle = 45 * MathUtils.degreesToRadians;// MathUtils.random(MathUtils.PI2);
+        Vector2 vel = MyMath.vector(angle, 70 /*MathUtils.random(1, 50)*/);
+        float range = 800.0f;
         int clusterSize = 20;//MathUtils.random(1, 20);
         for (int i = 0; i < clusterSize; i++) {
-            float newX = MathUtils.random(x-range, x+range);
-            float newY = MathUtils.random(y-range, y+range);
-            spawnAsteroid(newX, newY, vel.x, vel.x);
+            float newX = MathUtils.random(x - range, x + range);
+            float newY = MathUtils.random(y - range, y + range);
+            spawnAsteroid(newX, newY, vel.x, vel.y);
         }
         Gdx.app.log(this.getClass().getSimpleName(), "spawn field: " + clusterSize);
     }
@@ -154,40 +155,28 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
         float minAsteroidSize = 100; //anything smaller than this will not create more
         if (asteroid.area >= minAsteroidSize) {
             
-            Vector2 parentPos = Mappers.transform.get(parentAsteroid).pos;
-            Body body = Mappers.physics.get(parentAsteroid).body;
-            Vector2 parentVelocity = body.getLinearVelocity();
-    
             float[] vertices = asteroid.polygon.getVertices();
             
-            if (vertices.length == 6) { //3 points: triangle
-                Vector2 center = new Vector2();
-                GeometryUtils.polygonCentroid(vertices, 0, vertices.length, center);
-                if (!asteroid.centerOfMass.epsilonEquals(center)) {
-                    Gdx.app.debug(this.getClass().getSimpleName(), "WARNING: polygonCentroid disagreement");
-                }
-                GeometryUtils.triangleCentroid(vertices[0], vertices[1], vertices[2], vertices[3], vertices[4], vertices[5], center);
-                if (!asteroid.centerOfMass.epsilonEquals(center)) {
-                    Gdx.app.debug(this.getClass().getSimpleName(), "WARNING: triangleCentroid disagreement");
-                }
-                
-                //create new polygons from triangle + center point to "sub shatter" into smaller triangle shards
-                int length = vertices.length;
-                float[] newPoly = new float[length + 2];
-                System.arraycopy(vertices, 0, newPoly, 0, vertices.length);
-                //add new point in center of triangle
-                newPoly[length] = center.x;
-                newPoly[length + 1] = center.y;
-                
-                vertices = newPoly;
+            Vector2 center = new Vector2();
+            GeometryUtils.polygonCentroid(vertices, 0, vertices.length, center);
+            if (!asteroid.centerOfMass.epsilonEquals(center)) {
+                Gdx.app.debug(this.getClass().getSimpleName(), "WARNING: polygonCentroid disagreement");
             }
-    
-            triangles = delaunay.computeTriangles(vertices, false);
-            subShatter(parentPos, body, parentVelocity, vertices);
+            
+            //create new polygons from vertices + center point to "sub shatter" into smaller polygon shards
+            int length = vertices.length;
+            float[] newPoly = new float[length + 2];
+            System.arraycopy(vertices, 0, newPoly, 0, vertices.length);
+            //add new point in center of triangle
+            newPoly[length] = center.x;
+            newPoly[length + 1] = center.y;
+
+            triangles = delaunay.computeTriangles(newPoly, false);
+            subShatter(parentAsteroid, newPoly);
         }
     }
     
-    private void subShatter(Vector2 parentPos, Body body, Vector2 parentVelocity, float[] vertices) {
+    private void subShatter(Entity parentAsteroid, float[] vertices) {
         /* NOTE: Box2D expects Polygons vertices are stored with a counter clockwise winding (CCW).
         We must be careful because the notion of CCW is with respect to a right-handed
         coordinate system with the z-axis pointing out of the plane. */
@@ -237,10 +226,13 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
             Vector2 newPos = parentPos.copy().add(center);
             */
             
+            Body body = Mappers.physics.get(parentAsteroid).body;
+            Vector2 vel = body.getLinearVelocity();
+            Vector2 pos = body.getPosition();
             Entity childAsteroid = EntityFactory.createAsteroid((long) (Math.random() * Long.MAX_VALUE),
-                    parentPos.x, parentPos.y,
-                    parentVelocity.x, parentVelocity.y, body.getAngle(), hull);
+                    pos.x, pos.y, vel.x, vel.y, body.getAngle(), hull);
             Mappers.physics.get(childAsteroid).body.setAngularVelocity(body.getAngularVelocity());
+            
             getEngine().addEntity(childAsteroid);
         }
     }
