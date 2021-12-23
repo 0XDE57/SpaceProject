@@ -18,12 +18,15 @@ import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.Sprite3DComponent;
+import com.spaceproject.components.VehicleComponent;
 
 public class PhysicsContactListener implements ContactListener {
     
     private final Engine engine;
-    private final int highImpactThreshold = 15000;
-    private float peakImpulse = 0;
+    private final int asteroidShatterThreshold = 15000; //impulse threshold to apply damage caused by impact
+    private final int vehicleDamageThreshold = 15; //impulse threshold to apply damage to vehicles
+    private final float impactMultiplier = 0.1f; //how much damage relative to impulse
+    private float peakImpulse = 0; //highest recorded impact, stat just to gauge
     
     public PhysicsContactListener(Engine engine) {
         this.engine = engine;
@@ -53,53 +56,68 @@ public class PhysicsContactListener implements ContactListener {
         }
         peakImpulse = Math.max(maxImpulse, peakImpulse);
         
-        if (maxImpulse > highImpactThreshold) {
-            onHighImpulseImpact(contact, maxImpulse);
-        }
-    }
-    
-    private void onHighImpulseImpact(Contact contact, float impulse) {
-        Gdx.app.debug(this.getClass().getSimpleName(), "collide " + impulse + " : " + peakImpulse);
-        
         Object dataA = contact.getFixtureA().getBody().getUserData();
         Object dataB = contact.getFixtureB().getBody().getUserData();
         if (dataA != null && dataB != null) {
             Entity entityA = (Entity) dataA;
             Entity entityB = (Entity) dataB;
-            AsteroidComponent asteroidA = Mappers.asteroid.get(entityA);
-            AsteroidComponent asteroidB = Mappers.asteroid.get(entityB);
-            if (asteroidA != null && asteroidB != null) {
-                asteroidA.doShatter = true;
-                asteroidB.doShatter = true;
-                
-                //calc damage relative to size of bodies and impact impulse
-                float damage = impulse * 0.1f;
-                float total = asteroidA.area + asteroidB.area;
-                float damageA = damage * (asteroidA.area / total);
-                float damageB = damage * (asteroidB.area / total);
-
-                //todo: how should shatter mechanics handle? what if pass down extra damage to children.
-                // eg: asteroid has 100 hp, breaks into 2 = 50hp children
-                //   damage 110 = -10 hp, breaks into 2 minus 5 each = 45hp
-                //   damage 200 = -100 hp, breaks into 2 minus 50 = 0hp = don't spawn children -> instant destruction
-                //  could play with different rules and ratios, find what feels good
-                
-                HealthComponent healthA = Mappers.health.get(entityA);
-                HealthComponent healthB = Mappers.health.get(entityB);
-                healthA.health -= damageA;
-                healthB.health -= damageB;
-                
-                if (healthA.health <= 0) {
-                    entityA.add(new RemoveComponent());
-                    Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID A break down " + impulse + " : " + damageA);
+    
+            if (maxImpulse > asteroidShatterThreshold) {
+                //Gdx.app.debug(this.getClass().getSimpleName(), "asteroid impact: " + maxImpulse);
+                AsteroidComponent asteroidA = Mappers.asteroid.get(entityA);
+                if (asteroidA != null) {
+                    asteroidImpact(entityA, asteroidA, maxImpulse);
                 }
-                if (healthB.health <= 0) {
-                    entityB.add(new RemoveComponent());
-                    Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID B break down " + impulse + " : " + damageB);
+                AsteroidComponent asteroidB = Mappers.asteroid.get(entityB);
+                if (asteroidB != null) {
+                    asteroidImpact(entityB, asteroidB, maxImpulse);
+                }
+            } else if (maxImpulse > vehicleDamageThreshold) {
+                VehicleComponent vehicleA = Mappers.vehicle.get(entityA);
+                if (vehicleA != null) {
+                    doVehicleDamage(entityA, maxImpulse);
+                }
+                VehicleComponent vehicleB = Mappers.vehicle.get(entityA);
+                if (vehicleB != null) {
+                    doVehicleDamage(entityB, maxImpulse);
                 }
             }
         }
     }
+    
+    private void asteroidImpact(Entity entity, AsteroidComponent asteroid, float impulse) {
+        //todo: how should shatter mechanics handle? what if pass down extra damage to children.
+        // eg: asteroid has 100 hp, breaks into 2 = 50hp children
+        //   damage 110 = -10 hp, breaks into 2 minus 5 each = 45hp
+        //   damage 200 = -100 hp, breaks into 2 minus 50 = 0hp = don't spawn children -> instant destruction
+        //  could play with different rules and ratios, find what feels good
+        
+        //calc damage relative to size of bodies and how hard impact impulse was
+        float relativeDamage = (impulse * impactMultiplier) * asteroid.area;
+        
+        HealthComponent health = Mappers.health.get(entity);
+        health.health -= relativeDamage;
+        if (health.health <= 0) {
+            asteroid.doShatter = true;
+            entity.add(new RemoveComponent());
+            Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID shatter: " + impulse + " -> damage: " + relativeDamage);
+        }
+    }
+    
+    private void doVehicleDamage(Entity entityA, float impulse) {
+        //Gdx.app.debug(this.getClass().getSimpleName(), "high impact damage: " + impulse);
+        
+        //calc damage relative to how hard impact impulse was
+        float relativeDamage = (impulse * 0.4f);
+        
+        HealthComponent health = Mappers.health.get(entityA);
+        health.health -= relativeDamage;
+        if (health.health <= 0) {
+            entityA.add(new RemoveComponent());
+            Gdx.app.debug(this.getClass().getSimpleName(), "vehicle destroyed: " + impulse + " -> damage: " + relativeDamage);
+        }
+    }
+    
     
     private void onCollision(Entity a, Entity b) {
         //todo: collision filtering: http://www.iforce2d.net/b2dtut/collision-filtering
