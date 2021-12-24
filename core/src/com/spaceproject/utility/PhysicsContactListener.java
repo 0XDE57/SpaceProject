@@ -104,16 +104,25 @@ public class PhysicsContactListener implements ContactListener {
         }
     }
     
-    private void doVehicleDamage(Entity entityA, float impulse) {
-        //Gdx.app.debug(this.getClass().getSimpleName(), "high impact damage: " + impulse);
+    private void doVehicleDamage(Entity entity, float impulse) {
+        //don't apply damage while shield active
+        ShieldComponent shield = Mappers.shield.get(entity);
+        if (shield != null && shield.state == ShieldComponent.State.on) {
+            //todo: break shield if impact is hard enough
+            //int shieldBreakThreshold = 500;
+            //if (impulse > shieldBreakThreshold) { }
+            return; //protected by shield
+        }
+        
+        Gdx.app.debug(this.getClass().getSimpleName(), "high impact damage: " + impulse);
         
         //calc damage relative to how hard impact impulse was
         float relativeDamage = (impulse * 0.4f);
         
-        HealthComponent health = Mappers.health.get(entityA);
+        HealthComponent health = Mappers.health.get(entity);
         health.health -= relativeDamage;
         if (health.health <= 0) {
-            entityA.add(new RemoveComponent());
+            entity.add(new RemoveComponent());
             Gdx.app.debug(this.getClass().getSimpleName(), "vehicle destroyed: " + impulse + " -> damage: " + relativeDamage);
         }
     }
