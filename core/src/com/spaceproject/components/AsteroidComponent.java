@@ -15,6 +15,8 @@ public class AsteroidComponent implements Component {
     
     public Type type;
     
+    public Vector2 orbit;
+    
     public Polygon polygon;
     
     public Vector2 centerOfMass;

@@ -141,6 +141,16 @@ public class PhysicsContactListener implements ContactListener {
         if (damageB != null && healthA != null) {
             onAttacked(b, a, damageB, healthA);
         }
+    
+        //if asteroid was locked in orbit, unlock it so regular physics can take over
+        AsteroidComponent asteroidA = Mappers.asteroid.get(a);
+        if (asteroidA != null) {
+            asteroidA.type = AsteroidComponent.Type.free;
+        }
+        AsteroidComponent asteroidB = Mappers.asteroid.get(a);
+        if (asteroidB != null) {
+            asteroidB.type = AsteroidComponent.Type.free;
+        }
     }
     
     private void onAttacked(Entity damageEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent healthComponent) {
@@ -200,9 +210,9 @@ public class PhysicsContactListener implements ContactListener {
             }
     
             //if entity was asteroid, shatter
-            AsteroidComponent asteroidA = Mappers.asteroid.get(attackedEntity);
-            if (asteroidA != null) {
-                asteroidA.doShatter = true;
+            AsteroidComponent asteroid = Mappers.asteroid.get(attackedEntity);
+            if (asteroid != null) {
+                asteroid.doShatter = true;
             }
             
             Gdx.app.log(this.getClass().getSimpleName(),

@@ -41,9 +41,9 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     // - if any asteroid is too far from player, unload
     
     private ImmutableArray<Entity> asteroids;
-    private ImmutableArray<Entity> spawnDisk;
+    private ImmutableArray<Entity> spawnBelt;
     SimpleTimer lastSpawnedTimer = new SimpleTimer(1000);
-    int maxSpawn = 100;
+    int maxSpawn = 180;
     
     ShortArray triangles;
     DelaunayTriangulator delaunay = new DelaunayTriangulator();
@@ -51,52 +51,54 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     @Override
     public void addedToEngine(Engine engine) {
         asteroids = engine.getEntitiesFor(Family.all(AsteroidComponent.class, TransformComponent.class).get());
-        spawnDisk = engine.getEntitiesFor(Family.all(CircumstellarDiscComponent.class).get());
+        spawnBelt = engine.getEntitiesFor(Family.all(CircumstellarDiscComponent.class).get());
         lastSpawnedTimer.setCanDoEvent();
     }
     
     @Override
     public void update(float deltaTime) {
-        spawnAsteroidDisk();
+        spawnAsteroidBelt();
         
         if (asteroids.size() < maxSpawn) {
             if (lastSpawnedTimer.canDoEvent()) {
                 //spawnAsteroidField(-1000, -1000);
                 //lastSpawnedTimer.reset();
+                
+                //float angle = 90 * MathUtils.degreesToRadians;// MathUtils.random(MathUtils.PI2);
+                //spawnAsteroidField(3000, 1000, angle-angle);
+                //spawnAsteroidField(9000, 1000, angle + angle);
             }
         }
         
-        
-        
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
-            Vector3 projected = GameScreen.cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-            spawnAsteroid(projected.x, projected.y, 0, 0);
+        //debug add asteroid at mouse position
+        if (GameScreen.isDebugMode && Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
+            Vector3 unproject = GameScreen.cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+            spawnAsteroid(unproject.x, unproject.y, 0, 0);
         }
         
-        
-        //todo: orbit asteroids around parent body, currently just flings everything out into universe...
-        //for (Entity parentEntity : spawnDisk) {
         /*
+        //todo: orbit asteroids around parent body, currently just flings everything out into universe...
         for (Entity entity : asteroids) {
             AsteroidComponent asteroid = Mappers.asteroid.get(entity);
             if (asteroid.type == AsteroidComponent.Type.orbitLocked) {
                 PhysicsComponent physics = Mappers.physics.get(entity);
-                physics.body.g
-                //physics.body.setLinearVelocity();
+                float dist = asteroid.orbit.dst(physics.body.getPosition());
+                float angle = (float) (asteroid.orbit.angleRad(physics.body.getPosition()));// + (Math.PI / 2));
+                physics.body.setLinearVelocity(MyMath.vector(angle, 20));
             }
         }*/
     }
     
-    private void spawnAsteroidDisk() {
-        for (Entity parentEntity : spawnDisk) {
+    private void spawnAsteroidBelt() {
+        for (Entity parentEntity : spawnBelt) {
             CircumstellarDiscComponent disk = Mappers.circumstellar.get(parentEntity);
             if (asteroids.size() <= maxSpawn) {
                 //if (lastSpawnedTimer.tryEvent()) {
                 Vector2 pos = Mappers.transform.get(parentEntity).pos.cpy();
                 float bandwidthOffset = MathUtils.random(-disk.width/2, disk.width/2);//todo, should bias towards middle and taper off edges
                 //alternatively could be a 1D noise from inner to outer with different concentrations?
-                float d = MathUtils.random(MathUtils.PI2);
-                pos.add(MyMath.vector(d, disk.radius + bandwidthOffset));
+                float angle = MathUtils.random(MathUtils.PI2);
+                pos.add(MyMath.vector(angle, disk.radius + bandwidthOffset));
                 //todo: apply gravity to keep them rotating around star
                 // problem: we want asteroids to spawn in rings and stay in rings generally, but allow player to shoot them out of belt.
                 // I can't let the bodies float around freely with a simple n body sim as they are not stable.
@@ -110,8 +112,11 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                 // plan of attack: i think i will start off with a lie, lock them in orbit when spawn.
                 // once disturbed or interacted with by an outside force, unlock the orbit and let gravity take over
                 // allow belt to "chain react" collapse / disperse and see what that plays like
-                Vector2 velocity = MyMath.vector((float) (d + Math.PI/2), 20);
-                spawnAsteroid(pos.x, pos.y, velocity.x, velocity.y);
+                Vector2 velocity = MyMath.vector((float) (angle + Math.PI/2), 20);
+                Entity newAsteroid = spawnAsteroid(pos.x, pos.y, velocity.x, velocity.y);
+                AsteroidComponent ast = Mappers.asteroid.get(newAsteroid);
+                ast.type = AsteroidComponent.Type.orbitLocked;
+                ast.orbit = Mappers.transform.get(parentEntity).pos.cpy();
                 //}
             } else {
                 lastSpawnedTimer.reset();
@@ -119,8 +124,7 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
         }
     }
     
-    private void spawnAsteroidField(float x, float y) {
-        float angle = 45 * MathUtils.degreesToRadians;// MathUtils.random(MathUtils.PI2);
+    private void spawnAsteroidField(float x, float y, float angle) {
         Vector2 vel = MyMath.vector(angle, 70 /*MathUtils.random(1, 50)*/);
         float range = 800.0f;
         int clusterSize = 20;//MathUtils.random(1, 20);
@@ -132,11 +136,12 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
         Gdx.app.log(this.getClass().getSimpleName(), "spawn field: " + clusterSize);
     }
     
-    private void spawnAsteroid(float x, float y, float velX, float velY) {
+    private Entity spawnAsteroid(float x, float y, float velX, float velY) {
         int size = MathUtils.random(14, 120);
         long seed = MyMath.getSeed(x, y);
         Entity asteroid = EntityFactory.createAsteroid(seed, x, y, velX, velY, size);
         getEngine().addEntity(asteroid);
+        return asteroid;
         //Gdx.app.debug(this.getClass().getSimpleName(), "spawned: " + x + ", " + y);
     }
     
