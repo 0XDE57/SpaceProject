@@ -191,9 +191,14 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                     vertices[p2], vertices[p2 + 1], // xy: 2, 3
                     vertices[p3], vertices[p3 + 1]  // xy: 4, 5
             };
-
+    
+            float triangleQuality = GeometryUtils.triangleQuality(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5]);
+            //if (triangleQuality < 2.0f) {
+                //todo: add new vertices to break in half
+                // because the current shatter creates long ugly slivers
+            //}
             Gdx.app.debug(this.getClass().getSimpleName(), "Clockwise: " + GeometryUtils.isClockwise(hull, 0, hull.length)
-                    + " | quality: " + GeometryUtils.triangleQuality(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5]));
+                    + " | quality: " + triangleQuality);
             Gdx.app.debug(this.getClass().getSimpleName(),
                     MyMath.round(hull[0],1) + ", " + MyMath.round(hull[1],1) + " | " +
                             MyMath.round(hull[2],1) + ", " + MyMath.round(hull[3],1) + " | " +

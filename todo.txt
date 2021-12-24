@@ -217,9 +217,9 @@ Legend:
         [ ] tune!
             -shatter difficulty: how many shots to break, how hard impact to break
             -density: weight and feel of how bodies impact eachother and player
-        [ ] should not display health bar on asteroids, but some visual feedback like cracks would be nice
+        [x] should not display health bar on asteroids, but some visual feedback like cracks would be nice
         [ ] polygon slicing! ability to cast ray through asteroid and have it split on intersection
-            would be useful for
+            would be useful for laser weapon
         [x] basic triangle shatter
             [ ] broken rotation when shattering some polygons rotate and jump instead of simply separating in place
         [ ] voronoi shatter, for destructible asteroids.
@@ -235,6 +235,7 @@ Legend:
             https://www.emanueleferonato.com/2012/01/17/create-real-explosions-with-box2d-adding-textures/
             https://www.emanueleferonato.com/2012/03/05/breaking-objects-with-box2d-the-realistic-way/
             https://thebookofshaders.com/12/
+    [x] damage vehicle on high impact
 
 [ ] JUICE!
     https://www.youtube.com/watch?v=Fy0aCDmgnxg
@@ -363,18 +364,16 @@ Legend:
 
 [...] shield
     [...] if collide with bullet, shrink/destroy shield
-    [ ] shield should protect from high impact collisions. otherwise do damage relative to how hard impact.
+    [x] shield should protect from high impact collisions. otherwise do damage relative to how hard impact.
         eg: ram ship into an asteroid at high velocity could destroy ship, use shield before impact to bounce off
-        if hit is hard enough, break shield
-    [ ] if collide with another body with significant difference in velocity
-        and if other has HealthComponent, do damage using velocity as damage factor
+        [ ] if hit is hard enough, break shield
+            add new broken state with cooldown
         [ ] shield dash bash? high impulse forward, then activate shield to ram other objects and do damage to them
     [x] fix radius is not consistent. rotation of body affects size of shield. don't trust calculateBoundingBox()?
     [x] shield growth overrides and cancels charge cannon
     [ ] grow/shrink body with shield. looks like cant resize bodies in box2d? destroy and recreate each frame seems inefficient likely
-
     [x] bug not render on planet
-    [ ] graphics: rotate shield polygon, possibly a shader to make edges glow
+    [ ] graphics: rotate shield polygon, possibly a shader to make edges glow: BLOOM!
     [x] should be unavailable during hyper drive
     [ ] should not activate during screen transition
     [ ] needs control for mobile
