@@ -17,6 +17,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.CircumstellarDiscComponent;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.math.MyMath;
@@ -75,18 +76,21 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
             Vector3 unproject = GameScreen.cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
             spawnAsteroid(unproject.x, unproject.y, 0, 0);
         }
-        
-        /*
-        //todo: orbit asteroids around parent body, currently just flings everything out into universe...
+    
+    
+        updateBeltOrbit();
+    }
+    
+    private void updateBeltOrbit() {
+        //orbit asteroids around parent body, don't fling everything out into universe...
         for (Entity entity : asteroids) {
             AsteroidComponent asteroid = Mappers.asteroid.get(entity);
             if (asteroid.type == AsteroidComponent.Type.orbitLocked) {
                 PhysicsComponent physics = Mappers.physics.get(entity);
-                float dist = asteroid.orbit.dst(physics.body.getPosition());
-                float angle = (float) (asteroid.orbit.angleRad(physics.body.getPosition()));// + (Math.PI / 2));
-                physics.body.setLinearVelocity(MyMath.vector(angle, 20));
+                float ang = (float) (MyMath.angleTo(asteroid.orbit, physics.body.getPosition()) - (Math.PI / 2));
+                physics.body.setLinearVelocity(MyMath.vector(ang, 20));
             }
-        }*/
+        }
     }
     
     private void spawnAsteroidBelt() {
