@@ -144,7 +144,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
         if (drawHud) {
             if (GameScreen.inSpace()) {
-                drawOrbitPath(GameScreen.isDebugMode);
+                drawOrbitPath();
             }
         
             drawHUD();
@@ -183,7 +183,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
     
-    private void drawOrbitPath(boolean showSyncedPos) {
+    private void drawOrbitPath() {
         float alpha = MathUtils.clamp((cam.zoom / uiCFG.lodShowOrbitPath / uiCFG.orbitFadeFactor), 0, 1);
         uiCFG.orbitObjectColor.a = alpha;
         uiCFG.orbitSyncPosColor.a = alpha;
@@ -201,18 +201,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             OrbitComponent orbit = Mappers.orbit.get(entity);
             if (orbit != null) {
                 TransformComponent entityPos = Mappers.transform.get(entity);
-                
                 if (orbit.parent != null) {
                     TransformComponent parentPos = Mappers.transform.get(orbit.parent);
-                    
-                    if (showSyncedPos) {
-                        //synced orbit position (where the object should be)
-                        Vector2 orbitPos = OrbitSystem.getTimeSyncedPos(orbit, GameScreen.getGameTimeCurrent());
-                        shape.setColor(uiCFG.orbitSyncPosColor);
-                        shape.line(parentPos.pos.x, parentPos.pos.y, orbitPos.x, orbitPos.y);
-                    }
-                    
-                    //actual position
                     shape.setColor(uiCFG.orbitObjectColor);
                     shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
                     shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
