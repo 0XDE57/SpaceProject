@@ -158,7 +158,7 @@ public class BodyFactory {
         circle.setRadius(size);
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = circle;
-        fixtureDef.density = 0.8f;
+        fixtureDef.density = 1f;
         fixtureDef.friction = 0.0f;
         fixtureDef.restitution = 0.6f;
         body.createFixture(fixtureDef);

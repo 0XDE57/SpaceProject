@@ -24,6 +24,7 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.CircumstellarDiscComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TextureComponent;
@@ -468,9 +469,20 @@ public class DebugSystem extends IteratingSystem implements Disposable {
                 if (tex != null) {
                     float radius = tex.texture.getWidth() * 0.5f * tex.scale;
                     Vector2 orientation = MyMath.vector(entityPos.rotation, radius).add(entityPos.pos);
+                    shape.setColor(orbitObjectColor);
                     shape.line(entityPos.pos.x, entityPos.pos.y, orientation.x, orientation.y);
                     shape.circle(entityPos.pos.x, entityPos.pos.y, radius);
                 }
+            }
+    
+            CircumstellarDiscComponent stellarDisk = Mappers.circumstellar.get(entity);
+            if (stellarDisk != null) {
+                Vector2 pos = Mappers.transform.get(entity).pos;
+                shape.setColor(Color.LIME);
+                shape.circle(pos.x, pos.y, stellarDisk.radius);
+                shape.setColor(Color.PURPLE);
+                shape.circle(pos.x, pos.y, stellarDisk.radius - (stellarDisk.width / 2));
+                shape.circle(pos.x, pos.y, stellarDisk.radius + (stellarDisk.width / 2));
             }
             
         }

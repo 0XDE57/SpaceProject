@@ -221,9 +221,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 TextureComponent tex = Mappers.texture.get(entity);
                 if (tex != null) {
                     float radius = tex.texture.getWidth() * 0.5f * tex.scale;
-                    Vector2 orientation = MyMath.vector(entityPos.rotation, radius).add(entityPos.pos);
                     shape.setColor(uiCFG.orbitObjectColor);
-                    shape.line(entityPos.pos.x, entityPos.pos.y, orientation.x, orientation.y);
                     shape.circle(entityPos.pos.x, entityPos.pos.y, radius);
                 }
             }

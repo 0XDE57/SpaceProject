@@ -219,7 +219,7 @@ public class ShipControlSystem extends IteratingSystem {
         }
         if (Gdx.input.isKeyJustPressed(Keys.Z)) {
             //physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(physicsComp.body.getLinearVelocity()));
-            physicsComp.body.applyLinearImpulse(MyMath.vector(physicsComp.body.getAngle(), 10), physicsComp.body.getPosition(), true);
+            physicsComp.body.applyLinearImpulse(MyMath.vector(physicsComp.body.getAngle(), 1000), physicsComp.body.getPosition(), true);
         }
     }
     

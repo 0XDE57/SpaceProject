@@ -21,6 +21,7 @@ public class AsteroidRenderSystem extends IteratingSystem {
         super(Family.all(AsteroidComponent.class, TransformComponent.class).get());
         shapeRenderer = new CustomShapeRenderer();
     }
+    
     @Override
     public void update(float deltaTime) {
         shapeRenderer.setProjectionMatrix(GameScreen.cam.combined);
@@ -42,8 +43,9 @@ public class AsteroidRenderSystem extends IteratingSystem {
         Polygon polygon = asteroid.polygon;
         polygon.setRotation(transform.rotation * MathUtils.radiansToDegrees);
         polygon.setPosition(transform.pos.x, transform.pos.y);
-        shapeRenderer.fillPolygon(polygon.getTransformedVertices(), 0, polygon.getVertices().length,
-                shapeRenderer.getCurrentType() == ShapeRenderer.ShapeType.Filled ? Color.WHITE : asteroid.color);
+        Color debugColor = shapeRenderer.getCurrentType() == ShapeRenderer.ShapeType.Filled ?
+                (asteroid.type == AsteroidComponent.Type.orbitLocked ? Color.WHITE : Color.RED) : asteroid.color;
+        shapeRenderer.fillPolygon(polygon.getTransformedVertices(), 0, polygon.getVertices().length, debugColor);
     }
     
 }

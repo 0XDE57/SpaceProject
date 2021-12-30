@@ -214,6 +214,7 @@ Legend:
         [ ] set a texture to take up the dimension of an arbitrary poly
         [ ] sub shatter texture to child polygons scissors?
     [...] break into smaller asteroids
+        [ ] BUG: sometimes shatter creates way more child bodies than it should, like 2 or 3 times the pieces
         [ ] tune!
             -shatter difficulty: how many shots to break, how hard impact to break
             -density: weight and feel of how bodies impact eachother and player
