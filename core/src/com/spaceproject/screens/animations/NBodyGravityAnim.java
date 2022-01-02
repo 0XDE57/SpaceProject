@@ -93,7 +93,7 @@ public class NBodyGravityAnim extends TitleAnimation {
         Vector2 x3 = new Vector2(0, 0); //center body
         
         Vector2 vx3 = new Vector2(0.93240737f, 0.86473146f);
-        vx3.scl(4);//todo: not accurate scaling: not stable
+        vx3.scl(4.1f);//todo: not accurate scaling: not stable
         Vector2 vx2 = new Vector2(-vx3.x / 2, -vx3.y / 2);
         Vector2 vx1 = new Vector2(vx2.x, vx2.y);
     
