@@ -202,8 +202,33 @@ Legend:
 
 [x] add basic asteroids (arbitrary poly)
     [x] spec spawner for asteroid.
+        - asteroid source A: belt / circumstellar disc
+          a ring of random destructible asteroids around a planet
+             belt radius: range from source body
+             belt width: how wide bodies spawn from concentration of bodies at belt
+             belt density: how many asteroids to populate belt with
+             direction: which way they orbit around body
+        - asteroid source B: "field" / cluster
+          random group out in the depths of space
+             pocket size: how many to spawn in group
+             direction: which way headed
+        - asteroid source c: rogue rock "odd ball"
+             just a single rock of random size maybe larger than usual, going in a random direction
+        - if any asteroid is too far from player, unload
     [...] belt - ring around barycenter component
-        [ ] orbit with flocking / group mechanic
+        todo: apply gravity to keep them rotating around star
+        problem: we want asteroids to spawn in rings and stay in rings generally, but allow player to shoot them out of belt.
+        I can't let the bodies float around freely with a simple n body sim as they are not stable.
+        the system will just tear itself apart. even if a "stable" orbit is found it will become unstable as the player starts interacting with it
+        currently this is why planets are locked in an elliptical orbit to sort of fake gravity.
+        do I lock the asteroids in orbit similar to the planets? maybe interpolate to where they "should" be, pulling them back into the ring
+        maybe once hit or disturbed, loses orbit component and floats freely?
+        basically it comes down to how "arcadey" vs "simulator" does it need to be fun?
+        currently there is no friction and we have conservation of momentum
+        plan of attack: i think i will start off with a lie, lock them in orbit when spawn.
+        once disturbed or interacted with by an outside force, unlock the orbit and let gravity take over
+        allow belt to "chain react" collapse / disperse and see what that plays like
+        [ ] orbit with flocking / group mechanic?
             currently broken: flings out into space
     [x] field - randomly spawn while in space
     [x] begin make asteroid
@@ -215,10 +240,12 @@ Legend:
         [ ] sub shatter texture to child polygons scissors?
     [...] break into smaller asteroids
         [ ] BUG: sometimes shatter creates way more child bodies than it should, like 2 or 3 times the pieces
+        [ ] BUG: sometimes bodies disappear instead of shatter
         [ ] tune!
             -shatter difficulty: how many shots to break, how hard impact to break
             -density: weight and feel of how bodies impact eachother and player
-        [x] should not display health bar on asteroids, but some visual feedback like cracks would be nice
+        [x] should not display health bar on asteroids
+        [ ] some visual feedback for damage like cracks would be nice: could use voronoi edges as cracks
         [ ] polygon slicing! ability to cast ray through asteroid and have it split on intersection
             would be useful for laser weapon
         [x] basic triangle shatter
@@ -242,7 +269,6 @@ Legend:
     https://www.youtube.com/watch?v=Fy0aCDmgnxg
     https://www.youtube.com/watch?v=tu-Qe66AvtY
     [x] lag camera behind movement a little for visual effect, especially when dodging for more visual impact
-
     [x] change cursor to a crosshair sprite
     [...] camera allow cursor to "extend view": pushing cursor to edge of screen pulls camera position at a point between player and mouse
     [...] camera: combat camera
@@ -298,7 +324,7 @@ Legend:
             [ ] apply shadow on side of planets not facing star
                 [ ] could even do eclipse if another planet / moon in between star
             [ ] apply light source on 3D models would make 3D barrel roll rotation more clear with shadowing
-        it's currently static just like planets, but I want it to shift the z, exactly like the title screen background
+        [x] it's currently static just like planets, but I want it to shift the z, exactly like the title screen background
             com.spaceproject.screens.animations.NoiseAnim
         could be done on gpu even:
             https://www.shadertoy.com/view/XscGzl
@@ -826,7 +852,10 @@ Legend:
         [ ] dev blog thingy?
     [ ] wiki n documentation
     [ ] should prolly make some unit tests at some point...
-
+    [ ] legal crap?
+        https://www.youtube.com/watch?v=8eAW-7Js7NA
+        https://www.youtube.com/watch?v=t8UFJ3obm-Q
+        https://www.youtube.com/watch?v=ePQcAjuiSEo
 
 [...] config
     [x] config manager, save and load all configs

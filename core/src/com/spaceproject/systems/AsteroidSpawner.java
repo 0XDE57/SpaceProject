@@ -26,28 +26,15 @@ import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
 public class AsteroidSpawner extends EntitySystem implements EntityListener {
-    //todo:
-    // - asteroid source A: belt / circumstellar disc
-    //   a ring of random destructible asteroids around a planet
-    //      belt radius: range from source body
-    //      belt width: how wide bodies spawn from concentration of bodies at belt
-    //      belt density: how many asteroids to populate belt with
-    //      direction: which way they orbit around body
-    // - asteroid source B: "field" / cluster
-    //   random group out in the depths of space
-    //      pocket size: how many to spawn in group
-    //      direction: which way headed
-    // - asteroid source c: rogue rock "odd ball"
-    //      just a single rock of random size maybe larger than usual, going in a random direction
-    // - if any asteroid is too far from player, unload
-    
+
     private ImmutableArray<Entity> asteroids;
     private ImmutableArray<Entity> spawnBelt;
-    SimpleTimer lastSpawnedTimer = new SimpleTimer(1000);
-    int maxSpawn = 180;
     
-    ShortArray triangles;
-    DelaunayTriangulator delaunay = new DelaunayTriangulator();
+    private SimpleTimer lastSpawnedTimer = new SimpleTimer(1000);
+    private int maxSpawn = 180;
+    
+    private ShortArray triangles;
+    private DelaunayTriangulator delaunay = new DelaunayTriangulator();
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -66,7 +53,7 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                 //lastSpawnedTimer.reset();
                 
                 //float angle = 90 * MathUtils.degreesToRadians;// MathUtils.random(MathUtils.PI2);
-                //spawnAsteroidField(3000, 1000, angle-angle);
+                //spawnAsteroidField(3000, 1000, angle - angle);
                 //spawnAsteroidField(9000, 1000, angle + angle);
             }
         }
@@ -77,19 +64,42 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
             spawnAsteroid(unproject.x, unproject.y, 0, 0);
         }
     
-    
         updateBeltOrbit();
     }
     
     private void updateBeltOrbit() {
-        //orbit asteroids around parent body, don't fling everything out into universe...
+        //keep asteroids orbit around parent body, don't fling everything out into universe...
         for (Entity entity : asteroids) {
             AsteroidComponent asteroid = Mappers.asteroid.get(entity);
-            if (asteroid.type == AsteroidComponent.Type.orbitLocked) {
-                PhysicsComponent physics = Mappers.physics.get(entity);
-                float ang = (float) (MyMath.angleTo(asteroid.orbit, physics.body.getPosition()) - (Math.PI / 2));
-                physics.body.setLinearVelocity(MyMath.vector(ang, 20));
+            PhysicsComponent physics = Mappers.physics.get(entity);
+            if (asteroid.parentOrbitBody != null) {
+                TransformComponent parentTransform = Mappers.transform.get(asteroid.parentOrbitBody);
+                CircumstellarDiscComponent stellarDisk = Mappers.circumstellar.get(asteroid.parentOrbitBody);
+                
+                float angle = (float) (MyMath.angleTo(parentTransform.pos,
+                        physics.body.getPosition()) + (stellarDisk.clockwise ? -(Math.PI / 2) : Math.PI / 2));
+                physics.body.setLinearVelocity(MyMath.vector(angle, stellarDisk.velocity));
+            } else {
+                // re-entry?
+                for (Entity parentEntity : spawnBelt) {
+                    CircumstellarDiscComponent stellarDisk = Mappers.circumstellar.get(parentEntity);
+                    TransformComponent parentTransform = Mappers.transform.get(parentEntity);
+                    float dist = parentTransform.pos.dst(physics.body.getPosition());
+                    if (dist > stellarDisk.radius - (stellarDisk.width/2) && dist < stellarDisk.radius + (stellarDisk.width/2)) {
+                        float targetAngle = (float) (MyMath.angleTo(parentTransform.pos,
+                                physics.body.getPosition()) + (stellarDisk.clockwise ? -(Math.PI / 2) : Math.PI / 2));
+                        double angleDeltaThreshold = Math.PI / 6;
+                        boolean meetsAngleThreshold = Math.abs(physics.body.getLinearVelocity().angleRad() - targetAngle) < angleDeltaThreshold;
+                        float velDeltaThreshold = 5f;
+                        boolean meetsVelThreshold = Math.abs(physics.body.getLinearVelocity().len() - stellarDisk.velocity) < velDeltaThreshold;
+                        if (meetsAngleThreshold /*&& meetsVelThreshold*/) {
+                            asteroid.parentOrbitBody = parentEntity;
+                            break; // no point looking at other disks once met
+                        }
+                    }
+                }
             }
+
         }
     }
     
@@ -97,33 +107,17 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
         for (Entity parentEntity : spawnBelt) {
             CircumstellarDiscComponent disk = Mappers.circumstellar.get(parentEntity);
             if (asteroids.size() <= maxSpawn) {
-                //if (lastSpawnedTimer.tryEvent()) {
+                
                 Vector2 pos = Mappers.transform.get(parentEntity).pos.cpy();
                 float bandwidthOffset = MathUtils.random(-disk.width/2, disk.width/2);//todo, should bias towards middle and taper off edges
                 //alternatively could be a 1D noise from inner to outer with different concentrations?
                 float angle = MathUtils.random(MathUtils.PI2);
                 pos.add(MyMath.vector(angle, disk.radius + bandwidthOffset));
-                //todo: apply gravity to keep them rotating around star
-                // problem: we want asteroids to spawn in rings and stay in rings generally, but allow player to shoot them out of belt.
-                // I can't let the bodies float around freely with a simple n body sim as they are not stable.
-                // the system will just tear itself apart. even if a "stable" orbit is found it will become unstable as the player starts interacting with it
-                // currently this is why planets are locked in an elliptical orbit to sort of fake gravity.
-                // do I lock the asteroids in orbit similar to the planets? maybe interpolate to where they "should" be, pulling them back into the ring
-                // maybe once hit or disturbed, loses orbit component and floats freely?
-                // basically it comes down to how "arcadey" vs "simulator" does it need to be fun?
-                // currently there is no friction and we have conservation of momentum
                 
-                // plan of attack: i think i will start off with a lie, lock them in orbit when spawn.
-                // once disturbed or interacted with by an outside force, unlock the orbit and let gravity take over
-                // allow belt to "chain react" collapse / disperse and see what that plays like
-                Vector2 velocity = MyMath.vector((float) (angle + Math.PI/2), 20);
-                Entity newAsteroid = spawnAsteroid(pos.x, pos.y, velocity.x, velocity.y);
+                
+                Entity newAsteroid = spawnAsteroid(pos.x, pos.y, 0, 0);
                 AsteroidComponent ast = Mappers.asteroid.get(newAsteroid);
-                ast.type = AsteroidComponent.Type.orbitLocked;
-                ast.orbit = Mappers.transform.get(parentEntity).pos.cpy();
-                //}
-            } else {
-                lastSpawnedTimer.reset();
+                ast.parentOrbitBody = parentEntity;
             }
         }
     }

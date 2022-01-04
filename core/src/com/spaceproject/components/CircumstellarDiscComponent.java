@@ -10,4 +10,8 @@ public class CircumstellarDiscComponent implements Component {
     //width of band centered on radius
     public float width;
     
+    public boolean clockwise;
+    
+    public float velocity;
+    
 }

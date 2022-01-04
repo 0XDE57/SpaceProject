@@ -44,7 +44,7 @@ public class AsteroidRenderSystem extends IteratingSystem {
         polygon.setRotation(transform.rotation * MathUtils.radiansToDegrees);
         polygon.setPosition(transform.pos.x, transform.pos.y);
         Color debugColor = shapeRenderer.getCurrentType() == ShapeRenderer.ShapeType.Filled ?
-                (asteroid.type == AsteroidComponent.Type.orbitLocked ? Color.WHITE : Color.RED) : asteroid.color;
+                (asteroid.parentOrbitBody != null ? Color.WHITE : Color.RED) : asteroid.debugColor;
         shapeRenderer.fillPolygon(polygon.getTransformedVertices(), 0, polygon.getVertices().length, debugColor);
     }
     

@@ -23,7 +23,8 @@ import com.spaceproject.components.VehicleComponent;
 public class PhysicsContactListener implements ContactListener {
     
     private final Engine engine;
-    private final int asteroidShatterThreshold = 15000; //impulse threshold to apply damage caused by impact
+    private final int asteroidDamageThreshold = 15000; //impulse threshold to apply damage caused by impact
+    private final float asteroidBreakOrbitThreshold = 250;
     private final int vehicleDamageThreshold = 15; //impulse threshold to apply damage to vehicles
     private final float impactMultiplier = 0.1f; //how much damage relative to impulse
     private float peakImpulse = 0; //highest recorded impact, stat just to gauge
@@ -61,18 +62,17 @@ public class PhysicsContactListener implements ContactListener {
         if (dataA != null && dataB != null) {
             Entity entityA = (Entity) dataA;
             Entity entityB = (Entity) dataB;
-    
-            if (maxImpulse > asteroidShatterThreshold) {
-                //Gdx.app.debug(this.getClass().getSimpleName(), "asteroid impact: " + maxImpulse);
-                AsteroidComponent asteroidA = Mappers.asteroid.get(entityA);
-                if (asteroidA != null) {
-                    asteroidImpact(entityA, asteroidA, maxImpulse);
-                }
-                AsteroidComponent asteroidB = Mappers.asteroid.get(entityB);
-                if (asteroidB != null) {
-                    asteroidImpact(entityB, asteroidB, maxImpulse);
-                }
-            } else if (maxImpulse > vehicleDamageThreshold) {
+            
+            AsteroidComponent asteroidA = Mappers.asteroid.get(entityA);
+            if (asteroidA != null) {
+                asteroidImpact(entityA, asteroidA, maxImpulse);
+            }
+            AsteroidComponent asteroidB = Mappers.asteroid.get(entityB);
+            if (asteroidB != null) {
+                asteroidImpact(entityB, asteroidB, maxImpulse);
+            }
+
+            if (maxImpulse > vehicleDamageThreshold) {
                 VehicleComponent vehicleA = Mappers.vehicle.get(entityA);
                 if (vehicleA != null) {
                     doVehicleDamage(entityA, maxImpulse);
@@ -92,15 +92,23 @@ public class PhysicsContactListener implements ContactListener {
         //   damage 200 = -100 hp, breaks into 2 minus 50 = 0hp = don't spawn children -> instant destruction
         //  could play with different rules and ratios, find what feels good
         
-        //calc damage relative to size of bodies and how hard impact impulse was
-        float relativeDamage = (impulse * impactMultiplier) * asteroid.area;
+        if (impulse > asteroidBreakOrbitThreshold) {
+            //asteroid.type = AsteroidComponent.Type.free;
+            asteroid.parentOrbitBody = null;
+            Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID knocked out of orbit: " + impulse);
+        }
         
-        HealthComponent health = Mappers.health.get(entity);
-        health.health -= relativeDamage;
-        if (health.health <= 0) {
-            asteroid.doShatter = true;
-            entity.add(new RemoveComponent());
-            Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID shatter: " + impulse + " -> damage: " + relativeDamage);
+        if (impulse > asteroidDamageThreshold) {
+            //calc damage relative to size of bodies and how hard impact impulse was
+            float relativeDamage = (impulse * impactMultiplier) * asteroid.area;
+    
+            HealthComponent health = Mappers.health.get(entity);
+            health.health -= relativeDamage;
+            if (health.health <= 0) {
+                asteroid.doShatter = true;
+                entity.add(new RemoveComponent());
+                Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID shatter: " + impulse + " -> damage: " + relativeDamage);
+            }
         }
     }
     
@@ -117,7 +125,8 @@ public class PhysicsContactListener implements ContactListener {
         Gdx.app.debug(this.getClass().getSimpleName(), "high impact damage: " + impulse);
         
         //calc damage relative to how hard impact impulse was
-        float relativeDamage = (impulse * 0.4f);
+        float damageMultiplier = 0.4f;
+        float relativeDamage = (impulse * damageMultiplier);
         
         HealthComponent health = Mappers.health.get(entity);
         health.health -= relativeDamage;
@@ -126,7 +135,6 @@ public class PhysicsContactListener implements ContactListener {
             Gdx.app.debug(this.getClass().getSimpleName(), "vehicle destroyed: " + impulse + " -> damage: " + relativeDamage);
         }
     }
-    
     
     private void onCollision(Entity a, Entity b) {
         //todo: collision filtering: http://www.iforce2d.net/b2dtut/collision-filtering
@@ -140,16 +148,6 @@ public class PhysicsContactListener implements ContactListener {
         }
         if (damageB != null && healthA != null) {
             onAttacked(b, a, damageB, healthA);
-        }
-    
-        //if asteroid was locked in orbit, unlock it so regular physics can take over
-        AsteroidComponent asteroidA = Mappers.asteroid.get(a);
-        if (asteroidA != null) {
-            asteroidA.type = AsteroidComponent.Type.free;
-        }
-        AsteroidComponent asteroidB = Mappers.asteroid.get(a);
-        if (asteroidB != null) {
-            asteroidB.type = AsteroidComponent.Type.free;
         }
     }
     

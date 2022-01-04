@@ -1,21 +1,16 @@
 package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 
 public class AsteroidComponent implements Component {
     
-    //public enum Composition { rock, ice }
+    //public enum Composition { rock, ice } todo: different asteroid types?
     
-    public enum Type {
-        free, orbitLocked
-    }
-    
-    public Type type;
-    
-    public Vector2 orbit;
+    public Entity parentOrbitBody;
     
     public Polygon polygon;
     
@@ -23,8 +18,8 @@ public class AsteroidComponent implements Component {
     
     public float area;
     
-    public Color color; //temporary rendering color
-    
     public boolean doShatter = false;
+    
+    public Color debugColor; //temporary rendering color
     
 }

@@ -169,7 +169,6 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     }
     
     private void loadCloseEntities(float loadDistance) {
-        //todo...
         for (AstroBody astroBodies : GameScreen.galaxy.objects) {
             //check if point is close enough to be loaded
             if (Vector2.dst2(astroBodies.x, astroBodies.y, GameScreen.cam.position.x, GameScreen.cam.position.y) < loadDistance) {
@@ -204,7 +203,6 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         }
     }
     
-    
     public Array<Entity> createAstronomicalObjects(float x, float y) {
         long seed = MyMath.getSeed(x, y);
         MathUtils.random.setSeed(seed);
@@ -236,21 +234,23 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         float distance = celestCFG.minPlanetDist / 3; //add some initial distance between star and first planet
         
         //rotation of system (orbits and spins)
-        boolean rotDir = MathUtils.randomBoolean();
+        boolean isRotateClockwise = MathUtils.randomBoolean();
         
         //collection of planets/stars
         Array<Entity> entities = new Array<Entity>();
         
         //add star to center of planetary system
-        Entity star = EntityFactory.createStar(seed, x, y, rotDir);
+        Entity star = EntityFactory.createStar(seed, x, y, isRotateClockwise);
         BarycenterComponent barycenter = new BarycenterComponent();
         barycenter.bodyType = numPlanets == 0 ? BarycenterComponent.AstronomicalBodyType.loneStar : BarycenterComponent.AstronomicalBodyType.uniStellar;
         star.add(barycenter);
     
-        
+        //todo, allow multiple disks at different radius: make sure layer is distinct (not overlap planet orbits)
         CircumstellarDiscComponent circumstellarDisc = new CircumstellarDiscComponent();
         circumstellarDisc.radius = 1500;
-        circumstellarDisc.width = 200; //how wide of band centered on radius, concentrated at radius
+        circumstellarDisc.width = 220; //how wide of band centered on radius, concentrated at radius
+        circumstellarDisc.velocity = 20;
+        circumstellarDisc.clockwise = isRotateClockwise;
         star.add(circumstellarDisc);
         entities.add(star);
         
@@ -262,7 +262,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
             
             //create planet
             long planetSeed = MyMath.getSeed(x, y + distance);
-            Entity planet = EntityFactory.createPlanet(planetSeed, star, distance, rotDir);
+            Entity planet = EntityFactory.createPlanet(planetSeed, star, distance, isRotateClockwise);
             
             //add moon
             boolean hasMoon = MathUtils.randomBoolean();
@@ -270,7 +270,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
                 float moonDist = planet.getComponent(TextureComponent.class).texture.getWidth() * planet.getComponent(TextureComponent.class).scale * 2;
                 moonDist *= 0.7f;
                 distance += moonDist;
-                Entity moon = EntityFactory.createMoon(MyMath.getSeed(x, y + distance), planet, moonDist, rotDir);
+                Entity moon = EntityFactory.createMoon(MyMath.getSeed(x, y + distance), planet, moonDist, isRotateClockwise);
                 entities.add(moon);
                 
                 /*// nested test
