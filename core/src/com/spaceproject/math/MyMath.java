@@ -40,7 +40,7 @@ public abstract class MyMath {
         long newSeed = new Random().nextLong();
         
         if (GameScreen.isDebugMode) {
-            newSeed = 4; //test seed
+            newSeed = 1; //test seed
         }
         Gdx.app.log("MyMath", "galaxy seed: " + newSeed);
         
