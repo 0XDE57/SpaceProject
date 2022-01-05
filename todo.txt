@@ -11,7 +11,7 @@ diagrams is that the polygons it creates are always convex by nature. When an as
 create a set of random points (perhaps concentrated where the bullet hits) within the asteroids polygon.
 From those points make a voronoi diagram within the original polygon, then break up the asteroid into the resulting pieces.
 Those pieces can also be hit and broken down further with the same process. Until a certain threshold of
-smallness where we actually destroy the object because there's no point in breaking it own further.
+smallness where we actually destroy the object because there's no point in breaking it down further.
 Upon destruction, chance to drop items/resources for the player to pick up.
 Maybe the asteroid contains resources or items which can be used by the player.
 
@@ -72,7 +72,6 @@ Data Directory (...\SpaceProject\android\assets)
         .frag  : fragment shader
         .glsl  : .vert.glsl, .tesc.glsl, ..., .comp.glsl compound suffixes
         .hlsl  : .vert.hlsl, .tesc.hlsl, ..., .comp.hlsl compound suffixes
-
     \sounds: (todo)
         each sound effect gets it's own folder.
             if no sound in folder, dont play
