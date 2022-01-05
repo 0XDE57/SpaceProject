@@ -30,11 +30,11 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     private ImmutableArray<Entity> asteroids;
     private ImmutableArray<Entity> spawnBelt;
     
-    private SimpleTimer lastSpawnedTimer = new SimpleTimer(1000);
-    private int maxSpawn = 180;
+    private final SimpleTimer lastSpawnedTimer = new SimpleTimer(1000);
+    private final int maxSpawn = 180;
+    private final float minAsteroidSize = 100; //anything smaller than this will not create more
     
-    private ShortArray triangles;
-    private DelaunayTriangulator delaunay = new DelaunayTriangulator();
+    private final DelaunayTriangulator delaunay = new DelaunayTriangulator();
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -47,100 +47,14 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     public void update(float deltaTime) {
         spawnAsteroidBelt();
         
-        if (asteroids.size() < maxSpawn) {
-            if (lastSpawnedTimer.canDoEvent()) {
-                //spawnAsteroidField(-1000, -1000);
-                //lastSpawnedTimer.reset();
-                
-                //float angle = 90 * MathUtils.degreesToRadians;// MathUtils.random(MathUtils.PI2);
-                //spawnAsteroidField(3000, 1000, angle - angle);
-                //spawnAsteroidField(9000, 1000, angle + angle);
-            }
-        }
-        
+        updateBeltOrbit();
+    
         //debug add asteroid at mouse position
         if (GameScreen.isDebugMode && Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             Vector3 unproject = GameScreen.cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
             spawnAsteroid(unproject.x, unproject.y, 0, 0);
+            //spawnAsteroidField(unproject.x, unproject.y, 0, 80, 20, 400);
         }
-    
-        updateBeltOrbit();
-    }
-    
-    private void updateBeltOrbit() {
-        //keep asteroids orbit around parent body, don't fling everything out into universe...
-        for (Entity entity : asteroids) {
-            AsteroidComponent asteroid = Mappers.asteroid.get(entity);
-            PhysicsComponent physics = Mappers.physics.get(entity);
-            if (asteroid.parentOrbitBody != null) {
-                TransformComponent parentTransform = Mappers.transform.get(asteroid.parentOrbitBody);
-                CircumstellarDiscComponent stellarDisk = Mappers.circumstellar.get(asteroid.parentOrbitBody);
-                
-                float angle = (float) (MyMath.angleTo(parentTransform.pos,
-                        physics.body.getPosition()) + (stellarDisk.clockwise ? -(Math.PI / 2) : Math.PI / 2));
-                physics.body.setLinearVelocity(MyMath.vector(angle, stellarDisk.velocity));
-            } else {
-                // re-entry?
-                for (Entity parentEntity : spawnBelt) {
-                    CircumstellarDiscComponent stellarDisk = Mappers.circumstellar.get(parentEntity);
-                    TransformComponent parentTransform = Mappers.transform.get(parentEntity);
-                    float dist = parentTransform.pos.dst(physics.body.getPosition());
-                    if (dist > stellarDisk.radius - (stellarDisk.width/2) && dist < stellarDisk.radius + (stellarDisk.width/2)) {
-                        float targetAngle = (float) (MyMath.angleTo(parentTransform.pos,
-                                physics.body.getPosition()) + (stellarDisk.clockwise ? -(Math.PI / 2) : Math.PI / 2));
-                        double angleDeltaThreshold = Math.PI / 6;
-                        boolean meetsAngleThreshold = Math.abs(physics.body.getLinearVelocity().angleRad() - targetAngle) < angleDeltaThreshold;
-                        float velDeltaThreshold = 5f;
-                        boolean meetsVelThreshold = Math.abs(physics.body.getLinearVelocity().len() - stellarDisk.velocity) < velDeltaThreshold;
-                        if (meetsAngleThreshold /*&& meetsVelThreshold*/) {
-                            asteroid.parentOrbitBody = parentEntity;
-                            break; // no point looking at other disks once met
-                        }
-                    }
-                }
-            }
-
-        }
-    }
-    
-    private void spawnAsteroidBelt() {
-        for (Entity parentEntity : spawnBelt) {
-            CircumstellarDiscComponent disk = Mappers.circumstellar.get(parentEntity);
-            if (asteroids.size() <= maxSpawn) {
-                
-                Vector2 pos = Mappers.transform.get(parentEntity).pos.cpy();
-                float bandwidthOffset = MathUtils.random(-disk.width/2, disk.width/2);//todo, should bias towards middle and taper off edges
-                //alternatively could be a 1D noise from inner to outer with different concentrations?
-                float angle = MathUtils.random(MathUtils.PI2);
-                pos.add(MyMath.vector(angle, disk.radius + bandwidthOffset));
-                
-                
-                Entity newAsteroid = spawnAsteroid(pos.x, pos.y, 0, 0);
-                AsteroidComponent ast = Mappers.asteroid.get(newAsteroid);
-                ast.parentOrbitBody = parentEntity;
-            }
-        }
-    }
-    
-    private void spawnAsteroidField(float x, float y, float angle) {
-        Vector2 vel = MyMath.vector(angle, 70 /*MathUtils.random(1, 50)*/);
-        float range = 800.0f;
-        int clusterSize = 20;//MathUtils.random(1, 20);
-        for (int i = 0; i < clusterSize; i++) {
-            float newX = MathUtils.random(x - range, x + range);
-            float newY = MathUtils.random(y - range, y + range);
-            spawnAsteroid(newX, newY, vel.x, vel.y);
-        }
-        Gdx.app.log(this.getClass().getSimpleName(), "spawn field: " + clusterSize);
-    }
-    
-    private Entity spawnAsteroid(float x, float y, float velX, float velY) {
-        int size = MathUtils.random(14, 120);
-        long seed = MyMath.getSeed(x, y);
-        Entity asteroid = EntityFactory.createAsteroid(seed, x, y, velX, velY, size);
-        getEngine().addEntity(asteroid);
-        return asteroid;
-        //Gdx.app.debug(this.getClass().getSimpleName(), "spawned: " + x + ", " + y);
     }
     
     @Override
@@ -154,12 +68,95 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
         }
     }
     
+    private void updateBeltOrbit() {
+        //keep asteroids orbit around parent body, don't fling everything out into universe...
+        for (Entity entity : asteroids) {
+            AsteroidComponent asteroid = Mappers.asteroid.get(entity);
+            PhysicsComponent physics = Mappers.physics.get(entity);
+            if (asteroid.parentOrbitBody != null) {
+                TransformComponent parentTransform = Mappers.transform.get(asteroid.parentOrbitBody);
+                CircumstellarDiscComponent stellarDisk = Mappers.circumstellar.get(asteroid.parentOrbitBody);
+                
+                float angle = (float) (MyMath.angleTo(parentTransform.pos, physics.body.getPosition()) + (stellarDisk.clockwise ? -(Math.PI / 2) : Math.PI / 2));
+                physics.body.setLinearVelocity(MyMath.vector(angle, stellarDisk.velocity));
+            } else {
+                // re-entry?
+                for (Entity parentEntity : spawnBelt) {
+                    CircumstellarDiscComponent stellarDisk = Mappers.circumstellar.get(parentEntity);
+                    TransformComponent parentTransform = Mappers.transform.get(parentEntity);
+                    float dist = parentTransform.pos.dst(physics.body.getPosition());
+                    if (dist > stellarDisk.radius - (stellarDisk.width/2) && dist < stellarDisk.radius + (stellarDisk.width/2)) {
+                        float targetAngle = (float) (MyMath.angleTo(parentTransform.pos, physics.body.getPosition()) + (stellarDisk.clockwise ? -(Math.PI / 2) : Math.PI / 2));
+                        double angleDeltaThreshold = Math.PI / 6;
+                        boolean meetsAngleThreshold = Math.abs(physics.body.getLinearVelocity().angleRad() - targetAngle) < angleDeltaThreshold;
+                        float velDeltaThreshold = 5f;
+                        boolean meetsVelThreshold = Math.abs(physics.body.getLinearVelocity().len() - stellarDisk.velocity) < velDeltaThreshold;
+                        
+                        //if (asteroid.mergeTimer != null) {
+                            //todo: slowly pull into stream of asteroid, match velocity and angle
+                        //}
+                        
+                        if (meetsAngleThreshold /*&& meetsVelThreshold*/) {
+                            /*todo: if should merge, begin merge
+                            if (asteroid.mergeTimer == null) {
+                                asteroid.mergeTimer = new SimpleTimer(1000);
+                            } else {
+                                //merge once met
+                                if (asteroid.mergeTimer.canDoEvent()): merge
+                            }*/
+                            
+                            asteroid.parentOrbitBody = parentEntity;
+                            Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID re-entry into orbit");
+                            break; // no point looking at other disks once met
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+  
+    //region spawning
+    private Entity spawnAsteroid(float x, float y, float velX, float velY) {
+        int size = MathUtils.random(14, 120);
+        long seed = MyMath.getSeed(x, y);
+        Entity asteroid = EntityFactory.createAsteroid(seed, x, y, velX, velY, size);
+        getEngine().addEntity(asteroid);
+        return asteroid;
+    }
+    
+    private void spawnAsteroidBelt() {
+        for (Entity parentEntity : spawnBelt) {
+            CircumstellarDiscComponent disk = Mappers.circumstellar.get(parentEntity);
+            if (asteroids.size() <= maxSpawn) {
+                float bandwidthOffset = MathUtils.random(-disk.width/2, disk.width/2);//todo, should bias towards middle and taper off edges
+                //alternatively could be a 1D noise from inner to outer with different concentrations?
+                float angle = MathUtils.random(MathUtils.PI2);
+                Vector2 pos = Mappers.transform.get(parentEntity).pos.cpy();
+                pos.add(MyMath.vector(angle, disk.radius + bandwidthOffset));
+                
+                Entity newAsteroid = spawnAsteroid(pos.x, pos.y, 0, 0);
+                AsteroidComponent ast = Mappers.asteroid.get(newAsteroid);
+                ast.parentOrbitBody = parentEntity;
+            }
+        }
+    }
+    
+    private void spawnAsteroidField(float x, float y, float angle, float velocity, int clusterSize, float range) {
+        Vector2 vel = MyMath.vector(angle, velocity);
+        for (int i = 0; i < clusterSize; i++) {
+            float newX = MathUtils.random(x - range, x + range);
+            float newY = MathUtils.random(y - range, y + range);
+            spawnAsteroid(newX, newY, vel.x, vel.y);
+        }
+        Gdx.app.log(this.getClass().getSimpleName(), "spawn field: " + clusterSize);
+    }
+
     public void spawnChildren(Entity parentAsteroid, AsteroidComponent asteroid) {
-        float minAsteroidSize = 100; //anything smaller than this will not create more
         if (asteroid.area >= minAsteroidSize) {
-            
             float[] vertices = asteroid.polygon.getVertices();
             
+            //debug center of mass / origin
             Vector2 center = new Vector2();
             GeometryUtils.polygonCentroid(vertices, 0, vertices.length, center);
             if (!asteroid.centerOfMass.epsilonEquals(center)) {
@@ -173,16 +170,19 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
             //add new point in center of triangle
             newPoly[length] = center.x;
             newPoly[length + 1] = center.y;
-
-            triangles = delaunay.computeTriangles(newPoly, false);
+            
             subShatter(parentAsteroid, newPoly);
         }
     }
+    //endregion
     
     private void subShatter(Entity parentAsteroid, float[] vertices) {
         /* NOTE: Box2D expects Polygons vertices are stored with a counter clockwise winding (CCW).
         We must be careful because the notion of CCW is with respect to a right-handed
         coordinate system with the z-axis pointing out of the plane. */
+        
+        ShortArray triangles = delaunay.computeTriangles(vertices, false);
+        Gdx.app.debug(this.getClass().getSimpleName(), "shatter into " + triangles.size);
         
         //create cells for each triangle
         for (int index = 0; index < triangles.size; index += 3) {
@@ -200,12 +200,12 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                 //todo: add new vertices to break in half
                 // because the current shatter creates long ugly slivers
             //}
-            Gdx.app.debug(this.getClass().getSimpleName(), "Clockwise: " + GeometryUtils.isClockwise(hull, 0, hull.length)
-                    + " | quality: " + triangleQuality);
+
             Gdx.app.debug(this.getClass().getSimpleName(),
                     MyMath.round(hull[0],1) + ", " + MyMath.round(hull[1],1) + " | " +
                             MyMath.round(hull[2],1) + ", " + MyMath.round(hull[3],1) + " | " +
-                            MyMath.round(hull[4],1) + ", " + MyMath.round(hull[5],1));
+                            MyMath.round(hull[4],1) + ", " + MyMath.round(hull[5],1) +
+                            " | clockwise: " + GeometryUtils.isClockwise(hull, 0, hull.length) + " | quality: " + triangleQuality);
             
             //discard duplicate points
             if ((hull[0] == hull[2] && hull[1] == hull[3]) || // p1 == p2 or
@@ -233,6 +233,10 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
             //3. push by center offset so vertices are correct position relative to parent
             Vector2 newPos = parentPos.copy().add(center);
             */
+            //todo: add slight velocity from center of parent poly outward to each sub poly, so shatter gently drift apart
+            //Vector2 center = new Vector2();
+            //GeometryUtils.triangleCentroid(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5], center);
+            //Vector2 driftVel = MyMath.vector(center.angleRad(parentAsteroid.getComponent(TransformComponent.class).pos), 1);
             
             Body body = Mappers.physics.get(parentAsteroid).body;
             Vector2 vel = body.getLinearVelocity();
