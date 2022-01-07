@@ -39,7 +39,6 @@ public class NoiseAnim extends TitleAnimation {
         this(0, 0.2f, 16.6f, 0.110f, false);
     }
     
-    
     @Override
     public void render(float delta, ShapeRenderer shape) {
         performance.start();
@@ -63,29 +62,23 @@ public class NoiseAnim extends TitleAnimation {
         }
         shape.end();
         
+        performance.stop();
         
         if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
             scale += 0.001f;
             Gdx.app.log(getClass().getSimpleName(), scale + "");
         }
+        
         if (Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
             scale -= 0.001f;
             Gdx.app.log(getClass().getSimpleName(), scale + "");
         }
         
-        
-        performance.stop();
-        
         if (Gdx.graphics.getFramesPerSecond() < 30) {
             if (lagDetector.canDoEvent()) {
                 size += 0.01f;
-                //lagDetector.setInterval(5, true);
                 Gdx.app.log(getClass().getSimpleName(), "lag detected. adjusting: " +  performance.toString());
-                //Gdx.app.log(getClass().getSimpleName(), "lag detected. adjusting: " + size);
             }
-            
-            //Gdx.app.log(this.getClass().getSimpleName(), lagDetector.toString());
-            //Gdx.graphics.getDensity();
         }
     }
     
