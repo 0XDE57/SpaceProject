@@ -5,33 +5,47 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.spaceproject.noise.OpenSimplexNoise;
+import com.badlogic.gdx.utils.PerformanceCounter;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.noise.OpenSimplexNoise;
+import com.spaceproject.utility.IndependentTimer;
 
 public class NoiseAnim extends TitleAnimation {
     float z;
     float zDelta;
-    int size;
+    float size;
     float scale;
     boolean crossSection;
     OpenSimplexNoise noise;
     
-    public NoiseAnim(float z, float zDelta, int size, float scale, boolean crossSection) {
+    PerformanceCounter performance;
+    IndependentTimer lagDetector;
+    
+    public NoiseAnim(float z, float zDelta, float size, float scale, boolean crossSection) {
         this.z = z;
         this.zDelta = zDelta;
-        this.size = size;
+        this.size = size * Gdx.graphics.getDensity();
         this.scale = scale;
         this.crossSection = crossSection;
         noise = new OpenSimplexNoise(MathUtils.random(Long.MAX_VALUE));
+        
+        //one DIP is one pixel on an approximately 160 dpi screen. Thus on a 160dpi screen this density value will be 1; on a 120 dpi screen it would be .75; etc.
+        Gdx.app.log(getClass().getSimpleName(), "density: " + Gdx.graphics.getDensity());
+        lagDetector = new IndependentTimer(2000, true);
+        performance = new PerformanceCounter("anim");
     }
     
     public NoiseAnim() {
-        this(0, 0.2f, 10, 0.110f, false);
+        this(0, 0.2f, 16.6f, 0.110f, false);
     }
     
     
     @Override
     public void render(float delta, ShapeRenderer shape) {
+        performance.start();
+        
+        z += zDelta * delta;
+
         shape.begin(ShapeRenderer.ShapeType.Filled);
         for (int x = 0; x <= Gdx.graphics.getWidth() / size; x++) {
             for (int y = 0; y <= Gdx.graphics.getHeight() / size; y++) {
@@ -43,25 +57,40 @@ public class NoiseAnim extends TitleAnimation {
                     }
                 } else {
                     shape.setColor(e, e, e, 1);
-                    //if (e > 0.4f && e < 0.5f) shape.setColor(Color.BLACK);
                     shape.rect(x * size, y * size, size, size);
                 }
             }
         }
-        z += zDelta * delta;
         shape.end();
+        
         
         if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
             scale += 0.001f;
-            Gdx.app.log(this.getClass().getSimpleName(), scale + "");
+            Gdx.app.log(getClass().getSimpleName(), scale + "");
         }
         if (Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
             scale -= 0.001f;
-            Gdx.app.log(this.getClass().getSimpleName(), scale + "");
+            Gdx.app.log(getClass().getSimpleName(), scale + "");
+        }
+        
+        
+        performance.stop();
+        
+        if (Gdx.graphics.getFramesPerSecond() < 30) {
+            if (lagDetector.canDoEvent()) {
+                size += 0.01f;
+                //lagDetector.setInterval(5, true);
+                Gdx.app.log(getClass().getSimpleName(), "lag detected. adjusting: " +  performance.toString());
+                //Gdx.app.log(getClass().getSimpleName(), "lag detected. adjusting: " + size);
+            }
+            
+            //Gdx.app.log(this.getClass().getSimpleName(), lagDetector.toString());
+            //Gdx.graphics.getDensity();
         }
     }
     
     @Override
     public void resize(int width, int height) {
     }
+    
 }

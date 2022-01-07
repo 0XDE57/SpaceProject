@@ -284,6 +284,7 @@ Legend:
     [ ] while im no artist, i think picking a color palate might make it look a world and ui a little more consistent
         http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
         [ ] the space ships need more contrast from space background
+            add a 1-3 px dark pixel drop shadow around edges of ship as part of the raw ship image
     [ ] box2d lights https://github.com/libgdx/box2dlights
         [ ] engine fire can be a light source
         [ ] shield can be a light source
