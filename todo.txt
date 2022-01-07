@@ -281,7 +281,7 @@ Legend:
             dynamic focus, maybe who gets shot last has focus? todo: study cam mechanics for smashbros / project m style combat
             thresholds for how close to focus near the edge
         [?] still allow manual override with scroll, with perhaps a timer to focus back in, or when a new enemy joins
-    [ ] while im no artist, i think picking a color palate might make it look a world and ui a little more consistent
+    [ ] while im no artist, i think picking a color palette might make it look a world and ui a little more consistent
         http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
         [ ] the space ships need more contrast from space background
             add a 1-3 px dark pixel drop shadow around edges of ship as part of the raw ship image
@@ -387,7 +387,15 @@ Legend:
     [ ] how to handle death? start on planet back at base? start at a space station?
         [?] could have a "home planet" and just spawn from there like transitionsystem takeoff
         [?] base space station that has its own orbit around either planet or star. dock to space station
-    [ ] notify AI that are stuck attacking nothing and should return to dumbwander or previous task
+
+[ ] AI
+    Current AI is very primitive placeholder.
+    https://github.com/libgdx/gdx-ai/wiki
+    [ ] lead shot, projectile prediction
+    [ ] when player dies, notify AI that are stuck attacking nothing and should return to dumbwander or previous task
+    [ ] #Arrive for landing on planets: arrive at the target position with a zero velocity.
+    [ ] Heat system? Attacking another ship will bring heat on yo ass.
+        Other ships will spawn from nearby planets or space stations after you.
 
 [...] shield
     [...] if collide with bullet, shrink/destroy shield
@@ -545,8 +553,6 @@ Legend:
             EndContact:vehicleButton.disable()
         http://www.iforce2d.net/b2dtut/sensors
 
-[ ] AI
-    [ ] lead shot, projectile prediction
 
 [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
     jk, sound will eventually exist
