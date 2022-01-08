@@ -31,7 +31,6 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     private ImmutableArray<Entity> spawnBelt;
     
     private final SimpleTimer lastSpawnedTimer = new SimpleTimer(1000);
-    private final int maxSpawn = 180;
     private final float minAsteroidSize = 100; //anything smaller than this will not create more
     
     private final DelaunayTriangulator delaunay = new DelaunayTriangulator();
@@ -76,7 +75,7 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
             if (asteroid.parentOrbitBody != null) {
                 TransformComponent parentTransform = Mappers.transform.get(asteroid.parentOrbitBody);
                 CircumstellarDiscComponent stellarDisk = Mappers.circumstellar.get(asteroid.parentOrbitBody);
-                
+                //set velocity perpendicular to parent body, (simplified 2-body model)
                 float angle = (float) (MyMath.angleTo(parentTransform.pos, physics.body.getPosition()) + (stellarDisk.clockwise ? -(Math.PI / 2) : Math.PI / 2));
                 physics.body.setLinearVelocity(MyMath.vector(angle, stellarDisk.velocity));
             } else {
@@ -84,27 +83,19 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                 for (Entity parentEntity : spawnBelt) {
                     CircumstellarDiscComponent stellarDisk = Mappers.circumstellar.get(parentEntity);
                     TransformComponent parentTransform = Mappers.transform.get(parentEntity);
+                    
+                    //todo: if close enough: slowly pull into stream of asteroid, match velocity and angle
                     float dist = parentTransform.pos.dst(physics.body.getPosition());
                     if (dist > stellarDisk.radius - (stellarDisk.width/2) && dist < stellarDisk.radius + (stellarDisk.width/2)) {
                         float targetAngle = (float) (MyMath.angleTo(parentTransform.pos, physics.body.getPosition()) + (stellarDisk.clockwise ? -(Math.PI / 2) : Math.PI / 2));
                         double angleDeltaThreshold = Math.PI / 6;
                         boolean meetsAngleThreshold = Math.abs(physics.body.getLinearVelocity().angleRad() - targetAngle) < angleDeltaThreshold;
+                        
                         float velDeltaThreshold = 5f;
                         boolean meetsVelThreshold = Math.abs(physics.body.getLinearVelocity().len() - stellarDisk.velocity) < velDeltaThreshold;
-                        
-                        //if (asteroid.mergeTimer != null) {
-                            //todo: slowly pull into stream of asteroid, match velocity and angle
-                        //}
-                        
+    
+                        //todo: if should merge, begin merge
                         if (meetsAngleThreshold /*&& meetsVelThreshold*/) {
-                            /*todo: if should merge, begin merge
-                            if (asteroid.mergeTimer == null) {
-                                asteroid.mergeTimer = new SimpleTimer(1000);
-                            } else {
-                                //merge once met
-                                if (asteroid.mergeTimer.canDoEvent()): merge
-                            }*/
-                            
                             asteroid.parentOrbitBody = parentEntity;
                             Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID re-entry into orbit");
                             break; // no point looking at other disks once met
@@ -112,7 +103,6 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                     }
                 }
             }
-
         }
     }
   
@@ -128,9 +118,10 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
     private void spawnAsteroidBelt() {
         for (Entity parentEntity : spawnBelt) {
             CircumstellarDiscComponent disk = Mappers.circumstellar.get(parentEntity);
-            if (asteroids.size() <= maxSpawn) {
-                float bandwidthOffset = MathUtils.random(-disk.width/2, disk.width/2);//todo, should bias towards middle and taper off edges
-                //alternatively could be a 1D noise from inner to outer with different concentrations?
+            if (disk.spawned <= disk.maxSpawn) {
+                //todo, should bias towards middle and taper off edges
+                // alternatively could be a 1D noise from inner to outer with different concentrations?
+                float bandwidthOffset = MathUtils.random(-disk.width/2, disk.width/2);
                 float angle = MathUtils.random(MathUtils.PI2);
                 Vector2 pos = Mappers.transform.get(parentEntity).pos.cpy();
                 pos.add(MyMath.vector(angle, disk.radius + bandwidthOffset));
@@ -138,6 +129,8 @@ public class AsteroidSpawner extends EntitySystem implements EntityListener {
                 Entity newAsteroid = spawnAsteroid(pos.x, pos.y, 0, 0);
                 AsteroidComponent ast = Mappers.asteroid.get(newAsteroid);
                 ast.parentOrbitBody = parentEntity;
+                
+                disk.spawned++;
             }
         }
     }

@@ -14,4 +14,8 @@ public class CircumstellarDiscComponent implements Component {
     
     public float velocity;
     
+    public int spawned;
+    
+    public int maxSpawn;
+    
 }

@@ -13,6 +13,7 @@ import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.CamTargetComponent;
 import com.spaceproject.components.ChargeCannonComponent;
+import com.spaceproject.components.CircumstellarDiscComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.RemoveComponent;
@@ -86,16 +87,15 @@ public class PhysicsContactListener implements ContactListener {
     }
     
     private void asteroidImpact(Entity entity, AsteroidComponent asteroid, float impulse) {
-        //todo: how should shatter mechanics handle? what if pass down extra damage to children.
-        // eg: asteroid has 100 hp, breaks into 2 = 50hp children
-        //   damage 110 = -10 hp, breaks into 2 minus 5 each = 45hp
-        //   damage 200 = -100 hp, breaks into 2 minus 50 = 0hp = don't spawn children -> instant destruction
-        //  could play with different rules and ratios, find what feels good
-        
         if (impulse > asteroidBreakOrbitThreshold) {
-            //asteroid.type = AsteroidComponent.Type.free;
-            asteroid.parentOrbitBody = null;
-            Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID knocked out of orbit: " + impulse);
+            if (asteroid.parentOrbitBody != null) {
+                CircumstellarDiscComponent circumstellar = Mappers.circumstellar.get(asteroid.parentOrbitBody);
+                //if (circumstellar.spawnTimer != null && circumstellar.spawnTimer.canDoEvent()) {
+                if (circumstellar.spawned == circumstellar.maxSpawn) {
+                    asteroid.parentOrbitBody = null;
+                    Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID knocked out of orbit: " + impulse);
+                }
+            }
         }
         
         if (impulse > asteroidDamageThreshold) {

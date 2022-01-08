@@ -243,6 +243,11 @@ Legend:
         [ ] tune!
             -shatter difficulty: how many shots to break, how hard impact to break
             -density: weight and feel of how bodies impact eachother and player
+            -shatter mechanics pass down extra damage to children?
+                eg: asteroid has 100 hp, breaks into 2 = 50hp children
+                  damage 110 = -10 hp, breaks into 2 minus 5 each = 45hp
+                  damage 200 = -100 hp, breaks into 2 minus 50 = 0hp = don't spawn children -> instant destruction
+                 could play with different rules and ratios, find what feels good
         [x] should not display health bar on asteroids
         [ ] some visual feedback for damage like cracks would be nice: could use voronoi edges as cracks
         [ ] polygon slicing! ability to cast ray through asteroid and have it split on intersection

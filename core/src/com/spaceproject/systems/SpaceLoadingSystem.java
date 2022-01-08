@@ -249,6 +249,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         CircumstellarDiscComponent circumstellarDisc = new CircumstellarDiscComponent();
         circumstellarDisc.radius = 1500;
         circumstellarDisc.width = 220; //how wide of band centered on radius, concentrated at radius
+        circumstellarDisc.maxSpawn = 180; //todo: calculate density: ratio of asteroids to space in disk
         circumstellarDisc.velocity = 20;
         circumstellarDisc.clockwise = isRotateClockwise;
         star.add(circumstellarDisc);
