@@ -242,7 +242,7 @@ public class GameScreen extends MyScreenAdapter {
         engine.update(delta);
         
         
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.act(Math.min(delta, 1 / 30f));
         stage.draw();
     }
     
