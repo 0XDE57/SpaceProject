@@ -22,6 +22,7 @@ import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.utility.SimpleTimer;
 
 public class CannonSystem extends IteratingSystem {
     
@@ -118,7 +119,7 @@ public class CannonSystem extends IteratingSystem {
         
         //expire time (self destruct)
         ExpireComponent expire = new ExpireComponent();
-        expire.time = 5;//in seconds ~approx
+        expire.timer = new SimpleTimer(5000, true);
         
         //missile damage
         DamageComponent missile = new DamageComponent();

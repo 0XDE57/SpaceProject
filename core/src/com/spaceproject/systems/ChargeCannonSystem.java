@@ -21,6 +21,7 @@ import com.spaceproject.generation.BodyFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.utility.SimpleTimer;
 
 public class ChargeCannonSystem extends IteratingSystem {
     
@@ -128,7 +129,7 @@ public class ChargeCannonSystem extends IteratingSystem {
         chargeCannon.projectileEntity.add(physics);
         
         ExpireComponent expire = new ExpireComponent();
-        expire.time = 8;
+        expire.timer = new SimpleTimer(8000, true);
         chargeCannon.projectileEntity.add(expire);
         
         
