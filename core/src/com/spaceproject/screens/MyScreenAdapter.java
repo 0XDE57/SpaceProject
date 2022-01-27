@@ -6,6 +6,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.EngineConfig;
@@ -29,6 +30,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
     private EngineConfig engineCFG;
     private KeyConfig keyCFG;
     
+    public GLProfiler glProfiler;
     
     public MyScreenAdapter() {
         Gdx.app.log(this.getClass().getSimpleName(), "ScreenAdapter Reset.");
@@ -53,7 +55,9 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
         //set this as input processor for mouse wheel scroll events
         inputMultiplexer = new InputMultiplexer();
         Gdx.input.setInputProcessor(inputMultiplexer);
-        
+    
+        glProfiler = new GLProfiler(Gdx.graphics);
+        glProfiler.enable();
         
         //debug
         toggleVsync();

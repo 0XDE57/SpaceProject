@@ -30,6 +30,7 @@ import com.spaceproject.generation.Galaxy;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.math.Physics;
 import com.spaceproject.noise.NoiseManager;
+import com.spaceproject.systems.DebugSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.ECSUtil;
@@ -59,17 +60,19 @@ public class GameScreen extends MyScreenAdapter {
     private static Stage stage;
     
     public static boolean isDebugMode = true;
+    final StringBuilder profilerStringBuilder = new StringBuilder();
     
     public GameScreen() {
         //LOG_NONE: mutes all logging.
         //LOG_DEBUG: logs all messages.
         //LOG_ERROR: logs only error messages.
         //LOG_INFO: logs error and normal messages.
-        Gdx.app.setLogLevel(Application.LOG_DEBUG);
-        //Gdx.app.setLogLevel(Application.LOG_INFO);
+        Gdx.app.setLogLevel(isDebugMode ? Application.LOG_DEBUG : Application.LOG_INFO);
         
-        //test
-        Physics.test();
+        if (isDebugMode) {
+            //test
+            Physics.test();
+        }
         
         initUI();
         
@@ -241,9 +244,32 @@ public class GameScreen extends MyScreenAdapter {
         }
         engine.update(delta);
         
-        
         stage.act(Math.min(delta, 1 / 30f));
         stage.draw();
+        
+        pollGLProfiler();
+    }
+    
+    private void pollGLProfiler() {
+        profilerStringBuilder.setLength(0);
+        profilerStringBuilder.append("GL calls: ");
+        profilerStringBuilder.append(glProfiler.getCalls());
+        
+        profilerStringBuilder.append("\nDraw calls: ");
+        profilerStringBuilder.append(glProfiler.getDrawCalls());
+        
+        profilerStringBuilder.append("\nShader switches: ");
+        profilerStringBuilder.append(glProfiler.getShaderSwitches());
+        
+        profilerStringBuilder.append("\nTexture bindings: ");
+        profilerStringBuilder.append(glProfiler.getTextureBindings());
+        
+        profilerStringBuilder.append("\nVertices: ");
+        profilerStringBuilder.append(glProfiler.getVertexCount().total);
+    
+        DebugSystem.addDebugText(profilerStringBuilder.toString(), 10, 90);
+        
+        glProfiler.reset();
     }
     
     //region states
