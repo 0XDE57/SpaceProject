@@ -33,7 +33,7 @@ public class Sprite2DShaderRenderSystem extends IteratingSystem implements Dispo
     
     private final Array<Entity> renderQueue = new Array<>();
     
-    //sort by enum ordinal
+    //sort by enum ordinal (group by shader)
     private final Comparator<Entity> shaderComparator = new Comparator<Entity>() {
         @Override
         public int compare(Entity entityA, Entity entityB) {

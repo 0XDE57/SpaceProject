@@ -43,13 +43,13 @@ public class PolygonUtil {
             case Polygon: {
                 PolygonShape shape = (PolygonShape) fixture.getShape();
                 
-                Vector2 tmp = new Vector2();
-                shape.getVertex(0, tmp);
-                tmp = fixture.getBody().getWorldPoint(tmp);
-                boundingBox = new BoundingBox(new Vector3(tmp, 0), new Vector3(tmp, 0));
+                Vector2 vertex = new Vector2();
+                shape.getVertex(0, vertex);
+                vertex = fixture.getBody().getWorldPoint(vertex);
+                boundingBox = new BoundingBox(new Vector3(vertex, 0), new Vector3(vertex, 0));
                 for (int v = 1; v < shape.getVertexCount(); v++) {
-                    shape.getVertex(v, tmp);
-                    boundingBox.ext(new Vector3(fixture.getBody().getWorldPoint(tmp), 0));
+                    shape.getVertex(v, vertex);
+                    boundingBox.ext(new Vector3(fixture.getBody().getWorldPoint(vertex), 0));
                 }
                 
                 break;

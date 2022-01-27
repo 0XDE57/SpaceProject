@@ -290,7 +290,12 @@ Legend:
         http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
         [ ] the space ships need more contrast from space background
             add a 1-3 px dark pixel drop shadow around edges of ship as part of the raw ship image
-    [ ] box2d lights https://github.com/libgdx/box2dlights
+    [ ] lighting!
+        simple "cheat" use sprites: https://www.youtube.com/watch?v=fsE1ddOas7A
+        https://github.com/mattdesl/lwjgl-basics/wiki/ShaderLesson5
+        https://github.com/mattdesl/lwjgl-basics/wiki/OpenGL-ES-Blurs
+        https://github.com/mattdesl/lwjgl-basics/wiki/2D-Pixel-Perfect-Shadows
+        box2d lights https://github.com/libgdx/box2dlights
         [ ] engine fire can be a light source
         [ ] shield can be a light source
         [ ] player eyes facing forward cone light
@@ -974,6 +979,7 @@ Legend:
     [ ] something is funny with the memory, it climbs then resets in a cyclical fashion
         I have a feeling this is a poor use of 'new' somewhere and when the memory resets its the GC cleaning it up
     [ ] fonts should all be in skin, ensure fonts are not duplicated/loaded twice
+    http://gameprogrammingpatterns.com/data-locality.html
     http://t-machine.org/index.php/2014/03/08/data-structures-for-entity-systems-contiguous-memory/
     http://unseen-academy.de/snippet_component_system.html
     https://github.com/junkdog/entity-system-benchmarks#entity-system-benchmarks
@@ -992,7 +998,6 @@ Legend:
         5. this new system will not pick up those entities in the family, where it should
         * solution: engine.removeAllEntities(); before re-instantiating engine and system. this resolves the issue.
         Reproduced in ReproFamilyBugTest.class;
-
     [B] scenario B:
         1. create engine
         2. add a new instance of a system that is an entity listener
