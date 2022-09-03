@@ -2,8 +2,6 @@ package com.spaceproject.utility;
 
 import com.spaceproject.screens.GameScreen;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 public class SimpleTimer {
     
     private long interval;
@@ -56,14 +54,6 @@ public class SimpleTimer {
     public void setCanDoEvent() {
         //ensures event can be done right now
         setLastEvent(timeSinceLastEvent() - getInterval());
-    }
-    
-    public void pause() {
-        throw new NotImplementedException();//TODO
-    }
-    
-    public void unpause() {
-        throw new NotImplementedException();//TODO
     }
     
     public long timeSinceLastEvent() {
