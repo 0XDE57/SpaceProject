@@ -326,7 +326,8 @@ Legend:
                     Cooler things - peak at longer wavelengths - redder
             [ ] luminosity?
         [ ] could add more noise layers: octaves
-        [ ] needs flares!!!
+        [ ] needs flames n solar flares!!!
+            fire: https://stegu.github.io/psrdnoise/2d-tutorial/2d-psrdnoise-tutorial-20.html
             [ ] some sort of texture / shader to make firery splines
             [ ] outward firing firery particles
         [ ] varying brightness, twinkle by increasing decreasing brightness pseudo-random sine wave, or rather 1d noise
@@ -742,7 +743,7 @@ Legend:
         - etc, added as needed
     Player can use materials for building.
     Can also be used for trading at space stations -> sell gold / diamonds for currency -> buy ships / upgrades.
-    Player tools: (for now player always has slege and pickaxe by default, can't drop, can use with click, switch equipped with hotkey)
+    Player tools: (for now player always has sledge and pickaxe by default, can't drop, can use with click, switch equipped with hotkey)
         sledge hammer   : breaking rock, destruction, attack(hit enemy, do damage, knockback force),
         pickaxe         : mining minerals
         sword           : damage
@@ -933,7 +934,7 @@ Legend:
             redirect all gdx.log calls?
         [ ] commands
             eg: /create entity <ship>
-                /add component <component> <entitity id>
+                /add component <component> <entity id>
                 /enable/disable system <"system name">
                 /setcamfocus <entity>
                 /takecontrol <entity> (set control /input focus, if has AI, override (or maybe swap with player would be cool)
@@ -981,7 +982,6 @@ Legend:
     [ ] fonts should all be in skin, ensure fonts are not duplicated/loaded twice
     http://gameprogrammingpatterns.com/data-locality.html
     http://t-machine.org/index.php/2014/03/08/data-structures-for-entity-systems-contiguous-memory/
-    http://unseen-academy.de/snippet_component_system.html
     https://github.com/junkdog/entity-system-benchmarks#entity-system-benchmarks
 
 [...] investigate possible bug in ashley.
@@ -1015,6 +1015,14 @@ Legend:
             	at com.badlogic.ashley.core.Engine.removeAllEntities(Engine.java:98)
         * Solution: engine.removeEntityListener(the system) when removing system
 
+[OUT_OF_SCOPE] multiplayer
+    simple lan arena mode 1v1: one computer hosts, other computer joins
+    scope: get physics synced and tweak combat to feel good.
+    https://libgdx.com/wiki/networking
+    udp vs tcp
+    p2p vs server client
+    https://www.gabrielgambetta.com/client-server-game-architecture.html
+    https://developer.valvesoftware.com/wiki/Source_Multiplayer_Networking
 
 
 ~~~~~~~~~~~~~~~~~~~~RESOURCES!!!~~~~~~~~~~~~~~~~~~~~
