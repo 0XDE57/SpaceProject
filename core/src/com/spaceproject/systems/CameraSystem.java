@@ -51,6 +51,7 @@ public class CameraSystem extends IteratingSystem {
     public void processEntity(Entity entity, float delta) {
         Vector2 playerPosition = Mappers.transform.get(entity).pos;
     
+        //lockToTarget(playerPosition);
         lerpToTarget(playerPosition, delta);
     
         

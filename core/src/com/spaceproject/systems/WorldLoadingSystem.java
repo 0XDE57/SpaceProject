@@ -38,7 +38,7 @@ public class WorldLoadingSystem extends EntitySystem {
         }
         
         Entity aiTest = EntityFactory.createCharacterAI(position, position + 10);
-        Mappers.AI.get(aiTest).state = AIComponent.State.dumbwander;
+        Mappers.AI.get(aiTest).state = AIComponent.State.wander;
         engine.addEntity(aiTest);
 
 		/*

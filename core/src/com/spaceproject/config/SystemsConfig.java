@@ -43,39 +43,40 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(BarrelRollSystem.class, 52, true, true, true, true, true));
         systems.add(new SysCFG(ShieldSystem.class, 53, true, true, true, true, true));
         systems.add(new SysCFG(CannonSystem.class, 55, true, true, true, true, true));
-        systems.add(new SysCFG(ChargeCannonSystem.class, 56, true, true, true, true, true));
         systems.add(new SysCFG(HyperDriveSystem.class, 59, true, true, true, true, true));
         
         systems.add(new SysCFG(OrbitSystem.class, 60, true, true, false, true, true));
         systems.add(new SysCFG(WorldWrapSystem.class, 65, true, false, true, true, true));
         
         systems.add(new SysCFG(FixedPhysicsSystem.class, 70, true, true, true, true, true));
-    
+        //NOTE: chargecannon ghost charge rendering works better after physics system has updated the transforms. otherwise jitter while movement
+        systems.add(new SysCFG(ChargeCannonSystem.class, 71, true, true, true, true, true));
+        
         //---loading---
         systems.add(new SysCFG(WorldLoadingSystem.class, 90, true, false, true, true, true));
         systems.add(new SysCFG(SpaceLoadingSystem.class, 91, false, true, false, true, true));
-        systems.add(new SysCFG(AsteroidSpawner.class, 92, true, true, false, true, true));
+        //systems.add(new SysCFG(AsteroidSpawner.class, 92, true, true, false, true, true));
         //systems.add(new SysCFG(SpaceRespawnSystem.class, ??, true, true, false, true, true));
-        //systems.add(new SysCFG(PlanetarySystemEntitySpawner.class, ??, true, true, false, true, true));
+        //systems.add(new SysCFG(PlanetAISpawnerSystem.class, 93, true, true, false, true, true));
         
     
         //----render----
         // Rendering Pipeline: render order (priority) is important for which layer draws on top of which layer.
-        //  [?] could have multilayer rendering if needed:
-        //      eg: particle layer pre sprite (under sprites), particle layer post sprite (over sprites)
-        // - clear screen -> repaint between frames to clear display
-        // - cam update -> update, zoom and move camera
+        // - clear screen -> clear color and depth buffer, then repaint solid color. clears display between frames
+        // - cam update -> move, zoom, and update camera
         // - sprite 2D renderer -> render regular textures no shader
         // - sprite 2D shader renderer -> render textures with shader applied
-        // - asteroid renderer -> poly shape render
+        // - asteroid renderer -> custom shaperenderer to draw filled polygons
         // - sprite 3D renderer -> render 3d meshes with no shader
         // - todo: sprite 3D shader renderer -> render 3d meshes with shader applied
-        // - shield renderer -> shape render post sprite (possible shader for glow? box2d-lights?)
-        // - particle renderer -> render particles on to of sprites
+        // - shield renderer -> shape render post sprite (possible shader for glow? render to fbo: bloom)
+        // - particle renderer -> render particles on top of sprites
         // - hud system -> render player info, minimap, healthbars, and in game Menu when paused
         // - todo: touchcontrolrendersystem: should decouple from hud
         // - screen transition system -> renders full screen white out animation between game states and handles transition logic
         // - debug system -> render debug and diagnostic info: should always be last so we can see debug info at all times, hence high-value priority to make execute near end of frame
+        //  [?] could have multilayer rendering if needed:
+        //      eg: particle layer pre sprite (under sprites), particle layer post sprite (over sprites)
         systems.add(new SysCFG(CameraSystem.class, 100, true, true, true, true, true));
         systems.add(new SysCFG(SpaceParallaxSystem.class, 105, false, true, false, true, true));
         systems.add(new SysCFG(SpaceDustSystem.class, 106, false, true, false, true, true));
@@ -119,6 +120,5 @@ public class SystemsConfig extends Config {
         Gdx.app.error(this.getClass().getSimpleName(), "Could not find config for: " + className);
         return null;
     }
+    
 }
-
-

@@ -38,7 +38,8 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     
     private final CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
     private ImmutableArray<Entity> loadedAstronomicalBodies;
-    private SimpleTimer checkStarsTimer;
+    private ImmutableArray<Entity> orbitingBodies;
+    private SimpleTimer loadTimer;
     
     private boolean hasInit;
     
@@ -47,19 +48,13 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     public void addedToEngine(Engine engine) {
         // currently loaded stars/planets
         loadedAstronomicalBodies = engine.getEntitiesFor(Family.all(BarycenterComponent.class, TransformComponent.class).get());
+        orbitingBodies = engine.getEntitiesFor(Family.all(OrbitComponent.class).get());
         
-        //engine.addEntityListener(Family.one(PlanetComponent.class, BarycenterComponent.class).get(), this);
-        
-        
-        // load space things (asteroids, wormhole, black hole, etc)
-        // load ai/mobs
-        //initMobs(engine);
-        hasInit = false;
-        
-        checkStarsTimer = new SimpleTimer(4000);
-        checkStarsTimer.setCanDoEvent();
-    }
+        loadTimer = new SimpleTimer(4000);
+        loadTimer.setCanDoEvent();
     
+        hasInit = false;
+    }
     
     @Override
     public void entityAdded(Entity entity) {
@@ -72,92 +67,28 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     
     @Override
     public void entityRemoved(Entity entity) {
-        for (Entity e : getEngine().getEntitiesFor(Family.all(OrbitComponent.class).get())) {
+        for (Entity e : orbitingBodies) {
             OrbitComponent orbit = Mappers.orbit.get(e);
-            if (orbit.parent != null) {
-                if (orbit.parent == entity) {
-                    e.add(new RemoveComponent());
-                }
+            if (orbit.parent != null && orbit.parent == entity) {
+                e.add(new RemoveComponent());
             }
         }
     }
     
-    
-    public void initTestDebugMobs(Engine engine) {
-        hasInit = true;
-        
-        //a placeholder to add dummy objects for now
-        for (Entity e : EntityFactory.createBasicShip(-20, 40, GameScreen.inSpace())) {
-            engine.addEntity(e);
-        }
-        for (Entity e : EntityFactory.createBasicShip(-30, 40, GameScreen.inSpace())) {
-            engine.addEntity(e);
-        }
-        for (Entity e : EntityFactory.createBasicShip(-40, 40, GameScreen.inSpace())) {
-            engine.addEntity(e);
-        }
-        for (Entity e : EntityFactory.createBasicShip(-60, 40, GameScreen.inSpace())) {
-            engine.addEntity(e);
-        }
-        
-        Entity aiTest = EntityFactory.createCharacterAI(0, 40);
-        Mappers.AI.get(aiTest).state = AIComponent.State.dumbwander;
-        //aiTest.add(new CameraFocusComponent());//test cam focus on AI
-        engine.addEntity(aiTest);
-        
-        Entity aiTest2 = EntityFactory.createCharacterAI(0, 60);
-        Mappers.AI.get(aiTest2).state = AIComponent.State.idle;
-        engine.addEntity(aiTest2);
-        
-        Entity aiTest3 = EntityFactory.createCharacterAI(0, 80);
-        Mappers.AI.get(aiTest3).state = AIComponent.State.landOnPlanet;
-        //aiTest3.add(new CameraFocusComponent());
-        engine.addEntity(aiTest3);
-    }
-    
     @Override
     public void update(float delta) {
-        if (!hasInit) {
-            initTestDebugMobs(getEngine());
-        }
+        //if (!hasInit) { initTestDebugMobs(getEngine()); }
         
         // load and unload stars
-        updateStars(celestCFG.loadSystemDistance);
+        updateLoadedBodies(celestCFG.loadSystemDistance);
         
         // update/replace textures
         updatePlanetTextures();
     }
     
-    
-    private void updatePlanetTextures() {
-        //todo: this should probably subscribe to a thread finished event instead of polling
-        //check queue for tilemaps / pixmaps to load into textures
-        if (!GameScreen.noiseManager.isNoiseAvailable()) {
-            return;
-        }
-        
-        //grab noise from queue
-        NoiseBuffer noise = GameScreen.noiseManager.getNoiseFromQueue();
-        if (noise.pixelatedTileMap == null) {
-            Gdx.app.log(this.getClass().getSimpleName(), "ERROR, no map for: [" + noise.seed + "]");
-            return;
-        }
-    
-        //find planet that noise belongs to (matching seed)
-        for (Entity p : getEngine().getEntitiesFor(Family.all(PlanetComponent.class).get())) {
-            if (p.getComponent(SeedComponent.class).seed == noise.seed) {
-                // create planet texture from tileMap, replace texture
-                Texture newTex = TextureFactory.generatePlanet(noise.pixelatedTileMap, Tile.defaultTiles);
-                p.getComponent(TextureComponent.class).texture = newTex;
-                Gdx.app.log(this.getClass().getSimpleName(), "Texture loaded: [" + noise.seed + "]");
-                return;
-            }
-        }
-    }
-    
-    
-    private void updateStars(float loadDistance) {
-        if (checkStarsTimer.tryEvent()) {
+    //region load
+    private void updateLoadedBodies(float loadDistance) {
+        if (loadTimer.tryEvent()) {
             loadDistance *= loadDistance;//square for dst2
             
             // remove stars from engine that are too far
@@ -198,22 +129,52 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
             TransformComponent t = Mappers.transform.get(entity);
             if (Vector2.dst2(t.pos.x, t.pos.y, GameScreen.cam.position.x, GameScreen.cam.position.y) > loadDistance) {
                 entity.add(new RemoveComponent());
-                Gdx.app.log(this.getClass().getSimpleName(), "Removing Planetary System: " + entity.getComponent(TransformComponent.class).pos.toString());
+                Gdx.app.log(getClass().getSimpleName(), "Removing Planetary System: " + entity.getComponent(TransformComponent.class).pos.toString());
             }
         }
     }
     
-    public Array<Entity> createAstronomicalObjects(float x, float y) {
-        long seed = MyMath.getSeed(x, y);
-        MathUtils.random.setSeed(seed);
+    private void updatePlanetTextures() {
+        //todo: this should probably subscribe to a thread finished event instead of polling
+        //check queue for tilemaps / pixmaps to load into textures
+        if (!GameScreen.noiseManager.isNoiseAvailable()) {
+            return;
+        }
         
-        switch (MathUtils.random(2)) {
-            case 0:
-                return createPlanetarySystem(x, y);
-            case 1:
-                return createBinarySystem(x, y);
-            case 2:
-                return createRoguePlanet(x, y);
+        //grab noise from queue
+        NoiseBuffer noise = GameScreen.noiseManager.getNoiseFromQueue();
+        if (noise.pixelatedTileMap == null) {
+            Gdx.app.log(getClass().getSimpleName(), "ERROR, no map for: [" + noise.seed + "]");
+            return;
+        }
+        
+        //find planet that noise belongs to (matching seed)
+        for (Entity p : getEngine().getEntitiesFor(Family.all(PlanetComponent.class).get())) {
+            if (p.getComponent(SeedComponent.class).seed == noise.seed) {
+                // create planet texture from tileMap, replace texture
+                Texture newTex = TextureFactory.generatePlanet(noise.pixelatedTileMap, Tile.defaultTiles);
+                p.getComponent(TextureComponent.class).texture = newTex;
+                Gdx.app.log(getClass().getSimpleName(), "Texture loaded: [" + noise.seed + "]");
+                return;
+            }
+        }
+    }
+    //endregion
+    
+    //region create bodies
+    public Array<Entity> createAstronomicalObjects(float x, float y) {
+        if (!GameScreen.isDebugMode) {
+            long seed = MyMath.getSeed(x, y);
+            MathUtils.random.setSeed(seed);
+            
+            switch (MathUtils.random(2)) {
+                case 0:
+                    return createPlanetarySystem(x, y);
+                case 1:
+                    return createBinarySystem(x, y);
+                case 2:
+                    return createRoguePlanet(x, y);
+            }
         }
         
         return createPlanetarySystem(x, y);
@@ -284,12 +245,12 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
                 entities.add(moonsMoonsMoon);*/
             }
             
-            //addLifeToPlanet(planet);
+            addLifeToPlanet(planet);
             
             entities.add(planet);
         }
         
-        Gdx.app.log(this.getClass().getSimpleName(), "Planetary System: [" + seed + "](" + x + ", " + y + ") Objects: " + (numPlanets));
+        Gdx.app.log(getClass().getSimpleName(), "Planetary System: [" + seed + "](" + x + ", " + y + ") Objects: " + (numPlanets));
         
         return entities;
         
@@ -302,22 +263,12 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         //  eg chance of life = distance from habit zone
         //more complex rules can be applied like considering the planets type. ocean might have life but if entire planet is ocean = no ships = no spawner
         //desert might have different life, so different spawner rules
-        boolean hasLife = MathUtils.randomBoolean();
-        if (hasLife) {
-            int min = 10000;
-            int max = 100000;
-            int lifeDensity = MathUtils.random(1);
-            
-            AISpawnComponent spawnComponent = new AISpawnComponent();
-            spawnComponent.min = min;
-            spawnComponent.max = max;
-            spawnComponent.timers = new SimpleTimer[lifeDensity];
-            spawnComponent.state = AIComponent.State.attack;
-            for (int t = 0; t < spawnComponent.timers.length; t++) {
-                spawnComponent.timers[t] = new SimpleTimer(MathUtils.random(spawnComponent.min, spawnComponent.max));
-            }
-            planet.add(spawnComponent);
-        }
+        
+        //boolean hasLife = MathUtils.randomBoolean();
+        
+        AISpawnComponent spawnComponent = new AISpawnComponent();
+        spawnComponent.maxSpawn = 10;
+        planet.add(spawnComponent);
     }
     
     public Array<Entity> createRoguePlanet(float x, float y) {
@@ -400,6 +351,39 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         
         Gdx.app.log(this.getClass().getSimpleName(), "Binary System: [" + seed + "](" + x + ", " + y + ")");
         return entities;
+    }
+    //endregion
+    
+    public void initTestDebugMobs(Engine engine) {
+        hasInit = true;
+        
+        //a placeholder to add dummy objects for now
+        for (Entity e : EntityFactory.createBasicShip(-20, 40, GameScreen.inSpace())) {
+            engine.addEntity(e);
+        }
+        for (Entity e : EntityFactory.createBasicShip(-30, 40, GameScreen.inSpace())) {
+            engine.addEntity(e);
+        }
+        for (Entity e : EntityFactory.createBasicShip(-40, 40, GameScreen.inSpace())) {
+            engine.addEntity(e);
+        }
+        for (Entity e : EntityFactory.createBasicShip(-60, 40, GameScreen.inSpace())) {
+            engine.addEntity(e);
+        }
+        
+        Entity aiTest = EntityFactory.createCharacterAI(0, 40);
+        Mappers.AI.get(aiTest).state = AIComponent.State.wander;
+        //aiTest.add(new CameraFocusComponent());//test cam focus on AI
+        engine.addEntity(aiTest);
+        
+        Entity aiTest2 = EntityFactory.createCharacterAI(0, 60);
+        Mappers.AI.get(aiTest2).state = AIComponent.State.idle;
+        engine.addEntity(aiTest2);
+        
+        Entity aiTest3 = EntityFactory.createCharacterAI(0, 80);
+        Mappers.AI.get(aiTest3).state = AIComponent.State.landOnPlanet;
+        //aiTest3.add(new CameraFocusComponent());
+        engine.addEntity(aiTest3);
     }
     
 }

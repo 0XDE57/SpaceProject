@@ -6,10 +6,12 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class AISpawnComponent implements Component {
     
-    public SimpleTimer[] timers;
-    public long min;
-    public long max;
     public AIComponent.State state;
+    
+    public SimpleTimer spawnTimer;
+    
+    public long maxSpawn;
+    
     public int spawnCount;
     
 }

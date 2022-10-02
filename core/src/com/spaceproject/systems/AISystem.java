@@ -5,7 +5,9 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CharacterComponent;
@@ -13,15 +15,16 @@ import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.math.MyMath;
+import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.math.MyMath;
+import com.spaceproject.utility.Steering;
 
 public class AISystem extends IteratingSystem {
     
     private ImmutableArray<Entity> vehicles;
     private ImmutableArray<Entity> planets;
-    //private ImmutableArray<Entity> players;
     
     public AISystem() {
         super(Family.all(AIComponent.class, ControllableComponent.class).get());
@@ -31,61 +34,41 @@ public class AISystem extends IteratingSystem {
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
         vehicles = engine.getEntitiesFor(Family.all(VehicleComponent.class).get());
-        //players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
         planets = engine.getEntitiesFor(Family.all(PlanetComponent.class).get());
     }
     
-    
+    @Override
     protected void processEntity(Entity entity, float delta) {
-        /* simple DUMB test "AI" for now just to create structure/skeleton
-         * and test some basic behaviors
-         */
+        /* simple DUMB test "AI" for now just to create structure/skeleton and test some basic behaviors */
+        
         AIComponent ai = Mappers.AI.get(entity);
         ControllableComponent control = Mappers.controllable.get(entity);
         Vector2 aiPos = Mappers.transform.get(entity).pos;
         
-        //aiPos.y += 100 * delta;
         if (ai.state == null) {
-            ai.state = AIComponent.State.dumbwander;
-            //ai.State = AIComponent.State.landOnPlanet;
+            ai.state = AIComponent.State.wander;
+            Gdx.app.debug(getClass().getSimpleName(), "WARNING: null state. adjusting to default state: " + ai.state.name());
         }
         
         switch (ai.state) {
             case attack:
-                if (ai.attackTarget != null) {
-                    
+                if (ai.attackTarget != null || (getEngine().getEntities().contains(ai.attackTarget, false))) {
                     VehicleComponent vehicle = Mappers.vehicle.get(entity);
                     if (vehicle == null) {
-                        Entity closestVehicle = ECSUtil.closestEntity(aiPos, vehicles);
-                        if (closestVehicle != null) {
-                            control.angleTargetFace = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
-                            control.moveForward = true;
-                            control.movementMultiplier = 1f;
-                            PhysicsComponent aiPhysics = Mappers.physics.get(entity);
-                            for (Entity v : vehicles) {
-                                //skip vehicle is occupied
-                                if (Mappers.vehicle.get(v).driver != null) continue;
-                                
-                                //check if character is near a vehicle
-                                PhysicsComponent vehiclePhysics = Mappers.physics.get(v);
-                                if (aiPhysics.body.getPosition().dst(vehiclePhysics.body.getPosition()) < 1.5) {
-                                    control.changeVehicle = true;
-                                }
-                            }
-                        }
+                        //find a vehicle if on foot
+                        seekAndEnterVehicle(entity, control, aiPos);
                     } else {
-                        Vector2 pPos = Mappers.transform.get(ai.attackTarget).pos;
-                        control.angleTargetFace = MyMath.angleTo(pPos, aiPos);
-                        control.moveForward = true;
-                        control.movementMultiplier = 0.3f;
-                        control.attack = true;
+                        //seek and attack
+                        Vector2 targetPos = Mappers.transform.get(ai.attackTarget).pos;
+                        dumbSeek(control, aiPos, targetPos, 0.3f);//todo: distance based. threshold radius
+                        control.attack = !control.attack;
                     }
-                    
                 } else {
-                    ai.state = AIComponent.State.dumbwander;
+                    ai.state = AIComponent.State.wander;
+                    Gdx.app.debug(getClass().getSimpleName(), "attack target null or entity not found. setting state: " + ai.state.name());
                 }
                 break;
-            case dumbwander:
+            case wander:
                 control.attack = false;
                 
                 //dumb wander
@@ -98,46 +81,27 @@ public class AISystem extends IteratingSystem {
                 if (Mappers.screenTrans.get(entity) != null) {
                     ai.state = AIComponent.State.idle;
                     control.transition = false;
+                    Gdx.app.debug(getClass().getSimpleName(), DebugUtil.objString(ai) + "AI landing. setting state: " + ai.state.name());
                     return;
                 }
                 
                 VehicleComponent vehicle = Mappers.vehicle.get(entity);
                 if (vehicle == null) {
-                    Entity closestVehicle = ECSUtil.closestEntity(aiPos, vehicles);
-                    if (closestVehicle != null) {
-                        control.angleTargetFace = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
-                        control.moveForward = true;
-                        control.movementMultiplier = 0.5f;
-                        PhysicsComponent aiPhysics = Mappers.physics.get(entity);
-                        for (Entity v : vehicles) {
-                            //skip vehicle is occupied
-                            if (Mappers.vehicle.get(v).driver != null) continue;
-                            
-                            //check if character is near a vehicle
-                            PhysicsComponent vehiclePhysics = Mappers.physics.get(v);
-                            if (aiPhysics.body.getPosition().dst(vehiclePhysics.body.getPosition()) < 1.5) {
-                                control.changeVehicle = true;
-                            }
-                        }
-                    }
+                    //todo: debug test behavior. normally character would not be without a ship in space
+                    seekAndEnterVehicle(entity, control, aiPos);
                 } else {
-                    ai.planetTarget = ECSUtil.closestEntity(aiPos, planets);
-                    if (ai.planetTarget != null) {
-                        
-                        Vector2 pPos = Mappers.transform.get(ai.planetTarget).pos;
-                        control.angleTargetFace = MyMath.angleTo(pPos, aiPos);
-                        
-                        
-                        if (aiPos.dst(pPos) < 200f) {
-                            control.moveForward = false;
-                            control.moveBack = true;
-                            control.transition = true;
-                            
-                        } else {
-                            control.moveForward = true;
-                            control.movementMultiplier = 1f;
-                        }
+                    if (ai.planetTarget == null) {
+                        ai.planetTarget = ECSUtil.closestEntity(aiPos, planets);
+                        Gdx.app.debug(getClass().getSimpleName(),
+                                "WARNING: no landing target planet for AI, defaulting nearest planet: " + DebugUtil.objString(ai.planetTarget));
                     }
+                    
+                    //arrive behavior
+                    Vector2 targetPos = Mappers.transform.get(ai.planetTarget).pos;
+                    Body body = Mappers.physics.get(entity).body;
+                    arrive(body, ai.steering, targetPos);
+                    applySteering(body, ai.steering, delta);
+                    //control.angleTargetFace = MyMath.angleTo(targetPos, aiPos);
                 }
                 break;
             }
@@ -157,55 +121,19 @@ public class AISystem extends IteratingSystem {
                     // follow player
                     Entity player = getEngine().getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get()).first();
                     Vector2 pPos = Mappers.transform.get(player).pos;
-                    control.angleTargetFace = MyMath.angleTo(pPos, aiPos);
-                    control.moveForward = true;
-                    control.movementMultiplier = 0.5f;
+                    dumbSeek(control, aiPos, pPos, 0.5f);
                 }
                 
                 CharacterComponent character = Mappers.character.get(entity);
                 if (character != null) {
-                    // follow closet vehicle
-                    Entity closestVehicle = ECSUtil.closestEntity(aiPos, vehicles);
-                    if (closestVehicle != null) {
-                        control.angleTargetFace = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
-                    }
-                    
-                    PhysicsComponent playerPhysics = Mappers.physics.get(entity);
-                    for (Entity v : vehicles) {
-                        //skip vehicle is occupied
-                        if (Mappers.vehicle.get(v).driver != null) continue;
-                        
-                        //check if character is near a vehicle
-                        PhysicsComponent vehiclePhysics = Mappers.physics.get(v);
-                        if (vehiclePhysics.body.getPosition().dst(vehiclePhysics.body.getPosition()) < 1.5) {
-                            control.changeVehicle = true;
-                        }
-                    }
-                    control.moveForward = true;
-                    control.movementMultiplier = 1f;
+                    seekAndEnterVehicle(entity, control, aiPos);
                 }
                 break;
             }
             case takeOffPlanet: {
                 VehicleComponent vehicle = Mappers.vehicle.get(entity);
                 if (vehicle == null) {
-                    Entity closestVehicle = ECSUtil.closestEntity(aiPos, vehicles);
-                    if (closestVehicle != null) {
-                        control.angleTargetFace = MyMath.angleTo(Mappers.transform.get(closestVehicle).pos, aiPos);
-                        control.moveForward = false;
-                        control.movementMultiplier = 0.01f;
-                        PhysicsComponent aiPhysics = Mappers.physics.get(entity);
-                        for (Entity v : vehicles) {
-                            //skip vehicle is occupied
-                            if (Mappers.vehicle.get(v).driver != null) continue;
-                            
-                            //check if character is near a vehicle
-                            PhysicsComponent vehiclePhysics = Mappers.physics.get(v);
-                            if (vehiclePhysics.body.getPosition().dst(vehiclePhysics.body.getPosition()) < 1.5) {
-                                control.changeVehicle = true;
-                            }
-                        }
-                    }
+                    seekAndEnterVehicle(entity, control, aiPos);
                 } else {
                     control.transition = true;
                     ai.state = AIComponent.State.idle;
@@ -213,6 +141,114 @@ public class AISystem extends IteratingSystem {
                 break;
             }
         }
+    }
+    
+    protected void applySteering (Body body, Steering steering, float deltaTime) {
+        boolean anyAccelerations = false;
+        
+        // Update position and linear velocity.
+        if (!steering.linearVelocity.isZero()) {
+            // this method internally scales the force by deltaTime
+            body.applyForceToCenter(steering.linearVelocity, true);
+            anyAccelerations = true;
+        }
+   
+        // If we haven't got any velocity, then we can do nothing.
+        Vector2 linVel = body.getLinearVelocity();
+        float zeroLinearSpeedThreshold = 0.001f;
+        if (!linVel.isZero(zeroLinearSpeedThreshold)) {
+            float newOrientation = MyMath.vectorToAngle(linVel);
+            body.setAngularVelocity((newOrientation - body.getAngularVelocity()) * deltaTime); // this is superfluous if independentFacing is always true
+            body.setTransform(body.getPosition(), newOrientation);
+        }
+        
+        if (anyAccelerations) {
+            // body.activate();
+            
+            // TODO:
+            // Looks like truncating speeds here after applying forces doesn't work as expected.
+            // We should likely cap speeds form inside an InternalTickCallback, see
+            // http://www.bulletphysics.org/mediawiki-1.5.8/index.php/Simulation_Tick_Callbacks
+            
+            // Cap the linear speed
+            Vector2 velocity = body.getLinearVelocity();
+            float currentSpeedSquare = velocity.len2();
+            float maxLinearSpeed = FixedPhysicsSystem.getVelocityLimit();
+            if (currentSpeedSquare > maxLinearSpeed * maxLinearSpeed) {
+                body.setLinearVelocity(velocity.scl(maxLinearSpeed / (float)Math.sqrt(currentSpeedSquare)));
+            }
+            
+        }
+    }
+    
+    private void arrive(Body body, Steering steering, Vector2 targetPos) {
+        float arrivalRadius = 50f; //radius for arriving at the target
+        float slowRadius = 500f; //slow down when within this radius of target
+        float timeToTarget = 0.1f; //time over which to achieve target speed
+        float maxAcceleration = 200f;//aiVehicle.thrust?
+        
+        Vector2 aiPos = body.getPosition();
+        Vector2 direction = steering.linearVelocity.set(targetPos).sub(aiPos);
+        float distanceToTarget = direction.len();
+        float targetSpeed = FixedPhysicsSystem.getVelocityLimit();
+        
+        if (distanceToTarget <= arrivalRadius) {
+            //we have arrived at target
+            steering.linearVelocity.setZero();
+            steering.angularVelocity = 0;
+            //control.moveForward = false;
+            //control.moveBack = false;
+            return;
+        }
+        
+        if (distanceToTarget <= slowRadius) {
+            //scale velocity based on distance
+            targetSpeed *= distanceToTarget / slowRadius;
+        }
+        
+        steering.linearVelocity = direction.scl(targetSpeed / distanceToTarget);
+        steering.linearVelocity.sub(body.getLinearVelocity()).scl(1f / timeToTarget).limit(maxAcceleration);
+        
+        steering.angularVelocity = 0;
+        
+        /*
+        if (currentVelocity > velocityTarget) {
+            control.moveForward = false;
+            control.moveBack = true;
+            control.boost = true;
+        } else {
+            //full speed ahead
+            control.movementMultiplier = 1f;
+            control.moveForward = true;
+            control.boost = true;
+        }*/
         
     }
+    
+    private void dumbSeek(ControllableComponent control, Vector2 aiPos, Vector2 targetPos, float multiplier) {
+        control.angleTargetFace = MyMath.angleTo(targetPos, aiPos);
+        control.moveForward = true;
+        control.movementMultiplier = multiplier;
+    }
+    
+    private void seekAndEnterVehicle(Entity entity,  ControllableComponent control, Vector2 aiPos) {
+        Entity closestVehicle = ECSUtil.closestEntity(aiPos, vehicles);
+        if (closestVehicle != null) {
+            //seek
+            dumbSeek(control, aiPos, Mappers.transform.get(closestVehicle).pos, 1f);
+            
+            PhysicsComponent aiPhysics = Mappers.physics.get(entity);
+            for (Entity v : vehicles) {
+                //skip vehicle is occupied
+                if (Mappers.vehicle.get(v).driver != null) continue;
+                
+                //check if character is near a vehicle
+                PhysicsComponent vehiclePhysics = Mappers.physics.get(v);
+                if (aiPhysics.body.getPosition().dst(vehiclePhysics.body.getPosition()) < 5) {
+                    control.changeVehicle = true;
+                }
+            }
+        }
+    }
+    
 }

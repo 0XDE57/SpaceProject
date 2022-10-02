@@ -2,37 +2,28 @@ package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
+import com.spaceproject.utility.Steering;
 
 public class AIComponent implements Component {
     
-    public Entity attackTarget;//short index...
-    //public Array<Entity> attackTargets;
-    
-    public Entity followTarget;//short index...
-    //public Array<Entity> followTargets;
-    
-    public Entity planetTarget; //test land
-    
     public enum State {
-        dumbwander,
-        attack,
+        idle,
+        wander,
         landOnPlanet,
         takeOffPlanet,
-        idle,
+        attack,
         follow
     }
     
     public State state;
     
-    //statemachine?
-	/*
-	State {
-		follow,
-		attack,
-		gotoPlace,
-		idle,
-		customTask -> delegate to logic
-		...	
-	}	
-	 */
+    public Steering steering;
+    
+    public Entity attackTarget; //todo: should be in attack state data?
+    
+    public Entity followTarget; //todo: should be in follow state data?
+    
+    public Entity planetTarget; //todo: should be in land state data?
+    
+    
 }
