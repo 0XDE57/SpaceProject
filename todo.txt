@@ -45,7 +45,7 @@ See SystemsConfig for defining system priories and properties.
 
 
 One goal is to have everything highly configurable. (and perhaps I have gone too far in this direction at the cost of complexity?)
-Data Directory (...\SpaceProject\android\assets)
+Data Directory (...\SpaceProject\assets)
     \config:
         plain text json files that define all values for game. these files will be written on first run of the game.
         if no config exists, default is loaded and written to disk. if config exists on disk, it is loaded.

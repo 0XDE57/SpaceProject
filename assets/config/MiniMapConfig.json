@@ -1,0 +1,87 @@
+{
+fileName: config/MiniMapConfig.json
+miniMapPosition: bottomRight
+defaultMapScale: 200
+gridSize: 65536
+borderWidth: 1
+playerMarkerSize: 3
+celestialMarkerSize: 6
+lodRenderOrbitPathScale: 500
+edgePad: 50
+miniEdgePad: 10
+miniWidth: 320
+miniHeight: 240
+zoomMultiplier: 4
+minScale: 0.5
+maxSale: 10000
+drawScaleTimer: 5000
+fontSize: 12
+debugDisableClipping: false
+debugDrawLoadDist: false
+backingColor: {
+	r: 0
+	g: 0
+	b: 0
+	a: 0.9
+}
+borderColor: {
+	r: 0.1
+	g: 0.63
+	b: 0.88
+	a: 1
+}
+gridColor: {
+	r: 0.2
+	g: 0.2
+	b: 0.2
+	a: 0.8
+}
+mouseColor: {
+	r: 1
+	g: 0.2
+	b: 0.2
+	a: 1
+}
+viewportColor: {
+	r: 0.07
+	g: 0.45
+	b: 0.64
+	a: 1
+}
+universeMarkerColor: {
+	r: 1
+	g: 1
+	b: 1
+	a: 1
+}
+orbitPathColor: {
+	r: 0.5
+	g: 0.5
+	b: 0.5
+	a: 0.5
+}
+playerMarkerColor: {
+	r: 1
+	g: 1
+	b: 1
+	a: 1
+}
+velocityVecColor: {
+	r: 1
+	g: 0
+	b: 0
+	a: 1
+}
+orientationColor: {
+	r: 0.63
+	g: 0.63
+	b: 0.63
+	a: 0.4
+}
+debugLoadDistColor: {
+	r: 1
+	g: 0
+	b: 0
+	a: 1
+}
+}

@@ -1,0 +1,32 @@
+{
+fileName: config/KeyConfig.json
+forward: 51
+right: 32
+left: 29
+back: 47
+alter: 59
+attack: 62
+defend: 57
+changeVehicle: 35
+land: 48
+activateHyperDrive: 8
+toggleHUD: 36
+toggleEdgeMap: 42
+toggleSpaceMap: 41
+fullscreen: 254
+vsync: 251
+zoomOut: 69
+zoomIn: 70
+resetZoom: 56
+rotateLeft: 71
+rotateRight: 72
+toggleDebug: 246
+toggleEngineViewer: 252
+togglePos: 144
+toggleComponents: 145
+toggleBounds: 146
+toggleFPS: 147
+toggleOrbit: 148
+toggleVector: 149
+toggleMenu: 153
+}

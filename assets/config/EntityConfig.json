@@ -1,0 +1,23 @@
+{
+fileName: config/EntityConfig.json
+characterHealth: 100
+characterWalkSpeed: 200
+controlTimerDodge: 500
+controlTimerVehicle: 1000
+controlTimerHyperCooldown: 1000
+shipSizeMin: 5
+shipSizeMax: 18
+shipHealth: 200
+engineThrust: 200
+hyperSpeed: 1000
+dodgeForce: 5
+dodgeAnimationTimer: 475
+cannonSize: 1
+cannonAmmo: 5
+cannonDamage: 15
+cannonFireRate: 200
+cannonRechargeRate: 1000
+cannonVelocity: 60
+cannonAcceleration: 200
+shrinkGrowAnimTime: 2500
+}

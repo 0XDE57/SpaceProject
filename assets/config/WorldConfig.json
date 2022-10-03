@@ -1,0 +1,5 @@
+{
+fileName: config/WorldConfig.json
+tileSize: 2
+chunkSize: 8
+}

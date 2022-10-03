@@ -1,0 +1,43 @@
+{
+fileName: config/UIConfig.json
+playerHPBarY: 55
+playerHPBarWidth: 200
+playerHPBarHeight: 12
+playerAmmoBarColor: {
+	r: 0
+	g: 0.5
+	b: 0.5
+	a: 1
+}
+playerAmmoBarRechargeColor: {
+	r: 0.4392157
+	g: 0.5019608
+	b: 0.5647059
+	a: 1
+}
+renderFullHealth: false
+entityHPbarLength: 40
+entityHPbarWidth: 8
+entityHPbarYOffset: -20
+entityHPbarBackground: {
+	r: 1
+	g: 1
+	b: 1
+	a: 0.5
+}
+entityHPbarOpacity: 0.7
+orbitObjectColor: {
+	r: 1
+	g: 1
+	b: 1
+	a: 1
+}
+orbitSyncPosColor: {
+	r: 1
+	g: 0
+	b: 0
+	a: 1
+}
+lodShowOrbitPath: 500
+orbitFadeFactor: 6
+}

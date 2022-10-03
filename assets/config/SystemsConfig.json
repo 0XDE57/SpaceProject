@@ -1,0 +1,185 @@
+{
+fileName: config/SystemsConfig.json
+systems: [
+	{
+		className: com.spaceproject.systems.DesktopInputSystem
+		priority: 10
+		haltOnGamePause: true
+		loadInSpace: true
+		loadInWorld: true
+		loadOnDesktop: true
+		loadOnMobile: false
+	}
+	{
+		className: com.spaceproject.systems.MobileInputSystem
+		priority: 20
+		haltOnGamePause: true
+		loadInSpace: true
+		loadInWorld: true
+		loadOnDesktop: false
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.AISystem
+		priority: 30
+		haltOnGamePause: true
+		loadInSpace: true
+		loadInWorld: true
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.CharacterControlSystem
+		priority: 40
+		haltOnGamePause: true
+		loadInSpace: true
+		loadInWorld: true
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.ShipControlSystem
+		priority: 50
+		haltOnGamePause: true
+		loadInSpace: true
+		loadInWorld: true
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.HyperDriveSystem
+		priority: 55
+		haltOnGamePause: true
+		loadInSpace: true
+		loadInWorld: true
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.FixedPhysicsSystem
+		priority: 60
+		haltOnGamePause: true
+		loadInSpace: true
+		loadInWorld: true
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.OrbitSystem
+		priority: 70
+		haltOnGamePause: true
+		loadInSpace: true
+		loadInWorld: false
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.WorldWrapSystem
+		priority: 80
+		haltOnGamePause: true
+		loadInSpace: false
+		loadInWorld: true
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.CameraSystem
+		priority: 90
+		haltOnGamePause: false
+		loadInSpace: true
+		loadInWorld: true
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.SpaceRenderingSystem
+		priority: 100
+		haltOnGamePause: false
+		loadInSpace: true
+		loadInWorld: false
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.WorldRenderingSystem
+		priority: 110
+		haltOnGamePause: false
+		loadInSpace: false
+		loadInWorld: true
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.HUDSystem
+		priority: 120
+		haltOnGamePause: false
+		loadInSpace: true
+		loadInWorld: true
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.ExpireSystem
+		priority: 130
+		haltOnGamePause: true
+		loadInSpace: true
+		loadInWorld: true
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.WorldLoadingSystem
+		priority: 140
+		haltOnGamePause: true
+		loadInSpace: false
+		loadInWorld: true
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.SpaceLoadingSystem
+		priority: 150
+		haltOnGamePause: false
+		loadInSpace: true
+		loadInWorld: false
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.SpaceParallaxSystem
+		priority: 160
+		haltOnGamePause: true
+		loadInSpace: true
+		loadInWorld: false
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.ScreenTransitionSystem
+		priority: 170
+		haltOnGamePause: true
+		loadInSpace: true
+		loadInWorld: true
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.DebugSystem
+		priority: 180
+		haltOnGamePause: false
+		loadInSpace: true
+		loadInWorld: true
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+	{
+		className: com.spaceproject.systems.RemovalSystem
+		priority: 200
+		haltOnGamePause: false
+		loadInSpace: true
+		loadInWorld: true
+		loadOnDesktop: true
+		loadOnMobile: true
+	}
+]
+}

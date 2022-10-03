@@ -1,0 +1,18 @@
+{
+fileName: config/DebugConfig.json
+drawDebugUI: true
+drawFPS: true
+drawDiagnosticInfo: true
+drawComponentList: false
+drawPos: false
+box2DDebugRender: true
+drawBodies: true
+drawJoints: true
+drawAABBs: true
+drawInactiveBodies: true
+drawVelocities: true
+drawContacts: true
+drawOrbitPath: false
+drawMousePos: false
+drawEntityList: false
+}

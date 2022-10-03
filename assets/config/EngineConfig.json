@@ -1,0 +1,17 @@
+{
+fileName: config/EngineConfig.json
+vsync: true
+renderScale: 30
+viewportWidth: 1280
+viewportHeight: 720
+entityScale: 4
+bodyScale: 0.1
+meterPerUnit: 0.1
+pixelPerUnit: 2
+physicsVelocityIterations: 6
+physicsPositionIterations: 2
+physicsStepPerFrame: 60
+maxNoiseGenThreads: 4
+defaultZoomCharacter: 0.5
+defaultZoomVehicle: 1
+}
