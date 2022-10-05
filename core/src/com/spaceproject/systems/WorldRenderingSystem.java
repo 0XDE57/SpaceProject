@@ -29,6 +29,7 @@ public class WorldRenderingSystem extends EntitySystem {
     private final WorldConfig worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
     
     private boolean debugShowEdgeTile = false;
+    private boolean debugGrayscaleWorld = false;
     
     public WorldRenderingSystem() {
         this.cam = GameScreen.cam;
@@ -109,10 +110,16 @@ public class WorldRenderingSystem extends EntitySystem {
                 
                 //render tile
                 Color tileColor = tiles.get(noiseMap.tileMap[tX][tY]).getColor();
+                if (debugGrayscaleWorld) {
+                    tileColor.r = noiseMap.heightMap[tX][tY];
+                    tileColor.g = noiseMap.heightMap[tX][tY];
+                    tileColor.b = noiseMap.heightMap[tX][tY];
+                }
                 if (debugShowEdgeTile) {
                     if (tX == noiseMap.heightMap.length - 1 || tY == noiseMap.heightMap.length - 1)
                         tileColor = Color.BLACK;
                 }
+                
                 spriteBatch.setColor(tileColor);
                 spriteBatch.draw(tileTex,
                         tileX * tileSize,
