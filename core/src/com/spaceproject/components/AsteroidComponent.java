@@ -5,7 +5,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
-import com.spaceproject.utility.SimpleTimer;
 
 public class AsteroidComponent implements Component {
     
@@ -20,8 +19,6 @@ public class AsteroidComponent implements Component {
     public float area;
     
     public boolean doShatter = false;
-    
-    public SimpleTimer mergeTimer;
     
     public Color debugColor; //temporary rendering color
     

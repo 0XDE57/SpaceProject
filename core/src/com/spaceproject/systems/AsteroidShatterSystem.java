@@ -7,6 +7,7 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.GeometryUtils;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.ShortArray;
@@ -19,6 +20,8 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
     
     private final DelaunayTriangulator delaunay = new DelaunayTriangulator();
     private final float minAsteroidSize = 100; //anything smaller than this will not create more
+    private final float maxDriftVel = 2.0f; //drift when shatter
+    private final float maxDriftAngle = 0.25f; //angular drift when shatter
     
     @Override
     public void addedToEngine(Engine engine) { }
@@ -32,35 +35,35 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
     @Override
     public void entityRemoved(Entity entity) {
         AsteroidComponent asteroid = Mappers.asteroid.get(entity);
-        if (asteroid != null && asteroid.doShatter) {
-            spawnChildren(entity, asteroid);
+        if (asteroid == null) return;
+        
+        if (asteroid.doShatter && asteroid.area >= minAsteroidSize) {
+            shatterAsteroid(entity, asteroid);
         }
     }
     
-    public void spawnChildren(Entity parentAsteroid, AsteroidComponent asteroid) {
-        if (asteroid.area >= minAsteroidSize) {
-            float[] vertices = asteroid.polygon.getVertices();
-            
-            //debug center of mass / origin
-            Vector2 center = new Vector2();
-            GeometryUtils.polygonCentroid(vertices, 0, vertices.length, center);
-            if (!asteroid.centerOfMass.epsilonEquals(center)) {
-                Gdx.app.debug(this.getClass().getSimpleName(), "WARNING: polygonCentroid disagreement");
-            }
-            
-            //create new polygons from vertices + center point to "sub shatter" into smaller polygon shards
-            int length = vertices.length;
-            float[] newPoly = new float[length + 2];
-            System.arraycopy(vertices, 0, newPoly, 0, vertices.length);
-            //add new point in center of triangle
-            newPoly[length] = center.x;
-            newPoly[length + 1] = center.y;
-            
-            subShatter(parentAsteroid, newPoly);
+    private void shatterAsteroid(Entity parentAsteroid, AsteroidComponent asteroid) {
+        float[] vertices = asteroid.polygon.getVertices();
+        
+        //debug center of mass / origin
+        Vector2 center = new Vector2();
+        GeometryUtils.polygonCentroid(vertices, 0, vertices.length, center);
+        if (!asteroid.centerOfMass.epsilonEquals(center)) {
+            Gdx.app.debug(this.getClass().getSimpleName(), "WARNING: polygonCentroid disagreement");
         }
+        
+        //create new polygons from vertices + center point to "sub shatter" into smaller polygon shards
+        int length = vertices.length;
+        float[] newPoly = new float[length + 2];
+        System.arraycopy(vertices, 0, newPoly, 0, vertices.length);
+        //add new point in center of triangle
+        newPoly[length] = center.x;
+        newPoly[length + 1] = center.y;
+        
+        spawnChildAsteroid(parentAsteroid, newPoly);
     }
     
-    private void subShatter(Entity parentAsteroid, float[] vertices) {
+    private void spawnChildAsteroid(Entity parentAsteroid, float[] vertices) {
         /* NOTE: Box2D expects Polygons vertices are stored with a counter clockwise winding (CCW).
         We must be careful because the notion of CCW is with respect to a right-handed
         coordinate system with the z-axis pointing out of the plane. */
@@ -103,31 +106,18 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
                 continue;
             }
             
-            //todo: broken rotation when shattering some polygons rotate and jump instead of simply separating in place
-            /* todo: fix triangle origin to be center
-            //1. find minX minY
-            //2. shift vertices to be centered around 0,0 relatively
-            Vector2 center = new Vector2();
-            GeometryUtils.polygonCentroid(hull, 0, hull.length, center);
-            center.add(minX, minY);
-            for (int i = 0; i < hull.length; i += 2) {
-                hull[i] -= center.x;
-                hull[i + 1] -= center.y;
-            }
-            //3. push by center offset so vertices are correct position relative to parent
-            Vector2 newPos = parentPos.copy().add(center);
-            */
-            //todo: add slight velocity from center of parent poly outward to each sub poly, so shatter gently drift apart
-            //Vector2 center = new Vector2();
-            //GeometryUtils.triangleCentroid(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5], center);
-            //Vector2 driftVel = MyMath.vector(center.angleRad(parentAsteroid.getComponent(TransformComponent.class).pos), 1);
+            Body parentBody = Mappers.physics.get(parentAsteroid).body;
+            Vector2 pos = parentBody.getPosition();
+            Vector2 vel = parentBody.getLinearVelocity();
+    
+            //add some variation in velocity and angular so pieces drift apart
+            Vector2 driftVel = MyMath.vector(MathUtils.random(0, MathUtils.PI2), maxDriftVel);
+            vel.add(driftVel);
+            float angularDrift = MathUtils.random(-maxDriftAngle, maxDriftAngle);
             
-            Body body = Mappers.physics.get(parentAsteroid).body;
-            Vector2 vel = body.getLinearVelocity();
-            Vector2 pos = body.getPosition();
             Entity childAsteroid = EntityFactory.createAsteroid((long) (Math.random() * Long.MAX_VALUE),
-                    pos.x, pos.y, vel.x, vel.y, body.getAngle(), hull);
-            Mappers.physics.get(childAsteroid).body.setAngularVelocity(body.getAngularVelocity());
+                    pos.x, pos.y, vel.x, vel.y, parentBody.getAngle(), hull);
+            Mappers.physics.get(childAsteroid).body.setAngularVelocity(parentBody.getAngularVelocity() + angularDrift);
             
             getEngine().addEntity(childAsteroid);
         }

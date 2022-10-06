@@ -20,7 +20,7 @@ import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
-public class AsteroidSpawner extends EntitySystem {
+public class AsteroidBeltSystem extends EntitySystem {
 
     private ImmutableArray<Entity> asteroids;
     private ImmutableArray<Entity> spawnBelt;
@@ -55,29 +55,30 @@ public class AsteroidSpawner extends EntitySystem {
             PhysicsComponent physics = Mappers.physics.get(entity);
             if (asteroid.parentOrbitBody != null) {
                 TransformComponent parentTransform = Mappers.transform.get(asteroid.parentOrbitBody);
-                AsteroidBeltComponent stellarDisk = Mappers.asteroidBelt.get(asteroid.parentOrbitBody);
+                AsteroidBeltComponent asteroidBelt = Mappers.asteroidBelt.get(asteroid.parentOrbitBody);
                 //set velocity perpendicular to parent body, (simplified 2-body model)
-                float angle = (float) (MyMath.angleTo(parentTransform.pos, physics.body.getPosition()) + (stellarDisk.clockwise ? -(Math.PI / 2) : Math.PI / 2));
-                physics.body.setLinearVelocity(MyMath.vector(angle, stellarDisk.velocity));
+                float angle = (float) (MyMath.angleTo(parentTransform.pos, physics.body.getPosition()) + (asteroidBelt.clockwise ? -(Math.PI / 2) : Math.PI / 2));
+                physics.body.setLinearVelocity(MyMath.vector(angle, asteroidBelt.velocity));
             } else {
+                
                 // re-entry?
                 for (Entity parentEntity : spawnBelt) {
-                    AsteroidBeltComponent stellarDisk = Mappers.asteroidBelt.get(parentEntity);
+                    AsteroidBeltComponent asteroidBelt = Mappers.asteroidBelt.get(parentEntity);
                     TransformComponent parentTransform = Mappers.transform.get(parentEntity);
                     
                     //todo: if close enough: slowly pull into stream of asteroid, match velocity and angle
                     float dist = parentTransform.pos.dst(physics.body.getPosition());
-                    if (dist > stellarDisk.radius - (stellarDisk.bandWidth /2) && dist < stellarDisk.radius + (stellarDisk.bandWidth /2)) {
-                        float targetAngle = (float) (MyMath.angleTo(parentTransform.pos, physics.body.getPosition()) + (stellarDisk.clockwise ? -(Math.PI / 2) : Math.PI / 2));
+                    if (dist > asteroidBelt.radius - (asteroidBelt.bandWidth /2) && dist < asteroidBelt.radius + (asteroidBelt.bandWidth /2)) {
+                        float targetAngle = (float) (MyMath.angleTo(parentTransform.pos, physics.body.getPosition()) + (asteroidBelt.clockwise ? -(Math.PI / 2) : Math.PI / 2));
                         double angleDeltaThreshold = Math.PI / 6;
                         boolean meetsAngleThreshold = Math.abs(physics.body.getLinearVelocity().angleRad() - targetAngle) < angleDeltaThreshold;
                         
                         float velDeltaThreshold = 5f;
-                        boolean meetsVelThreshold = Math.abs(physics.body.getLinearVelocity().len() - stellarDisk.velocity) < velDeltaThreshold;
+                        boolean meetsVelThreshold = Math.abs(physics.body.getLinearVelocity().len() - asteroidBelt.velocity) < velDeltaThreshold;
     
                         //todo: if should merge, begin merge
                         if (meetsAngleThreshold /*&& meetsVelThreshold*/) {
-                            asteroid.parentOrbitBody = parentEntity;
+                            //asteroid.parentOrbitBody = parentEntity;
                             Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID re-entry into orbit");
                             break; // no point looking at other disks once met
                         }
