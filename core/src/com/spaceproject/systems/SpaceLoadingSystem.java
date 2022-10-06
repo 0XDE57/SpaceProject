@@ -15,7 +15,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AISpawnComponent;
 import com.spaceproject.components.BarycenterComponent;
-import com.spaceproject.components.CircumstellarDiscComponent;
+import com.spaceproject.components.AsteroidBeltComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.RemoveComponent;
@@ -207,9 +207,9 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         star.add(barycenter);
     
         //todo, allow multiple disks at different radius: make sure layer is distinct (not overlap planet orbits)
-        CircumstellarDiscComponent circumstellarDisc = new CircumstellarDiscComponent();
+        AsteroidBeltComponent circumstellarDisc = new AsteroidBeltComponent();
         circumstellarDisc.radius = 1500;
-        circumstellarDisc.width = 220; //how wide of band centered on radius, concentrated at radius
+        circumstellarDisc.bandWidth = 220; //how wide of band centered on radius, concentrated at radius
         circumstellarDisc.maxSpawn = 180; //todo: calculate density: ratio of asteroids to space in disk
         circumstellarDisc.velocity = 20;
         circumstellarDisc.clockwise = isRotateClockwise;

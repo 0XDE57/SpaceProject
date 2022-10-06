@@ -8,6 +8,7 @@ public class Mappers {
     public static final ComponentMapper<AIComponent> AI = ComponentMapper.getFor(AIComponent.class);
     public static final ComponentMapper<AISpawnComponent> spawn = ComponentMapper.getFor(AISpawnComponent.class);
     public static final ComponentMapper<AsteroidComponent> asteroid = ComponentMapper.getFor(AsteroidComponent.class);
+    public static final ComponentMapper<AsteroidBeltComponent> asteroidBelt = ComponentMapper.getFor(AsteroidBeltComponent.class);
     public static final ComponentMapper<AttachedToComponent> attachedTo = ComponentMapper.getFor(AttachedToComponent.class);
     public static final ComponentMapper<BarrelRollComponent> barrelRoll = ComponentMapper.getFor(BarrelRollComponent.class);
     public static final ComponentMapper<BarycenterComponent> barycenter = ComponentMapper.getFor(BarycenterComponent.class);
@@ -15,7 +16,6 @@ public class Mappers {
     public static final ComponentMapper<CannonComponent> cannon = ComponentMapper.getFor(CannonComponent.class);
     public static final ComponentMapper<CharacterComponent> character = ComponentMapper.getFor(CharacterComponent.class);
     public static final ComponentMapper<ChargeCannonComponent> chargeCannon = ComponentMapper.getFor(ChargeCannonComponent.class);
-    public static final ComponentMapper<CircumstellarDiscComponent> circumstellar = ComponentMapper.getFor(CircumstellarDiscComponent.class);
     public static final ComponentMapper<ControlFocusComponent> controlFocus = ComponentMapper.getFor(ControlFocusComponent.class);
     public static final ComponentMapper<ControllableComponent> controllable = ComponentMapper.getFor(ControllableComponent.class);
     public static final ComponentMapper<DamageComponent> damage = ComponentMapper.getFor(DamageComponent.class);
@@ -37,4 +37,5 @@ public class Mappers {
     public static final ComponentMapper<TextureComponent> texture = ComponentMapper.getFor(TextureComponent.class);
     public static final ComponentMapper<TransformComponent> transform = ComponentMapper.getFor(TransformComponent.class);
     public static final ComponentMapper<VehicleComponent> vehicle = ComponentMapper.getFor(VehicleComponent.class);
+    
 }

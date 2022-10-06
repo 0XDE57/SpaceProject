@@ -13,7 +13,7 @@ import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.CamTargetComponent;
 import com.spaceproject.components.ChargeCannonComponent;
-import com.spaceproject.components.CircumstellarDiscComponent;
+import com.spaceproject.components.AsteroidBeltComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.RemoveComponent;
@@ -89,7 +89,7 @@ public class PhysicsContactListener implements ContactListener {
     private void asteroidImpact(Entity entity, AsteroidComponent asteroid, float impulse) {
         if (impulse > asteroidBreakOrbitThreshold) {
             if (asteroid.parentOrbitBody != null) {
-                CircumstellarDiscComponent circumstellar = Mappers.circumstellar.get(asteroid.parentOrbitBody);
+                AsteroidBeltComponent circumstellar = Mappers.asteroidBelt.get(asteroid.parentOrbitBody);
                 //if (circumstellar.spawnTimer != null && circumstellar.spawnTimer.canDoEvent()) {
                 if (circumstellar.spawned == circumstellar.maxSpawn) {
                     asteroid.parentOrbitBody = null;
