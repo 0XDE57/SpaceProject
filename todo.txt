@@ -298,7 +298,7 @@ Legend:
         [ ] player eyes facing forward cone light
         [ ] lava on planets can be a light source
     [...] better star rendering
-        [ ] gausian blur, write star to buffer.
+        [ ] gaussian blur, write star to buffer.
             use gdx-vfx, stop reinventing wheels
             https://github.com/crashinvaders/gdx-vfx
         [ ] smooth out image
