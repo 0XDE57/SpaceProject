@@ -175,8 +175,9 @@ Legend:
 
 
 [ ] terrible BUG! lerping camera movement is giving some jittering in the rendering when vsync on.
+        this is caused by interpolation being a percentage from target and the value is
+        shifting back and forth when near target.
         less visible when vsync off. not visible when lockedOn.
-        look into interpolating physics, and investigate floating point errors
 
 [...] BUG! start game, leave to main menu, return to game: planets do not load
     [x] clean up, dispose and unload systems properly when return to main menu
@@ -297,6 +298,9 @@ Legend:
         [ ] player eyes facing forward cone light
         [ ] lava on planets can be a light source
     [...] better star rendering
+        [ ] gaussian blur, write star to buffer.
+            use gdx-vfx, stop reinventing wheels
+            https://github.com/crashinvaders/gdx-vfx
         [ ] smooth out image
             could extend the source star radius on texture (or simply full rectangle), then simply set the alpha drop off in the shader
         [ ] could shift the noise vertically and horizontally
@@ -387,6 +391,8 @@ Legend:
               custom shape renderer?
               if we are doing too much batch flushing could use (bonus if could do outlined shapes, perhaps a job for a shader instead?):
               https://github.com/earlygrey/shapedrawer
+    [ ] its really hard to see ships when zoomed out.
+        look into homeworld - style NLIPS, or non-linear inverse perspective scaling
 
 [...] respawn
     [x] for now, just place back at origin 0, 0
@@ -767,6 +773,8 @@ Legend:
             - I/O cables and circuitry / scripting possibilities...way out of scope.
 
 [...] planet generation
+    [ ] grid based loading 3x3 tiles with "bleed area" margin: leeway/tolerance for loading when on edge.
+        so that tiles aren't constantly loading or unloading when walking along edge between tiles.
     [ ] research planet attributes //size, temperature, pressure, atmosphere/elements(https://en.wikipedia.org/wiki/Astronomical_spectroscopy)...etc
         https://en.wikipedia.org/wiki/Circumstellar_habitable_zone
         [ ] add temperature variable to planet determined by distance from star
