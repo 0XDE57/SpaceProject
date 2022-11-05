@@ -60,6 +60,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     private final Matrix4 projectionMatrix;
     private final BitmapFont fontSmall, fontLarge;
     private final Box2DDebugRenderer debugRenderer;
+    private final Vector3 tempProjVector = new Vector3(); //for (un)/projecting screen coords
     
     //textures
     private final Texture texCompBack = TextureFactory.createTile(Color.GRAY);
@@ -68,8 +69,8 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     //entity storage
     private final Array<Entity> objects;
     
-    private static final ArrayList<DebugText> debugTexts = new ArrayList<DebugText>();
-    private static final ArrayList<DebugVec> debugVecs = new ArrayList<DebugVec>();
+    private static final ArrayList<DebugText> debugTexts = new ArrayList<>();
+    private static final ArrayList<DebugVec> debugVecs = new ArrayList<>();
     
     
     public DebugSystem() {
@@ -324,7 +325,6 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     /** Draw all Entity components and fields */
     private void drawComponentList() {
         // todo: this is a very heavy method, consider frustrum culling: if object is offscreen do not render!
-        
         float fontHeight = fontSmall.getLineHeight();
         int backWidth = 400;//width of background
         
@@ -336,7 +336,8 @@ public class DebugSystem extends IteratingSystem implements Disposable {
             ImmutableArray<Component> components = entity.getComponents();
             
             //use Vector3.cpy() to project only the position and avoid modifying projection matrix for all coordinates
-            Vector3 screenPos = cam.project(new Vector3(t.pos.cpy(), 0));
+            tempProjVector.set(t.pos.cpy(), 0);
+            Vector3 screenPos = cam.project(tempProjVector);
             
             //calculate spacing and offset for rendering
             int fields = 0;
@@ -389,35 +390,36 @@ public class DebugSystem extends IteratingSystem implements Disposable {
             
             //String vel = " ~ " + MyMath.round(t.velocity.len(), 1);
             String info = MyMath.round(t.pos.x, 1) + "," + MyMath.round(t.pos.y, 1);
-            
-            Vector3 screenPos = cam.project(new Vector3(t.pos.cpy(), 0));
+    
+            tempProjVector.set(t.pos.cpy(), 0);
+            Vector3 screenPos = cam.project(tempProjVector);
             fontSmall.draw(batch, Integer.toHexString(entity.hashCode()), screenPos.x, screenPos.y);
             fontSmall.draw(batch, info, screenPos.x, screenPos.y-10);
         }
     }
     
     private void drawMousePos() {
+        //get mouse coords
         int x = Gdx.input.getX();
         int y = Gdx.graphics.getHeight() - Gdx.input.getY();
         
-        String localPos = x + "," + y;
-        fontSmall.draw(batch, localPos, x, y);
-    
-        Vector3 worldPos = cam.unproject(new Vector3(x, y, 0));
-        long seed = MyMath.getSeed(worldPos.x, worldPos.y);
-        fontSmall.draw(batch, (int) worldPos.x + "," + (int) worldPos.y + " (" + seed + ")", x, y + fontSmall.getLineHeight());
-    
-        //float angle = MyMath.angleTo(Gdx.input.getX(), Gdx.input.getY(), Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
-        //fontSmall.draw(batch, MyMath.round(angle,3) + " / " + MyMath.round(angle * MathUtils.radDeg, 3), x, y + (int) fontSmall.getLineHeight()*2);
+        //convert to game world coords
+        tempProjVector.set(x, y , 0);
+        Vector3 worldPos = cam.unproject(tempProjVector);
+        
+        String location = x + "," + y + "\n" + MyMath.formatVector3as2(worldPos, 1);
+        //location += "\n" +  MyMath.getSeed(worldPos.x, worldPos.y);//calculate seed for position if used
+        fontSmall.draw(batch, location, x, y);
     }
     
     private void drawMouseLine() {
         int crossHairSize = 32;
-        Color mouseLineColor = Color.BLACK;
+        Color mouseLineColor = Color.WHITE;
         
         int x = Gdx.input.getX();
         int y = Gdx.input.getY();
-        Vector3 worldPos = cam.unproject(new Vector3(x, y, 0));
+        tempProjVector.set(x, y, 0);
+        Vector3 worldPos = cam.unproject(tempProjVector);
         shape.setColor(mouseLineColor);
         shape.line(worldPos.x, worldPos.y + crossHairSize, worldPos.x, worldPos.y - crossHairSize);
         shape.line(worldPos.x + crossHairSize, worldPos.y, worldPos.x - crossHairSize, worldPos.y);
@@ -506,12 +508,15 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         addDebugText(text, x, y, false);
     }
     
+    static Vector3 tempProj = new Vector3();
     public static void addDebugText(String text, float x, float y, boolean project) {
         if (project) {
-            Vector3 screenPos = cam.project(new Vector3(x, y, 0));
+            tempProj.set(x, y, 0);
+            Vector3 screenPos = cam.project(tempProj);
             x = screenPos.x;
             y = screenPos.y;
         }
+        //todo: pooling or some way to use of new here
         debugTexts.add(new DebugText(text, x, y));
     }
     

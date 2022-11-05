@@ -148,6 +148,10 @@ public abstract class MyMath {
         return round(vec.x, decimal) + ", " + round(vec.y, decimal) + ", " + round(vec.z, decimal);
     }
     
+    public static String formatVector3as2(Vector3 vec, int decimal) {
+        return round(vec.x, decimal) + ", " + round(vec.y, decimal);
+    }
+    
     /**
      * Round value with specified precision.
      *
