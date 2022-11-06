@@ -82,7 +82,7 @@ It may be difficult to find sensible touchscren controls, I am focused more on d
 * Set up your [Development Environment](https://libgdx.badlogicgames.com/documentation/gettingstarted/Setting%20Up.html)
 * Make sure Android SDK is installed.
 * Import project in IDE of choice using gradle.
-* If a "File not found" error occurs, check the working directory. Append "android\assets" to the working directory in run configurations.
+* If a "File not found" error occurs, check the working directory. Append "\assets" to the working directory in run configurations.
 
 
 **Android Studio**
@@ -90,8 +90,8 @@ It may be difficult to find sensible touchscren controls, I am focused more on d
   * create Run Configuration
   * main class = com.spaceproject.desktop.DesktopLauncher
   * use classpath of module 'desktop'
-  * working directory = ...\SpaceProject\android\assets
-  * (must ensure working directory includes assets so data like fonts, particles, shaders, configs can be loaded)
+  * working directory = ...\SpaceProject\assets
+      * (must ensure working directory includes assets so data like fonts, particles, shaders, configs can be loaded)
   * build and run!
 * Android
   * enable dev options, enable usb debugging
