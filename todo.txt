@@ -174,10 +174,20 @@ Legend:
     [ * ] = exceptions
 
 
-[ ] terrible BUG! lerping camera movement is giving some jittering in the rendering when vsync on.
+[x] terrible BUG! lerping camera movement is giving some jittering in the rendering when vsync on.
         this is caused by interpolation being a percentage from target and the value is
         shifting back and forth when near target.
         less visible when vsync off. not visible when lockedOn.
+        update: discovered problem:
+            we want to lerp the camera for some smoothed following
+            but if we lerp directly using built in camera.position.lerp()
+              x += alpha * (target.x - x)
+              y += alpha * (target.y - y)
+            we are left from some jitter due to the lerp result being a ratio between self and target values.
+            the cam position would be closer to the lerped position one frame leading to a lower value
+            the next frame which in turns lags the camera and the lerp value will be higher
+            leading to an ugly back and forth jitter making cam / sprites render unstable/jumpy
+        solution: perform a rolling average on the lerped value over a few frames and set camera position to average.
 
 [...] BUG! start game, leave to main menu, return to game: planets do not load
     [x] clean up, dispose and unload systems properly when return to main menu

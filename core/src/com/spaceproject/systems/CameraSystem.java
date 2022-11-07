@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Queue;
 import com.spaceproject.components.CamTargetComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.TransformComponent;
@@ -29,9 +30,11 @@ public class CameraSystem extends IteratingSystem {
     private final float minZoom = 0f;
     private final float maxZoom = 100000;
     private final float smoothFollowSpeed = 2f;
-    private final float maxOffsetFromTarget = 9f;
+    private float maxOffsetFromTarget = 9f;
     private final Vector2 offsetFromTarget = new Vector2();
-    private final Vector3 tempVec = new Vector3();
+    private final int frames = 10; //how many frames to average lerp over
+    private final Queue<Vector2> averageTarget = new Queue<>();
+    private final Vector3 average = new Vector3();
     
     private ImmutableArray<Entity> focalPoints;
     private boolean inCombat = false;
@@ -140,11 +143,31 @@ public class CameraSystem extends IteratingSystem {
         
         cam.update();
     }
-
+    
     private void lerpToTarget(Vector2 pos, float delta) {
-        tempVec.set(pos, 0);
-        cam.position.lerp(tempVec, smoothFollowSpeed * delta);
+        //we want to lerp the camera for some smoothed following
+        //but if we lerp directly using built in camera.position.lerp()
+        //  x += alpha * (target.x - x)
+        //  y += alpha * (target.y - y)
+        //we are left from some jitter due to the lerp result being a ratio between self and target values.
+        //the cam position would be closer to the lerped position one frame leading to a lower value
+        //the next frame which in turns lags the camera and the lerp value will be higher
+        //leading to an ugly back and forth jitter making cam / sprites render unstable/jumpy
         
+        //so we calculate the rolling average of the lerped value over a few frames to smooth out jitter
+        averageTarget.addLast(new Vector2(cam.position.x + (pos.x - cam.position.x) * smoothFollowSpeed * delta,
+                cam.position.y + (pos.y - cam.position.y) * smoothFollowSpeed * delta));
+        if (averageTarget.size > frames) {
+            averageTarget.removeFirst();
+        }
+        average.set(0,0,0);
+        for (Vector2 v : averageTarget) {
+            average.add(v.x, v.y, 0);
+        }
+        average.scl(1.0f / averageTarget.size);
+        cam.position.set(average);
+    
+        //clamp lerp offset so character remains on screen
         offsetFromTarget.set(pos.x - cam.position.x, pos.y - cam.position.y);
         if (offsetFromTarget.len() > maxOffsetFromTarget) {
             Vector2 clamped = offsetFromTarget.clamp(0, maxOffsetFromTarget);
