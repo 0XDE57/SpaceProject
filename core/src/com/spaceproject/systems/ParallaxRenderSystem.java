@@ -42,13 +42,18 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     
         //render
         shape.begin(ShapeRenderer.ShapeType.Line);
+        
+        //todo: apply shader to grid
         //drawGrid(Color.GOLD, 100);
+        
         drawOrigin(Color.SKY);
         drawCameraPos(Color.RED);
+        
         animate += deltaTime;
+        //drawEye( 10.0f, boundingBox);
         drawEye((float) (10.0f + (Math.sin(animate) * 5.0f)), boundingBox);
-        drawEye((float) (10.0f + (Math.sin(animate) * 5.0f)), new Rectangle(100F, 200F, 100F, (float) (100 + (Math.sin(animate) * 100.0f))));
-        drawEye((float) (20.0f + ((Math.sin(animate * 20.0f) + MathUtils.PI) * 10.0f)), new Rectangle(100F, 100F, (float) (100 + (Math.sin(animate) * 100.0f)), 100));
+        drawEye((float) (10.0f + (Math.sin(animate) * 10.0f)), new Rectangle(100F, 200F, 100F, (float) (100 + (Math.sin(animate) * 100.0f))));
+        drawEye((float) (10.0f + ((Math.sin(animate * 10.0f) + MathUtils.PI) * 10.0f)), new Rectangle(100F, 100F, (float) (100 + (Math.sin(animate) * 100.0f)), 100));
         shape.end();
     }
    
@@ -76,11 +81,11 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         shape.line(0, screenCoords.y, Gdx.graphics.getWidth(), screenCoords.y);
     }
     
-    private void drawEye(float segment, Rectangle rectangle) {
+    private void drawEye(float segments, Rectangle rectangle) {
         shape.setColor(Color.RED);
         
-        float height = rectangle.getHeight() / segment;
-        float width = rectangle.getWidth() / segment;
+        float height = rectangle.getHeight() / segments;
+        float width = rectangle.getWidth() / segments;
         for (int i = 0; i * height <= rectangle.getHeight(); i++) {
             //bottom right
             shape.line(rectangle.x + i * width,  rectangle.y, rectangle.x + rectangle.getWidth(), rectangle.y + i * height);
@@ -89,11 +94,15 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
             shape.line(rectangle.x,  rectangle.y + i * height,  rectangle.x + i * width, rectangle.y + rectangle.getHeight());
             
             //bottom left
-            //shape.line();
+            //shape.line(rectangle.x, rectangle.y + i * height, rectangle.x + i * width, rectangle.y);
+    
+            //diagonal
+            //shape.line(rectangle.x, rectangle.y  + i * height, rectangle.x + i * width, rectangle.y);
         }
         shape.setColor(Color.GREEN);
         shape.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.getHeight());
     }
+    
     
     private void drawGrid(Color color, int tileSize) {
         shape.setColor(color);

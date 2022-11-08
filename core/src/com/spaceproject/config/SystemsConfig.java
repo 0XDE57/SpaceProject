@@ -80,6 +80,7 @@ public class SystemsConfig extends Config {
         //      eg: particle layer pre sprite (under sprites), particle layer post sprite (over sprites)
         systems.add(new SysCFG(CameraSystem.class, 100, true, true, true, true, true));
         systems.add(new SysCFG(SpaceParallaxSystem.class, 105, false, true, false, true, true));
+        systems.add(new SysCFG(ParallaxRenderSystem.class, 107, false, true, false, true, true));
         //systems.add(new SysCFG(SpaceDustSystem.class, 106, false, true, false, true, true));
         systems.add(new SysCFG(WorldRenderingSystem.class, 110, false, false, true, true, true));
         systems.add(new SysCFG(Sprite2DRenderSystem.class, 120, false, true, true, true, true));
