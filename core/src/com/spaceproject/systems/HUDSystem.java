@@ -432,9 +432,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         int verticalEdge = (height - padding * 2) / 2;
         int horizontalEdge = (width - padding * 2) / 2;
         
-        boolean drawBorder = false;
+        //todo: add navigation point for current direction facing
+        //todo: add navigation point for current velocity vector
+        boolean drawBorder = true;
         if (drawBorder) {
-            shape.setColor(Color.BLACK);
+            //todo: look broken dont see border
+            shape.setColor(Color.RED);
             shape.line(padding, padding, padding, height - padding);//left
             shape.line(width - padding, padding, width - padding, height - padding);//right
             shape.line(padding, padding, width - padding, padding);//bottom
