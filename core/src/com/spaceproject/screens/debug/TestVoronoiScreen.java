@@ -16,9 +16,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.generation.FontFactory;
+import com.spaceproject.math.DelaunayCell;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
-import com.spaceproject.math.DelaunayCell;
 
 import java.util.ArrayList;
 
@@ -54,6 +54,19 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawMidpoints = false,
             drawHull = true;
     
+    float dragRaduis = 20;
+    int focusedPoint = -1;//no index
+    
+    //todo: [x] fix grabbing points, focus point, don't lose it
+    //todo: [x] highlight focused point
+    //todo: highlight when near grab-able point
+    //todo: center points
+    //todo: draw grid
+    //todo: discard points if too close? epsilon check remove duplicate points
+    //todo: fix scaling for window resize
+    //todo: fix voronoi cells for edge cases
+    //todo: extract voronoi cells
+    
     public TestVoronoiScreen() {
         //center cam
         cam.position.x = Gdx.graphics.getWidth() / 2;
@@ -72,6 +85,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             points.add(x);
             points.add(y);
         }
+        
+        //todo: center points
+        //consider polygon centroid as center of polygon (naturally)
+        //GeometryUtils.polygonCentroid()
+        
+        
         //create cells out of points
         calculateDelaunay();
     }
@@ -204,7 +223,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
     }
     
-    
     private void drawStuff() {
         shape.begin(ShapeType.Line);
         
@@ -303,6 +321,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             if (drawCircumcenter) shape.circle(d.circumcenter.x, d.circumcenter.y, pSize);
         }
         
+        if (focusedPoint >= 0) {
+            float focusX = points.get(focusedPoint);
+            float focusY = points.get(focusedPoint + 1);
+            shape.setColor(Color.GREEN);
+            shape.circle(focusX, focusY, dragRaduis);
+        }
         
         if (drawHull) {
             shape.setColor(Color.RED);
@@ -379,15 +403,18 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         if (Gdx.input.isButtonPressed(Buttons.RIGHT)) {
             int x = Gdx.input.getX();
             int y = Gdx.graphics.getHeight() - Gdx.input.getY();
-            boolean mod = false;
             
+            if (focusedPoint >= 0) {
+                points.set(focusedPoint, x);
+                points.set(focusedPoint + 1, y);
+            }
+            
+            boolean mod = false;
             for (int i = 0; i < points.size && !mod; i += 2) {
                 float px = points.get(i);
                 float py = points.get(i + 1);
-                
-                if (Vector2.dst(x, y, px, py) < 20) {
-                    points.set(i, x);
-                    points.set(i + 1, y);
+                if (Vector2.dst(x, y, px, py) < dragRaduis) {
+                    focusedPoint = i;
                     mod = true;
                 }
             }
@@ -395,6 +422,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             if (mod) {
                 calculateDelaunay();
             }
+        } else {
+            focusedPoint = -1;
         }
         
         
