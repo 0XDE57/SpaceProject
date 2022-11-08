@@ -33,7 +33,7 @@ public class DebugConfig extends Config {
         drawInactiveBodies = true;
         drawVelocities = true;
         drawContacts = true;
-        drawOrbitPath = false;
+        drawOrbitPath = true;
         drawMousePos = false;
         drawEntityList = false;
     }
