@@ -88,6 +88,22 @@ Data Directory (...\SpaceProject\assets)
     \save: (todo) serialization
         https://github.com/libgdx/libgdx/wiki/Saved-game-serialization
 
+Scale of the universe = Currently somewhat arbitrary. Random points generated relative to 0, 0.
+Values need to be chosen that make sense for gameplay. Considering combat, base building, interstellar travel.
+Should optimize feel for spaceship combat as that will be a large part of gameplay.
+    sprites and world units: how big should a ship or player be in relation to the universe / planets?
+    planets: how big should a planet be?
+    distances between planets: how long should the player spend traveling between systems and planets and stars?
+CONSTRAINTS: Box2D uses MKS (meters, kilograms, and seconds) units and radians for angles.
+    Large coordinates will introduce inaccuracy courtesy of floating point arithmetic rounding.
+    Meaning once we are roughly <investigate how many> meters away from origin, will begin to break things.
+    The real universe by contrast, is a little bigger...allegedly.
+    To solve this, we can use a local small coordinate system and a large global coordinate system.
+    todo: shift
+    Movement limit: = 2 * units per step. (eg step of 60: 60 * 2 = 120,  max velocity = 120)
+    For the hyperdrive feature I need to bypass this (incredibly slow relative to scale of universe) limit,
+    so the box2D physics body is disabled which means no collisions but that works in favor.
+    https://box2d.org/documentation/md__d_1__git_hub_box2d_docs_loose_ends.html#autotoc_md126
 
 Space Background Rendering
 	Simple but effective: 4 parallax layers
@@ -99,7 +115,7 @@ Space Background Rendering
 		Just some combinations and ratios of red, blue and green that I played around with until it looked nice.
 
 Noise Generation
-	Noise is heavy to generate at runtime so it's done in background threads.
+	Noise is heavy to generate at runtime so it's done in background threads. Threadpool.
 	Once generated, it's picked up by SpaceLoadingSystem who then creates a texture from the noise.
 	You can specify how many simultaneous threads you would like to allow in EngineConfig.
 	Todo: save textures/noise so it's only generated the first time. Load from disk.
@@ -141,23 +157,10 @@ When animation hits transition state, it calls the system loader and loads/unloa
 			grow: grow ship sprite from 0 to give illusion of taking off planet
 			end: remove transition component
 
-
-Scale of the universe.
-Currently somewhat arbitrary. Just selected values that make sense at the time and feel ok.
-I originally wanted to play with n-body physics and have an "infinite" universe....hahahaha NO! Focus!
-So while in space, we are in a finite galaxy. Points of interest are generated relative to 0,0.
-Go too far into the void, and enjoy broken rendering and physics, courtesy of floating point arithmetic rounding!
-Todo: Need to make a more standard definition for everything:
-    sprites and unit: how big should a ship or player be in relation to the universe / planets?
-    planets: how big should a planet be?
-    distances between planets: how long should the player spend traveling between systems and planets and stars?
-    Values need to be chosen that make sense for gameplay. Considering combat, base building, interstellar travel.
-    Should optimize feel for spaceship combat as that will be a large part of gameplay.
-
-
 AI: currently primitive placeholder systems to flesh out ideas.
 They can't aim properly, need to predict where player will be. Lead target.
 And much more....problems for later.
+
 
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
