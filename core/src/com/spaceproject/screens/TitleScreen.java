@@ -193,7 +193,6 @@ public class TitleScreen extends MyScreenAdapter {
     ForegroundAnimation previousAnim;
     private void initForegroundAnim() {
         ForegroundAnimation anim = ForegroundAnimation.random();
-        Gdx.app.log("", "a:" + anim);
         
         //don't allow same anim on refresh
         if (previousAnim != null && anim == previousAnim) {
