@@ -57,9 +57,10 @@ public class AsteroidBeltSystem extends EntitySystem {
                 TransformComponent parentTransform = Mappers.transform.get(asteroid.parentOrbitBody);
                 AsteroidBeltComponent asteroidBelt = Mappers.asteroidBelt.get(asteroid.parentOrbitBody);
                 //set velocity perpendicular to parent body, (simplified 2-body model)
-                float angle = (float) (MyMath.angleTo(parentTransform.pos, physics.body.getPosition()) + (asteroidBelt.clockwise ? -(Math.PI / 2) : Math.PI / 2));
+                float angle = MyMath.angleTo(parentTransform.pos, physics.body.getPosition()) + (asteroidBelt.clockwise ? -MathUtils.HALF_PI : MathUtils.HALF_PI);
                 physics.body.setLinearVelocity(MyMath.vector(angle, asteroidBelt.velocity));
             } else {
+                //todo: gravity pull into belt if close enough
                 
                 // re-entry?
                 for (Entity parentEntity : spawnBelt) {
@@ -68,8 +69,8 @@ public class AsteroidBeltSystem extends EntitySystem {
                     
                     //todo: if close enough: slowly pull into stream of asteroid, match velocity and angle
                     float dist = parentTransform.pos.dst(physics.body.getPosition());
-                    if (dist > asteroidBelt.radius - (asteroidBelt.bandWidth /2) && dist < asteroidBelt.radius + (asteroidBelt.bandWidth /2)) {
-                        float targetAngle = (float) (MyMath.angleTo(parentTransform.pos, physics.body.getPosition()) + (asteroidBelt.clockwise ? -(Math.PI / 2) : Math.PI / 2));
+                    if (dist > asteroidBelt.radius - (asteroidBelt.bandWidth/2) && dist < asteroidBelt.radius + (asteroidBelt.bandWidth/2)) {
+                        float targetAngle = MyMath.angleTo(parentTransform.pos, physics.body.getPosition()) + (asteroidBelt.clockwise ? -MathUtils.HALF_PI : MathUtils.HALF_PI);
                         double angleDeltaThreshold = Math.PI / 6;
                         boolean meetsAngleThreshold = Math.abs(physics.body.getLinearVelocity().angleRad() - targetAngle) < angleDeltaThreshold;
                         
@@ -79,7 +80,7 @@ public class AsteroidBeltSystem extends EntitySystem {
                         //todo: if should merge, begin merge
                         if (meetsAngleThreshold /*&& meetsVelThreshold*/) {
                             //asteroid.parentOrbitBody = parentEntity;
-                            Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID re-entry into orbit");
+                            //Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID re-entry into orbit");
                             break; // no point looking at other disks once met
                         }
                     }

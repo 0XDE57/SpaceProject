@@ -105,12 +105,11 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
                 //java: ../b2PolygonShape.cpp:158: void b2PolygonShape::Set(const b2Vec2*, int32): Assertion `false' failed.
                 continue;
             }
-            
+    
+            //add some variation in velocity and angular so pieces drift apart
             Body parentBody = Mappers.physics.get(parentAsteroid).body;
             Vector2 pos = parentBody.getPosition();
             Vector2 vel = parentBody.getLinearVelocity();
-    
-            //add some variation in velocity and angular so pieces drift apart
             Vector2 driftVel = MyMath.vector(MathUtils.random(0, MathUtils.PI2), maxDriftVel);
             vel.add(driftVel);
             float angularDrift = MathUtils.random(-maxDriftAngle, maxDriftAngle);
@@ -118,7 +117,6 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
             Entity childAsteroid = EntityFactory.createAsteroid((long) (Math.random() * Long.MAX_VALUE),
                     pos.x, pos.y, vel.x, vel.y, parentBody.getAngle(), hull);
             Mappers.physics.get(childAsteroid).body.setAngularVelocity(parentBody.getAngularVelocity() + angularDrift);
-            
             getEngine().addEntity(childAsteroid);
         }
     }
