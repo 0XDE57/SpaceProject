@@ -35,6 +35,7 @@ public class TitleScreen extends MyScreenAdapter {
     private int edgePad;
     private Matrix4 projectionMatrix = new Matrix4();
     private TitleAnimation foregroundAnimation, backgroundAnimation;
+    private ForegroundAnimation previousAnim;
     
     enum ForegroundAnimation {
         tree, delaunay, orbit, crossNoise, nbody;/*, asteroid*/;
@@ -189,8 +190,7 @@ public class TitleScreen extends MyScreenAdapter {
         BitmapFont fontComfortaaBold = FontFactory.createFont(FontFactory.fontComfortaaBold, parameter);
         VisUI.getSkin().add(titleFont, fontComfortaaBold);
     }
- 
-    ForegroundAnimation previousAnim;
+    
     private void initForegroundAnim() {
         ForegroundAnimation anim = ForegroundAnimation.random();
         
