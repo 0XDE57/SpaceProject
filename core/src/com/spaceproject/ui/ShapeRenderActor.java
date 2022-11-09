@@ -1,5 +1,6 @@
 package com.spaceproject.ui;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
@@ -37,14 +38,15 @@ public class ShapeRenderActor extends Actor {
         
         coords.set(getX(), getY());
         localToStageCoordinates(coords);
-        /*debug corners
-        shape.setColor(Color.GREEN);
-        shape.circle(coords.x + getWidth() / 2, coords.y + getHeight() / 2, 10);
+        //debug corners
+        shape.setColor(Color.SKY);
         shape.circle(coords.x, coords.y, 10);
+        shape.circle(coords.x + getWidth() / 2, coords.y + getHeight() / 2, 10);
+        shape.setColor(Color.GREEN);
         shape.circle(coords.x, coords.y + getHeight(), 10);
         shape.circle(coords.x + getWidth(), coords.y, 10);
         shape.circle(coords.x + getWidth(), coords.y + getHeight(), 10);
-        */
+        
         
         //debug black body radiation, color temperature
         float x = coords.x + 50;
