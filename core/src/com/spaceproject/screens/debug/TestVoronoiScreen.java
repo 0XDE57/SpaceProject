@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ShortArray;
@@ -38,7 +39,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     
     //triangulation
     DelaunayTriangulator delaunay = new DelaunayTriangulator();
-    ShortArray triangles;
+    ShortArray triangles = new ShortArray();
     ArrayList<DelaunayCell> dCells = new ArrayList<DelaunayCell>();
     
     //convex hull
@@ -54,6 +55,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawMidpoints = false,
             drawHull = true;
     
+    int pSize = 6;
     float dragRaduis = 20;
     int focusedPoint = -1;//no index
     
@@ -67,6 +69,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     //todo: fix voronoi cells for edge cases
     //todo: extract voronoi cells
     
+    
     public TestVoronoiScreen() {
         //center cam
         cam.position.x = Gdx.graphics.getWidth() / 2;
@@ -77,6 +80,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     
     
     private void generateNewPoints(int numPoints) {
+        //reset / clear previous
+        dCells.clear();
+        triangles.clear();
+        hullPoly = null;
+        
         int pad = 200;//distance away from edge of screen
         points = new FloatArray();
         for (int i = 0; i < numPoints * 2; i += 2) {
@@ -85,6 +93,17 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             points.add(x);
             points.add(y);
         }
+    
+    
+        float p = 100;
+        Rectangle rectangle = new Rectangle( p, p, Gdx.graphics.getWidth()-p*2, Gdx.graphics.getHeight()-p*2);
+        //bottom left
+        //points.add(rectangle.x);
+        //points.add(rectangle.y);
+        //top right
+        //points.add(rectangle.x + rectangle.getWidth());
+        //points.add(rectangle.y + rectangle.getHeight());
+        
         
         //todo: center points
         //consider polygon centroid as center of polygon (naturally)
@@ -102,9 +121,13 @@ public class TestVoronoiScreen extends MyScreenAdapter {
      * Find and set neighbors for each cell.
      */
     private void calculateDelaunay() {
+        //polygons must contain at least 3 points.
+        if (points.size < 6) return;
+        
         //apply delaunay triangulation to points
         triangles = delaunay.computeTriangles(points, false);
         //triangles = new EarClippingTriangulator().computeTriangles(points);
+        
         
         //create cells for each triangle
         dCells.clear();
@@ -128,7 +151,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         ConvexHull convex = new ConvexHull();
         hull = convex.computePolygon(points, false).toArray();
         hullPoly = new Polygon(hull);
-        
     }
     
     /**
@@ -224,9 +246,19 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     }
     
     private void drawStuff() {
+        
         shape.begin(ShapeType.Line);
         
-        int pSize = 6;
+        shape.setColor(Color.BLACK);
+        if (points.size <= 4) {
+            for (int i = 0; i < points.size; i += 2) {
+                float x = points.get(i);
+                float y = points.get(i + 1);
+                shape.circle(x, y, pSize);
+            }
+        }
+        
+        
         for (DelaunayCell d : dCells) {
             //draw points
             if (drawPoints) {
@@ -328,7 +360,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             shape.circle(focusX, focusY, dragRaduis);
         }
         
-        if (drawHull) {
+        if (drawHull && hullPoly != null) {
             shape.setColor(Color.RED);
             shape.polyline(hullPoly.getVertices());
         }
