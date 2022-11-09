@@ -391,16 +391,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             generateNewPoints(3);
         }
         
-        
         //create new point
-        if (Gdx.input.justTouched() && Gdx.input.isButtonPressed(Buttons.LEFT)) {
+        if (Gdx.input.justTouched() && Gdx.input.isButtonPressed(Buttons.RIGHT)) {
             points.add(Gdx.input.getX());
             points.add(Gdx.graphics.getHeight() - Gdx.input.getY());
             calculateDelaunay();
         }
         
         //drag points around
-        if (Gdx.input.isButtonPressed(Buttons.RIGHT)) {
+        if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
             int x = Gdx.input.getX();
             int y = Gdx.graphics.getHeight() - Gdx.input.getY();
             
