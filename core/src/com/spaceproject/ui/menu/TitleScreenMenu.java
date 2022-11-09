@@ -18,6 +18,7 @@ import com.kotcrab.vis.ui.widget.ButtonBar;
 import com.kotcrab.vis.ui.widget.LinkLabel;
 import com.kotcrab.vis.ui.widget.VisDialog;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.screens.debug.BlocksTestScreen;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.debug.Test3DScreen;
 import com.spaceproject.screens.debug.TestNoiseScreen;
@@ -170,9 +171,17 @@ public class TitleScreenMenu {
                 game.setScreen(new TestSpiralGalaxy());
             }
         });
+    
+        TextButton btnBlock = new TextButton("[DEBUG] Block Engine Test", VisUI.getSkin());
+        btnBlock.getLabel().setAlignment(Align.left);
+        btnBlock.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.setScreen(new BlocksTestScreen());
+            }
+        });
         
-        
-        
+        table.add(btnBlock).fillX().row();
         table.add(btnSpiral).fillX().row();
         table.add(btnVoronoi).fillX().row();
         table.add(btnNoise).fillX().row();
