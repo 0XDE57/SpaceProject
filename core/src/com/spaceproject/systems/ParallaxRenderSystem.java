@@ -5,7 +5,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
@@ -44,16 +43,17 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         shape.begin(ShapeRenderer.ShapeType.Line);
         
         //todo: apply shader to grid
-        //drawGrid(Color.GOLD, 100);
+        //drawGrid(Color.GOLD, 100, 1.0f);
+        //drawGrid(Color.MAGENTA, 100, 0.5f);
         
         drawOrigin(Color.SKY);
         drawCameraPos(Color.RED);
         
         animate += deltaTime;
         //drawEye( 10.0f, boundingBox);
-        drawEye((float) (10.0f + (Math.sin(animate) * 5.0f)), boundingBox);
-        drawEye((float) (10.0f + (Math.sin(animate) * 10.0f)), new Rectangle(100F, 200F, 100F, (float) (100 + (Math.sin(animate) * 100.0f))));
-        drawEye((float) (10.0f + ((Math.sin(animate * 10.0f) + MathUtils.PI) * 10.0f)), new Rectangle(100F, 100F, (float) (100 + (Math.sin(animate) * 100.0f)), 100));
+        //drawEye((float) (10.0f + (Math.sin(animate) * 5.0f)), boundingBox);
+        //((float) (10.0f + (Math.sin(animate) * 10.0f)), new Rectangle(100F, 200F, 100F, (float) (100 + (Math.sin(animate) * 100.0f))));
+        //drawEye((float) (10.0f + ((Math.sin(animate * 10.0f) + MathUtils.PI) * 10.0f)), new Rectangle(100F, 100F, (float) (100 + (Math.sin(animate) * 100.0f)), 100));
         shape.end();
     }
    
@@ -63,7 +63,12 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         shape.circle(camWorldPos.x, camWorldPos.y, 8);
         shape.line(camWorldPos.x, 0, camWorldPos.x, Gdx.graphics.getHeight());
         shape.line(0, camWorldPos.y, Gdx.graphics.getWidth(), camWorldPos.y);
-    
+        
+        //todo: draw ring from center to target
+        //Vector2 average = getEngine().getSystem(CameraSystem.class).average;
+        //Vector2 offsetFromTarget = getEngine().getSystem(CameraSystem.class).offsetFromTarget;
+        //shape.circle(camWorldPos.x, camWorldPos.y, offsetFromTarget.len());
+        //shape.circle(average.x, average.y, 10);
         //GameScreen.viewport.getWorldHeight();
         /*
         shape.setColor(Color.GREEN);
@@ -104,17 +109,21 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     }
     
     
-    private void drawGrid(Color color, int tileSize) {
+    private void drawGrid(Color color, int tileSize, float depth) {
         shape.setColor(color);
-    
-        // camWorldPos.x
-        //GameScreen.viewport.getScreenX();
         
+        //unscaled
         for (int horizontal = 0; horizontal <= 10; horizontal++) {
             float offset = horizontal * tileSize;
-            shape.line(camWorldPos.x + offset, 0, camWorldPos.x + offset, Gdx.graphics.getHeight());
+            //shape.line(screenCoords.x + offset, 0, screenCoords.x + offset, Gdx.graphics.getHeight());
         }
-        
+    
+        float scale = 1/GameScreen.cam.zoom;
+        scale += depth;
+        for (int horizontal = 0; horizontal <= 10; horizontal++) {
+            float offset = horizontal * tileSize * scale;
+            shape.line(screenCoords.x + offset, 0, screenCoords.x + offset, Gdx.graphics.getHeight());
+        }
     }
     
     private void debugClearScreen() {
