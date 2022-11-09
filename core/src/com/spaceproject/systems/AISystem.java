@@ -173,7 +173,7 @@ public class AISystem extends IteratingSystem {
             // Cap the linear speed
             Vector2 velocity = body.getLinearVelocity();
             float currentSpeedSquare = velocity.len2();
-            float maxLinearSpeed = FixedPhysicsSystem.getVelocityLimit();
+            float maxLinearSpeed = B2DPhysicsSystem.getVelocityLimit();
             if (currentSpeedSquare > maxLinearSpeed * maxLinearSpeed) {
                 body.setLinearVelocity(velocity.scl(maxLinearSpeed / (float)Math.sqrt(currentSpeedSquare)));
             }
@@ -190,7 +190,7 @@ public class AISystem extends IteratingSystem {
         Vector2 aiPos = body.getPosition();
         Vector2 direction = steering.linearVelocity.set(targetPos).sub(aiPos);
         float distanceToTarget = direction.len();
-        float targetSpeed = FixedPhysicsSystem.getVelocityLimit();
+        float targetSpeed = B2DPhysicsSystem.getVelocityLimit();
         
         if (distanceToTarget <= arrivalRadius) {
             //we have arrived at target

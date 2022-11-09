@@ -386,7 +386,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
         
         shape.setColor(Color.PURPLE);
-        float velocity = MathUtils.clamp(0, (physics.body.getLinearVelocity().len() / FixedPhysicsSystem.getVelocityLimit()) * barWidth, barWidth);
+        float velocity = MathUtils.clamp(0, (physics.body.getLinearVelocity().len() / B2DPhysicsSystem.getVelocityLimit()) * barWidth, barWidth);
         shape.rect(playerBarX, playerHyperBarY, velocity, barHeight);
     }
 
