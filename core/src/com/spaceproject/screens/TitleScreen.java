@@ -42,6 +42,14 @@ public class TitleScreen extends MyScreenAdapter {
         public static ForegroundAnimation random() {
             return ForegroundAnimation.values()[MathUtils.random(ForegroundAnimation.values().length - 1)];
         }
+        
+        public static ForegroundAnimation next(ForegroundAnimation e) {
+            int index = e.ordinal();
+            int nextIndex = index + 1;
+            ForegroundAnimation[] cars = ForegroundAnimation.values();
+            nextIndex %= cars.length;
+            return cars[nextIndex];
+        }
     }
     
     public TitleScreen(SpaceProject spaceProject) {
@@ -182,8 +190,16 @@ public class TitleScreen extends MyScreenAdapter {
         VisUI.getSkin().add(titleFont, fontComfortaaBold);
     }
  
+    ForegroundAnimation previousAnim;
     private void initForegroundAnim() {
         ForegroundAnimation anim = ForegroundAnimation.random();
+        Gdx.app.log("", "a:" + anim);
+        
+        //don't allow same anim on refresh
+        if (previousAnim != null && anim == previousAnim) {
+            anim = ForegroundAnimation.next(anim);
+        }
+        
         switch (anim) {
             case delaunay:
                 this.foregroundAnimation = new DelaunayAnim();
@@ -206,6 +222,8 @@ public class TitleScreen extends MyScreenAdapter {
 				break;*/
         
         }
+        previousAnim = anim;
+        
         Gdx.app.debug(this.getClass().getSimpleName(), "Animation: " + anim);
     }
     
