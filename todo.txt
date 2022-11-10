@@ -97,9 +97,10 @@ Should optimize feel for spaceship combat as that will be a large part of gamepl
 CONSTRAINTS: Box2D uses MKS (meters, kilograms, and seconds) units and radians for angles.
     Large coordinates will introduce inaccuracy courtesy of floating point arithmetic rounding.
     Meaning once we are roughly <investigate how many> meters away from origin, will begin to break things.
+    Floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
     The real universe by contrast, is a little bigger...allegedly.
     To solve this, we can use a local small coordinate system and a large global coordinate system.
-    todo: shift
+    todo: shift 'Floating Origin'
     Movement limit: = 2 * units per step. (eg step of 60: 60 * 2 = 120,  max velocity = 120)
     For the hyperdrive feature I need to bypass this (incredibly slow relative to scale of universe) limit,
     so the box2D physics body is disabled which means no collisions but that works in favor.
@@ -177,20 +178,22 @@ Legend:
     [ * ] = exceptions
 
 
-[x] terrible BUG! lerping camera movement is giving some jittering in the rendering when vsync on.
-        this is caused by interpolation being a percentage from target and the value is
-        shifting back and forth when near target.
-        less visible when vsync off. not visible when lockedOn.
-        update: discovered problem:
-            we want to lerp the camera for some smoothed following
-            but if we lerp directly using built in camera.position.lerp()
-              x += alpha * (target.x - x)
-              y += alpha * (target.y - y)
-            we are left from some jitter due to the lerp result being a ratio between self and target values.
-            the cam position would be closer to the lerped position one frame leading to a lower value
-            the next frame which in turns lags the camera and the lerp value will be higher
-            leading to an ugly back and forth jitter making cam / sprites render unstable/jumpy
+[...] terrible BUG! lerping camera movement is giving some jittering in the rendering when vsync on.
+    this is caused by interpolation being a percentage from target and the value is
+    shifting back and forth when near target.
+    less visible when vsync off. not visible when lockedOn.
+    [x] update: discovered problem:
+        we want to lerp the camera for some smoothed following
+        but if we lerp directly using built in camera.position.lerp()
+          x += alpha * (target.x - x)
+          y += alpha * (target.y - y)
+        we are left from some jitter due to the lerp result being a ratio between self and target values.
+        the cam position would be closer to the lerped position one frame leading to a lower value
+        the next frame which in turns lags the camera and the lerp value will be higher
+        leading to an ugly back and forth jitter making cam / sprites render unstable/jumpy
         solution: perform a rolling average on the lerped value over a few frames and set camera position to average.
+        [ ] introduced new render issue at world border x,y < 0 when vsync off, lerp is rapidly switching between position teleporting
+        [ ] camera too slow when close to lerp position -> percentage infinitely never reaching 0, should snap when close enough
 
 [...] BUG! start game, leave to main menu, return to game: planets do not load
     [x] clean up, dispose and unload systems properly when return to main menu
@@ -210,6 +213,10 @@ Legend:
         [ ] fog layer could use some more octaves. possible shader can just render another layer on top
             with some movement and multiply the layers together
         [?] what about a basic noise shader rendered to a quad on a layer above player?
+
+[ ] ENGINE: fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
+    https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
+    https://www.youtube.com/watch?v=mXTxQko-JH0&t=4m18s
 
 [x] add basic asteroids (arbitrary poly)
     [x] spec spawner for asteroid.
@@ -260,6 +267,10 @@ Legend:
                   damage 110 = -10 hp, breaks into 2 minus 5 each = 45hp
                   damage 200 = -100 hp, breaks into 2 minus 50 = 0hp = don't spawn children -> instant destruction
                  could play with different rules and ratios, find what feels good
+           -shatter style (asteroid type): triangles, evenly, grid, arbitrary geometry. eg: rock shatters different than ice (material properties)
+            rock: larger pieces widely spaced more voronic with concentration of points at impact location
+            ice: more crystalline shards / slivers
+            crystal: evenly spaced geometrical shards: eg hexagons
         [x] should not display health bar on asteroids
         [ ] some visual feedback for damage like cracks would be nice: could use voronoi edges as cracks
         [ ] polygon slicing! ability to cast ray through asteroid and have it split on intersection
@@ -439,6 +450,7 @@ Legend:
         [ ] shield dash bash? high impulse forward, then activate shield to ram other objects and do damage to them
     [x] fix radius is not consistent. rotation of body affects size of shield. don't trust calculateBoundingBox()?
     [x] shield growth overrides and cancels charge cannon
+        [ ] since we built up the energy in our cannon, it should transfer to the shield for insta charge!
     [ ] grow/shrink body with shield. looks like cant resize bodies in box2d? destroy and recreate each frame seems inefficient likely
     [x] bug not render on planet
     [ ] graphics: rotate shield polygon, possibly a shader to make edges glow: BLOOM!
@@ -501,6 +513,20 @@ Legend:
         [ ] maybe some screen shake during
     [ ] potential for playing with some shaders
 
+[ ] laser
+    [ ] cut asteroids, arbitrary polygons in half
+    [ ] ray case polygon collision to stop head of lazer at object
+    [ ] render technique? sprites or shader? for now just shape renderer
+        [ ] programmatic color and width
+
+[ ] glow / lighting
+    shaders vs sprites
+    texture mask with alpha that fades towards edges
+    bloom?
+    emission map?
+    https://www.youtube.com/watch?v=WiDVoj5VQ4c
+
+
 [...] particle effects!
     https://github.com/rockbite/talos
     [ ] BUG: broken engine effects applying to other ships when land on planet
@@ -548,11 +574,13 @@ Legend:
         [x] tested with xbox 360 wired and ps4 controller over usb
         [x] allow hot-plugging
         [x] crashes title screen after return to menu from game, looks like systems still loaded (unhook listeners?)
-         cant repro, seems fixed. update: still crashes!!! update: fixed again.
+            cant repro, seems fixed. update: still crashes!!! update: fixed again.
         [x] basic Xbox 360 support
             [x] not detecting DPAD buttons
             [x] double tap right left bumpers for barrel roll
             [x] right stick camera control, click to reset
+                [ ] tune: doesn't feel smooth when stick all the way in or out.
+                    adjust curve to stick in amount
         [x] move to getMapping() but seems im on an older lib?
             https://github.com/MrStahlfelge/gdx-controllerutils/wiki/Configurable-Game-Controller-Mappings
             https://github.com/libgdx/gdx-controllers/wiki/Migrate-from-v1
@@ -633,7 +661,7 @@ Legend:
     [ ] ready / sync / load state. should all be in transition system?
         still a little coupled, but working reliably now
         [ ] WorldRenderingSystem shouldn't be responsible for loading map: loadMap().
-    [ ] landing animation should center camera focus on planet rather than player
+    [ ] landing animation should center camera focus on midpoint between planet and player
     [ ] better take off animation
         [ ] should have ship leave ground camera stays put, create a shadow sprite underneath for depth
         [ ] ship can fly off screen, camera stays put, zoom out.
@@ -706,9 +734,6 @@ Legend:
         ! actually for now this is a convenient bug for testing
 
 
-[ ] fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
-    https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
-    https://www.youtube.com/watch?v=mXTxQko-JH0&t=4m18s
 
 [ ] devmode and play mode
     [ ] DevMode
