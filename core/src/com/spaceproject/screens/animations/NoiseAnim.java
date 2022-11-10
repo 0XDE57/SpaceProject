@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.PerformanceCounter;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.noise.OpenSimplexNoise;
@@ -20,6 +21,9 @@ public class NoiseAnim extends TitleAnimation {
     
     PerformanceCounter performance;
     IndependentTimer lagDetector;
+    
+    boolean isDrag = false;
+    Vector2 clickStart = new Vector2();
     
     public NoiseAnim(float z, float zDelta, float size, float scale, boolean crossSection) {
         this.z = z;
@@ -50,7 +54,7 @@ public class NoiseAnim extends TitleAnimation {
             for (int y = 0; y <= Gdx.graphics.getHeight() / size; y++) {
                 float e = MyMath.inverseLerp(-1, 1, (float) noise.eval(x * scale, y * scale, z));
                 if (crossSection) {
-                    if (e > 0.4f && e < 0.5f) {
+                    if (e > 0.45f && e < 0.55f) {
                         shape.setColor(Color.BLACK);
                         shape.rect(x * size, y * size, size, size);
                     }
@@ -63,6 +67,21 @@ public class NoiseAnim extends TitleAnimation {
         shape.end();
         
         performance.stop();
+        
+        if (crossSection) {
+            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+                if (!isDrag) {
+                    if (!clickStart.epsilonEquals(Gdx.input.getX(), Gdx.input.getY(), 2)) {
+                        clickStart.set(Gdx.input.getX(), Gdx.input.getY());
+                        isDrag = true;
+                    }
+                }
+            } else {
+                isDrag = false;
+            }
+            if (isDrag)
+                z = z + ((Gdx.input.getX() - clickStart.x) * 0.0002f);
+        }
         
         if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
             scale += 0.001f;
