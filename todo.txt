@@ -387,6 +387,7 @@ Legend:
 
 
 [...] rendering system
+    [ ] tune camera: https://www.youtube.com/watch?v=aAKwZt3aXQM
     [ ] decouple HUD from stage -> move scene2D stage out of HUD into own system
     [x] fix space parallax system rendering
         [x] background layer stars are just white currently

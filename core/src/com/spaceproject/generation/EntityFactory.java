@@ -34,6 +34,7 @@ import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.ShaderComponent;
 import com.spaceproject.components.ShieldComponent;
+import com.spaceproject.components.SplineComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TextureComponent;
@@ -482,6 +483,10 @@ public class EntityFactory {
         particle.offset = new Vector2();
         particle.angle = 0;
         shipEntity.add(particle);
+        
+        //spline
+        SplineComponent spline = new SplineComponent();
+        shipEntity.add(spline);
     
         //engine particle effect
         Entity mainEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineMain, new Vector2(0, height + 0.2f), 0);

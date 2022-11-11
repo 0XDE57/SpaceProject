@@ -30,8 +30,9 @@ public class Mappers {
     public static final ComponentMapper<PlanetComponent> planet = ComponentMapper.getFor(PlanetComponent.class);
     public static final ComponentMapper<ScreenTransitionComponent> screenTrans = ComponentMapper.getFor(ScreenTransitionComponent.class);
     public static final ComponentMapper<SeedComponent> seed = ComponentMapper.getFor(SeedComponent.class);
-    public static final ComponentMapper<ShieldComponent> shield = ComponentMapper.getFor(ShieldComponent.class);
     public static final ComponentMapper<ShaderComponent> shader = ComponentMapper.getFor(ShaderComponent.class);
+    public static final ComponentMapper<ShieldComponent> shield = ComponentMapper.getFor(ShieldComponent.class);
+    public static final ComponentMapper<SplineComponent> spline = ComponentMapper.getFor(SplineComponent.class);
     public static final ComponentMapper<Sprite3DComponent> sprite3D = ComponentMapper.getFor(Sprite3DComponent.class);
     public static final ComponentMapper<StarComponent> star = ComponentMapper.getFor(StarComponent.class);
     public static final ComponentMapper<TextureComponent> texture = ComponentMapper.getFor(TextureComponent.class);
