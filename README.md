@@ -6,7 +6,8 @@ Welcome to A Space Project. A project involving space...
    * (yeah it's real cuz like quantum anti-dark matter n' stuff yo)
 * During your explorations you could find various astronomical bodies including:
     * Unique planetary systems
-    * Binary star systems, Trinary star systems, and even quadri... quatro? quadrino-ary? as-many-as-you-want star systems!
+    * Binary star systems, Trinary star systems, and even quadri... quatro? quadrino-ary? 
+      * as-many-as-you-want star systems!
     * Discover lonely rogue planets who lost their sun. :(
 * Pilot a space ship and combat broken placeholder AI while I figure out the rest of the engine.
 * Then when your bored of that you can land on a planet I guess. 
