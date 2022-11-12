@@ -17,6 +17,8 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.SplineComponent;
+import com.spaceproject.components.TransformComponent;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
@@ -30,6 +32,8 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     private final Rectangle boundingBox = new Rectangle();
     private ImmutableArray<Entity> players;
     
+    Entity camMarker;
+    
     public ParallaxRenderSystem() {
         shape = new ShapeRenderer();
         projectionMatrix = new Matrix4();
@@ -38,6 +42,9 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     @Override
     public void addedToEngine(Engine engine) {
         players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
+        camMarker = new Entity().add(new SplineComponent()).add(new TransformComponent());
+        camMarker.getComponent(SplineComponent.class).color = Color.PURPLE;
+        engine.addEntity(camMarker);
     }
     
     float animate = 0;
@@ -63,7 +70,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         //drawGrid(Color.MAGENTA, 100, 0.5f);
         
         //drawOrigin(Color.SKY);
-        //drawCameraPos(Color.RED);
+        drawCameraPos(Color.RED);
     
         Entity player = players.first();
         Body body = Mappers.physics.get(player).body;
@@ -97,6 +104,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         shape.line(GameScreen.viewport.getScreenX(), GameScreen.viewport.getScreenY(),
                 GameScreen.viewport.getScreenX() + GameScreen.viewport.getWorldWidth(), GameScreen.viewport.getScreenY() + GameScreen.viewport.getWorldHeight());
          */
+        Mappers.transform.get(camMarker).pos.set(GameScreen.cam.position.x, GameScreen.cam.position.y);
     }
     
     private void drawOrigin(Color color) {

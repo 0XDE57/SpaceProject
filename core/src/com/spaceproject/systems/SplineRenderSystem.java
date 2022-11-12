@@ -84,14 +84,15 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
             if (indexWrap < 0) indexWrap += spline.path.length;
             Vector2 p2 = spline.path[indexWrap];
             
-            //todo: don't draw end
-            if (indexWrap == spline.index) {
-                //shape.line(p.x,p.y,p2.x,p2.y, Color.WHITE, Color.RED);
-                //return;
-            } else {
-                shape.line(p.x,p.y,p2.x,p2.y, Color.BLUE, Color.GREEN);
+            // don't draw head to tail
+            if (indexWrap != spline.index) {
+                if (spline.color != null) {
+                    shape.line(p.x, p.y, p2.x, p2.y, spline.color, spline.color);
+                } else {
+                    //default
+                    shape.line(p.x, p.y, p2.x, p2.y, Color.BLUE, Color.GREEN);
+                }
             }
-            //shape.line(p, p2);
         }
     }
     
