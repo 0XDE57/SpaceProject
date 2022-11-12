@@ -14,6 +14,7 @@ import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ShieldComponent;
+import com.spaceproject.components.SplineComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.RenderOrder;
@@ -153,6 +154,8 @@ public class ChargeCannonSystem extends IteratingSystem {
             particleSystem.initializeParticleFromPool(newParticle);
         }
         chargeCannon.projectileEntity.add(newParticle);
+        
+        chargeCannon.projectileEntity.add(new SplineComponent());
         
         //release
         chargeCannon.projectileEntity = null;

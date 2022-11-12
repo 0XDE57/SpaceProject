@@ -59,11 +59,11 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         shape.begin(ShapeRenderer.ShapeType.Line);
         
         //todo: apply shader to grid
-        drawGrid(Color.GOLD, 100, 1.0f);
+        //drawGrid(Color.GOLD, 100, 1.0f);
         //drawGrid(Color.MAGENTA, 100, 0.5f);
         
-        drawOrigin(Color.SKY);
-        drawCameraPos(Color.RED);
+        //drawOrigin(Color.SKY);
+        //drawCameraPos(Color.RED);
     
         Entity player = players.first();
         Body body = Mappers.physics.get(player).body;

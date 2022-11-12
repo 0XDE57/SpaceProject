@@ -26,14 +26,14 @@ public class DebugConfig extends Config {
         drawDiagnosticInfo = true;
         drawComponentList = false;
         drawPos = false;
-        box2DDebugRender = true;
+        box2DDebugRender = false;
         drawBodies = true;
         drawJoints = true;
         drawAABBs = true;
         drawInactiveBodies = true;
         drawVelocities = true;
         drawContacts = true;
-        drawOrbitPath = true;
+        drawOrbitPath = false;
         drawMousePos = false;
         drawEntityList = false;
     }

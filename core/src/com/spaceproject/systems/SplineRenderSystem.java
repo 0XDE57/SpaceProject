@@ -18,7 +18,7 @@ import com.spaceproject.utility.Mappers;
 public class SplineRenderSystem extends IteratingSystem implements Disposable {
         
     private final ShapeRenderer shape;
-    private int pathSize = 10;
+    private int pathSize = 1000;
     
     public SplineRenderSystem() {
         super(Family.all(SplineComponent.class, TransformComponent.class).get());
@@ -59,11 +59,11 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
             }
         }
         
-        /*
-        if (spline.path[spline.index].epsilonEquals(transform.pos.x, transform.pos.y, 10)) {
+        //
+        //if (spline.path[spline.index].epsilonEquals(transform.pos.x, transform.pos.y, 10)) {
             //delta too small skip update
-            return;
-        }*/
+        //    return;
+        //}
         
         spline.path[spline.index].set(transform.pos.x, transform.pos.y);
         //roll index
@@ -83,7 +83,14 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
             int indexWrap = i + 1 % spline.path.length;
             if (indexWrap < 0) indexWrap += spline.path.length;
             Vector2 p2 = spline.path[indexWrap];
-            shape.line(p.x,p.y,p2.x,p2.y, Color.RED, Color.GREEN);
+            
+            //todo: don't draw end
+            if (indexWrap == spline.index) {
+                //shape.line(p.x,p.y,p2.x,p2.y, Color.WHITE, Color.RED);
+                //return;
+            } else {
+                shape.line(p.x,p.y,p2.x,p2.y, Color.BLUE, Color.GREEN);
+            }
             //shape.line(p, p2);
         }
     }
