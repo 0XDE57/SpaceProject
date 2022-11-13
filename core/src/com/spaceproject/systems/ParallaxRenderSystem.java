@@ -32,7 +32,9 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     private final Rectangle boundingBox = new Rectangle();
     private ImmutableArray<Entity> players;
     
-    Entity camMarker;
+    //mouse debug
+    Entity camMarker, mouseMarker;
+    Vector3 mouseProj = new Vector3();
     
     public ParallaxRenderSystem() {
         shape = new ShapeRenderer();
@@ -42,9 +44,6 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     @Override
     public void addedToEngine(Engine engine) {
         players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
-        camMarker = new Entity().add(new SplineComponent()).add(new TransformComponent());
-        camMarker.getComponent(SplineComponent.class).color = Color.PURPLE;
-        engine.addEntity(camMarker);
     }
     
     float animate = 0;
@@ -61,6 +60,8 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     
         //debug override background
         //debugClearScreen();
+        //debugDrawMousePath();
+        
     
         //render
         shape.begin(ShapeRenderer.ShapeType.Line);
@@ -70,10 +71,14 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         //drawGrid(Color.MAGENTA, 100, 0.5f);
         
         //drawOrigin(Color.SKY);
-        drawCameraPos(Color.RED);
+        //drawDebugCameraPos(Color.RED);
+        //update debug cam position
+        
+        //debugDrawCameraPath(Color.WHITE);
     
         Entity player = players.first();
         Body body = Mappers.physics.get(player).body;
+        //float alpha = MathUtils.clamp((cam.zoom / uiCFG.lodShowOrbitPath / uiCFG.orbitFadeFactor), 0, 1);
         Vector2 velocity = body.getLinearVelocity();
         Vector2 facing = MyMath.vector(body.getAngle(), 1);
         
@@ -86,7 +91,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     }
    
     
-    private void drawCameraPos(Color color) {
+    private void drawDebugCameraPos(Color color) {
         shape.setColor(color);
         shape.circle(camWorldPos.x, camWorldPos.y, 8);
         shape.line(camWorldPos.x, 0, camWorldPos.x, Gdx.graphics.getHeight());
@@ -104,6 +109,16 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         shape.line(GameScreen.viewport.getScreenX(), GameScreen.viewport.getScreenY(),
                 GameScreen.viewport.getScreenX() + GameScreen.viewport.getWorldWidth(), GameScreen.viewport.getScreenY() + GameScreen.viewport.getWorldHeight());
          */
+    }
+    
+    private void debugDrawCameraPath(Color color) {
+        if (camMarker == null) {
+            //add debug camera marker
+            camMarker = new Entity().add(new SplineComponent()).add(new TransformComponent());
+            camMarker.getComponent(SplineComponent.class).color = color;
+            getEngine().addEntity(camMarker);
+            Gdx.app.log(this.getClass().getSimpleName(), "debug cam marker activated");
+        }
         Mappers.transform.get(camMarker).pos.set(GameScreen.cam.position.x, GameScreen.cam.position.y);
     }
     
@@ -113,6 +128,18 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         shape.circle(screenCoords.x, screenCoords.y, 10);
         shape.line(screenCoords.x, 0, screenCoords.x, Gdx.graphics.getHeight());
         shape.line(0, screenCoords.y, Gdx.graphics.getWidth(), screenCoords.y);
+    }
+    
+    
+    private void debugDrawMousePath(){
+        if (mouseMarker == null) {
+            mouseMarker = new Entity().add(new SplineComponent()).add(new TransformComponent());
+            mouseMarker.getComponent(SplineComponent.class).color = Color.CYAN;
+            getEngine().addEntity(mouseMarker);
+        }
+        mouseProj.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+        GameScreen.viewport.unproject(mouseProj);
+        Mappers.transform.get(mouseMarker).pos.set(mouseProj.x, mouseProj.y);
     }
     
     private void drawEye(float segments, Rectangle rectangle) {

@@ -19,6 +19,7 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
         
     private final ShapeRenderer shape;
     private int pathSize = 1000;
+    boolean debugDrawHeadTail = false;
     
     public SplineRenderSystem() {
         super(Family.all(SplineComponent.class, TransformComponent.class).get());
@@ -46,6 +47,8 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
         TransformComponent transform = Mappers.transform.get(entity);
         
         updateTail(spline, transform);
+        
+        //todo: fade nicely
         renderTail(spline);
     }
     
@@ -60,6 +63,7 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
         }
         
         //
+        //todo: don't record useless points (duplicate). consider resolution
         //if (spline.path[spline.index].epsilonEquals(transform.pos.x, transform.pos.y, 10)) {
             //delta too small skip update
         //    return;
@@ -75,9 +79,10 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
     }
     
     public void renderTail(SplineComponent spline) {
+        
+        //todo: rainbow render
         for (int i = 0; i < spline.path.length-1; i++) {
             Vector2 p = spline.path[i];
-            //shape.point(p.x, p.y, 0);
             
             //wrap tiles when position is outside of map
             int indexWrap = i + 1 % spline.path.length;
@@ -87,10 +92,20 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
             // don't draw head to tail
             if (indexWrap != spline.index) {
                 if (spline.color != null) {
+                    //solid color
                     shape.line(p.x, p.y, p2.x, p2.y, spline.color, spline.color);
                 } else {
-                    //default
+                    //point to point color
                     shape.line(p.x, p.y, p2.x, p2.y, Color.BLUE, Color.GREEN);
+    
+                    //lerped point to point color
+                    //Color lerp = Color.BLUE.lerp(Color.GREEN, spline);
+                    //shape.line(p.x, p.y, p2.x, p2.y, Color.BLUE, Color.GREEN);
+                }
+            } else {
+                //debug draw head to tail
+                if (debugDrawHeadTail) {
+                    shape.line(p.x, p.y, p2.x, p2.y, Color.RED, Color.WHITE);
                 }
             }
         }
