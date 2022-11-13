@@ -129,10 +129,12 @@ public class PhysicsContactListener implements ContactListener {
         float relativeDamage = (impulse * damageMultiplier);
         
         HealthComponent health = Mappers.health.get(entity);
-        health.health -= relativeDamage;
-        if (health.health <= 0) {
-            entity.add(new RemoveComponent());
-            Gdx.app.debug(this.getClass().getSimpleName(), "vehicle destroyed: " + impulse + " -> damage: " + relativeDamage);
+        if (health != null) {
+            health.health -= relativeDamage;
+            if (health.health <= 0) {
+                entity.add(new RemoveComponent());
+                Gdx.app.debug(this.getClass().getSimpleName(), "vehicle destroyed: " + impulse + " -> damage: " + relativeDamage);
+            }
         }
     }
     
