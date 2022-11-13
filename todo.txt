@@ -254,6 +254,9 @@ Legend:
             [x] fix center of gravity
         [x] take damage when hit by shots
     [ ] better rendering. currently just debug render with modified shaperenderer
+        [ ] display health/damage on asteroid
+            [x] colorize by damage/health for visual feedback
+            [ ] draw cracks / sub poly
         [ ] set a texture to take up the dimension of an arbitrary poly
         [ ] sub shatter texture to child polygons scissors?
     [...] break into smaller asteroids
