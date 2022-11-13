@@ -18,6 +18,7 @@ public class AsteroidRenderSystem extends IteratingSystem {
     
     CustomShapeRenderer shapeRenderer;
     Color color = new Color();
+    boolean debugFloatingBodies = false;
     
     public AsteroidRenderSystem() {
         super(Family.all(AsteroidComponent.class, TransformComponent.class).get());
@@ -27,6 +28,7 @@ public class AsteroidRenderSystem extends IteratingSystem {
     @Override
     public void update(float deltaTime) {
         shapeRenderer.setProjectionMatrix(GameScreen.cam.combined);
+        
         //render filled inner poly
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         super.update(deltaTime);
@@ -43,25 +45,25 @@ public class AsteroidRenderSystem extends IteratingSystem {
         AsteroidComponent asteroid = Mappers.asteroid.get(entity);
         TransformComponent transform = Mappers.transform.get(entity);
         HealthComponent health = Mappers.health.get(entity);
-        
+    
+        //set polygon translation and rotation
         Polygon polygon = asteroid.polygon;
         polygon.setRotation(transform.rotation * MathUtils.radiansToDegrees);
         polygon.setPosition(transform.pos.x, transform.pos.y);
         
-        
-        
+        //set color based on fill type and health
         if (shapeRenderer.getCurrentType() == ShapeRenderer.ShapeType.Filled) {
             //inner body
-            //color = asteroid.debugColor.cpy();
             float ratio = health.health / health.maxHealth;
             color.set(1, ratio, ratio, 1);
         } else {
             //mesh outline
-            color = Color.WHITE;
-            //color = asteroid.debugColor;
-            if (asteroid.parentOrbitBody == null) {
-                color = Color.RED;
-            }
+            color = asteroid.debugColor.cpy();
+        }
+        
+        //debug orbit lock
+        if (debugFloatingBodies && asteroid.parentOrbitBody == null) {
+            color.set(1, 0 , 0, 1);
         }
         
         shapeRenderer.fillPolygon(polygon.getTransformedVertices(), 0, polygon.getVertices().length, color);
