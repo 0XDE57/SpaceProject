@@ -23,10 +23,10 @@ public class DebugConfig extends Config {
     public void loadDefault() {
         drawDebugUI = true;
         drawFPS = true;
-        drawDiagnosticInfo = true;
+        drawDiagnosticInfo = false;
         drawComponentList = false;
         drawPos = false;
-        box2DDebugRender = true;
+        box2DDebugRender = false;
         drawBodies = true;
         drawJoints = true;
         drawAABBs = false;
