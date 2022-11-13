@@ -120,7 +120,7 @@ public class CannonSystem extends IteratingSystem {
         
         //expire time (self destruct)
         ExpireComponent expire = new ExpireComponent();
-        expire.timer = new SimpleTimer(5000, true);
+        expire.timer = new SimpleTimer(20000, true);
         
         //missile damage
         DamageComponent missile = new DamageComponent();
