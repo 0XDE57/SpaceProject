@@ -419,7 +419,7 @@ public class EntityFactory {
         shipEntity.add(health);
         
         //weapon
-        if (MathUtils.randomBoolean()) {
+        if (true) {
             CannonComponent cannon = new CannonComponent();
             cannon.damage = entityCFG.cannonDamage;
             cannon.maxAmmo = entityCFG.cannonAmmo;

@@ -13,6 +13,7 @@ import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ShieldComponent;
+import com.spaceproject.components.SplineComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.EngineConfig;
@@ -56,8 +57,8 @@ public class CannonSystem extends IteratingSystem {
     private void fireCannon(CannonComponent cannon, Entity parentEntity) {
         if (GameScreen.isDebugMode) {
             //Cheat for debug: fast firing and infinite ammo
-            //cannon.curAmmo = cannon.maxAmmo;
-            //cannon.timerFireRate.setLastEvent(0);
+            cannon.curAmmo = cannon.maxAmmo;
+            cannon.timerFireRate.setLastEvent(0);
         }
         
         //check if can fire before shooting
@@ -126,6 +127,7 @@ public class CannonSystem extends IteratingSystem {
         missile.damage = cannon.damage;
         missile.source = parentEntity;
         
+        entity.add(new SplineComponent());
         
         entity.add(missile);
         entity.add(expire);
