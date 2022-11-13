@@ -81,7 +81,6 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(CameraSystem.class, 100, true, true, true, true, true));
         systems.add(new SysCFG(SpaceParallaxSystem.class, 105, false, true, false, true, true));
         systems.add(new SysCFG(ParallaxRenderSystem.class, 107, false, true, true, true, true));
-        
         //systems.add(new SysCFG(SpaceDustSystem.class, 106, false, true, false, true, true));
         systems.add(new SysCFG(WorldRenderingSystem.class, 110, false, false, true, true, true));
         systems.add(new SysCFG(TileGridSystem.class, 111, false, false, true, true, true));
