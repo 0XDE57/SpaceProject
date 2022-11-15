@@ -9,7 +9,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.math.BlackBodyColorSpectrum;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.noise.NoiseGen;
-import com.spaceproject.noise.OpenSimplexNoise;
+import com.spaceproject.math.OpenSimplexNoise;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Tile;
 

@@ -1,4 +1,4 @@
-package com.spaceproject.noise;
+package com.spaceproject.math;
 /*
  * OpenSimplex Noise in Java.
  * by Kurt Spencer

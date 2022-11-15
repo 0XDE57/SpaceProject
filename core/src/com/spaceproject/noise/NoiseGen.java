@@ -3,6 +3,7 @@ package com.spaceproject.noise;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.math.OpenSimplexNoise;
 import com.spaceproject.ui.Tile;
 import com.spaceproject.math.MyMath;
 

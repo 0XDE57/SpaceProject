@@ -8,7 +8,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.PerformanceCounter;
 import com.spaceproject.math.MyMath;
-import com.spaceproject.noise.OpenSimplexNoise;
+import com.spaceproject.math.OpenSimplexNoise;
 import com.spaceproject.utility.IndependentTimer;
 
 public class NoiseAnim extends TitleAnimation {
