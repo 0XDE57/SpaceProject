@@ -177,6 +177,7 @@ Legend:
     [ ! ] = notes
     [ * ] = exceptions
 
+[ ] touch the sun and die! do damage to things with health, including asteroids
 
 [...] terrible BUG! lerping camera movement is giving some jittering in the rendering when vsync on.
     this is caused by interpolation being a percentage from target and the value is
@@ -218,6 +219,19 @@ Legend:
     https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
     https://www.youtube.com/watch?v=mXTxQko-JH0&t=4m18s
 
+[ ] engine architecture:
+    [ ] double check use of static in gamescreen
+    Caution: don’t make your AssetManager or any other resources (like Texture, etc.) static,
+    unless you properly manage them. E.g. the following code will cause issues:
+    This will cause problems on Android because the life-cycle of the static variable is not necessarily the same as the life-cycle of your application.
+    Therefore the AssetManager instance of a previous instance of your application might be used for the next instance, while the resources are no longer valid.
+    This typically would cause black/missing textures or incorrect assets.
+    On Android, it is even possible for multiple instances of your Activity to be active at the same time,
+    so do not think you’re safe even if you handle life-cycle methods properly!
+    https://libgdx.com/wiki/managing-your-assets
+    [ ] Memory leaks
+    theres a lot of new Vector3 in core loops. -> cache
+
 [x] add basic asteroids (arbitrary poly)
     [x] spec spawner for asteroid.
         - asteroid source A: belt / circumstellar disc
@@ -254,7 +268,7 @@ Legend:
             [x] fix center of gravity
         [x] take damage when hit by shots
     [ ] better rendering. currently just debug render with modified shaperenderer
-        [ ] display health/damage on asteroid
+        [...] display health/damage on asteroid
             [x] colorize by damage/health for visual feedback
             [ ] draw cracks / sub poly
         [ ] set a texture to take up the dimension of an arbitrary poly
@@ -518,6 +532,7 @@ Legend:
     [ ] potential for playing with some shaders
 
 [ ] laser
+    [ ] you are the laser! hyper drive
     [ ] cut asteroids, arbitrary polygons in half
     [ ] ray case polygon collision to stop head of lazer at object
     [ ] render technique? sprites or shader? for now just shape renderer
