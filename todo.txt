@@ -178,6 +178,10 @@ Legend:
     [ * ] = exceptions
 
 [ ] touch the sun and die! do damage to things with health, including asteroids
+[ ] better death visual
+    [ ] maybe shatter player
+    [ ] emit explosion rings
+    [ ] emit explosion rays
 
 [...] terrible BUG! lerping camera movement is giving some jittering in the rendering when vsync on.
     this is caused by interpolation being a percentage from target and the value is
@@ -583,7 +587,7 @@ Legend:
         [x] this control should also exit hyper drive
         [ ] how does this feel with controller? needs moveBack control
     [x] basic controller input
-        [?] should separate look from movemwent? meaning movement left stick, aim/look right stick
+        [?] should separate look from movement? meaning movement left stick, aim/look right stick
             might make sense for on foot character (could separate look and movement on MnK too)
             this would displace the camera zoom control. we could let it modify camera with a modifier? eg: d-pad left + right stick
             would probably make mobile control more difficult (two virtual sticks)
@@ -636,17 +640,39 @@ Legend:
     [ ] getting into ship sometimes a little clunky, switch from distance check to sensor
         add sensor to player
             if contact has ship component, get in.
-        could also hand generic interactions if contact has interactable component, do whatever interact action
+        could also hand generic interactions if contact has intractable component, do whatever interact action
         collision callback can also solve mobile ui for vehicle button:
             BeginContact:vehicleButton.enable()
             EndContact:vehicleButton.disable()
         http://www.iforce2d.net/b2dtut/sensors
 
-
 [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
-    jk, sound will eventually exist
-        https://github.com/libgdx/libgdx/wiki/Audio
+    [ ] engine / movement
+        [ ] active, pitch tied to velocity
+        [ ] left right?
+        [ ] boost
+        [ ] barrel roll
+        [ ] hyper drive
+            [ ] charge
+            [ ] discharge
+            [ ] active
+    [ ] cannon
+        [x] start
+        [ ] active
+    [ ] laser
+        [ ] start
+        [ ] active
+    [ ] shield
+        [ ] charge, pitch tied to charge
+        [ ] activated, max charge
+        [ ] decharge, pitch tied to charge
+        [ ] hit, pitch set by impulse
+        [ ] shield broken, shatter
+    [ ] asteroid
+        [ ] hit, pitch set by impulse (how hard hit)
+        [ ] shatter
     Apparently audio on android sucks?
+        https://github.com/libgdx/libgdx/wiki/Audio
         https://github.com/barsoosayque/libgdx-oboe
     More advanced audio:
         https://github.com/Hangman/TuningFork

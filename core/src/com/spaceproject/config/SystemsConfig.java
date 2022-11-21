@@ -95,6 +95,7 @@ public class SystemsConfig extends Config {
         
         systems.add(new SysCFG(ScreenTransitionSystem.class, 300, true, true, true, true, true));
     
+        systems.add(new SysCFG(SoundSystem.class, 400, false, true, true, true, true));
     
         systems.add(new SysCFG(ExpireSystem.class, 500, true, true, true, true, true));
         
