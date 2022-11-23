@@ -1,47 +1,37 @@
 # a space project
 Welcome to A Space Project. A project involving space...
-* Enjoy Galactic Space Exploration in a sate-of-the-art, hyper-realistic physics simulation of the entire universe!
-* Get a realistic sense of the cosmic scale; there's literally dozens of planets and traveling between them could take up to minutes!
-* Faster Than Light Travel!
-   * (yeah it's real cuz like quantum anti-dark matter n' stuff yo)
-* During your explorations you could find various astronomical bodies including:
-    * Unique planetary systems
-    * Binary star systems, Trinary star systems, and even quadri... quatro? quadrino-ary? 
-      * as-many-as-you-want star systems!
-    * Discover lonely rogue planets who lost their sun. :(
-* Pilot a space ship and combat broken placeholder AI while I figure out the rest of the engine.
-* Then when your bored of that you can land on a planet I guess. 
-   * The worlds are flat. (Ha! take that Round Earthers). 
-      * Actually the worlds are donuts. (Ha! take that Flat Earthers).
-
+> Enjoy Galactic Space Exploration in a sate-of-the-art, hyper-realistic physics simulation of the entire universe!
+> Get a realistic sense of the cosmic scale; there's literally dozens of planets and traveling between them could take up to minutes!
 
 ![screenshot](/Capture.PNG?raw=true)
 
-
-## Current Status
-A work in progress engine toy sandbox thing: scaffolding for what will hopefully one day be a game.
-Currently focused on figuring out some rendering issues with how shaders work.
-The code is bit rough in some places, littered with todo's, half-baked features, and of course the occasional bug.
-  
-**This game is still in pre-alpha prototype phase. More of an engine than a game, there's not much content**
-
+***This game is in pre-alpha prototype phase. More of an sandbox than a game, there's not much content***
 
 ## Features
-* Explore a starsystem in a spaceship
-* Destructable asteroids
-* Land on planets and explore
-   * Mining and base-building on planets (todo: potentially out of scope)
+* Fly around the starsystem in a spaceship
+  * Faster Than Light Travel! (yeah it's real cuz like quantum anti-dark matter n' stuff yo)
+* Discover a plethora of astronomical bodies including:
+    * Destructable asteroids using cutting edge triangle technology 
+    * Single star systems, Binary star systems, Trinary star systems, and even Quadri... quatro? quadrino-ary?
+      * as-many-as-you-want star systems!
+    * lonely rogue planets who lost their sun :(
 * Fight against other ship (in progress)
-* Controller Support
+  * combat broken placeholder AI while I figure out the rest of the engine.
+* Then when you're bored of that you can land on a planet I guess (in theory, probably out of scope):
+   * The planets are flat (ha, take that Round Earthers!)
+      * Actually the planets are ***donuts*** (ha, take that Flat Earthers!)
+* Controller Support (works in game but not menus)
    * hot plugging!
-   * works in game but not menus
-* Developer Tools (in progress)
-* Unit Tests
+* Sound?
+  * there is no sound in the vacuum of space silly
+* Unit Tests?
    * pfft... my code is perfect. the first time. every time.
+* Developer Tools (in progress)
 * Cross-Platform Desktop and Mobile Support
   * Windows, OSX, Linux, Android, IOS
 * Feature Creep and Unrealistic Scope!
    * Multiplayer is out of current scope :(
+
 
 ### Controls
 | Control                        | Desktop       | Controller/Gamepad    | Mobile (Android, iOS)                   |
@@ -67,10 +57,17 @@ The code is bit rough in some places, littered with todo's, half-baked features,
 
 It may be difficult to find sensible touchscren controls, I am focused more on desktop and controller.
 
+
+## Current Status
+A work in progress engine toy sandbox thing: scaffolding for what will hopefully one day be a game.
+Currently focused on figuring out some rendering issues with how shaders work.
+The code is bit rough in some places, littered with todo's, half-baked features, and of course the occasional bug.
+  
+
+
+
 ## License
    Apache 2.0: see [LICENSE.md](/LICENSE.md)
-   
-   Credit appreciated, but not required.
 
 
 ## Libraries
