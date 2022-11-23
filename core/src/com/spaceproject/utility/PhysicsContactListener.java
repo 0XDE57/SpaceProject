@@ -20,6 +20,7 @@ import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.systems.SoundSystem;
 
 public class PhysicsContactListener implements ContactListener {
     
@@ -93,7 +94,7 @@ public class PhysicsContactListener implements ContactListener {
                 //if (circumstellar.spawnTimer != null && circumstellar.spawnTimer.canDoEvent()) {
                 if (circumstellar.spawned == circumstellar.maxSpawn) {
                     asteroid.parentOrbitBody = null;
-                    Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID knocked out of orbit: " + impulse);
+                    //Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID knocked out of orbit: " + impulse);
                 }
             }
         }
@@ -102,12 +103,14 @@ public class PhysicsContactListener implements ContactListener {
             //calc damage relative to size of bodies and how hard impact impulse was
             float relativeDamage = (impulse * impactMultiplier) * asteroid.area;
     
+            //damage (potential could be optimization to remove health, add merge it with asteroid, one less mapper)
             HealthComponent health = Mappers.health.get(entity);
             health.health -= relativeDamage;
             if (health.health <= 0) {
                 asteroid.doShatter = true;
                 entity.add(new RemoveComponent());
-                Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID shatter: " + impulse + " -> damage: " + relativeDamage);
+                engine.getSystem(SoundSystem.class).asteroidShatter();
+                //Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID shatter: " + impulse + " -> damage: " + relativeDamage);
             }
         }
     }
@@ -157,8 +160,10 @@ public class PhysicsContactListener implements ContactListener {
         if (damageComponent.source == attackedEntity) {
             return; //ignore self-inflicted damage
         }
+        /*
         Gdx.app.debug(this.getClass().getSimpleName(),
                 "[" + DebugUtil.objString(attackedEntity) + "] attacked by: [" + DebugUtil.objString(damageComponent.source) + "]");
+        */
         
         //check if attacked entity was AI
         AIComponent ai = Mappers.AI.get(attackedEntity);
@@ -213,10 +218,13 @@ public class PhysicsContactListener implements ContactListener {
             AsteroidComponent asteroid = Mappers.asteroid.get(attackedEntity);
             if (asteroid != null) {
                 asteroid.doShatter = true;
+                engine.getSystem(SoundSystem.class).asteroidShatter();
             }
             
+            /*
             Gdx.app.log(this.getClass().getSimpleName(),
                     "[" + DebugUtil.objString(attackedEntity) + "] killed by: [" + DebugUtil.objString(damageComponent.source) + "]");
+             */
         }
         
         //remove projectile
