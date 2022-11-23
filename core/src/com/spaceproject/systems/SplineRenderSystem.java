@@ -10,8 +10,10 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
+import com.spaceproject.components.HyperDriveComponent;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.SplineComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
@@ -22,7 +24,7 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
     private final ShapeRenderer shape;
     private final Color tmpColor = new Color();
     private int maxPathSize = 1000;
-    boolean debugDrawHeadTail = false;
+    
     
     public SplineRenderSystem() {
         super(Family.all(SplineComponent.class, TransformComponent.class).get());
@@ -47,22 +49,31 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         SplineComponent spline = Mappers.spline.get(entity);
-        TransformComponent transform = Mappers.transform.get(entity);
         
-        updateTail(spline, transform);
-        
+        updateTail(spline, entity);
+        //todo: z-index to render player trail above bullet trail
         //todo: fade nicely
-        renderPath(spline);
-        //renderRainbowPath(spline);
+        if (spline.style == null) {
+            spline.style = SplineComponent.Style.simple;
+        }
+        switch (spline.style) {
+            case velocity: renderVelocityPath(spline); break;
+            case rainbow: renderRainbowPath(spline); break;
+            default:
+                renderPath(spline);
+        }
     }
     
     //see also: https://libgdx.com/wiki/math-utils/path-interface-and-splines
-    public void updateTail(SplineComponent spline, TransformComponent transform) {
+    public void updateTail(SplineComponent spline, Entity entity) {
+        TransformComponent transform = Mappers.transform.get(entity);
+        PhysicsComponent physics = Mappers.physics.get(entity);
+        
         if (spline.path == null) {
             //init
-            spline.path = new Vector2[maxPathSize];
+            spline.path = new Vector3[maxPathSize];
             for (int v = 0; v < maxPathSize; v++) {
-                spline.path[v] = new Vector2();
+                spline.path[v] = new Vector3();
             }
         }
         
@@ -72,8 +83,13 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
             //delta too small skip update
         //    return;
         //}
-        
-        spline.path[spline.index].set(transform.pos.x, transform.pos.y);
+    
+        float velocity = physics.body.getLinearVelocity().len2();
+        if (!physics.body.isActive()) {
+            HyperDriveComponent hyper = Mappers.hyper.get(entity);
+            velocity = hyper.speed * hyper.speed;
+        }
+        spline.path[spline.index].set(transform.pos.x, transform.pos.y, velocity);
         //roll index
         spline.index++;
         if (spline.index >= spline.path.length) {
@@ -82,14 +98,52 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
         
     }
     
-    public void renderPath(SplineComponent spline) {
+    Color tempColor = new Color();
+    public void renderVelocityPath(SplineComponent spline) {
+        //todo: bug with tail index not properly rendered
+        boolean debugDrawHeadTail = false;
+        
         for (int i = 0; i < spline.path.length-1; i++) {
-            Vector2 p = spline.path[i];
+            Vector3 p = spline.path[i];
             
             //wrap tiles when position is outside of map
             int indexWrap = i + 1 % spline.path.length;
-            if (indexWrap < 0) indexWrap += spline.path.length;
-            Vector2 p2 = spline.path[indexWrap];
+            if (indexWrap <= 0) indexWrap += spline.path.length;
+            Vector3 p2 = spline.path[indexWrap];
+            
+            // don't draw head to tail
+            if (indexWrap != spline.index) {
+                if (spline.color != null) {
+                    //z = linearVelocity [0 - max box2d] then  hyperdrive velocity
+                    float velocity = p.z / (B2DPhysicsSystem.getVelocityLimit() * B2DPhysicsSystem.getVelocityLimit());
+                    
+                    tempColor.set(1-velocity, velocity, velocity, 1);
+                    if (velocity > 1) {
+                        //hyperdrive travel
+                        tempColor.set(1, 1, 1, 1);
+                    }
+                    shape.line(p.x, p.y, p2.x, p2.y, tempColor, tempColor);
+                }
+            } else {
+                //debug draw head to tail
+                if (debugDrawHeadTail) {
+                    shape.line(p.x, p.y, p2.x, p2.y, Color.RED, Color.WHITE);
+                }
+            }
+        }
+    }
+    
+    public void renderPath(SplineComponent spline) {
+        //todo: bug with tail index not properly rendered
+        boolean debugDrawHeadTail = false;
+        
+        for (int i = 0; i < spline.path.length-1; i++) {
+            Vector3 p = spline.path[i];
+            
+            //wrap tiles when position is outside of map
+            int indexWrap = i + 1 % spline.path.length;
+            if (indexWrap <= 0) indexWrap += spline.path.length;
+            Vector3 p2 = spline.path[indexWrap];
             
             // don't draw head to tail
             if (indexWrap != spline.index) {
@@ -114,14 +168,14 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
         //xy mode
         //change of angle: same color when going straight, 360 otherwise, doesnt care speed
         //change of speed: 0-max, doesn't care angle
-        
+        boolean debugDrawHeadTail = false;
         for (int i = 0; i < spline.path.length-1; i++) {
-            Vector2 p = spline.path[i];
+            Vector3 p = spline.path[i];
             
             //wrap tiles when position is outside of map
             int indexWrap = i + 1 % spline.path.length;
-            if (indexWrap < 0) indexWrap += spline.path.length;
-            Vector2 p2 = spline.path[indexWrap];
+            if (indexWrap <= 0) indexWrap += spline.path.length;
+            Vector3 p2 = spline.path[indexWrap];
             
             // don't draw head to tail
             if (indexWrap != spline.index) {

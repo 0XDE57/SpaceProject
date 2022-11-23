@@ -486,7 +486,8 @@ public class EntityFactory {
         
         //spline
         SplineComponent spline = new SplineComponent();
-        spline.color = Color.SKY;
+        spline.style = SplineComponent.Style.velocity;
+        spline.color = Color.CYAN;
         shipEntity.add(spline);
     
         //engine particle effect
