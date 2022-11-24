@@ -123,7 +123,7 @@ public class OrbitAnim extends TitleAnimation {
                 //angle is equal to other angle with given epsilon
                 if (MathUtils.isEqual(body.angleRadians, other.angleRadians, angleSyncEpsilon)) {
                     shape.setColor(Color.WHITE);
-                    shape.line(body.pos, other.pos);
+                    //shape.line(body.pos, other.pos);
                     
                     /*add ghost marker where phase aligned
                     boolean contain = false;
