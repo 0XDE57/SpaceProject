@@ -62,7 +62,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         //todo: z-index to render player trail above bullet trail
         //todo: fade nicely
         if (spline.style == null) {
-            spline.style = SplineComponent.Style.simple;
+            spline.style = SplineComponent.Style.solid;
         }
         switch (spline.style) {
             case velocity: renderVelocityPath(spline); break;
@@ -124,7 +124,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
                     //z = linearVelocity [0 - max box2d] then  hyperdrive velocity
                     float velocity = p.z / (B2DPhysicsSystem.getVelocityLimit() * B2DPhysicsSystem.getVelocityLimit());
                     tmpColor.set(1-velocity, velocity, velocity, 1);
-                    if (velocity > 1) {
+                    if (velocity > 1.01f) {
                         //hyperdrive travel
                         tmpColor.set(1, 1, 1, 1);
                     }

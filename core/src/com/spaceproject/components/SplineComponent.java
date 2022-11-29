@@ -18,7 +18,7 @@ public class SplineComponent implements Component {
     public Style style;
     
     public enum Style {
-        simple, velocity, rainbow
+        solid, velocity, rainbow
     }
     
 }

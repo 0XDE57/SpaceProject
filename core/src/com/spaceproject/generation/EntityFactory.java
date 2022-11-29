@@ -495,7 +495,7 @@ public class EntityFactory {
         Entity mainEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineMain, new Vector2(0, height + 0.2f), 0);
         Entity leftEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineLeft, new Vector2(width/2 - 0.2f, 0), -90);
         Entity rightEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineRight, new Vector2(-(width/2 - 0.2f), 0), 90);
-        //leftEngine.add(new SplineComponent());
+        
         
         entityCluster.add(shipEntity);
         entityCluster.add(mainEngine);
@@ -519,6 +519,16 @@ public class EntityFactory {
         particle.offset = offset;
         particle.angle = angle;
         entity.add(particle);
+    
+        /*
+        todo: offset and angle like attached to?
+        todo: alternatively, move offset and angle into AttachedTo and allow chaining
+        SplineComponent test = new SplineComponent();
+        test.zOrder = 200;
+        test.style = SplineComponent.Style.solid;
+        test.color = Color.GOLD;
+        entity.add(test);
+        */
         
         return entity;
     }
