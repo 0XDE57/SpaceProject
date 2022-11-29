@@ -208,12 +208,15 @@ Legend:
         I believe this is to do with the noise threads shutting down?
 
 [...] needs frame of reference to judge speed and direction since parallax is so deep
+    [...] ship tail and bullet tail fx help with frame of reference
+        [ ] nicer rendering: bloom/glow, fade, colors
+        [ ] optimize: reduce data points
     [ ] floaty dust particles at same depth as player to help visualize movement/speed
         perhaps play with lod, different layers based on zoom
         maybe with a very slow wander
     [ ] space debri, mostly inconsequential small irregular bodies
     [...] fog layer (particles, or white noise parallax at 1.0?)
-        disabled: ugly
+        disabled because ugly
         [ ] could have different layers that fade in and out at different depths when zoom out
         [ ] fog layer could use some more octaves. possible shader can just render another layer on top
             with some movement and multiply the layers together

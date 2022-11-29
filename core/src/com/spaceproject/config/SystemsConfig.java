@@ -67,6 +67,7 @@ public class SystemsConfig extends Config {
         // - cam update -> move, zoom, and update camera
         // - sprite 2D renderer -> render regular textures no shader
         // - sprite 2D shader renderer -> render textures with shader applied
+        // - spline render -> render movement paths, mostly for debug and frame of reference
         // - asteroid renderer -> custom shaperenderer to draw filled polygons
         // - sprite 3D renderer -> render 3d meshes with no shader
         // - todo: sprite 3D shader renderer -> render 3d meshes with shader applied
