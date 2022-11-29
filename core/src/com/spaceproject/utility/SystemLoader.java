@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.utils.Disposable;
@@ -79,19 +80,22 @@ public abstract class SystemLoader {
     }
     
     private static void unLoad(Engine engine, EntitySystem systemInEngine) {
-        // auto unhook and cleanup. we could require that systems:
+        // auto unhook listeners and cleanup. we could require that systems:
         //  - remove themselves as listeners on removedFromEngine()
         //  - dispose themselves on removedFromEngine()
-        // as a failsafe we clean up here.
+        // as a failsafe we clean up here. also note other listeners:
+        //  - PhysicsContactListener box2d physics system
         
         if (systemInEngine instanceof EntityListener) {
             //listener must be removed, otherwise a reference is kept in engine (i think?)
             //when system is re-added / re-removed down the line, the families/listeners are broken
             engine.removeEntityListener((EntityListener) systemInEngine);
         }
-        
         if (systemInEngine instanceof ControllerListener) {
             Controllers.removeListener((ControllerListener) systemInEngine);
+        }
+        if (systemInEngine instanceof InputProcessor) {
+            GameScreen.getInputMultiplexer().removeProcessor((InputProcessor) systemInEngine);
         }
         
         engine.removeSystem(systemInEngine);

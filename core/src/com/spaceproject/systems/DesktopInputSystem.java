@@ -45,6 +45,11 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     }
     
     @Override
+    public void removedFromEngine(Engine engine) {
+        GameScreen.getInputMultiplexer().removeProcessor(this);
+    }
+    
+    @Override
     public void update(float delta) {
         if (!controllerHasFocus) {
             facePosition(Gdx.input.getX(), Gdx.input.getY());
