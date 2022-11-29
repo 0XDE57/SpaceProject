@@ -486,6 +486,7 @@ public class EntityFactory {
         
         //spline
         SplineComponent spline = new SplineComponent();
+        spline.zOrder = 100;//should be on top of others
         spline.style = SplineComponent.Style.velocity;
         spline.color = Color.CYAN;
         shipEntity.add(spline);

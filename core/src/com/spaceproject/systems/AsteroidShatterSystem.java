@@ -24,7 +24,14 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
     private final float maxDriftAngle = 0.25f; //angular drift when shatter
     
     @Override
-    public void addedToEngine(Engine engine) { }
+    public void addedToEngine(Engine engine) {
+        engine.addEntityListener(this);
+    }
+    
+    @Override
+    public void removedFromEngine(Engine engine) {
+        engine.removeEntityListener(this);
+    }
     
     @Override
     public void update(float deltaTime) { }
@@ -69,7 +76,7 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
         coordinate system with the z-axis pointing out of the plane. */
         
         ShortArray triangles = delaunay.computeTriangles(vertices, false);
-        Gdx.app.debug(this.getClass().getSimpleName(), "shatter into " + triangles.size);
+        //Gdx.app.debug(this.getClass().getSimpleName(), "shatter into " + triangles.size);
         
         //create cells for each triangle
         for (int index = 0; index < triangles.size; index += 3) {
@@ -87,12 +94,13 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
             //todo: add new vertices to break in half
             // because the current shatter creates long ugly slivers
             //}
-            
+            /*
             Gdx.app.debug(this.getClass().getSimpleName(),
                     MyMath.round(hull[0],1) + ", " + MyMath.round(hull[1],1) + " | " +
                             MyMath.round(hull[2],1) + ", " + MyMath.round(hull[3],1) + " | " +
                             MyMath.round(hull[4],1) + ", " + MyMath.round(hull[5],1) +
                             " | clockwise: " + GeometryUtils.isClockwise(hull, 0, hull.length) + " | quality: " + triangleQuality);
+            */
             
             //discard duplicate points
             if ((hull[0] == hull[2] && hull[1] == hull[3]) || // p1 == p2 or

@@ -4,6 +4,8 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.controllers.ControllerListener;
+import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.SysCFG;
@@ -69,27 +71,36 @@ public abstract class SystemLoader {
             ((IRequireGameContext) systemToLoad).initContext(game);
         }
         
-        if (systemToLoad instanceof EntityListener) {
-            engine.addEntityListener((EntityListener) systemToLoad);
-        }
+        //NOTE: don't hook up entity listener here, this overrides the family in case of SortedIteratingSystem when addedToEngine()
+        //if (systemToLoad instanceof EntityListener) { engine.addEntityListener((EntityListener) systemToLoad); }
         
         engine.addSystem(systemToLoad);
         Gdx.app.log(logSource, "Loaded: " + String.format("%-4d ", systemToLoad.priority) + systemToLoad.getClass().getName());
     }
     
     private static void unLoad(Engine engine, EntitySystem systemInEngine) {
-        //auto unhook and cleanup
+        // auto unhook and cleanup. we could require that systems:
+        //  - remove themselves as listeners on removedFromEngine()
+        //  - dispose themselves on removedFromEngine()
+        // as a failsafe we clean up here.
+        
         if (systemInEngine instanceof EntityListener) {
             //listener must be removed, otherwise a reference is kept in engine (i think?)
             //when system is re-added / re-removed down the line, the families/listeners are broken
             engine.removeEntityListener((EntityListener) systemInEngine);
         }
-        if (systemInEngine instanceof Disposable) {
-            //clean up
-            ((Disposable)systemInEngine).dispose();
+        
+        if (systemInEngine instanceof ControllerListener) {
+            Controllers.removeListener((ControllerListener) systemInEngine);
         }
         
         engine.removeSystem(systemInEngine);
+        
+        //dispose AFTER remove in case a system has to access some data when removedFromEngine()
+        if (systemInEngine instanceof Disposable) {
+            ((Disposable)systemInEngine).dispose();
+        }
+        
         Gdx.app.log(logSource, "Unload: " + String.format("%-4d ", systemInEngine.priority) + systemInEngine.getClass().getName());
     }
     

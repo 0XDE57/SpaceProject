@@ -3,7 +3,7 @@ package com.spaceproject.systems;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.ashley.systems.SortedIteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -19,15 +19,23 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
-public class SplineRenderSystem extends IteratingSystem implements Disposable {
-        
+import java.util.Comparator;
+
+public class SplineRenderSystem extends SortedIteratingSystem implements Disposable {
+    
+    private static class ZComparator implements Comparator<Entity> {
+        @Override
+        public int compare(Entity entityA, Entity entityB) {
+            return (int)Math.signum(Mappers.spline.get(entityA).zOrder - Mappers.spline.get(entityB).zOrder);
+        }
+    }
+    
     private final ShapeRenderer shape;
     private final Color tmpColor = new Color();
     private int maxPathSize = 1000;
     
-    
     public SplineRenderSystem() {
-        super(Family.all(SplineComponent.class, TransformComponent.class).get());
+        super(Family.all(SplineComponent.class, TransformComponent.class).get(), new ZComparator());
         shape = new ShapeRenderer();
     }
     
@@ -98,7 +106,6 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
         
     }
     
-    Color tempColor = new Color();
     public void renderVelocityPath(SplineComponent spline) {
         //todo: bug with tail index not properly rendered
         boolean debugDrawHeadTail = false;
@@ -116,13 +123,12 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
                 if (spline.color != null) {
                     //z = linearVelocity [0 - max box2d] then  hyperdrive velocity
                     float velocity = p.z / (B2DPhysicsSystem.getVelocityLimit() * B2DPhysicsSystem.getVelocityLimit());
-                    
-                    tempColor.set(1-velocity, velocity, velocity, 1);
+                    tmpColor.set(1-velocity, velocity, velocity, 1);
                     if (velocity > 1) {
                         //hyperdrive travel
-                        tempColor.set(1, 1, 1, 1);
+                        tmpColor.set(1, 1, 1, 1);
                     }
-                    shape.line(p.x, p.y, p2.x, p2.y, tempColor, tempColor);
+                    shape.line(p.x, p.y, p2.x, p2.y, tmpColor, tmpColor);
                 }
             } else {
                 //debug draw head to tail
@@ -188,7 +194,6 @@ public class SplineRenderSystem extends IteratingSystem implements Disposable {
             }
         }
     }
-    
     
     private Color backgroundColor(OrthographicCamera cam) {
         //still playing with these values to get the right feel/intensity of color...

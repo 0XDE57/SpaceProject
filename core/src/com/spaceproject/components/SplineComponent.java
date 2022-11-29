@@ -13,6 +13,8 @@ public class SplineComponent implements Component {
     
     public Color color;
     
+    public int zOrder;
+    
     public Style style;
     
     public enum Style {

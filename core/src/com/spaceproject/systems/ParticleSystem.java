@@ -1,6 +1,7 @@
 package com.spaceproject.systems;
 
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.Family;
@@ -246,22 +247,6 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         particle.pooledEffect.setPosition(transform.pos.x + particle.offset.x, transform.pos.y + particle.offset.y);
     }
     
-    @Override
-    public void entityAdded(Entity entity) {
-        ParticleComponent particle = Mappers.particle.get(entity);
-        if (particle != null && particle.pooledEffect == null) {
-            initializeParticleFromPool(particle);
-        }
-    }
-    
-    @Override
-    public void entityRemoved(Entity entity) {
-        ParticleComponent particle = Mappers.particle.get(entity);
-        if (particle != null && particle.pooledEffect != null) {
-            freeParticleFromPool(particle);
-        }
-    }
-    
     public void initializeParticleFromPool(ParticleComponent particle) {
         switch (particle.type) {
             case shipEngineMain:
@@ -306,6 +291,34 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                 shieldEffectPool.free(particle.pooledEffect);
                 break;
         }
+    }
+    
+    @Override
+    public void entityAdded(Entity entity) {
+        ParticleComponent particle = Mappers.particle.get(entity);
+        if (particle != null && particle.pooledEffect == null) {
+            initializeParticleFromPool(particle);
+        }
+    }
+    
+    @Override
+    public void entityRemoved(Entity entity) {
+        ParticleComponent particle = Mappers.particle.get(entity);
+        if (particle != null && particle.pooledEffect != null) {
+            freeParticleFromPool(particle);
+        }
+    }
+    
+    @Override
+    public void addedToEngine(Engine engine) {
+        super.addedToEngine(engine);
+        engine.addEntityListener(this);
+    }
+    
+    @Override
+    public void removedFromEngine(Engine engine) {
+        super.removedFromEngine(engine);
+        engine.removeEntityListener(this);
     }
     
     @Override

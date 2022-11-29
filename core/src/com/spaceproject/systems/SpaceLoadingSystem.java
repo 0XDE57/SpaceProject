@@ -43,7 +43,6 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     
     private boolean hasInit;
     
-    
     @Override
     public void addedToEngine(Engine engine) {
         // currently loaded stars/planets
@@ -54,6 +53,13 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         loadTimer.setCanDoEvent();
     
         hasInit = false;
+        
+        engine.addEntityListener(this);
+    }
+    
+    @Override
+    public void removedFromEngine(Engine engine) {
+        engine.removeEntityListener(this);
     }
     
     @Override
