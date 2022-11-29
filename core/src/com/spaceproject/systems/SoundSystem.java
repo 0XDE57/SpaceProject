@@ -35,6 +35,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         synth = Gdx.audio.newSound(Gdx.files.internal("sound/synth.mp3"));
         f3 = Gdx.audio.newSound(Gdx.files.internal("sound/f3.mp3"));
      
+        //-6 to -12 db track rendering because headroom
         
         //given the physics based nature of this game, id say rhythm is certainly important given we want collisions to feel accurate
         //12 notes
@@ -44,6 +45,9 @@ public class SoundSystem extends EntitySystem implements Disposable {
     
     @Override
     public void update(float deltaTime) {
+        //todo: should be event based, so any system can call
+        // should no be checking mouse here as controller can activate too also menus.
+        //see: https://github.com/libgdx/ashley/blob/master/ashley/tests/com/badlogic/ashley/signals/SignalTests.java
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             try {
                 kickID = kick.play(); // play new sound and keep handle for further manipulation
