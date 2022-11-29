@@ -51,6 +51,9 @@ import com.spaceproject.utility.Mappers;
 
 public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener {
     
+    private final UIConfig uiCFG = SpaceProject.configManager.getConfig(UIConfig.class);
+    private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
+    
     private GameMenu gameMenu;
     
     //rendering
@@ -69,9 +72,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     private boolean drawHud = true;
     private boolean drawEdgeMap = true;
-    
-    private final UIConfig uiCFG = SpaceProject.configManager.getConfig(UIConfig.class);
-    private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     
     public HUDSystem() {
         cam = MyScreenAdapter.cam;
@@ -290,7 +290,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     //region player status
-    private void drawPlayerStatus(Entity playerEntity) {
+    private void drawPlayerStatus(Entity entity) {
         if (players == null || players.size() == 0) {
             return;
         }
@@ -303,11 +303,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         int playerHyperBarY = playerHPBarY + barHeight + 1;
         
         
-        drawPlayerHealth(playerEntity, playerBarX, playerHPBarY, barWidth, barHeight);
-        drawPlayerShield(playerEntity, playerBarX, playerHPBarY, barWidth, barHeight);
-        drawPlayerAmmoBar(playerEntity, playerBarX, playerAmmoBarY, barWidth, barHeight);
-        drawPlayerVelocity(playerEntity, playerBarX, playerHyperBarY, barWidth, barHeight);
-        drawHyperDriveBar(playerEntity, playerBarX, playerHyperBarY, barWidth, barHeight);
+        drawPlayerHealth(entity, playerBarX, playerHPBarY, barWidth, barHeight);
+        drawPlayerShield(entity, playerBarX, playerHPBarY, barWidth, barHeight);
+        drawPlayerAmmoBar(entity, playerBarX, playerAmmoBarY, barWidth, barHeight);
+        drawPlayerVelocity(entity, playerBarX, playerHyperBarY, barWidth, barHeight);
+        drawHyperDriveBar(entity, playerBarX, playerHyperBarY, barWidth, barHeight);
 
 		/*
 		//border
@@ -320,22 +320,29 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 		*/
     }
     
-    private void drawPlayerHealth(Entity playerEntity, int playerBarX, int playerHPBarY, int barWidth, int barHeight) {
-        HealthComponent health = Mappers.health.get(playerEntity);
+    private void drawPlayerHealth(Entity entity, int x, int y, int width, int height) {
+        HealthComponent health = Mappers.health.get(entity);
         if (health != null) {
             shape.setColor(uiCFG.entityHPbarBackground);
-            shape.rect(playerBarX, playerHPBarY, barWidth, barHeight);
+            shape.rect(x, y, width, height);
     
             float ratioHP = health.health / health.maxHealth;
             shape.setColor(1 - ratioHP, ratioHP, 0, uiCFG.entityHPbarOpacity);
-            shape.rect(playerBarX, playerHPBarY, barWidth * ratioHP, barHeight);
+            shape.rect(x, y, width * ratioHP, height);
         }
     }
     
-    private void drawPlayerShield(Entity playerEntity, int playerBarX, int playerHPBarY, int barWidth, int barHeight) {
-        ShieldComponent shield = Mappers.shield.get(playerEntity);
-        if (shield == null || shield.state == ShieldComponent.State.off){
+    private void drawPlayerShield(Entity entity, int x, int y, int width, int height) {
+        ShieldComponent shield = Mappers.shield.get(entity);
+        if (shield == null || shield.state == ShieldComponent.State.off) {
             return;
+        }
+    
+        //if shield not engaged, render bar half width
+        if (shield.state != ShieldComponent.State.on) {
+            int halfHeight = height / 2;
+            height = halfHeight;
+            y += halfHeight / 2;
         }
     
         float ratioShield = shield.radius / shield.maxRadius;
@@ -344,51 +351,51 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         } else {
             shape.setColor(shield.color.r, shield.color.g, shield.color.b, 0.25f);
         }
-        shape.rect(playerBarX, playerHPBarY, barWidth * ratioShield, barHeight);
+        shape.rect(x, y, width * ratioShield, height);
     }
     
-    private void drawPlayerAmmoBar(Entity playerEntity, int playerBarX, int playerAmmoBarY, int barWidth, int barHeight) {
-        drawCannonAmmoBar(playerEntity, playerBarX, playerAmmoBarY, barWidth, barHeight);
-        drawGrowCannonAmmoBar(playerEntity, playerBarX, playerAmmoBarY, barWidth, barHeight);
+    private void drawPlayerAmmoBar(Entity entity, int x, int y, int width, int height) {
+        drawCannonAmmoBar(entity, x, y, width, height);
+        drawGrowCannonAmmoBar(entity, x, y, width, height);
     }
     
-    private void drawGrowCannonAmmoBar(Entity playerEntity, int playerBarX, int playerBarY, int barWidth, int barHeight) {
-        ChargeCannonComponent chargeCannon = Mappers.chargeCannon.get(playerEntity);
+    private void drawGrowCannonAmmoBar(Entity entity, int x, int y, int width, int height) {
+        ChargeCannonComponent chargeCannon = Mappers.chargeCannon.get(entity);
         if (chargeCannon == null)  return;
         
         float ratioAmmo = chargeCannon.size / chargeCannon.maxSize;
         shape.setColor(uiCFG.entityHPbarBackground);
-        shape.rect(playerBarX, playerBarY, barWidth, barHeight);
+        shape.rect(x, y, width, height);
         if (chargeCannon.isCharging) {
             shape.setColor(uiCFG.playerAmmoBarRechargeColor);
             if (chargeCannon.size == chargeCannon.maxSize) {
                 shape.setColor(uiCFG.playerAmmoBarColor);
             }
-            shape.rect(playerBarX, playerBarY, barWidth * ratioAmmo, barHeight);
+            shape.rect(x, y, width * ratioAmmo, height);
         }
     }
     
-    private void drawCannonAmmoBar(Entity playerEntity, int playerBarX, int playerBarY, int barWidth, int barHeight) {
-        CannonComponent cannon = Mappers.cannon.get(playerEntity);
+    private void drawCannonAmmoBar(Entity entity, int x, int y, int width, int height) {
+        CannonComponent cannon = Mappers.cannon.get(entity);
         if (cannon == null) return;
         
         float ratioAmmo = (float) cannon.curAmmo / (float) cannon.maxAmmo;
         shape.setColor(uiCFG.entityHPbarBackground);
-        shape.rect(playerBarX, playerBarY, barWidth, barHeight);
+        shape.rect(x, y, width, height);
         shape.setColor(uiCFG.playerAmmoBarColor);
-        shape.rect(playerBarX, playerBarY, barWidth * ratioAmmo, barHeight);
+        shape.rect(x, y, width * ratioAmmo, height);
         
         for (int i = 0; i < cannon.maxAmmo; i++) {
-            int x = playerBarX + (i * barWidth / cannon.maxAmmo);
+            int xDiv = x + (i * width / cannon.maxAmmo);
             //draw recharge bar
             if (i == cannon.curAmmo) {
                 shape.setColor(uiCFG.playerAmmoBarRechargeColor);
-                shape.rect(x, playerBarY, barWidth / cannon.maxAmmo * cannon.timerRechargeRate.ratio(), barHeight);
+                shape.rect(xDiv, y, width / cannon.maxAmmo * cannon.timerRechargeRate.ratio(), height);
             }
             //draw divisions to mark individual ammo
             if (i > 0) {
                 shape.setColor(Color.BLACK);
-                shape.rectLine(x, playerBarY + barHeight, x, playerBarY, 3);
+                shape.rectLine(xDiv, y + height, xDiv, y, 3);
             }
         }
         
@@ -397,49 +404,49 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 		if (cannon.curAmmo < cannon.maxAmmo) {
 			int rechargeBarHeight = 2;
 			shape.setColor(Color.SLATE);
-			shape.rect(playerBarX, playerBarY, barWidth * cannon.timerRechargeRate.ratio(), rechargeBarHeight);
+			shape.rect(x, playerBarY, width * cannon.timerRechargeRate.ratio(), rechargeBarHeight);
 		}
 		*/
     
     }
     
-    private void drawPlayerVelocity(Entity playerEntity, int playerBarX, int playerHyperBarY, int barWidth, int barHeight) {
-        PhysicsComponent physics = Mappers.physics.get(playerEntity);
+    private void drawPlayerVelocity(Entity entity, int x, int y, int width, int height) {
+        PhysicsComponent physics = Mappers.physics.get(entity);
         if (physics == null) {
             return;
         }
     
         float velocity = physics.body.getLinearVelocity().len() / B2DPhysicsSystem.getVelocityLimit();
-        float barRatio = MathUtils.clamp(0, velocity * barWidth, barWidth);
+        float barRatio = MathUtils.clamp(0, velocity * width, width);
         shape.setColor(1-velocity, velocity, velocity, 1);
-        shape.rect(playerBarX, playerHyperBarY, barRatio, barHeight);
+        shape.rect(x, y, barRatio, height);
     }
 
-    private void drawHyperDriveBar(Entity playerEntity, int playerBarX, int playerHyperBarY, int barWidth, int barHeight) {
-        HyperDriveComponent hyperDrive = Mappers.hyper.get(playerEntity);
+    private void drawHyperDriveBar(Entity entity, int x, int y, int width, int height) {
+        HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
         if (hyperDrive == null) {
             return;
         }
     
         //if hyper drive not engaged, render bar half width
         if (hyperDrive.state != HyperDriveComponent.State.on) {
-            int halfHeight = barHeight / 2;
-            barHeight = halfHeight;
-            playerHyperBarY += halfHeight / 2;
+            int halfHeight = height / 2;
+            height = halfHeight;
+            y += halfHeight / 2;
         }
         
         shape.setColor(Color.WHITE);
         switch (hyperDrive.state) {
             case on:
-                shape.rect(playerBarX, playerHyperBarY, barWidth, barHeight);
+                shape.rect(x, y, width, height);
                 break;
             case charging:
-                float charge = MathUtils.clamp(0, hyperDrive.chargeTimer.ratio() * barWidth, barWidth);
-                shape.rect(playerBarX, playerHyperBarY, charge, barHeight);
+                float charge = MathUtils.clamp(0, hyperDrive.chargeTimer.ratio() * width, width);
+                shape.rect(x, y, charge, height);
                 break;
             case cooldown:
-                float cooldown = MathUtils.clamp(0, (1 - hyperDrive.coolDownTimer.ratio()) * barWidth, barWidth);
-                shape.rect(playerBarX, playerHyperBarY, cooldown, barHeight);
+                float cooldown = MathUtils.clamp(0, (1 - hyperDrive.coolDownTimer.ratio()) * width, width);
+                shape.rect(x, y, cooldown, height);
                 break;
         }
     }
