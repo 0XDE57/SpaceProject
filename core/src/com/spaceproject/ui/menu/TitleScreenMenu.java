@@ -190,14 +190,14 @@ public class TitleScreenMenu {
     }
     
     private static VisDialog showAboutDialog(Stage stage) {
-        final VisDialog dialog = new VisDialog("[engine demo / prototype]");
+        final VisDialog dialog = new VisDialog("");
         dialog.closeOnEscape();
         dialog.centerWindow();
     
-        String aboutText = "you can fly ships to explore space, land on planets.";
-        aboutText += "\ncurrent state: a neat little engine with little to no content at this time. stay tuned.";
-        aboutText += "\n\nversion: " + SpaceProject.VERSION + "\nlibgdx: v" +  com.badlogic.gdx.Version.VERSION;
-        aboutText += "\n\nDeveloped with <3";
+        String aboutText = "shoot some asteroids. they fall apart!";
+        aboutText += "\nversion: " + SpaceProject.VERSION + " [engine demo]"
+                + "\nlibgdx: v" +  com.badlogic.gdx.Version.VERSION;
+        aboutText += "\nDeveloped with <3";
         dialog.text(aboutText);
         
         LinkLabel link = new LinkLabel("https://github.com/0xDE57/SpaceProject");
@@ -210,7 +210,8 @@ public class TitleScreenMenu {
         dialog.getContentTable().row();
         dialog.getContentTable().add(link);
 
-        dialog.button(ButtonBar.ButtonType.OK.getText()).padBottom(3.0F);
+        dialog.button(ButtonBar.ButtonType.OK.getText());
+        dialog.pad(30.0f).padBottom(10.0f);
         
         dialog.addListener(new InputListener() {
             public boolean keyDown(InputEvent event, int keycode) {
