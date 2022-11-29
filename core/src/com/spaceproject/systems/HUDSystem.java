@@ -37,6 +37,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.config.UIConfig;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.map.MapState;
@@ -45,7 +46,6 @@ import com.spaceproject.ui.menu.GameMenu;
 import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.math.MyMath;
 
 
 public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener {
@@ -172,8 +172,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         
         shape.begin(ShapeType.Filled);
-        
-        drawPlayerStatus();
+    
+        Entity player = players.first();
+        //drawCompass(player);
+        drawPlayerStatus(player);
         
         if (drawEdgeMap) drawEdgeMap();
         
@@ -266,7 +268,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     //region player status
-    private void drawPlayerStatus() {
+    private void drawPlayerStatus(Entity playerEntity) {
         if (players == null || players.size() == 0) {
             return;
         }
@@ -277,7 +279,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         int playerHPBarY = uiCFG.playerHPBarY;
         int playerAmmoBarY = playerHPBarY - barHeight - 1;
         int playerHyperBarY = playerHPBarY + barHeight + 1;
-        Entity playerEntity = players.first();
+        
         
         drawPlayerHealth(playerEntity, playerBarX, playerHPBarY, barWidth, barHeight);
         drawPlayerShield(playerEntity, playerBarX, playerHPBarY, barWidth, barHeight);
@@ -384,10 +386,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (physics == null) {
             return;
         }
-        
-        shape.setColor(Color.PURPLE);
-        float velocity = MathUtils.clamp(0, (physics.body.getLinearVelocity().len() / B2DPhysicsSystem.getVelocityLimit()) * barWidth, barWidth);
-        shape.rect(playerBarX, playerHyperBarY, velocity, barHeight);
+    
+        float velocity = physics.body.getLinearVelocity().len() / B2DPhysicsSystem.getVelocityLimit();
+        float barRatio = MathUtils.clamp(0, velocity * barWidth, barWidth);
+        shape.setColor(1-velocity, velocity, velocity, 1);
+        shape.rect(playerBarX, playerHyperBarY, barRatio, barHeight);
     }
 
     private void drawHyperDriveBar(Entity playerEntity, int playerBarX, int playerHyperBarY, int barWidth, int barHeight) {
@@ -396,7 +399,14 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             return;
         }
     
-        shape.setColor(Color.BLUE);//blue cuz blueshift?
+        //if hyper drive not engaged, render bar half width
+        if (hyperDrive.state != HyperDriveComponent.State.on) {
+            int halfHeight = barHeight / 2;
+            barHeight = halfHeight;
+            playerHyperBarY += halfHeight / 2;
+        }
+        
+        shape.setColor(Color.WHITE);
         switch (hyperDrive.state) {
             case on:
                 shape.rect(playerBarX, playerHyperBarY, barWidth, barHeight);
