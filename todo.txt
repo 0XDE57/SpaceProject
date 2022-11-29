@@ -673,7 +673,7 @@ Legend:
         [ ] shield broken, shatter
     [ ] asteroid
         [ ] hit, pitch set by impulse (how hard hit)
-        [ ] shatter
+        [...] shatter
     Apparently audio on android sucks?
         https://github.com/libgdx/libgdx/wiki/Audio
         https://github.com/barsoosayque/libgdx-oboe
@@ -875,6 +875,10 @@ Legend:
             - I/O cables and circuitry / scripting possibilities...way out of scope.
 
 [...] planet generation
+    [ ] we could render the planets as actual torus. since we already have the 3D render system
+        we find a way to map texture to a torus
+        https://stackoverflow.com/questions/29953874/how-to-texture-of-a-glutsolidtorus-in-opengl
+        https://mathematica.stackexchange.com/questions/103215/map-points-on-a-square-onto-a-torus
     [ ] grid based loading 3x3 tiles with "bleed area" margin: leeway/tolerance for loading when on edge.
         so that tiles aren't constantly loading or unloading when walking along edge between tiles.
     [ ] research planet attributes //size, temperature, pressure, atmosphere/elements(https://en.wikipedia.org/wiki/Astronomical_spectroscopy)...etc
@@ -967,7 +971,7 @@ Legend:
     [ ] what are requirements to release on Steam?
         [ ] do I need to trademark / copyright anything?
         [ ] do I need to that ersb rating thingy?
-    [?] move to LWJGL 3?
+    [x] move to LWJGL 3?
         https://libgdx.com/news/2021/07/devlog-7-lwjgl3
     [ ] move this todo list thingy to a trello or something?
     [ ] need an icon. its still the default libgdx logo...
