@@ -447,8 +447,8 @@ public class EntityFactory {
         //hyper drive
         HyperDriveComponent hyperDrive = new HyperDriveComponent();
         hyperDrive.speed = entityCFG.hyperSpeed;
-        hyperDrive.coolDownTimer = new SimpleTimer(1000);
-        hyperDrive.chargeTimer = new SimpleTimer(500);
+        hyperDrive.coolDownTimer = new SimpleTimer(2000);
+        hyperDrive.chargeTimer = new SimpleTimer(2000);
         hyperDrive.graceTimer = new SimpleTimer(1000);
         shipEntity.add(hyperDrive);
         
@@ -495,7 +495,6 @@ public class EntityFactory {
         Entity mainEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineMain, new Vector2(0, height + 0.2f), 0);
         Entity leftEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineLeft, new Vector2(width/2 - 0.2f, 0), -90);
         Entity rightEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineRight, new Vector2(-(width/2 - 0.2f), 0), 90);
-        
         
         entityCluster.add(shipEntity);
         entityCluster.add(mainEngine);
