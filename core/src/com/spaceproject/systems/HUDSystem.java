@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.spaceproject.SpaceProject;
@@ -174,7 +175,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape.begin(ShapeType.Filled);
     
         Entity player = players.first();
-        //drawCompass(player);
+        drawCompass(player);
         drawPlayerStatus(player);
         
         if (drawEdgeMap) drawEdgeMap();
@@ -185,8 +186,29 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
     
+    private void drawCompass(Entity entity) {
+        float alpha = MathUtils.clamp((cam.zoom / uiCFG.lodShowOrbitPath / uiCFG.orbitFadeFactor), 0, 0.3f);
+        if (MathUtils.isEqual(alpha, 0)) return;
+        
+        //draw movement direction for navigation assistance, line up vector with target destination
+        Body body = Mappers.physics.get(entity).body;
+        Vector2 facing = MyMath.vector(body.getAngle(), 50000);
+        Vector3 pos = cam.project(new Vector3(Mappers.transform.get(entity).pos.cpy(), 0));
+    
+        uiCFG.orbitObjectColor.a = alpha;
+        shape.rectLine(pos.x, pos.y, facing.x, facing.y, 1, uiCFG.orbitObjectColor, uiCFG.orbitObjectColor);
+        
+        //DebugSystem.addDebugText(body.getAngle() + "", pos.x, pos.y);
+        
+        //draw circle; width = velocity
+        //draw velocity vector
+        //draw engine impulses
+    }
+    
     private void drawOrbitPath() {
         float alpha = MathUtils.clamp((cam.zoom / uiCFG.lodShowOrbitPath / uiCFG.orbitFadeFactor), 0, 1);
+        if (MathUtils.isEqual(alpha, 0)) return;
+        
         uiCFG.orbitObjectColor.a = alpha;
         uiCFG.orbitSyncPosColor.a = alpha;
         
@@ -248,13 +270,13 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         int yOffset = uiCFG.entityHPbarYOffset;
         
         for (Entity entity : killableEntities) {
-            Vector3 pos = cam.project(new Vector3(Mappers.transform.get(entity).pos.cpy(), 0));
             HealthComponent health = Mappers.health.get(entity);
-            
             //ignore full health
             if (!uiCFG.renderFullHealth && health.health == health.maxHealth) {
                 continue;
             }
+            
+            Vector3 pos = cam.project(new Vector3(Mappers.transform.get(entity).pos.cpy(), 0));
             
             //background
             shape.setColor(uiCFG.entityHPbarBackground);
