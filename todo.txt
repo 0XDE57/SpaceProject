@@ -182,6 +182,7 @@ Legend:
     [ ] maybe shatter player
     [ ] emit explosion rings
     [ ] emit explosion rays
+    [ ] explodey particle fx!
 
 [...] terrible BUG! lerping camera movement is giving some jittering in the rendering when vsync on.
     this is caused by interpolation being a percentage from target and the value is
