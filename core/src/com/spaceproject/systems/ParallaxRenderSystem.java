@@ -11,16 +11,14 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.SplineComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 
 public class ParallaxRenderSystem extends EntitySystem implements Disposable {
@@ -35,6 +33,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     //mouse debug
     Entity camMarker, mouseMarker;
     Vector3 mouseProj = new Vector3();
+    float animate = 0;
     
     public ParallaxRenderSystem() {
         shape = new ShapeRenderer();
@@ -44,43 +43,54 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     @Override
     public void addedToEngine(Engine engine) {
         players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
+        
     }
     
-    float animate = 0;
+    
     @Override
     public void update(float deltaTime) {
         //update matrix and convert screen coords to world cords.
         projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         shape.setProjectionMatrix(projectionMatrix);
+        
         screenCoords.set(0,0,0);
         GameScreen.viewport.project(screenCoords);
-        camWorldPos.set(GameScreen.cam.position.cpy());
+        camWorldPos.set(GameScreen.cam.position);
         GameScreen.viewport.project(camWorldPos);
         boundingBox.set(1, 1, Gdx.graphics.getWidth()-2, Gdx.graphics.getHeight()-2);
     
         //debug override background
         //debugClearScreen();
         //debugDrawMousePath();
-        
     
+    
+        //enable transparency
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        
         //render
         shape.begin(ShapeRenderer.ShapeType.Line);
         
         //todo: apply shader to grid
-        //drawGrid(Color.GOLD, 100, 1.0f);
-        //drawGrid(Color.MAGENTA, 100, 0.5f);
+        int edgePad = 0;
+        Rectangle rectangle = new Rectangle(edgePad, edgePad,
+                Gdx.graphics.getWidth() - edgePad * 2, Gdx.graphics.getHeight() - edgePad * 2);
+        Color gridColor = Color.GOLD.cpy();
+        gridColor.a = 0.2f;
+        drawGrid(gridColor, rectangle, 500, 3);
         
-        //drawOrigin(Color.SKY);
+        
+        drawOrigin(Color.SKY);
         //drawDebugCameraPos(Color.RED);
         //update debug cam position
         
-        //debugDrawCameraPath(Color.WHITE);
-    
+        //debugDrawCameraPath(Color.SKY);
+    /*
         Entity player = players.first();
         Body body = Mappers.physics.get(player).body;
         //float alpha = MathUtils.clamp((cam.zoom / uiCFG.lodShowOrbitPath / uiCFG.orbitFadeFactor), 0, 1);
         Vector2 velocity = body.getLinearVelocity();
-        Vector2 facing = MyMath.vector(body.getAngle(), 1);
+        Vector2 facing = MyMath.vector(body.getAngle(), 1);*/
         
         animate += deltaTime;
         //drawEye( 10.0f, boundingBox);
@@ -88,6 +98,8 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         //((float) (10.0f + (Math.sin(animate) * 10.0f)), new Rectangle(100F, 200F, 100F, (float) (100 + (Math.sin(animate) * 100.0f))));
         //drawEye((float) (10.0f + ((Math.sin(animate * 10.0f) + MathUtils.PI) * 10.0f)), new Rectangle(100F, 100F, (float) (100 + (Math.sin(animate) * 100.0f)), 100));
         shape.end();
+    
+        Gdx.gl.glDisable(GL20.GL_BLEND);
     }
    
     
@@ -114,8 +126,9 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     private void debugDrawCameraPath(Color color) {
         if (camMarker == null) {
             //add debug camera marker
-            camMarker = new Entity().add(new SplineComponent()).add(new TransformComponent());
-            camMarker.getComponent(SplineComponent.class).color = color;
+            SplineComponent spline = new SplineComponent();
+            spline.color = color;
+            camMarker = new Entity().add(spline).add(new TransformComponent());
             getEngine().addEntity(camMarker);
             Gdx.app.log(this.getClass().getSimpleName(), "debug cam marker activated");
         }
@@ -124,17 +137,15 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     
     private void drawOrigin(Color color) {
         shape.setColor(color);
-        shape.circle(0, 0, 10);
         shape.circle(screenCoords.x, screenCoords.y, 10);
         shape.line(screenCoords.x, 0, screenCoords.x, Gdx.graphics.getHeight());
         shape.line(0, screenCoords.y, Gdx.graphics.getWidth(), screenCoords.y);
     }
     
-    
     private void debugDrawMousePath(){
         if (mouseMarker == null) {
             mouseMarker = new Entity().add(new SplineComponent()).add(new TransformComponent());
-            mouseMarker.getComponent(SplineComponent.class).color = Color.CYAN;
+            mouseMarker.getComponent(SplineComponent.class).color = Color.YELLOW;
             getEngine().addEntity(mouseMarker);
         }
         mouseProj.set(Gdx.input.getX(), Gdx.input.getY(), 0);
@@ -164,21 +175,46 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         shape.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.getHeight());
     }
     
-    
-    private void drawGrid(Color color, int tileSize, float depth) {
+    private void drawGrid(Color color, Rectangle rect, int gridSize, float width) {
         shape.setColor(color);
         
-        //unscaled
-        for (int horizontal = 0; horizontal <= 10; horizontal++) {
-            float offset = horizontal * tileSize;
-            //shape.line(screenCoords.x + offset, 0, screenCoords.x + offset, Gdx.graphics.getHeight());
+        float halfWidth = rect.width * 0.5f;
+        float halfHeight = rect.height * 0.5f;
+        float centerX = rect.x + halfWidth;
+        float centerY = rect.y + halfHeight;
+        float scale = GameScreen.cam.zoom;
+        
+        float relativeGrid = scale * gridSize;
+        
+        //draw X
+        float posX = MyScreenAdapter.cam.position.x;
+        int startX = (int) (posX + (-halfWidth * scale)) / gridSize;
+        int endX = (int) (posX + (halfWidth * scale)) / gridSize;
+        for (int i = startX; i < endX + 1; i++) {
+            float finalX = (((i * gridSize) - posX) / scale) + centerX;
+            shape.rect(finalX, rect.y, width, rect.height);
+        }
+        
+        //draw Y
+        float posY = MyScreenAdapter.cam.position.y;
+        int startY = (int) (posY + (-halfHeight * scale)) / gridSize;
+        int endY = (int) (posY + (halfHeight * scale)) / gridSize;
+        for (int i = startY; i < endY + 1; i++) {
+            float finalY = (((i * gridSize) - posY) /  scale) + centerY;
+            shape.rect(rect.x, finalY, rect.width, width);
         }
     
-        float scale = 1/GameScreen.cam.zoom;
-        scale += depth;
-        for (int horizontal = 0; horizontal <= 10; horizontal++) {
-            float offset = horizontal * tileSize * scale;
-            shape.line(screenCoords.x + offset, 0, screenCoords.x + offset, Gdx.graphics.getHeight());
+        boolean showDebug = false;
+        if (showDebug) {
+            //border
+            shape.setColor(Color.GREEN);
+            shape.rect(rect.x, rect.y, rect.width, rect.height);
+    
+            //center
+            shape.setColor(Color.PURPLE);
+            shape.circle(centerX, centerY, 10);
+            shape.line(centerX, rect.x, centerX, rect.y + rect.height);
+            shape.line(rect.x, centerY, rect.x + rect.width, centerY);
         }
     }
     
