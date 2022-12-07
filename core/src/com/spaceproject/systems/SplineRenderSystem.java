@@ -78,7 +78,8 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         PhysicsComponent physics = Mappers.physics.get(entity);
         
         if (spline.path == null) {
-            //init
+            //initialize
+            //todo: cache. use pooled vectors
             spline.path = new Vector3[maxPathSize];
             for (int v = 0; v < maxPathSize; v++) {
                 spline.path[v] = new Vector3();
@@ -92,10 +93,13 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         //    return;
         //}
     
-        float velocity = physics.body.getLinearVelocity().len2();
-        if (!physics.body.isActive()) {
-            HyperDriveComponent hyper = Mappers.hyper.get(entity);
-            velocity = hyper.speed * hyper.speed;
+        float velocity = 0;//todo: diff between now and previous point.
+        if (physics != null) {
+            velocity = physics.body.getLinearVelocity().len2();
+            if (!physics.body.isActive()) {
+                HyperDriveComponent hyper = Mappers.hyper.get(entity);
+                velocity = hyper.speed * hyper.speed;
+            }
         }
         spline.path[spline.index].set(transform.pos.x, transform.pos.y, velocity);
         //roll index
