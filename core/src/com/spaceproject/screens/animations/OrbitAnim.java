@@ -91,10 +91,11 @@ public class OrbitAnim extends TitleAnimation {
         
         //interaction: clicking aligns angle
         if (Gdx.input.isTouched()) {
+            centerScreen.set(Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
+            float angleToTouch = MyMath.angleTo(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY(), centerScreen.x, centerScreen.y);
             for (Body orbit : bodies) {
-                centerScreen.set(Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
-                float angleToTouch = MyMath.angleTo(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY(), centerScreen.x, centerScreen.y);
-                orbit.angleRadians = angleToTouch;
+                //orbit.angleRadians = angleToTouch;
+                orbit.angleRadians += 2 * delta;
                 //todo: drag to shift back and forth through phase
                 //save start position, phase shift = delta between start x and current x
             }
