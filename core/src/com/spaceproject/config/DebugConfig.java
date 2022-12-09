@@ -31,7 +31,7 @@ public class DebugConfig extends Config {
         drawJoints = true;
         drawAABBs = false;
         drawInactiveBodies = true;
-        drawVelocities = false;
+        drawVelocities = true;
         drawContacts = true;
         drawOrbitPath = false;
         drawMousePos = false;

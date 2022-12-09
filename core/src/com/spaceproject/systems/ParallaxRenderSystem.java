@@ -75,16 +75,18 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         int edgePad = 0;
         Rectangle rectangle = new Rectangle(edgePad, edgePad,
                 Gdx.graphics.getWidth() - edgePad * 2, Gdx.graphics.getHeight() - edgePad * 2);
-        Color gridColor = Color.GOLD.cpy();
+        Color gridColor = Color.GREEN.cpy();
         gridColor.a = 0.2f;
-        drawGrid(gridColor, rectangle, 500, 3);
+        drawGrid(gridColor, boundingBox, 500, 3);
+    
+        //drawGrid(Color.GREEN, rectangle, 50, 3);
         
         
         drawOrigin(Color.SKY);
         //drawDebugCameraPos(Color.RED);
         //update debug cam position
         
-        //debugDrawCameraPath(Color.SKY);
+        //debugDrawCameraPath(Color.YELLOW);
     /*
         Entity player = players.first();
         Body body = Mappers.physics.get(player).body;
@@ -93,7 +95,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         Vector2 facing = MyMath.vector(body.getAngle(), 1);*/
         
         animate += deltaTime;
-        //drawEye( 10.0f, boundingBox);
+        //drawEye((float) (10.0f * Math.sin(animate)), boundingBox);
         //drawEye((float) (10.0f + (Math.sin(animate) * 5.0f)), boundingBox);
         //((float) (10.0f + (Math.sin(animate) * 10.0f)), new Rectangle(100F, 200F, 100F, (float) (100 + (Math.sin(animate) * 100.0f))));
         //drawEye((float) (10.0f + ((Math.sin(animate * 10.0f) + MathUtils.PI) * 10.0f)), new Rectangle(100F, 100F, (float) (100 + (Math.sin(animate) * 100.0f)), 100));
@@ -154,23 +156,26 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     }
     
     private void drawEye(float segments, Rectangle rectangle) {
-        shape.setColor(Color.RED);
         
-        float height = rectangle.getHeight() / segments;
-        float width = rectangle.getWidth() / segments;
-        for (int i = 0; i * height <= rectangle.getHeight(); i++) {
-            //bottom right
-            shape.line(rectangle.x + i * width,  rectangle.y, rectangle.x + rectangle.getWidth(), rectangle.y + i * height);
-            
-            //top left
-            shape.line(rectangle.x,  rectangle.y + i * height,  rectangle.x + i * width, rectangle.y + rectangle.getHeight());
-            
-            //bottom left
-            //shape.line(rectangle.x, rectangle.y + i * height, rectangle.x + i * width, rectangle.y);
-    
-            //diagonal
-            //shape.line(rectangle.x, rectangle.y  + i * height, rectangle.x + i * width, rectangle.y);
+        if (segments > 0) {
+            shape.setColor(Color.RED);
+            float height = rectangle.getHeight() / segments;
+            float width = rectangle.getWidth() / segments;
+            for (int i = 0; i * height <= rectangle.getHeight(); i++) {
+                //bottom right
+                shape.line(rectangle.x + i * width,  rectangle.y, rectangle.x + rectangle.getWidth(), rectangle.y + i * height);
+                
+                //top left
+                shape.line(rectangle.x,  rectangle.y + i * height,  rectangle.x + i * width, rectangle.y + rectangle.getHeight());
+                
+                //bottom left
+                //shape.line(rectangle.x, rectangle.y + i * height, rectangle.x + i * width, rectangle.y);
+        
+                //diagonal
+                //shape.line(rectangle.x, rectangle.y  + i * height, rectangle.x + i * width, rectangle.y);
+            }
         }
+        
         shape.setColor(Color.GREEN);
         shape.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.getHeight());
     }
@@ -207,7 +212,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         boolean showDebug = false;
         if (showDebug) {
             //border
-            shape.setColor(Color.GREEN);
+            shape.setColor(new Color(0.1f, 0.63f, 0.88f, 1f));
             shape.rect(rect.x, rect.y, rect.width, rect.height);
     
             //center
