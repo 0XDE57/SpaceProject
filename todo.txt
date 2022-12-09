@@ -178,6 +178,7 @@ Legend:
     [ * ] = exceptions
 
 [ ] touch the sun and die! do damage to things with health, including asteroids
+    [ ] death message w/ reason
 [ ] better death visual
     [ ] maybe shatter player
     [ ] emit explosion rings
@@ -203,7 +204,7 @@ Legend:
 
 [...] BUG! start game, leave to main menu, return to game: planets do not load
     [x] clean up, dispose and unload systems properly when return to main menu
-    [ ] clean up threadpool properly, can find ways to spam.
+    [ ] clean up threadpool, can find ways to spam fill q. not clearing properly
     [ ] things will load now, but there seems to be a strange delay...
         -start game, leave to main menu, start game again = empty until move around for a bit then loads
         I believe this is to do with the noise threads shutting down?
@@ -238,7 +239,7 @@ Legend:
     so do not think you’re safe even if you handle life-cycle methods properly!
     https://libgdx.com/wiki/managing-your-assets
     [ ] Memory leaks
-    theres a lot of new Vector3 in core loops. -> cache
+    theres a lot of new Vector3 in core loops. -> cache / pool
 
 [x] add basic asteroids (arbitrary poly)
     [x] spec spawner for asteroid.
