@@ -9,8 +9,8 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DamageComponent;
-import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.ExpireComponent;
+import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.SplineComponent;
@@ -20,9 +20,9 @@ import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.RenderOrder;
 import com.spaceproject.generation.BodyFactory;
 import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.SimpleTimer;
 
 public class CannonSystem extends IteratingSystem {
@@ -35,11 +35,11 @@ public class CannonSystem extends IteratingSystem {
     protected void processEntity(Entity entity, float deltaTime) {
         CannonComponent cannon = Mappers.cannon.get(entity);
         
-         refillAmmo(cannon);
+        refillAmmo(cannon);
          
         if (canShoot(entity)) {
             fireCannon(cannon, entity);
-         }
+        }
     }
     
     private boolean canShoot(Entity entity) {
@@ -48,8 +48,9 @@ public class CannonSystem extends IteratingSystem {
             return false;
         }
         
-        BarrelRollComponent dodgeComp = Mappers.barrelRoll.get(entity);
+        //BarrelRollComponent dodgeComp = Mappers.barrelRoll.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
+        HyperDriveComponent hyper = Mappers.hyper.get(entity);
         //boolean canShoot = dodgeComp == null && shield == null;
         return shield != null && shield.state == ShieldComponent.State.off;
     }
@@ -58,7 +59,8 @@ public class CannonSystem extends IteratingSystem {
         if (GameScreen.isDebugMode) {
             //Cheat for debug: fast firing and infinite ammo
             cannon.curAmmo = cannon.maxAmmo;
-            cannon.timerFireRate.setLastEvent(0);
+            cannon.timerFireRate.setCanDoEvent();
+            //cannon.timerFireRate.setInterval(100, false);
         }
         
         //check if can fire before shooting
@@ -73,6 +75,10 @@ public class CannonSystem extends IteratingSystem {
         //create missile
         Entity missile = createMissile(cannon, parentEntity);
         getEngine().addEntity(missile);
+    
+        //todo: state? beginFire (first shot), isFiring, endFire
+        getEngine().getSystem(SoundSystem.class).shoot();
+        
         
         //subtract ammo
         --cannon.curAmmo;
