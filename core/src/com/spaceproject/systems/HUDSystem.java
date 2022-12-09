@@ -162,6 +162,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             mobileUI.drawControls();
     }
     
+    public boolean isDraw() {
+        return drawHud;
+    }
+    
     private void drawHUD() {
         //set projection matrix so things render using correct coordinates
         projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

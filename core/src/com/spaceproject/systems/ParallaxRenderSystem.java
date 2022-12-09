@@ -43,12 +43,15 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     @Override
     public void addedToEngine(Engine engine) {
         players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
-        
     }
     
     
     @Override
     public void update(float deltaTime) {
+        if (!getEngine().getSystem(HUDSystem.class).isDraw()) {
+            return;
+        }
+        
         //update matrix and convert screen coords to world cords.
         projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         shape.setProjectionMatrix(projectionMatrix);
@@ -72,15 +75,18 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         shape.begin(ShapeRenderer.ShapeType.Line);
         
         //todo: apply shader to grid
-        int edgePad = 0;
-        Rectangle rectangle = new Rectangle(edgePad, edgePad,
-                Gdx.graphics.getWidth() - edgePad * 2, Gdx.graphics.getHeight() - edgePad * 2);
         Color gridColor = Color.GREEN.cpy();
-        gridColor.a = 0.2f;
-        drawGrid(gridColor, boundingBox, 500, 3);
-    
-        //drawGrid(Color.GREEN, rectangle, 50, 3);
+        float brightness = (float) Math.abs(Math.sin(animate * 0.5f) * 0.1f);
+        //DebugSystem.addDebugText(brightness + " :" + animate, 100, 100);
+        gridColor.a =  brightness;
         
+        drawGrid(gridColor, boundingBox, 50, 1);
+        
+        //drawGrid(Color.WHITE, boundingBox, 50, 3);
+        
+        //Color red = Color.RED.cpy();
+        //red.a = 0.5f;
+        //drawGrid(red, boundingBox, 50, 1);
         
         drawOrigin(Color.SKY);
         //drawDebugCameraPos(Color.RED);
@@ -197,6 +203,9 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         int endX = (int) (posX + (halfWidth * scale)) / gridSize;
         for (int i = startX; i < endX + 1; i++) {
             float finalX = (((i * gridSize) - posX) / scale) + centerX;
+            if (width > 1) {
+                finalX -= width * 0.5f;
+            }
             shape.rect(finalX, rect.y, width, rect.height);
         }
         
@@ -206,8 +215,16 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         int endY = (int) (posY + (halfHeight * scale)) / gridSize;
         for (int i = startY; i < endY + 1; i++) {
             float finalY = (((i * gridSize) - posY) /  scale) + centerY;
+            if (width > 1) {
+                finalY -= width * 0.5f;
+            }
             shape.rect(rect.x, finalY, rect.width, width);
         }
+        
+        //highlight tile
+        //camera (center tile)
+        //mouse
+        //
     
         boolean showDebug = false;
         if (showDebug) {
