@@ -29,6 +29,7 @@ public class ShieldSystem extends IteratingSystem {
             }
             shield.radius = 0;
             shield.state = ShieldComponent.State.off;
+            shield.activate = false;
         }
         
         switch (shield.state) {
