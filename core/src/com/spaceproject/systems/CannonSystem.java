@@ -6,6 +6,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DamageComponent;
@@ -47,12 +48,14 @@ public class CannonSystem extends IteratingSystem {
         if (!control.attack) {
             return false;
         }
-        
-        //BarrelRollComponent dodgeComp = Mappers.barrelRoll.get(entity);
+    
+        BarrelRollComponent roll = Mappers.barrelRoll.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
         HyperDriveComponent hyper = Mappers.hyper.get(entity);
-        //boolean canShoot = dodgeComp == null && shield == null;
-        return shield != null && shield.state == ShieldComponent.State.off;
+        boolean shieldActive = shield != null && shield.state == ShieldComponent.State.on;
+        boolean hyperActive = hyper != null && hyper.state == HyperDriveComponent.State.on;
+        boolean isRolling = roll != null && roll.flipState != BarrelRollComponent.FlipState.off;
+        return !shieldActive && !hyperActive && !isRolling;
     }
     
     private void fireCannon(CannonComponent cannon, Entity parentEntity) {
