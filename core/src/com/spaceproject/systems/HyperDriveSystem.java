@@ -4,6 +4,7 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TransformComponent;
@@ -79,7 +80,12 @@ public class HyperDriveSystem extends IteratingSystem {
         float bodyAngle = physicsComp.body.getAngle();
         physicsComp.body.setTransform(entity.getComponent(TransformComponent.class).pos, bodyAngle);
         physicsComp.body.setActive(true);
-        physicsComp.body.setLinearVelocity(MyMath.vector(bodyAngle, 10));
+        //spin when exit hyper, temporarily lose control
+        float spin = MathUtils.random(25.0f, 50.0f) * MathUtils.randomSign();
+        physicsComp.body.setAngularVelocity(spin);
+        //add tiny bit of movement
+        physicsComp.body.setLinearVelocity(MyMath.vector(bodyAngle, 2));
+        //physicsComp.body.setLinearVelocity(0, 0); //freeze
     }
     
 }
