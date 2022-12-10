@@ -81,7 +81,7 @@ public class HyperDriveSystem extends IteratingSystem {
         physicsComp.body.setTransform(entity.getComponent(TransformComponent.class).pos, bodyAngle);
         physicsComp.body.setActive(true);
         //spin when exit hyper, temporarily lose control
-        float spin = MathUtils.random(25.0f, 50.0f) * MathUtils.randomSign();
+        float spin = 50.0f * MathUtils.randomSign();
         physicsComp.body.setAngularVelocity(spin);
         //add tiny bit of movement
         physicsComp.body.setLinearVelocity(MyMath.vector(bodyAngle, 2));
