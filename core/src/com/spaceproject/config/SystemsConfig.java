@@ -65,6 +65,7 @@ public class SystemsConfig extends Config {
         // Rendering Pipeline: render order (priority) is important for which layer draws on top of which layer.
         // - clear screen -> clear color and depth buffer, then repaint solid color. clears display between frames
         // - cam update -> move, zoom, and update camera
+        // - parallax grid render -> "under-hud" / frame of reference / debug tool
         // - sprite 2D renderer -> render regular textures no shader
         // - sprite 2D shader renderer -> render textures with shader applied
         // - spline render -> render movement paths, mostly for debug and frame of reference
