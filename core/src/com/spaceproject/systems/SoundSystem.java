@@ -44,9 +44,6 @@ public class SoundSystem extends EntitySystem implements Disposable {
     
     @Override
     public void update(float deltaTime) {
-        //todo: should be event based, so any system can call
-        //see: https://github.com/libgdx/ashley/blob/master/ashley/tests/com/badlogic/ashley/signals/SignalTests.java
-
         shatterPerFrame = 0;//reset
     }
     
@@ -65,8 +62,17 @@ public class SoundSystem extends EntitySystem implements Disposable {
         f3.setPitch(f3ID, MathUtils.random(0.5f, 2.0f));//0.5 - 2.0
     }
     
+    public void shoot(float pitch) {
+        shoot();
+        kick.setPitch(kickID, pitch);//0.5 - 2.0
+    }
+    
     public void shoot() {
-        kickID = kick.play(); // play new sound and keep handle for further manipulation
+        //todo: should be event based, so any system can call
+        //see: https://github.com/libgdx/ashley/blob/master/ashley/tests/com/badlogic/ashley/signals/SignalTests.java
+        
+        // play sound and keep handle for further manipulation
+        kickID = kick.play();
         //kick.setPitch(kickID, MathUtils.random(0.5f, 2.0f));//0.5 - 2.0
         
         //for continuous sound (loop), raw sound file
@@ -81,6 +87,5 @@ public class SoundSystem extends EntitySystem implements Disposable {
         f3.dispose();
         kick.dispose();
     }
-    
     
 }

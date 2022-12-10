@@ -3,13 +3,16 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.ExpireComponent;
+import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.RemoveComponent;
@@ -20,8 +23,8 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.RenderOrder;
 import com.spaceproject.generation.BodyFactory;
 import com.spaceproject.generation.TextureFactory;
-import com.spaceproject.utility.Mappers;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
 public class ChargeCannonSystem extends IteratingSystem {
@@ -52,7 +55,7 @@ public class ChargeCannonSystem extends IteratingSystem {
         ControllableComponent control = Mappers.controllable.get(entity);
         if (control.attack) {
             //charge
-            if (!chargeCannon.isCharging && (shieldComponent != null && shieldComponent.state == ShieldComponent.State.off)) {
+            if (!chargeCannon.isCharging && canShoot(entity)) {
                 activate(chargeCannon);
             }
         } else {
@@ -61,6 +64,16 @@ public class ChargeCannonSystem extends IteratingSystem {
                 releaseProjectile(chargeCannon, entity);
             }
         }
+    }
+    
+    private boolean canShoot(Entity entity) {
+        BarrelRollComponent roll = Mappers.barrelRoll.get(entity);
+        ShieldComponent shield = Mappers.shield.get(entity);
+        HyperDriveComponent hyper = Mappers.hyper.get(entity);
+        boolean shieldActive = shield != null && shield.state == ShieldComponent.State.on;
+        boolean hyperActive = hyper != null && hyper.state == HyperDriveComponent.State.on;
+        boolean isRolling = roll != null && roll.flipState != BarrelRollComponent.FlipState.off;
+        return !shieldActive && !hyperActive && !isRolling;
     }
     
     private void growCharge(ChargeCannonComponent chargeCannon) {
@@ -122,20 +135,20 @@ public class ChargeCannonSystem extends IteratingSystem {
         physics.body = BodyFactory.createRect(transformComponent.pos.x, transformComponent.pos.y,
                 bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody, chargeCannon.projectileEntity);
         physics.body.setTransform(transformComponent.pos, transformComponent.rotation);
-        
+        //add parent velocity to projectile
         Body parentBody = Mappers.physics.get(parentEntity).body;
         Vector2 projectileVel = MyMath.vector(transformComponent.rotation, chargeCannon.velocity).add(parentBody.getLinearVelocity());
         physics.body.setLinearVelocity(projectileVel);
         physics.body.setBullet(true);//turn on CCD
         chargeCannon.projectileEntity.add(physics);
         
+        //auto expire
         ExpireComponent expire = new ExpireComponent();
         expire.timer = new SimpleTimer(8000, true);
         chargeCannon.projectileEntity.add(expire);
         
-        
         //particle -> stop absorbing effect
-        ParticleComponent oldParticle = (ParticleComponent) chargeCannon.projectileEntity.remove(ParticleComponent.class);
+        ParticleComponent oldParticle = chargeCannon.projectileEntity.remove(ParticleComponent.class);
         if (oldParticle != null && oldParticle.pooledEffect != null) {
             oldParticle.pooledEffect.allowCompletion();
         }
@@ -145,20 +158,32 @@ public class ChargeCannonSystem extends IteratingSystem {
             //particleSystem.chargeEffectPool.free(oldParticle.pooledEffect);
             //oldParticle.pooledEffect.dispose();?
         }
-        
         //particle -> start trailing effect
         ParticleComponent newParticle = new ParticleComponent();
         newParticle.type = ParticleComponent.EffectType.projectileTrail;
-        newParticle.offset = new Vector2(0.75f,0);
+        newParticle.offset = new Vector2(0.75f,0.0f);
         if (particleSystem != null) {
             particleSystem.initializeParticleFromPool(newParticle);
         }
         chargeCannon.projectileEntity.add(newParticle);
         
+        //spline trail
         chargeCannon.projectileEntity.add(new SplineComponent());
         
-        //release
+        //release reference to "ghost"
         chargeCannon.projectileEntity = null;
+    
+        //normalize: size(min,max) to pitch [0.5-2.0]
+        //min -> 2.0f
+        //max -> 0.5f
+        //m = change in y / change in x
+        //m = (y2 - y1) / (x2 - x1)
+        //
+        //map a-b to x-y
+        //out = b1 + (b2 - b1) * ((in-a1)/(a2-a1))
+        //map from/to
+        float pitch = MathUtils.map(chargeCannon.minSize,chargeCannon.maxSize, 2.0f, 0.5f, chargeCannon.size);
+        getEngine().getSystem(SoundSystem.class).shoot(pitch);
     }
     
     private Entity createGrowMissileChargeEntity() {
