@@ -11,7 +11,6 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BarrelRollComponent;
-import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DashComponent;
@@ -21,7 +20,6 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
@@ -54,8 +52,6 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         if (!controllerHasFocus) {
             facePosition(Gdx.input.getX(), Gdx.input.getY());
         }
-        
-        debugCameraControls(delta);
     }
     
     private boolean playerControls(int keycode, boolean keyDown) {
@@ -190,37 +186,6 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         return true;
     }
     
-    private void debugCameraControls(float delta) {
-        if (players.size() == 0) {
-            return;
-        }
-        
-        Entity player = players.first();
-        CameraFocusComponent cameraFocus = Mappers.camFocus.get(player);
-        if (cameraFocus == null) {
-            return;
-        }
-        
-        float zoomSpeed = 2f * delta;
-        float angle = 5f * delta;
-        /*
-        if (Gdx.input.isKeyPressed(keyCFG.resetZoom)) {
-            cameraFocus.zoomTarget = 1;
-        }
-        if (Gdx.input.isKeyPressed(keyCFG.zoomOut)) {
-            cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom + zoomSpeed;
-        }
-        if (Gdx.input.isKeyPressed(keyCFG.zoomIn)) {
-            cameraFocus.zoomTarget = MyScreenAdapter.cam.zoom - zoomSpeed;
-        }*/
-        if (Gdx.input.isKeyPressed(keyCFG.rotateRight)) {
-            MyScreenAdapter.cam.rotate(angle);
-        }
-        if (Gdx.input.isKeyPressed(keyCFG.rotateLeft)) {
-            MyScreenAdapter.cam.rotate(-angle);
-        }
-    }
-    
     @Override
     public boolean scrolled(float amountX, float amountY) {
         if (amountY <= 0) {
@@ -228,7 +193,6 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         } else {
             getEngine().getSystem(CameraSystem.class).zoomOut();
         }
-        
         return false;
     }
     
