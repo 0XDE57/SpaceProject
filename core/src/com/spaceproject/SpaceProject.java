@@ -27,14 +27,13 @@ public class SpaceProject extends Game {
         setScreen(new TitleScreen(this));
     }
     
-    
     private static void loadConfigs() {
         configManager = new ConfigManager();
         configManager.init();
     }
     
-    
     public static boolean isMobile() {
         return isMobile;
     }
+    
 }
