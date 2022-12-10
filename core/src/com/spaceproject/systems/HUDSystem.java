@@ -306,6 +306,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         int playerAmmoBarY = playerHPBarY - barHeight - 1;
         int playerHyperBarY = playerHPBarY + barHeight + 1;
         
+        //todo: force certain elements when hud is off (bypass)
+        // 1. hyperdrive should bring up velocity
+        // 2. health when take damage (timer)
+        // 3. shield when broken? (broken state not implemented yet)
         
         drawPlayerHealth(entity, playerBarX, playerHPBarY, barWidth, barHeight);
         drawPlayerShield(entity, playerBarX, playerHPBarY, barWidth, barHeight);
