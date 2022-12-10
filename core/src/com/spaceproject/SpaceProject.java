@@ -21,6 +21,8 @@ public class SpaceProject extends Game {
         MyScreenAdapter.game = this;
         
         isMobile = Gdx.app.getType() != Application.ApplicationType.Desktop;
+    
+        Gdx.graphics.setTitle(TITLE + "  -  " + VERSION);
         
         loadConfigs();
         
