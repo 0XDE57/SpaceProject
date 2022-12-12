@@ -73,12 +73,12 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
     }
     
     //see also: https://libgdx.com/wiki/math-utils/path-interface-and-splines
-    public void updateTail(SplineComponent spline, Entity entity) {
+    private void updateTail(SplineComponent spline, Entity entity) {
         TransformComponent transform = Mappers.transform.get(entity);
         PhysicsComponent physics = Mappers.physics.get(entity);
         
+        //initialize
         if (spline.path == null) {
-            //initialize
             //todo: cache. use pooled vectors
             spline.path = new Vector3[maxPathSize];
             for (int v = 0; v < maxPathSize; v++) {
@@ -107,7 +107,6 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         if (spline.index >= spline.path.length) {
             spline.index = 0;
         }
-        
     }
     
     public void renderVelocityPath(SplineComponent spline) {

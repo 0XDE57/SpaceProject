@@ -3,6 +3,7 @@ package com.spaceproject.utility;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
@@ -10,15 +11,18 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.AIComponent;
+import com.spaceproject.components.AsteroidBeltComponent;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.CamTargetComponent;
 import com.spaceproject.components.ChargeCannonComponent;
-import com.spaceproject.components.AsteroidBeltComponent;
 import com.spaceproject.components.DamageComponent;
+import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ShieldComponent;
+import com.spaceproject.components.SplineComponent;
 import com.spaceproject.components.Sprite3DComponent;
+import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.systems.SoundSystem;
 
@@ -109,6 +113,7 @@ public class PhysicsContactListener implements ContactListener {
             if (health.health <= 0) {
                 asteroid.doShatter = true;
                 entity.add(new RemoveComponent());
+                //warning: coupling
                 engine.getSystem(SoundSystem.class).asteroidShatter();
                 //Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID shatter: " + impulse + " -> damage: " + relativeDamage);
             }
@@ -229,6 +234,30 @@ public class PhysicsContactListener implements ContactListener {
         
         //remove projectile
         damageEntity.add(new RemoveComponent());
+    
+        //add projectile ghost (fx)
+        boolean showGhost = false;
+        if (showGhost) {
+            SplineComponent oSpline = Mappers.spline.get(damageEntity);
+            if (oSpline != null && oSpline.path != null) {
+                Entity projectileHit = new Entity();
+                SplineComponent spline = new SplineComponent();
+                spline.zOrder = oSpline.zOrder;
+                spline.path = oSpline.path.clone();
+                spline.index = oSpline.index;
+                //spline.path[spline.index].set(spline.path[spline.index-1]);
+                spline.color = Color.RED;
+                spline.style = SplineComponent.Style.solid;
+                projectileHit.add(spline);
+                TransformComponent trans = new TransformComponent();
+                trans.pos.set(Mappers.transform.get(attackedEntity).pos);
+                projectileHit.add(trans);
+                ExpireComponent expire = new ExpireComponent();
+                expire.timer = new SimpleTimer(500, true);
+                projectileHit.add(expire);
+                engine.addEntity(projectileHit);
+            }
+        }
     }
     
 }
