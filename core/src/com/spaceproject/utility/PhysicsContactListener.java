@@ -19,6 +19,7 @@ import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.RemoveComponent;
+import com.spaceproject.components.RingEffectComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.SplineComponent;
 import com.spaceproject.components.Sprite3DComponent;
@@ -236,24 +237,25 @@ public class PhysicsContactListener implements ContactListener {
         damageEntity.add(new RemoveComponent());
     
         //add projectile ghost (fx)
-        boolean showGhost = false;
+        boolean showGhost = true;
         if (showGhost) {
             SplineComponent oSpline = Mappers.spline.get(damageEntity);
             if (oSpline != null && oSpline.path != null) {
                 Entity projectileHit = new Entity();
+                projectileHit.add(new RingEffectComponent());
                 SplineComponent spline = new SplineComponent();
                 spline.zOrder = oSpline.zOrder;
                 spline.path = oSpline.path.clone();
                 spline.index = oSpline.index;
                 //spline.path[spline.index].set(spline.path[spline.index-1]);
-                spline.color = Color.RED;
+                spline.color = Color.BLACK;
                 spline.style = SplineComponent.Style.solid;
                 projectileHit.add(spline);
                 TransformComponent trans = new TransformComponent();
                 trans.pos.set(Mappers.transform.get(attackedEntity).pos);
                 projectileHit.add(trans);
                 ExpireComponent expire = new ExpireComponent();
-                expire.timer = new SimpleTimer(500, true);
+                expire.timer = new SimpleTimer(2000, true);
                 projectileHit.add(expire);
                 engine.addEntity(projectileHit);
             }

@@ -28,6 +28,7 @@ public class Mappers {
     public static final ComponentMapper<ParticleComponent> particle = ComponentMapper.getFor(ParticleComponent.class);
     public static final ComponentMapper<PhysicsComponent> physics = ComponentMapper.getFor(PhysicsComponent.class);
     public static final ComponentMapper<PlanetComponent> planet = ComponentMapper.getFor(PlanetComponent.class);
+    public static final ComponentMapper<RingEffectComponent> ring = ComponentMapper.getFor(RingEffectComponent.class);
     public static final ComponentMapper<ScreenTransitionComponent> screenTrans = ComponentMapper.getFor(ScreenTransitionComponent.class);
     public static final ComponentMapper<SeedComponent> seed = ComponentMapper.getFor(SeedComponent.class);
     public static final ComponentMapper<ShaderComponent> shader = ComponentMapper.getFor(ShaderComponent.class);
