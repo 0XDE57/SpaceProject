@@ -8,19 +8,19 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
-public class ShieldRenderSystem extends IteratingSystem {
+public class ShieldRenderSystem extends IteratingSystem implements Disposable {
     
     private final OrthographicCamera cam;
     private final ShapeRenderer shape;
     
     public ShieldRenderSystem() {
         super(Family.all(ShieldComponent.class, TransformComponent.class).get());
-        
         cam = GameScreen.cam;
         shape = new ShapeRenderer();
     }
@@ -64,6 +64,11 @@ public class ShieldRenderSystem extends IteratingSystem {
         }
         shape.circle(transform.pos.x, transform.pos.y, shield.radius);
         shape.end();//double flush inside same loop. im a horrible person ;p
+    }
+    
+    @Override
+    public void dispose() {
+        shape.dispose();
     }
     
 }
