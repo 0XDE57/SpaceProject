@@ -81,8 +81,9 @@ public class SystemsConfig extends Config {
         //  [?] could have multilayer rendering if needed:
         //      eg: particle layer pre sprite (under sprites), particle layer post sprite (over sprites)
         systems.add(new SysCFG(CameraSystem.class, 100, true, true, true, true, true));
+        systems.add(new SysCFG(ParallaxRenderSystem.class, 101, false, true, true, true, true));
         systems.add(new SysCFG(SpaceParallaxSystem.class, 105, false, true, false, true, true));
-        systems.add(new SysCFG(ParallaxRenderSystem.class, 107, false, true, true, true, true));
+        //systems.add(new SysCFG(.class, 108, false, true, true, true, true));
         //systems.add(new SysCFG(SpaceDustSystem.class, 106, false, true, false, true, true));
         systems.add(new SysCFG(WorldRenderingSystem.class, 110, false, false, true, true, true));
         systems.add(new SysCFG(TileGridSystem.class, 111, false, false, true, true, true));
@@ -94,15 +95,13 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(ShieldRenderSystem.class, 125, false, true, true, true, true));
         systems.add(new SysCFG(ParticleSystem.class, 130, true, true, true, true, true));
         systems.add(new SysCFG(HUDSystem.class, 200, false, true, true, true, true));
-        
         systems.add(new SysCFG(ScreenTransitionSystem.class, 300, true, true, true, true, true));
     
-        systems.add(new SysCFG(SoundSystem.class, 400, false, true, true, true, true));
+        systems.add(new SysCFG(SoundSystem.class, 500, false, true, true, true, true));
     
-        systems.add(new SysCFG(ExpireSystem.class, 500, true, true, true, true, true));
+        systems.add(new SysCFG(ExpireSystem.class, 800, true, true, true, true, true));
         
         systems.add(new SysCFG(DebugSystem.class, 900, false, true, true, true, true));
-        
         
         //Should always be last system fired. This is where entities flagged with the removal component are removed from engine
         //and resources are auto-disposed. Any systems processed after this should be careful if they rely

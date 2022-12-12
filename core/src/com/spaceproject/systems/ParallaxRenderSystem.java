@@ -48,6 +48,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     
     @Override
     public void update(float deltaTime) {
+        //warning: coupling
         if (!getEngine().getSystem(HUDSystem.class).isDraw()) {
             return;
         }
@@ -75,12 +76,19 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         shape.begin(ShapeRenderer.ShapeType.Line);
         
         //todo: apply shader to grid
-        Color gridColor = Color.GREEN.cpy();
+        int gridSize = 400;
+        Color gridColor = Color.BLACK.cpy();
         float brightness = (float) Math.abs(Math.sin(animate * 0.5f) * 0.1f);
         //DebugSystem.addDebugText(brightness + " :" + animate, 100, 100);
-        gridColor.a =  brightness;
+    
         
-        drawGrid(gridColor, boundingBox, 50, 1);
+        
+        //step function
+        // size / 2
+        //
+        //gridColor.a =  brightness;
+        gridColor.a = 0.15f;
+        drawGrid(gridColor, boundingBox, gridSize, 0.5f);
         
         //drawGrid(Color.WHITE, boundingBox, 50, 3);
         
@@ -88,11 +96,13 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         //red.a = 0.5f;
         //drawGrid(red, boundingBox, 50, 1);
         
-        drawOrigin(Color.SKY);
+        drawOrigin(Color.WHITE);
         //drawDebugCameraPos(Color.RED);
         //update debug cam position
         
         //debugDrawCameraPath(Color.YELLOW);
+        //debugDrawMousePath();
+        
     /*
         Entity player = players.first();
         Body body = Mappers.physics.get(player).body;
@@ -101,7 +111,11 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         Vector2 facing = MyMath.vector(body.getAngle(), 1);*/
         
         animate += deltaTime;
-        //drawEye((float) (10.0f * Math.sin(animate)), boundingBox);
+        int edgePad = 200;
+        Rectangle rectangle = new Rectangle(edgePad, edgePad,
+                Gdx.graphics.getWidth() - edgePad * 2,
+                Gdx.graphics.getHeight() - edgePad * 2);
+        //drawEye((float) (10.0f * Math.sin(animate)), rectangle);
         //drawEye((float) (10.0f + (Math.sin(animate) * 5.0f)), boundingBox);
         //((float) (10.0f + (Math.sin(animate) * 10.0f)), new Rectangle(100F, 200F, 100F, (float) (100 + (Math.sin(animate) * 100.0f))));
         //drawEye((float) (10.0f + ((Math.sin(animate * 10.0f) + MathUtils.PI) * 10.0f)), new Rectangle(100F, 100F, (float) (100 + (Math.sin(animate) * 100.0f)), 100));
@@ -148,6 +162,9 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         shape.circle(screenCoords.x, screenCoords.y, 10);
         shape.line(screenCoords.x, 0, screenCoords.x, Gdx.graphics.getHeight());
         shape.line(0, screenCoords.y, Gdx.graphics.getWidth(), screenCoords.y);
+    
+        //shape.rect(screenCoords.x, rect.y, width, rect.height);
+        //shape.rect(0, screenCoords.y, rect.width, width);
     }
     
     private void debugDrawMousePath(){
@@ -194,10 +211,24 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         float centerX = rect.x + halfWidth;
         float centerY = rect.y + halfHeight;
         float scale = GameScreen.cam.zoom;
+        float relativeGridWidth = gridSize / scale;
         
-        float relativeGrid = scale * gridSize;
+        //dynamic size
+        boolean adaptiveGrid = false;
+        if (adaptiveGrid) {
+            if (relativeGridWidth < gridSize) {
+                gridSize *= 2.0f;
+            }
+            relativeGridWidth = gridSize / scale;
+            /*
+            if (relativeGridWidth < gridSize * 2f) {
+                gridSize *= 0.5f;
+                relativeGridWidth = gridSize / scale;
+            }*/
+        }
+        int countX = 0, countY = 0;
         
-        //draw X
+        //draw X: horizontal lines
         float posX = MyScreenAdapter.cam.position.x;
         int startX = (int) (posX + (-halfWidth * scale)) / gridSize;
         int endX = (int) (posX + (halfWidth * scale)) / gridSize;
@@ -206,10 +237,13 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
             if (width > 1) {
                 finalX -= width * 0.5f;
             }
+            countX++;
             shape.rect(finalX, rect.y, width, rect.height);
         }
         
-        //draw Y
+        //gridSize *= 1.0f / (16.0f / 9.0f);//test 16x9 asymmetrical grid
+        
+        //draw Y: vertical lines
         float posY = MyScreenAdapter.cam.position.y;
         int startY = (int) (posY + (-halfHeight * scale)) / gridSize;
         int endY = (int) (posY + (halfHeight * scale)) / gridSize;
@@ -218,16 +252,25 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
             if (width > 1) {
                 finalY -= width * 0.5f;
             }
+            countY++;
             shape.rect(rect.x, finalY, rect.width, width);
         }
         
-        //highlight tile
+        //todo: highlight tile
         //camera (center tile)
         //mouse
+        //draw grid co'ods
         //
-    
-        boolean showDebug = false;
+        
+        int tilesX = countX + 1;
+        int tilesY = countY + 1;
+        
+        boolean showDebug = true;
         if (showDebug) {
+            DebugSystem.addDebugText(countX + ", " + countY
+                    + " | " + tilesX + ", " + tilesY
+                    + " | " + relativeGridWidth, rect.x + rect.width/2, rect.y + 20);
+            
             //border
             shape.setColor(new Color(0.1f, 0.63f, 0.88f, 1f));
             shape.rect(rect.x, rect.y, rect.width, rect.height);
