@@ -32,6 +32,8 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     ParticleEffectPool fireEffectPool;
     ParticleEffect chargeEffect;
     ParticleEffectPool chargeEffectPool;
+    ParticleEffect explodeEffect;
+    ParticleEffectPool explodeEffectPool;
     ParticleEffect tailEffect;
     ParticleEffectPool tailEffectPool;
     ParticleEffect shieldEffect;
@@ -41,6 +43,8 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     final float[] engineColorBoost;
     final float[] engineColorHyper;
     
+    float particleScale = 0.02f;
+    
     public ParticleSystem() {
         super(Family.all(ParticleComponent.class).get());
         
@@ -49,7 +53,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         //engine fire
         fireEffect = new ParticleEffect();
         fireEffect.load(Gdx.files.internal("particles/shipEngineFire.particle"), Gdx.files.internal("particles/"));
-        fireEffect.scaleEffect(0.02f);
+        fireEffect.scaleEffect(particleScale);
         fireEffectPool = new ParticleEffectPool(fireEffect, 20, 20);
         engineColor = new float[]{ 1, 0.34901962f, 0.047058824f };
         engineColorBoost = new float[]{ 0.047058824f, 0.34901962f, 1 };
@@ -58,25 +62,30 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         //projectile charge
         chargeEffect = new ParticleEffect();
         chargeEffect.load(Gdx.files.internal("particles/absorb2.particle"), Gdx.files.internal("particles/"));
-        chargeEffect.scaleEffect(0.02f);
+        chargeEffect.scaleEffect(particleScale);
         chargeEffectPool = new ParticleEffectPool(chargeEffect, 20, 20);
+    
+        //projectile explode
+        explodeEffect = new ParticleEffect();
+        explodeEffect.load(Gdx.files.internal("particles/absorb2.particle"), Gdx.files.internal("particles/"));
+        explodeEffect.scaleEffect(particleScale);
+        //todo: give own particle effect instead of reusing absorb
+        Array<ParticleEmitter> emitters = explodeEffect.getEmitters();
+        for (int i = 0; i < emitters.size; i++) {
+            emitters.get(i).getVelocity().setLow(15);
+        }
+        explodeEffectPool = new ParticleEffectPool(explodeEffect, 20, 40);
     
         //shield charge
         shieldEffect = new ParticleEffect();
         shieldEffect.load(Gdx.files.internal("particles/absorb2.particle"), Gdx.files.internal("particles/"));
-        shieldEffect.scaleEffect(0.02f);
-        /* todo: make blue
-        Array<ParticleEmitter> emitters = shieldEffect.getEmitters();
-        for (int i = 0; i < emitters.size; i++) {
-            ParticleEmitter.GradientColorValue tint = emitters.get(i).getTint();
-            tint.setColors(new float[]{ 0, 0, 1 });
-        }*/
+        shieldEffect.scaleEffect(particleScale);
         shieldEffectPool = new ParticleEffectPool(shieldEffect, 20, 20);
         
         //projectile tail
         tailEffect = new ParticleEffect();
         tailEffect.load(Gdx.files.internal("particles/tail4.particle"), Gdx.files.internal("particles/"));
-        tailEffect.scaleEffect(0.02f);
+        tailEffect.scaleEffect(particleScale);
         tailEffectPool = new ParticleEffectPool(tailEffect, 20, 20);
     }
     
@@ -103,6 +112,9 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                 break;
             case bulletCharge:
                 updateChargeParticle(entity, particle);
+                break;
+            case bulletExplode:
+                updateExplodeParticle(entity, particle);
                 break;
             case projectileTrail:
                 updateTailParticle(entity, particle);
@@ -206,6 +218,11 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         particle.pooledEffect.setPosition(transform.pos.x, transform.pos.y);
     }
     
+    private void updateExplodeParticle(Entity entity, ParticleComponent particle) {
+        TransformComponent transform = Mappers.transform.get(entity);
+        particle.pooledEffect.setPosition(transform.pos.x, transform.pos.y);
+    }
+    
     private void updateShieldChargeParticle(Entity entity, ParticleComponent particle) {
         ShieldComponent shield = Mappers.shield.get(entity);
         if (shield != null) {
@@ -261,6 +278,10 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                 //start with emitter on
                 particle.pooledEffect.start();
                 break;
+            case bulletExplode:
+                particle.pooledEffect = explodeEffectPool.obtain();
+                particle.pooledEffect.start();
+                break;
             case projectileTrail:
                 particle.pooledEffect = tailEffectPool.obtain();
                 //start with emitter on
@@ -283,6 +304,9 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                 break;
             case bulletCharge:
                 chargeEffectPool.free(particle.pooledEffect);
+                break;
+            case bulletExplode:
+                explodeEffectPool.free(particle.pooledEffect);
                 break;
             case projectileTrail:
                 tailEffectPool.free(particle.pooledEffect);

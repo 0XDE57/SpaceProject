@@ -241,22 +241,32 @@ public class PhysicsContactListener implements ContactListener {
         //add projectile ghost (fx)
         //explodeProjectile(contact, damageEntity, attackedEntity);
     
+        explodeProjectile(contact);
+    }
+    
+    private void explodeProjectile(Contact contact) {
+        
         WorldManifold manifold = contact.getWorldManifold();
         //for (Vector2 p : manifold.getPoints()) {
         Vector2 p = manifold.getPoints()[0];
-            Entity contactP = new Entity();
-            TransformComponent trans = new TransformComponent();
-            trans.pos.set(p);
-            contactP.add(trans);
-            
-            contactP.add(new RingEffectComponent());
-            
-            ExpireComponent expire = new ExpireComponent();
-            expire.timer = new SimpleTimer(2000, true);
-            contactP.add(expire);
-            
-            engine.addEntity(contactP);
-        //}
+        
+        Entity contactP = new Entity();
+        
+        TransformComponent trans = new TransformComponent();
+        trans.pos.set(p);
+        contactP.add(trans);
+        
+        contactP.add(new RingEffectComponent());
+        
+        ExpireComponent expire = new ExpireComponent();
+        expire.timer = new SimpleTimer(2000, true);
+        contactP.add(expire);
+        
+        ParticleComponent particle = new ParticleComponent();
+        particle.type = ParticleComponent.EffectType.bulletExplode;
+        contactP.add(particle);
+        
+        engine.addEntity(contactP);
     }
     
     private void explodeProjectile(Contact contact, Entity damageEntity, Entity attackedEntity) {
