@@ -5,10 +5,12 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
+import com.badlogic.gdx.physics.box2d.WorldManifold;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AsteroidBeltComponent;
@@ -18,6 +20,7 @@ import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
+import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.RingEffectComponent;
 import com.spaceproject.components.ShieldComponent;
@@ -44,9 +47,8 @@ public class PhysicsContactListener implements ContactListener {
     public void beginContact(Contact contact) {
         Object dataA = contact.getFixtureA().getBody().getUserData();
         Object dataB = contact.getFixtureB().getBody().getUserData();
-        
         if (dataA != null && dataB != null) {
-            onCollision((Entity) dataA, (Entity) dataB);
+            onCollision(contact, (Entity) dataA, (Entity) dataB);
         }
     }
     
@@ -147,7 +149,7 @@ public class PhysicsContactListener implements ContactListener {
         }
     }
     
-    private void onCollision(Entity a, Entity b) {
+    private void onCollision(Contact contact, Entity a, Entity b) {
         //todo: collision filtering: http://www.iforce2d.net/b2dtut/collision-filtering
         DamageComponent damageA = Mappers.damage.get(a);
         DamageComponent damageB = Mappers.damage.get(b);
@@ -155,14 +157,14 @@ public class PhysicsContactListener implements ContactListener {
         HealthComponent healthB = Mappers.health.get(b);
         
         if (damageA != null && healthB != null) {
-            onAttacked(a, b, damageA, healthB);
+            onAttacked(contact, a, b, damageA, healthB);
         }
         if (damageB != null && healthA != null) {
-            onAttacked(b, a, damageB, healthA);
+            onAttacked(contact, b, a, damageB, healthA);
         }
     }
     
-    private void onAttacked(Entity damageEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent healthComponent) {
+    private void onAttacked(Contact contact, Entity damageEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent healthComponent) {
         if (damageComponent.source == attackedEntity) {
             return; //ignore self-inflicted damage
         }
@@ -237,12 +239,44 @@ public class PhysicsContactListener implements ContactListener {
         damageEntity.add(new RemoveComponent());
     
         //add projectile ghost (fx)
+        //explodeProjectile(contact, damageEntity, attackedEntity);
+    
+        WorldManifold manifold = contact.getWorldManifold();
+        //for (Vector2 p : manifold.getPoints()) {
+        Vector2 p = manifold.getPoints()[0];
+            Entity contactP = new Entity();
+            TransformComponent trans = new TransformComponent();
+            trans.pos.set(p);
+            contactP.add(trans);
+            
+            contactP.add(new RingEffectComponent());
+            
+            ExpireComponent expire = new ExpireComponent();
+            expire.timer = new SimpleTimer(2000, true);
+            contactP.add(expire);
+            
+            engine.addEntity(contactP);
+        //}
+    }
+    
+    private void explodeProjectile(Contact contact, Entity damageEntity, Entity attackedEntity) {
+        Entity projectileHit = new Entity();
+        
+        TransformComponent trans = new TransformComponent();
+        //trans.pos.set(Mappers.transform.get(attackedEntity).pos);
+        //trans.pos.set(Mappers.physics.get(attackedEntity).body.getPosition());
+        projectileHit.add(trans);
+    
+        projectileHit.add(new RingEffectComponent());
+        
+        ParticleComponent particle = new ParticleComponent();
+        particle.type = ParticleComponent.EffectType.shieldCharge; //todo: make new explode particle effect!
+        projectileHit.add(particle);
+        
         boolean showGhost = true;
         if (showGhost) {
             SplineComponent oSpline = Mappers.spline.get(damageEntity);
             if (oSpline != null && oSpline.path != null) {
-                Entity projectileHit = new Entity();
-                projectileHit.add(new RingEffectComponent());
                 SplineComponent spline = new SplineComponent();
                 spline.zOrder = oSpline.zOrder;
                 spline.path = oSpline.path.clone();
@@ -251,15 +285,14 @@ public class PhysicsContactListener implements ContactListener {
                 spline.color = Color.BLACK;
                 spline.style = SplineComponent.Style.solid;
                 projectileHit.add(spline);
-                TransformComponent trans = new TransformComponent();
-                trans.pos.set(Mappers.transform.get(attackedEntity).pos);
-                projectileHit.add(trans);
-                ExpireComponent expire = new ExpireComponent();
-                expire.timer = new SimpleTimer(2000, true);
-                projectileHit.add(expire);
-                engine.addEntity(projectileHit);
             }
         }
+    
+        ExpireComponent expire = new ExpireComponent();
+        expire.timer = new SimpleTimer(2000, true);
+        projectileHit.add(expire);
+        
+        engine.addEntity(projectileHit);
     }
     
 }
