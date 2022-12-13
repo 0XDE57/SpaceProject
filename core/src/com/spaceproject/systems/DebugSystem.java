@@ -52,6 +52,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     private static final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     
     private ECSExplorerWindow engineView;
+    private InputListener listener;
     
     //rendering
     private static OrthographicCamera cam;
@@ -92,32 +93,32 @@ public class DebugSystem extends IteratingSystem implements Disposable {
                 debugCFG.drawVelocities,
                 debugCFG.drawContacts);
         
-        GameScreen.getStage().addListener(new InputListener() {
+        listener = new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
                 super.keyDown(event, keycode);
                 engineView.keyDown(event, keycode);
                 return false;
             }
-        
+    
             @Override
             public boolean keyUp(InputEvent event, int keycode) {
                 super.keyUp(event, keycode);
                 return false;
             }
-        
+    
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 super.touchDown(event, x, y, pointer, button);
                 return false;
             }
-        });
+        };
+        GameScreen.getStage().addListener(listener);
     }
     
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-
         engineView = new ECSExplorerWindow(engine);
     }
     
@@ -535,13 +536,18 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     //endregion
     
     @Override
+    public void removedFromEngine(Engine engine) {
+        super.removedFromEngine(engine);
+        engine.removeEntityListener(engineView);
+        GameScreen.getStage().removeListener(listener);
+    }
+    
+    @Override
     public void dispose() {
         texCompBack.dispose();
         texCompSeparator.dispose();
         fontSmall.dispose();
         fontLarge.dispose();
-        
-        getEngine().removeEntityListener(engineView);
     }
     
 }
