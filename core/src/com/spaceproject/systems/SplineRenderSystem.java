@@ -126,7 +126,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
                 if (spline.color != null) {
                     //z = linearVelocity [0 - max box2d] then  hyperdrive velocity
                     float velocity = p.z / (B2DPhysicsSystem.getVelocityLimit() * B2DPhysicsSystem.getVelocityLimit());
-                    tmpColor.set(1-velocity, velocity, velocity, 1);
+                    tmpColor.set(Color.BLACK.cpy().lerp(Color.CYAN, velocity));
                     if (velocity > 1.01f) {
                         //hyperdrive travel
                         tmpColor.set(1, 1, 1, 1);
