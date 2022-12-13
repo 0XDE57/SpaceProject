@@ -351,6 +351,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         chargeEffect.dispose();
         tailEffect.dispose();
         shieldEffect.dispose();
+        spriteBatch.dispose();
     }
     
 }
