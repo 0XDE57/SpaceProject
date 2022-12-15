@@ -191,12 +191,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     private void drawCompass(Entity entity) {
-        float alpha = MathUtils.clamp((cam.zoom / uiCFG.lodShowOrbitPath / uiCFG.orbitFadeFactor), 0, 0.3f);
+        float alpha = MathUtils.clamp((cam.zoom / uiCFG.lodShowOrbitPath / uiCFG.orbitFadeFactor), 0, 0.35f);
         if (MathUtils.isEqual(alpha, 0)) return;
         
         //draw movement direction for navigation assistance, line up vector with target destination
         Body body = Mappers.physics.get(entity).body;
-        Vector2 facing = MyMath.vector(body.getAngle(), 50000);
+        Vector2 facing = MyMath.vector(body.getAngle(), 5000);
         Vector3 pos = cam.project(new Vector3(Mappers.transform.get(entity).pos.cpy(), 0));
     
         uiCFG.orbitObjectColor.a = alpha;
@@ -204,8 +204,13 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         
         //DebugSystem.addDebugText(body.getAngle() + "", pos.x, pos.y);
         
-        //draw circle; width = velocity
         //draw velocity vector
+        if (body.getLinearVelocity().len2() > 1) {
+            Vector2 vel = MyMath.vector(body.getLinearVelocity().angleRad(), 5000);
+            shape.rectLine(pos.x, pos.y, vel.x, vel.y, 1, uiCFG.orbitObjectColor, uiCFG.orbitObjectColor);
+        }
+        
+        //draw circle; width = velocity
         //draw engine impulses
     }
     
