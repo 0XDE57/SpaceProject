@@ -429,9 +429,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             return;
         }
     
-        float velocity = physics.body.getLinearVelocity().len() / B2DPhysicsSystem.getVelocityLimit();
-        float barRatio = MathUtils.clamp(0, velocity * width, width);
-        shape.setColor(1-velocity, velocity, velocity, 1);
+        float velocity = physics.body.getLinearVelocity().len2() /
+                (B2DPhysicsSystem.getVelocityLimit() * B2DPhysicsSystem.getVelocityLimit());
+        float barRatio = MathUtils.clamp(velocity * width, 0,  width);
+        shape.setColor(Color.CYAN);
         shape.rect(x, y, barRatio, height);
     }
 
