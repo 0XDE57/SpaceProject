@@ -354,6 +354,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     private void drawPlayerVelocity(Entity entity, int x, int y, int width, int height) {
+        shape.setColor(Color.BLACK);
+        shape.rect(x, y + (height*0.5f), width, 1);
+        
         PhysicsComponent physics = Mappers.physics.get(entity);
         if (physics == null) {
             return;
