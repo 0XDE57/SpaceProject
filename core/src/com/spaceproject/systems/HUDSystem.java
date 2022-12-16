@@ -10,7 +10,10 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Interpolation;
@@ -20,6 +23,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.CameraFocusComponent;
@@ -31,11 +35,13 @@ import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.PhysicsComponent;
+import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.config.UIConfig;
+import com.spaceproject.generation.FontFactory;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
@@ -47,7 +53,7 @@ import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 
 
-public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener {
+public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener, Disposable {
     
     private final UIConfig uiCFG = SpaceProject.configManager.getConfig(UIConfig.class);
     private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
@@ -59,6 +65,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private Matrix4 projectionMatrix;
     private ShapeRenderer shape;
     private SpriteBatch batch;
+    private BitmapFont font;
+    private GlyphLayout layout = new GlyphLayout();
     
     //entity storage
     private ImmutableArray<Entity> mapableEntities;
@@ -70,11 +78,22 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private boolean drawHud = true;
     private boolean drawEdgeMap = true;
     
+    enum SpecialState {
+        off, hyper, landing, launching;
+    }
+    SpecialState messageState = SpecialState.off;
+    
     public HUDSystem() {
         cam = MyScreenAdapter.cam;
         shape = MyScreenAdapter.shape;
         batch = MyScreenAdapter.batch;
         projectionMatrix = new Matrix4();
+    
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 26;
+        parameter.borderColor = Color.BLACK;
+        parameter.borderWidth = 2;
+        font = FontFactory.createFont(FontFactory.fontPressStart, parameter);
         
         GameScreen.getStage().addListener(new InputListener() {
             @Override
@@ -171,15 +190,30 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         
         shape.begin(ShapeType.Filled);
         
-        drawPlayerStatus();
+        Entity player = players.first();
+        drawPlayerStatus(player);
         
         if (drawEdgeMap) {
             drawEdgeMap();
         }
         
         drawHealthBars();
+    
+        /*
+        shape.setColor(Color.BLACK);
+        float padding = 10;
+        //shape.rectLine(centerX-padding, messageHeight-((layout.height-padding)*0.35f),
+        //        centerX+layout.width+(padding*2), messageHeight-((layout.height-padding)*0.35f), layout.height + (padding*2));
+        //shape.rectLine(0, messageHeight, , messageHeight, Gdx.graphics.getWidth(),layout.height);*/
         
         shape.end();
+        
+        batch.begin();
+        
+        //draw special state: hyper or landing / launching
+        drawSpecialStateMessage(player);
+    
+        batch.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
     
@@ -227,11 +261,41 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     //region player status
-    private void drawPlayerStatus() {
-        if (players == null || players.size() == 0) {
-            return;
+    private void drawSpecialStateMessage(Entity player) {
+        if (player == null) return;
+        
+        messageState = SpecialState.off;
+        
+        HyperDriveComponent hyper = Mappers.hyper.get(player);
+        if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
+            messageState = SpecialState.hyper;
         }
-        Entity entity = players.first();
+    
+        ScreenTransitionComponent trans = Mappers.screenTrans.get(player);
+        if (trans != null) {
+            if (trans.landStage != null) {
+                messageState = SpecialState.landing;
+            }
+            if (trans.takeOffStage != null) {
+                messageState = SpecialState.launching;
+            }
+        }
+        
+        switch (messageState) {
+            case hyper: layout.setText(font, "[ HYPER-DRIVE ]"); break;
+            case landing: layout.setText(font, "[ LANDING ]"); break;
+            case launching: layout.setText(font, "[ LAUNCHING ]"); break;
+            case off:
+                return;
+        }
+        
+        float centerX = (Gdx.graphics.getWidth() - layout.width) * 0.5f;
+        int messageHeight = (int) (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3) + layout.height);
+        font.draw(batch, layout, centerX, messageHeight);
+    }
+    
+    private void drawPlayerStatus(Entity entity) {
+        if (entity == null) return;
         
         int barWidth = uiCFG.playerHPBarWidth;
         int barHeight = uiCFG.playerHPBarHeight;
@@ -532,4 +596,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         miniMap.updateMapPosition();
     }
     
+    @Override
+    public void dispose() {
+        font.dispose();
+    }
 }
