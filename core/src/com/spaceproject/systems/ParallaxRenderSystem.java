@@ -62,7 +62,8 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     @Override
     public void update(float deltaTime) {
         //warning: coupling
-        if (!getEngine().getSystem(HUDSystem.class).isDraw()) {
+        HUDSystem hudSystem = getEngine().getSystem(HUDSystem.class);
+        if (hudSystem != null && !hudSystem.isDraw()) {
             return;
         }
         

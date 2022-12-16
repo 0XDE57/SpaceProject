@@ -36,7 +36,7 @@ public class MiniMap {
     private MiniMapConfig miniMapCFG;
     private CelestialConfig celestCFG;
     private MapState mapState = MapState.off;
-    private Rectangle mapContainer;
+    private Rectangle mapContainer = new Rectangle();
     private BitmapFont font;
     private float mapScale;
     private SimpleTimer drawScaleTimer;
@@ -354,7 +354,7 @@ public class MiniMap {
     }
     
     public void updateMapPosition() {
-        mapContainer = createNewMapRectangle();
+        createNewMapRectangle(mapContainer);
         drawScaleTimer.reset();
     }
     
@@ -362,23 +362,32 @@ public class MiniMap {
         return mapState;
     }
     
-    private Rectangle createNewMapRectangle() {
-        if (mapState == MapState.full) {
-            return new Rectangle(miniMapCFG.edgePad, miniMapCFG.edgePad, Gdx.graphics.getWidth() - miniMapCFG.edgePad * 2, Gdx.graphics.getHeight() - miniMapCFG.edgePad * 2);
-        }
-        
+    private Rectangle createNewMapRectangle(Rectangle rectangle) {
         switch (miniMapCFG.miniMapPosition) {
             case topLeft:
-                return new Rectangle(miniMapCFG.miniEdgePad, Gdx.graphics.getHeight() - miniMapCFG.miniHeight - miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
+                rectangle.set(miniMapCFG.miniEdgePad, Gdx.graphics.getHeight() - miniMapCFG.miniHeight - miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
+                break;
             case topRight:
-                return new Rectangle(Gdx.graphics.getWidth() - miniMapCFG.miniWidth - miniMapCFG.miniEdgePad, Gdx.graphics.getHeight() - miniMapCFG.miniHeight - miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
+                rectangle.set(Gdx.graphics.getWidth() - miniMapCFG.miniWidth - miniMapCFG.miniEdgePad, Gdx.graphics.getHeight() - miniMapCFG.miniHeight - miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
+                break;
             case bottomLeft:
-                return new Rectangle(miniMapCFG.miniEdgePad, miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
+                rectangle.set(miniMapCFG.miniEdgePad, miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
+                break;
             case bottomRight:
-                return new Rectangle(Gdx.graphics.getWidth() - miniMapCFG.miniWidth - miniMapCFG.miniEdgePad, miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
-            default:
-                return new Rectangle();
+                rectangle.set(Gdx.graphics.getWidth() - miniMapCFG.miniWidth - miniMapCFG.miniEdgePad, miniMapCFG.miniEdgePad, miniMapCFG.miniWidth, miniMapCFG.miniHeight);
+                break;
         }
+    
+        if (mapState == MapState.full) {
+            //padded
+            rectangle.set(miniMapCFG.edgePad, miniMapCFG.edgePad,
+                    Gdx.graphics.getWidth() - miniMapCFG.edgePad * 2,
+                    Gdx.graphics.getHeight() - miniMapCFG.edgePad * 2);
+            //truly fullscreen
+            rectangle.set(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        }
+        
+        return rectangle;
     }
     
     public Rectangle getMapContainer() {
