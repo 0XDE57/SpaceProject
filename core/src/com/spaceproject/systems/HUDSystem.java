@@ -355,20 +355,22 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     private void drawPlayerVelocity(Entity entity, int x, int y, int width, int height) {
         shape.setColor(Color.BLACK);
+        
+        ControllableComponent control = Mappers.controllable.get(entity);
+        if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight) {
+            shape.setColor(Color.GOLD);
+            if (control.boost) {
+                shape.setColor(Color.CYAN);
+            }
+        }
         shape.rect(x, y + (height*0.5f), width, 1);
         
         PhysicsComponent physics = Mappers.physics.get(entity);
         if (physics == null) {
             return;
         }
-        
-        ControllableComponent control = Mappers.controllable.get(entity);
-        shape.setColor(Color.GOLD);
-        if (control.boost) {
-            shape.setColor(Color.CYAN);
-        }
-        
-        float velocity = physics.body.getLinearVelocity().len2() / B2DPhysicsSystem.getVelocityLimit2();
+
+        float velocity = physics.body.getLinearVelocity().len() / B2DPhysicsSystem.getVelocityLimit();
         float barRatio = MathUtils.clamp(velocity * width, 0,  width);
         float center = (width * 0.5f) - (barRatio * 0.5f);
         shape.rect(x + center, y, barRatio, height);
