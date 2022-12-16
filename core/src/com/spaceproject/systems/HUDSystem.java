@@ -64,7 +64,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private ImmutableArray<Entity> mapableEntities;
     private ImmutableArray<Entity> players;
     private ImmutableArray<Entity> killableEntities;
-    private ImmutableArray<Entity> orbitEntities;
     
     private MiniMap miniMap;
     
@@ -134,7 +133,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
         killableEntities = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(
                 ControlFocusComponent.class, AsteroidComponent.class).get());
-        orbitEntities = engine.getEntitiesFor(Family.all(TransformComponent.class).get());
     }
     
     @Override
@@ -253,7 +251,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         drawPlayerVelocity(entity, barX, hyperBarY, barWidth, barHeight);
         drawHyperDriveBar(entity, barX, hyperBarY, barWidth, barHeight);
 
-		
+		/*
 		//border
 		//shape.setColor(new Color(0.1f, 0.63f, 0.88f, 1f));
         shape.setColor(Color.GREEN);
@@ -262,7 +260,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 		shape.rectLine(barX, healthBarY-barHeight, barX+barWidth, healthBarY-barHeight,thickness);//bottom
 		shape.rectLine(barX, healthBarY+barHeight, barX, healthBarY-barHeight, thickness);//left
 		shape.rectLine(barX+barWidth, healthBarY+barHeight, barX+barWidth, healthBarY-barHeight, thickness);//right
-		
+		*/
     }
     
     private void drawPlayerHealth(Entity entity, int x, int y, int width, int height) {
@@ -394,11 +392,13 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 break;
             case charging:
                 float charge = MathUtils.clamp(0, hyperDrive.chargeTimer.ratio() * width, width);
-                shape.rect(x, y, charge, height);
+                float center = (width * 0.5f) - (charge * 0.5f);
+                shape.rect(x + center, y, charge, height);
                 break;
             case cooldown:
                 float cooldown = MathUtils.clamp(0, (1 - hyperDrive.coolDownTimer.ratio()) * width, width);
-                shape.rect(x, y, cooldown, height);
+                float centerD = (width * 0.5f) - (cooldown * 0.5f);
+                shape.rect(x + centerD, y, cooldown, height);
                 break;
         }
     }
