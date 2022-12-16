@@ -112,11 +112,11 @@ public class ChargeCannonSystem extends IteratingSystem {
     
     private void releaseProjectile(ChargeCannonComponent chargeCannon, Entity parentEntity) {
         chargeCannon.isCharging = false;
-        
-        //ensure minimum size and update
-        chargeCannon.size = Math.max(chargeCannon.minSize, chargeCannon.size);
+    
+        //clamp size and update texture
+        chargeCannon.size = MathUtils.clamp(chargeCannon.size, chargeCannon.minSize, chargeCannon.maxSize);
         updateChargeTexture(chargeCannon);
-        
+    
         //damage modifier
         DamageComponent damageComponent = new DamageComponent();
         damageComponent.source = parentEntity;
@@ -125,7 +125,7 @@ public class ChargeCannonSystem extends IteratingSystem {
             damageComponent.damage *= 1.20;//bonus damage for maxed out
         }
         chargeCannon.projectileEntity.add(damageComponent);
-        
+    
         //physics
         TextureComponent textureComponent = Mappers.texture.get(chargeCannon.projectileEntity);
         float bodyWidth = textureComponent.texture.getWidth() * textureComponent.scale;
@@ -141,30 +141,29 @@ public class ChargeCannonSystem extends IteratingSystem {
         physics.body.setLinearVelocity(projectileVel);
         physics.body.setBullet(true);//turn on CCD
         chargeCannon.projectileEntity.add(physics);
-        
+    
         //auto expire
         ExpireComponent expire = new ExpireComponent();
         expire.timer = new SimpleTimer(8000, true);
         chargeCannon.projectileEntity.add(expire);
-        
-        //particle -> stop absorbing effect
+    
+        //particle fx
+        ParticleSystem particleSystem = getEngine().getSystem(ParticleSystem.class);
+        //destroy old particle -> stop absorbing effect
         ParticleComponent oldParticle = chargeCannon.projectileEntity.remove(ParticleComponent.class);
         if (oldParticle != null && oldParticle.pooledEffect != null) {
             oldParticle.pooledEffect.allowCompletion();
+            if (particleSystem != null) {
+                particleSystem.freeParticleFromPool(oldParticle);
+            }
         }
-        ParticleSystem particleSystem = getEngine().getSystem(ParticleSystem.class);
-        if (particleSystem != null) {
-            //particleSystem.freeParticleFromPool(oldParticle);
-            //particleSystem.chargeEffectPool.free(oldParticle.pooledEffect);
-            //oldParticle.pooledEffect.dispose();?
-        }
-        //particle -> start trailing effect
+        //add new particle -> start trailing effect
         ParticleComponent newParticle = new ParticleComponent();
         newParticle.type = ParticleComponent.EffectType.projectileTrail;
-        newParticle.offset = new Vector2(0.75f,0.0f);
         if (particleSystem != null) {
             particleSystem.initializeParticleFromPool(newParticle);
         }
+        newParticle.offset = new Vector2(0.75f, 0.0f);
         chargeCannon.projectileEntity.add(newParticle);
         
         //spline trail

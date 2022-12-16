@@ -12,6 +12,7 @@ import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HyperDriveComponent;
+import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.SplineComponent;
@@ -63,7 +64,7 @@ public class CannonSystem extends IteratingSystem {
             //Cheat for debug: fast firing and infinite ammo
             cannon.curAmmo = cannon.maxAmmo;
             cannon.timerFireRate.setCanDoEvent();
-            //cannon.timerFireRate.setInterval(100, false);
+            //cannon.timerFireRate.setInterval(80, false);
         }
         
         //check if can fire before shooting
@@ -81,7 +82,6 @@ public class CannonSystem extends IteratingSystem {
     
         //todo: state? beginFire (first shot), isFiring, endFire
         getEngine().getSystem(SoundSystem.class).shoot();
-        
         
         //subtract ammo
         --cannon.curAmmo;
@@ -135,6 +135,12 @@ public class CannonSystem extends IteratingSystem {
         DamageComponent missile = new DamageComponent();
         missile.damage = cannon.damage;
         missile.source = parentEntity;
+    
+        //particle fx -> trailing effect
+        ParticleComponent newParticle = new ParticleComponent();
+        newParticle.type = ParticleComponent.EffectType.projectileTrail;
+        newParticle.offset = new Vector2();
+        entity.add(newParticle);
         
         entity.add(new SplineComponent());
         
