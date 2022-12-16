@@ -38,11 +38,15 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     
     private ImmutableArray<Entity> players;
     private ImmutableArray<Entity> orbitEntities;
+    private Color ringColor = Color.PURPLE.cpy();
+    private Color lineColor = Color.GREEN.cpy();
     
     //mouse debug
-    Entity camMarker, mouseMarker;
-    Vector3 mouseProj = new Vector3();
-    float animate = 0;
+    private Entity camMarker, mouseMarker;
+    private Vector3 mouseProj = new Vector3();
+    private float animate = 0;
+    
+    private Vector3 tmpVec = new Vector3();
     
     public ParallaxRenderSystem() {
         shape = new ShapeRenderer();
@@ -116,84 +120,6 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         shape.end();
     
         Gdx.gl.glDisable(GL20.GL_BLEND);
-    }
-    
-    private void drawDebugCameraPos(Color color) {
-        shape.setColor(color);
-        shape.circle(camWorldPos.x, camWorldPos.y, 8);
-        shape.line(camWorldPos.x, 0, camWorldPos.x, Gdx.graphics.getHeight());
-        shape.line(0, camWorldPos.y, Gdx.graphics.getWidth(), camWorldPos.y);
-        
-        //todo: draw ring from center to target
-        //Vector2 average = getEngine().getSystem(CameraSystem.class).average;
-        //Vector2 offsetFromTarget = getEngine().getSystem(CameraSystem.class).offsetFromTarget;
-        //shape.circle(camWorldPos.x, camWorldPos.y, offsetFromTarget.len());
-        //shape.circle(average.x, average.y, 10);
-        //GameScreen.viewport.getWorldHeight();
-        /*
-        shape.setColor(Color.GREEN);
-        shape.circle(GameScreen.viewport.getScreenX(), GameScreen.viewport.getScreenY(), 8);
-        shape.line(GameScreen.viewport.getScreenX(), GameScreen.viewport.getScreenY(),
-                GameScreen.viewport.getScreenX() + GameScreen.viewport.getWorldWidth(), GameScreen.viewport.getScreenY() + GameScreen.viewport.getWorldHeight());
-         */
-    }
-    
-    private void debugDrawCameraPath(Color color) {
-        if (camMarker == null) {
-            //add debug camera marker
-            SplineComponent spline = new SplineComponent();
-            spline.color = color;
-            camMarker = new Entity().add(spline).add(new TransformComponent());
-            getEngine().addEntity(camMarker);
-            Gdx.app.log(this.getClass().getSimpleName(), "debug cam marker activated");
-        }
-        Mappers.transform.get(camMarker).pos.set(GameScreen.cam.position.x, GameScreen.cam.position.y);
-    }
-    
-    private void drawWorldOrigin(Color color) {
-        shape.setColor(color);
-        shape.circle(screenCoords.x, screenCoords.y, 10);
-        shape.line(screenCoords.x, 0, screenCoords.x, Gdx.graphics.getHeight());
-        shape.line(0, screenCoords.y, Gdx.graphics.getWidth(), screenCoords.y);
-    
-        //shape.rect(screenCoords.x, rect.y, width, rect.height);
-        //shape.rect(0, screenCoords.y, rect.width, width);
-    }
-    
-    private void debugDrawMousePath(){
-        if (mouseMarker == null) {
-            mouseMarker = new Entity().add(new SplineComponent()).add(new TransformComponent());
-            mouseMarker.getComponent(SplineComponent.class).color = Color.YELLOW;
-            getEngine().addEntity(mouseMarker);
-        }
-        mouseProj.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-        GameScreen.viewport.unproject(mouseProj);
-        Mappers.transform.get(mouseMarker).pos.set(mouseProj.x, mouseProj.y);
-    }
-    
-    private void drawEye(float segments, Rectangle rectangle) {
-        
-        if (segments > 0) {
-            shape.setColor(Color.RED);
-            float height = rectangle.getHeight() / segments;
-            float width = rectangle.getWidth() / segments;
-            for (int i = 0; i * height <= rectangle.getHeight(); i++) {
-                //bottom right
-                shape.line(rectangle.x + i * width,  rectangle.y, rectangle.x + rectangle.getWidth(), rectangle.y + i * height);
-                
-                //top left
-                shape.line(rectangle.x,  rectangle.y + i * height,  rectangle.x + i * width, rectangle.y + rectangle.getHeight());
-                
-                //bottom left
-                //shape.line(rectangle.x, rectangle.y + i * height, rectangle.x + i * width, rectangle.y);
-        
-                //diagonal
-                //shape.line(rectangle.x, rectangle.y  + i * height, rectangle.x + i * width, rectangle.y);
-            }
-        }
-        
-        shape.setColor(Color.GREEN);
-        shape.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.getHeight());
     }
     
     private void drawGrid(Color color, Rectangle rect, int gridSize, float width) {
@@ -280,9 +206,8 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         float alpha = MathUtils.clamp((GameScreen.cam.zoom / 150 / 2), 0, 1);
         if (MathUtils.isEqual(alpha, 0)) return;
         
-        Color color = Color.PURPLE.cpy();
-        color.a = alpha;
-        shape.setColor(color);
+        ringColor.a = alpha;
+        lineColor.a = alpha;
         
         for (Entity entity : orbitEntities) {
             OrbitComponent orbit = Mappers.orbit.get(entity);
@@ -290,7 +215,9 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
             
             if (orbit.parent != null) {
                 TransformComponent parentPos = Mappers.transform.get(orbit.parent);
+                shape.setColor(ringColor);
                 shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
+                shape.setColor(lineColor);
                 shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
             }
             
@@ -299,12 +226,9 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
                 float radius = tex.texture.getWidth() * 0.5f * tex.scale;
                 shape.circle(entityPos.pos.x, entityPos.pos.y, radius);
             }
-            
         }
-        
     }
     
-    Vector3 tmpVec = new Vector3();
     private void drawCompass(Entity entity) {
         float alpha = MathUtils.clamp((GameScreen.cam.zoom / 150 / 2), 0, 1);
         if (MathUtils.isEqual(alpha, 0)) return;
@@ -332,10 +256,90 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         //draw engine impulses
     }
     
+    //region debug and testing
     private void debugClearScreen() {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
     }
+    
+    private void drawDebugCameraPos(Color color) {
+        shape.setColor(color);
+        shape.circle(camWorldPos.x, camWorldPos.y, 8);
+        shape.line(camWorldPos.x, 0, camWorldPos.x, Gdx.graphics.getHeight());
+        shape.line(0, camWorldPos.y, Gdx.graphics.getWidth(), camWorldPos.y);
+        
+        //todo: draw ring from center to target
+        //Vector2 average = getEngine().getSystem(CameraSystem.class).average;
+        //Vector2 offsetFromTarget = getEngine().getSystem(CameraSystem.class).offsetFromTarget;
+        //shape.circle(camWorldPos.x, camWorldPos.y, offsetFromTarget.len());
+        //shape.circle(average.x, average.y, 10);
+        //GameScreen.viewport.getWorldHeight();
+        /*
+        shape.setColor(Color.GREEN);
+        shape.circle(GameScreen.viewport.getScreenX(), GameScreen.viewport.getScreenY(), 8);
+        shape.line(GameScreen.viewport.getScreenX(), GameScreen.viewport.getScreenY(),
+                GameScreen.viewport.getScreenX() + GameScreen.viewport.getWorldWidth(), GameScreen.viewport.getScreenY() + GameScreen.viewport.getWorldHeight());
+         */
+    }
+    
+    private void debugDrawCameraPath(Color color) {
+        if (camMarker == null) {
+            //add debug camera marker
+            SplineComponent spline = new SplineComponent();
+            spline.color = color;
+            camMarker = new Entity().add(spline).add(new TransformComponent());
+            getEngine().addEntity(camMarker);
+            Gdx.app.log(this.getClass().getSimpleName(), "debug cam marker activated");
+        }
+        Mappers.transform.get(camMarker).pos.set(GameScreen.cam.position.x, GameScreen.cam.position.y);
+    }
+    
+    private void drawWorldOrigin(Color color) {
+        shape.setColor(color);
+        shape.circle(screenCoords.x, screenCoords.y, 10);
+        shape.line(screenCoords.x, 0, screenCoords.x, Gdx.graphics.getHeight());
+        shape.line(0, screenCoords.y, Gdx.graphics.getWidth(), screenCoords.y);
+        
+        //shape.rect(screenCoords.x, rect.y, width, rect.height);
+        //shape.rect(0, screenCoords.y, rect.width, width);
+    }
+    
+    private void debugDrawMousePath(){
+        if (mouseMarker == null) {
+            mouseMarker = new Entity().add(new SplineComponent()).add(new TransformComponent());
+            mouseMarker.getComponent(SplineComponent.class).color = Color.YELLOW;
+            getEngine().addEntity(mouseMarker);
+        }
+        mouseProj.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+        GameScreen.viewport.unproject(mouseProj);
+        Mappers.transform.get(mouseMarker).pos.set(mouseProj.x, mouseProj.y);
+    }
+    
+    private void drawEye(float segments, Rectangle rectangle) {
+        
+        if (segments > 0) {
+            shape.setColor(Color.RED);
+            float height = rectangle.getHeight() / segments;
+            float width = rectangle.getWidth() / segments;
+            for (int i = 0; i * height <= rectangle.getHeight(); i++) {
+                //bottom right
+                shape.line(rectangle.x + i * width,  rectangle.y, rectangle.x + rectangle.getWidth(), rectangle.y + i * height);
+                
+                //top left
+                shape.line(rectangle.x,  rectangle.y + i * height,  rectangle.x + i * width, rectangle.y + rectangle.getHeight());
+                
+                //bottom left
+                //shape.line(rectangle.x, rectangle.y + i * height, rectangle.x + i * width, rectangle.y);
+                
+                //diagonal
+                //shape.line(rectangle.x, rectangle.y  + i * height, rectangle.x + i * width, rectangle.y);
+            }
+        }
+        
+        shape.setColor(Color.GREEN);
+        shape.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.getHeight());
+    }
+    //endregion
     
     @Override
     public void dispose() {
