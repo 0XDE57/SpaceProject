@@ -28,6 +28,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     
     // center tile to check for tile change
     private Vector2 dustCenterTile;
+    private Vector2 star0CenterTile;
     private Vector2 star1CenterTile;
     private Vector2 star2CenterTile;
     private Vector2 star3CenterTile;
@@ -73,6 +74,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     
     private void updateTiles() {
         dustCenterTile = updateLayer(dustCenterTile, dustTileDepth, SpaceBackgroundTile.TileType.Dust);
+        star0CenterTile = updateLayer(star0CenterTile, 0, SpaceBackgroundTile.TileType.Stars);
         star1CenterTile = updateLayer(star1CenterTile, star1TileDepth, SpaceBackgroundTile.TileType.Stars);
         star2CenterTile = updateLayer(star2CenterTile, star2TileDepth, SpaceBackgroundTile.TileType.Stars);
         star3CenterTile = updateLayer(star3CenterTile, star3TileDepth, SpaceBackgroundTile.TileType.Stars);
@@ -205,6 +207,8 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
             t.tex.dispose();
         }
         tiles.clear();
+        
+        spriteBatch.dispose();
     }
     
 }
