@@ -9,14 +9,21 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.HyperDriveComponent;
+import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.SplineComponent;
+import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
@@ -28,7 +35,9 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     private final Vector3 screenCoords = new Vector3();
     private final Vector3 camWorldPos = new Vector3();
     private final Rectangle boundingBox = new Rectangle();
+    
     private ImmutableArray<Entity> players;
+    private ImmutableArray<Entity> orbitEntities;
     
     //mouse debug
     Entity camMarker, mouseMarker;
@@ -42,9 +51,9 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     
     @Override
     public void addedToEngine(Engine engine) {
+        orbitEntities = engine.getEntitiesFor(Family.all(OrbitComponent.class).get());
         players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
     }
-    
     
     @Override
     public void update(float deltaTime) {
@@ -63,11 +72,6 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         GameScreen.viewport.project(camWorldPos);
         boundingBox.set(1, 1, Gdx.graphics.getWidth()-2, Gdx.graphics.getHeight()-2);
     
-        //debug override background
-        //debugClearScreen();
-        //debugDrawMousePath();
-    
-    
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -75,55 +79,44 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         //render
         shape.begin(ShapeRenderer.ShapeType.Line);
         
-        //todo: apply shader to grid
         int gridSize = 400;
         Color gridColor = Color.BLACK.cpy();
-        float brightness = (float) Math.abs(Math.sin(animate * 0.5f) * 0.1f);
-        //DebugSystem.addDebugText(brightness + " :" + animate, 100, 100);
-    
-        
-        
-        //step function
-        // size / 2
-        //
-        //gridColor.a =  brightness;
         gridColor.a = 0.15f;
         drawGrid(gridColor, boundingBox, gridSize, 0.5f);
         
         //drawGrid(Color.WHITE, boundingBox, 50, 3);
-        
         //Color red = Color.RED.cpy();
         //red.a = 0.5f;
         //drawGrid(red, boundingBox, 50, 1);
         
-        drawOrigin(Color.WHITE);
-        //drawDebugCameraPos(Color.RED);
-        //update debug cam position
-        
-        //debugDrawCameraPath(Color.YELLOW);
-        //debugDrawMousePath();
-        
-    /*
-        Entity player = players.first();
-        Body body = Mappers.physics.get(player).body;
-        //float alpha = MathUtils.clamp((cam.zoom / uiCFG.lodShowOrbitPath / uiCFG.orbitFadeFactor), 0, 1);
-        Vector2 velocity = body.getLinearVelocity();
-        Vector2 facing = MyMath.vector(body.getAngle(), 1);*/
-        
-        animate += deltaTime;
+        // debug test rendering
+        /*animate += deltaTime;
         int edgePad = 200;
         Rectangle rectangle = new Rectangle(edgePad, edgePad,
                 Gdx.graphics.getWidth() - edgePad * 2,
-                Gdx.graphics.getHeight() - edgePad * 2);
+                Gdx.graphics.getHeight() - edgePad * 2);*/
         //drawEye((float) (10.0f * Math.sin(animate)), rectangle);
         //drawEye((float) (10.0f + (Math.sin(animate) * 5.0f)), boundingBox);
         //((float) (10.0f + (Math.sin(animate) * 10.0f)), new Rectangle(100F, 200F, 100F, (float) (100 + (Math.sin(animate) * 100.0f))));
         //drawEye((float) (10.0f + ((Math.sin(animate * 10.0f) + MathUtils.PI) * 10.0f)), new Rectangle(100F, 100F, (float) (100 + (Math.sin(animate) * 100.0f)), 100));
+    
+        //debug override background
+        //debugClearScreen();
+        //debug reference points
+        //drawWorldOrigin(Color.WHITE);
+        //drawDebugCameraPos(Color.RED);
+        //debugDrawCameraPath(Color.YELLOW);
+        //debugDrawMousePath();
+        
+        drawCompass(players.first());
+        
+        shape.setProjectionMatrix(GameScreen.cam.combined);
+        drawOrbitPath();
+        
         shape.end();
     
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
-   
     
     private void drawDebugCameraPos(Color color) {
         shape.setColor(color);
@@ -157,7 +150,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         Mappers.transform.get(camMarker).pos.set(GameScreen.cam.position.x, GameScreen.cam.position.y);
     }
     
-    private void drawOrigin(Color color) {
+    private void drawWorldOrigin(Color color) {
         shape.setColor(color);
         shape.circle(screenCoords.x, screenCoords.y, 10);
         shape.line(screenCoords.x, 0, screenCoords.x, Gdx.graphics.getHeight());
@@ -265,7 +258,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         int tilesX = countX + 1;
         int tilesY = countY + 1;
         
-        boolean showDebug = true;
+        boolean showDebug = false;
         if (showDebug) {
             DebugSystem.addDebugText(countX + ", " + countY
                     + " | " + tilesX + ", " + tilesY
@@ -281,6 +274,62 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
             shape.line(centerX, rect.x, centerX, rect.y + rect.height);
             shape.line(rect.x, centerY, rect.x + rect.width, centerY);
         }
+    }
+    
+    private void drawOrbitPath() {
+        float alpha = MathUtils.clamp((GameScreen.cam.zoom / 150 / 2), 0, 1);
+        if (MathUtils.isEqual(alpha, 0)) return;
+        
+        Color color = Color.PURPLE.cpy();
+        color.a = alpha;
+        shape.setColor(color);
+        
+        for (Entity entity : orbitEntities) {
+            OrbitComponent orbit = Mappers.orbit.get(entity);
+            TransformComponent entityPos = Mappers.transform.get(entity);
+            
+            if (orbit.parent != null) {
+                TransformComponent parentPos = Mappers.transform.get(orbit.parent);
+                shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
+                shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
+            }
+            
+            TextureComponent tex = Mappers.texture.get(entity);
+            if (tex != null) {
+                float radius = tex.texture.getWidth() * 0.5f * tex.scale;
+                shape.circle(entityPos.pos.x, entityPos.pos.y, radius);
+            }
+            
+        }
+        
+    }
+    
+    Vector3 tmpVec = new Vector3();
+    private void drawCompass(Entity entity) {
+        float alpha = MathUtils.clamp((GameScreen.cam.zoom / 150 / 2), 0, 1);
+        if (MathUtils.isEqual(alpha, 0)) return;
+        
+        //draw movement direction for navigation assistance, line up vector with target destination
+        Body body = Mappers.physics.get(entity).body;
+        Vector2 facing = MyMath.vector(body.getAngle(), 50000);
+        tmpVec.set(new Vector3(Mappers.transform.get(entity).pos.cpy(), 0));
+        Vector3 pos = GameScreen.cam.project(tmpVec);
+        
+        Color color = Color.WHITE.cpy();
+        color.a = alpha;
+        shape.rectLine(pos.x, pos.y, facing.x, facing.y, 0.5f, color, color);
+        
+        //draw velocity vector
+        if (body.getLinearVelocity().len2() > 1) {
+            HyperDriveComponent hyper = Mappers.hyper.get(entity);
+            if (hyper != null && hyper.state == HyperDriveComponent.State.off) {
+                Vector2 vel = MyMath.vector(body.getLinearVelocity().angleRad(), 50000);
+                shape.rectLine(pos.x, pos.y, vel.x, vel.y, 0.5f, color, color);
+            }
+        }
+        
+        //draw circle; width = velocity
+        //draw engine impulses
     }
     
     private void debugClearScreen() {

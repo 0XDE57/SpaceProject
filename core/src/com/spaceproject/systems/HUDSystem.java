@@ -18,7 +18,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.spaceproject.SpaceProject;
@@ -31,7 +30,6 @@ import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.MapComponent;
-import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TextureComponent;
@@ -144,10 +142,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         checkInput();
     
         if (drawHud) {
-            if (GameScreen.inSpace()) {
-                drawOrbitPath();
-            }
-        
             drawHUD();
         
             if (miniMap.getState() != MapState.off) {
@@ -157,6 +151,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
     
         //TODO: temporary fix. engine system priority....
+        //always draw even if hud off
         MobileInputSystem mobileUI = getEngine().getSystem(MobileInputSystem.class);
         if (mobileUI != null)
             mobileUI.drawControls();
@@ -177,81 +172,16 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         
         shape.begin(ShapeType.Filled);
-    
-        Entity player = players.first();
-        drawCompass(player);
-        drawPlayerStatus(player);
         
-        if (drawEdgeMap) drawEdgeMap();
+        drawPlayerStatus();
+        
+        if (drawEdgeMap) {
+            drawEdgeMap();
+        }
         
         drawHealthBars();
         
         shape.end();
-        Gdx.gl.glDisable(GL20.GL_BLEND);
-    }
-    
-    private void drawCompass(Entity entity) {
-        float alpha = MathUtils.clamp((cam.zoom / uiCFG.lodShowOrbitPath / uiCFG.orbitFadeFactor), 0, 0.35f);
-        if (MathUtils.isEqual(alpha, 0)) return;
-        
-        //draw movement direction for navigation assistance, line up vector with target destination
-        Body body = Mappers.physics.get(entity).body;
-        Vector2 facing = MyMath.vector(body.getAngle(), 5000);
-        Vector3 pos = cam.project(new Vector3(Mappers.transform.get(entity).pos.cpy(), 0));
-    
-        uiCFG.orbitObjectColor.a = alpha;
-        shape.rectLine(pos.x, pos.y, facing.x, facing.y, 1, uiCFG.orbitObjectColor, uiCFG.orbitObjectColor);
-        
-        //DebugSystem.addDebugText(body.getAngle() + "", pos.x, pos.y);
-        
-        //draw velocity vector
-        if (body.getLinearVelocity().len2() > 1) {
-            Vector2 vel = MyMath.vector(body.getLinearVelocity().angleRad(), 5000);
-            shape.rectLine(pos.x, pos.y, vel.x, vel.y, 1, uiCFG.orbitObjectColor, uiCFG.orbitObjectColor);
-        }
-        
-        //draw circle; width = velocity
-        //draw engine impulses
-    }
-    
-    private void drawOrbitPath() {
-        float alpha = MathUtils.clamp((cam.zoom / uiCFG.lodShowOrbitPath / uiCFG.orbitFadeFactor), 0, 1);
-        if (MathUtils.isEqual(alpha, 0)) return;
-        
-        uiCFG.orbitObjectColor.a = alpha;
-        uiCFG.orbitSyncPosColor.a = alpha;
-        
-        shape.setProjectionMatrix(cam.combined);
-        
-        //enable transparency
-        Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        
-        shape.begin(ShapeType.Line);
-        
-        for (Entity entity : orbitEntities) {
-            
-            OrbitComponent orbit = Mappers.orbit.get(entity);
-            if (orbit != null) {
-                TransformComponent entityPos = Mappers.transform.get(entity);
-                if (orbit.parent != null) {
-                    TransformComponent parentPos = Mappers.transform.get(orbit.parent);
-                    shape.setColor(uiCFG.orbitObjectColor);
-                    shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
-                    shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
-                }
-                
-                TextureComponent tex = Mappers.texture.get(entity);
-                if (tex != null) {
-                    float radius = tex.texture.getWidth() * 0.5f * tex.scale;
-                    shape.setColor(uiCFG.orbitObjectColor);
-                    shape.circle(entityPos.pos.x, entityPos.pos.y, radius);
-                }
-            }
-        }
-        
-        shape.end();
-        
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
     
@@ -299,38 +229,40 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     //region player status
-    private void drawPlayerStatus(Entity entity) {
+    private void drawPlayerStatus() {
         if (players == null || players.size() == 0) {
             return;
         }
+        Entity entity = players.first();
         
         int barWidth = uiCFG.playerHPBarWidth;
         int barHeight = uiCFG.playerHPBarHeight;
-        int playerBarX = Gdx.graphics.getWidth() / 2 - barWidth / 2;
-        int playerHPBarY = uiCFG.playerHPBarY;
-        int playerAmmoBarY = playerHPBarY - barHeight - 1;
-        int playerHyperBarY = playerHPBarY + barHeight + 1;
+        int barX = Gdx.graphics.getWidth() / 2 - barWidth / 2;
+        int healthBarY = uiCFG.playerHPBarY;
+        int ammoBarY = healthBarY - barHeight - 1;
+        int hyperBarY = healthBarY + barHeight + 1;
         
         //todo: force certain elements when hud is off (bypass)
         // 1. hyperdrive should bring up velocity
         // 2. health when take damage (timer)
         // 3. shield when broken? (broken state not implemented yet)
         
-        drawPlayerHealth(entity, playerBarX, playerHPBarY, barWidth, barHeight);
-        drawPlayerShield(entity, playerBarX, playerHPBarY, barWidth, barHeight);
-        drawPlayerAmmoBar(entity, playerBarX, playerAmmoBarY, barWidth, barHeight);
-        drawPlayerVelocity(entity, playerBarX, playerHyperBarY, barWidth, barHeight);
-        drawHyperDriveBar(entity, playerBarX, playerHyperBarY, barWidth, barHeight);
+        drawPlayerHealth(entity, barX, healthBarY, barWidth, barHeight);
+        drawPlayerShield(entity, barX, healthBarY, barWidth, barHeight);
+        drawPlayerAmmoBar(entity, barX, ammoBarY, barWidth, barHeight);
+        drawPlayerVelocity(entity, barX, hyperBarY, barWidth, barHeight);
+        drawHyperDriveBar(entity, barX, hyperBarY, barWidth, barHeight);
 
-		/*
+		
 		//border
-		shape.setColor(new Color(0.1f, 0.63f, 0.88f, 1f));
-		int thickness = 1;
-		shape.rectLine(playerBarX, playerHPBarY+barHeight, playerBarX+barWidth, playerHPBarY+barHeight, thickness);//top
-		shape.rectLine(playerBarX, playerHPBarY-barHeight, playerBarX+barWidth, playerHPBarY-barHeight,thickness);//bottom
-		shape.rectLine(playerBarX, playerHPBarY+barHeight, playerBarX, playerHPBarY-barHeight, thickness);//left
-		shape.rectLine(playerBarX+barWidth, playerHPBarY+barHeight, playerBarX+barWidth, playerHPBarY-barHeight, thickness);//right
-		*/
+		//shape.setColor(new Color(0.1f, 0.63f, 0.88f, 1f));
+        shape.setColor(Color.GREEN);
+		int thickness = 2;
+		shape.rectLine(barX, healthBarY+barHeight*2, barX+barWidth, healthBarY+barHeight*2, thickness);//top
+		shape.rectLine(barX, healthBarY-barHeight, barX+barWidth, healthBarY-barHeight,thickness);//bottom
+		shape.rectLine(barX, healthBarY+barHeight, barX, healthBarY-barHeight, thickness);//left
+		shape.rectLine(barX+barWidth, healthBarY+barHeight, barX+barWidth, healthBarY-barHeight, thickness);//right
+		
     }
     
     private void drawPlayerHealth(Entity entity, int x, int y, int width, int height) {
@@ -428,12 +360,18 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (physics == null) {
             return;
         }
-    
+        
+        ControllableComponent control = Mappers.controllable.get(entity);
+        shape.setColor(Color.GOLD);
+        if (control.boost) {
+            shape.setColor(Color.CYAN);
+        }
+        
         float velocity = physics.body.getLinearVelocity().len2() /
                 (B2DPhysicsSystem.getVelocityLimit() * B2DPhysicsSystem.getVelocityLimit());
         float barRatio = MathUtils.clamp(velocity * width, 0,  width);
-        shape.setColor(Color.CYAN);
-        shape.rect(x, y, barRatio, height);
+        float center = (width * 0.5f) - (barRatio * 0.5f);
+        shape.rect(x + center, y, barRatio, height);
     }
 
     private void drawHyperDriveBar(Entity entity, int x, int y, int width, int height) {
