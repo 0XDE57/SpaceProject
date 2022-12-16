@@ -39,8 +39,8 @@ public class TextureFactory {
     static OpenSimplexNoise redNoise = new OpenSimplexNoise(GameScreen.getGalaxySeed() + 1);
     static OpenSimplexNoise blueNoise = new OpenSimplexNoise(GameScreen.getGalaxySeed() + 2);
     
-    public static Texture generateSpaceBackgroundDust(int tX, int tY, int tileSize) {
-        Pixmap pixmap = new Pixmap(tileSize, tileSize, Format.RGBA8888);
+    public static Texture generateSpaceBackgroundDust(int tX, int tY, int tileSize, Pixmap.Format format) {
+        Pixmap pixmap = new Pixmap(tileSize, tileSize, format);
         
         double featureSize = 100;
         for (int y = 0; y < pixmap.getHeight(); y++) {
