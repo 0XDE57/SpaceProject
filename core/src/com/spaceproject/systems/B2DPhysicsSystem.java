@@ -81,4 +81,8 @@ public class B2DPhysicsSystem extends EntitySystem {
         return 2 * engineCFG.physicsStepPerFrame;
     }
     
+    public static int getVelocityLimit2() {
+        return getVelocityLimit() * getVelocityLimit();
+    }
+    
 }

@@ -173,8 +173,8 @@ public class AISystem extends IteratingSystem {
             // Cap the linear speed
             Vector2 velocity = body.getLinearVelocity();
             float currentSpeedSquare = velocity.len2();
-            float maxLinearSpeed = B2DPhysicsSystem.getVelocityLimit();
-            if (currentSpeedSquare > maxLinearSpeed * maxLinearSpeed) {
+            float maxLinearSpeed = B2DPhysicsSystem.getVelocityLimit2();
+            if (currentSpeedSquare > maxLinearSpeed) {
                 body.setLinearVelocity(velocity.scl(maxLinearSpeed / (float)Math.sqrt(currentSpeedSquare)));
             }
             
