@@ -53,10 +53,13 @@ public class AsteroidRenderSystem extends IteratingSystem {
         
         //set color based on fill type and health
         if (shapeRenderer.getCurrentType() == ShapeRenderer.ShapeType.Filled) {
-            //inner body: black to red
+            
             float ratio = health.health / health.maxHealth;
-            color.set(1-ratio, 0 ,0, 1);
-            //color.set(1, ratio, ratio, 1);//white to red
+            if (asteroid.parentOrbitBody == null) {
+                color.set(1-ratio, 0 ,0, 1);//black to red
+            } else {
+                color.set(1, ratio, ratio, 1);//white to red
+            }
         } else {
             //mesh outline
             color = asteroid.debugColor.cpy();
