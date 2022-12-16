@@ -232,6 +232,11 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     private void drawCompass(Entity entity) {
         float alpha = MathUtils.clamp((GameScreen.cam.zoom / 150 / 2), 0, 1);
         if (MathUtils.isEqual(alpha, 0)) return;
+    
+        HyperDriveComponent hyper = Mappers.hyper.get(entity);
+        if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
+            return;
+        }
         
         //draw movement direction for navigation assistance, line up vector with target destination
         Body body = Mappers.physics.get(entity).body;
@@ -256,11 +261,8 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         //draw velocity vector
         float vel2 = body.getLinearVelocity().len2();
         if (vel2 > 1) {
-            HyperDriveComponent hyper = Mappers.hyper.get(entity);
-            if (hyper != null && hyper.state == HyperDriveComponent.State.off) {
-                Vector2 vel = MyMath.vector(body.getLinearVelocity().angleRad(), 50000);
-                shape.rectLine(pos.x, pos.y, vel.x, vel.y, 0.5f, compassHighlight, compassHighlight);
-            }
+            Vector2 vel = MyMath.vector(body.getLinearVelocity().angleRad(), 50000);
+            shape.rectLine(pos.x, pos.y, vel.x, vel.y, 0.5f, compassHighlight, compassHighlight);
         }
         
         //draw circle; radius = velocity
