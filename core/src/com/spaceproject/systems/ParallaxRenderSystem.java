@@ -36,6 +36,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     public boolean drawCameraPos = false;
     public boolean drawCameraPath = false;
     public boolean drawMousePath = false;
+    public boolean drawThirdsGrid = false;
     public boolean drawTest = false;
     
     //rendering
@@ -98,7 +99,6 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         gridColor.a = 0.15f;
         drawGrid(gridColor, gridBounds, gridSize, 0.5f);
         
-        
         //debug override background
         if (clearScreen) debugClearScreen();
         //debug reference points
@@ -106,7 +106,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         if (drawCameraPos) drawDebugCameraPos(Color.RED);
         if (drawCameraPath) debugDrawCameraPath(Color.YELLOW);
         if (drawMousePath) debugDrawMousePath();
-    
+        if (drawThirdsGrid) drawThirdsGrid(Color.PINK);
         // debug test rendering
         if (drawTest) debugRenderTest(deltaTime);
         
@@ -323,6 +323,20 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         mouseProj.set(Gdx.input.getX(), Gdx.input.getY(), 0);
         GameScreen.viewport.unproject(mouseProj);
         Mappers.transform.get(mouseMarker).pos.set(mouseProj.x, mouseProj.y);
+    }
+    
+    private void drawThirdsGrid(Color color) {
+        float widthThirds = Gdx.graphics.getWidth()/3;
+        float heightThirds = Gdx.graphics.getHeight()/3;
+        shape.setColor(color);
+        
+        //verticle
+        shape.line(widthThirds, 0, widthThirds, Gdx.graphics.getHeight());
+        shape.line(widthThirds*2, 0, widthThirds*2, Gdx.graphics.getHeight());
+        
+        //horizontal
+        shape.line(0, heightThirds, Gdx.graphics.getWidth(), heightThirds);
+        shape.line(0, heightThirds*2, Gdx.graphics.getWidth(), heightThirds*2);
     }
     
     private void drawEye(float segments, Rectangle rectangle) {
