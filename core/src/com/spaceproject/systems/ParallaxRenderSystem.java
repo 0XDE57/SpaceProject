@@ -228,7 +228,6 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         }
     }
     
-    
     private void drawCompass(Entity entity) {
         float alpha = MathUtils.clamp((GameScreen.cam.zoom / 150 / 2), 0, 1);
         if (MathUtils.isEqual(alpha, 0)) return;
@@ -291,19 +290,6 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         shape.circle(camWorldPos.x, camWorldPos.y, 8);
         shape.line(camWorldPos.x, 0, camWorldPos.x, Gdx.graphics.getHeight());
         shape.line(0, camWorldPos.y, Gdx.graphics.getWidth(), camWorldPos.y);
-        
-        //todo: draw ring from center to target
-        //Vector2 average = getEngine().getSystem(CameraSystem.class).average;
-        //Vector2 offsetFromTarget = getEngine().getSystem(CameraSystem.class).offsetFromTarget;
-        //shape.circle(camWorldPos.x, camWorldPos.y, offsetFromTarget.len());
-        //shape.circle(average.x, average.y, 10);
-        //GameScreen.viewport.getWorldHeight();
-        /*
-        shape.setColor(Color.GREEN);
-        shape.circle(GameScreen.viewport.getScreenX(), GameScreen.viewport.getScreenY(), 8);
-        shape.line(GameScreen.viewport.getScreenX(), GameScreen.viewport.getScreenY(),
-                GameScreen.viewport.getScreenX() + GameScreen.viewport.getWorldWidth(), GameScreen.viewport.getScreenY() + GameScreen.viewport.getWorldHeight());
-         */
     }
     
     private void debugDrawCameraPath(Color color) {
