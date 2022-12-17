@@ -82,6 +82,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         off, hyper, landing, launching;
     }
     SpecialState messageState = SpecialState.off;
+    float anim = 0;
     
     public HUDSystem() {
         cam = MyScreenAdapter.cam;
@@ -159,6 +160,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         checkInput();
     
         if (drawHud) {
+            anim += 4f * delta;
             drawHUD();
         
             if (miniMap.getState() != MapState.off) {
@@ -280,7 +282,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 messageState = SpecialState.launching;
             }
         }
-        
+    
+        float ratio = 1 + (float) Math.sin(anim);
+        Color c = Color.GOLD.cpy().lerp(Color.CYAN, ratio);
+        font.setColor(c);
         switch (messageState) {
             case hyper: layout.setText(font, "[ HYPER-DRIVE ]"); break;
             case landing: layout.setText(font, "[ LANDING ]"); break;
