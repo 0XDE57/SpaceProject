@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Disposable;
+import com.spaceproject.components.AsteroidBeltComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HyperDriveComponent;
@@ -224,6 +225,16 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
             if (tex != null) {
                 float radius = tex.texture.getWidth() * 0.5f * tex.scale;
                 shape.circle(entityPos.pos.x, entityPos.pos.y, radius);
+            }
+    
+            AsteroidBeltComponent stellarDisk = Mappers.asteroidBelt.get(entity);
+            if (stellarDisk != null) {
+                Vector2 pos = Mappers.transform.get(entity).pos;
+                shape.setColor(lineColor);
+                shape.circle(pos.x, pos.y, stellarDisk.radius);
+                shape.setColor(ringColor);
+                shape.circle(pos.x, pos.y, stellarDisk.radius - (stellarDisk.bandWidth / 2));
+                shape.circle(pos.x, pos.y, stellarDisk.radius + (stellarDisk.bandWidth / 2));
             }
         }
     }
