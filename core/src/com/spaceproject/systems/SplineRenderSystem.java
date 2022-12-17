@@ -12,7 +12,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
-import com.spaceproject.components.HyperDriveComponent;
+import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.SplineComponent;
 import com.spaceproject.components.TransformComponent;
@@ -66,7 +66,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         }
         switch (spline.style) {
             case velocity: renderVelocityPath(spline); break;
-            case rainbow: renderRainbowPath(spline); break;
+            //case rainbow: renderRainbowPath(spline); break;
             default:
                 renderPath(spline);
         }
@@ -92,16 +92,32 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
             //delta too small skip update
         //    return;
         //}
-    
-        float velocity = 0;//todo: diff between now and previous point.
-        if (physics != null) {
-            velocity = physics.body.getLinearVelocity().len2();
-            if (!physics.body.isActive()) {
-                HyperDriveComponent hyper = Mappers.hyper.get(entity);
-                velocity = hyper.speed * hyper.speed;
+        
+        //off, on, boost, hyper
+        //0, 1, 2, 3
+        float velocity = 0;
+        if (spline.style == SplineComponent.Style.velocity) {
+            if (physics != null) {
+                ControllableComponent control = Mappers.controllable.get(entity);
+                if (control != null) {
+                    if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight) {
+                        velocity = 1f;
+                        if (control.boost) {
+                            velocity = 2f;
+                        }
+                    }
+                }
+                //velocity = physics.body.getLinearVelocity().len2();
+                if (!physics.body.isActive()) {
+                    //HyperDriveComponent hyper = Mappers.hyper.get(entity);
+                    //velocity = hyper.speed * hyper.speed;
+                    velocity = 3f;
+                }
             }
         }
+        
         spline.path[spline.index].set(transform.pos.x, transform.pos.y, velocity);
+        
         //roll index
         spline.index++;
         if (spline.index >= spline.path.length) {
@@ -116,23 +132,31 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         for (int i = 0; i < spline.path.length-1; i++) {
             Vector3 p = spline.path[i];
             
-            //wrap tiles when position is outside of map
             int indexWrap = i + 1 % spline.path.length;
             if (indexWrap <= 0) indexWrap += spline.path.length;
             Vector3 p2 = spline.path[indexWrap];
             
             // don't draw head to tail
             if (indexWrap != spline.index) {
-                if (spline.color != null) {
-                    //z = linearVelocity [0 - max box2d] then  hyperdrive velocity
-                    float velocity = p.z / (B2DPhysicsSystem.getVelocityLimit() * B2DPhysicsSystem.getVelocityLimit());
-                    tmpColor.set(Color.BLACK.cpy().lerp(Color.CYAN, velocity));
-                    if (velocity > 1.01f) {
-                        //hyperdrive travel
-                        tmpColor.set(1, 1, 1, 1);
-                    }
-                    shape.line(p.x, p.y, p2.x, p2.y, tmpColor, tmpColor);
+                //z = linearVelocity [0 - max box2d] then  hyperdrive velocity
+                float velocity = p.z / B2DPhysicsSystem.getVelocityLimit2();
+                tmpColor.set(Color.BLACK.cpy().lerp(spline.color, velocity));
+                if (velocity > 1.01f) {
+                    //hyperdrive travel
+                    tmpColor.set(1, 1, 1, 1);
                 }
+                
+                Color state = Color.BLACK;
+                if (MathUtils.isEqual(p.z, 1)) {
+                    state = Color.GOLD;
+                }
+                if (MathUtils.isEqual(p.z, 2)) {
+                    state = Color.CYAN;
+                }
+                if (MathUtils.isEqual(p.z, 3)) {
+                    state = Color.WHITE;
+                }
+                shape.line(p.x, p.y, p2.x, p2.y, state, state);
             } else {
                 //debug draw head to tail
                 if (debugDrawHeadTail) {
@@ -149,25 +173,28 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         for (int i = 0; i < spline.path.length-1; i++) {
             Vector3 p = spline.path[i];
             
-            //wrap tiles when position is outside of map
             int indexWrap = i + 1 % spline.path.length;
             if (indexWrap <= 0) indexWrap += spline.path.length;
             Vector3 p2 = spline.path[indexWrap];
             
             // don't draw head to tail
             if (indexWrap != spline.index) {
-                if (spline.color != null) {
-                    //solid color
-                    shape.line(p.x, p.y, p2.x, p2.y, spline.color, spline.color);
-                } else {
+                //if (spline.color != null) {
+                    //tmpColor.a = indexWrap / spline.path.length;
+                    //shape.line(p.x, p.y, p2.x, p2.y, tmpColor, tmpColor);
+                //} else {
                     //point to point color
-                    shape.line(p.x, p.y, p2.x, p2.y, Color.BLUE, Color.GREEN);
-                }
+                    shape.line(p.x, p.y, p2.x, p2.y, Color.GREEN,  Color.BLUE);
+                //}
             } else {
                 //debug draw head to tail
                 if (debugDrawHeadTail) {
                     shape.line(p.x, p.y, p2.x, p2.y, Color.RED, Color.WHITE);
                 }
+            }
+    
+            if (spline.index == 0) {
+                shape.line(p.x, p.y, p2.x, p2.y, Color.RED, Color.WHITE);
             }
         }
     }
@@ -177,25 +204,6 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         //xy mode
         //change of angle: same color when going straight, 360 otherwise, doesnt care speed
         //change of speed: 0-max, doesn't care angle
-        boolean debugDrawHeadTail = false;
-        for (int i = 0; i < spline.path.length-1; i++) {
-            Vector3 p = spline.path[i];
-            
-            //wrap tiles when position is outside of map
-            int indexWrap = i + 1 % spline.path.length;
-            if (indexWrap <= 0) indexWrap += spline.path.length;
-            Vector3 p2 = spline.path[indexWrap];
-            
-            // don't draw head to tail
-            if (indexWrap != spline.index) {
-                shape.line(p.x, p.y, p2.x, p2.y, Color.WHITE, Color.GREEN);
-            } else {
-                //debug draw head to tail
-                if (debugDrawHeadTail) {
-                    shape.line(p.x, p.y, p2.x, p2.y, Color.RED, Color.WHITE);
-                }
-            }
-        }
     }
     
     private Color backgroundColor(OrthographicCamera cam) {
