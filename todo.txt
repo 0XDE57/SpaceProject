@@ -8,7 +8,7 @@ In space there will be asteroids floating around. Asteroids spawn in belts aroun
 Similar to original arcade style asteroids. Arbitrary convex polygons, but shatter in such a way that all the pieces
 that break off can make up the original object. To achieve this; voronoi diagrams! A cool property of voronoi
 diagrams is that the polygons it creates are always convex by nature. When an asteroid is shot by player,
-create a set of random points (perhaps concentrated where the bullet hits) within the asteroids polygon.
+create a set of random points (concentrated where the bullet hits) within the asteroids polygon.
 From those points make a voronoi diagram within the original polygon, then break up the asteroid into the resulting pieces.
 Those pieces can also be hit and broken down further with the same process. Until a certain threshold of
 smallness where we actually destroy the object because there's no point in breaking it down further.
@@ -25,13 +25,70 @@ Currently space is fairly empty. Worlds are very empty. Just test objects while 
 and prototype systems.
 
 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-It's half in notes, half in my head, and half in code.
+MILESTONES:
+ [x] started off with basic POC in a double-buffered JFrame. pure java, no libraries.
+ [x] very basic physics sim with separate position, velocity, acceleration in a 0G environment.
+ [x] basic polygon asteroids with simple AABB collision detection
+ [x] lose the original source because I don't understand git commands
+ [x] realize engines are hard
+ [x] cry and move to libGDX
+ [x] implement simple custom ECS
+ [x] re-implement simple spaceship flight and basic asteroid polygons in new ECS style
+ [x] collisions support for rotated bounding box with convex polygons
+ [x] procedurally generated ship textures
+ [x] space render system with orbiting bodies
+ [x] world render system with tiled noise
+ [x] engine architecture that supports transfer between space and planets
+ [x] better ECS: migrate to ashley
+ [x] moved to B2D: fixed physics step and collision detection with impulse resolution
+ [x] pause menu
+ [x] title screen
+ [x] custom shape renderer to draw filled polygons for asteroids
+ [x] basic asteroid destruction using Delaunay triangulation
+ [x] simple shader for star textures
+ [ ] better asteroid destruction using voronoi
 
-***architecture***
-Uses an ECS. If you are unfamiliar with the concept of an Entity Component System, start here:
+ todo: look through commits and put these in chronological order + dates?
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+........................it's half in notes, half in my head, and half in code........................
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+***engine architecture***
+The game entities and over-all engine architecture is designed around an Entity Component System.
+Entities are composed of Components. Systems operate on Entities. Systems are managed by the engine.
+If you are unfamiliar with the concept of an ECS, start here:
     https://github.com/libgdx/ashley/wiki/Framework-overview
-For consistency, components are pure data, no implementation. This may change in future.
+ECS layout: [...\SpaceProject\core\src\com\spaceproject\]
+    \systems: all systems go in here.
+        Most of the game logic and rendering happens in systems.
+    \components: all components go in here.
+        For simplicity and consistency, components are pure data. No implementation. This may change in future.
+
+I knew transitioning between space and planets would be a little tricky, memory and design wise.
+So after lots of researching design patterns, I knew an ECS would probably be the best tool.
+
+I make heavy use of the flexibility provided by the ability to add or remove components during run time.
+This means entities can change their behavior on the fly. This allows for dynamic behaviors that are
+completely decoupled from the entity itself.
+
+I originally wrote my own basic ECS implementation, but didn't want to spend time optimizing cache.
+So I migrated to Ashley for simplicity, but I would consider migrating to artemis if performance becomes an issue.
+(and I still need to pool the bullets...but first i'll build some better diagnostics tools and profile...)
+
+Similar to dynamic components, I also make heavy use of the ability to load and unload systems on the fly.
+This allows me to not only change the behaviors of entities at run-time, but I can dynamically
+change the behavior of the game itself by loading and unloading systems.
+
+Ultimately this allows me to transition between space and planets smoothly, with very little load times.
+It's not "seamless" per say, I hide the rendering system swap behind some animations. It's fairly smooth.
+
+I do have to be careful with managing memory such as textures when a new context is loaded and the old one is unloaded.
+I also needed it to be easily configurable as I add new systems. So I built a manager to deal with all that complexity for me.
+
+Maybe it's a little over-engineered, asking for memory troubles. But it works really well so far...
 
 Systems are dynamically loaded and unloaded per context. Space and World can have different systems.
     eg: don't need an orbit system when on a planet.
@@ -39,9 +96,8 @@ Mobile and Desktop can have different systems.
     eg: don't need to render touch control on desktop
 See SystemsConfig for defining system priories and properties.
 
-
-One goal is to have everything highly configurable. (and perhaps I have gone too far in this direction at the cost of complexity?)
-Data Directory (...\SpaceProject\assets)
+Physical project structure and file layout:
+Data Directory [...\SpaceProject\assets]
     \config:
         plain text json files that define all values for game. these files will be written on first run of the game.
         if no config exists, default is loaded and written to disk. if config exists on disk, it is loaded.
@@ -61,6 +117,10 @@ Data Directory (...\SpaceProject\assets)
             DebugConfig: defines settings like show debug rendering
             MinimapConfig: define colors and behaviors for minimap
             UIConfig: define ui element colors and positions
+        One goal is to have everything highly configurable.
+        (perhaps I have gone too far in this direction at the cost of complexity?
+        key bindings makes sense but ui stuff feels weird.
+        todo: better serialization solution for systems themselves. non-session-only?)
     \fonts: fonts for UI
         .tff   : True Type Fonts
     \shaders: GLSL shader files (name convention: reference GLSL compiler extensions)
@@ -70,10 +130,11 @@ Data Directory (...\SpaceProject\assets)
         .hlsl  : .vert.hlsl, .tesc.hlsl, ..., .comp.hlsl compound suffixes
     \sounds: (todo)
         each sound effect gets it's own folder.
-            if no sound in folder, dont play
+            if no sound in folder, don't play
             if one sound in folder, play that
             if multiple sound in folder, play random
-            allow user configurable chance? what about effects/volume? NO! this is overkill for now but just an idea. Keep it simple...
+            allow user configurable chance? what about effects/volume? NO! this is overkill for now but just an idea.
+            Keep it simple...
         potential structure / implementation might look like
             music
                 track a
@@ -88,32 +149,46 @@ Data Directory (...\SpaceProject\assets)
     \save: (todo) serialization
         https://github.com/libgdx/libgdx/wiki/Saved-game-serialization
 
-Scale of the universe = Currently somewhat arbitrary. Random points generated relative to 0, 0.
-Values need to be chosen that make sense for gameplay. Considering combat, base building, interstellar travel.
-Should optimize feel for spaceship combat as that will be a large part of gameplay.
-    sprites and world units: how big should a ship or player be in relation to the universe / planets?
-    planets: how big should a planet be?
-    distances between planets: how long should the player spend traveling between systems and planets and stars?
-CONSTRAINTS: Box2D uses MKS (meters, kilograms, and seconds) units and radians for angles.
-    Large coordinates will introduce inaccuracy courtesy of floating point arithmetic rounding.
-    Meaning once we are roughly <investigate how many> meters away from origin, will begin to break things.
+
+PHYSICS CONSTRAINTS:
+    * Box2D uses MKS (meters, kilograms, and seconds) units, and radians for angles.
+    * Body Size Limit: Keep moving objects roughly between 0.1 and 10 meters.
+    * Movement limit: = 2 * units per physics step.
+        * (eg step of 60: 60 * 2 = 120,  max velocity = 120km/s)
+        * For the [hyperdrive] feature I need to bypass this incredibly slow limit,
+          so the box2D physics body is disabled via  which means no collisions but that works in favor of gameplay.
+    * The fixed physics step keeps calculations frame-rate independent. (turning vsync off won't make your character run faster)
+    * Large world space coordinates will introduce inaccuracy courtesy of floating point arithmetic rounding.
     Floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
-    The real universe by contrast, is a little bigger...allegedly.
-    To solve this, we can use a local small coordinate system and a large global coordinate system.
-    todo: shift 'Floating Origin'
-    Movement limit: = 2 * units per step. (eg step of 60: 60 * 2 = 120,  max velocity = 120)
-    For the hyperdrive feature I need to bypass this (incredibly slow relative to scale of universe) limit,
-    so the box2D physics body is disabled which means no collisions but that works in favor.
+    The real universe by contrast, is a little bit bigger than 2km....
+    Meaning the deeper in space we go, the more roughly 2 "stuff" begins to break.
+    To solve this, we can use a local coordinate system and a large global coordinate system.
+    todo: 'Floating Origin' ->  b2World::ShiftOrigin
     https://box2d.org/documentation/md__d_1__git_hub_box2d_docs_loose_ends.html#autotoc_md126
+    https://box2d.org/documentation/#:~:text=Caution%3A%20Box2D%20is%20tuned%20for,between%200.1%20and%2010%20meters.
+    Also sprites and world units: We can't use pixels for coordinates.
+    https://xoppa.github.io/blog/pixels/
+The scale of the universe is currently somewhat arbitrary, as I have just been adjusting to the constraints as I implement these systems.
+The gameplay is mainly driven by the spaceship flight, destructible asteroids, and combat.
+* how big should a ship or player be in relation to the universe / planets?
+* asteroids: how big should asteroids be?
+* planets: how big should a planet be?
+* distances between planets: how long should the player spend traveling between systems and planets and stars?
+I have been making up values as I go, learn rendering techniques and given the above constraints.
+Tuning the scale and physics values as small as possible to maximize the velocity limit per step.
+Gameplay design focus around what feels intuitive and responsive in respect navigating space and the control of the character and ship.
+Ultimately: Is flying around and breaking asteroids actually fun and satisfying?
+It doesn't matter how big the universe is, if the local-verse isn't fun.
 
 Space Background Rendering
-	Simple but effective: 4 parallax layers
+	Simple but effective: 5 parallax layers
 		stars close
 		stars far
-		stars far
+		stars farther
+		stars farthest
 		noise far
 	Background color is set based on camera positioning.
-		Just some combinations and ratios of red, blue and green that I played around with until it looked nice.
+	Just some combinations and ratios of red, blue and green that I played around with until it looked nice.
 
 Noise Generation
 	Noise is heavy to generate at runtime so it's done in background threads. Threadpool.
@@ -126,7 +201,7 @@ Noise Generation
         https://www.opengl.org/wiki/OpenGL_and_multithreading
         We can however generate noise for the textures on a separate thread and then feed that to the rendering thread.
 
-Screen transition logic/stages overview
+Screen transition logic/stages overview:
 One of the trickier parts of the engine. Animation states for transition, and dynamic system loading/unloading.
 When animation hits transition state, it calls the system loader and loads/unloads relevant systems based on SystemsConfig
 
@@ -177,8 +252,10 @@ Legend:
     [ ! ] = notes
     [ * ] = exceptions
 
-[ ] touch the sun and die! do damage to things with health, including asteroids
-    [ ] death message w/ reason
+[ ] touch the sun and die!
+    [ ] do damage to things with health, including asteroids
+    [ ] death message w/ reason: "stars are hot"
+
 [ ] better death visual
     [ ] maybe shatter player
     [ ] emit explosion rings
@@ -216,7 +293,7 @@ Legend:
     [ ] floaty dust particles at same depth as player to help visualize movement/speed
         perhaps play with lod, different layers based on zoom
         maybe with a very slow wander
-    [ ] space debri, mostly inconsequential small irregular bodies
+    [ ] space debris, mostly inconsequential small irregular bodies
     [...] fog layer (particles, or white noise parallax at 1.0?)
         disabled because ugly
         [ ] could have different layers that fade in and out at different depths when zoom out
@@ -303,6 +380,8 @@ Legend:
             would be useful for laser weapon
         [x] basic triangle shatter
             [ ] broken rotation when shattering some polygons rotate and jump instead of simply separating in place
+                note: this is more visible with vsync off.
+
         [ ] voronoi shatter, for destructible asteroids.
             (and world generation can be used for tectonic plates / countries / biomes)
             https://www.badlogicgames.com/forum/viewtopic.php?f=11&t=22784 (my old thread)
@@ -965,6 +1044,7 @@ Legend:
     WARNING: All illegal access operations will be denied in a future release
 
 [!] untested on 4k or ultra wide, my machines are all 1080p.
+    broken!
 
 [ ] devops n website n legal crap n misc
     [  ] prepare to branch and have a dev stream and "stable stream"
