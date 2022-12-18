@@ -36,6 +36,7 @@ MILESTONES:
  [x] re-implement simple spaceship flight and basic asteroid polygons in new ECS style
  [x] collisions support for rotated bounding box with convex polygons
  [x] procedurally generated ship textures
+ [x] 3D renderer for rotating 2D textures on the third axis
  [x] space render system with orbiting bodies
  [x] world render system with tiled noise
  [x] engine architecture that supports transfer between space and planets
