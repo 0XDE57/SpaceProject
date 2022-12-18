@@ -257,11 +257,18 @@ Legend:
     [ ] do damage to things with health, including asteroids
     [ ] death message w/ reason: "stars are hot"
 
+[ ] hyperdrive spinup
+
+[ ] put wings on ship
+
 [ ] better death visual
     [ ] maybe shatter player
     [ ] emit explosion rings
     [ ] emit explosion rays
     [ ] explodey particle fx!
+
+[ ] terrible BUG! Space Parallax Render broken on resolutions above 1080p
+    eg: 4k or ultra wide
 
 [...] terrible BUG! lerping camera movement is giving some jittering in the rendering when vsync on.
     this is caused by interpolation being a percentage from target and the value is
@@ -287,6 +294,41 @@ Legend:
         -start game, leave to main menu, start game again = empty until move around for a bit then loads
         I believe this is to do with the noise threads shutting down?
 
+[ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
+    [ ] engine / movement
+        [ ] active, pitch tied to velocity
+        [ ] left right?
+        [ ] boost
+        [ ] barrel roll
+        [ ] hyper drive
+            [ ] charge
+            [ ] discharge
+            [ ] active
+    [ ] cannon
+        [x] start
+        [ ] active
+    [ ] laser
+        [ ] start
+        [ ] active
+    [ ] shield
+        [ ] charge, pitch tied to charge
+        [ ] activated, max charge
+        [ ] decharge, pitch tied to charge
+        [ ] hit, pitch set by impulse
+        [ ] shield broken, shatter
+    [ ] asteroid
+        [ ] hit, pitch set by impulse (how hard hit)
+        [...] shatter
+    Apparently audio on android sucks?
+        https://github.com/libgdx/libgdx/wiki/Audio
+        https://github.com/barsoosayque/libgdx-oboe
+    More advanced audio:
+        https://github.com/Hangman/TuningFork
+        https://github.com/rafaskb/Parrot
+        https://github.com/rafaskb/Boom
+
+..........................above is focused on bug fix and polish phase for demo..........................
+
 [...] needs frame of reference to judge speed and direction since parallax is so deep
     [...] ship tail and bullet tail fx help with frame of reference
         [ ] nicer rendering: bloom/glow, fade, colors
@@ -301,6 +343,8 @@ Legend:
         [ ] fog layer could use some more octaves. possible shader can just render another layer on top
             with some movement and multiply the layers together
         [?] what about a basic noise shader rendered to a quad on a layer above player?
+
+[ ] character eye color
 
 [ ] ENGINE: fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
     https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
@@ -731,38 +775,6 @@ Legend:
             EndContact:vehicleButton.disable()
         http://www.iforce2d.net/b2dtut/sensors
 
-[ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
-    [ ] engine / movement
-        [ ] active, pitch tied to velocity
-        [ ] left right?
-        [ ] boost
-        [ ] barrel roll
-        [ ] hyper drive
-            [ ] charge
-            [ ] discharge
-            [ ] active
-    [ ] cannon
-        [x] start
-        [ ] active
-    [ ] laser
-        [ ] start
-        [ ] active
-    [ ] shield
-        [ ] charge, pitch tied to charge
-        [ ] activated, max charge
-        [ ] decharge, pitch tied to charge
-        [ ] hit, pitch set by impulse
-        [ ] shield broken, shatter
-    [ ] asteroid
-        [ ] hit, pitch set by impulse (how hard hit)
-        [...] shatter
-    Apparently audio on android sucks?
-        https://github.com/libgdx/libgdx/wiki/Audio
-        https://github.com/barsoosayque/libgdx-oboe
-    More advanced audio:
-        https://github.com/Hangman/TuningFork
-        https://github.com/rafaskb/Parrot
-        https://github.com/rafaskb/Boom
 
 [...] physics and movement
     [x] move to box2d
@@ -1044,8 +1056,6 @@ Legend:
     WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
     WARNING: All illegal access operations will be denied in a future release
 
-[!] untested on 4k or ultra wide, my machines are all 1080p.
-    broken!
 
 [ ] devops n website n legal crap n misc
     [  ] prepare to branch and have a dev stream and "stable stream"
