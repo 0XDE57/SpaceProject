@@ -29,14 +29,13 @@ MILESTONES:
  [x] started off with basic POC in a double-buffered JFrame. pure java, no libraries.
  [x] very basic physics sim with separate position, velocity, acceleration in a 0G environment.
  [x] basic polygon asteroids with simple AABB collision detection
- [x] lose the original source because I don't understand git commands
+ [x] lose the original source because I don't understand git
  [x] realize engines are hard
  [x] cry and move to libGDX
  [x] implement simple custom ECS
  [x] re-implement simple spaceship flight and basic asteroid polygons in new ECS style
  [x] collisions support for rotated bounding box with convex polygons
  [x] procedurally generated ship textures
- [x] 3D renderer for rotating 2D textures on the third axis
  [x] space render system with orbiting bodies
  [x] world render system with tiled noise
  [x] engine architecture that supports transfer between space and planets
@@ -44,6 +43,7 @@ MILESTONES:
  [x] moved to B2D: fixed physics step and collision detection with impulse resolution
  [x] pause menu
  [x] title screen
+ [x] 3D renderer for rotating 2D textures on the third axis
  [x] custom shape renderer to draw filled polygons for asteroids
  [x] basic asteroid destruction using Delaunay triangulation
  [x] simple shader for star textures
@@ -159,10 +159,10 @@ PHYSICS CONSTRAINTS:
         * For the [hyperdrive] feature I need to bypass this incredibly slow limit,
           so the box2D physics body is disabled via  which means no collisions but that works in favor of gameplay.
     * The fixed physics step keeps calculations frame-rate independent. (turning vsync off won't make your character run faster)
-    * Large world space coordinates will introduce inaccuracy courtesy of floating point arithmetic rounding.
-    Floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
-    The real universe by contrast, is a little bit bigger than 2km....
-    Meaning the deeper in space we go, the more roughly 2 "stuff" begins to break.
+    * Large world space coordinates will introduce inaccuracy, courtesy of floating point arithmetic rounding.
+    Floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating error.
+    Meaning the deeper in space we go, the more "stuff" begins to break.
+    Box2D works best with world sizes less than 2 kilometers. The real universe by contrast, is a little bit bigger than 2km....
     To solve this, we can use a local coordinate system and a large global coordinate system.
     todo: 'Floating Origin' ->  b2World::ShiftOrigin
     https://box2d.org/documentation/md__d_1__git_hub_box2d_docs_loose_ends.html#autotoc_md126
@@ -176,7 +176,7 @@ The gameplay is mainly driven by the spaceship flight, destructible asteroids, a
 * planets: how big should a planet be?
 * distances between planets: how long should the player spend traveling between systems and planets and stars?
 I have been making up values as I go, learn rendering techniques and given the above constraints.
-Tuning the scale and physics values as small as possible to maximize the velocity limit per step.
+Tuning the render scale and physics bodies as small as possible to maximize the velocity limit per step.
 Gameplay design focus around what feels intuitive and responsive in respect navigating space and the control of the character and ship.
 Ultimately: Is flying around and breaking asteroids actually fun and satisfying?
 It doesn't matter how big the universe is, if the local-verse isn't fun.
@@ -239,7 +239,6 @@ They can't aim properly, need to predict where player will be. Lead target.
 And much more....problems for later.
 
 
-
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ***the plan***: make combat fun. make flight and movement fun, and look a little better.
 focus! i keep jumping between ideas and features and never finish anything
@@ -256,6 +255,10 @@ Legend:
 [ ] touch the sun and die!
     [ ] do damage to things with health, including asteroids
     [ ] death message w/ reason: "stars are hot"
+
+[ ] space station.
+    [ ] orbit's around planet's, ship can dock at.
+    [ ] repair ship
 
 [ ] hyperdrive spinup
 
@@ -327,7 +330,18 @@ Legend:
         https://github.com/rafaskb/Parrot
         https://github.com/rafaskb/Boom
 
-..........................above is focused on bug fix and polish phase for demo..........................
+[ ] subtle yet annoying bug: when rotating continually counter-clockwise with mouse,
+    once past ~7.6? radians, the ship will flip around the other way to correct.
+    I suspect its to do with getAngularImpulse
+    > 0
+    ^ 1.6
+    < 3.14
+    v 4.7
+    > 6.2
+    ^ 7.6       <- problem
+
+................above is focused on bug fix and polish phase for space demo..........................
+................landing will be disabled until worlds are further developed..........................
 
 [...] needs frame of reference to judge speed and direction since parallax is so deep
     [...] ship tail and bullet tail fx help with frame of reference
@@ -1248,4 +1262,5 @@ https://itch.io/game-assets/free/tag-16-bit
 
 https://opensource.org/faq#profit
 
-
+Splines
+https://www.youtube.com/watch?v=jvPPXbo87ds
