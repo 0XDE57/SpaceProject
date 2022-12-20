@@ -290,7 +290,7 @@ public class PhysicsContactListener implements ContactListener {
                 SplineComponent spline = new SplineComponent();
                 spline.zOrder = oSpline.zOrder;
                 spline.path = oSpline.path.clone();
-                spline.index = oSpline.index;
+                spline.indexHead = oSpline.indexHead;
                 //spline.path[spline.index].set(spline.path[spline.index-1]);
                 spline.color = Color.BLACK;
                 spline.style = SplineComponent.Style.solid;

@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.SplineComponent;
 import com.spaceproject.components.TransformComponent;
@@ -66,13 +67,14 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         }
         switch (spline.style) {
             case velocity: renderVelocityPath(spline); break;
-            //case rainbow: renderRainbowPath(spline); break;
+            case state: renderStatePath(spline); break;
             default:
-                renderPath(spline);
+                renderDefaultPath(spline);
         }
     }
     
-    //see also: https://libgdx.com/wiki/math-utils/path-interface-and-splines
+    // these are more like paths than splines, but see also:
+    // https://libgdx.com/wiki/math-utils/path-interface-and-splines
     private void updateTail(SplineComponent spline, Entity entity) {
         TransformComponent transform = Mappers.transform.get(entity);
         PhysicsComponent physics = Mappers.physics.get(entity);
@@ -84,50 +86,59 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
             for (int v = 0; v < maxPathSize; v++) {
                 spline.path[v] = new Vector3();
             }
+            spline.state = new byte[maxPathSize];
         }
         
         //
         //todo: don't record useless points (duplicate). consider resolution
-        //if (spline.path[spline.index].epsilonEquals(transform.pos.x, transform.pos.y, 10)) {
+        //if (spline.path[spline.index-1].epsilonEquals(transform.pos.x, transform.pos.y, 10)) {
             //delta too small skip update
         //    return;
         //}
         
-        //off, on, boost, hyper
-        //0, 1, 2, 3
+        //off, on, boost, hyper -> 0, 1, 2, 3
         float velocity = 0;
+        byte state = 0;
         if (spline.style == SplineComponent.Style.velocity) {
             if (physics != null) {
+                //set state
                 ControllableComponent control = Mappers.controllable.get(entity);
                 if (control != null) {
                     if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight) {
-                        velocity = 1f;
+                        state = 1;
                         if (control.boost) {
-                            velocity = 2f;
+                            state = 2;
                         }
                     }
                 }
-                //velocity = physics.body.getLinearVelocity().len2();
+                //set velocity
+                velocity = physics.body.getLinearVelocity().len2();
                 if (!physics.body.isActive()) {
-                    //HyperDriveComponent hyper = Mappers.hyper.get(entity);
-                    //velocity = hyper.speed * hyper.speed;
-                    velocity = 3f;
+                    HyperDriveComponent hyper = Mappers.hyper.get(entity);
+                    velocity = hyper.speed * hyper.speed;
+                    state = 3;
                 }
             }
         }
         
-        spline.path[spline.index].set(transform.pos.x, transform.pos.y, velocity);
+        spline.path[spline.indexHead].set(transform.pos.x, transform.pos.y, velocity);
+        spline.state[spline.indexHead] = state;
         
         //roll index
-        spline.index++;
-        if (spline.index >= spline.path.length) {
-            spline.index = 0;
+        spline.indexHead++;
+        if (spline.indexHead >= spline.path.length) {
+            spline.indexHead = 0;
         }
     }
     
     public void renderVelocityPath(SplineComponent spline) {
         //todo: bug with tail index not properly rendered
         boolean debugDrawHeadTail = false;
+    
+        //set default color
+        if (spline.color == null) {
+            spline.color = Color.RED;
+        }
         
         for (int i = 0; i < spline.path.length-1; i++) {
             Vector3 p = spline.path[i];
@@ -137,26 +148,15 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
             Vector3 p2 = spline.path[indexWrap];
             
             // don't draw head to tail
-            if (indexWrap != spline.index) {
-                //z = linearVelocity [0 - max box2d] then  hyperdrive velocity
+            if (indexWrap != spline.indexHead) {
+                //z = linearVelocity [0 - max box2d] then hyperdrive velocity
                 float velocity = p.z / B2DPhysicsSystem.getVelocityLimit2();
                 tmpColor.set(Color.BLACK.cpy().lerp(spline.color, velocity));
                 if (velocity > 1.01f) {
                     //hyperdrive travel
                     tmpColor.set(1, 1, 1, 1);
                 }
-                
-                Color state = Color.BLACK;
-                if (MathUtils.isEqual(p.z, 1)) {
-                    state = Color.GOLD;
-                }
-                if (MathUtils.isEqual(p.z, 2)) {
-                    state = Color.CYAN;
-                }
-                if (MathUtils.isEqual(p.z, 3)) {
-                    state = Color.WHITE;
-                }
-                shape.line(p.x, p.y, p2.x, p2.y, state, state);
+                shape.line(p.x, p.y, p2.x, p2.y, tmpColor, tmpColor);
             } else {
                 //debug draw head to tail
                 if (debugDrawHeadTail) {
@@ -166,7 +166,41 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         }
     }
     
-    public void renderPath(SplineComponent spline) {
+    
+    public void renderStatePath(SplineComponent spline) {
+        //todo: bug with tail index not properly rendered
+        boolean debugDrawHeadTail = false;
+        
+        for (int i = 0; i < spline.path.length-1; i++) {
+            Vector3 p = spline.path[i];
+            
+            int indexWrap = i + 1 % spline.path.length;
+            if (indexWrap <= 0) {
+                indexWrap += spline.path.length;
+            }
+            Vector3 p2 = spline.path[indexWrap];
+            
+            // don't draw head to tail
+            if (indexWrap != spline.indexHead) {
+                Color color;
+                switch (spline.state[indexWrap]) {
+                    case -1: color = Color.RED; break;
+                    case 1: color = Color.GOLD; break;
+                    case 2: color = Color.CYAN; break;
+                    case 3: color = Color.WHITE; break;
+                    default: color = Color.BLACK;
+                }
+                shape.line(p.x, p.y, p2.x, p2.y, color, color);
+            } else {
+                //debug draw head to tail
+                if (debugDrawHeadTail) {
+                    shape.line(p.x, p.y, p2.x, p2.y, Color.RED, Color.WHITE);
+                }
+            }
+        }
+    }
+    
+    public void renderDefaultPath(SplineComponent spline) {
         //todo: bug with tail index not properly rendered
         boolean debugDrawHeadTail = false;
         
@@ -178,14 +212,8 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
             Vector3 p2 = spline.path[indexWrap];
             
             // don't draw head to tail
-            if (indexWrap != spline.index) {
-                //if (spline.color != null) {
-                    //tmpColor.a = indexWrap / spline.path.length;
-                    //shape.line(p.x, p.y, p2.x, p2.y, tmpColor, tmpColor);
-                //} else {
-                    //point to point color
-                    shape.line(p.x, p.y, p2.x, p2.y, Color.GREEN,  Color.BLUE);
-                //}
+            if (indexWrap != spline.indexHead) {
+                shape.line(p.x, p.y, p2.x, p2.y, Color.GREEN,  Color.BLUE);
             } else {
                 //debug draw head to tail
                 if (debugDrawHeadTail) {
@@ -193,8 +221,8 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
                 }
             }
     
-            if (spline.index == 0) {
-                shape.line(p.x, p.y, p2.x, p2.y, Color.RED, Color.WHITE);
+            if (spline.indexHead == 0) {
+                shape.line(p.x, p.y, p2.x, p2.y, Color.PINK, Color.PURPLE);
             }
         }
     }

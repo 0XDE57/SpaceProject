@@ -48,11 +48,11 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     private final Vector3 mouseProj = new Vector3();
     private final Vector3 playerPos = new Vector3();
     
+    private final int gridWidth = 400;
     private final Rectangle gridBounds = new Rectangle();
     private final Color gridColor = Color.BLACK.cpy();
     private final Color ringColor = Color.PURPLE.cpy();
     private final Color lineColor = Color.GREEN.cpy();
-    private final int gridSize = 400;
     
     private final Color compassColor = Color.WHITE.cpy();
     private ImmutableArray<Entity> players;
@@ -98,7 +98,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         
         //draw grid
         gridColor.a = 0.15f;
-        drawGrid(gridColor, gridBounds, gridSize, 0.5f);
+        drawGrid(gridColor, gridBounds, gridWidth, 0.5f);
         
         //debug override background
         if (clearScreen) debugClearScreen();
@@ -261,9 +261,9 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         Color compassHighlight = compassColor;
         ControllableComponent control = Mappers.controllable.get(entity);
         if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight) {
-            compassHighlight = Color.GOLD;
+            compassHighlight = Color.GOLD.cpy();
             if (control.boost) {
-                compassHighlight = Color.CYAN;
+                compassHighlight = Color.CYAN.cpy();
             }
         }
         compassHighlight.a = alpha;
@@ -276,13 +276,13 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         }
         
         //draw circle; radius = velocity
-        shape.setProjectionMatrix(GameScreen.cam.combined);
+        //shape.setProjectionMatrix(GameScreen.cam.combined);
         //yellow when engine engaged cyan when boost engaged
         float relVel = vel2 / B2DPhysicsSystem.getVelocityLimit2();
         float radius = 2 + 2 * relVel;
     
-        compassHighlight.a = 1;
-        shape.setColor(compassHighlight);
+        //compassHighlight.a = 1;
+        //shape.setColor(compassHighlight);
         //shape.line(originalPosition.x, originalPosition.y,);
         //shape.circle(originalPosition.x, originalPosition.y, radius);
         //shape.circle(originalPosition.x, originalPosition.y, 2);
