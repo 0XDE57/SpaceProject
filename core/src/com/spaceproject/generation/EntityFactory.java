@@ -487,8 +487,7 @@ public class EntityFactory {
         //spline
         SplineComponent spline = new SplineComponent();
         spline.zOrder = 100;//should be on top of others
-        spline.style = SplineComponent.Style.velocity;
-        spline.color = Color.CYAN;
+        spline.style = SplineComponent.Style.state;
         shipEntity.add(spline);
     
         //engine particle effect
@@ -512,6 +511,10 @@ public class EntityFactory {
         entity.add(attached);
         
         //EngineComponent->thrust?
+        //ShipEngineComponent engine = new ShipEngineComponent();
+        //engine.engineState = ShipEngineComponent.State.off;
+        //engine.thrust
+        //entity.add(engine);
         
         ParticleComponent particle = new ParticleComponent();
         particle.type = type;

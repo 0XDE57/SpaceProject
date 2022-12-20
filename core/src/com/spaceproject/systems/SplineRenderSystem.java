@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
+import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.SplineComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
@@ -99,7 +100,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         //off, on, boost, hyper -> 0, 1, 2, 3
         float velocity = 0;
         byte state = 0;
-        if (spline.style == SplineComponent.Style.velocity) {
+        if (spline.style == SplineComponent.Style.state) {
             if (physics != null) {
                 //set state
                 ControllableComponent control = Mappers.controllable.get(entity);
@@ -111,6 +112,11 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
                         }
                     }
                 }
+                ShieldComponent shield = Mappers.shield.get(entity);
+                if (shield != null && shield.activate) {
+                    state = -2;
+                }
+                
                 //set velocity
                 velocity = physics.body.getLinearVelocity().len2();
                 if (!physics.body.isActive()) {
@@ -184,6 +190,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
             if (indexWrap != spline.indexHead) {
                 Color color;
                 switch (spline.state[indexWrap]) {
+                    case -2: color = Color.BLUE; break;
                     case -1: color = Color.RED; break;
                     case 1: color = Color.GOLD; break;
                     case 2: color = Color.CYAN; break;
