@@ -275,41 +275,47 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     }
     
     private void drawDiagnosticInfo(int x, int y) {
-        //camera position
-        String camera = String.format("Pos: %s %s  Zoom:%3$.2f", (int) cam.position.x, (int) cam.position.y, cam.zoom);
-        
-        //memory
-        String memory = DebugUtil.getMemory();
-        
-        //entity/component count
-        String count = ECSUtil.getECSString(getEngine());
-        
-        //threads
-        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-        String threads = "  Threads: " + threadSet.size();
-        
-        int sbCalls = GameScreen.batch.renderCalls;
-        
         int linePos = 1;
         float lineHeight = fontLarge.getLineHeight();
         fontLarge.setColor(Color.WHITE);
-        fontLarge.draw(batch, count, x, y - (lineHeight * linePos++));
-        fontLarge.draw(batch, memory + threads, x, y - (lineHeight * linePos++));
-        fontLarge.draw(batch, camera, x, y - (lineHeight * linePos++));
-        fontLarge.draw(batch, "time: " + MyMath.formatDuration(GameScreen.getGameTimeCurrent())
-                        + " (" + GameScreen.getGameTimeCurrent() + ")", Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10);
-        fontLarge.draw(batch, "seed: " + GameScreen.getGalaxySeed(), Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight);
         
+        //entity/component count
+        String count = ECSUtil.getECSString(getEngine());
+        fontLarge.draw(batch, count, x, y - (lineHeight * linePos++));
+        
+        //memory
+        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+        String memory = DebugUtil.getMemory();
+        String threads = "  Threads: " + threadSet.size();
+        fontLarge.draw(batch, memory + threads, x, y - (lineHeight * linePos++));
+        
+        //OpenGL profiler
+        fontSmall.draw(batch, GameScreen.getProfilerString(), x, y - (lineHeight * linePos++));
+        
+        //world info, cam, time, seed
+        String camera = String.format("Pos:  %s %s  Zoom:%3$.2f", (int) cam.position.x, (int) cam.position.y, cam.zoom);
+        fontLarge.draw(batch, camera, Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight);
+        fontLarge.draw(batch, "Time: " + MyMath.formatDuration(GameScreen.getGameTimeCurrent())
+                + " (" + GameScreen.getGameTimeCurrent() + ")", Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 );
+        fontLarge.draw(batch, "Seed: " + GameScreen.getGalaxySeed(), Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight *2);
+    
         if (!GameScreen.inSpace()) {
-            fontLarge.draw(batch, "planet: " + GameScreen.getPlanetSeed(),
+            fontLarge.draw(batch, "Planet: " + GameScreen.getPlanetSeed(),
                     Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight * 2);
         }
         
         //view threads
+        float bottomY = 10;
         String noisePool = GameScreen.noiseManager.getNoiseThreadPool().toString();
-        fontSmall.draw(batch, noisePool, x, y - (lineHeight * linePos++));
-        for (Thread t : threadSet) {
-            fontSmall.draw(batch, t.toString(), x, y - (lineHeight * linePos++));
+        fontSmall.draw(batch, noisePool, x, bottomY + lineHeight);
+        if (GameScreen.noiseManager.getNoiseThreadPool().getActiveCount() > 0) {
+            linePos = 3;
+            String threadSetInfo = "";
+            for (Thread t : threadSet) {
+                threadSetInfo += t.toString() + "\n";
+                linePos++;
+            }
+            fontSmall.draw(batch, threadSetInfo, x, bottomY + ((lineHeight * 0.5f) * linePos));
         }
     }
 

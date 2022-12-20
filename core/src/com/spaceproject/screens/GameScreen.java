@@ -30,7 +30,6 @@ import com.spaceproject.generation.Galaxy;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.math.Physics;
 import com.spaceproject.noise.NoiseManager;
-import com.spaceproject.systems.DebugSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.ECSUtil;
@@ -60,7 +59,7 @@ public class GameScreen extends MyScreenAdapter {
     private static Stage stage;
     
     public static boolean isDebugMode = true;
-    final StringBuilder profilerStringBuilder = new StringBuilder();
+    static final StringBuilder profilerStringBuilder = new StringBuilder();
     
     public GameScreen() {
         //LOG_NONE: mutes all logging.
@@ -269,11 +268,13 @@ public class GameScreen extends MyScreenAdapter {
     
         profilerStringBuilder.append("\nDispose: ");
         profilerStringBuilder.append(ResourceDisposer.disposeCounter);
-        
-        DebugSystem.addDebugText(profilerStringBuilder.toString(), 10, 90);
+        //DebugSystem.addDebugText(profilerStringBuilder.toString(), 10, 90);
         
         glProfiler.reset();
-        //ResourceDisposer.reset();
+    }
+    
+    public static CharSequence getProfilerString() {
+        return profilerStringBuilder;
     }
     
     //region states

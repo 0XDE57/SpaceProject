@@ -65,7 +65,7 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
     public String toString() {
         return "active: [" + getActiveCount() + "/" + getCorePoolSize()
                 + "] completed: [" + getCompletedTaskCount() + "/" + getTaskCount()
-                + "]" /*+ "\nQ:" + getQueue()*/ + "\nactive: " + activeTasks;
+                + "]" /*+ "\nQ:" + getQueue()*/ + " -> " + activeTasks;
     }
     
 }
