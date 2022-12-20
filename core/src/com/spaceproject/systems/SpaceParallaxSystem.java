@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.screens.GameScreen;
@@ -35,10 +36,30 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     
     private static final int tileSize = 512;//1024;
     private int surround = 2;// how many tiles to load around center tile
+    private final ShaderProgram grayscaleShader, invertShader;
+    
+    private boolean grayScale = true;
     
     public SpaceParallaxSystem() {
         cam = new OrthographicCamera();
         spriteBatch = new SpriteBatch();
+        
+        grayscaleShader = new ShaderProgram(Gdx.files.internal("shaders/grayscale.vert"), Gdx.files.internal("shaders/grayscale.frag"));
+        if (grayScale) {
+            if (grayscaleShader.isCompiled()) {
+                spriteBatch.setShader(grayscaleShader);
+                Gdx.app.log(this.getClass().getSimpleName(), "shader compiled successfully!");
+            } else {
+                Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + grayscaleShader.getLog());
+            }
+        }
+        
+        invertShader = new ShaderProgram(Gdx.files.internal("shaders/invert.vert"), Gdx.files.internal("shaders/invert.frag"));
+        if (invertShader.isCompiled()) {
+            Gdx.app.log(this.getClass().getSimpleName(), "shader compiled successfully!");
+        } else {
+            Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + grayscaleShader.getLog());
+        }
     }
     
     @Override
@@ -48,6 +69,16 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         
         // load and unload tiles
         updateTiles();
+        
+        /*
+        if (GameScreen.isHyper()) {
+            spriteBatch.setShader(invertShader);
+        } else {
+            spriteBatch.setShader(grayscaleShader);
+            
+        }*/
+        
+        //grayscaleShader.
         
         spriteBatch.begin();
         drawParallaxTiles();
@@ -209,6 +240,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         tiles.clear();
         
         spriteBatch.dispose();
+        grayscaleShader.dispose();
     }
     
 }
