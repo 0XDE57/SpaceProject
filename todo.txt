@@ -492,8 +492,8 @@ Legend:
         [ ] shield can be a light source
         [ ] player eyes facing forward cone light
         [ ] lava on planets can be a light source
-        [ ] ship / wind trail system to visualise movement
-            [ ] debug just draw path?
+        [...] ship / wind trail system to visualise movement
+            [x] debug just draw path?
         [ ] ship wing tips blink with lights, or light source on texture (simply a image overlay)
 
     [...] better star rendering
