@@ -267,15 +267,10 @@ public class PhysicsContactListener implements ContactListener {
         //contactP.add(particle);
         
         if (showGhost) {
-            SplineComponent oSpline = Mappers.spline.get(entityHit);
-            if (oSpline != null && oSpline.path != null) {
-                SplineComponent spline = new SplineComponent();
-                spline.zOrder = oSpline.zOrder;
-                spline.path = oSpline.path.clone();
-                spline.indexHead = oSpline.indexHead;
-                spline.color = Color.BLACK;
-                spline.style = SplineComponent.Style.solid;
-                contactP.add(spline);
+            SplineComponent transfered = (SplineComponent) ECSUtil.transferComponent(entityHit, contactP, SplineComponent.class);
+            if (transfered != null) {
+                transfered.color = Color.BLACK;
+                transfered.style = SplineComponent.Style.solid;
             }
         }
         
