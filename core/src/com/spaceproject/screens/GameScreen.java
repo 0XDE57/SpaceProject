@@ -198,7 +198,7 @@ public class GameScreen extends MyScreenAdapter {
         
         //clean up resources
         ResourceDisposer.disposeAllExcept(engine.getEntities(), transEntityCluster);
-        engine.removeAllEntities();//to fix family references when entities added to new engine
+        engine.removeAllEntities();//to fix family references when entities added to engine
         
         ScreenTransitionComponent screenTrans = Mappers.screenTrans.get(transEntity);
         
