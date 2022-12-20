@@ -157,13 +157,14 @@ public class BarrelRollSystem extends IteratingSystem {
             sprite3D.renderable.angle = 0;
             return;
         }
-        
+    
+        float rotation = MathUtils.PI2 * rollComp.revolutions;
         switch (rollComp.flipState) {
             case left:
-                sprite3D.renderable.angle = animInterpolation.apply(MathUtils.PI2 * rollComp.revolutions, 0, rollComp.animationTimer.ratio());
+                sprite3D.renderable.angle = animInterpolation.apply(rotation, 0, rollComp.animationTimer.ratio());
                 break;
             case right:
-                sprite3D.renderable.angle = animInterpolation.apply(0, MathUtils.PI2 * rollComp.revolutions, rollComp.animationTimer.ratio());
+                sprite3D.renderable.angle = animInterpolation.apply(0, rotation, rollComp.animationTimer.ratio());
                 break;
         }
     }
