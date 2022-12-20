@@ -93,7 +93,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 26;
         parameter.borderColor = Color.BLACK;
-        parameter.borderWidth = 2;
+        parameter.borderWidth = 3;
         font = FontFactory.createFont(FontFactory.fontPressStart, parameter);
         
         GameScreen.getStage().addListener(new InputListener() {
@@ -287,7 +287,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         Color c = Color.GOLD.cpy().lerp(Color.CYAN, ratio);
         font.setColor(c);
         switch (messageState) {
-            case hyper: layout.setText(font, "[ HYPER-DRIVE ]"); break;
+            case hyper: layout.setText(font, "[ HYPERDRIVE ]"); break;
             case landing: layout.setText(font, "[ LANDING ]"); break;
             case launching: layout.setText(font, "[ LAUNCHING ]"); break;
             case off:
