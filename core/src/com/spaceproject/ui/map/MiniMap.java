@@ -155,15 +155,15 @@ public class MiniMap {
         float textPosY = mapContainer.y + mapContainer.height;
         float lineHeight = font.getLineHeight() + 2;
         
-        String mapString = (int) MyScreenAdapter.cam.position.x + ", " + (int) MyScreenAdapter.cam.position.y;
+        String mapString = "";//(int) MyScreenAdapter.cam.position.x + ", " + (int) MyScreenAdapter.cam.position.y;
         if (player != null) {
             Body body = Mappers.physics.get(player).body;
-            String playerInfo = ": " + MyMath.round(body.getLinearVelocity().len(), 1);
+            float vel = (float) MyMath.round(body.getLinearVelocity().len(), 1);
             HyperDriveComponent hyper = Mappers.hyper.get(player);
             if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
-                playerInfo = ": " + MyMath.round(hyper.velocity.len(), 1);
+                vel = (float) MyMath.round(hyper.velocity.len(), 1);
             }
-            mapString += playerInfo;
+            mapString = vel + "";
         }
         font.draw(batch, mapString, textPosX, textPosY - lineHeight);
         if (mapState == MapState.full) {
