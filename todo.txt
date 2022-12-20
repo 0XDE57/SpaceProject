@@ -260,6 +260,8 @@ Legend:
     [ ] orbit's around planet's, ship can dock at.
     [ ] repair ship
 
+[ ] bug: shouldn't be able to control ship during take off and landing
+
 [ ] hyperdrive spinup
 
 [ ] put wings on ship
