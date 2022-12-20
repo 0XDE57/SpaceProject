@@ -43,6 +43,12 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
     
     @Override
     public void update(float delta) {
+        //warning: system coupling -> todo: use signals?
+        HUDSystem hudSystem = getEngine().getSystem(HUDSystem.class);
+        if (hudSystem != null && !hudSystem.isDraw()) {
+            return;
+        }
+        
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
