@@ -47,6 +47,7 @@ public class ProjectileHitRenderSystem extends IteratingSystem implements Dispos
         TransformComponent t = Mappers.transform.get(entity);
         RingEffectComponent ring = Mappers.ring.get(entity);
         ring.radius += growthRate * delta;
+        shape.setColor(1, 1, 1, 1 - ring.radius);
         shape.circle(t.pos.x, t.pos.y, ring.radius);
     }
     
