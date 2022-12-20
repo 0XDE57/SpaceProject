@@ -240,9 +240,10 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     }
     
     private void drawCompass(Entity entity) {
+        //set alpha
         float alpha = MathUtils.clamp((GameScreen.cam.zoom / 150 / 2), 0, 1);
         if (MathUtils.isEqual(alpha, 0)) return;
-    
+        
         HyperDriveComponent hyper = Mappers.hyper.get(entity);
         if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
             return;
@@ -255,12 +256,15 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         playerPos.set(originalPosition, 0);
         Vector3 pos = GameScreen.cam.project(playerPos);
         
+        float width = 0.5f;
         compassColor.a = alpha;
-        shape.rectLine(pos.x, pos.y, facing.x, facing.y, 0.5f, compassColor, compassColor);
-        
+        shape.rectLine(pos.x, pos.y, facing.x, facing.y, width, compassColor, compassColor);
+    
+        //draw movement direction for navigation assistance, line up vector with target destination
         Color compassHighlight = compassColor;
         ControllableComponent control = Mappers.controllable.get(entity);
         if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight) {
+            width *= 2;
             compassHighlight = Color.GOLD.cpy();
             if (control.boost) {
                 compassHighlight = Color.CYAN.cpy();
@@ -272,7 +276,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         float vel2 = body.getLinearVelocity().len2();
         if (vel2 > 1) {
             Vector2 vel = MyMath.vector(body.getLinearVelocity().angleRad(), 50000);
-            shape.rectLine(pos.x, pos.y, vel.x, vel.y, 0.5f, compassHighlight, compassHighlight);
+            shape.rectLine(pos.x, pos.y, vel.x, vel.y, width, compassHighlight, compassHighlight);
         }
         
         //draw circle; radius = velocity
