@@ -188,6 +188,8 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     @Override
     public boolean scrolled(float amountX, float amountY) {
+        //todo: needs to overide middle clicks setZoomToDefault
+        //  if I scroll while resting, set to nearest zoom level
         if (amountY <= 0) {
             getEngine().getSystem(CameraSystem.class).zoomIn();
         } else {

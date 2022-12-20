@@ -24,15 +24,16 @@ public class ECSUtil {
     public static Component transferComponent(Entity fromEntity, Entity toEntity, Class<? extends Component> componentClass) {
         Component transferredComponent = fromEntity.remove(componentClass);
         if (transferredComponent == null) {
+            /*
             Gdx.app.debug("ECSUtil", "Warning: " + DebugUtil.objString(fromEntity)
                     + " has no " + componentClass.getSimpleName()
-                    + " to give to " + DebugUtil.objString(toEntity));
+                    + " to give to " + DebugUtil.objString(toEntity));*/
             return null;
         }
     
         toEntity.add(transferredComponent);
-        Gdx.app.debug("ECSUtil", "transferComponent: " + DebugUtil.objString(transferredComponent)
-                + ": " + DebugUtil.objString(fromEntity) + " -> " + DebugUtil.objString(toEntity));
+        //Gdx.app.debug("ECSUtil", "transferComponent: " + DebugUtil.objString(transferredComponent)
+        //        + ": " + DebugUtil.objString(fromEntity) + " -> " + DebugUtil.objString(toEntity));
         return transferredComponent;
     }
     
