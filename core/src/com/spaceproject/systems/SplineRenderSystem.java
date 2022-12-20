@@ -64,7 +64,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         //todo: z-index to render player trail above bullet trail
         //todo: fade nicely
         if (spline.style == null) {
-            spline.style = SplineComponent.Style.solid;
+            spline.style = SplineComponent.Style.velocity;
         }
         switch (spline.style) {
             case velocity: renderVelocityPath(spline); break;
@@ -100,8 +100,12 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         //off, on, boost, hyper -> 0, 1, 2, 3
         float velocity = 0;
         byte state = 0;
-        if (spline.style == SplineComponent.Style.state) {
-            if (physics != null) {
+        
+        if (physics != null) {
+            //set velocity
+            velocity = physics.body.getLinearVelocity().len2();
+            
+            if (spline.style == SplineComponent.Style.state) {
                 //set state
                 ControllableComponent control = Mappers.controllable.get(entity);
                 if (control != null) {
@@ -112,17 +116,17 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
                         }
                     }
                 }
+                
                 ShieldComponent shield = Mappers.shield.get(entity);
                 if (shield != null && shield.activate) {
                     state = -2;
                 }
                 
-                //set velocity
-                velocity = physics.body.getLinearVelocity().len2();
                 if (!physics.body.isActive()) {
+                    state = 3;
+    
                     HyperDriveComponent hyper = Mappers.hyper.get(entity);
                     velocity = hyper.speed * hyper.speed;
-                    state = 3;
                 }
             }
         }
