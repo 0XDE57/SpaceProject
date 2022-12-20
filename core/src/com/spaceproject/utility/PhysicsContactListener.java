@@ -269,7 +269,7 @@ public class PhysicsContactListener implements ContactListener {
         if (showGhost) {
             SplineComponent transfered = (SplineComponent) ECSUtil.transferComponent(entityHit, contactP, SplineComponent.class);
             if (transfered != null) {
-                transfered.color = Color.BLACK;
+                transfered.color = new Color(0, 0, 0, 0.4f);
                 transfered.style = SplineComponent.Style.solid;
             }
         }
