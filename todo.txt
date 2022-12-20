@@ -256,14 +256,15 @@ Legend:
     [ ] do damage to things with health, including asteroids
     [ ] death message w/ reason: "stars are hot"
 
-[ ] space station.
-    [ ] orbit's around planet's, ship can dock at.
+[ ] space station
+    [ ] orbit's around planet's, ship can dock at
     [ ] repair ship
 
 [ ] bug: shouldn't be able to control ship during take off and landing
 
 [...] hyperdrive animation
-    [ ] spinup
+    [ ] spool up
+        cancelling hyper should spool down instead of insta reset
     [x] spin
 
 [ ] put wings on ship
