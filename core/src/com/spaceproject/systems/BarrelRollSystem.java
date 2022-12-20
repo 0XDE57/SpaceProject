@@ -20,7 +20,7 @@ public class BarrelRollSystem extends IteratingSystem {
     
     private final Interpolation animInterpolation = Interpolation.pow2;
     private final float strafeMaxRollAngle = 40 * MathUtils.degRad;
-    private final float strafeRollSpeed = 3f;
+    private final float strafeRollSpeed = 4f;
     private final float hyperRollSpeed = 20;
     
     public BarrelRollSystem() {
@@ -33,6 +33,16 @@ public class BarrelRollSystem extends IteratingSystem {
         ControllableComponent control = Mappers.controllable.get(entity);
     
         float rollAmount = strafeRollSpeed * deltaTime;
+    
+        //clamp within
+        //DebugSystem.addDebugText(sprite3D.renderable.angle + "", 10, 10);
+        float s = 360 * MathUtils.degRad;
+        if (sprite3D.renderable.angle > s) {
+            sprite3D.renderable.angle -= s;
+        }
+        if (sprite3D.renderable.angle < -s) {
+            sprite3D.renderable.angle += s;
+        }
         
         //don't allow dodging while shield is active
         ShieldComponent shield = Mappers.shield.get(entity);
@@ -86,6 +96,7 @@ public class BarrelRollSystem extends IteratingSystem {
     
     private void rollLeft(Sprite3DComponent sprite3D, float roll) {
         sprite3D.renderable.angle += roll;
+        //if (sprite3D.renderable.angle)
         //sprite3D.renderable.angle = MathUtils.clamp(sprite3D.renderable.angle, -strafeMaxRollAngle, strafeMaxRollAngle);
     }
     
@@ -95,7 +106,7 @@ public class BarrelRollSystem extends IteratingSystem {
     }
     
     private void stabilizeRoll(Sprite3DComponent sprite3D, float roll) {
-        if (sprite3D.renderable.angle == 0) return;
+        //if (sprite3D.renderable.angle == 0) return;
         
         if (sprite3D.renderable.angle < 0) {
             sprite3D.renderable.angle += roll;
