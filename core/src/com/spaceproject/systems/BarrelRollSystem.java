@@ -86,12 +86,12 @@ public class BarrelRollSystem extends IteratingSystem {
     
     private void rollLeft(Sprite3DComponent sprite3D, float roll) {
         sprite3D.renderable.angle += roll;
-        sprite3D.renderable.angle = MathUtils.clamp(sprite3D.renderable.angle, -strafeMaxRollAngle, strafeMaxRollAngle);
+        //sprite3D.renderable.angle = MathUtils.clamp(sprite3D.renderable.angle, -strafeMaxRollAngle, strafeMaxRollAngle);
     }
     
     private void rollRight(Sprite3DComponent sprite3D, float roll) {
         sprite3D.renderable.angle -= roll;
-        sprite3D.renderable.angle = MathUtils.clamp(sprite3D.renderable.angle, -strafeMaxRollAngle, strafeMaxRollAngle);
+        //sprite3D.renderable.angle = MathUtils.clamp(sprite3D.renderable.angle, -strafeMaxRollAngle, strafeMaxRollAngle);
     }
     
     private void stabilizeRoll(Sprite3DComponent sprite3D, float roll) {
