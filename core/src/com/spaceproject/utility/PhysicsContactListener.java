@@ -239,22 +239,21 @@ public class PhysicsContactListener implements ContactListener {
         damageEntity.add(new RemoveComponent());
     
         //add projectile ghost (fx)
-        //explodeProjectile(contact, damageEntity, attackedEntity);
-    
-        explodeProjectile(contact);
+        explodeProjectile(contact, damageEntity, true);
     }
     
-    private void explodeProjectile(Contact contact) {
-        
+    private void explodeProjectile(Contact contact, Entity entityHit, boolean showGhost) {
         WorldManifold manifold = contact.getWorldManifold();
         //for (Vector2 p : manifold.getPoints()) {
         Vector2 p = manifold.getPoints()[0];
         
         Entity contactP = new Entity();
         
+        //create entity at point of contact
         TransformComponent trans = new TransformComponent();
         trans.pos.set(p);
         contactP.add(trans);
+        //todo: transfer velocity from object hit
         
         contactP.add(new RingEffectComponent());
         
@@ -262,47 +261,25 @@ public class PhysicsContactListener implements ContactListener {
         expire.timer = new SimpleTimer(2000, true);
         contactP.add(expire);
         
+        //todo: better particle this one is ugly
         ParticleComponent particle = new ParticleComponent();
         particle.type = ParticleComponent.EffectType.bulletExplode;
-        contactP.add(particle);
+        //contactP.add(particle);
         
-        engine.addEntity(contactP);
-    }
-    
-    private void explodeProjectile(Contact contact, Entity damageEntity, Entity attackedEntity) {
-        Entity projectileHit = new Entity();
-        
-        TransformComponent trans = new TransformComponent();
-        //trans.pos.set(Mappers.transform.get(attackedEntity).pos);
-        //trans.pos.set(Mappers.physics.get(attackedEntity).body.getPosition());
-        projectileHit.add(trans);
-    
-        projectileHit.add(new RingEffectComponent());
-        
-        ParticleComponent particle = new ParticleComponent();
-        particle.type = ParticleComponent.EffectType.shieldCharge; //todo: make new explode particle effect!
-        projectileHit.add(particle);
-        
-        boolean showGhost = true;
         if (showGhost) {
-            SplineComponent oSpline = Mappers.spline.get(damageEntity);
+            SplineComponent oSpline = Mappers.spline.get(entityHit);
             if (oSpline != null && oSpline.path != null) {
                 SplineComponent spline = new SplineComponent();
                 spline.zOrder = oSpline.zOrder;
                 spline.path = oSpline.path.clone();
                 spline.indexHead = oSpline.indexHead;
-                //spline.path[spline.index].set(spline.path[spline.index-1]);
                 spline.color = Color.BLACK;
                 spline.style = SplineComponent.Style.solid;
-                projectileHit.add(spline);
+                contactP.add(spline);
             }
         }
-    
-        ExpireComponent expire = new ExpireComponent();
-        expire.timer = new SimpleTimer(2000, true);
-        projectileHit.add(expire);
         
-        engine.addEntity(projectileHit);
+        engine.addEntity(contactP);
     }
     
 }

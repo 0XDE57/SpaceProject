@@ -35,6 +35,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
     private final ShapeRenderer shape;
     private final Color tmpColor = new Color();
     private int maxPathSize = 1000;
+    private float alpha = 1;
     
     public SplineRenderSystem() {
         super(Family.all(SplineComponent.class, TransformComponent.class).get(), new ZComparator());
@@ -48,6 +49,9 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         if (hudSystem != null && !hudSystem.isDraw()) {
             return;
         }
+    
+        alpha = MathUtils.clamp((GameScreen.cam.zoom / 100), 0, 1);
+        if (MathUtils.isEqual(alpha, 0)) return;
         
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -138,7 +142,9 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         }
         
         spline.path[spline.indexHead].set(transform.pos.x, transform.pos.y, velocity);
-        spline.state[spline.indexHead] = state;
+        if (spline.style == SplineComponent.Style.state) {
+            spline.state[spline.indexHead] = state;
+        }
         
         //roll index
         spline.indexHead++;
@@ -168,6 +174,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
                 //z = linearVelocity [0 - max box2d] then hyperdrive velocity
                 float velocity = p.z / B2DPhysicsSystem.getVelocityLimit2();
                 tmpColor.set(Color.BLACK.cpy().lerp(spline.color, velocity));
+                tmpColor.a = alpha;
                 if (velocity > 1.01f) {
                     //hyperdrive travel
                     tmpColor.set(1, 1, 1, 1);
@@ -230,7 +237,11 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
             
             // don't draw head to tail
             if (indexWrap != spline.indexHead) {
-                shape.line(p.x, p.y, p2.x, p2.y, Color.GREEN,  Color.BLUE);
+                if (spline.color == null) {
+                    shape.line(p.x, p.y, p2.x, p2.y, Color.GREEN, Color.BLUE);
+                } else {
+                    shape.line(p.x, p.y, p2.x, p2.y, spline.color, spline.color);
+                }
             } else {
                 //debug draw head to tail
                 if (debugDrawHeadTail) {
