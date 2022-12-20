@@ -36,6 +36,8 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
     private final Color tmpColor = new Color();
     private int maxPathSize = 1000;
     private float alpha = 1;
+    private float animation;
+    private float animSpeed = 2f;
     
     public SplineRenderSystem() {
         super(Family.all(SplineComponent.class, TransformComponent.class).get(), new ZComparator());
@@ -52,6 +54,8 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
     
         alpha = MathUtils.clamp((GameScreen.cam.zoom / 100), 0, 1);
         if (MathUtils.isEqual(alpha, 0)) return;
+        
+        animation += animSpeed * delta;
         
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -215,6 +219,11 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
                     default: color = Color.BLACK;
                 }
                 shape.line(p.x, p.y, p2.x, p2.y, color, color);
+                if (spline.state[indexWrap] == 3) {
+                    shape.rectLine(p.x, p.y, p2.x, p2.y, (float) (0.5f * Math.sin(animation * 3.14 * 0.5)), Color.RED, Color.RED);
+                    shape.rectLine(p.x, p.y, p2.x, p2.y, (float) (0.5f * Math.sin(animation)), Color.MAGENTA, Color.CYAN);
+                    shape.rectLine(p.x, p.y, p2.x, p2.y, (float) (0.5f * Math.sin(animation * 3.14)), Color.GOLD, Color.GREEN);
+                }
             } else {
                 //debug draw head to tail
                 if (debugDrawHeadTail) {
