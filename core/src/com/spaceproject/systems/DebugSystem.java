@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -66,6 +67,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     //textures
     private final Texture texCompBack = TextureFactory.createTile(Color.GRAY);
     private final Texture texCompSeparator = TextureFactory.createTile(Color.RED);
+    GlyphLayout versionLayout;
     
     //entity storage
     private final Array<Entity> objects;
@@ -114,6 +116,8 @@ public class DebugSystem extends IteratingSystem implements Disposable {
             }
         };
         GameScreen.getStage().addListener(listener);
+    
+        versionLayout = new GlyphLayout(fontLarge, SpaceProject.VERSION);
     }
     
     @Override
@@ -192,81 +196,6 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         objects.add(entity);
     }
     
-    private void updateKeyToggles() {
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_8)) {
-            GameScreen.adjustGameTime(2000);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_9)) {
-            GameScreen.adjustGameTime(-2000);
-        }
-        
-    
-        if (Gdx.input.isKeyJustPressed(keyCFG.toggleEngineViewer)) {
-            engineView.toggle();
-        }
-    
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
-            GameScreen.getStage().setDebugAll(!GameScreen.getStage().isDebugAll());
-        }
-        
-        //toggle debug
-        if (Gdx.input.isKeyJustPressed(keyCFG.toggleDebug)) {
-            debugCFG.drawDebugUI = !debugCFG.drawDebugUI;
-            Gdx.app.log(this.getClass().getSimpleName(), "DEBUG UI: " + debugCFG.drawDebugUI);
-        }
-        
-        //toggle pos
-        if (Gdx.input.isKeyJustPressed(keyCFG.togglePos)) {
-            debugCFG.drawPos = !debugCFG.drawPos;
-            if (debugCFG.drawComponentList) {
-                debugCFG.drawComponentList = false;
-            }
-            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw pos: " + debugCFG.drawPos);
-        }
-        
-        //toggle components
-        if (Gdx.input.isKeyJustPressed(keyCFG.toggleComponents)) {
-            debugCFG.drawComponentList = !debugCFG.drawComponentList;
-            if (debugCFG.drawPos) {
-                debugCFG.drawPos = false;
-            }
-            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw component list: " + debugCFG.drawComponentList);
-        }
-        
-        //toggle bounds
-        if (Gdx.input.isKeyJustPressed(keyCFG.toggleBounds)) {
-            debugCFG.box2DDebugRender = !debugCFG.box2DDebugRender;
-            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw bounds: " + debugCFG.box2DDebugRender);
-        }
-        
-        //toggle fps
-        if (Gdx.input.isKeyJustPressed(keyCFG.toggleFPS)) {
-            debugCFG.drawFPS = !debugCFG.drawFPS;
-            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw FPS: " + debugCFG.drawFPS);
-        }
-        
-        //toggle orbit circle
-        if (Gdx.input.isKeyJustPressed(keyCFG.toggleOrbit)) {
-            debugCFG.drawOrbitPath = !debugCFG.drawOrbitPath;
-            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw orbit path: " + debugCFG.drawOrbitPath);
-        }
-        
-        //toggle vector
-        if (Gdx.input.isKeyJustPressed(keyCFG.toggleVector)) {
-            debugCFG.drawVelocities = !debugCFG.drawVelocities;
-            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw vectors: " + debugCFG.drawVelocities);
-        }
-        
-        
-        debugRenderer.setDrawVelocities(debugCFG.drawVelocities);
-        debugRenderer.setDrawBodies(debugCFG.drawBodies);
-        debugRenderer.setDrawJoints(debugCFG.drawJoints);
-        debugRenderer.setDrawAABBs(debugCFG.drawAABBs);
-        debugRenderer.setDrawInactiveBodies(debugCFG.drawInactiveBodies);
-        debugRenderer.setDrawVelocities(debugCFG.drawVelocities);
-        debugRenderer.setDrawContacts(debugCFG.drawContacts);
-    }
-    
     private void drawFPS(int x, int y) {
         int fps = Gdx.graphics.getFramesPerSecond();
         Color fpsColor = fps >= 120 ? Color.SKY : fps > 45 ? Color.WHITE : fps > 30 ? Color.YELLOW : Color.RED;
@@ -292,17 +221,23 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         //OpenGL profiler
         fontSmall.draw(batch, GameScreen.getProfilerString(), x, y - (lineHeight * linePos++));
         
-        //world info, cam, time, seed
-        String camera = String.format("Pos:  %s %s  Zoom:%3$.2f", (int) cam.position.x, (int) cam.position.y, cam.zoom);
-        fontLarge.draw(batch, camera, Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight);
-        fontLarge.draw(batch, "Time: " + MyMath.formatDuration(GameScreen.getGameTimeCurrent())
-                + " (" + GameScreen.getGameTimeCurrent() + ")", Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 );
-        fontLarge.draw(batch, "Seed: " + GameScreen.getGalaxySeed(), Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight *2);
+        //time
+        float worldInfoX = Gdx.graphics.getWidth() * 0.5f;
+        fontLarge.draw(batch, MyMath.formatDuration(GameScreen.getGameTimeCurrent())
+                + " (" + GameScreen.getGameTimeCurrent() + ")", worldInfoX, Gdx.graphics.getHeight() - 10);
+        
+        //cam position and zoom
+        int zoomLevel = getEngine().getSystem(CameraSystem.class).getZoomLevel();
+        String camera = (int)cam.position.x + ", " + (int)cam.position.y
+                + " [" + zoomLevel + "] " + MyMath.round(cam.zoom, 2);
+        fontLarge.draw(batch, camera, worldInfoX, Gdx.graphics.getHeight() - 10 - lineHeight);
     
+        //seed
+        String seed = "Seed: " + GameScreen.getGalaxySeed();
         if (!GameScreen.inSpace()) {
-            fontLarge.draw(batch, "Planet: " + GameScreen.getPlanetSeed(),
-                    Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 10 - lineHeight * 2);
+            seed += " - Planet: " + GameScreen.getPlanetSeed();
         }
+        fontLarge.draw(batch, seed, worldInfoX, Gdx.graphics.getHeight() - 10 - lineHeight * 2);
         
         //view threads
         float bottomY = 10;
@@ -317,6 +252,8 @@ public class DebugSystem extends IteratingSystem implements Disposable {
             }
             fontSmall.draw(batch, threadSetInfo, x, bottomY + ((lineHeight * 0.5f) * linePos));
         }
+    
+        fontLarge.draw(batch, versionLayout, Gdx.graphics.getWidth() - versionLayout.width -10, lineHeight + 10);
     }
 
     private void drawEntityList() {
@@ -540,6 +477,81 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         debugTexts.clear();
     }
     //endregion
+    
+    private void updateKeyToggles() {
+        if (Gdx.input.isKeyPressed(Input.Keys.NUM_8)) {
+            GameScreen.adjustGameTime(2000);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.NUM_9)) {
+            GameScreen.adjustGameTime(-2000);
+        }
+        
+        
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleEngineViewer)) {
+            engineView.toggle();
+        }
+        
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
+            GameScreen.getStage().setDebugAll(!GameScreen.getStage().isDebugAll());
+        }
+        
+        //toggle debug
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleDebug)) {
+            debugCFG.drawDebugUI = !debugCFG.drawDebugUI;
+            Gdx.app.log(this.getClass().getSimpleName(), "DEBUG UI: " + debugCFG.drawDebugUI);
+        }
+        
+        //toggle pos
+        if (Gdx.input.isKeyJustPressed(keyCFG.togglePos)) {
+            debugCFG.drawPos = !debugCFG.drawPos;
+            if (debugCFG.drawComponentList) {
+                debugCFG.drawComponentList = false;
+            }
+            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw pos: " + debugCFG.drawPos);
+        }
+        
+        //toggle components
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleComponents)) {
+            debugCFG.drawComponentList = !debugCFG.drawComponentList;
+            if (debugCFG.drawPos) {
+                debugCFG.drawPos = false;
+            }
+            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw component list: " + debugCFG.drawComponentList);
+        }
+        
+        //toggle bounds
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleBounds)) {
+            debugCFG.box2DDebugRender = !debugCFG.box2DDebugRender;
+            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw bounds: " + debugCFG.box2DDebugRender);
+        }
+        
+        //toggle fps
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleFPS)) {
+            debugCFG.drawFPS = !debugCFG.drawFPS;
+            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw FPS: " + debugCFG.drawFPS);
+        }
+        
+        //toggle orbit circle
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleOrbit)) {
+            debugCFG.drawOrbitPath = !debugCFG.drawOrbitPath;
+            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw orbit path: " + debugCFG.drawOrbitPath);
+        }
+        
+        //toggle vector
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleVector)) {
+            debugCFG.drawVelocities = !debugCFG.drawVelocities;
+            Gdx.app.log(this.getClass().getSimpleName(), "[debug] draw vectors: " + debugCFG.drawVelocities);
+        }
+        
+        
+        debugRenderer.setDrawVelocities(debugCFG.drawVelocities);
+        debugRenderer.setDrawBodies(debugCFG.drawBodies);
+        debugRenderer.setDrawJoints(debugCFG.drawJoints);
+        debugRenderer.setDrawAABBs(debugCFG.drawAABBs);
+        debugRenderer.setDrawInactiveBodies(debugCFG.drawInactiveBodies);
+        debugRenderer.setDrawVelocities(debugCFG.drawVelocities);
+        debugRenderer.setDrawContacts(debugCFG.drawContacts);
+    }
     
     @Override
     public void removedFromEngine(Engine engine) {
