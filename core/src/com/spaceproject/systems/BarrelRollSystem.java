@@ -21,6 +21,7 @@ public class BarrelRollSystem extends IteratingSystem {
     private final Interpolation animInterpolation = Interpolation.pow2;
     private final float strafeMaxRollAngle = 40 * MathUtils.degRad;
     private final float strafeRollSpeed = 3f;
+    private final float hyperRollSpeed = 20;
     
     public BarrelRollSystem() {
         super(Family.all(Sprite3DComponent.class).get());
@@ -40,10 +41,12 @@ public class BarrelRollSystem extends IteratingSystem {
             stabilizeRoll(sprite3D, rollAmount);
             return;
         }
-        //don't allow roll or dodge while hyperdrive active
+        
+        //force roll while hyperdrive active
         HyperDriveComponent hyper = Mappers.hyper.get(entity);
         if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
-            sprite3D.renderable.angle = 0; //force no roll
+            sprite3D.renderable.angle += hyperRollSpeed * deltaTime;
+            //and don't allow dodge while hyper so exit here
             return;
         }
         
@@ -83,26 +86,22 @@ public class BarrelRollSystem extends IteratingSystem {
     
     private void rollLeft(Sprite3DComponent sprite3D, float roll) {
         sprite3D.renderable.angle += roll;
-        if (sprite3D.renderable.angle > strafeMaxRollAngle) {
-            sprite3D.renderable.angle = strafeMaxRollAngle;
-        }
+        sprite3D.renderable.angle = MathUtils.clamp(sprite3D.renderable.angle, -strafeMaxRollAngle, strafeMaxRollAngle);
     }
     
     private void rollRight(Sprite3DComponent sprite3D, float roll) {
         sprite3D.renderable.angle -= roll;
-        if (sprite3D.renderable.angle < -strafeMaxRollAngle) {
-            sprite3D.renderable.angle = -strafeMaxRollAngle;
-        }
+        sprite3D.renderable.angle = MathUtils.clamp(sprite3D.renderable.angle, -strafeMaxRollAngle, strafeMaxRollAngle);
     }
     
     private void stabilizeRoll(Sprite3DComponent sprite3D, float roll) {
-        if (sprite3D.renderable.angle != 0) {
-            if (sprite3D.renderable.angle < 0) {
-                sprite3D.renderable.angle += roll;
-            }
-            if (sprite3D.renderable.angle > 0) {
-                sprite3D.renderable.angle -= roll;
-            }
+        if (sprite3D.renderable.angle == 0) return;
+        
+        if (sprite3D.renderable.angle < 0) {
+            sprite3D.renderable.angle += roll;
+        }
+        if (sprite3D.renderable.angle > 0) {
+            sprite3D.renderable.angle -= roll;
         }
     }
     

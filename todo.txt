@@ -262,7 +262,9 @@ Legend:
 
 [ ] bug: shouldn't be able to control ship during take off and landing
 
-[ ] hyperdrive spinup
+[...] hyperdrive animation
+    [ ] spinup
+    [x] spin
 
 [ ] put wings on ship
 
