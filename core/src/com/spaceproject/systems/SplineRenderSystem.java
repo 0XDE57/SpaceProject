@@ -123,7 +123,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
                 //set state
                 ControllableComponent control = Mappers.controllable.get(entity);
                 if (control != null) {
-                    if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight) {
+                    if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight || control.boost) {
                         state = 1;
                         if (control.boost) {
                             state = 2;
