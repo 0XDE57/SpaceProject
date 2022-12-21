@@ -40,7 +40,7 @@ public class GameMenu extends VisWindow {
     private boolean retainPositionOnOpen = true;
     private boolean isResizable = true;
     private boolean isMovable = true;
-    private int edgePadding = 150;
+    private float ratio = 0.66f;//scaling, how much screen does menu cover
     private boolean debugShowPlaceholderTests = true;
     
     public GameMenu(GameScreen game, boolean vertical) {
@@ -146,7 +146,12 @@ public class GameMenu extends VisWindow {
     }
     
     public void resetPosition() {
-        setSize(Gdx.graphics.getWidth() - edgePadding, Gdx.graphics.getHeight() - edgePadding);
+        setSize(Gdx.graphics.getWidth() * ratio, Gdx.graphics.getHeight() * ratio);
+        
+        if (Gdx.graphics.getWidth() < 400) {
+            setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        }
+        
         centerWindow();
     }
     
