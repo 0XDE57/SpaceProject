@@ -252,6 +252,9 @@ Legend:
     [ ! ] = notes
     [ * ] = exceptions
 
+[ ] breaks. no more relying on debug insta stop. must have stop
+    [ ] X on controller
+
 [ ] touch the sun and die!
     [ ] do damage to things with health, including asteroids
 
