@@ -56,6 +56,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         
         invertShader = new ShaderProgram(Gdx.files.internal("shaders/invert.vert"), Gdx.files.internal("shaders/invert.frag"));
         if (invertShader.isCompiled()) {
+            //spriteBatch.setShader(invertShader);
             Gdx.app.log(this.getClass().getSimpleName(), "shader compiled successfully!");
         } else {
             Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + grayscaleShader.getLog());
@@ -78,7 +79,15 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
             
         }*/
         
-        //grayscaleShader.
+        float blend = 0f;
+        //0 at 1 or less
+        //1 at max zoom
+        CameraSystem cam = getEngine().getSystem(CameraSystem.class);
+        if (cam.getZoomLevel() == 17) {
+            blend = 1f;
+        }
+        grayscaleShader.bind();
+        grayscaleShader.setUniformf("u_blend", blend);
         
         spriteBatch.begin();
         drawParallaxTiles();
