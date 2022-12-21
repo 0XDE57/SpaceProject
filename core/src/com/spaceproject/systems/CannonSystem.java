@@ -63,7 +63,7 @@ public class CannonSystem extends IteratingSystem {
         if (GameScreen.isDebugMode) {
             //Cheat for debug: fast firing and infinite ammo
             cannon.curAmmo = cannon.maxAmmo;
-            cannon.timerFireRate.setCanDoEvent();
+            //cannon.timerFireRate.setCanDoEvent();
             //cannon.timerFireRate.setInterval(80, false);
         }
         

@@ -11,6 +11,7 @@ import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.components.BarrelRollComponent;
+import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DashComponent;
@@ -28,7 +29,9 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     private float leftStickVertAxis;
     private float rightStickHorAxis;
     private float rightStickVertAxis;
-    private final float deadZone = 0.25f;
+    private float l2, r2;
+    private final float stickDeadzone = 0.5f;
+    private final float triggerDeadZone = 0.1f;
     
     private final SimpleTimer cameraDelayTimer = new SimpleTimer(400);
     
@@ -60,7 +63,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     public void update(float deltaTime) {
         super.update(deltaTime);
     
-        if (Math.abs(rightStickVertAxis) >= deadZone) {
+        if (Math.abs(rightStickVertAxis) >= stickDeadzone) {
             if (cameraDelayTimer.tryEvent()) {
                 if (rightStickVertAxis >= 0) {
                     getEngine().getSystem(CameraSystem.class).zoomOut();
@@ -81,20 +84,23 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         ControllableComponent control = Mappers.controllable.get(player);
         
         if (buttonCode == controller.getMapping().buttonA) {
-            control.attack = buttonDown;
-            handled = true;
+            control.boost = buttonDown;
+            
+            if (control.boost) {
+                control.movementMultiplier = 1;
+            }
             
             DashComponent dash = Mappers.dash.get(player);
             if (dash != null) {
                 dash.activate = buttonDown;
-                handled = true;
             }
+            handled = true;
         }
         
         if (buttonCode == controller.getMapping().buttonB) {
-            ShieldComponent shield = Mappers.shield.get(player);
-            if (shield != null) {
-                shield.activate = buttonDown;
+            HyperDriveComponent hyperDrive = Mappers.hyper.get(player);
+            if (hyperDrive != null) {
+                hyperDrive.activate = buttonDown;
                 handled = true;
             }
         }
@@ -105,16 +111,12 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         }
         
         if (buttonCode == controller.getMapping().buttonX) {
-            control.boost = buttonDown;
+            control.attack = buttonDown;
             handled = true;
         }
     
         if (buttonCode == controller.getMapping().buttonDpadUp) {
-            HyperDriveComponent hyperDrive = Mappers.hyper.get(player);
-            if (hyperDrive != null) {
-                hyperDrive.activate = buttonDown;
-                handled = true;
-            }
+        
         }
         
         if (buttonCode == controller.getMapping().buttonDpadDown) {
@@ -192,7 +194,12 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         //reset cam
         if ((buttonCode == controller.getMapping().buttonRightStick) && buttonDown) {
             GameScreen.resetRotation();
-            getEngine().getSystem(CameraSystem.class).setZoomToDefault(player);
+            CameraSystem camera = getEngine().getSystem(CameraSystem.class);
+            if (camera.getZoomLevel() == 2) {
+                camera.zoomOutMax();
+            } else {
+                camera.setZoomToDefault(player);
+            }
             handled = true;
         }
         
@@ -221,6 +228,8 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     
     @Override
     public boolean axisMoved(Controller controller, int axisCode, float value) {
+        //Gdx.app.log("control:", axisCode + ", " + value);
+        //controller.getMapping().buttonL2 = ?
         if (axisCode == controller.getMapping().axisLeftX) {
             leftStickHorAxis = value;
         }
@@ -233,10 +242,43 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         if (axisCode == controller.getMapping().axisRightY) {
             rightStickVertAxis = value;
         }
+        if (axisCode == 4 /*controller.getMapping().buttonL2*/) {
+            l2 = value;
+        }
+        if (axisCode == 5 /* controller.getMapping().buttonR2*/) {
+            r2 = value;
+        }
+    
+        Entity player = players.first();
+        ControllableComponent control = Mappers.controllable.get(player);
+        if (r2 > triggerDeadZone) {
+            control.attack = true;
+            
+            CannonComponent cannon = Mappers.cannon.get(player);
+            if (cannon != null) {
+                int baseRate = 300;
+                int minRate = 40;
+                long rateOfFire = (long) (baseRate * (1 - r2));
+                if (rateOfFire < minRate) {
+                    rateOfFire = minRate;
+                }
+                cannon.timerFireRate.setInterval(rateOfFire, false);
+            }
+        } else {
+            control.attack = false;
+        }
+    
+        ShieldComponent shield = Mappers.shield.get(player);
+        if (shield != null) {
+            if (l2 > triggerDeadZone) {
+                shield.activate = true;
+            } else {
+                shield.activate = false;
+            }
+        }
         
-        ControllableComponent control = Mappers.controllable.get(players.first());
         float dist = Math.abs(MyMath.distance(0, 0, leftStickHorAxis, leftStickVertAxis));
-        if (dist >= deadZone) {
+        if (dist >= stickDeadzone) {
             //face stick direction
             control.angleTargetFace = MyMath.angle2(0, 0, -leftStickVertAxis, leftStickHorAxis);
             control.movementMultiplier = MathUtils.clamp(dist, 0, 1);
@@ -245,7 +287,9 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             //notify mouse that controller has current focus
             getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus = true;
         } else {
-            control.moveForward = false;
+            if (!control.boost) {
+                control.moveForward = false;
+            }
         }
 
         return false;
