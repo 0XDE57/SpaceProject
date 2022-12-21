@@ -46,18 +46,15 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         spriteBatch = new SpriteBatch();
         
         grayscaleShader = new ShaderProgram(Gdx.files.internal("shaders/grayscale.vert"), Gdx.files.internal("shaders/grayscale.frag"));
-        if (grayScale) {
-            if (grayscaleShader.isCompiled()) {
-                spriteBatch.setShader(grayscaleShader);
-                Gdx.app.log(this.getClass().getSimpleName(), "shader compiled successfully!");
-            } else {
-                Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + grayscaleShader.getLog());
-            }
+        if (grayscaleShader.isCompiled()) {
+            spriteBatch.setShader(grayscaleShader);
+            Gdx.app.log(this.getClass().getSimpleName(), "shader compiled successfully!");
+        } else {
+            Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + grayscaleShader.getLog());
         }
         
         invertShader = new ShaderProgram(Gdx.files.internal("shaders/invert.vert"), Gdx.files.internal("shaders/invert.frag"));
         if (invertShader.isCompiled()) {
-            //spriteBatch.setShader(invertShader);
             Gdx.app.log(this.getClass().getSimpleName(), "shader compiled successfully!");
         } else {
             Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + grayscaleShader.getLog());
@@ -71,7 +68,6 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         
         // load and unload tiles
         updateTiles();
-        
         
         if (GameScreen.isHyper()) {
             //invert
