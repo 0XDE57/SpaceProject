@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -16,6 +17,7 @@ import com.spaceproject.components.CamTargetComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 
@@ -23,21 +25,29 @@ public class CameraSystem extends IteratingSystem {
     
     private final OrthographicCamera cam;
     
+    private byte maxZoomLevel = 17;
     private byte zoomLevel = 2;
     private float zoomTarget = 1;
     private final float zoomSpeed = 2;
     private final float zoomSetThreshold = 0.001f;
     private final float minZoom = 0f;
     private final float maxZoom = 100000;
+    
     private final float smoothFollowSpeed = 2f;
     private float maxOffsetFromTarget = 9f;
     private final Vector2 offsetFromTarget = new Vector2();
+    
     private final int frames = 10; //how many frames to average lerp over
     private final Queue<Vector2> averageTarget = new Queue<>();
     private final Vector3 average = new Vector3();
     
     private ImmutableArray<Entity> focalPoints;
-    private boolean inCombat = false;
+    
+    private Mode mode = Mode.lockTarget;
+    
+    enum Mode {
+        free, lerpTarget, lockTarget, combat
+    }
     
     public CameraSystem() {
         super(Family.all(CameraFocusComponent.class, TransformComponent.class).get());
@@ -52,15 +62,30 @@ public class CameraSystem extends IteratingSystem {
     
     @Override
     public void processEntity(Entity entity, float delta) {
-        Vector2 playerPosition = Mappers.transform.get(entity).pos;
+        Vector2 pos = Mappers.transform.get(entity).pos;
     
-        //lockToTarget(playerPosition);
-        lerpToTarget(playerPosition, delta);
+        switch (mode) {
+            case lockTarget: lockToTarget(pos); break;
+            case lerpTarget: lerpToTarget(pos, delta); break;
+            case combat: {
+                //midpoint between mouse and player to pull you away
+                Vector3 targetPos = GameScreen.cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+                //lockToTarget(targetPos);
+                Vector2 midpoint = new Vector2(targetPos.x, targetPos.y).scl(0.5f);
+                //lockToTarget(pos.cpy().add(midpoint));
+            } break;
+            case free: {
+                //just chase mouse relative to center screen
+                Vector3 targetPos = GameScreen.cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+                //lockToTarget(targetPos);
+            }
+        }
     
+        
         
         //if (focalPoints.size() > 0) {
         //    //todo: broken, need smooth transition between states
-        //    //focusCombatCamera(playerPosition, delta);
+        //    //focusCombatCamera(pos, delta);
         //    if (focalPoints.size() == 0) {
         //        //inCombat = false;
         //    }
@@ -73,13 +98,13 @@ public class CameraSystem extends IteratingSystem {
             //DebugSystem.addDebugText(MyMath.formatVector2(midpoint, 1) + "", 500, 500);
     
             //set camera to focal point between targets, lock once acquired.
-            //lockToTarget(playerPosition);
-            //lerpToTarget(playerPosition.cpy().add(midpoint), delta);
+            //lockToTarget(pos);
+            //lerpToTarget(pos.cpy().add(midpoint), delta);
             
             
             //set camera position to entity
-            //lerpToTarget(playerPosition, delta);
-            //lockToTarget(playerPosition);
+            //lerpToTarget(pos, delta);
+            //lockToTarget(pos);
             
             //if (focalPoints.size() > 0) {
                 //inCombat = true;
@@ -91,7 +116,7 @@ public class CameraSystem extends IteratingSystem {
         int padding = 0;
         Rectangle focalWindow = new Rectangle(padding, padding,
                 Gdx.graphics.getWidth()-padding, Gdx.graphics.getHeight()-padding);
-        Vector3 playerScreenPos = cam.project(new Vector3(playerPosition, 0));
+        Vector3 playerScreenPos = cam.project(new Vector3(pos, 0));
         int edgeTop = Gdx.graphics.getWidth();
         int edgeBottom = 0;
         int edgeLeft = 0;
@@ -113,16 +138,16 @@ public class CameraSystem extends IteratingSystem {
         }
         
         if (playerScreenPos.x < focalWindow.x) {
-            cam.position.x += /*playerPosition.x -* (playerScreenPos.x - focalWindow.x);//playerPosition.x - (playerScreenPos.x - edgeLeft);
+            cam.position.x += /*pos.x -* (playerScreenPos.x - focalWindow.x);//pos.x - (playerScreenPos.x - edgeLeft);
         }
         if (playerScreenPos.y < focalWindow.y) {
-            //cam.position.x = playerPosition.y - focalWindow.y;
+            //cam.position.x = pos.y - focalWindow.y;
         }
         if (playerScreenPos.x > focalWindow.width) {
-            //cam.position.x = playerPosition.x - focalWindow.width;
+            //cam.position.x = pos.x - focalWindow.width;
         }
         if (playerScreenPos.y > focalWindow.height) {
-            //cam.position.y = playerPosition.y - focalWindow.height;
+            //cam.position.y = pos.y - focalWindow.height;
         }
         
         
@@ -139,7 +164,12 @@ public class CameraSystem extends IteratingSystem {
         }
     */
         
+        //clamp lerp offset so character remains on screen
+        clampOffset(pos);
+        
         animateZoom(delta);
+        
+        debugCameraControls(delta);
         
         cam.update();
     }
@@ -166,8 +196,12 @@ public class CameraSystem extends IteratingSystem {
         }
         average.scl(1.0f / averageTarget.size);
         cam.position.set(average);
+
+    }
     
-        //clamp lerp offset so character remains on screen
+    private void clampOffset(Vector2 pos) {
+        //todo: set offset max offset to scale based on thirds
+        
         offsetFromTarget.set(pos.x - cam.position.x, pos.y - cam.position.y);
         if (offsetFromTarget.len() > maxOffsetFromTarget) {
             Vector2 clamped = offsetFromTarget.clamp(0, maxOffsetFromTarget);
@@ -251,7 +285,7 @@ public class CameraSystem extends IteratingSystem {
     public void setZoomZero() {
         zoomLevel = -1;
         zoomTarget = getZoomForLevel(zoomLevel);
-        Gdx.app.debug(this.getClass().getSimpleName(), "zoom0: " + zoomTarget + " : " + zoomLevel);
+        //Gdx.app.debug(this.getClass().getSimpleName(), "zoom0: " + zoomTarget + " : " + zoomLevel);
     }
     
     public float setZoomToDefault(Entity entity) {
@@ -261,7 +295,7 @@ public class CameraSystem extends IteratingSystem {
             zoomLevel = 1;//-> 0.5f
         }
         zoomTarget = getZoomForLevel(zoomLevel);
-        Gdx.app.debug(this.getClass().getSimpleName(), "default zoom: " + zoomTarget + " : " + zoomLevel);
+        //Gdx.app.debug(this.getClass().getSimpleName(), "default zoom: " + zoomTarget + " : " + zoomLevel);
         return zoomTarget;
     }
     
@@ -272,9 +306,14 @@ public class CameraSystem extends IteratingSystem {
     }
     
     public void zoomOut() {
-        if (zoomLevel >= 17) return;
+        if (zoomLevel >= maxZoomLevel) return;
         zoomTarget = getZoomForLevel(++zoomLevel);
         //Gdx.app.debug(this.getClass().getSimpleName(), "zoomOut: " + zoomTarget + " : " + zoomLevel);
+    }
+    
+    public void zoomOutMax() {
+        zoomLevel = (byte) (maxZoomLevel-1);
+        zoomOut();
     }
     
     /** iter: -1,    0,   1, 2, 3, 4, 5, 6,  7, 8...
@@ -290,6 +329,10 @@ public class CameraSystem extends IteratingSystem {
         }
     }
     
+    public byte getZoomLevel() {
+        return zoomLevel;
+    }
+    
     private void animateZoom(float delta) {
         cam.zoom = MathUtils.lerp(cam.zoom, zoomTarget, zoomSpeed * delta);
         
@@ -301,5 +344,15 @@ public class CameraSystem extends IteratingSystem {
         cam.zoom = MathUtils.clamp(cam.zoom, minZoom, maxZoom);
     }
     //endregion
+    
+    private void debugCameraControls(float delta) {
+        float angle = 5f * delta;
+        if (Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
+            cam.rotate(angle);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
+            cam.rotate(-angle);
+        }
+    }
     
 }
