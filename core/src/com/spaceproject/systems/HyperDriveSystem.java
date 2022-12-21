@@ -84,7 +84,7 @@ public class HyperDriveSystem extends IteratingSystem {
         float spin = 50.0f * MathUtils.randomSign();
         physicsComp.body.setAngularVelocity(spin);
         //add tiny bit of movement
-        physicsComp.body.setLinearVelocity(MyMath.vector(bodyAngle, 2));
+        physicsComp.body.setLinearVelocity(MyMath.vector(bodyAngle, 999999));
         //physicsComp.body.setLinearVelocity(0, 0); //freeze
     }
     
