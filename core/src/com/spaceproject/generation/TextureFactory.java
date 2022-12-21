@@ -283,9 +283,9 @@ public class TextureFactory {
             // draw body
             if (yY == 0 || yY == width) {
                 // if first or last position of texture, "cap" it to complete the edging
-                pixmap.setColor(Color.LIGHT_GRAY);
+                pixmap.setColor(Color.WHITE);
             } else {
-                pixmap.setColor(Color.DARK_GRAY);
+                pixmap.setColor(Color.BLACK);
             }
             
             if (!debugImage) {
