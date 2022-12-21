@@ -48,7 +48,7 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(OrbitSystem.class, 60, true, true, false, true, true));
         systems.add(new SysCFG(WorldWrapSystem.class, 65, true, false, true, true, true));
         
-        systems.add(new SysCFG(B2DPhysicsSystem.class, 70, true, true, true, true, true));
+        systems.add(new SysCFG(Box2DPhysicsSystem.class, 70, true, true, true, true, true));
         //NOTE: chargecannon ghost charge rendering works better after physics system has updated the transforms. otherwise jitter while movement
         systems.add(new SysCFG(ChargeCannonSystem.class, 71, true, true, true, true, true));
         

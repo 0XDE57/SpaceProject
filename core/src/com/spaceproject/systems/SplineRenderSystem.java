@@ -176,7 +176,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
             // don't draw head to tail
             if (indexWrap != spline.indexHead) {
                 //z = linearVelocity [0 - max box2d] then hyperdrive velocity
-                float velocity = p.z / B2DPhysicsSystem.getVelocityLimit2();
+                float velocity = p.z / Box2DPhysicsSystem.getVelocityLimit2();
                 tmpColor.set(Color.BLACK.cpy().lerp(spline.color, velocity));
                 tmpColor.a = alpha;
                 if (velocity > 1.01f) {

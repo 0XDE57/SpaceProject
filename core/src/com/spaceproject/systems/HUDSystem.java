@@ -461,7 +461,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             return;
         }
 
-        float velocity = physics.body.getLinearVelocity().len() / B2DPhysicsSystem.getVelocityLimit();
+        float velocity = physics.body.getLinearVelocity().len() / Box2DPhysicsSystem.getVelocityLimit();
         float barRatio = MathUtils.clamp(velocity * width, 0,  width);
         float center = (width * 0.5f) - (barRatio * 0.5f);
         shape.rect(x + center, y, barRatio, height);

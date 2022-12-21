@@ -14,7 +14,7 @@ import com.spaceproject.generation.BodyFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.systems.AsteroidRenderSystem;
-import com.spaceproject.systems.B2DPhysicsSystem;
+import com.spaceproject.systems.Box2DPhysicsSystem;
 import com.spaceproject.systems.ClearScreenSystem;
 import com.spaceproject.systems.ParallaxRenderSystem;
 
@@ -29,7 +29,7 @@ public class BlocksTestScreen extends MyScreenAdapter {
         engine = new Engine();
         engine.addSystem(new ClearScreenSystem());
         engine.addSystem(new ParallaxRenderSystem());
-        engine.addSystem(new B2DPhysicsSystem());
+        engine.addSystem(new Box2DPhysicsSystem());
         engine.addSystem(new AsteroidRenderSystem());
         
         Entity paddle = new Entity();

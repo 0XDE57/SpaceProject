@@ -17,7 +17,7 @@ import com.spaceproject.utility.PhysicsContactListener;
 // based off:
 // http://gafferongames.com/game-physics/fix-your-timestep/
 // http://saltares.com/blog/games/fixing-your-timestep-in-libgdx-and-box2d/
-public class B2DPhysicsSystem extends EntitySystem {
+public class Box2DPhysicsSystem extends EntitySystem {
     
     private static final EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     private final int velocityIterations = engineCFG.physicsVelocityIterations;

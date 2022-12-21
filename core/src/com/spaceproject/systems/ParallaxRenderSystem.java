@@ -282,7 +282,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         //draw circle; radius = velocity
         //shape.setProjectionMatrix(GameScreen.cam.combined);
         //yellow when engine engaged cyan when boost engaged
-        float relVel = vel2 / B2DPhysicsSystem.getVelocityLimit2();
+        float relVel = vel2 / Box2DPhysicsSystem.getVelocityLimit2();
         float radius = 2 + 2 * relVel;
     
         //compassHighlight.a = 1;
