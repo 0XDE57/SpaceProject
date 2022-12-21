@@ -9,6 +9,7 @@ import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
 public class HyperDriveSystem extends IteratingSystem {
@@ -60,6 +61,10 @@ public class HyperDriveSystem extends IteratingSystem {
     }
     
     private void engageHyperDrive(Entity entity, HyperDriveComponent hyperDrive) {
+        if (Mappers.controlFocus.get(entity) != null) {
+            GameScreen.setHyper(true);
+        }
+        
         // disable physics body to override velocity
         PhysicsComponent physicsComp = Mappers.physics.get(entity);
         physicsComp.body.setActive(false);
@@ -71,6 +76,10 @@ public class HyperDriveSystem extends IteratingSystem {
     }
     
     public static void disengageHyperDrive(Entity entity, HyperDriveComponent hyperDrive) {
+        if (Mappers.controlFocus.get(entity) != null) {
+            GameScreen.setHyper(false);
+        }
+        
         // disable hyper
         hyperDrive.state = HyperDriveComponent.State.cooldown;
         hyperDrive.coolDownTimer.reset();

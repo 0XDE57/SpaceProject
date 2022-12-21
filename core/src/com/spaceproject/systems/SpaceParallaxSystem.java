@@ -37,6 +37,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     private static final int tileSize = 512;//1024;
     private int surround = 2;// how many tiles to load around center tile
     private final ShaderProgram grayscaleShader, invertShader;
+    private boolean swapShader = false;
     
     private boolean grayScale = true;
     
@@ -71,13 +72,20 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         // load and unload tiles
         updateTiles();
         
-        /*
+        
         if (GameScreen.isHyper()) {
-            spriteBatch.setShader(invertShader);
+            //invert
+            if (!swapShader) {
+                spriteBatch.setShader(invertShader);
+                swapShader = true;
+            }
         } else {
-            spriteBatch.setShader(grayscaleShader);
-            
-        }*/
+            //set back to default
+            if (swapShader) {
+                spriteBatch.setShader(grayscaleShader);
+                swapShader = false;
+            }
+        }
         
         float blend = 0f;
         //0 at 1 or less

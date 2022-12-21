@@ -51,6 +51,7 @@ public class GameScreen extends MyScreenAdapter {
     private boolean isPaused = false;
     
     private static boolean inSpace;
+    private static boolean isHyper;
     private static Entity currentPlanet;
     
     private static long galaxySeed;
@@ -292,6 +293,12 @@ public class GameScreen extends MyScreenAdapter {
     
     public static boolean inSpace() {
         return inSpace;
+    }
+    
+    public static boolean isHyper() { return isHyper; }
+    
+    public static void  setHyper(boolean active) {
+        isHyper = active;
     }
     
     public static long getGameTimeCurrent() {
