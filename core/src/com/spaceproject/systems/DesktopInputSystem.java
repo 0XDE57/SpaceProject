@@ -229,7 +229,12 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         //reset cam
         if (button == Input.Buttons.MIDDLE) {
             GameScreen.resetRotation();
-            getEngine().getSystem(CameraSystem.class).setZoomToDefault(players.first());
+            CameraSystem system = getEngine().getSystem(CameraSystem.class);
+            if (system.getZoomLevel() == 2) {
+                system.zoomOutMax();
+            } else {
+                system.setZoomToDefault(players.first());
+            }
             return true;
         }
         
