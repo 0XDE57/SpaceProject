@@ -436,7 +436,8 @@ public class TextureFactory {
             for (int x = 0; x < shipTop.getWidth(); x++) {
                 int color = orig.getPixel(x, y);
                 if (color != 0) {
-                    Color c = new Color(color).sub(0.2f, 0.2f, 0.2f, 0f);
+                    Color c = new Color(color);
+                    c.set(1-c.r, 1-c.g,1-c.b, 1); //invert
                     pixmap.drawPixel(x, y, Color.rgba8888(c));
                 }
             }
