@@ -140,7 +140,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         if (control != null && shieldIsOff) {
             switch (particle.type) {
                 case shipEngineMain:
-                    if (control.moveForward || hyperdriveIsActive) {
+                    if (control.moveForward || control.boost || hyperdriveIsActive) {
                         particle.pooledEffect.start();
                     } else {
                         particle.pooledEffect.allowCompletion();
@@ -190,7 +190,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                 if (roll != null) {
                     ParticleEmitter.GradientColorValue tint = emitters.get(i).getTint();
                     boolean boostActive = roll.flipState != BarrelRollComponent.FlipState.off ||
-                            (control != null && ((control.moveForward && control.boost) || (control.moveBack && control.boost)));
+                            (control != null && ((control.moveForward && control.boost) || (control.moveBack && control.boost) || control.boost));
                     if (boostActive) {
                         tint.setColors(engineColorBoost);
                     } else {
