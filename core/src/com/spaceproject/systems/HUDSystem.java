@@ -65,7 +65,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private Matrix4 projectionMatrix;
     private ShapeRenderer shape;
     private SpriteBatch batch;
-    private BitmapFont font;
+    private BitmapFont font, subFont;
     private GlyphLayout layout = new GlyphLayout();
     
     //entity storage
@@ -95,6 +95,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         parameter.borderColor = Color.BLACK;
         parameter.borderWidth = 3;
         font = FontFactory.createFont(FontFactory.fontPressStart, parameter);
+    
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter2 = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter2.size = 20;
+        parameter2.borderColor = Color.BLACK;
+        parameter2.borderWidth = 3;
+        subFont = FontFactory.createFont(FontFactory.fontPressStart, parameter2);
         
         GameScreen.getStage().addListener(new InputListener() {
             @Override
@@ -214,6 +220,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         
         //draw special state: hyper or landing / launching
         drawSpecialStateMessage(player);
+        //todo: if player is over planet
+        //drawHint("press [T] to land");
+        //drawHint("stars are hot");
+        //drawHint("an object in motion remains in motion");
     
         batch.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
@@ -297,6 +307,18 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         float centerX = (Gdx.graphics.getWidth() - layout.width) * 0.5f;
         int messageHeight = (int) (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3) + layout.height);
         font.draw(batch, layout, centerX, messageHeight);
+    }
+    
+    private void drawHint(String text) {
+        float ratio = 1 + (float) Math.sin(anim*0.1);
+        Color c = Color.GREEN.cpy().lerp(Color.PURPLE, ratio);
+        subFont.setColor(c);
+        layout.setText(subFont, text);
+        
+        float centerX = (Gdx.graphics.getWidth() - layout.width) * 0.5f;
+        int messageHeight = (int) (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3) + layout.height);
+        messageHeight -= layout.height * 2;
+        subFont.draw(batch, layout, centerX, messageHeight);
     }
     
     private void drawPlayerStatus(Entity entity) {
@@ -426,7 +448,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape.setColor(Color.BLACK);
         
         ControllableComponent control = Mappers.controllable.get(entity);
-        if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight) {
+        if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight || control.boost) {
             shape.setColor(Color.GOLD);
             if (control.boost) {
                 shape.setColor(Color.CYAN);

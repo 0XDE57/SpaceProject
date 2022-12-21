@@ -72,7 +72,7 @@ public class ShipControlSystem extends IteratingSystem {
             return;
         
         //movement
-        if (control.moveForward) {
+        if (control.moveForward || control.boost) {
             accelerate(control, physicsComp.body, vehicle, delta);
         }
         if (control.moveBack) {
@@ -84,6 +84,22 @@ public class ShipControlSystem extends IteratingSystem {
         if (control.moveRight) {
             strafeRight(vehicle, control, physicsComp, delta);
         }
+    
+        //todo: auto engage hyper when [forward + boost] while max speed -> intuitive?
+        /*
+        HyperDriveComponent hyper = Mappers.hyper.get(entity);
+        if (control.moveForward && control.boost) {
+            //if reached max velocity, start auto-charging hyperdrive
+            if (MathUtils.isEqual(physicsComp.body.getLinearVelocity().len2(), B2DPhysicsSystem.getVelocityLimit2(), 0.1f)) {
+                hyper.activate = true;
+                //this engages but leave active hanging...
+            }
+        } else {
+            //if no input from keyboard or mouse, and
+            if (hyper.state == HyperDriveComponent.State.on) {
+                //hyper.activate = false;
+            }
+        }*/
         
         //exit vehicle
         if (control.changeVehicle) {
@@ -128,7 +144,7 @@ public class ShipControlSystem extends IteratingSystem {
             thrust *= boostMultiplier;//booost!
         }
         body.applyForceToCenter(MyMath.vector(body.getAngle()-(180*MathUtils.degreesToRadians), thrust), true);
-        /*
+        /* todo: breaking mode that auto faces velocity angle and turns on reverse thrusters
         float stopThreshold = 0.2f;
         if (body.getLinearVelocity().len() <= stopThreshold) {
             //completely stop if moving really slowly
@@ -199,6 +215,11 @@ public class ShipControlSystem extends IteratingSystem {
         if (hyperdrive != null && hyperdrive.state == HyperDriveComponent.State.on) {
             return false;
         }
+        ScreenTransitionComponent trans = Mappers.screenTrans.get(entity);
+        if (trans != null) {
+            
+            return false;
+        }
         
         return true;
     }
@@ -213,7 +234,7 @@ public class ShipControlSystem extends IteratingSystem {
             HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
             hyperDrive.state = HyperDriveComponent.State.off;
         }
-        if (Gdx.input.isKeyJustPressed(Keys.Z)) {
+        if (Gdx.input.isKeyPressed(Keys.Z)) {
             //physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(physicsComp.body.getLinearVelocity()));
             physicsComp.body.applyLinearImpulse(MyMath.vector(physicsComp.body.getAngle(), 1000), physicsComp.body.getPosition(), true);
         }
