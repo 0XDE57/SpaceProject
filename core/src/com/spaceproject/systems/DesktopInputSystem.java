@@ -120,6 +120,8 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             handled = true;
         }
         if (keycode == keyCFG.back) {
+            //todo, back should be breaks
+            //X on controller, S on keyboard
             control.moveBack = keyDown;
             
             if (control.moveBack) {
