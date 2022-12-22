@@ -199,10 +199,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape.begin(ShapeType.Filled);
         
         Entity player = players.first();
-        CameraSystem cam = getEngine().getSystem(CameraSystem.class);
-        if (cam.getZoomLevel() != cam.getMaxZoomLevel()) {
-            drawPlayerStatus(player);
-        }
+        drawPlayerStatus(player);
         
         if (drawEdgeMap) {
             drawEdgeMap();
@@ -233,6 +230,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     private void checkInput() {
+        //todo: move to desktop input
         if (Gdx.input.isKeyJustPressed(keyCFG.toggleHUD)) {
             drawHud = !drawHud;
             Gdx.app.log(this.getClass().getSimpleName(), "HUD: " + drawHud);
@@ -335,22 +333,28 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         int hyperBarY = healthBarY + barHeight + 1;
         
         //todo: force certain elements when hud is off (bypass)
-        // 1. hyperdrive should bring up velocity
-        // 2. health when take damage (timer)
-        // 3. shield when broken? (broken state not implemented yet)
+        // 1. [x] hyperdrive should bring up velocity
+        // 2. [ ] health when take damage (timer)
+        // 3. [ ] shield when broken? (broken state not implemented yet)
         
-        if (!GameScreen.isHyper()) {
-            drawPlayerHealth(entity, barX, healthBarY, barWidth, barHeight);
-            drawPlayerShield(entity, barX, healthBarY, barWidth, barHeight);
-            drawPlayerAmmoBar(entity, barX, ammoBarY, barWidth, barHeight);
+        CameraSystem cam = getEngine().getSystem(CameraSystem.class);
+        if (cam.getZoomLevel() == cam.getMaxZoomLevel()) {
+            return;
         }
+    
         drawPlayerVelocity(entity, barX, hyperBarY, barWidth, barHeight);
         drawHyperDriveBar(entity, barX, hyperBarY, barWidth, barHeight);
+    
+        if (GameScreen.isHyper()) return;
+        
+        drawPlayerHealth(entity, barX, healthBarY, barWidth, barHeight);
+        drawPlayerShield(entity, barX, healthBarY, barWidth, barHeight);
+        drawPlayerAmmoBar(entity, barX, ammoBarY, barWidth, barHeight);
 
 		/*
 		//border
 		//shape.setColor(new Color(0.1f, 0.63f, 0.88f, 1f));
-        shape.setColor(Color.GREEN);
+        shape.setColor(Color.DARK_GRAY);
 		int thickness = 2;
 		shape.rectLine(barX, healthBarY+barHeight*2, barX+barWidth, healthBarY+barHeight*2, thickness);//top
 		shape.rectLine(barX, healthBarY-barHeight, barX+barWidth, healthBarY-barHeight,thickness);//bottom
@@ -474,10 +478,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
     private void drawHyperDriveBar(Entity entity, int x, int y, int width, int height) {
         HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
-        if (hyperDrive == null) {
-            return;
-        }
-    
+        if (hyperDrive == null) return;
+
         //if hyper drive not engaged, render bar half width
         if (hyperDrive.state != HyperDriveComponent.State.on) {
             int halfHeight = height / 2;

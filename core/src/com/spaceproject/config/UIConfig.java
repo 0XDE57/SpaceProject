@@ -27,7 +27,7 @@ public class UIConfig extends Config {
         playerHPBarY = 55;
         playerHPBarWidth = 200;
         playerHPBarHeight = 12;
-        playerAmmoBarColor = Color.TEAL;
+        playerAmmoBarColor = Color.MAGENTA;
         playerAmmoBarRechargeColor = Color.SLATE;
         
         renderFullHealth = false;
