@@ -33,8 +33,8 @@ public class CameraSystem extends IteratingSystem {
     private final float minZoom = 0f;
     private final float maxZoom = 100000;
     
-    private final float smoothFollowSpeed = 2f;
-    private float maxOffsetFromTarget = 9f;
+    private final float smoothFollowSpeed = 10f;
+    private float maxOffsetFromTarget = 5f;
     private final Vector2 offsetFromTarget = new Vector2();
     
     private final int frames = 10; //how many frames to average lerp over
@@ -63,7 +63,14 @@ public class CameraSystem extends IteratingSystem {
     @Override
     public void processEntity(Entity entity, float delta) {
         Vector2 pos = Mappers.transform.get(entity).pos;
-    
+        //Vector2 vel = pos.cpy().add(Mappers.physics.get(entity).body.getLinearVelocity().cpy().scl(0.02f));
+        
+        if (GameScreen.inSpace()) {
+            mode = Mode.lockTarget;
+        } else {
+            mode = Mode.lerpTarget;
+        }
+        
         switch (mode) {
             case lockTarget: lockToTarget(pos); break;
             case lerpTarget: lerpToTarget(pos, delta); break;
@@ -80,37 +87,53 @@ public class CameraSystem extends IteratingSystem {
                 //lockToTarget(targetPos);
             }
         }
-    
         
+        //clamp lerp offset so character remains on screen
+        clampOffset(pos, maxOffsetFromTarget);
         
-        //if (focalPoints.size() > 0) {
-        //    //todo: broken, need smooth transition between states
-        //    //focusCombatCamera(pos, delta);
-        //    if (focalPoints.size() == 0) {
-        //        //inCombat = false;
-        //    }
-        //} else {
-            //todo: push camera out towards cursor, as if to extend your focus there
-            //Vector3 targetPos = GameScreen.cam.unproject(new Vector3(Gdx.input.getX()/* + Gdx.graphics.getWidth() * 0.5f*/, Gdx.input.getY() - Gdx.graphics.getHeight() * 0.5f, 0));
-            //Vector2 targetPos = new Vector2(Gdx.input.getX() /*+ Gdx.graphics.getWidth() * 0.5f */, Gdx.input.getY() + Gdx.graphics.getHeight() * 0.5f);
-            
-            //Vector2 midpoint = new Vector2(targetPos.x, targetPos.y);//.scl(0.5f);//.clamp(0, 20);
-            //DebugSystem.addDebugText(MyMath.formatVector2(midpoint, 1) + "", 500, 500);
+        animateZoom(delta);
+        
+        debugCameraControls(delta);
+        
+        cam.update();
+    }
     
-            //set camera to focal point between targets, lock once acquired.
-            //lockToTarget(pos);
-            //lerpToTarget(pos.cpy().add(midpoint), delta);
-            
-            
-            //set camera position to entity
-            //lerpToTarget(pos, delta);
-            //lockToTarget(pos);
-            
-            //if (focalPoints.size() > 0) {
-                //inCombat = true;
-            //}
-        //}
+    private void lerpToTarget(Vector2 pos, float delta) {
+        //we want to lerp the camera for some smoothed following
+        //but if we lerp directly using built in camera.position.lerp()
+        //  x += alpha * (target.x - x)
+        //  y += alpha * (target.y - y)
+        //we are left from some jitter due to the lerp result being a ratio between self and target values.
+        //the cam position would be closer to the lerped position one frame leading to a lower value
+        //the next frame which in turns lags the camera and the lerp value will be higher
+        //leading to an ugly back and forth jitter making cam / sprites render unstable/jumpy
+        
+        //so we calculate the rolling average of the lerped value over a few frames to smooth out jitter
+        averageTarget.addLast(new Vector2(cam.position.x + (pos.x - cam.position.x) * smoothFollowSpeed * delta,
+                cam.position.y + (pos.y - cam.position.y) * smoothFollowSpeed * delta));
+        if (averageTarget.size > frames) {
+            averageTarget.removeFirst();
+        }
+        average.set(0,0,0);
+        for (Vector2 v : averageTarget) {
+            average.add(v.x, v.y, 0);
+        }
+        average.scl(1.0f / averageTarget.size);
+        cam.position.set(average);
+
+    }
     
+    private void clampOffset(Vector2 pos, float maxOffset) {
+        //radial clamp
+        offsetFromTarget.set(pos.x - cam.position.x, pos.y - cam.position.y);
+        if (offsetFromTarget.len() > maxOffset) {
+            Vector2 clamped = offsetFromTarget.clamp(0, maxOffset);
+            cam.position.x = pos.x - clamped.x;
+            cam.position.y = pos.y - clamped.y;
+        }
+    }
+    
+    private void clampViewport() {
         /*
         //todo: always keep player within viewport
         int padding = 0;
@@ -163,53 +186,8 @@ public class CameraSystem extends IteratingSystem {
             //cameraFocus.zoomTarget += 2f * delta;
         }
     */
-        
-        //clamp lerp offset so character remains on screen
-        clampOffset(pos);
-        
-        animateZoom(delta);
-        
-        debugCameraControls(delta);
-        
-        cam.update();
-    }
     
-    private void lerpToTarget(Vector2 pos, float delta) {
-        //we want to lerp the camera for some smoothed following
-        //but if we lerp directly using built in camera.position.lerp()
-        //  x += alpha * (target.x - x)
-        //  y += alpha * (target.y - y)
-        //we are left from some jitter due to the lerp result being a ratio between self and target values.
-        //the cam position would be closer to the lerped position one frame leading to a lower value
-        //the next frame which in turns lags the camera and the lerp value will be higher
-        //leading to an ugly back and forth jitter making cam / sprites render unstable/jumpy
-        
-        //so we calculate the rolling average of the lerped value over a few frames to smooth out jitter
-        averageTarget.addLast(new Vector2(cam.position.x + (pos.x - cam.position.x) * smoothFollowSpeed * delta,
-                cam.position.y + (pos.y - cam.position.y) * smoothFollowSpeed * delta));
-        if (averageTarget.size > frames) {
-            averageTarget.removeFirst();
-        }
-        average.set(0,0,0);
-        for (Vector2 v : averageTarget) {
-            average.add(v.x, v.y, 0);
-        }
-        average.scl(1.0f / averageTarget.size);
-        cam.position.set(average);
-
     }
-    
-    private void clampOffset(Vector2 pos) {
-        //todo: set offset max offset to scale based on thirds
-        
-        offsetFromTarget.set(pos.x - cam.position.x, pos.y - cam.position.y);
-        if (offsetFromTarget.len() > maxOffsetFromTarget) {
-            Vector2 clamped = offsetFromTarget.clamp(0, maxOffsetFromTarget);
-            cam.position.x = pos.x - clamped.x;
-            cam.position.y = pos.y - clamped.y;
-        }
-    }
-    
     private void lockToTarget(Vector2 pos) {
         cam.position.x = pos.x;
         cam.position.y = pos.y;
@@ -314,6 +292,10 @@ public class CameraSystem extends IteratingSystem {
     public void zoomOutMax() {
         zoomLevel = (byte) (maxZoomLevel-1);
         zoomOut();
+    }
+    
+    public float getMaxZoomLevel() {
+        return maxZoomLevel;
     }
     
     /** iter: -1,    0,   1, 2, 3, 4, 5, 6,  7, 8...

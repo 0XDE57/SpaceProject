@@ -36,28 +36,19 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     
     private static final int tileSize = 512;//1024;
     private int surround = 2;// how many tiles to load around center tile
-    private final ShaderProgram grayscaleShader, invertShader;
-    private boolean swapShader = false;
+    private final ShaderProgram spaceShader;
     
-    private boolean grayScale = true;
     
     public SpaceParallaxSystem() {
         cam = new OrthographicCamera();
         spriteBatch = new SpriteBatch();
         
-        grayscaleShader = new ShaderProgram(Gdx.files.internal("shaders/grayscale.vert"), Gdx.files.internal("shaders/grayscale.frag"));
-        if (grayscaleShader.isCompiled()) {
-            spriteBatch.setShader(grayscaleShader);
+        spaceShader = new ShaderProgram(Gdx.files.internal("shaders/spaceParallax.vert"), Gdx.files.internal("shaders/spaceParallax.frag"));
+        if (spaceShader.isCompiled()) {
+            spriteBatch.setShader(spaceShader);
             Gdx.app.log(this.getClass().getSimpleName(), "shader compiled successfully!");
         } else {
-            Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + grayscaleShader.getLog());
-        }
-        
-        invertShader = new ShaderProgram(Gdx.files.internal("shaders/invert.vert"), Gdx.files.internal("shaders/invert.frag"));
-        if (invertShader.isCompiled()) {
-            Gdx.app.log(this.getClass().getSimpleName(), "shader compiled successfully!");
-        } else {
-            Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + grayscaleShader.getLog());
+            Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + spaceShader.getLog());
         }
     }
     
@@ -69,29 +60,13 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         // load and unload tiles
         updateTiles();
         
-        if (GameScreen.isHyper()) {
-            //invert
-            if (!swapShader) {
-                spriteBatch.setShader(invertShader);
-                swapShader = true;
-            }
-        } else {
-            //set back to default
-            if (swapShader) {
-                spriteBatch.setShader(grayscaleShader);
-                swapShader = false;
-            }
-        }
-        
+        float invert = GameScreen.isHyper() ? 1 : 0;
         float blend = 0f;
-        //0 at 1 or less
-        //1 at max zoom
         CameraSystem cam = getEngine().getSystem(CameraSystem.class);
-        if (cam.getZoomLevel() == 17) {
-            blend = 1f;
-        }
-        grayscaleShader.bind();
-        grayscaleShader.setUniformf("u_blend", blend);
+        blend = cam.getZoomLevel() / cam.getMaxZoomLevel();
+        spaceShader.bind();
+        spaceShader.setUniformf("u_blend", blend);
+        spaceShader.setUniformf("u_invert", invert);
         
         spriteBatch.begin();
         drawParallaxTiles();
@@ -253,7 +228,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         tiles.clear();
         
         spriteBatch.dispose();
-        grayscaleShader.dispose();
+        spaceShader.dispose();
     }
     
 }

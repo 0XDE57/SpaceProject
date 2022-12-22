@@ -84,22 +84,6 @@ public class ShipControlSystem extends IteratingSystem {
         if (control.moveRight) {
             strafeRight(vehicle, control, physicsComp, delta);
         }
-    
-        //todo: auto engage hyper when [forward + boost] while max speed -> intuitive?
-        /*
-        HyperDriveComponent hyper = Mappers.hyper.get(entity);
-        if (control.moveForward && control.boost) {
-            //if reached max velocity, start auto-charging hyperdrive
-            if (MathUtils.isEqual(physicsComp.body.getLinearVelocity().len2(), B2DPhysicsSystem.getVelocityLimit2(), 0.1f)) {
-                hyper.activate = true;
-                //this engages but leave active hanging...
-            }
-        } else {
-            //if no input from keyboard or mouse, and
-            if (hyper.state == HyperDriveComponent.State.on) {
-                //hyper.activate = false;
-            }
-        }*/
         
         //exit vehicle
         if (control.changeVehicle) {
