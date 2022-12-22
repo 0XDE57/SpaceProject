@@ -199,7 +199,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape.begin(ShapeType.Filled);
         
         Entity player = players.first();
-        drawPlayerStatus(player);
+        CameraSystem cam = getEngine().getSystem(CameraSystem.class);
+        if (cam.getZoomLevel() != cam.getMaxZoomLevel()) {
+            drawPlayerStatus(player);
+        }
         
         if (drawEdgeMap) {
             drawEdgeMap();
@@ -336,9 +339,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         // 2. health when take damage (timer)
         // 3. shield when broken? (broken state not implemented yet)
         
-        drawPlayerHealth(entity, barX, healthBarY, barWidth, barHeight);
-        drawPlayerShield(entity, barX, healthBarY, barWidth, barHeight);
-        drawPlayerAmmoBar(entity, barX, ammoBarY, barWidth, barHeight);
+        if (!GameScreen.isHyper()) {
+            drawPlayerHealth(entity, barX, healthBarY, barWidth, barHeight);
+            drawPlayerShield(entity, barX, healthBarY, barWidth, barHeight);
+            drawPlayerAmmoBar(entity, barX, ammoBarY, barWidth, barHeight);
+        }
         drawPlayerVelocity(entity, barX, hyperBarY, barWidth, barHeight);
         drawHyperDriveBar(entity, barX, hyperBarY, barWidth, barHeight);
 
