@@ -252,14 +252,22 @@ Legend:
     [ ! ] = notes
     [ * ] = exceptions
 
+[ ] control lock state during screen transition animation
+    should not engage jets
+    should not exit vehicle
+    should not shoot
+    should not hyper
+
 [ ] charge cannon at max shatter fully
 
 [ ] move hyper trail layer to render when hud off
 
 [ ] when take damage
+    [ ] ship body gets more red ship with health. body shader, inner black cells.
+        outline shader for other states: blue sheild, yellow engine, blue boost?
     [ ] snap camera
     [ ] red spline
-    [ ] vibrate
+    [ ] vibrate controller
     [ ] flash health bar
 
 [ ] touch the sun and die!
@@ -368,6 +376,7 @@ Legend:
     v 4.7
     > 6.2
     ^ 7.6       <- problem
+    honestly i kinda like this quirk. it makes spin outs fun. ima leave it in for now.
 
 
 
@@ -974,46 +983,6 @@ Legend:
         [ ? ] do we give up on proc gen and modular ships and go with something like:
             https://livingtheindie.itch.io/pixel-art-spaceships-for-shmup
 
-[OUT_OF_SCOPE] Planetary Base Building
-    Player can spawn on, or land on a  planet. And walk around.
-    Give player character tools hammer / pickaxe for mining.
-    Ore / minerals / materials will be algorithmically dispersed throughout the planet.
-        - rock
-        - iron
-        - steel
-        - silver
-        - gold
-        - diamonds
-        - etc, added as needed
-    Player can use materials for building.
-    Can also be used for trading at space stations -> sell gold / diamonds for currency -> buy ships / upgrades.
-    Player tools: (for now player always has sledge and pickaxe by default, can't drop, can use with click, switch equipped with hotkey)
-        sledge hammer   : breaking rock, destruction, attack(hit enemy, do damage, knockback force),
-        pickaxe         : mining minerals
-        sword           : damage
-    I really don't want to do a complex crafting system, keep it simple.
-    For now, the only items should be raw materials themselves.
-        eg: i dont want to have to build a wall item with rock and steel,
-            i should just be able to place a wall if i have the raw materials cost
-            i don't want to hold onto a wall item.
-    - get rock / ore -> turn into items / entities
-        - walls (cost: rock, steel)
-            - blocks bullets, takes little to no damage from player
-        - landing pad (cost: rock)
-            - lays down a gravelly / paved sort of pad, and a places a flag(no cost) (which shows wind direction)
-            - when landing on planet, you will land at your home base pad (or last used pad if multiple)
-            - use: typically would make this the first step of picking your base location, then build walls around it
-        - gates (cost: rock, steel
-            - (walls with sliding block)
-            - can be manually open closed by player, (box2D sensor)
-            - powered component, open close requires power source
-        - roads: (cost: rock)
-            - gravelly paved path to walk / drive on
-            - probably just cosmetic, could perhaps have physics implications for vehicle
-        - bridge: to cross river
-        - terminal (base computer)
-            - I/O cables and circuitry / scripting possibilities...way out of scope.
-
 [...] planet generation
     [ ] we could render the planets as actual torus. since we already have the 3D render system
         we find a way to map texture to a torus
@@ -1090,6 +1059,9 @@ Legend:
         [ ] minimap should show heightmap of world when on planet
             (fog of war) start out with grayscale pixelated version, when area visited then render full map and color
     [...] menu menu
+        [ ] window snap left right
+        [ ] change mouse cursor when over resize,
+        [ ] visui resize is only 1px wide = very hard to use
         [x] pause / freeze game
         [...] settings and config
     [ ] player manager/inventory/shipbuilder thingy
@@ -1263,6 +1235,47 @@ Legend:
             	at com.badlogic.ashley.core.EntityManager.removeAllEntities(EntityManager.java:72)
             	at com.badlogic.ashley.core.Engine.removeAllEntities(Engine.java:98)
         * Solution: engine.removeEntityListener(the system) when removing system
+
+------------------------------------------OUT_OF_SCOPE---------------------------------------------
+[OUT_OF_SCOPE] Planetary Base Building
+    Player can spawn on, or land on a  planet. And walk around.
+    Give player character tools hammer / pickaxe for mining.
+    Ore / minerals / materials will be algorithmically dispersed throughout the planet.
+        - rock
+        - iron
+        - steel
+        - silver
+        - gold
+        - diamonds
+        - etc, added as needed
+    Player can use materials for building.
+    Can also be used for trading at space stations -> sell gold / diamonds for currency -> buy ships / upgrades.
+    Player tools: (for now player always has sledge and pickaxe by default, can't drop, can use with click, switch equipped with hotkey)
+        sledge hammer   : breaking rock, destruction, attack(hit enemy, do damage, knockback force),
+        pickaxe         : mining minerals
+        sword           : damage
+    I really don't want to do a complex crafting system, keep it simple.
+    For now, the only items should be raw materials themselves.
+        eg: i dont want to have to build a wall item with rock and steel,
+            i should just be able to place a wall if i have the raw materials cost
+            i don't want to hold onto a wall item.
+    - get rock / ore -> turn into items / entities
+        - walls (cost: rock, steel)
+            - blocks bullets, takes little to no damage from player
+        - landing pad (cost: rock)
+            - lays down a gravelly / paved sort of pad, and a places a flag(no cost) (which shows wind direction)
+            - when landing on planet, you will land at your home base pad (or last used pad if multiple)
+            - use: typically would make this the first step of picking your base location, then build walls around it
+        - gates (cost: rock, steel
+            - (walls with sliding block)
+            - can be manually open closed by player, (box2D sensor)
+            - powered component, open close requires power source
+        - roads: (cost: rock)
+            - gravelly paved path to walk / drive on
+            - probably just cosmetic, could perhaps have physics implications for vehicle
+        - bridge: to cross river
+        - terminal (base computer)
+            - I/O cables and circuitry / scripting possibilities...way out of scope.
 
 [OUT_OF_SCOPE] multiplayer
     simple lan arena mode 1v1: one computer hosts, other computer joins
