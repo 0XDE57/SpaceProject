@@ -60,6 +60,20 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     }
     
     @Override
+    public void connected(Controller controller) {
+        Gdx.app.log(this.getClass().getSimpleName(), "Connected: " + controller.getName()
+                +  " id:[" + controller.getUniqueId() + "] index:" + controller.getPlayerIndex()
+                + " power:" + controller.getPowerLevel());
+    }
+    
+    @Override
+    public void disconnected(Controller controller) {
+        Gdx.app.log(this.getClass().getSimpleName(), "Disconnected: " + controller.getName()
+                +  " id:[" + controller.getUniqueId() + "] index:" + controller.getPlayerIndex()
+                + " power:" + controller.getPowerLevel());
+    }
+    
+    @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
     
@@ -115,8 +129,10 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             handled = true;
         }
     
-        if (buttonCode == controller.getMapping().buttonDpadUp) {
-        
+        if (buttonCode == controller.getMapping().buttonDpadRight) {
+            //todo: swap ship weapons
+            //burst cannon <-> charge cannon
+            //remove one, install the other
         }
         
         if (buttonCode == controller.getMapping().buttonDpadDown) {
@@ -206,16 +222,6 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         return handled;
     }
     
-    @Override
-    public void connected(Controller controller) {
-        Gdx.app.log(this.getClass().getSimpleName(), "Connected: " + controller.getName());
-    }
-    
-    @Override
-    public void disconnected(Controller controller) {
-        Gdx.app.log(this.getClass().getSimpleName(), "Disconnected: " + controller.getName());
-    }
-
     @Override
     public boolean buttonDown(Controller controller, int buttonCode) {
         return playerControls(controller, buttonCode, true);
