@@ -69,7 +69,7 @@ The code is bit rough in some places, littered with todo's, half-baked features,
 
 ## License
    Apache 2.0: see [LICENSE.md](/LICENSE.md)
-
+   Credit appreciated.
 
 ## Libraries
 - [libGDX](https://github.com/libgdx/libgdx)
