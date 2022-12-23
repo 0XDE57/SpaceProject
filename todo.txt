@@ -294,7 +294,10 @@ Legend:
 
 [ ] put wings on ship
 
+[ ] terrible BUG! space loadderr loading and unloading system near debug origin when shouldn't
+    flashes for a moment.
 
+[ ] scroll should over ride reset cam
 
 [ ] terrible BUG! Space Parallax Render broken on resolutions above 1080p
     eg: 4k or ultra wide
