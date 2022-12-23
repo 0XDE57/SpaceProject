@@ -234,6 +234,8 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     
     @Override
     public boolean axisMoved(Controller controller, int axisCode, float value) {
+        if (players.size() == 0) return false;
+        
         //Gdx.app.log("control:", axisCode + ", " + value);
         //controller.getMapping().buttonL2 = ?
         if (axisCode == controller.getMapping().axisLeftX) {
@@ -254,7 +256,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         if (axisCode == 5 /* controller.getMapping().buttonR2*/) {
             r2 = value;
         }
-    
+        
         Entity player = players.first();
         ControllableComponent control = Mappers.controllable.get(player);
         if (r2 > triggerDeadZone) {
