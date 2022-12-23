@@ -13,6 +13,7 @@ public class ResourceDisposer {
     
     private static int disposedTextures, disposedS3D, destroyedBody, disposedParticle;
     private static int totalTextures, totalS3D, totalBody, totalParticle;
+    private static int totalTotal;
     private static StringBuilder info = new StringBuilder();
     
     public static void dispose(Entity entity) {
@@ -57,12 +58,14 @@ public class ResourceDisposer {
     }
     
     public static void reset() {
-        //should be called at very end of frame
+        //total
         totalTextures += disposedTextures;
         totalS3D += disposedS3D;
         totalParticle += disposedParticle;
         totalBody += destroyedBody;
-        //per frame data
+        totalTotal = totalTextures + totalS3D + totalParticle + totalBody;
+        
+        //reset per frame data: should be called at very end of frame
         disposedTextures = 0;
         disposedS3D = 0;
         disposedParticle = 0;
@@ -75,6 +78,7 @@ public class ResourceDisposer {
         info.append("\n     [Sprite3D]: " + totalS3D);
         info.append("\n     [Particle]: " + totalParticle);
         info.append("\n     [B2D Body]: " + totalBody);
+        info.append("\n     [Total]:    " + totalTotal); // total ;)
         reset();
         return info.toString();
     }

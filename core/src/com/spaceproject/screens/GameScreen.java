@@ -252,24 +252,23 @@ public class GameScreen extends MyScreenAdapter {
     
     private void pollGLProfiler() {
         profilerStringBuilder.setLength(0);
-        profilerStringBuilder.append("GL calls: ");
+        profilerStringBuilder.append("[GL calls]:         ");
         profilerStringBuilder.append(glProfiler.getCalls());
         
-        profilerStringBuilder.append("\nDraw calls: ");
+        profilerStringBuilder.append("\n[Draw calls]:       ");
         profilerStringBuilder.append(glProfiler.getDrawCalls());
         
-        profilerStringBuilder.append("\nShader switches: ");
+        profilerStringBuilder.append("\n[Shader switches]:  ");
         profilerStringBuilder.append(glProfiler.getShaderSwitches());
         
-        profilerStringBuilder.append("\nTexture bindings: ");
+        profilerStringBuilder.append("\n[Texture bindings]: ");
         profilerStringBuilder.append(glProfiler.getTextureBindings());
         
-        profilerStringBuilder.append("\nVertices: ");
+        profilerStringBuilder.append("\n[Vertices]:         ");
         profilerStringBuilder.append(glProfiler.getVertexCount().total);
     
-        profilerStringBuilder.append("\nDisposed: ");
+        profilerStringBuilder.append("\n-----[DISPOSED]----");
         profilerStringBuilder.append(ResourceDisposer.getTotalDisposeCount());
-        //DebugSystem.addDebugText(profilerStringBuilder.toString(), 10, 90);
         
         glProfiler.reset();
     }
