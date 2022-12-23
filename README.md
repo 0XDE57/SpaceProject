@@ -1,6 +1,7 @@
 # a space project
 Welcome to A Space Project. A project involving space...
 > Enjoy Galactic Space Exploration in a sate-of-the-art, hyper-realistic physics simulation of the entire universe!
+
 > Get a realistic sense of the cosmic scale; there's literally dozens of planets and traveling between them could take up to entire minutes!
 
 ![screenshot](/Capture.PNG?raw=true)
