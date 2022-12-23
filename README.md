@@ -1,7 +1,8 @@
 # a space project
 Welcome to A Space Project. A project involving space...
 > Enjoy Galactic Space Exploration in a sate-of-the-art, hyper-realistic physics simulation of the entire universe!
-> Get a realistic sense of the cosmic scale; there's literally dozens of planets and traveling between them could take up to minutes!
+
+> Get a realistic sense of the cosmic scale; there's literally dozens of planets and traveling between them could take up to entire minutes!
 
 ![screenshot](/Capture.PNG?raw=true)
 
@@ -9,12 +10,13 @@ Welcome to A Space Project. A project involving space...
 
 ## Features
 * Fly around the starsystem in a spaceship
-  * Faster Than Light Travel! (yeah it's real cuz like quantum anti-dark matter n' stuff yo)
-* Destructable asteroids using cutting edge ***t r i ▲ n g l e s***
+* Faster Than Light Travel! (yeah, it's real cuz like quantum anti-dark matter n' stuff yo)
+* Destructable asteroids using cutting edge - ***t r i ▲ n g l e s*** -
 * Discover a plethora of astronomical bodies including:
-    * Unary star systems, Binary star systems, Trinary star systems, and even ~~Quadri... quatro? quadrino-ary?~~ as-many-as-you-want star systems!
+    * Unary star systems, Binary star systems, Trinary star systems, and even ~~Quadri... quatro? quadrino-ary?~~ 
+    * as-many-as-you-want star systems!
     * lonely rogue planets who lost their sun :(
-* Fight against other ship (in progress)
+* Fight against other ship (disabled for now)
   * combat broken placeholder AI while I figure out the rest of the engine.
 * Then when you're bored of that you can land on a planet I guess (in theory, probably out of scope):
    * The planets are flat (ha, take that Round Earthers!)
@@ -67,7 +69,7 @@ The code is bit rough in some places, littered with todo's, half-baked features,
 
 ## License
    Apache 2.0: see [LICENSE.md](/LICENSE.md)
-
+   Credit appreciated.
 
 ## Libraries
 - [libGDX](https://github.com/libgdx/libgdx)
