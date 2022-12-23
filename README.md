@@ -10,7 +10,7 @@ Welcome to A Space Project. A project involving space...
 
 ## Features
 * Fly around the starsystem in a spaceship
-* Faster Than Light Travel! (yeah, it's real cuz like quantum anti-dark matter n' stuff yo)
+* Faster Than Light Travel! (yeah it's real, cuz like quantum anti-dark matter n' stuff yo)
 * Destructable asteroids using cutting edge - ***t r i ▲ n g l e s*** -
 * Discover a plethora of astronomical bodies including:
     * Unary star systems, Binary star systems, Trinary star systems, and even ~~Quadri... quatro? quadrino-ary?~~ 
@@ -30,6 +30,7 @@ Welcome to A Space Project. A project involving space...
 * Developer Tools (in progress)
 * Cross-Platform Desktop and Mobile Support
   * Windows, OSX, Linux, Android, IOS
+  * (it may be difficult to find sensible touchscren controls, focus is desktop and controller)
 * Feature Creep and Unrealistic Scope!
    * Multiplayer is out of current scope :(
 
@@ -37,13 +38,13 @@ Welcome to A Space Project. A project involving space...
 ### Controls
 | Control                        | Desktop       | Controller/Gamepad    | Mobile (Android, iOS)                   |
 |------------------------------- | ------------  | ------------------    | ----------------------------------------|
-| Movement                       | WASD          | Left Joystick + L1/R1 | Left Joystick                           |
-| Aim                            | Mouse         | Left Joystick         | Left Joystick                           |
-| Boost                          | Space         | X                     | todo: needs button                      |
-| Attack: Shoot                  | Right-Click   | A                     | bottom right button                     |
-| Defense: Shield                | Shift         | B                     | todo: needs button                      |
+| Movement                       | WASD          | Left Stick + L1/R1    | Left Stick                              |
+| Aim                            | Mouse         | Left Stick            | Left Stick                              |
+| Boost                          | Space         | A                     | todo: needs button                      |
+| Attack: Shoot                  | Right-Click   | RT                    | bottom right button                     |
+| Defense: Shield                | Shift         | LT                    | todo: needs button                      |
 | Defense: Dodge (Barrel Roll)   | A/D + Space (or) Double Tap A/D | Double Tap R1/L1 | todo: swipe gesture?       |
-| Toggle HyperDrive              | Hold 1        | Hold D-Pad Up         | todo: needs button                      |
+| Toggle HyperDrive              | Hold 1        | Hold B                | todo: needs button                      |
 | Land/Take Off                  | T             | D-Pad Down            | top center when over planet             |
 | Enter/Exit vehicle             | G             | Y                     | bottom right small button when in/near vehicle |
 | Zoom                           | Scroll Wheel  | Right JoyStick        | todo: Pinch Zoom                        |
@@ -55,8 +56,6 @@ Welcome to A Space Project. A project involving space...
 | Vsync                          | F8            |                       |                                         |
 | ECS Debug Viewer               | F9            |                       |                                         |
 | Misc debug keys I am too lazy to document rn and won't be permanent anyway |                                     |
-
-It may be difficult to find sensible touchscren controls, I am focused more on desktop and controller.
 
 
 ## Current Status
