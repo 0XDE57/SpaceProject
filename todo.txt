@@ -252,18 +252,34 @@ Legend:
     [ ! ] = notes
     [ * ] = exceptions
 
-[ ] breaks. no more relying on debug insta stop. must have stop
-    [ ] X on controller
+[ ] charge cannon at max shatter fully
+
+[ ] move hyper trail layer to render when hud off
+
+[ ] when take damage
+    [ ] snap camera
+    [ ] red spline
+    [ ] vibrate
+    [ ] flash health bar
 
 [ ] touch the sun and die!
     [ ] do damage to things with health, including asteroids
-
-[ ] when take damage, snap camera
 
 [ ] death message w/ reason:
     [ ] "stars are hot!"
     [ ] "asteroids are harder than your ship..."
     [ ] "press [] to use your shield"
+
+[ ] better death visual
+    [ ] maybe shatter player
+    [ ] emit explosion rings
+    [ ] emit explosion rays
+    [ ] explodey particle fx!
+
+[ ] breaks. no more relying on debug insta stop. must have stop
+    [ ] X on controller
+
+[ ] highlight planet when over
 
 [ ] space station
     [ ] orbit's around planet's, ship can dock at
@@ -273,16 +289,12 @@ Legend:
 
 [...] hyperdrive animation
     [ ] spool up
-        cancelling hyper should spool down instead of insta reset
+        cancelling hyper should spool down instead of insta reset?
     [x] spin
 
 [ ] put wings on ship
 
-[ ] better death visual
-    [ ] maybe shatter player
-    [ ] emit explosion rings
-    [ ] emit explosion rays
-    [ ] explodey particle fx!
+
 
 [ ] terrible BUG! Space Parallax Render broken on resolutions above 1080p
     eg: 4k or ultra wide
@@ -354,8 +366,11 @@ Legend:
     > 6.2
     ^ 7.6       <- problem
 
+
+
 ................above is focused on bug fix and polish phase for space demo..........................
 ................landing will be disabled until worlds are further developed..........................
+
 
 [...] needs frame of reference to judge speed and direction since parallax is so deep
     [...] ship tail and bullet tail fx help with frame of reference
@@ -372,7 +387,7 @@ Legend:
             with some movement and multiply the layers together
         [?] what about a basic noise shader rendered to a quad on a layer above player?
 
-[ ] character eye color
+[ ] character eye color: magenta other. red when enemy attack
 
 [ ] ENGINE: fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
     https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
