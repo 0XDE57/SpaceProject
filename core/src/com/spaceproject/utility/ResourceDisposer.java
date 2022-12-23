@@ -2,6 +2,7 @@ package com.spaceproject.utility;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.PhysicsComponent;
@@ -10,42 +11,40 @@ import com.spaceproject.components.TextureComponent;
 
 public class ResourceDisposer {
     
-    public static int disposeCounter;
+    private static int disposedTextures, disposedS3D, destroyedBody, disposedParticle;
+    private static int totalTextures, totalS3D, totalBody, totalParticle;
+    private static StringBuilder info = new StringBuilder();
     
     public static void dispose(Entity entity) {
         TextureComponent tex = Mappers.texture.get(entity);
         if (tex != null) {
             tex.texture.dispose();
-            //Gdx.app.debug("ResourceDisposer", "texture released:    " + DebugUtil.objString(entity));
-            disposeCounter++;
+            disposedTextures++;
         }
         
         Sprite3DComponent s3d = Mappers.sprite3D.get(entity);
         if (s3d != null) {
             s3d.renderable.dispose();
-            //Gdx.app.debug("ResourceDisposer", "renderable released: " + DebugUtil.objString(entity));
-            disposeCounter++;
+            disposedS3D++;
         }
     
         PhysicsComponent physics = Mappers.physics.get(entity);
         if (physics != null) {
             physics.body.getWorld().destroyBody(physics.body);
-            //Gdx.app.debug("ResourceDisposer", "body destroyed:      " + DebugUtil.objString(entity));
-            disposeCounter++;
+            destroyedBody++;
         }
     
         ParticleComponent particle = Mappers.particle.get(entity);
         if (particle != null) {
             particle.pooledEffect.dispose();
-            //Gdx.app.debug("ResourceDisposer", "particle released:   " + DebugUtil.objString(entity));
-            disposeCounter++;
+            disposedParticle++;
         }
     }
     
     public static void disposeAllExcept(ImmutableArray<Entity> entities, Array<Entity> ignoreEntities) {
         for (Entity entity : entities) {
             if (ignoreEntities != null && ignoreEntities.contains(entity, false)) {
-                //Gdx.app.debug("ResourceDisposer", "Did not dispose: " + DebugUtil.objString(entity));
+                Gdx.app.debug("ResourceDisposer", "Did NOT dispose: " + DebugUtil.objString(entity));
                 continue;
             }
             
@@ -58,6 +57,26 @@ public class ResourceDisposer {
     }
     
     public static void reset() {
-        disposeCounter = 0;
+        //should be called at very end of frame
+        totalTextures += disposedTextures;
+        totalS3D += disposedS3D;
+        totalParticle += disposedParticle;
+        totalBody += destroyedBody;
+        //per frame data
+        disposedTextures = 0;
+        disposedS3D = 0;
+        disposedParticle = 0;
+        destroyedBody = 0;
     }
+    
+    public static String getTotalDisposeCount() {
+        info.setLength(0);
+        info.append("\n     [Texture]:  " + totalTextures);
+        info.append("\n     [Sprite3D]: " + totalS3D);
+        info.append("\n     [Particle]: " + totalParticle);
+        info.append("\n     [B2D Body]: " + totalBody);
+        reset();
+        return info.toString();
+    }
+    
 }

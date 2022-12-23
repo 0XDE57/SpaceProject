@@ -267,8 +267,8 @@ public class GameScreen extends MyScreenAdapter {
         profilerStringBuilder.append("\nVertices: ");
         profilerStringBuilder.append(glProfiler.getVertexCount().total);
     
-        profilerStringBuilder.append("\nDispose: ");
-        profilerStringBuilder.append(ResourceDisposer.disposeCounter);
+        profilerStringBuilder.append("\nDisposed: ");
+        profilerStringBuilder.append(ResourceDisposer.getTotalDisposeCount());
         //DebugSystem.addDebugText(profilerStringBuilder.toString(), 10, 90);
         
         glProfiler.reset();
