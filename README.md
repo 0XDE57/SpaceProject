@@ -30,6 +30,7 @@ Welcome to A Space Project. A project involving space...
 * Developer Tools (in progress)
 * Cross-Platform Desktop and Mobile Support
   * Windows, OSX, Linux, Android, IOS
+  * (it may be difficult to find sensible touchscren controls, focus is desktop and controller)
 * Feature Creep and Unrealistic Scope!
    * Multiplayer is out of current scope :(
 
@@ -55,8 +56,6 @@ Welcome to A Space Project. A project involving space...
 | Vsync                          | F8            |                       |                                         |
 | ECS Debug Viewer               | F9            |                       |                                         |
 | Misc debug keys I am too lazy to document rn and won't be permanent anyway |                                     |
-
-It may be difficult to find sensible touchscren controls, I am focused more on desktop and controller.
 
 
 ## Current Status
