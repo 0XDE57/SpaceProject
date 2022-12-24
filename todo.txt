@@ -252,30 +252,32 @@ Legend:
     [ ! ] = notes
     [ * ] = exceptions
 
-[ ] control lock state during screen transition animation
-    should not engage jets
-    should not exit vehicle
-    should not shoot
-    should not hyper
+[ ] swap between charge cannon and regular cannon
+    [ ] left right d-pad
+    [ ] q e keyboard
+    [ ] charge cannon at max shatter fully
 
-[ ] charge cannon at max shatter fully
-
-[ ] move hyper trail layer to render when hud off
+[ ] bug: control lock state during screen transition animation
+    shouldn't be able to control ship during take off and landing
+    [ ] should not engage jets
+    [ ] should not exit vehicle
+    [ ] should not shoot
+    [ ] should not hyper
 
 [ ] when take damage
-    [ ] ship body gets more red ship with health. body shader, inner black cells.
-        outline shader for other states: blue sheild, yellow engine, blue boost?
-    [ ] snap camera
     [ ] red spline
+    [ ] snap camera
     [ ] vibrate controller
     [ ] flash health bar
+    [ ] ship body gets more red ship with health. body shader, inner black cells.
+        outline shader for other states: blue shield, yellow engine, blue boost?
 
 [ ] touch the sun and die! (does not affect you during hyper)
-    [ ] do damage to things with health, including asteroids
+    [ ] do damage to things with health
     [ ] have to use shield to protect yourself from star if you accidentally fly into it
     [ ] shield heats up turns red with shader
-            perhaps this could be some sort of power up?
-            or need to upgrade shield to handle higher temps
+        perhaps this could be some sort of power up?
+        or need to upgrade shield to handle higher temps
 
 [ ] death message w/ reason:
     [ ] "stars are hot!"
@@ -283,21 +285,21 @@ Legend:
     [ ] "press [] to use your shield"
 
 [ ] better death visual
-    [ ] maybe shatter player
+    [ ] respawn system
+        (currently handled by: [RemovalSystem] Controlled entity assumed to be player; respawning...)
     [ ] emit explosion rings
     [ ] emit explosion rays
     [ ] explodey particle fx!
-
-[ ] breaks. no more relying on debug insta stop. must have stop
-    [ ] X on controller
-
-[ ] highlight planet when over
+    [ ] maybe shatter player
 
 [ ] space station
     [ ] orbit's around planet's, ship can dock at
     [ ] repair ship
 
-[ ] bug: shouldn't be able to control ship during take off and landing
+[ ] render layer: move hyper trail layer to render when hud off
+
+[ ] highlight planet when flying over and zoomed out to show when you can land
+    glowy ring / halo
 
 [...] hyperdrive animation
     [ ] spool up
@@ -305,9 +307,6 @@ Legend:
     [x] spin
 
 [ ] put wings on ship
-
-[ ] terrible BUG! space loadderr loading and unloading system near debug origin when shouldn't
-    flashes for a moment.
 
 [ ] scroll should over ride reset cam
 
@@ -331,12 +330,14 @@ Legend:
         [ ] introduced new render issue at world border x,y < 0 when vsync off, lerp is rapidly switching between position teleporting
         [ ] camera too slow when close to lerp position -> percentage infinitely never reaching 0, should snap when close enough
 
-[...] BUG! start game, leave to main menu, return to game: planets do not load
-    [x] clean up, dispose and unload systems properly when return to main menu
-    [ ] clean up threadpool, can find ways to spam fill q. not clearing properly
-    [ ] things will load now, but there seems to be a strange delay...
-        -start game, leave to main menu, start game again = empty until move around for a bit then loads
-        I believe this is to do with the noise threads shutting down?
+[ ] terrible BUG! space loadderr loading and unloading system near debug origin when shouldn't
+    flashes for a moment.
+    [...] BUG! start game, leave to main menu, return to game: planets do not load
+        [x] clean up, dispose and unload systems properly when return to main menu
+        [ ] clean up threadpool, can find ways to spam fill q. not clearing properly
+        [ ] things will load now, but there seems to be a strange delay...
+            -start game, leave to main menu, start game again = empty until move around for a bit then loads
+            I believe this is to do with the noise threads shutting down?
 
 [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
     [ ] engine / movement
@@ -371,7 +372,8 @@ Legend:
         https://github.com/rafaskb/Parrot
         https://github.com/rafaskb/Boom
 
-[ ] subtle yet annoying bug: when rotating continually counter-clockwise with mouse,
+[ ] The player can only turn right...
+    subtle yet annoying bug: when rotating continually counter-clockwise with mouse,
     once past ~7.6? radians, the ship will flip around the other way to correct.
     I suspect its to do with getAngularImpulse
     > 0
@@ -381,7 +383,13 @@ Legend:
     > 6.2
     ^ 7.6       <- problem
     honestly i kinda like this quirk. it makes spin outs fun. ima leave it in for now.
+    edit: found it, probably the -1.57 in -atan2
 
+[?] breaks. no more relying on debug insta stop. must have stop?
+    player must not stop immediately and break momentum.
+    i thing part of the charm is overshooting targets and having to fly back and correct.
+    so maybe no breaks?
+    [ ] X on controller
 
 
 ................above is focused on bug fix and polish phase for space demo..........................
