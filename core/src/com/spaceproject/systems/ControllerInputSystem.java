@@ -61,16 +61,47 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     
     @Override
     public void connected(Controller controller) {
-        Gdx.app.log(this.getClass().getSimpleName(), "Connected: " + controller.getName()
-                +  " id:[" + controller.getUniqueId() + "] index:" + controller.getPlayerIndex()
-                + " power:" + controller.getPowerLevel());
+        logController(controller, true);
     }
     
     @Override
     public void disconnected(Controller controller) {
-        Gdx.app.log(this.getClass().getSimpleName(), "Disconnected: " + controller.getName()
-                +  " id:[" + controller.getUniqueId() + "] index:" + controller.getPlayerIndex()
-                + " power:" + controller.getPowerLevel());
+        logController(controller, false);
+    }
+    
+    private void logController(Controller controller, boolean connected) {
+        //todo: bug in jampad?
+        // canVibrate() <-- null when disconnecting controller
+        /* Exception in thread "main" java.lang.NullPointerException
+	        at com.badlogic.gdx.controllers.desktop.support.JamepadController.canVibrate(JamepadController.java:173)
+	        at com.spaceproject.systems.ControllerInputSystem.logController(ControllerInputSystem.java:73)
+	        at com.spaceproject.systems.ControllerInputSystem.disconnected(ControllerInputSystem.java:69)
+	        at com.badlogic.gdx.controllers.desktop.support.CompositeControllerListener.disconnected(CompositeControllerListener.java:21)
+	        at com.badlogic.gdx.controllers.desktop.support.CompositeControllerListener.disconnected(CompositeControllerListener.java:21)
+	        at com.badlogic.gdx.controllers.desktop.support.JamepadController.setDisconnected(JamepadController.java:90)
+	        at com.badlogic.gdx.controllers.desktop.support.JamepadController.getButton(JamepadController.java:55)
+	        at com.badlogic.gdx.controllers.desktop.support.JamepadController.updateButtonsState(JamepadController.java:137)
+	        at com.badlogic.gdx.controllers.desktop.support.JamepadController.update(JamepadController.java:105)
+	        at com.badlogic.gdx.controllers.desktop.support.JamepadControllerMonitor.update(JamepadControllerMonitor.java:52)
+	        at com.badlogic.gdx.controllers.desktop.support.JamepadControllerMonitor.run(JamepadControllerMonitor.java:26)
+	        at com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application.loop(Lwjgl3Application.java:208)
+	        at com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application.<init>(Lwjgl3Application.java:166)
+	        at com.spaceproject.desktop.DesktopLauncher.main(DesktopLauncher.java:16)
+        * */
+        
+        boolean canVibrate = false;
+        if (connected) {
+            canVibrate = controller.canVibrate();
+        }
+        
+        //if (canVibrate == null)
+        String info = (connected ? "Connected: '" : "Disconnected: '")
+                + controller.getName()
+                + "' id:[" + controller.getUniqueId()
+                + "] index:" + controller.getPlayerIndex()
+                + " power:" + controller.getPowerLevel()
+                + " vibrate:" + canVibrate;
+        Gdx.app.log(this.getClass().getSimpleName(), info);
     }
     
     @Override
@@ -264,6 +295,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             
             CannonComponent cannon = Mappers.cannon.get(player);
             if (cannon != null) {
+                //todo, move this into canon system, just pass on multiplier to control component
                 int baseRate = 300;
                 int minRate = 40;
                 long rateOfFire = (long) (baseRate * (1 - r2));
@@ -273,6 +305,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                 cannon.timerFireRate.setInterval(rateOfFire, false);
             }
         } else {
+            //todo: bug, stick drift and minor inputs seem to be interfering with mouse input
             control.attack = false;
         }
     

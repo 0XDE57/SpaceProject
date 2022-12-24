@@ -402,6 +402,8 @@ Legend:
 ................above is focused on bug fix and polish phase for space demo..........................
 ................landing will be disabled until worlds are further developed..........................
 
+[ ] is this why its not picking up my controller over usb?
+    https://github.com/libgdx/gdx-controllers/wiki/Declare-game-controller-support
 
 [...] needs frame of reference to judge speed and direction since parallax is so deep
     [...] ship tail and bullet tail fx help with frame of reference
