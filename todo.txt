@@ -270,8 +270,12 @@ Legend:
     [ ] vibrate controller
     [ ] flash health bar
 
-[ ] touch the sun and die!
+[ ] touch the sun and die! (does not affect you during hyper)
     [ ] do damage to things with health, including asteroids
+    [ ] have to use shield to protect yourself from star if you accidentally fly into it
+    [ ] shield heats up turns red with shader
+            perhaps this could be some sort of power up?
+            or need to upgrade shield to handle higher temps
 
 [ ] death message w/ reason:
     [ ] "stars are hot!"
