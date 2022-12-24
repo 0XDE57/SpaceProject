@@ -256,6 +256,7 @@ Legend:
     [ ] left right d-pad
     [ ] q e keyboard
     [ ] charge cannon at max shatter fully
+    [ ] hold to bring up component ring
 
 [ ] bug: control lock state during screen transition animation
     shouldn't be able to control ship during take off and landing
@@ -297,6 +298,8 @@ Legend:
     [ ] repair ship
 
 [ ] render layer: move hyper trail layer to render when hud off
+
+[ ] character eye color: magenta other. red when enemy attack
 
 [ ] highlight planet when flying over and zoomed out to show when you can land
     glowy ring / halo
@@ -410,8 +413,6 @@ Legend:
         [ ] fog layer could use some more octaves. possible shader can just render another layer on top
             with some movement and multiply the layers together
         [?] what about a basic noise shader rendered to a quad on a layer above player?
-
-[ ] character eye color: magenta other. red when enemy attack
 
 [ ] ENGINE: fix floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics: epsilon / truncating errors
     https://randomascii.wordpress.com/2012/02/13/dont-store-that-in-a-float/
@@ -891,51 +892,6 @@ Legend:
         fixed!...but keep and eye on it.
 
 
-[OUT_OF_SCOPE] "Persistence Engine" what to do with rest of universe when on a planet? or stuff going on on planets when we are in space?
-    genericize and make work land and take off work for AI, system doesn't support non-player world switching
-    dumb loop where AI lands on planet, kept in some kind of background
-    processing state/alt engine, wait a second then take off to test all is working correctly
-    background engine meant to be low processing effort (eg: ultra dumbed down AI or simulations, no rendering, no physics, just states and events) to keep track of important entities
-    and states between space and worlds. eg: give entity important flag component to keep relevant, if dont have flag dont care and remove when switch
-    will be useful for persistence, AI and story type events.
-    //Example scenario:
-    //    you are on planet, you attack an AI, Ai comes after you. But you leave in your ship.
-    //    then AI gets TimedPersistenceComponent and will remain on planet for 5 minutes waiting for you, because angry!
-    //    maybe they will come after you. this could be very simple. we can fake intelligence in a background system in persistence engine
-    //
-    //    Think similar to skyrim, you attack someone in a house and leave they follow you out.
-    eg:
-    Engine persistenceEngine.
-    if (player switch screen) {
-        //move important entities from main to background processing
-        for each entity in mainEngine {
-            if (entity has PersistenceComponent) {
-                persistenceEngine.Add(entity);
-            }
-        }
-        //move relevant entity from background processing to main
-        for each entity in persistenceEngine {
-            if (entity has PersistenceComponent) {
-                if (is persistence relevant to new context) {
-                    //example relevance:
-                    //player in space, important entity on planet
-                    //if land on planet with important entity, load into actual engine
-                    mainEngine.Add(entity);
-                    //could be more nuanced, like perhaps entity is only loaded when event triggers it
-                    //or specific location on planet. dunno till start implementing.
-                    //possibly have multiple engines handling contexts? (thats dumb and overkill. keep it simple.)
-                }
-            }
-        }
-    }
-    if (AI switch screen) {
-        //similar thing to above
-        //if relevant load it, else keep in background
-
-        //if not important, remove from engine, forget about existence
-    }
-
-
 [...] fix texture / map loading
     [ ] save load noise so it doesnt have to be generated
     [ ] clean up star save/load
@@ -996,6 +952,10 @@ Legend:
             https://livingtheindie.itch.io/pixel-art-spaceships-for-shmup
 
 [...] planet generation
+    [ ] player could use more contrast against the planet
+        shadow back drop?
+    [ ] a cloud layer above planets
+        noise texture shifting across
     [ ] we could render the planets as actual torus. since we already have the 3D render system
         we find a way to map texture to a torus
         https://stackoverflow.com/questions/29953874/how-to-texture-of-a-glutsolidtorus-in-opengl
@@ -1297,6 +1257,52 @@ Legend:
     p2p vs server client
     https://www.gabrielgambetta.com/client-server-game-architecture.html
     https://developer.valvesoftware.com/wiki/Source_Multiplayer_Networking
+
+
+[OUT_OF_SCOPE] "Persistence Engine" what to do with rest of universe when on a planet? or stuff going on on planets when we are in space?
+    genericize and make work land and take off work for AI, system doesn't support non-player world switching
+    dumb loop where AI lands on planet, kept in some kind of background
+    processing state/alt engine, wait a second then take off to test all is working correctly
+    background engine meant to be low processing effort (eg: ultra dumbed down AI or simulations, no rendering, no physics, just states and events) to keep track of important entities
+    and states between space and worlds. eg: give entity important flag component to keep relevant, if dont have flag dont care and remove when switch
+    will be useful for persistence, AI and story type events.
+    //Example scenario:
+    //    you are on planet, you attack an AI, Ai comes after you. But you leave in your ship.
+    //    then AI gets TimedPersistenceComponent and will remain on planet for 5 minutes waiting for you, because angry!
+    //    maybe they will come after you. this could be very simple. we can fake intelligence in a background system in persistence engine
+    //
+    //    Think similar to skyrim, you attack someone in a house and leave they follow you out.
+    eg:
+    Engine persistenceEngine.
+    if (player switch screen) {
+        //move important entities from main to background processing
+        for each entity in mainEngine {
+            if (entity has PersistenceComponent) {
+                persistenceEngine.Add(entity);
+            }
+        }
+        //move relevant entity from background processing to main
+        for each entity in persistenceEngine {
+            if (entity has PersistenceComponent) {
+                if (is persistence relevant to new context) {
+                    //example relevance:
+                    //player in space, important entity on planet
+                    //if land on planet with important entity, load into actual engine
+                    mainEngine.Add(entity);
+                    //could be more nuanced, like perhaps entity is only loaded when event triggers it
+                    //or specific location on planet. dunno till start implementing.
+                    //possibly have multiple engines handling contexts? (thats dumb and overkill. keep it simple.)
+                }
+            }
+        }
+    }
+    if (AI switch screen) {
+        //similar thing to above
+        //if relevant load it, else keep in background
+
+        //if not important, remove from engine, forget about existence
+    }
+
 
 
 ~~~~~~~~~~~~~~~~~~~~RESOURCES!!!~~~~~~~~~~~~~~~~~~~~
