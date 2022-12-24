@@ -8,6 +8,10 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
@@ -24,16 +28,19 @@ import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.SplineComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.generation.FontFactory;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 
+import static com.spaceproject.screens.MyScreenAdapter.cam;
+
+//todo: rename? this is more of a grid render system / "under hud" frame of reference tool
 public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     
     //debug options
     public boolean clearScreen = false;
-    public boolean drawOrigin = false;
+    public boolean drawOrigin = true;
     public boolean drawCameraPos = false;
     public boolean drawCameraPath = false;
     public boolean drawMousePath = false;
@@ -60,9 +67,19 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     private Entity camMarker, mouseMarker;
     private float animate = 0;
     
+    private SpriteBatch batch;
+    private BitmapFont subFont;
+    
     public ParallaxRenderSystem() {
         shape = new ShapeRenderer();
+        batch = new SpriteBatch();
         projectionMatrix = new Matrix4();
+    
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter2 = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter2.size = 10;
+        parameter2.borderColor = Color.BLACK;
+        parameter2.borderWidth = 3;
+        subFont = FontFactory.createFont(FontFactory.fontPressStart, parameter2);
     }
     
     @Override
@@ -82,10 +99,11 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         //update matrix and convert screen coords to world cords.
         projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         shape.setProjectionMatrix(projectionMatrix);
+        batch.setProjectionMatrix(cam.combined);
         
         origin.set(0,0,0);
         GameScreen.viewport.project(origin);
-        camWorldPos.set(GameScreen.cam.position);
+        camWorldPos.set(cam.position);
         GameScreen.viewport.project(camWorldPos);
         gridBounds.set(1, 1, Gdx.graphics.getWidth()-2, Gdx.graphics.getHeight()-2);
     
@@ -112,12 +130,20 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         if (drawTest) debugRenderTest(deltaTime);
         
         //draw helpful navigation information
-        drawCompass(players.first());
+        if (players.size() > 0) {
+            drawCompass(players.first());
+        }
         
-        shape.setProjectionMatrix(GameScreen.cam.combined);
+        shape.setProjectionMatrix(cam.combined);
+        //if (!GameScreen.isHyper())
         drawOrbitPath();
         
+        
         shape.end();
+        
+        //batch.begin();
+        //drawHint("an object in motion, remains in motion");
+        //batch.end();
     
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
@@ -129,7 +155,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         float halfHeight = rect.height * 0.5f;
         float centerX = rect.x + halfWidth;
         float centerY = rect.y + halfHeight;
-        float scale = GameScreen.cam.zoom;
+        float scale = cam.zoom;
         float relativeGridWidth = gridSize / scale;
         
         //dynamic size
@@ -148,7 +174,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         int countX = 0, countY = 0;
         
         //draw X: horizontal lines
-        float posX = MyScreenAdapter.cam.position.x;
+        float posX = cam.position.x;
         int startX = (int) (posX + (-halfWidth * scale)) / gridSize;
         int endX = (int) (posX + (halfWidth * scale)) / gridSize;
         for (int i = startX; i < endX + 1; i++) {
@@ -163,7 +189,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         //gridSize *= 1.0f / (16.0f / 9.0f);//test 16x9 asymmetrical grid
         
         //draw Y: vertical lines
-        float posY = MyScreenAdapter.cam.position.y;
+        float posY = cam.position.y;
         int startY = (int) (posY + (-halfHeight * scale)) / gridSize;
         int endY = (int) (posY + (halfHeight * scale)) / gridSize;
         for (int i = startY; i < endY + 1; i++) {
@@ -176,6 +202,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         }
         
         //todo: highlight tile
+        //draw grid origin
         //camera (center tile)
         //mouse
         //draw grid co'ods
@@ -203,7 +230,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     }
     
     private void drawOrbitPath() {
-        float alpha = MathUtils.clamp((GameScreen.cam.zoom / 150 / 2), 0, 1);
+        float alpha = MathUtils.clamp((cam.zoom / 150 / 2), 0, 1);
         if (MathUtils.isEqual(alpha, 0)) return;
         
         ringColor.a = alpha;
@@ -241,7 +268,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     
     private void drawCompass(Entity entity) {
         //set alpha
-        float alpha = MathUtils.clamp((GameScreen.cam.zoom / 150 / 2), 0, 1);
+        float alpha = MathUtils.clamp((cam.zoom / 150 / 2), 0, 1);
         if (MathUtils.isEqual(alpha, 0)) return;
         
         HyperDriveComponent hyper = Mappers.hyper.get(entity);
@@ -254,7 +281,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         Vector2 facing = MyMath.vector(body.getAngle(), 50000);
         Vector2 originalPosition = Mappers.transform.get(entity).pos;
         playerPos.set(originalPosition, 0);
-        Vector3 pos = GameScreen.cam.project(playerPos);
+        Vector3 pos = cam.project(playerPos);
         
         float width = 0.5f;
         compassColor.a = alpha;
@@ -294,6 +321,19 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         //draw engine impulses
     }
     
+    private GlyphLayout layout = new GlyphLayout();
+    private void drawHint(String text) {
+        float ratio = 1 + (float) Math.sin(animate*0.1);
+        Color c = Color.GREEN.cpy().lerp(Color.PURPLE, ratio);
+        subFont.setColor(c);
+        layout.setText(subFont, text);
+        
+        float centerX = (Gdx.graphics.getWidth() - layout.width) * 0.5f;
+        int messageHeight = (int) (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3) + layout.height);
+        messageHeight -= layout.height * 2;
+        subFont.draw(batch, layout, 0, 0);
+    }
+    
     //region debug and testing
     private void debugClearScreen() {
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -316,7 +356,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
             getEngine().addEntity(camMarker);
             Gdx.app.log(this.getClass().getSimpleName(), "debug cam marker activated");
         }
-        Mappers.transform.get(camMarker).pos.set(GameScreen.cam.position.x, GameScreen.cam.position.y);
+        Mappers.transform.get(camMarker).pos.set(cam.position.x, cam.position.y);
     }
     
     private void drawWorldOrigin(Color color) {
@@ -400,6 +440,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     @Override
     public void dispose() {
         shape.dispose();
+        batch.dispose();
     }
     
 }
