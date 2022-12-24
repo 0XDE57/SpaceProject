@@ -256,7 +256,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
             entities.add(planet);
         }
         
-        Gdx.app.log(getClass().getSimpleName(), "Planetary System: [" + seed + "](" + x + ", " + y + ") Objects: " + (numPlanets));
+        Gdx.app.log(getClass().getSimpleName(), "Planetary System: [" + seed + "](" + x + ", " + y + ") Bodies: " + (numPlanets));
         
         return entities;
         
