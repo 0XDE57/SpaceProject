@@ -48,7 +48,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         Controllers.addListener(this);
         
         for (Controller controller : Controllers.getControllers()) {
-            Gdx.app.log(this.getClass().getSimpleName(), controller.getName());
+            logController(controller, "Detected", true);
         }
         
         players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
@@ -61,15 +61,15 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     
     @Override
     public void connected(Controller controller) {
-        logController(controller, true);
+        logController(controller, "Connected", true);
     }
     
     @Override
     public void disconnected(Controller controller) {
-        logController(controller, false);
+        logController(controller, "Disconnected", false);
     }
     
-    private void logController(Controller controller, boolean connected) {
+    private void logController(Controller controller, String status, boolean connected) {
         //todo: bug in jampad?
         // canVibrate() <-- null when disconnecting controller
         /* Exception in thread "main" java.lang.NullPointerException
@@ -94,9 +94,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             canVibrate = controller.canVibrate();
         }
         
-        //if (canVibrate == null)
-        String info = (connected ? "Connected: '" : "Disconnected: '")
-                + controller.getName()
+        String info = status + ": '" + controller.getName()
                 + "' id:[" + controller.getUniqueId()
                 + "] index:" + controller.getPlayerIndex()
                 + " power:" + controller.getPowerLevel()
