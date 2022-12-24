@@ -142,6 +142,9 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
                     HyperDriveComponent hyper = Mappers.hyper.get(entity);
                     velocity = hyper.speed * hyper.speed;
                 }
+                
+                //todo: state -1:
+                // health compontent : lastHitTime -simple timer or timestamp relative to current time
             }
         }
         
@@ -163,7 +166,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
     
         //set default color
         if (spline.color == null) {
-            spline.color = Color.RED;
+            spline.color = Color.MAGENTA;
         }
         
         for (int i = 0; i < spline.path.length-1; i++) {
