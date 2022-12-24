@@ -59,43 +59,47 @@ MILESTONES:
 
 ***engine architecture***
 The game entities and over-all engine architecture is designed around an Entity Component System.
-Entities are composed of Components. Systems operate on Entities. Systems are managed by the engine.
+Entities are composed of Components. Systems operate on components. Systems are managed by the engine.
+Most of the game logic and rendering happens in systems. For simplicity and consistency, components are pure data.
+No implementation. This may change in future.
+
 If you are unfamiliar with the concept of an ECS, start here:
-    https://github.com/libgdx/ashley/wiki/Framework-overview
+https://github.com/libgdx/ashley/wiki/Framework-overview
+
 ECS layout: [...\SpaceProject\core\src\com\spaceproject\]
     \systems: all systems go in here.
-        Most of the game logic and rendering happens in systems.
     \components: all components go in here.
-        For simplicity and consistency, components are pure data. No implementation. This may change in future.
 
-I knew transitioning between space and planets would be a little tricky, memory and design wise.
-So after lots of researching design patterns, I knew an ECS would probably be the best tool.
+-
+    I knew transitioning between space and planets would be a little tricky, memory and design wise.
+    So after lots of researching design patterns, I knew an ECS would probably be the best tool.
 
-I make heavy use of the flexibility provided by the ability to add or remove components during run time.
-This means entities can change their behavior on the fly. This allows for dynamic behaviors that are
-completely decoupled from the entity itself.
+    I make heavy use of the flexibility provided by the ability to add or remove components during run time.
+    This means entities can change their behavior on the fly. This allows for dynamic behaviors that are
+    completely decoupled from the entity itself.
 
-I originally wrote my own basic ECS implementation, but didn't want to spend time optimizing cache.
-So I migrated to Ashley for simplicity, but I would consider migrating to artemis if performance becomes an issue.
-(and I still need to pool the bullets...but first i'll build some better diagnostics tools and profile...)
+    I originally wrote my own basic ECS implementation, but didn't want to spend time optimizing cache.
+    So I migrated to Ashley for simplicity, but I would consider migrating to artemis if performance becomes an issue.
+    (and I still need to pool the bullets...but first i'll build some better diagnostics tools and profile...)
 
-Similar to dynamic components, I also make heavy use of the ability to load and unload systems on the fly.
-This allows me to not only change the behaviors of entities at run-time, but I can dynamically
-change the behavior of the game itself by loading and unloading systems.
+    Similar to dynamic components, I also make heavy use of the ability to load and unload systems on the fly.
+    This allows me to not only change the behaviors of entities at run-time, but I can dynamically
+    change the behavior of the game itself by loading and unloading systems.
 
-Ultimately this allows me to transition between space and planets smoothly, with very little load times.
-It's not "seamless" per say, I hide the rendering system swap behind some animations. It's fairly smooth.
+    Ultimately this allows me to transition between space and planets smoothly, with very little load times.
+    It's not "seamless" per say, I hide the rendering system swap behind some animations. It's fairly smooth.
 
-I do have to be careful with managing memory such as textures when a new context is loaded and the old one is unloaded.
-I also needed it to be easily configurable as I add new systems. So I built a manager to deal with all that complexity for me.
+    I do have to be careful with managing memory such as textures when a new context is loaded and the old one is unloaded.
+    I also needed it to be easily configurable as I add new systems. So I built a manager to deal with all that complexity for me.
 
-Maybe it's a little over-engineered, asking for memory troubles. But it works really well so far...
+    Maybe it's a little over-engineered, asking for memory troubles. But it works really well so far...
+-
 
-Systems are dynamically loaded and unloaded per context. Space and World can have different systems.
-    eg: don't need an orbit system when on a planet.
-Mobile and Desktop can have different systems.
-    eg: don't need to render touch control on desktop
-See SystemsConfig for defining system priories and properties.
+Systems are dynamically loaded and unloaded per context, as defined by @SystemsConfig:
+    Space and World can have different systems.
+        eg: don't need an orbit system when on a planet.
+    Mobile and Desktop can have different systems.
+        eg: don't need to render touch control on desktop
 
 Physical project structure and file layout:
 Data Directory [...\SpaceProject\assets]
