@@ -312,7 +312,7 @@ public class EntityFactory {
         float area = Math.abs(GeometryUtils.polygonArea(polygon.getVertices(), 0, polygon.getVertices().length));
         asteroid.polygon = polygon;
         asteroid.area = area;
-        asteroid.debugColor = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
+        asteroid.color = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
         entity.add(asteroid);
     
         PhysicsComponent physics = new PhysicsComponent();

@@ -61,7 +61,7 @@ public class AsteroidRenderSystem extends IteratingSystem {
             }
         } else {
             //mesh outline
-            color = asteroid.debugColor.cpy();
+            color = asteroid.color.cpy();
         }
         
         //debug orbit lock

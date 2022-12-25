@@ -20,6 +20,6 @@ public class AsteroidComponent implements Component {
     
     public boolean doShatter = false;
     
-    public Color debugColor; //temporary rendering color
+    public Color color;
     
 }
