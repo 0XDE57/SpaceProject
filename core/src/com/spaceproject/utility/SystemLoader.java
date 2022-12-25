@@ -30,7 +30,7 @@ public abstract class SystemLoader {
         }
         
         long now = System.currentTimeMillis();
-        Gdx.app.log(logSource,  engine.getSystems().size() + " systems loaded in " + (now - time) + " ms");
+        Gdx.app.log(logSource,  "Systems: [" + engine.getSystems().size() + "] load time: " + (now - time) + " ms");
     }
     
     @SuppressWarnings("unchecked")
