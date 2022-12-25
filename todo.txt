@@ -341,12 +341,14 @@ Legend:
 
 [ ] terrible BUG! space loadderr loading and unloading system near debug origin when shouldn't
     flashes for a moment.
-    [...] BUG! start game, leave to main menu, return to game: planets do not load
-        [x] clean up, dispose and unload systems properly when return to main menu
-        [ ] clean up threadpool, can find ways to spam fill q. not clearing properly
-        [ ] things will load now, but there seems to be a strange delay...
-            -start game, leave to main menu, start game again = empty until move around for a bit then loads
-            I believe this is to do with the noise threads shutting down?
+        [SpaceLoadingSystem] Removing Planetary System: (29993.0,29365.0)
+        [SpaceLoadingSystem] Planetary System: [128818954138294](29993.0, 29365.0) Bodies: 2
+[...] BUG! start game, leave to main menu, return to game: planets do not load
+    [x] clean up, dispose and unload systems properly when return to main menu
+    [ ] clean up threadpool, can find ways to spam fill q. not clearing properly
+    [ ] things will load now, but there seems to be a strange delay...
+        -start game, leave to main menu, start game again = empty until move around for a bit then loads
+        I believe this is to do with the noise threads shutting down?
 
 [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
     [ ] engine / movement
