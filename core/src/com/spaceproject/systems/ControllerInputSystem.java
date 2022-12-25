@@ -12,11 +12,14 @@ import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.CannonComponent;
+import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DashComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ShieldComponent;
+import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.menu.GameMenu;
@@ -162,6 +165,23 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             //todo: swap ship weapons
             //burst cannon <-> charge cannon
             //remove one, install the other
+            
+            CannonComponent cannonComponent = Mappers.cannon.get(player);
+            if (cannonComponent == null) {
+                //assume has charge equipped
+                ChargeCannonComponent removed = player.remove(ChargeCannonComponent.class);
+                //add new regular
+                VehicleComponent vehicle = Mappers.vehicle.get(player);
+                CannonComponent cannon = EntityFactory.makeCannon(vehicle.dimensions.width);
+                player.add(cannon);
+            } else {
+                //assume has regular cannon equipped
+                CannonComponent removed = player.remove(CannonComponent.class);
+                //add new charge
+                VehicleComponent vehicle = Mappers.vehicle.get(player);
+                ChargeCannonComponent chargeCannon = EntityFactory.makeChargeCannon(vehicle.dimensions.width);
+                player.add(chargeCannon);
+            }
         }
         
         if (buttonCode == controller.getMapping().buttonDpadDown) {
@@ -325,6 +345,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     
             //notify mouse that controller has current focus
             getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus = true;
+            //todo: setFocusController() logging: "Input focus set to: Controller | Desktop"
         } else {
             if (!control.boost) {
                 control.moveForward = false;

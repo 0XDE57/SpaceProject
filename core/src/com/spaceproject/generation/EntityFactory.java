@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.ConvexHull;
 import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -408,6 +409,7 @@ public class EntityFactory {
         
         //engine data and marks entity as drive-able
         VehicleComponent vehicle = new VehicleComponent();
+        vehicle.dimensions = new Rectangle(0, 0, width, height);
         vehicle.driver = driver;
         vehicle.thrust = entityCFG.engineThrust;
         shipEntity.add(vehicle);
@@ -420,10 +422,10 @@ public class EntityFactory {
         
         //weapon
         if (false) {
-            CannonComponent cannon = makeCannon(width);
+            CannonComponent cannon = makeCannon(vehicle.dimensions.width);
             shipEntity.add(cannon);
         } else {
-            ChargeCannonComponent chargeCannon = makeChargeCannon(width);
+            ChargeCannonComponent chargeCannon = makeChargeCannon(vehicle.dimensions.width);
             shipEntity.add(chargeCannon);
         }
         
@@ -486,7 +488,8 @@ public class EntityFactory {
         return entityCluster;
     }
     
-    private static ChargeCannonComponent makeChargeCannon(float width) {
+    public static ChargeCannonComponent makeChargeCannon(float width) {
+        //width the anchor point relative to body
         ChargeCannonComponent chargeCannon = new ChargeCannonComponent();
         chargeCannon.anchorVec = new Vector2(width, 0);
         chargeCannon.aimAngle = 0;
@@ -498,7 +501,8 @@ public class EntityFactory {
         return chargeCannon;
     }
     
-    private static CannonComponent makeCannon(float width) {
+    public static CannonComponent makeCannon(float width) {
+        //width the anchor point relative to body
         CannonComponent cannon = new CannonComponent();
         cannon.damage = entityCFG.cannonDamage;
         cannon.maxAmmo = entityCFG.cannonAmmo;
