@@ -419,28 +419,11 @@ public class EntityFactory {
         shipEntity.add(health);
         
         //weapon
-        if (true) {
-            CannonComponent cannon = new CannonComponent();
-            cannon.damage = entityCFG.cannonDamage;
-            cannon.maxAmmo = entityCFG.cannonAmmo;
-            cannon.curAmmo = cannon.maxAmmo;
-            cannon.timerFireRate = new SimpleTimer(entityCFG.cannonFireRate);
-            cannon.size = entityCFG.cannonSize;
-            cannon.velocity = entityCFG.cannonVelocity;
-            cannon.acceleration = entityCFG.cannonAcceleration;
-            cannon.anchorVec = new Vector2(width, 0);
-            cannon.aimAngle = 0;
-            cannon.timerRechargeRate = new SimpleTimer(entityCFG.cannonRechargeRate);
+        if (false) {
+            CannonComponent cannon = makeCannon(width);
             shipEntity.add(cannon);
         } else {
-            ChargeCannonComponent chargeCannon = new ChargeCannonComponent();
-            chargeCannon.anchorVec = new Vector2(width, 0);
-            chargeCannon.aimAngle = 0;
-            chargeCannon.velocity = entityCFG.cannonVelocity;
-            chargeCannon.maxSize = 0.30f;
-            chargeCannon.minSize = 0.1f;
-            chargeCannon.growRateTimer = new SimpleTimer(1500);
-            chargeCannon.baseDamage = 8f;
+            ChargeCannonComponent chargeCannon = makeChargeCannon(width);
             shipEntity.add(chargeCannon);
         }
         
@@ -501,6 +484,33 @@ public class EntityFactory {
         entityCluster.add(rightEngine);
         
         return entityCluster;
+    }
+    
+    private static ChargeCannonComponent makeChargeCannon(float width) {
+        ChargeCannonComponent chargeCannon = new ChargeCannonComponent();
+        chargeCannon.anchorVec = new Vector2(width, 0);
+        chargeCannon.aimAngle = 0;
+        chargeCannon.velocity = entityCFG.cannonVelocity;
+        chargeCannon.maxSize = 0.30f;
+        chargeCannon.minSize = 0.1f;
+        chargeCannon.growRateTimer = new SimpleTimer(1500);
+        chargeCannon.baseDamage = 8f;
+        return chargeCannon;
+    }
+    
+    private static CannonComponent makeCannon(float width) {
+        CannonComponent cannon = new CannonComponent();
+        cannon.damage = entityCFG.cannonDamage;
+        cannon.maxAmmo = entityCFG.cannonAmmo;
+        cannon.curAmmo = cannon.maxAmmo;
+        cannon.timerFireRate = new SimpleTimer(entityCFG.cannonFireRate);
+        cannon.size = entityCFG.cannonSize;
+        cannon.velocity = entityCFG.cannonVelocity;
+        cannon.acceleration = entityCFG.cannonAcceleration;
+        cannon.anchorVec = new Vector2(width, 0);
+        cannon.aimAngle = 0;
+        cannon.timerRechargeRate = new SimpleTimer(entityCFG.cannonRechargeRate);
+        return cannon;
     }
     
     public static Entity createEngine(Entity parent, ParticleComponent.EffectType type, Vector2 offset, float angle) {
