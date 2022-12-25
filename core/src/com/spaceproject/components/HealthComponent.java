@@ -8,4 +8,8 @@ public class HealthComponent implements Component {
     
     //total health
     public float maxHealth;
+    
+    //timestamp for taking damage
+    public long lastHit;
+    
 }

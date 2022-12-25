@@ -270,7 +270,7 @@ Legend:
     [ ] should not hyper
 
 [ ] when take damage
-    [ ] red spline
+    [x] red spline
     [ ] snap camera
     [ ] vibrate controller
     [ ] flash health bar
@@ -283,6 +283,8 @@ Legend:
     [ ] shield heats up turns red with shader
         perhaps this could be some sort of power up?
         or need to upgrade shield to handle higher temps
+        fly through the sun with shield up to absorb energy and heal?
+
 
 [ ] death message w/ reason:
     [ ] "stars are hot!"

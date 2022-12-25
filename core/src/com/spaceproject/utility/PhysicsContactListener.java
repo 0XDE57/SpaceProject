@@ -28,7 +28,9 @@ import com.spaceproject.components.SplineComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.systems.SoundSystem;
+
 
 public class PhysicsContactListener implements ContactListener {
     
@@ -113,6 +115,7 @@ public class PhysicsContactListener implements ContactListener {
             //damage (potential could be optimization to remove health, add merge it with asteroid, one less mapper)
             HealthComponent health = Mappers.health.get(entity);
             health.health -= relativeDamage;
+            health.lastHit = GameScreen.getGameTimeCurrent();
             if (health.health <= 0) {
                 asteroid.doShatter = true;
                 entity.add(new RemoveComponent());
@@ -142,6 +145,7 @@ public class PhysicsContactListener implements ContactListener {
         HealthComponent health = Mappers.health.get(entity);
         if (health != null) {
             health.health -= relativeDamage;
+            health.lastHit = GameScreen.getGameTimeCurrent();
             if (health.health <= 0) {
                 entity.add(new RemoveComponent());
                 Gdx.app.debug(this.getClass().getSimpleName(), "vehicle destroyed: " + impulse + " -> damage: " + relativeDamage);
@@ -206,6 +210,7 @@ public class PhysicsContactListener implements ContactListener {
         
         //do damage
         healthComponent.health -= damageComponent.damage;
+        healthComponent.lastHit = GameScreen.getGameTimeCurrent();
         
         //remove entity (kill)
         if (healthComponent.health <= 0) {
@@ -267,10 +272,10 @@ public class PhysicsContactListener implements ContactListener {
         //contactP.add(particle);
         
         if (showGhost) {
-            SplineComponent transfered = (SplineComponent) ECSUtil.transferComponent(entityHit, contactP, SplineComponent.class);
-            if (transfered != null) {
-                transfered.color = new Color(0, 0, 0, 0.4f);
-                transfered.style = SplineComponent.Style.solid;
+            SplineComponent transferred = (SplineComponent) ECSUtil.transferComponent(entityHit, contactP, SplineComponent.class);
+            if (transferred != null) {
+                transferred.color = new Color(0, 0, 0, 0.4f);
+                transferred.style = SplineComponent.Style.solid;
             }
         }
         

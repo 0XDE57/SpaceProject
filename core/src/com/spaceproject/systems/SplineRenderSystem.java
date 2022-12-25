@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ShieldComponent;
@@ -145,6 +146,15 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
                 
                 //todo: state -1:
                 // health compontent : lastHitTime -simple timer or timestamp relative to current time
+            }
+        }
+        
+        //show hurt
+        HealthComponent health = Mappers.health.get(entity);
+        if (health != null) {
+            long hurtTime = 1000;
+            if (GameScreen.getGameTimeCurrent() - health.lastHit < hurtTime) {
+                state = -1;
             }
         }
         
