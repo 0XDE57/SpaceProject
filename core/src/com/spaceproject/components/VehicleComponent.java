@@ -12,4 +12,6 @@ public class VehicleComponent implements Component {
     
     public Rectangle dimensions;
     
+    public byte weaponIndex;
+    
 }
