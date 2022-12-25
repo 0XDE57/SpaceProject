@@ -98,6 +98,11 @@ public class CameraSystem extends IteratingSystem {
         cam.update();
     }
     
+    private void lockToTarget(Vector2 pos) {
+        cam.position.x = pos.x;
+        cam.position.y = pos.y;
+    }
+    
     private void lerpToTarget(Vector2 pos, float delta) {
         //we want to lerp the camera for some smoothed following
         //but if we lerp directly using built in camera.position.lerp()
@@ -187,10 +192,6 @@ public class CameraSystem extends IteratingSystem {
         }
     */
     
-    }
-    private void lockToTarget(Vector2 pos) {
-        cam.position.x = pos.x;
-        cam.position.y = pos.y;
     }
     
     private void focusCombatCamera(Vector2 playerPosition, float delta) {
