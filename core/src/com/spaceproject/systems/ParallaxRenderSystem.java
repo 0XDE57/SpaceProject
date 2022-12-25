@@ -40,7 +40,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     
     //debug options
     public boolean clearScreen = false;
-    public boolean drawOrigin = true;
+    public boolean drawOrigin = false;
     public boolean drawCameraPos = false;
     public boolean drawCameraPath = false;
     public boolean drawMousePath = false;
