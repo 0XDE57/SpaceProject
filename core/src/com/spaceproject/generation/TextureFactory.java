@@ -281,9 +281,12 @@ public class TextureFactory {
         
         for (int yY = 0; yY <= width; yY++) {
             // draw body
-            if (yY == 0 || yY == width) {
+            if (yY == 0) {
                 // if first or last position of texture, "cap" it to complete the edging
-                pixmap.setColor(Color.WHITE);
+                pixmap.setColor(Color.RED);
+            } else if (yY == width) {
+                // if first or last position of texture, "cap" it to complete the edging
+                pixmap.setColor(Color.CYAN);
             } else {
                 pixmap.setColor(Color.BLACK);
             }
@@ -293,7 +296,7 @@ public class TextureFactory {
             }
             
             // draw edging
-            pixmap.setColor(Color.LIGHT_GRAY);
+            pixmap.setColor(Color.WHITE);
             pixmap.drawPixel(yY, edge);// bottom edge
             pixmap.drawPixel(yY, height - edge);// top edge
             
