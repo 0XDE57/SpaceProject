@@ -170,6 +170,11 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                 case 0: { //default charge cannon
                     //assume has charge equipped
                     ChargeCannonComponent removed = player.remove(ChargeCannonComponent.class);
+                    if (removed != null && removed.projectileEntity != null) {
+                        getEngine().removeEntity(removed.projectileEntity);
+                        removed.projectileEntity = null;
+                    }
+                    
                     //add new rapid cannon
                     CannonComponent cannon = EntityFactory.makeCannon(vehicle.dimensions.width);
                     player.add(cannon);
