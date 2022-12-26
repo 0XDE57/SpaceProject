@@ -58,11 +58,14 @@ MILESTONES:
 
 
 ***engine architecture***
-The game entities and over-all engine architecture is designed around an Entity Component System.
-Entities are composed of Components. Systems operate on components. Systems are managed by the engine.
-Most of the game logic and rendering happens in systems. For simplicity and consistency, components are pure data.
-No implementation. This may change in future.
+This game is written in Java, some GLSL for shaders, and built on top of libGDX. libGDX is a cross-platform
+Java game development framework based on OpenGL (ES) that works on Windows, Linux, macOS, Android, your browser and iOS.
+To learn libGDX, start here:
+https://libgdx.com/wiki/
 
+The engine architecture is designed around an Entity Component System. Entities are composed of Components.
+Systems operate on components. Systems are managed by the engine. Most of the game logic and rendering happens in systems.
+For simplicity and consistency, components are pure data. No implementation. This may change in future.
 If you are unfamiliar with the concept of an ECS, start here:
 https://github.com/libgdx/ashley/wiki/Framework-overview
 
@@ -175,10 +178,10 @@ PHYSICS CONSTRAINTS:
     https://xoppa.github.io/blog/pixels/
 The scale of the universe is currently somewhat arbitrary, as I have just been adjusting to the constraints as I implement these systems.
 The gameplay is mainly driven by the spaceship flight, destructible asteroids, and combat.
-* how big should a ship or player be in relation to the universe / planets?
-* asteroids: how big should asteroids be?
-* planets: how big should a planet be?
-* distances between planets: how long should the player spend traveling between systems and planets and stars?
+    * how big should a ship or player be in relation to the universe / planets?
+    * asteroids: how big should asteroids be?
+    * planets: how big should a planet be?
+    * distances between planets: how long should the player spend traveling between systems and planets and stars?
 I have been making up values as I go, learn rendering techniques and given the above constraints.
 Tuning the render scale and physics bodies as small as possible to maximize the velocity limit per step.
 Gameplay design focus around what feels intuitive and responsive in respect navigating space and the control of the character and ship.
@@ -257,7 +260,7 @@ Legend:
     [ * ] = exceptions
 
 [ ] swap between charge cannon and regular cannon
-    [ ] left right d-pad
+    [x] left right d-pad
     [ ] q e keyboard
     [ ] charge cannon at max shatter fully
     [ ] hold to bring up component ring
@@ -284,7 +287,6 @@ Legend:
         perhaps this could be some sort of power up?
         or need to upgrade shield to handle higher temps
         fly through the sun with shield up to absorb energy and heal?
-
 
 [ ] death message w/ reason:
     [ ] "stars are hot!"
