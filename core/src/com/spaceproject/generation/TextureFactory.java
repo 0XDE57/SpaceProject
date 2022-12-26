@@ -359,14 +359,14 @@ public class TextureFactory {
         int width = pixmap.getWidth() - 1;
         int height = pixmap.getHeight() - 1;
         
-        pixmap.setColor(Color.GRAY);
+        pixmap.setColor(Color.BLACK);
         //pixmap.setColor(0, 0.4f, 0, 1);
         pixmap.fillTriangle(
                 0, 0,  //top-right
                 0, height, //bottom-left
                 width, height);//bottom-right
         //pixmap.setColor(0.6f, 0.6f, 0.6f, 1);
-        pixmap.setColor(Color.DARK_GRAY);
+        pixmap.setColor(Color.WHITE);
         pixmap.drawLine(0, 0, width, height);
         pixmap.drawLine(0, 0, 0, height);
         
