@@ -71,9 +71,24 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
     }
     
     private void spawnChildAsteroid(Entity parentAsteroid, float[] vertices) {
-        /* NOTE: Box2D expects Polygons vertices are stored with a counter clockwise winding (CCW).
+        /* todo: re shatter issues; if we turn on b2d debug we can see the velocity is not the origin of child shards
+        NOTE: Box2D expects Polygons vertices are stored with a counter clockwise winding (CCW).
         We must be careful because the notion of CCW is with respect to a right-handed
-        coordinate system with the z-axis pointing out of the plane. */
+        coordinate system with the z-axis pointing out of the plane.
+       
+        NOTE: The body definition gives you the chance to initialize the position of the body on creation.
+        This has far better performance than creating the body at the world origin and then moving the body.
+        Caution: Do not create a body at the origin and then move it. If you create several bodies at the origin, then performance will suffer.
+        A body has two main points of interest. The first point is the body's origin. Fixtures and joints are attached relative to the body's origin.
+        The second point of interest is the center of mass.
+        The center of mass is determined from mass distribution of the attached shapes or is explicitly set with b2MassData.
+        Much of Box2D's internal computations use the center of mass position. For example b2Body stores the linear velocity for the center of mass.
+        When you are building the body definition, you may not know where the center of mass is located.
+        Therefore you specify the position of the body's origin.
+        You may also specify the body's angle in radians, which is not affected by the position of the center of mass.
+        If you later change the mass properties of the body, then the center of mass may move on the body,
+        but the origin position does not change and the attached shapes and joints do not move.
+        */
         
         ShortArray triangles = delaunay.computeTriangles(vertices, false);
         //Gdx.app.debug(this.getClass().getSimpleName(), "shatter into " + triangles.size);
