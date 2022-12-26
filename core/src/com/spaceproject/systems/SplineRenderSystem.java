@@ -133,7 +133,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
                 }
                 
                 ShieldComponent shield = Mappers.shield.get(entity);
-                if (shield != null && shield.activate) {
+                if (shield != null && shield.state == ShieldComponent.State.on) {
                     state = -2;
                 }
                 
