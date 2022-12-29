@@ -77,8 +77,8 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         float centerScreenX = Gdx.graphics.getWidth() * 0.5f;
         float centerScreenY = Gdx.graphics.getHeight() * 0.5f;
         for (SpaceBackgroundTile tile : tiles) {
-            float drawX = (tile.x - cam.position.x * tile.depth) + centerScreenX;
-            float drawY = (tile.y - cam.position.y * tile.depth) + centerScreenY;
+            float drawX = (tile.x - cam.position.x * tile.depth);
+            float drawY = (tile.y - cam.position.y * tile.depth);
             
             //draw texture
             float width = tile.tex.getWidth();
