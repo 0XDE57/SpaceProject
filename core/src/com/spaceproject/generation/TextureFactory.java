@@ -21,11 +21,11 @@ public class TextureFactory {
         Pixmap pixmap = new Pixmap(4, 4, Format.RGB565);
         
         //fill square
-        pixmap.setColor(0.5f, 0.5f, 0.5f, 1);
+        pixmap.setColor(0, 0, 0 , 1);
         pixmap.fill();
         
         //draw face/eyes (front of character)
-        pixmap.setColor(0, 1, 1, 1);
+        pixmap.setColor(1, 1, 1, 1);
         pixmap.drawPixel(3, 2);
         pixmap.drawPixel(3, 1);
         

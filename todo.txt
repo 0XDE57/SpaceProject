@@ -95,7 +95,7 @@ ECS layout: [...\SpaceProject\core\src\com\spaceproject\]
     I do have to be careful with managing memory such as textures when a new context is loaded and the old one is unloaded.
     I also needed it to be easily configurable as I add new systems. So I built a manager to deal with all that complexity for me.
 
-    Maybe it's a little over-engineered, asking for memory troubles. But it works really well so far...
+    Maybe it's a little over-engineered, asking for memory troubles. But it works well enough so far...
 -
 
 Systems are dynamically loaded and unloaded per context, as defined by @SystemsConfig:
@@ -308,6 +308,8 @@ Legend:
 [ ] render layer: move hyper trail layer to render when hud off
 
 [ ] character eye color: magenta other. red when enemy attack
+    [ ] shader, eye brightness tied to health
+    [ ] flash different colors and brightness at other drones to communicate
 
 [ ] highlight planet when flying over and zoomed out to show when you can land
     glowy ring / halo
@@ -404,11 +406,19 @@ Legend:
     so maybe no breaks?
     [ ] X on controller
 
+[ ] the way i render splines is terribly inefficient. a new vector3 per frame...
+    naughty, i know. apologies for my sins while i prototype.
+    [ ] Potential optimization: don't record point on same location, or within epsilon equals
+    manhattan distance^2 for faster checking. this part doesn't need to be hyper accurate
+    accept for at event points (health reduced).
+    or use optimized spines to render the path with reduced amount of data points?
+    [ ] plus were not even doing frustum culling of points outside the viewport...
+
 
 ................above is focused on bug fix and polish phase for space demo..........................
 ................landing will be disabled until worlds are further developed..........................
 
-[ ] is this why its not picking up my controller over usb?
+[ ] is this why its not picking up my controller over otg on mobile?
     https://github.com/libgdx/gdx-controllers/wiki/Declare-game-controller-support
 
 [...] needs frame of reference to judge speed and direction since parallax is so deep
