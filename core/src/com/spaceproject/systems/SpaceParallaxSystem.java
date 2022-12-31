@@ -2,9 +2,9 @@ package com.spaceproject.systems;
 
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.screens.GameScreen;
@@ -15,11 +15,11 @@ import java.util.ArrayList;
 
 public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     
-    private final OrthographicCamera cam;
     private final SpriteBatch spriteBatch;
+    private final Matrix4 projectionMatrix = new Matrix4();
     
     // background layer of tiles
-    private final ArrayList<SpaceBackgroundTile> tiles = new ArrayList<>();;
+    private final ArrayList<SpaceBackgroundTile> tiles = new ArrayList<>();
     
     // multiplier for parallax position of tile
     private static float dustTileDepth = 0.01f;
@@ -35,12 +35,11 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     private Vector2 star3CenterTile;
     
     private static final int tileSize = 512;//1024;
-    private int surround = 2;// how many tiles to load around center tile
+    private int surround = 3;// how many tiles to load around center tile
     private final ShaderProgram spaceShader;
     
     
     public SpaceParallaxSystem() {
-        cam = new OrthographicCamera();
         spriteBatch = new SpriteBatch();
         
         spaceShader = new ShaderProgram(Gdx.files.internal("shaders/spaceParallax.vert"), Gdx.files.internal("shaders/spaceParallax.frag"));
@@ -54,9 +53,6 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     
     @Override
     public void update(float delta) {
-        cam.position.x = GameScreen.cam.position.x;
-        cam.position.y = GameScreen.cam.position.y;
-        
         // load and unload tiles
         updateTiles();
         
@@ -68,6 +64,8 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         spaceShader.setUniformf("u_blend", blend);
         spaceShader.setUniformf("u_invert", invert);
         
+        projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        spriteBatch.setProjectionMatrix(projectionMatrix);
         spriteBatch.begin();
         drawParallaxTiles();
         spriteBatch.end();
@@ -77,8 +75,8 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         float centerScreenX = Gdx.graphics.getWidth() * 0.5f;
         float centerScreenY = Gdx.graphics.getHeight() * 0.5f;
         for (SpaceBackgroundTile tile : tiles) {
-            float drawX = (tile.x - cam.position.x * tile.depth);
-            float drawY = (tile.y - cam.position.y * tile.depth);
+            float drawX = ((-GameScreen.cam.position.x * tile.depth) + tile.x - tileSize * 0.5f) + centerScreenX;
+            float drawY = ((-GameScreen.cam.position.y * tile.depth) + tile.y - tileSize * 0.5f) + centerScreenY;
             
             //draw texture
             float width = tile.tex.getWidth();
@@ -111,7 +109,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
      */
     private Vector2 updateLayer(Vector2 lastTile, float depth, SpaceBackgroundTile.TileType type) {
         //calculate tile camera is within
-        Vector2 currentTile = getTilePos(cam.position.x, cam.position.y, depth);
+        Vector2 currentTile = getTilePos(GameScreen.cam.position.x, GameScreen.cam.position.y, depth);
 
         //load initial tiles
         if (lastTile == null) {
@@ -139,8 +137,8 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
      * @return tile that an object is in.
      */
     private static Vector2 getTilePos(float posX, float posY, float depth) {
-        float x = (posX + tileSize) * depth;
-        float y = (posY + tileSize) * depth;
+        float x = (posX ) * depth + tileSize * 0.5f;
+        float y = (posY ) * depth + tileSize * 0.5f;
         
         // calculate tile that position is in
         int tX = (int)(x / tileSize);
