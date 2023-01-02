@@ -29,24 +29,25 @@ MILESTONES:
  [x] started off with basic POC in a double-buffered JFrame. pure java, no libraries.
  [x] very basic physics sim with separate position, velocity, acceleration in a 0G environment.
  [x] basic polygon asteroids with simple AABB collision detection
- [x] lose the original source because I don't understand git
+ [x] lose the original source because I don't understand git :p
  [x] realize engines are hard
  [x] cry and move to libGDX
  [x] implement simple custom ECS
  [x] re-implement simple spaceship flight and basic asteroid polygons in new ECS style
  [x] collisions support for rotated bounding box with convex polygons
  [x] procedurally generated ship textures
- [x] space render system with orbiting bodies
+ [x] basic space render system with orbiting bodies
+ [x] 3D renderer for rotating 2D textures on the third axis
  [x] world render system with tiled noise
  [x] engine architecture that supports transfer between space and planets
  [x] better ECS: migrate to ashley
  [x] moved to B2D: fixed physics step and collision detection with impulse resolution
  [x] pause menu
  [x] title screen
- [x] 3D renderer for rotating 2D textures on the third axis
  [x] custom shape renderer to draw filled polygons for asteroids
  [x] basic asteroid destruction using Delaunay triangulation
  [x] simple shader for star textures
+ [ ] basic sfx
  [ ] better asteroid destruction using voronoi
 
  todo: look through commits and put these in chronological order + dates?
@@ -57,22 +58,27 @@ MILESTONES:
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-***engine architecture***
-This game is written in Java, some GLSL for shaders, and built on top of libGDX. libGDX is a cross-platform
-Java game development framework based on OpenGL (ES) that works on Windows, Linux, macOS, Android, your browser and iOS.
-To learn libGDX, start here:
+[engine architecture]
+This game is written in Java, GLSL for shaders, and built on top of libGDX.
+libGDX is a cross-platform Java game development framework based on OpenGL (ES) that works on Windows, Linux, macOS, Android, your browser and iOS.
+If you are unfamiliar with libGDX, start here:
 https://libgdx.com/wiki/
 
-The engine architecture is designed around an Entity Component System. Entities are composed of Components.
-Systems operate on components. Systems are managed by the engine. Most of the game logic and rendering happens in systems.
+The engine architecture is designed around an Entity Component System. Generally:
+    Entities are composed of Components.
+    Systems operate on components.
+    Systems are managed by the engine.
+Most of the game logic and rendering happens in systems.
 For simplicity and consistency, components are pure data. No implementation. This may change in future.
 If you are unfamiliar with the concept of an ECS, start here:
 https://github.com/libgdx/ashley/wiki/Framework-overview
 
 ECS layout: [...\SpaceProject\core\src\com\spaceproject\]
-    \systems: all systems go in here.
-    \components: all components go in here.
-
+    \systems: all systems go in here
+    \components: all components go in here
+    \utility
+        Mappers: Component Mapper Boilerplate
+        ECSUtil: Some tools for managing and debugging entities
 -
     I knew transitioning between space and planets would be a little tricky, memory and design wise.
     So after lots of researching design patterns, I knew an ECS would probably be the best tool.
@@ -167,15 +173,29 @@ PHYSICS CONSTRAINTS:
           so the box2D physics body is disabled via  which means no collisions but that works in favor of gameplay.
     * The fixed physics step keeps calculations frame-rate independent. (turning vsync off won't make your character run faster)
     * Large world space coordinates will introduce inaccuracy, courtesy of floating point arithmetic rounding: epsilon.
-    Floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics.
-    Meaning the deeper in space we go, the more "stuff" begins to break.
-    Box2D works best with world sizes less than 2 kilometers. The real universe by contrast, is a little bit bigger than 2km....
-    To solve this, we can use a local coordinate system and a large global coordinate system.
-    todo: 'Floating Origin' ->  b2World::ShiftOrigin
-    https://box2d.org/documentation/md__d_1__git_hub_box2d_docs_loose_ends.html#autotoc_md126
-    https://box2d.org/documentation/#:~:text=Caution%3A%20Box2D%20is%20tuned%20for,between%200.1%20and%2010%20meters.
-    Also sprites and world units: We can't use pixels for coordinates.
-    https://xoppa.github.io/blog/pixels/
+        Floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics.
+        Meaning the deeper in space we go, the more "stuff" begins to break.
+        Box2D works best with world sizes less than 2 kilometers. The universe by contrast, is a little bit bigger than 2km....
+        To solve this, we can use a local coordinate system and a large global coordinate system.
+        todo: 'Floating Origin' ->  b2World::ShiftOrigin
+        https://box2d.org/documentation/md__d_1__git_hub_box2d_docs_loose_ends.html#autotoc_md126
+        https://box2d.org/documentation/#:~:text=Caution%3A%20Box2D%20is%20tuned%20for,between%200.1%20and%2010%20meters.
+    * Also sprites and world units: We can't use pixels for coordinates.
+      https://xoppa.github.io/blog/pixels/
+    * Cannot remove bodies during a physics step: eg postSolve() in the physics contact listener.
+
+NOTE: Similarly to not removing bodies until all collisions have been processed;
+    Entities should not be removed mid-frame until all systems have finished processing!
+    To removed an entity we simply add a @RemoveComponent and entities with this component are
+    removed at the end of the frame as the @RemovalSystem should always be the very last system fired.
+    This way all systems can finish rendering the scene.
+    If a system is unsure about execution priority and weather an entity is dead or alive it may
+    check for the existance of
+
+NOTE: The @RemovalSystem also handles memory management in that it will check the entity for
+    data such as textures or b2D bodies and passes them off to the @ResourceDisposer to be auto-disposed.
+    (this is likely a place to look during optimization, eg: things like bullets should be pooled)
+
 The scale of the universe is currently somewhat arbitrary, as I have just been adjusting to the constraints as I implement these systems.
 The gameplay is mainly driven by the spaceship flight, destructible asteroids, and combat.
     * how big should a ship or player be in relation to the universe / planets?
@@ -258,6 +278,15 @@ Legend:
     [ ? ] = question
     [ ! ] = notes
     [ * ] = exceptions
+
+[ ] aiming on controller is sensitive to stick drifts and twitchy inputs,
+    direction facing should be average of inputs over last n frames?
+    "jitter buffer"
+    - in play testing this ends up being that its hard to get the ship facing the right direction
+    without holding down the stick. letting off the stick can change angle facing and control
+    feels not accurate to the the intentions.
+    https://gamedev.stackexchange.com/questions/51081/how-to-remove-jitter-from-motion-input
+    https://www.gamedeveloper.com/design/everything-i-learned-about-dual-stick-shooter-controls
 
 [ ] swap between charge cannon and regular cannon
     [x] left right d-pad
