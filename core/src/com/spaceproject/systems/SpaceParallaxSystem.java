@@ -34,6 +34,11 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     private Vector2 star2CenterTile;
     private Vector2 star3CenterTile;
     
+    //todo: split surround into separate x/y, calculate tiles needed:
+    // tX = GDX.graphics.getWidth()/tileSize;
+    // tY = GDX.graphics.getHeight()/tileSize;
+    // load appropriate amount of tiles for any resolution
+    // or fixed size then scaled to extended viewport?
     private static final int tileSize = 512;//1024;
     private int surround = 3;// how many tiles to load around center tile
     private final ShaderProgram spaceShader;
@@ -75,12 +80,12 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         float centerScreenX = Gdx.graphics.getWidth() * 0.5f;
         float centerScreenY = Gdx.graphics.getHeight() * 0.5f;
         for (SpaceBackgroundTile tile : tiles) {
-            float drawX = ((-GameScreen.cam.position.x * tile.depth) + tile.x - tileSize * 0.5f) + centerScreenX;
-            float drawY = ((-GameScreen.cam.position.y * tile.depth) + tile.y - tileSize * 0.5f) + centerScreenY;
-            
-            //draw texture
+            float centerTile = tileSize * 0.5f;
+            float drawX = ((-GameScreen.cam.position.x * tile.depth) + tile.x - centerTile) + centerScreenX;
+            float drawY = ((-GameScreen.cam.position.y * tile.depth) + tile.y - centerTile) + centerScreenY;
             float width = tile.tex.getWidth();
             float height = tile.tex.getHeight();
+            //draw texture
             spriteBatch.draw(tile.tex, drawX, drawY,
                     0, 0,
                     width, height,
@@ -137,8 +142,8 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
      * @return tile that an object is in.
      */
     private static Vector2 getTilePos(float posX, float posY, float depth) {
-        float x = (posX ) * depth + tileSize * 0.5f;
-        float y = (posY ) * depth + tileSize * 0.5f;
+        float x = (posX * depth) + (tileSize * 0.5f);
+        float y = (posY * depth) + (tileSize * 0.5f);
         
         // calculate tile that position is in
         int tX = (int)(x / tileSize);
