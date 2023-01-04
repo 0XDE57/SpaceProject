@@ -65,8 +65,8 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     private final Vector3 tempProjVector = new Vector3(); //for (un)/projecting screen coords
     
     //textures
-    private final Texture texCompBack = TextureFactory.createTile(Color.GRAY);
-    private final Texture texCompSeparator = TextureFactory.createTile(Color.RED);
+    private final Texture texCompBack = TextureFactory.createTile(Color.DARK_GRAY);
+    private final Texture texCompSeparator = TextureFactory.createTile(new Color(0.1f, 0.63f, 0.88f, 1f));
     GlyphLayout versionLayout;
     
     //entity storage
