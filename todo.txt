@@ -1097,6 +1097,8 @@ Legend:
     WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
     WARNING: All illegal access operations will be denied in a future release
 
+[ ] get rid of bar thing on fullscreen android
+    useImmersiveMode? see: #6683
 
 [ ] devops n website n legal crap n misc
     [  ] prepare to branch and have a dev stream and "stable stream"

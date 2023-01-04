@@ -88,6 +88,18 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
         You may also specify the body's angle in radians, which is not affected by the position of the center of mass.
         If you later change the mass properties of the body, then the center of mass may move on the body,
         but the origin position does not change and the attached shapes and joints do not move.
+        
+        asteroid.centerOfMass == B2D::body->GetLocalCenter()
+        
+        Vector2 center = new Vector2();
+        Polygon poly = new Polygon();
+        poly.getCentroid(center); -> transformed vertices -> GeometryUtils.polygonCentroid()
+        
+        GeometryUtils.polygonCentroid()
+        
+        API Addition: Polygon methods setVertex, getVertex, getVertexCount, getCentroid.
+        API Addition: GeometryUtils,polygons isCCW, ensureClockwise, reverseVertices
+        https://libgdx.com/news/2022/05/gdx-1-11
         */
         
         ShortArray triangles = delaunay.computeTriangles(vertices, false);
