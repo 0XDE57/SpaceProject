@@ -29,7 +29,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     private ImmutableArray<Entity> players;
     private final Vector3 tempVec = new Vector3();
-    public boolean controllerHasFocus = false;
+    private boolean controllerHasFocus = false;
     
     private final long doubleTapTime = 300;
     private final SimpleTimer doubleTapLeft = new SimpleTimer(doubleTapTime);
@@ -50,7 +50,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     @Override
     public void update(float delta) {
-        if (controllerHasFocus)
+        if (getControllerHasFocus())
             return;
         
         facePosition(Gdx.input.getX(), Gdx.input.getY());
@@ -256,6 +256,24 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         return false;
     }
     
+    public boolean getControllerHasFocus() {
+        return controllerHasFocus;
+    }
+    
+    public void setFocusToController() {
+        if (!controllerHasFocus) {
+            Gdx.app.debug(this.getClass().getSimpleName(), "input focus -> controller");
+        }
+        controllerHasFocus = true;
+    }
+    
+    private void setFocusToDesktop() {
+        if (controllerHasFocus) {
+            Gdx.app.debug(this.getClass().getSimpleName(), "input focus -> desktop");
+        }
+        controllerHasFocus = false;
+    }
+    
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         if (players.size() != 0) {
@@ -273,7 +291,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        controllerHasFocus = false;
+        setFocusToDesktop();
         return false;
     }
     

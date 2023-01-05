@@ -268,6 +268,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         
         Entity player = players.first();
         ControllableComponent control = Mappers.controllable.get(player);
+        DesktopInputSystem desktopInput = getEngine().getSystem(DesktopInputSystem.class);
         if (r2 > triggerDeadZone) {
             control.attack = true;
             
@@ -277,10 +278,9 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             }
         } else {
             //todo: bug, stick drift and minor inputs seem to be interfering with mouse input
-            //if (getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus) {
-            //log who has focus?
-            control.attack = false;
-            //}
+            if (desktopInput.getControllerHasFocus()) {
+                control.attack = false;
+            }
         }
     
         ShieldComponent shield = Mappers.shield.get(player);
@@ -298,16 +298,11 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             control.angleTargetFace = MyMath.angle2(0, 0, -leftStickVertAxis, leftStickHorAxis);
             control.movementMultiplier = MathUtils.clamp(dist, 0, 1);
             control.moveForward = true;
-    
-            
-            if (getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus) {
-                //todo: setFocusController() logging: "Input focus set to: Controller | Desktop"
-            }
             
             //notify mouse that controller has current focus
-            getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus = true;//todo getter setter
+            desktopInput.setFocusToController();
         } else {
-            if (!control.boost && getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus) {
+            if (!control.boost && desktopInput.getControllerHasFocus()) {
                 control.moveForward = false;
             }
         }
