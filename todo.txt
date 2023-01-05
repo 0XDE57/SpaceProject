@@ -290,7 +290,7 @@ Legend:
 
 [ ] swap between charge cannon and regular cannon
     [x] left right d-pad
-    [ ] q e keyboard
+    [x] E keyboard
     [ ] charge cannon at max shatter fully
     [ ] hold to bring up component ring
 
