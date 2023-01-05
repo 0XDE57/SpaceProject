@@ -67,6 +67,14 @@ public class CannonSystem extends IteratingSystem {
             //cannon.timerFireRate.setInterval(80, false);
         }
         
+        //set dynamic rate of fire based on multiplier (max on MnK, analog on controller)
+        int rateOfFire = (int) (cannon.baseRate * (1 - cannon.multiplier));
+        if (rateOfFire < cannon.minRate) {
+            rateOfFire = cannon.minRate;
+        }
+        cannon.timerFireRate.setInterval(rateOfFire, false);
+        
+        
         //check if can fire before shooting
         if (!(cannon.curAmmo > 0 && cannon.timerFireRate.canDoEvent()))
             return;

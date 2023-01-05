@@ -293,13 +293,8 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             CannonComponent cannon = Mappers.cannon.get(player);
             if (cannon != null) {
                 //todo, move this into canon system, just pass on multiplier to control component
-                int baseRate = 300;
-                int minRate = 40;
-                long rateOfFire = (long) (baseRate * (1 - r2));
-                if (rateOfFire < minRate) {
-                    rateOfFire = minRate;
-                }
-                cannon.timerFireRate.setInterval(rateOfFire, false);
+                cannon.multiplier = r2;
+                //DebugSystem.addDebugText(cannon.multiplier + "", 100, 100);
             }
         } else {
             //todo: bug, stick drift and minor inputs seem to be interfering with mouse input
@@ -326,7 +321,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus = true;
             //todo: setFocusController() logging: "Input focus set to: Controller | Desktop"
         } else {
-            if (!control.boost) {
+            if (!control.boost && getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus) {
                 control.moveForward = false;
             }
         }

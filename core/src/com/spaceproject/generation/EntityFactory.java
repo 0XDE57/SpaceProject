@@ -421,7 +421,7 @@ public class EntityFactory {
         shipEntity.add(health);
         
         //weapon
-        if (false) {
+        if (true) {
             CannonComponent cannon = makeCannon(vehicle.dimensions.width);
             shipEntity.add(cannon);
         } else {
@@ -507,6 +507,8 @@ public class EntityFactory {
         cannon.damage = entityCFG.cannonDamage;
         cannon.maxAmmo = entityCFG.cannonAmmo;
         cannon.curAmmo = cannon.maxAmmo;
+        cannon.baseRate = 300;
+        cannon.minRate = 40;
         cannon.timerFireRate = new SimpleTimer(entityCFG.cannonFireRate);
         cannon.size = entityCFG.cannonSize;
         cannon.velocity = entityCFG.cannonVelocity;

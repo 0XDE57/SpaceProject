@@ -11,6 +11,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BarrelRollComponent;
+import com.spaceproject.components.CannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DashComponent;
@@ -226,11 +227,17 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         if (players.size() == 0) {
             return false;
         }
-    
+        Entity player = players.first();
+        
         //primary attack
         if (button == Input.Buttons.LEFT) {
-            ControllableComponent control = Mappers.controllable.get(players.first());
+            ControllableComponent control = Mappers.controllable.get(player);
             control.attack = true;
+    
+            CannonComponent cannon = Mappers.cannon.get(player);
+            if (cannon != null) {
+                cannon.multiplier = 1;
+            }
             return true;
         }
         
@@ -241,7 +248,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             if (system.getZoomLevel() == 2) {
                 system.zoomOutMax();
             } else {
-                system.setZoomToDefault(players.first());
+                system.setZoomToDefault(player);
             }
             return true;
         }

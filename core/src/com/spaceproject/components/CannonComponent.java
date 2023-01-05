@@ -16,14 +16,20 @@ public class CannonComponent implements Component {
     
     public int curAmmo;
     
+    public int baseRate;
+    
+    public int minRate;
+    
     public float velocity;
     
     public float acceleration;
     
     public int size;
     
-    //timers
     public SimpleTimer timerFireRate;
+    
     public SimpleTimer timerRechargeRate;
+    
+    public float multiplier;
     
 }
