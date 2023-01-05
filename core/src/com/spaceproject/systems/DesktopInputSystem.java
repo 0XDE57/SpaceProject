@@ -11,13 +11,17 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.BarrelRollComponent;
+import com.spaceproject.components.CannonComponent;
+import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DashComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.KeyConfig;
+import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
@@ -49,9 +53,10 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     @Override
     public void update(float delta) {
-        if (!controllerHasFocus) {
-            facePosition(Gdx.input.getX(), Gdx.input.getY());
-        }
+        if (controllerHasFocus)
+            return;
+        
+        facePosition(Gdx.input.getX(), Gdx.input.getY());
     }
     
     private boolean playerControls(int keycode, boolean keyDown) {
@@ -156,6 +161,12 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             }
         }
         
+        if (keycode == keyCFG.switchWeapon) {
+            swapWeapon(player);
+            handled = true;
+        }
+        
+        
         if (keycode == keyCFG.activateShield) {
             ShieldComponent shield = Mappers.shield.get(player);
             if (shield != null) {
@@ -172,6 +183,47 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         }
         
         return handled;
+    }
+    
+    private void swapWeapon(Entity player) {
+        VehicleComponent vehicle = Mappers.vehicle.get(player);
+        if (vehicle == null) return;
+        
+        if (vehicle.weaponSwapTimer == null) {
+            vehicle.weaponSwapTimer = new SimpleTimer(500);
+        }
+        
+        if (!vehicle.weaponSwapTimer.tryEvent()) return;
+        
+        //swap: [burst cannon] <-> [charge cannon]
+        //remove one, install the other
+        switch (vehicle.weaponIndex) {
+            case 0: { //default charge cannon
+                //assume has charge equipped
+                ChargeCannonComponent removed = player.remove(ChargeCannonComponent.class);
+                if (removed != null && removed.projectileEntity != null) {
+                    getEngine().removeEntity(removed.projectileEntity);
+                    removed.projectileEntity = null;
+                }
+        
+                //add new rapid cannon
+                CannonComponent cannon = EntityFactory.makeCannon(vehicle.dimensions.width);
+                player.add(cannon);
+                vehicle.weaponIndex = 1;
+                Gdx.app.log(this.getClass().getSimpleName(), vehicle.weaponIndex + ": cannon");
+                break;
+            }
+            case 1: { //rapid cannon
+                //assume has regular cannon equipped
+                CannonComponent removed = player.remove(CannonComponent.class);
+                //add new charge
+                ChargeCannonComponent chargeCannon = EntityFactory.makeChargeCannon(vehicle.dimensions.width);
+                player.add(chargeCannon);
+                vehicle.weaponIndex = 0;
+                Gdx.app.log(this.getClass().getSimpleName(), vehicle.weaponIndex + ": charge cannon");
+                break;
+            }
+        }
     }
     
     private boolean facePosition(int x, int y) {
@@ -191,7 +243,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     @Override
     public boolean scrolled(float amountX, float amountY) {
         //todo: needs to overide middle clicks setZoomToDefault
-        //  if I scroll while resting, set to nearest zoom level
+        //  if I scroll while reseting, set to nearest zoom level
         if (amountY <= 0) {
             getEngine().getSystem(CameraSystem.class).zoomIn();
         } else {
@@ -261,7 +313,6 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
         controllerHasFocus = false;
-        
         return false;
     }
     
