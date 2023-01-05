@@ -186,11 +186,11 @@ PHYSICS CONSTRAINTS:
 
 NOTE: Similarly to not removing bodies until all collisions have been processed;
     Entities should not be removed mid-frame until all systems have finished processing!
-    To removed an entity we simply add a @RemoveComponent and entities with this component are
+    To remove an entity we simply add to the entity a @RemoveComponent and entities with this component are
     removed at the end of the frame as the @RemovalSystem should always be the very last system fired.
     This way all systems can finish rendering the scene.
     If a system is unsure about execution priority and weather an entity is dead or alive it may
-    check for the existance of
+    check for the existence of the @RemoveComponent.
 
 NOTE: The @RemovalSystem also handles memory management in that it will check the entity for
     data such as textures or b2D bodies and passes them off to the @ResourceDisposer to be auto-disposed.
