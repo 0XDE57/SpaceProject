@@ -12,6 +12,7 @@ public class KeyConfig extends Config {
     public int back;
     public int boost;
     public int dash;
+    public int switchWeapon;
     public int activateShield;
     public int changeVehicle;
     public int land;
@@ -43,6 +44,7 @@ public class KeyConfig extends Config {
     public int toggleMenu;
     
     
+    
     public void loadDefault() {
         //player
         forward = Keys.W;
@@ -51,6 +53,7 @@ public class KeyConfig extends Config {
         back = Keys.S;
         boost = Keys.SPACE;
         dash = Keys.SPACE;
+        switchWeapon = Keys.E;
         activateShield = Keys.SHIFT_LEFT;
         changeVehicle = Keys.G;
         land = Keys.T;

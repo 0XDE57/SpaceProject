@@ -3,6 +3,7 @@ package com.spaceproject.components;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Rectangle;
+import com.spaceproject.utility.SimpleTimer;
 
 public class VehicleComponent implements Component {
     
@@ -13,5 +14,7 @@ public class VehicleComponent implements Component {
     public Rectangle dimensions;
     
     public byte weaponIndex;
+    
+    public SimpleTimer weaponSwapTimer;
     
 }
