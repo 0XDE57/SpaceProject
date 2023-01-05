@@ -12,6 +12,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.spaceproject.SpaceProject;
+import com.spaceproject.components.CannonComponent;
+import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
@@ -23,6 +25,7 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.EntityConfig;
 import com.spaceproject.generation.BodyFactory;
+import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.DebugUtil;
@@ -91,6 +94,10 @@ public class ShipControlSystem extends IteratingSystem {
             if (canExit) {
                 exitVehicle(entity, control);
             }
+        }
+        
+        if (control.swapWeapon) {
+            swapWeapon(entity);
         }
         
         //transition or take off from planet
@@ -221,6 +228,47 @@ public class ShipControlSystem extends IteratingSystem {
         if (Gdx.input.isKeyPressed(Keys.Z)) {
             //physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(physicsComp.body.getLinearVelocity()));
             physicsComp.body.applyLinearImpulse(MyMath.vector(physicsComp.body.getAngle(), 1000), physicsComp.body.getPosition(), true);
+        }
+    }
+    
+    private void swapWeapon(Entity player) {
+        VehicleComponent vehicle = Mappers.vehicle.get(player);
+        if (vehicle == null) return;
+        
+        if (vehicle.weaponSwapTimer == null) {
+            vehicle.weaponSwapTimer = new SimpleTimer(500);
+        }
+        
+        if (!vehicle.weaponSwapTimer.tryEvent()) return;
+        
+        //swap: [burst cannon] <-> [charge cannon]
+        //remove one, install the other
+        switch (vehicle.weaponIndex) {
+            case 0: { //default charge cannon
+                //assume has charge equipped
+                ChargeCannonComponent removed = player.remove(ChargeCannonComponent.class);
+                if (removed != null && removed.projectileEntity != null) {
+                    getEngine().removeEntity(removed.projectileEntity);
+                    removed.projectileEntity = null;
+                }
+                
+                //add new rapid cannon
+                CannonComponent cannon = EntityFactory.makeCannon(vehicle.dimensions.width);
+                player.add(cannon);
+                vehicle.weaponIndex = 1;
+                Gdx.app.log(this.getClass().getSimpleName(), vehicle.weaponIndex + ": cannon");
+                break;
+            }
+            case 1: { //rapid cannon
+                //assume has regular cannon equipped
+                CannonComponent removed = player.remove(CannonComponent.class);
+                //add new charge
+                ChargeCannonComponent chargeCannon = EntityFactory.makeChargeCannon(vehicle.dimensions.width);
+                player.add(chargeCannon);
+                vehicle.weaponIndex = 0;
+                Gdx.app.log(this.getClass().getSimpleName(), vehicle.weaponIndex + ": charge cannon");
+                break;
+            }
         }
     }
     

@@ -12,14 +12,11 @@ import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.math.MathUtils;
 import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.CannonComponent;
-import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DashComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.VehicleComponent;
-import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.menu.GameMenu;
@@ -161,38 +158,9 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             handled = true;
         }
     
-        if (buttonCode == controller.getMapping().buttonDpadRight && buttonDown) {
-            //todo: swap ship weapons
-            //burst cannon <-> charge cannon
-            //remove one, install the other
-            VehicleComponent vehicle = Mappers.vehicle.get(player);
-            switch (vehicle.weaponIndex) {
-                case 0: { //default charge cannon
-                    //assume has charge equipped
-                    ChargeCannonComponent removed = player.remove(ChargeCannonComponent.class);
-                    if (removed != null && removed.projectileEntity != null) {
-                        getEngine().removeEntity(removed.projectileEntity);
-                        removed.projectileEntity = null;
-                    }
-                    
-                    //add new rapid cannon
-                    CannonComponent cannon = EntityFactory.makeCannon(vehicle.dimensions.width);
-                    player.add(cannon);
-                    vehicle.weaponIndex = 1;
-                    Gdx.app.log(this.getClass().getSimpleName(), vehicle.weaponIndex + ": cannon");
-                    break;
-                }
-                case 1: { //rapid cannon
-                    //assume has regular cannon equipped
-                    CannonComponent removed = player.remove(CannonComponent.class);
-                    //add new charge
-                    ChargeCannonComponent chargeCannon = EntityFactory.makeChargeCannon(vehicle.dimensions.width);
-                    player.add(chargeCannon);
-                    vehicle.weaponIndex = 0;
-                    Gdx.app.log(this.getClass().getSimpleName(), vehicle.weaponIndex + ": charge cannon");
-                    break;
-                }
-            }
+        if (buttonCode == controller.getMapping().buttonDpadRight) {
+            control.swapWeapon = buttonDown;
+            handled = true;
         }
         
         if (buttonCode == controller.getMapping().buttonDpadDown) {
