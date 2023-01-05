@@ -44,7 +44,7 @@ Welcome to A Space Project. A project involving space...
 | Attack: Shoot                  | Left-Click    | RT                    | bottom right button                     |
 | Defense: Shield                | Shift         | LT                    | todo: needs button                      |
 | Defense: Dodge (Barrel Roll)   | A/D + Space (or) Double Tap A/D | Double Tap R1/L1 | todo: swipe gesture?       |
-| Switch Weapon                  | todo: e/q?    | D-Pad Right           | idk at this point, mobile might not have space for controls
+| Switch Weapon                  | E             | D-Pad Right           | idk at this point, mobile might not have space for controls
 | Toggle HyperDrive              | Hold 1        | Hold B                | todo: needs button                      |
 | Land/Take Off                  | T             | D-Pad Down            | top center when over planet             |
 | Enter/Exit vehicle             | G             | Y                     | bottom right small button when in/near vehicle |
