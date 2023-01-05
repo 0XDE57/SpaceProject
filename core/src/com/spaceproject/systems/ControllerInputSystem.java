@@ -25,6 +25,8 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class ControllerInputSystem extends EntitySystem implements ControllerListener {
     
+    private boolean debugInput = false;
+    
     private float leftStickHorAxis;
     private float leftStickVertAxis;
     private float rightStickHorAxis;
@@ -48,7 +50,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         Controllers.addListener(this);
         
         for (Controller controller : Controllers.getControllers()) {
-            logController(controller, "Detected", true);
+            logControllerStatus(controller, "Detected", true);
         }
         
         players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
@@ -61,45 +63,12 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     
     @Override
     public void connected(Controller controller) {
-        logController(controller, "Connected", true);
+        logControllerStatus(controller, "Connected", true);
     }
     
     @Override
     public void disconnected(Controller controller) {
-        logController(controller, "Disconnected", false);
-    }
-    
-    private void logController(Controller controller, String status, boolean connected) {
-        //todo: bug in jampad?
-        // canVibrate() <-- null when disconnecting controller
-        /* Exception in thread "main" java.lang.NullPointerException
-	        at com.badlogic.gdx.controllers.desktop.support.JamepadController.canVibrate(JamepadController.java:173)
-	        at com.spaceproject.systems.ControllerInputSystem.logController(ControllerInputSystem.java:73)
-	        at com.spaceproject.systems.ControllerInputSystem.disconnected(ControllerInputSystem.java:69)
-	        at com.badlogic.gdx.controllers.desktop.support.CompositeControllerListener.disconnected(CompositeControllerListener.java:21)
-	        at com.badlogic.gdx.controllers.desktop.support.CompositeControllerListener.disconnected(CompositeControllerListener.java:21)
-	        at com.badlogic.gdx.controllers.desktop.support.JamepadController.setDisconnected(JamepadController.java:90)
-	        at com.badlogic.gdx.controllers.desktop.support.JamepadController.getButton(JamepadController.java:55)
-	        at com.badlogic.gdx.controllers.desktop.support.JamepadController.updateButtonsState(JamepadController.java:137)
-	        at com.badlogic.gdx.controllers.desktop.support.JamepadController.update(JamepadController.java:105)
-	        at com.badlogic.gdx.controllers.desktop.support.JamepadControllerMonitor.update(JamepadControllerMonitor.java:52)
-	        at com.badlogic.gdx.controllers.desktop.support.JamepadControllerMonitor.run(JamepadControllerMonitor.java:26)
-	        at com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application.loop(Lwjgl3Application.java:208)
-	        at com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application.<init>(Lwjgl3Application.java:166)
-	        at com.spaceproject.desktop.DesktopLauncher.main(DesktopLauncher.java:16)
-        * */
-        
-        boolean canVibrate = false;
-        if (connected) {
-            canVibrate = controller.canVibrate();
-        }
-        
-        String info = status + ": '" + controller.getName()
-                + "' id:[" + controller.getUniqueId()
-                + "] index:" + controller.getPlayerIndex()
-                + " power:" + controller.getPowerLevel()
-                + " vibrate:" + canVibrate;
-        Gdx.app.log(this.getClass().getSimpleName(), info);
+        logControllerStatus(controller, "Disconnected", false);
     }
     
     @Override
@@ -118,8 +87,14 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     }
     
     private boolean playerControls(Controller controller, int buttonCode, boolean buttonDown) {
-        if (players.size() == 0)
+        if (debugInput) {
+            logInput(controller, buttonCode, buttonDown);
+        }
+        
+        if (players.size() == 0) {
             return false;
+        }
+        
         
         boolean handled = false;
         
@@ -262,10 +237,15 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     
     @Override
     public boolean axisMoved(Controller controller, int axisCode, float value) {
-        if (players.size() == 0) return false;
+        if (debugInput) {
+            logAxis(controller, axisCode, value);
+        }
         
-        //Gdx.app.log("control:", axisCode + ", " + value);
-        //controller.getMapping().buttonL2 = ?
+        if (players.size() == 0) {
+            return false;
+        }
+        
+        //update axis
         if (axisCode == controller.getMapping().axisLeftX) {
             leftStickHorAxis = value;
         }
@@ -278,6 +258,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         if (axisCode == controller.getMapping().axisRightY) {
             rightStickVertAxis = value;
         }
+        //controller.getMapping().buttonL2 = ?
         if (axisCode == 4 /*controller.getMapping().buttonL2*/) {
             l2 = value;
         }
@@ -292,13 +273,14 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             
             CannonComponent cannon = Mappers.cannon.get(player);
             if (cannon != null) {
-                //todo, move this into canon system, just pass on multiplier to control component
                 cannon.multiplier = r2;
-                //DebugSystem.addDebugText(cannon.multiplier + "", 100, 100);
             }
         } else {
             //todo: bug, stick drift and minor inputs seem to be interfering with mouse input
+            //if (getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus) {
+            //log who has focus?
             control.attack = false;
+            //}
         }
     
         ShieldComponent shield = Mappers.shield.get(player);
@@ -317,9 +299,13 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             control.movementMultiplier = MathUtils.clamp(dist, 0, 1);
             control.moveForward = true;
     
+            
+            if (getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus) {
+                //todo: setFocusController() logging: "Input focus set to: Controller | Desktop"
+            }
+            
             //notify mouse that controller has current focus
-            getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus = true;
-            //todo: setFocusController() logging: "Input focus set to: Controller | Desktop"
+            getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus = true;//todo getter setter
         } else {
             if (!control.boost && getEngine().getSystem(DesktopInputSystem.class).controllerHasFocus) {
                 control.moveForward = false;
@@ -327,6 +313,49 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         }
 
         return false;
+    }
+    
+    private void logControllerStatus(Controller controller, String status, boolean connected) {
+        //todo: bug in jampad?
+        // canVibrate() <-- null when disconnecting controller
+        /* Exception in thread "main" java.lang.NullPointerException
+	        at com.badlogic.gdx.controllers.desktop.support.JamepadController.canVibrate(JamepadController.java:173)
+	        at com.spaceproject.systems.ControllerInputSystem.logController(ControllerInputSystem.java:73)
+	        at com.spaceproject.systems.ControllerInputSystem.disconnected(ControllerInputSystem.java:69)
+	        at com.badlogic.gdx.controllers.desktop.support.CompositeControllerListener.disconnected(CompositeControllerListener.java:21)
+	        at com.badlogic.gdx.controllers.desktop.support.CompositeControllerListener.disconnected(CompositeControllerListener.java:21)
+	        at com.badlogic.gdx.controllers.desktop.support.JamepadController.setDisconnected(JamepadController.java:90)
+	        at com.badlogic.gdx.controllers.desktop.support.JamepadController.getButton(JamepadController.java:55)
+	        at com.badlogic.gdx.controllers.desktop.support.JamepadController.updateButtonsState(JamepadController.java:137)
+	        at com.badlogic.gdx.controllers.desktop.support.JamepadController.update(JamepadController.java:105)
+	        at com.badlogic.gdx.controllers.desktop.support.JamepadControllerMonitor.update(JamepadControllerMonitor.java:52)
+	        at com.badlogic.gdx.controllers.desktop.support.JamepadControllerMonitor.run(JamepadControllerMonitor.java:26)
+	        at com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application.loop(Lwjgl3Application.java:208)
+	        at com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application.<init>(Lwjgl3Application.java:166)
+	        at com.spaceproject.desktop.DesktopLauncher.main(DesktopLauncher.java:16)
+        * */
+        
+        boolean canVibrate = false;
+        if (connected) {
+            canVibrate = controller.canVibrate();
+        }
+        
+        String info = status + ": '" + controller.getName()
+                + "' id:[" + controller.getUniqueId()
+                + "] index:" + controller.getPlayerIndex()
+                + " power:" + controller.getPowerLevel()
+                + " vibrate:" + canVibrate;
+        Gdx.app.log(this.getClass().getSimpleName(), info);
+    }
+    
+    private void logInput(Controller controller, int buttonCode, boolean buttonDown) {
+        String info = controller.getName() + ": ["+ buttonCode + "] " + buttonDown;
+        Gdx.app.debug(this.getClass().getSimpleName(), info);
+    }
+    
+    private void logAxis(Controller controller, int axisCode, float value) {
+        String info = controller.getName() + ": ["+ axisCode + "] " + value;
+        Gdx.app.debug(this.getClass().getSimpleName(), info);
     }
     
 }
