@@ -171,7 +171,7 @@ PHYSICS CONSTRAINTS:
         * (eg step of 60: 60 * 2 = 120,  max velocity = 120km/s)
         * For the [hyperdrive] feature I need to bypass this incredibly slow limit,
           so the box2D physics body is disabled via  which means no collisions but that works in favor of gameplay.
-    * The fixed physics step keeps calculations frame-rate independent. (turning vsync off won't make your character run faster)
+    * The fixed physics step keeps calculations frame-rate independent. (turning vsync off won't make your ship fly faster)
     * Large world space coordinates will introduce inaccuracy, courtesy of floating point arithmetic rounding: epsilon.
         Floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics.
         Meaning the deeper in space we go, the more "stuff" begins to break.
@@ -560,6 +560,7 @@ Legend:
             https://www.emanueleferonato.com/2012/03/05/breaking-objects-with-box2d-the-realistic-way/
             https://thebookofshaders.com/12/
             https://www.youtube.com/watch?v=4ySSsESzw2Y
+            https://www.youtube.com/watch?v=jxOAU7YfypA
     [x] damage vehicle on high impact
 
 [ ] JUICE!
