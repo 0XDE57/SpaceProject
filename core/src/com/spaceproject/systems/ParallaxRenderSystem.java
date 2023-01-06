@@ -293,9 +293,9 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight) {
             width *= 2;
             compassHighlight = Color.GOLD.cpy();
-            if (control.boost) {
-                compassHighlight = Color.CYAN.cpy();
-            }
+        }
+        if (control.boost) {
+            compassHighlight = Color.CYAN.cpy();
         }
         compassHighlight.a = alpha;
         
