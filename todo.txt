@@ -1092,12 +1092,13 @@ Legend:
     [ ] player manager/inventory/shipbuilder thingy
     [ ] career event timeline stats
 
-[ ] warning when launch
+[x] warning when launch
     WARNING: An illegal reflective access operation has occurred
     WARNING: Illegal reflective access by org.lwjgl.LWJGLUtil$3 (file:/home/logica/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.3/3df168ac74e4a8c96562cdff24ad352e255bf89c/lwjgl-2.9.3.jar) to method java.lang.ClassLoader.findLibrary(java.lang.String)
     WARNING: Please consider reporting this to the maintainers of org.lwjgl.LWJGLUtil$3
     WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
     WARNING: All illegal access operations will be denied in a future release
+    closed #1
 
 [ ] get rid of bar thing on fullscreen android
     useImmersiveMode? see: #6683
@@ -1228,6 +1229,7 @@ Legend:
     [ ] something is funny with the memory, it climbs then resets in a cyclical fashion
         I have a feeling this is a poor use of 'new' somewhere and when the memory resets its the GC cleaning it up
     [ ] fonts should all be in skin, ensure fonts are not duplicated/loaded twice
+        https://libgdx.com/wiki/managing-your-assets#writing-your-own-loaders
     http://gameprogrammingpatterns.com/data-locality.html
     http://t-machine.org/index.php/2014/03/08/data-structures-for-entity-systems-contiguous-memory/
     https://github.com/junkdog/entity-system-benchmarks#entity-system-benchmarks
