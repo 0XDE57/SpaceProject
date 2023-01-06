@@ -80,7 +80,7 @@ The code is bit rough in some places, littered with todo's, half-baked features,
 
 ## Building
 **General**
-* Set up your [Development Environment](https://libgdx.badlogicgames.com/documentation/gettingstarted/Setting%20Up.html)
+* Set up your Development Environment: https://libgdx.com/wiki/start/setup
 * Make sure Android SDK is installed.
 * Import project in IDE of choice using gradle.
 * If a "File not found" error occurs, check the working directory. Append "\assets" to the working directory in run configurations.
