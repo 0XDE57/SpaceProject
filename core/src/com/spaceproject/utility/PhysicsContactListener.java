@@ -244,10 +244,10 @@ public class PhysicsContactListener implements ContactListener {
         damageEntity.add(new RemoveComponent());
     
         //add projectile ghost (fx)
-        explodeProjectile(contact, damageEntity, attackedEntity, true);
+        explodeProjectile(contact, damageEntity, attackedEntity, healthComponent,true);
     }
     
-    private void explodeProjectile(Contact contact, Entity entityHit, Entity attackedEntity, boolean showGhost) {
+    private void explodeProjectile(Contact contact, Entity entityHit, Entity attackedEntity, HealthComponent health, boolean showGhost) {
         WorldManifold manifold = contact.getWorldManifold();
         //for (Vector2 p : manifold.getPoints()) {
         Vector2 p = manifold.getPoints()[0];
@@ -274,10 +274,13 @@ public class PhysicsContactListener implements ContactListener {
         if (showGhost) {
             SplineComponent transferred = (SplineComponent) ECSUtil.transferComponent(entityHit, contactP, SplineComponent.class);
             if (transferred != null) {
-                transferred.color = new Color(0, 0, 0, 0.5f);
+                transferred.color = new Color(0, 0, 0, 0.15f);
                 AsteroidComponent asteroid = Mappers.asteroid.get(attackedEntity);
                 if (asteroid != null) {
-                    transferred.color.set(asteroid.color).a = 0.5f;
+                    //only color when asteroid destroyed
+                    if (health.health <= 0) {
+                        transferred.color.set(asteroid.color).a = 0.75f;
+                    }
                 }
                 transferred.style = SplineComponent.Style.solid;
             }
