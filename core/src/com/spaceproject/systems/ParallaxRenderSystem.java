@@ -116,7 +116,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         
         //draw grid
         gridColor.a = 0.15f;
-        drawGrid(gridColor, gridBounds, gridWidth, 0.5f);
+        drawGrid(gridColor, gridBounds, calculateGridDensity(gridWidth), 0.5f);
         
         //debug override background
         if (clearScreen) debugClearScreen();
@@ -148,6 +148,19 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
     
+    private int calculateGridDensity(int width) {
+        // calculate "adaptive grid size"
+        CameraSystem camera = getEngine().getSystem(CameraSystem.class);
+        byte zoomLevel = camera.getZoomLevel();
+        byte zoomLevelThreshold = 10; // at what level to start halving grid cells
+        for (byte level = zoomLevelThreshold; level <= camera.getMaxZoomLevel(); level++) {
+            if (zoomLevel >= level) {
+                width *= 2; // double width as we zoom out
+            }
+        }
+        return width;
+    }
+    
     private void drawGrid(Color color, Rectangle rect, int gridSize, float width) {
         shape.setColor(color);
         
@@ -157,20 +170,6 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         float centerY = rect.y + halfHeight;
         float scale = cam.zoom;
         float relativeGridWidth = gridSize / scale;
-        
-        //dynamic size
-        boolean adaptiveGrid = false;
-        if (adaptiveGrid) {
-            if (relativeGridWidth < gridSize) {
-                gridSize *= 2.0f;
-            }
-            relativeGridWidth = gridSize / scale;
-            /*
-            if (relativeGridWidth < gridSize * 2f) {
-                gridSize *= 0.5f;
-                relativeGridWidth = gridSize / scale;
-            }*/
-        }
         int countX = 0, countY = 0;
         
         //draw X: horizontal lines
