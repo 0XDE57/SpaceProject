@@ -353,4 +353,12 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         Gdx.app.debug(this.getClass().getSimpleName(), info);
     }
     
+    public void vibrate(int durationMS, float strength) {
+        Controller controller = Controllers.getCurrent();
+        if (!controller.canVibrate()) {
+            return;
+        }
+        //strength range: 0.0 - 1.0
+        controller.startVibration(durationMS, strength);
+    }
 }

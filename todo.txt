@@ -304,7 +304,7 @@ Legend:
 [ ] when take damage
     [x] red spline
     [ ] snap camera
-    [ ] vibrate controller
+    [x] vibrate controller
     [x] flash health bar
     [ ] ship body gets more red ship with health. body shader, inner black cells.
         outline shader for other states: blue shield, yellow engine, blue boost?

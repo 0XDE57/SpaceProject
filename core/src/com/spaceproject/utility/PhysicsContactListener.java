@@ -17,6 +17,7 @@ import com.spaceproject.components.AsteroidBeltComponent;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.CamTargetComponent;
 import com.spaceproject.components.ChargeCannonComponent;
+import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
@@ -29,6 +30,7 @@ import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.systems.ControllerInputSystem;
 import com.spaceproject.systems.SoundSystem;
 
 
@@ -151,6 +153,11 @@ public class PhysicsContactListener implements ContactListener {
                 Gdx.app.debug(this.getClass().getSimpleName(), "vehicle destroyed: " + impulse + " -> damage: " + relativeDamage);
             }
         }
+    
+        ControlFocusComponent controlled = Mappers.controlFocus.get(entity);
+        if (controlled != null) {
+            engine.getSystem(ControllerInputSystem.class).vibrate(100, 1f);
+        }
     }
     
     private void onCollision(Contact contact, Entity a, Entity b) {
@@ -240,11 +247,11 @@ public class PhysicsContactListener implements ContactListener {
              */
         }
         
-        //remove projectile
-        damageEntity.add(new RemoveComponent());
-    
         //add projectile ghost (fx)
         explodeProjectile(contact, damageEntity, attackedEntity, healthComponent,true);
+    
+        //remove projectile
+        damageEntity.add(new RemoveComponent());
     }
     
     private void explodeProjectile(Contact contact, Entity entityHit, Entity attackedEntity, HealthComponent health, boolean showGhost) {
@@ -277,6 +284,7 @@ public class PhysicsContactListener implements ContactListener {
                 transferred.color = new Color(0, 0, 0, 0.15f);
                 AsteroidComponent asteroid = Mappers.asteroid.get(attackedEntity);
                 if (asteroid != null) {
+                    
                     //only color when asteroid destroyed
                     if (health.health <= 0) {
                         transferred.color.set(asteroid.color).a = 0.75f;
