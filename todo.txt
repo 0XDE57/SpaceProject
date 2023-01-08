@@ -303,7 +303,9 @@ Legend:
 
 [ ] when take damage
     [x] red spline
-    [ ] snap camera
+    [...] snap camera
+        this could be tuned a little, point is to bring attention to the fact we took damage.
+        especially if we are maxed out.
     [x] vibrate controller
     [x] flash health bar
     [ ] ship body gets more red ship with health. body shader, inner black cells.
@@ -1122,6 +1124,8 @@ Legend:
         https://www.youtube.com/watch?v=8eAW-7Js7NA
         https://www.youtube.com/watch?v=t8UFJ3obm-Q
         https://www.youtube.com/watch?v=ePQcAjuiSEo
+    [ ] build signing
+        https://developer.android.com/studio/publish/app-signing
 
 [...] config
     [x] config manager, save and load all configs

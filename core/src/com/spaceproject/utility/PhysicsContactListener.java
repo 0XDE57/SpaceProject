@@ -30,6 +30,7 @@ import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.systems.CameraSystem;
 import com.spaceproject.systems.ControllerInputSystem;
 import com.spaceproject.systems.SoundSystem;
 
@@ -157,6 +158,10 @@ public class PhysicsContactListener implements ContactListener {
         ControlFocusComponent controlled = Mappers.controlFocus.get(entity);
         if (controlled != null) {
             engine.getSystem(ControllerInputSystem.class).vibrate(100, 1f);
+            CameraSystem camera = engine.getSystem(CameraSystem.class);
+            if (camera.getZoomLevel() > 10) {
+                camera.setZoomToDefault(entity);
+            }
         }
     }
     
