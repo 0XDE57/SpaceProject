@@ -164,6 +164,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         }
         
         //roll index
+        spline.stepCount++;
         spline.indexHead++;
         if (spline.indexHead >= spline.path.length) {
             spline.indexHead = 0;
