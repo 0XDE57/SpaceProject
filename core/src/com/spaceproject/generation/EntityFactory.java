@@ -439,7 +439,7 @@ public class EntityFactory {
         
         //shield
         ShieldComponent shield = new ShieldComponent();
-        shield.animTimer = new SimpleTimer(250, true);
+        shield.animTimer = new SimpleTimer(100, true);
         shield.defence = 100f;
         BoundingBox boundingBox = PolygonUtil.calculateBoundingBox(physics.body);
         float radius = Math.max(boundingBox.getWidth(), boundingBox.getHeight());
