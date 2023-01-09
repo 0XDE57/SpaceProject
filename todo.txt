@@ -386,6 +386,16 @@ Legend:
         I believe this is to do with the noise threads shutting down?
 
 [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
+    [ ] ship impact
+        [ ] hull
+            -light
+            -heavy
+        [ ] shield
+            [ ] charge up
+            [ ] activate
+            [ ] sustain
+            [ ] charge down
+            [ ] break
     [ ] engine / movement
         [ ] active, pitch tied to velocity
         [ ] left right?
@@ -1179,6 +1189,11 @@ Legend:
             lets not reinvent this wheel.
             stop brain. this is getting ridiculous.
 
+[ ] stats
+    [ ] shots fired
+    [ ] shots hit
+    [ ] distance travelled
+    [ ] planets visited
 
 [ ] DEBUG
     [ ] in game console

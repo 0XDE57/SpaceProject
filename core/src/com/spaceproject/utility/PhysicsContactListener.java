@@ -85,16 +85,14 @@ public class PhysicsContactListener implements ContactListener {
             if (asteroidB != null) {
                 asteroidImpact(entityB, asteroidB, maxImpulse);
             }
-
-            if (maxImpulse > vehicleDamageThreshold) {
-                VehicleComponent vehicleA = Mappers.vehicle.get(entityA);
-                if (vehicleA != null) {
-                    doVehicleDamage(entityA, maxImpulse);
-                }
-                VehicleComponent vehicleB = Mappers.vehicle.get(entityA);
-                if (vehicleB != null) {
-                    doVehicleDamage(entityB, maxImpulse);
-                }
+            
+            VehicleComponent vehicleA = Mappers.vehicle.get(entityA);
+            if (vehicleA != null) {
+                doVehicleDamage(entityA, maxImpulse);
+            }
+            VehicleComponent vehicleB = Mappers.vehicle.get(entityA);
+            if (vehicleB != null) {
+                doVehicleDamage(entityB, maxImpulse);
             }
         }
     }
@@ -130,20 +128,43 @@ public class PhysicsContactListener implements ContactListener {
     }
     
     private void doVehicleDamage(Entity entity, float impulse) {
+        //calc damage relative to how hard impact impulse was
+        float damageMultiplier = 0.4f;
+        float relativeDamage = (impulse * damageMultiplier);
+        
+        SoundSystem sound = engine.getSystem(SoundSystem.class);
+    
         //don't apply damage while shield active
         ShieldComponent shield = Mappers.shield.get(entity);
         if (shield != null && shield.state == ShieldComponent.State.on) {
             //todo: break shield if impact is hard enough
             //int shieldBreakThreshold = 500;
             //if (impulse > shieldBreakThreshold) { }
+        
+            sound.shieldImpact(1);
+            
+            Gdx.app.debug(this.getClass().getSimpleName(),
+                    "impulse: " + impulse + " -> " + relativeDamage +
+                            ((impulse < vehicleDamageThreshold) ? " - <shield protect>" : "DAMAGED!")
+            );
             return; //protected by shield
         }
         
-        Gdx.app.debug(this.getClass().getSimpleName(), "high impact damage: " + impulse);
         
-        //calc damage relative to how hard impact impulse was
-        float damageMultiplier = 0.4f;
-        float relativeDamage = (impulse * damageMultiplier);
+        if (impulse < vehicleDamageThreshold) {
+            if (impulse > 1) {
+                sound.hullImpactLight(impulse / vehicleDamageThreshold);
+            } else {
+                //todo: scrapping dragging hull across asteroid
+                //
+            }
+            
+            return;
+        }
+        
+        
+        
+        Gdx.app.debug(this.getClass().getSimpleName(), "high impact damage: " + impulse + " -> -" + relativeDamage);
         
         HealthComponent health = Mappers.health.get(entity);
         if (health != null) {
@@ -162,6 +183,8 @@ public class PhysicsContactListener implements ContactListener {
             if (camera.getZoomLevel() > 10) {
                 camera.setZoomToDefault(entity);
             }
+    
+            sound.hullImpactHeavy(1);
         }
     }
     
