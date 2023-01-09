@@ -355,7 +355,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     
     public void vibrate(int durationMS, float strength) {
         Controller controller = Controllers.getCurrent();
-        if (!controller.canVibrate()) {
+        if (controller == null || !controller.canVibrate()) {
             return;
         }
         //strength range: 0.0 - 1.0
