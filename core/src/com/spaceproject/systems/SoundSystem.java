@@ -14,13 +14,13 @@ public class SoundSystem extends EntitySystem implements Disposable {
     Sound f3;
     Sound hullImpact, hullImpactHeavy;
     Sound shieldImpact;
-    Sound shieldCharge, shieldOn, shieldOff;
+    Sound shieldCharge, shieldOn, shieldOff, shieldAmbient;
     long kickID;
     long synthID;
     long f3ID;
     long hullImpactID, hullImpactHeavyID;
     long shieldImpactID;
-    long shieldChargeID, shieldOnID, shieldOffID;
+    long shieldChargeID, shieldOnID, shieldOffID, shieldAmbientID;
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -62,6 +62,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         shieldCharge = Gdx.audio.newSound(Gdx.files.internal("sound/shieldChargeUp.mp3"));
         shieldOn = Gdx.audio.newSound(Gdx.files.internal("sound/shieldOn.mp3"));
         shieldOff = Gdx.audio.newSound(Gdx.files.internal("sound/shieldOff.mp3"));
+        shieldAmbient = Gdx.audio.newSound(Gdx.files.internal("sound/shieldAmbient.mp3"));
     }
     
     @Override
@@ -99,8 +100,24 @@ public class SoundSystem extends EntitySystem implements Disposable {
     public long shieldOn() {
         return shieldOnID = shieldOn.play();
     }
+    
     public long shieldOff() {
         return shieldOffID = shieldOff.play();
+    }
+    
+    boolean isAlreadyLooping = false;
+    public long shieldAmbient(boolean loop) {
+        if (loop) {
+            if (!isAlreadyLooping) {
+                shieldAmbientID = shieldAmbient.play();
+            }
+            isAlreadyLooping = true;
+        } else {
+            isAlreadyLooping = false;
+            shieldAmbient.stop();
+        }
+        shieldAmbient.setLooping(shieldAmbientID, loop);
+        return shieldAmbientID;
     }
     
     @Override

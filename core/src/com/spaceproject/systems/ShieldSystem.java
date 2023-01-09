@@ -32,18 +32,29 @@ public class ShieldSystem extends IteratingSystem {
             shield.state = ShieldComponent.State.off;
             shield.activate = false;
         }
+        SoundSystem sound = getEngine().getSystem(SoundSystem.class);
+        ControlFocusComponent controlFocus = Mappers.controlFocus.get(entity);
         
         switch (shield.state) {
             case off:
                 if (shield.activate) {
                     engage(shield);
                 }
+    
+                //stop loop if entity is controlled player
+                if (controlFocus != null) {
+                    sound.shieldAmbient(false);
+                }
                 break;
             case on:
                 if (!shield.activate) {
                     disengage(entity, shield);
                 }
-                
+    
+                //start loop if entity is controlled player
+                if (controlFocus != null) {
+                    long id = sound.shieldAmbient(true);//todo
+                }
                 break;
             case charge:
                 if (!shield.activate) {
@@ -52,8 +63,6 @@ public class ShieldSystem extends IteratingSystem {
                 }
                 
                 //if entity is controlled player
-                SoundSystem sound = getEngine().getSystem(SoundSystem.class);
-                ControlFocusComponent controlFocus = Mappers.controlFocus.get(entity);
                 if (controlFocus != null) {
                     //sound.shieldCharge();
                 }
