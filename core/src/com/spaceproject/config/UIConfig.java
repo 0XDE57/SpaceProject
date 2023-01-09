@@ -25,8 +25,8 @@ public class UIConfig extends Config {
     @Override
     public void loadDefault() {
         playerHPBarY = 55;
-        playerHPBarWidth = 200;
-        playerHPBarHeight = 12;
+        playerHPBarWidth = 300;
+        playerHPBarHeight = 20;
         playerAmmoBarColor = Color.MAGENTA;
         playerAmmoBarRechargeColor = Color.SLATE;
         
