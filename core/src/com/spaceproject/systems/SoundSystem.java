@@ -14,11 +14,13 @@ public class SoundSystem extends EntitySystem implements Disposable {
     Sound f3;
     Sound hullImpact, hullImpactHeavy;
     Sound shieldImpact;
+    Sound shieldCharge, shieldOn, shieldOff;
     long kickID;
     long synthID;
     long f3ID;
     long hullImpactID, hullImpactHeavyID;
     long shieldImpactID;
+    long shieldChargeID, shieldOnID, shieldOffID;
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -57,6 +59,9 @@ public class SoundSystem extends EntitySystem implements Disposable {
         hullImpact = Gdx.audio.newSound(Gdx.files.internal("sound/hullImpactLight.mp3"));
         hullImpactHeavy = Gdx.audio.newSound(Gdx.files.internal("sound/hullImpactHeavy.mp3"));
         shieldImpact = Gdx.audio.newSound(Gdx.files.internal("sound/shieldImpact.mp3"));
+        shieldCharge = Gdx.audio.newSound(Gdx.files.internal("sound/shieldChargeUp.mp3"));
+        shieldOn = Gdx.audio.newSound(Gdx.files.internal("sound/shieldOn.mp3"));
+        shieldOff = Gdx.audio.newSound(Gdx.files.internal("sound/shieldOff.mp3"));
     }
     
     @Override
@@ -85,6 +90,17 @@ public class SoundSystem extends EntitySystem implements Disposable {
     
     public long shieldImpact(float volume) {
         return shieldImpactID = shieldImpact.play(volume, 1, 0);
+    }
+    
+    public long shieldCharge() {
+        return shieldChargeID = shieldCharge.play();
+    }
+    
+    public long shieldOn() {
+        return shieldOnID = shieldOn.play();
+    }
+    public long shieldOff() {
+        return shieldOffID = shieldOff.play();
     }
     
     @Override

@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
+import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ShieldComponent;
@@ -42,11 +43,19 @@ public class ShieldSystem extends IteratingSystem {
                 if (!shield.activate) {
                     disengage(entity, shield);
                 }
+                
                 break;
             case charge:
                 if (!shield.activate) {
                     shield.state = ShieldComponent.State.discharge;
                     break;
+                }
+                
+                //if entity is controlled player
+                SoundSystem sound = getEngine().getSystem(SoundSystem.class);
+                ControlFocusComponent controlFocus = Mappers.controlFocus.get(entity);
+                if (controlFocus != null) {
+                    //sound.shieldCharge();
                 }
                 
                 //charge: gain energy
@@ -57,6 +66,11 @@ public class ShieldSystem extends IteratingSystem {
                     //add shield fixture to body for protection
                     Body body = entity.getComponent(PhysicsComponent.class).body;
                     BodyFactory.addShieldFixtureToBody(body, shield.radius);
+    
+                    //if entity is controlled player
+                    if (controlFocus != null) {
+                        sound.shieldOn();
+                    }
                 }
                 break;
             case discharge:
@@ -96,6 +110,15 @@ public class ShieldSystem extends IteratingSystem {
         body.destroyFixture(circleFixture);
         
         shield.animTimer.flipRatio();
+    
+        
+        //if entity is controlled player
+        ControlFocusComponent controlFocus = Mappers.controlFocus.get(entity);
+        if (controlFocus != null) {
+            SoundSystem sound = getEngine().getSystem(SoundSystem.class);
+            sound.shieldOff();
+        }
+        
     }
     
 }
