@@ -42,15 +42,18 @@ public class ShieldRenderSystem extends IteratingSystem implements Disposable {
     protected void processEntity(Entity entity, float deltaTime) {
         TransformComponent transform = Mappers.transform.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
-
-        Color c = shield.color;
         
         //draw overlay
         shape.begin(ShapeRenderer.ShapeType.Filled);
         if (shield.state == ShieldComponent.State.on) {
-            shape.setColor(c.r, c.g, c.b, 0.25f);
+            shape.setColor(0, 0, 1, 0.25f);
         } else {
-            shape.setColor(c.r, c.g, c.b, 0.15f);
+            shape.setColor(0, 0, 1, 0.15f);
+        }
+        float hitTime = 500;
+        if ((GameScreen.getGameTimeCurrent() - shield.lastHit) < hitTime) {
+            float green = ((GameScreen.getGameTimeCurrent() - shield.lastHit)) / hitTime;
+            shape.setColor(0, 1-green, 0, Math.max(1-green, 0.25f));
         }
         shape.circle(transform.pos.x, transform.pos.y, shield.radius);
         shape.end();//flush inside loop = bad! (allegedly)
@@ -59,8 +62,11 @@ public class ShieldRenderSystem extends IteratingSystem implements Disposable {
         shape.begin(ShapeRenderer.ShapeType.Line);
         if (shield.state == ShieldComponent.State.on) {
             shape.setColor(Color.WHITE);
+            if ((GameScreen.getGameTimeCurrent() - shield.lastHit) < hitTime) {
+                shape.setColor(Color.MAGENTA);
+            }
         } else {
-            shape.setColor(c.r, c.g, c.b, 1f);
+            shape.setColor(0, 0, 1, 1f);
         }
         shape.circle(transform.pos.x, transform.pos.y, shield.radius);
         shape.end();//double flush inside same loop. im a horrible person ;p

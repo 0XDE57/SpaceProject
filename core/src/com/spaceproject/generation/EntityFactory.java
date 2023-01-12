@@ -444,7 +444,6 @@ public class EntityFactory {
         BoundingBox boundingBox = PolygonUtil.calculateBoundingBox(physics.body);
         float radius = Math.max(boundingBox.getWidth(), boundingBox.getHeight());
         shield.maxRadius = radius;
-        shield.color = Color.BLUE;
         shipEntity.add(shield);
         
         //barrel roll

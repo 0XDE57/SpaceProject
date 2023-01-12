@@ -133,8 +133,19 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
                 }
                 
                 ShieldComponent shield = Mappers.shield.get(entity);
-                if (shield != null && shield.state == ShieldComponent.State.on) {
-                    state = -2;
+                if (shield != null) {
+                    if (shield.state == ShieldComponent.State.on) {
+                        state = -2;
+                    } else {
+                        //charge discharge
+                        //in out
+                        //state =- 4;?
+                    }
+                    
+                    if ((GameScreen.getGameTimeCurrent() - shield.lastHit) < 500) {
+                        state = -3;
+                    }
+                    
                 }
                 
                 if (!physics.body.isActive()) {
@@ -153,7 +164,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         HealthComponent health = Mappers.health.get(entity);
         if (health != null) {
             long hurtTime = 1000;
-            if (GameScreen.getGameTimeCurrent() - health.lastHit < hurtTime) {
+            if ((GameScreen.getGameTimeCurrent() - health.lastHit) < hurtTime) {
                 state = -1;
             }
         }
@@ -225,6 +236,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
             if (indexWrap != spline.indexHead) {
                 Color color;
                 switch (spline.state[indexWrap]) {
+                    case -3: color = Color.GREEN; break; //or color of asteroid hit?
                     case -2: color = Color.BLUE; break;
                     case -1: color = Color.RED; break;
                     case 1: color = Color.GOLD; break;

@@ -79,7 +79,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private boolean drawEdgeMap = true;
     
     enum SpecialState {
-        off, hyper, landing, launching;
+        off, hyper, landing, launching, destroyed;
     }
     SpecialState messageState = SpecialState.off;
     float anim = 0;
@@ -227,6 +227,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         //drawHint("press [T] to land");
         //drawHint("stars are hot");
         //drawHint("an object in motion remains in motion");
+        float warningDist = 200000;
+        warningDist = warningDist * warningDist;
+        if (cam.position.dst2(0,0,0) > warningDist) {
+            drawHint("warning: broken physics ahead " + MyMath.formatVector3as2(cam.position, 1));
+        }
     
         batch.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
@@ -299,14 +304,18 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
         float ratio = 1 + (float) Math.sin(anim);
         Color c = Color.GOLD.cpy().lerp(Color.CYAN, ratio);
-        font.setColor(c);
         switch (messageState) {
             case hyper: layout.setText(font, "[ HYPERDRIVE ]"); break;
             case landing: layout.setText(font, "[ LANDING ]"); break;
             case launching: layout.setText(font, "[ LAUNCHING ]"); break;
+            case destroyed:
+                layout.setText(font, ". . . DESTROYED . . .");
+                c = Color.BLACK.cpy().lerp(Color.RED, ratio);
+                break;
             case off:
                 return;
         }
+        font.setColor(c);
         
         float centerX = (Gdx.graphics.getWidth() - layout.width) * 0.5f;
         int messageHeight = (int) (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3) + layout.height);
@@ -410,9 +419,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
         float ratioShield = shield.radius / shield.maxRadius;
         if (shield.state == ShieldComponent.State.on) {
-            shape.setColor(shield.color);
+            float hitTime = 500;
+            if ((GameScreen.getGameTimeCurrent() - shield.lastHit) < hitTime) {
+                float green = ((GameScreen.getGameTimeCurrent() - shield.lastHit)) / hitTime;
+                shape.setColor(0, 1-green, green, green);
+            } else {
+                shape.setColor(0, 0, 1, 1);
+            }
         } else {
-            shape.setColor(shield.color.r, shield.color.g, shield.color.b, 0.25f);
+            shape.setColor(0, 0, 1, 0.25f);
         }
         shape.rect(x, y, width * ratioShield, height);
     }
