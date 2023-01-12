@@ -90,7 +90,7 @@ public class PhysicsContactListener implements ContactListener {
             if (vehicleA != null) {
                 doVehicleDamage(entityA, maxImpulse);
             }
-            VehicleComponent vehicleB = Mappers.vehicle.get(entityA);
+            VehicleComponent vehicleB = Mappers.vehicle.get(entityB);
             if (vehicleB != null) {
                 doVehicleDamage(entityB, maxImpulse);
             }
@@ -137,6 +137,7 @@ public class PhysicsContactListener implements ContactListener {
         //don't apply damage while shield active
         ShieldComponent shield = Mappers.shield.get(entity);
         if (shield != null && shield.state == ShieldComponent.State.on) {
+            shield.lastHit = GameScreen.getGameTimeCurrent();
             //todo: break shield if impact is hard enough
             //int shieldBreakThreshold = 500;
             //if (impulse > shieldBreakThreshold) { }
@@ -144,8 +145,7 @@ public class PhysicsContactListener implements ContactListener {
             sound.shieldImpact(1);
             
             Gdx.app.debug(this.getClass().getSimpleName(),
-                    "impulse: " + impulse + " -> " + relativeDamage +
-                            ((impulse < vehicleDamageThreshold) ? " - <shield protect>" : "DAMAGED!")
+                    "impulse: " + impulse + " -> " + relativeDamage +  " - <shield protect>"
             );
             return; //protected by shield
         }
@@ -163,9 +163,6 @@ public class PhysicsContactListener implements ContactListener {
         }
         
         
-        
-        Gdx.app.debug(this.getClass().getSimpleName(), "high impact damage: " + impulse + " -> -" + relativeDamage);
-        
         HealthComponent health = Mappers.health.get(entity);
         if (health != null) {
             health.health -= relativeDamage;
@@ -173,17 +170,21 @@ public class PhysicsContactListener implements ContactListener {
             if (health.health <= 0) {
                 entity.add(new RemoveComponent());
                 Gdx.app.debug(this.getClass().getSimpleName(), "vehicle destroyed: " + impulse + " -> damage: " + relativeDamage);
+            } else {
+                Gdx.app.debug(this.getClass().getSimpleName(), "high impact damage: " + impulse + " -> -" + relativeDamage);
             }
         }
     
+        
         ControlFocusComponent controlled = Mappers.controlFocus.get(entity);
         if (controlled != null) {
             engine.getSystem(ControllerInputSystem.class).vibrate(100, 1f);
             CameraSystem camera = engine.getSystem(CameraSystem.class);
             if (camera.getZoomLevel() > 10) {
                 camera.setZoomToDefault(entity);
+            } else if (camera.getZoomLevel() > 5) {
+                camera.zoomIn();
             }
-    
             sound.hullImpactHeavy(1);
         }
     }
