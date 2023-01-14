@@ -12,9 +12,15 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.components.AsteroidComponent;
+import com.spaceproject.components.ExpireComponent;
+import com.spaceproject.components.PhysicsComponent;
+import com.spaceproject.components.TextureComponent;
+import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.SimpleTimer;
 
 public class AsteroidShatterSystem extends EntitySystem implements EntityListener {
     
@@ -46,6 +52,8 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
         
         if (asteroid.doShatter && asteroid.area >= minAsteroidSize) {
             shatterAsteroid(entity, asteroid);
+        } else {
+            dropResource(entity, asteroid);
         }
     }
     
@@ -54,6 +62,7 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
         
         //debug center of mass / origin
         Vector2 center = new Vector2();
+        
         GeometryUtils.polygonCentroid(vertices, 0, vertices.length, center);
         if (!asteroid.centerOfMass.epsilonEquals(center)) {
             Gdx.app.debug(this.getClass().getSimpleName(), "WARNING: polygonCentroid disagreement");
@@ -64,8 +73,8 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
         float[] newPoly = new float[length + 2];
         System.arraycopy(vertices, 0, newPoly, 0, vertices.length);
         //add new point in center of triangle
-        newPoly[length] = center.x;
-        newPoly[length + 1] = center.y;
+        newPoly[length] = asteroid.centerOfMass.x;
+        newPoly[length + 1] = asteroid.centerOfMass.y;
         
         spawnChildAsteroid(parentAsteroid, newPoly);
     }
@@ -154,6 +163,32 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
             Mappers.physics.get(childAsteroid).body.setAngularVelocity(parentBody.getAngularVelocity() + angularDrift);
             getEngine().addEntity(childAsteroid);
         }
+    }
+    
+    private void dropResource(Entity entity, AsteroidComponent asteroid) {
+        
+        Entity drop = new Entity();
+        
+        TextureComponent texture = new TextureComponent();
+        texture.texture = TextureFactory.createTile(asteroid.color);
+        texture.scale = 1f;
+    
+        TransformComponent transform = new TransformComponent();
+        PhysicsComponent physics = Mappers.physics.get(entity);
+        transform.pos.set(physics.body.getPosition());
+        
+        //attractee component, to be sucked up by vehicles with attractor component
+        //attractors handled in separate system
+        //drop.add(attractee)
+    
+        //expire time (self destruct)
+        ExpireComponent expire = new ExpireComponent();
+        expire.timer = new SimpleTimer(100000, true);
+    
+        drop.add(texture);
+        drop.add(transform);
+        //drop.add(expire);
+        getEngine().addEntity(drop);
     }
     
 }
