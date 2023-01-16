@@ -68,7 +68,7 @@ public class NoiseThread implements Runnable {
             isDone = true;
             long endTime = System.currentTimeMillis() - startTime;
             Gdx.app.log(this.getClass().getSimpleName(),
-                    toString() + " complete. total: " + endTime + "ms -> heightmap("
+                    toString() + " complete: " + endTime + "ms -> heightmap("
                             + heightTime + ") tilemap(" + tileTime + ") pixelate(" + pixelTime + ")");
 
         } catch (Exception e) {
