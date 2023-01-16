@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
     
     private final List<Runnable> activeTasks;
-    private Array<INoiseGenListener> listeners;
+    private final Array<INoiseGenListener> listeners;
     
     NoiseThreadPoolExecutor(int numThreads) {
         super(numThreads, numThreads, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -25,8 +25,7 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
         Gdx.app.log(this.getClass().getSimpleName(), "Detected " + Runtime.getRuntime().availableProcessors() + " available CPUs");
         Gdx.app.log(this.getClass().getSimpleName(), "Created ThreadPool with " + getMaximumPoolSize() + " threads");
     }
-    
-    
+
     public void addListener(INoiseGenListener listener) {
         listeners.add(listener);
     }
@@ -40,7 +39,7 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
     @Override
     public void execute(Runnable runnable) {
         if (activeTasks.contains(runnable)) {
-            Gdx.app.log(this.getClass().getSimpleName(), "Seed already exists: " + runnable.toString() + ". Ignoring.");
+            Gdx.app.log(this.getClass().getSimpleName(), "Seed already exists. Ignoring:" + runnable.toString());
             return;
         }
         
@@ -59,14 +58,13 @@ public class NoiseThreadPoolExecutor extends ThreadPoolExecutor {
             Gdx.app.error(this.getClass().getSimpleName(), "Task failed", t);
         }
     }
-    
-    
+
     @Override
     public String toString() {
         return "completed: [" + getCompletedTaskCount() + "/" + getTaskCount()
                 + "] active: [" + getActiveCount() + "/" + getCorePoolSize()
-                + "] -> " + activeTasks;
-        /* + "\nQ:" + getQueue()*/
+                + "] -> " + activeTasks
+         + "\nQ:" + getQueue();
     }
     
 }
