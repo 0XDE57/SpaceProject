@@ -41,12 +41,14 @@ public class NoiseGen {
      * Based off of https://www.youtube.com/watch?v=MRNFcywkUSA
      * TODO: scaling is incorrect in 4D implementation: stretching/curving distortion due to curvature of torus
      *
-     * @param seed        of noise
-     * @param size        of map to generate
-     * @param scale       or zoom
-     * @param octaves     or layers of noise
-     * @param persistence or weight of layers
-     * @param lacunarity  ?
+     * @param seed        64-bit seed
+     * @param size        size of map to generate
+     * @param scale       scale of features
+     * @param octaves     how many layers of noise
+     * @param persistence weight of layers
+     * @param lacunarity  'Lacunarity' meaning "gap" or "lake". Geometry term referring to
+     *                    measure of how patterns, especially fractals, fill space,
+     *                    where patterns having more or larger gaps generally have higher lacunarity.
      * @return array holding noise
      */
     public static float[][] generateWrappingNoise4D(long seed, int size, double scale, int octaves, float persistence, float lacunarity) {
@@ -55,24 +57,25 @@ public class NoiseGen {
         float[][] map = new float[size][size];
         float minNoise = Float.MAX_VALUE;
         float maxNoise = Float.MIN_VALUE;
-        
-        for (int x = 0; x < size; ++x) {
-            for (int y = 0; y < size; ++y) {
+
+        for (int y = 0; y < size; ++y) {
+            for (int x = 0; x < size; ++x) {
+
                 float amplitude = 1;
                 float frequency = 1;
                 float noiseHeight = 0;
                 
                 //for each layer(octave)
                 for (int oct = 0; oct < octaves; ++oct) {
-                    // sinX, cosX. wrap X axis
-                    double sx = (MathUtils.sin(x * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale) * frequency;
-                    double cx = (MathUtils.cos(x * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale) * frequency;
-                    // sinY, cosY. wrap Y axis
-                    double sy = (MathUtils.sin(y * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale) * frequency;
-                    double cy = (MathUtils.cos(y * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale) * frequency;
-                    
+                    // wrap Y axis
+                    double sinY = (MathUtils.sin(y * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale) * frequency;
+                    double cosY = (MathUtils.cos(y * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale) * frequency;
+                    // wrap X axis
+                    double sinX = (MathUtils.sin(x * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale) * frequency;
+                    double cosX = (MathUtils.cos(x * MathUtils.PI2 / size) / MathUtils.PI2 * size / scale) * frequency;
+
                     // eval 4D noise using wrapped x and y axis
-                    double n = noise.eval(sx, cx, sy, cy);
+                    double n = noise.eval(sinX, cosX, sinY, cosY);
                     
                     //accumulate noise
                     noiseHeight += n * amplitude;
@@ -112,8 +115,8 @@ public class NoiseGen {
             for (int cX = 0; cX < chunks; cX++) {
                 
                 //calculate chunk position
-                int chunkX = cX * chunkSize;
                 int chunkY = cY * chunkSize;
+                int chunkX = cX * chunkSize;
                 
                 //reset chunk count
                 int[] count = new int[tiles.size()];

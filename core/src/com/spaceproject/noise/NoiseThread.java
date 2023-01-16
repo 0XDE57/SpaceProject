@@ -49,7 +49,7 @@ public class NoiseThread implements Runnable {
             //generate noise
             if (stop) { return; }
             heightTime = System.currentTimeMillis();
-            noise.heightMap = NoiseGen.generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity);//this call consumes most(all) the time
+            noise.heightMap = NoiseGen.generateWrappingNoise4D(seed, mapSize, scale, octaves, persistence, lacunarity);
             heightTime = System.currentTimeMillis() - heightTime;
 
             //map height to tile
