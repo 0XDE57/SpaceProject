@@ -89,7 +89,7 @@ public class CannonSystem extends IteratingSystem {
         getEngine().addEntity(missile);
     
         //todo: state? beginFire (first shot), isFiring, endFire
-        getEngine().getSystem(SoundSystem.class).shoot();
+        getEngine().getSystem(SoundSystem.class).laserShoot();
         
         //subtract ammo
         --cannon.curAmmo;

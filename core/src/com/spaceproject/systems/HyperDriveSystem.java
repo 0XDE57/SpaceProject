@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
+import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TransformComponent;
@@ -73,6 +74,12 @@ public class HyperDriveSystem extends IteratingSystem {
         hyperDrive.state = HyperDriveComponent.State.on;
         hyperDrive.velocity.set(MyMath.vector(physicsComp.body.getAngle(), hyperDrive.speed));
         hyperDrive.graceTimer.reset();
+    
+        // if player, make sound
+        ControlFocusComponent control = Mappers.controlFocus.get(entity);
+        if (control != null) {
+            getEngine().getSystem(SoundSystem.class).hyperdriveEngage();
+        }
     }
     
     public static void disengageHyperDrive(Entity entity, HyperDriveComponent hyperDrive) {

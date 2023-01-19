@@ -279,6 +279,12 @@ Legend:
     [ ! ] = notes
     [ * ] = exceptions
 
+[ ] convert fire to bpm
+
+[ ] controller input stuck on desktop until joystick moved:
+    noticeable when shooting, or trying to shoot.
+    see terminal for input focus -> desktop
+
 [ ] aiming on controller is sensitive to stick drifts and twitchy inputs,
     direction facing should be average of inputs over last n frames?
     "jitter buffer"
@@ -388,13 +394,14 @@ Legend:
 [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
     [ ] ship impact
         [ ] hull
-            -light
-            -heavy
+            [x] light: hull tapped, impulse tied to volume
+            [x] heavy: ship took damage, impulse tied to volume
         [ ] shield
-            [ ] charge up
-            [ ] activate
-            [ ] sustain
-            [ ] charge down
+            [...] charge up
+            [x] activate
+            [...] sustain
+                this needs to loop better, it's clipping
+            [x] charge release
             [ ] break
     [ ] engine / movement
         [ ] active, pitch tied to velocity
@@ -405,13 +412,16 @@ Legend:
             [ ] charge
             [ ] discharge
             [ ] active
-    [ ] cannon
-        [x] start
+    [ ] rapid cannon
+        [x] fire
         [ ] active
+    [ ] charge cannon
+        [x] fire
+        [ ] charge up
     [ ] laser
         [ ] start
         [ ] active
-    [ ] shield
+    [...] shield
         [ ] charge, pitch tied to charge
         [ ] activated, max charge
         [ ] decharge, pitch tied to charge
