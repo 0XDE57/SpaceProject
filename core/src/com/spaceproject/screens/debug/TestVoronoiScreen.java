@@ -270,7 +270,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             
             //draw delaunay triangles
             if (drawDelaunay) {
-                shape.setColor(Color.GRAY);
+                shape.setColor(Color.BLACK);
                 shape.triangle(d.a.x, d.a.y, // A
                         d.b.x, d.b.y, // B
                         d.c.x, d.c.y);// C
@@ -372,7 +372,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     public void render(float delta) {
         
         //clear screen
-        Gdx.gl20.glClearColor(1, 1, 1, 1);
+        Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
         
         //render voronoi stuff
