@@ -1,4 +1,5 @@
-***the vision***
+
+[ ----- ----- ----- the vision ----- ----- ----- ]
 In space you fly around to explore planets and star systems, and combat other ships.
 For Combat/fighting, my vision is to have some elements of reactive fighter style like smash bros
 where you can attack, dodge and use shield. Maybe you can upgrade your ship or swap out components
@@ -47,38 +48,162 @@ MILESTONES:
  [x] custom shape renderer to draw filled polygons for asteroids
  [x] basic asteroid destruction using Delaunay triangulation
  [x] simple shader for star textures
- [ ] basic sfx
+ [...] basic sfx
  [ ] better asteroid destruction using voronoi
 
  todo: look through commits and put these in chronological order + dates?
 
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-........................it's half in notes, half in my head, and half in code........................
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-[engine architecture]
+[ ----- ----- ----- Engine Architecture ----- ----- ----- ]
 This game is written in Java, GLSL for shaders, and built on top of libGDX.
 libGDX is a cross-platform Java game development framework based on OpenGL (ES) that works on Windows, Linux, macOS, Android, your browser and iOS.
-If you are unfamiliar with libGDX, start here:
+To get started with libGDX:
 https://libgdx.com/wiki/
 
 The engine architecture is designed around an Entity Component System. Generally:
-    Entities are composed of Components.
-    Systems operate on components.
-    Systems are managed by the engine.
+    - Entities are composed of Components.
+    - Systems operate on components.
+    - Systems are managed by the engine.
 Most of the game logic and rendering happens in systems.
 For simplicity and consistency, components are pure data. No implementation. This may change in future.
-If you are unfamiliar with the concept of an ECS, start here:
+To get started with ECS:
 https://github.com/libgdx/ashley/wiki/Framework-overview
 
+
+[ ----- ----- ----- Project Structure ----- ----- ----- ]
 ECS layout: [...\SpaceProject\core\src\com\spaceproject\]
     \systems: all systems go in here
     \components: all components go in here
     \utility
         Mappers: Component Mapper Boilerplate
         ECSUtil: Some tools for managing and debugging entities
+
+Systems are dynamically loaded and unloaded per context, as defined by @SystemsConfig:
+    Space and World can have different systems.
+        eg: don't need an orbit system when on a planet.
+    Mobile and Desktop can have different systems.
+        eg: don't need to render touch control on desktop
+
+Data Directory [...\SpaceProject\assets]
+    \config:
+        One goal is to make the engine highly tune-able/configurable. (perhaps I have gone too far in this direction at the cost of complexity?)
+        Plain text JSON files that define all values for game. These files will be written on first run of the game.
+        if no config exists, default is loaded and written to disk. If config exists on disk, it is loaded.
+        [default always loaded when debugDevForceLoadDefault = true]
+        SystemsConfig: define system loading priorities and properties.
+            priority: order of execution is important for game loop logic and rendering pipeline.
+            haltOnGamePause: if true, system stops processing when game is paused.
+            loadInSpace: if true, system will be loaded when player is in space.
+            loadInWorld: if true, system will be loaded when player is on a planet.
+            loadOnDesktop: if true, will be loaded on desktop platform.
+            loadOnMobile: if true, will be loaded on iOS or Android platform.
+        EngineConfig: define physics and rendering constants
+        KeyConfig: define input keycodes
+        EntityConfig: define generation parameters for entities
+        CelestialConfig: defines star system generation rules
+        WorldConfig: define terrain generation parameters (in progress)
+        DebugConfig: defines settings like show debug rendering
+        MinimapConfig: define colors and behaviors for minimap
+        UIConfig: define ui element colors and positions
+    \fonts: fonts for UI
+        .tff   : True Type Fonts
+    \shaders: GLSL shader files (name convention: reference GLSL compiler extensions)
+        .vert  : vertex shader
+        .frag  : fragment shader
+        .glsl  : .vert.glsl, .tesc.glsl, ..., .comp.glsl compound suffixes
+        .hlsl  : .vert.hlsl, .tesc.hlsl, ..., .comp.hlsl compound suffixes
+    \sounds:
+        Potential structure / implementation might look like: each sound effect gets it's own folder.
+            - if no sound in folder, don't play
+            - if one sound in folder, play that
+            - if multiple sound in folder, play random
+            - could allow user configurable chance? what about pitch/volume? Keep it simple...
+        \music
+            track a
+            track b
+        \effects
+            \effectA
+                effectA1.wav
+                effectA2.wav
+                effectA3.wav
+            \effectB
+            \effectC
+    \save: (todo) serialization
+        https://github.com/libgdx/libgdx/wiki/Saved-game-serialization
+
+[ ----- ----- ----- Sound & Music ----- ----- ----- ]
+The current upper limit for decoded audio is 1 MB.
+https://libgdx.com/wiki/audio/sound-effects
+* Supported Formats: MP3, OGG and WAV
+    - WAV files are quite large compared to other formats
+        - WAV files must have 16 bits per sample
+    - OGG files don’t work on RoboVM (iOS) nor with Safari (GWT)
+    - MP3 files have issues with seamless looping.
+* Continuous / Looping sound 'sound.loop()'
+    - raw sound file must have no gaps
+    - start and end of wave should line up to prevent clipping
+* Pitch: range = [0.5f - 2.0f] -> half to double frequency. Or +/- 1 octave from sample frequency:
+    lower octave = [0.5 - 1.0] (eg: 440Hz * 0.5 = 220Hz)
+    upper octave = [1.0 - 2.0] (eg: 440Hz * 2.0 = 880Hz)
+* Panning: sound must be MONO
+* Latency on android: is not great and the default implementation is not recommended for latency sensitive apps like rhythm games.
+https://libgdx.com/wiki/audio/audio#audio-on-android
+
+Given the above, sound files will be expected as:
+    16-bit WAV -> MONO
+    Roughly -3 to -6 db track rendering?
+
+[ ----- ----- ----- PHYSICS CONSTRAINTS ----- ----- ----- ]
+* Box2D uses MKS (meters, kilograms, and seconds) units, and radians for angles.
+* Body Size Limit: Keep moving objects roughly between 0.1 and 10 meters.
+* Movement limit: = 2 * units per physics step.
+    * (eg step of 60: 60 * 2 = 120,  max velocity = 120km/s)
+    * For the [hyperdrive] feature I need to bypass this incredibly slow limit,
+      so the box2D physics body is disabled via  which means no collisions but that works in favor of gameplay.
+* The fixed physics step keeps calculations frame-rate independent. (turning vsync off won't make your ship fly faster)
+* Large world space coordinates will introduce inaccuracy, courtesy of floating point arithmetic rounding: epsilon.
+    Floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics.
+    Meaning the deeper in space we go, the more "stuff" begins to break.
+    Box2D works best with world sizes less than 2 kilometers. The universe by contrast, is a little bit bigger than 2km....
+    To solve this, we can use a local coordinate system and a large global coordinate system.
+    todo: 'Floating Origin' ->  b2World::ShiftOrigin
+    https://box2d.org/documentation/md__d_1__git_hub_box2d_docs_loose_ends.html#autotoc_md126
+    https://box2d.org/documentation/#:~:text=Caution%3A%20Box2D%20is%20tuned%20for,between%200.1%20and%2010%20meters.
+* Also sprites and world units: We can't use pixels for coordinates.
+  https://xoppa.github.io/blog/pixels/
+* Cannot remove bodies during a physics step: eg postSolve() in the physics contact listener.
+
+NOTE: Entities should not be removed mid-frame until all systems have finished processing!
+    Similarly to not removing bodies until all collisions have been processed, we remove entities at end of frame
+    so that all systems can finish processing and rendering the scene.
+
+    To remove an entity we simply add to the entity a new @RemoveComponent and entities with this component are
+    removed at the end of the frame as the @RemovalSystem should always be the very last system fired.
+
+    If a system is paranoid about execution priority and weather an entity is dead or alive,
+    that system can check for the existence of the @RemoveComponent. (I haven't needed to yet in practice)
+
+NOTE: The @RemovalSystem also handles memory management in that it will check the entity for
+    data such as textures or b2D bodies and passes them off to the @ResourceDisposer to be auto-disposed.
+    (this is likely a place to look during optimization, eg: things like bullets should be pooled)
+
+
+[ ----- ----- ----- Size of Universe & Scale ----- ----- ----- ]
+The scale of the universe is currently somewhat arbitrary as I have adjusting to the above constraints as I implement these systems.
+Min/maxing the physics engine: render scale and physics bodies as small as possible to maximize the velocity limit per step.
+The gameplay is mainly driven by the spaceship flight, destructible asteroids, and combat. Navigating space
+and the control of the ship should feel intuitive and responsive in respect to the universe.
+    * how big should a ship or player be in relation to the universe / planets?
+    * asteroids: how big should asteroids be?
+    * planets: how big should a planet be?
+    * distances between planets: how long should the player spend traveling between systems and planets and stars?
+
+Ultimately: Is flying around and shooting asteroids and other ships actually fun and satisfying?
+It doesn't matter how big the universe is, if the local-verse isn't fun.
+
+
+[ ----- ----- ----- Screen Transition + Dynamic System Loading & Unloading ----- ----- ----- ]
+One of the trickier parts of the engine....
 -
     I knew transitioning between space and planets would be a little tricky, memory and design wise.
     So after lots of researching design patterns, I knew an ECS would probably be the best tool.
@@ -104,136 +229,7 @@ ECS layout: [...\SpaceProject\core\src\com\spaceproject\]
     Maybe it's a little over-engineered, asking for memory troubles. But it works well enough so far...
 -
 
-Systems are dynamically loaded and unloaded per context, as defined by @SystemsConfig:
-    Space and World can have different systems.
-        eg: don't need an orbit system when on a planet.
-    Mobile and Desktop can have different systems.
-        eg: don't need to render touch control on desktop
-
-Physical project structure and file layout:
-Data Directory [...\SpaceProject\assets]
-    \config:
-        plain text json files that define all values for game. these files will be written on first run of the game.
-        if no config exists, default is loaded and written to disk. if config exists on disk, it is loaded.
-        [default always loaded when debugDevForceLoadDefault = true]
-            SystemsConfig: define system loading priorities and properties.
-                priority: order of execution is important for game loop logic and rendering pipeline.
-                haltOnGamePause: if true, system stops processing when game is paused.
-                loadInSpace: if true, system will be loaded when player is in space.
-                loadInWorld: if true, system will be loaded when player is on a planet.
-                loadOnDesktop: if true, will be loaded on desktop platform.
-                loadOnMobile: if true, will be loaded on iOS or Android platform.
-            EngineConfig: define physics and rendering constants
-            KeyConfig: define input keycodes
-            EntityConfig: define generation parameters for entities
-            CelestialConfig: defines star system generation rules
-            WorldConfig: define terrain generation parameters (in progress)
-            DebugConfig: defines settings like show debug rendering
-            MinimapConfig: define colors and behaviors for minimap
-            UIConfig: define ui element colors and positions
-        One goal is to have everything highly configurable.
-        (perhaps I have gone too far in this direction at the cost of complexity?
-        key bindings makes sense but ui stuff feels weird.
-        todo: better serialization solution for systems themselves. non-session-only?)
-    \fonts: fonts for UI
-        .tff   : True Type Fonts
-    \shaders: GLSL shader files (name convention: reference GLSL compiler extensions)
-        .vert  : vertex shader
-        .frag  : fragment shader
-        .glsl  : .vert.glsl, .tesc.glsl, ..., .comp.glsl compound suffixes
-        .hlsl  : .vert.hlsl, .tesc.hlsl, ..., .comp.hlsl compound suffixes
-    \sounds: (todo)
-        each sound effect gets it's own folder.
-            if no sound in folder, don't play
-            if one sound in folder, play that
-            if multiple sound in folder, play random
-            allow user configurable chance? what about effects/volume? NO! this is overkill for now but just an idea.
-            Keep it simple...
-        potential structure / implementation might look like
-            music
-                track a
-                track b
-            effects
-                effect a
-                    effect1.wav
-                    effect2.wav
-                    effect3.wav
-                effect b
-                effect c
-    \save: (todo) serialization
-        https://github.com/libgdx/libgdx/wiki/Saved-game-serialization
-
-
-PHYSICS CONSTRAINTS:
-    * Box2D uses MKS (meters, kilograms, and seconds) units, and radians for angles.
-    * Body Size Limit: Keep moving objects roughly between 0.1 and 10 meters.
-    * Movement limit: = 2 * units per physics step.
-        * (eg step of 60: 60 * 2 = 120,  max velocity = 120km/s)
-        * For the [hyperdrive] feature I need to bypass this incredibly slow limit,
-          so the box2D physics body is disabled via  which means no collisions but that works in favor of gameplay.
-    * The fixed physics step keeps calculations frame-rate independent. (turning vsync off won't make your ship fly faster)
-    * Large world space coordinates will introduce inaccuracy, courtesy of floating point arithmetic rounding: epsilon.
-        Floating point errors in deep space caused by large world coordinates and small frame times is affecting movement physics.
-        Meaning the deeper in space we go, the more "stuff" begins to break.
-        Box2D works best with world sizes less than 2 kilometers. The universe by contrast, is a little bit bigger than 2km....
-        To solve this, we can use a local coordinate system and a large global coordinate system.
-        todo: 'Floating Origin' ->  b2World::ShiftOrigin
-        https://box2d.org/documentation/md__d_1__git_hub_box2d_docs_loose_ends.html#autotoc_md126
-        https://box2d.org/documentation/#:~:text=Caution%3A%20Box2D%20is%20tuned%20for,between%200.1%20and%2010%20meters.
-    * Also sprites and world units: We can't use pixels for coordinates.
-      https://xoppa.github.io/blog/pixels/
-    * Cannot remove bodies during a physics step: eg postSolve() in the physics contact listener.
-
-NOTE: Similarly to not removing bodies until all collisions have been processed;
-    Entities should not be removed mid-frame until all systems have finished processing!
-    To remove an entity we simply add to the entity a @RemoveComponent and entities with this component are
-    removed at the end of the frame as the @RemovalSystem should always be the very last system fired.
-    This way all systems can finish rendering the scene.
-    If a system is unsure about execution priority and weather an entity is dead or alive it may
-    check for the existence of the @RemoveComponent.
-
-NOTE: The @RemovalSystem also handles memory management in that it will check the entity for
-    data such as textures or b2D bodies and passes them off to the @ResourceDisposer to be auto-disposed.
-    (this is likely a place to look during optimization, eg: things like bullets should be pooled)
-
-The scale of the universe is currently somewhat arbitrary, as I have just been adjusting to the constraints as I implement these systems.
-The gameplay is mainly driven by the spaceship flight, destructible asteroids, and combat.
-    * how big should a ship or player be in relation to the universe / planets?
-    * asteroids: how big should asteroids be?
-    * planets: how big should a planet be?
-    * distances between planets: how long should the player spend traveling between systems and planets and stars?
-I have been making up values as I go, learn rendering techniques and given the above constraints.
-Tuning the render scale and physics bodies as small as possible to maximize the velocity limit per step.
-Gameplay design focus around what feels intuitive and responsive in respect navigating space and the control of the character and ship.
-Ultimately: Is flying around and breaking asteroids actually fun and satisfying?
-It doesn't matter how big the universe is, if the local-verse isn't fun.
-
-Space Background Rendering
-	Simple but effective: 5 parallax layers
-		stars close
-		stars far
-		stars farther
-		stars farthest
-		noise far
-	Background color is set based on camera positioning.
-	Just some combinations and ratios of red, blue and green that I played around with until it looked nice.
-
-Noise Generation
-	Noise is heavy to generate at runtime so it's done in background threads. Threadpool.
-	Once generated, it's picked up by SpaceLoadingSystem who then creates a texture from the noise.
-	You can specify how many simultaneous threads you would like to allow in EngineConfig.
-	Todo: save textures/noise so it's only generated the first time. Load from disk.
-	For dev purposes, just generate ad-hoc for now.
-    [!] NOTE: cannot generate textures in another thread due to glContext...
-        https://github.com/libgdx/libgdx/wiki/Threading
-        https://www.opengl.org/wiki/OpenGL_and_multithreading
-        We can however generate noise for the textures on a separate thread and then feed that to the rendering thread.
-
-Screen transition logic/stages overview:
-One of the trickier parts of the engine. Animation states for transition, and dynamic system loading/unloading.
-When animation hits transition state, it calls the system loader and loads/unloads relevant systems based on SystemsConfig
-
-	Transition action (key press, virtual button on mobile)
+Player first presses transition action to land or take off:
 	ControlSystem()
 		if in space
 			landOnPlanet()
@@ -242,12 +238,15 @@ When animation hits transition state, it calls the system loader and loads/unloa
 			takeOffPlanet()
 				add ScreenTransitionComponent -> anim stage = transition
 
+When animation hits `transition` state, this calls @GameScreen to begin switching context between space and worlds.
+@SystemLoader which loads/unloads relevant systems based on @SystemsConfig
+
 	ScreenTransitionSystem()
 		landOnPlanet:
 			shrink: shrink ship sprite to give illusion of landing
 			zoomIn: zoom in camera
 			screenEffectFadeIn: fade screen to white
-			transition: trigger GameScreen to switch to planet. load and unload relevant systems.
+		-->	transition: <-- trigger @GameScreen to switch to planet.
 			load: (todo: ensure planet map loaded before allowing play)
 			screenEffectFadeOut: fade white back to screen
 			pause: brief pause for effect
@@ -255,22 +254,48 @@ When animation hits transition state, it calls the system loader and loads/unloa
 			end: remove transition component
 		takeOffPlanet:
 			screenEffectFadeIn: fade screen to white
-			transition: trigger GameScreen to switch to planet. load and unload relevant systems.
+		-->	transition: <-- trigger @GameScreen to switch to planet.
 			sync: ensure find planet landed on is loaded (based on seed), ensure found and texture loaded before allowing play
 			zoomOut: zoom camera from 0 to normal
 			grow: grow ship sprite from 0 to give illusion of taking off planet
 			end: remove transition component
 
-AI: currently primitive placeholder systems to flesh out ideas.
+
+[ ----- ----- -----Space Parallax Background Rendering ----- ----- ----- ]
+Background color is set based on camera positioning.
+Just some combinations and ratios of red, blue and green that I played around with until it looked nice.
+Simple but effective: 5 parallax layers
+	stars close
+	stars far
+	stars farther
+	stars farthest
+	noise far
+
+
+[ ----- ----- -----  Noise Generation ----- ----- ----- ]
+Noise is heavy to generate at runtime so it's done in background threads.
+
+NOTE: we cannot generate textures in another thread due to glContext...
+https://github.com/libgdx/libgdx/wiki/Threading
+https://www.opengl.org/wiki/OpenGL_and_multithreading
+
+We can however, generate noise data for the textures on a separate thread, and then pass the data to the rendering thread.
+And we do that via a Threadpool. Once generated, it's picked up by @SpaceLoadingSystem who then creates a texture from the noise data.
+You can specify how many simultaneous threads you would like to allow in @EngineConfig.
+Todo: save textures/noise so it's only generated the first time. Load from disk.
+For dev purposes, just generate ad-hoc for now.
+
+
+[ ----- ----- ----- AI ----- ----- ----- ]
+Currently primitive placeholder systems to flesh out ideas.
 They can't aim properly, need to predict where player will be. Lead target.
 And much more....problems for later.
 
 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-***the plan***: make combat fun. make flight and movement fun, and look a little better.
-focus! i keep jumping between ideas and features and never finish anything
-Spaceship combat will be a core part of gameplay. So lets focus on cleaning that up first.
 
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+........................it's half in notes, half in my head, and half in code........................
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 Legend:
     [   ] = not started
     [...] = in progress
@@ -278,6 +303,7 @@ Legend:
     [ ? ] = question
     [ ! ] = notes
     [ * ] = exceptions
+.....................................................................................................
 
 [ ] convert fire to bpm
 
@@ -414,21 +440,22 @@ Legend:
             [ ] active
     [ ] rapid cannon
         [x] fire
-        [ ] active
     [ ] charge cannon
-        [x] fire
+        [x] fire - pitch tied to size
         [ ] charge up
+        [ ] max out
     [ ] laser
         [ ] start
-        [ ] active
+        [ ] active loop hum
     [...] shield
-        [ ] charge, pitch tied to charge
-        [ ] activated, max charge
-        [ ] decharge, pitch tied to charge
-        [ ] hit, pitch set by impulse
+        [x] activated, max charge
+        [x] deactivated
+        [x] hit, volume set by impulse
         [ ] shield broken, shatter
+        [ ] charge, pitch tied to charge
+        [ ] decharge, pitch tied to charge
     [ ] asteroid
-        [ ] hit, pitch set by impulse (how hard hit)
+        [ ] hit, volume set by impulse (how hard hit), pitch matching asteroid
         [...] shatter
     Apparently audio on android sucks?
         https://github.com/libgdx/libgdx/wiki/Audio
