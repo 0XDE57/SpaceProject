@@ -222,6 +222,10 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             handled = true;
         }
         
+        if (handled) {
+            getEngine().getSystem(DesktopInputSystem.class).setFocusToController();
+        }
+        
         return handled;
     }
     
@@ -276,6 +280,8 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             if (cannon != null) {
                 cannon.multiplier = r2;
             }
+            
+            desktopInput.setFocusToController();
         } else {
             //todo: bug, stick drift and minor inputs seem to be interfering with mouse input
             if (desktopInput.getControllerHasFocus()) {
@@ -287,6 +293,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         if (shield != null) {
             if (l2 > triggerDeadZone) {
                 shield.activate = true;
+                desktopInput.setFocusToController();
             } else {
                 shield.activate = false;
             }

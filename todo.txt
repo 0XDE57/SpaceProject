@@ -281,7 +281,7 @@ Legend:
 
 [ ] convert fire to bpm
 
-[ ] controller input stuck on desktop until joystick moved:
+[x] controller input stuck on desktop until joystick moved:
     noticeable when shooting, or trying to shoot.
     see terminal for input focus -> desktop
 

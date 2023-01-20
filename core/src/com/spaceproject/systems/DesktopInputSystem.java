@@ -178,6 +178,10 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             }
         }
         
+        if (handled) {
+            setFocusToDesktop();
+        }
+        
         return handled;
     }
     
@@ -204,6 +208,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         } else {
             getEngine().getSystem(CameraSystem.class).zoomOut();
         }
+        setFocusToDesktop();
         return false;
     }
     
@@ -238,6 +243,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             if (cannon != null) {
                 cannon.multiplier = 1;
             }
+            setFocusToDesktop();
             return true;
         }
         
@@ -250,6 +256,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             } else {
                 system.setZoomToDefault(player);
             }
+            setFocusToDesktop();
             return true;
         }
         
