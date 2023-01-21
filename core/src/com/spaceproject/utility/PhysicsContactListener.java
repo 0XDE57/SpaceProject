@@ -40,7 +40,7 @@ public class PhysicsContactListener implements ContactListener {
     private final Engine engine;
     private final int asteroidDamageThreshold = 15000; //impulse threshold to apply damage caused by impact
     private final float asteroidBreakOrbitThreshold = 250;
-    private final int vehicleDamageThreshold = 15; //impulse threshold to apply damage to vehicles
+    private final float vehicleDamageThreshold = 15; //impulse threshold to apply damage to vehicles
     private final float impactMultiplier = 0.1f; //how much damage relative to impulse
     private float peakImpulse = 0; //highest recorded impact, stat just to gauge
     
