@@ -9,12 +9,43 @@ import com.badlogic.gdx.utils.Disposable;
 
 public class SoundSystem extends EntitySystem implements Disposable {
     
+    //  todo: should be event based?, so any system can call
+    //  currently any systems wanting to make a sound can get the system from the engine, but inter-system coupling.
+    //  see: https://github.com/libgdx/ashley/blob/master/ashley/tests/com/badlogic/ashley/signals/SignalTests.java
+    
+    //  The current upper limit for decoded audio is 1 MB.
+    //  https://libgdx.com/wiki/audio/sound-effects
+    //
+    //  Supported Formats: MP3, OGG and WAV
+    //  - WAV files are quite large compared to other formats
+    //      - WAV files must have 16 bits per sample
+    //  - OGG files don’t work on RoboVM (iOS) nor with Safari (GWT)
+    //  - MP3 files have issues with seamless looping.
+    //
+    //  Continuous / looping sound: soundID = sound.loop();
+    //  - raw sound file must have no gaps
+    //  - start and end of wave should line up to prevent clipping
+    //  - must not use mp3
+    //
+    //  Panning:
+    //  - sounds must be MONO
+    //
+    //  Latency is not great and the default implementation is not recommended for latency sensitive apps like rhythm games.
+    //  https://libgdx.com/wiki/audio/audio#audio-on-android
+    //  Given the physics based nature of this game, id say rhythm is certainly important given we want collisions to feel accurate
+    
+    //  Given the above sound files will be expected as:
+    //  16-bit WAV -> MONO
+    //  Roughly -3 to -6 db track rendering?
+    
     Sound f3;
     Sound laserShoot, laserShootCharge;
     Sound hullImpact, hullImpactHeavy;
     Sound shieldImpact;
     Sound shieldCharge, shieldOn, shieldOff, shieldAmbientLoop;
     Sound hyperdriveEngage;
+    
+    //these are maybe not necessary. will hold most recent handle.
     long laserSID, laserCID;
     long f3ID;
     long hullImpactID, hullImpactHeavyID;
@@ -24,31 +55,6 @@ public class SoundSystem extends EntitySystem implements Disposable {
     
     @Override
     public void addedToEngine(Engine engine) {
-        //  The current upper limit for decoded audio is 1 MB.
-        //  https://libgdx.com/wiki/audio/sound-effects
-        //
-        //  Supported Formats: MP3, OGG and WAV
-        //  - WAV files are quite large compared to other formats
-        //      - WAV files must have 16 bits per sample
-        //  - OGG files don’t work on RoboVM (iOS) nor with Safari (GWT)
-        //  - MP3 files have issues with seamless looping.
-        //
-        //  For continuous sound (loop), raw sound file must have
-        //  - no gaps
-        //  - start and end of wave should line up to prevent clipping
-        //  soundID = sound.loop();
-        //
-        //  Latency is not great and the default implementation is not recommended for latency sensitive apps like rhythm games.
-        //  https://libgdx.com/wiki/audio/audio#audio-on-android
-        //given the physics based nature of this game, id say rhythm is certainly important given we want collisions to feel accurate
-    
-        //  Given the above sound files will be expected as:
-        //  WAV 16-bit MONO
-        //  Roughly -3 to -6 db track rendering?
-        
-        //  todo: should be event based, so any system can call
-        //  see: https://github.com/libgdx/ashley/blob/master/ashley/tests/com/badlogic/ashley/signals/SignalTests.java
-        
         //  load sounds (should use assetmanager?)
         f3 = Gdx.audio.newSound(Gdx.files.internal("sound/f3.wav"));
         
@@ -71,23 +77,44 @@ public class SoundSystem extends EntitySystem implements Disposable {
     @Override
     public void update(float deltaTime) {}
     
-    int curStep = 0;
     public long asteroidShatter() {
         // play new sound and keep handle for further manipulation
-        // range -> 0.5 - 2.0 = half to double frequency
-        // +/-1 octave from sample frequency
-        //      lower octave = 0.5 - 1.0 (eg: 440hz * 0.5 = 220)
-        //      upper octave = 1.0 - 2.0 (eg: 440hz * 2.0 = 880)
-        float step = 1.0f/12.0f;
-        //curStep = MathUtils.random(12);//12-tone stepped random
-        float pitch = 1.0f + (step * curStep);
-        pitch = MathUtils.random(0.5f, 2.0f);//pure random
-        f3ID = f3.play(0.25f, pitch, 0);
-        curStep++;
-        if (curStep > 12) {
+        //float pitch = MathUtils.random(0.5f, 2.0f);//pure random
+        //return f3ID = f3.play(0.25f, pitch, 0);
+        return ascendingTone();
+    }
+    
+    int curStep = 0;
+    public long ascendingTone() {
+        //  play new sound and keep handle for further manipulation
+        //  range -> 0.5 - 2.0 = half to double frequency
+        //  +/-1 octave from sample frequency
+        //  lower octave = 0.5 - 1.0 (eg: 440hz * 0.5 = 220)
+        //  upper octave = 1.0 - 2.0 (eg: 440hz * 2.0 = 880)
+        //  lower: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11
+        //  upper: 12,13,14,15,16,17,18,19,20,21,22,24
+        
+        //upper octave = 1.0 - 2.0 (eg: 440hz * 2.0 = 880)
+        //curStep 12 = 1.0 + ((1/12) * 0)  = 1.0;
+        //curStep 24 = 1.0 + ((1/12) * 12) = 2.0;
+        float step = 1.0f/12.0f; // = 0.08333
+        float pitch = 1.0f + (step * (curStep-12));
+        if (curStep < 12) {
+            //lower octave = 0.5 - <1.0 (eg: 440hz * 0.5 = 220)
+            //curStep 0  = 0.5 + ((1/12) * 0)  = 0.5;
+            //curStep 11 = 0.5 + ((1/12) * 11) = 0.916; (0.916 / 2) + 0.5f = 0.9583?;
+            //curStep 12 = 0.5 + ((1/12) * 12) = 1.5;
+            step *= 0.5f;//scale down 1.0 -> 0.5
+            pitch = 0.5f + (step * curStep);
+        }
+        //Gdx.app.debug(getClass().getSimpleName(), curStep + ": " + step + " -> " + pitch);
+        
+        //increase step but loop back
+        if (curStep++ > 24) {
             curStep = 0;
         }
-        return f3ID;
+        
+        return f3ID = f3.play(0.25f, pitch, 0);
     }
     
     
