@@ -116,7 +116,6 @@ public class SoundSystem extends EntitySystem implements Disposable {
         return f3ID = f3.play(0.25f, pitch, 0);
     }
     
-    
     public void laserShoot() {
         laserShoot(0.3f, 1 + MathUtils.random(-0.02f, 0.02f));
     }
@@ -183,6 +182,9 @@ public class SoundSystem extends EntitySystem implements Disposable {
         hullImpact.dispose();
         hullImpactHeavy.dispose();
         shieldImpact.dispose();
+        shieldOn.dispose();
+        shieldOff.dispose();
+        shieldAmbientLoop.dispose();
     }
     
 }
