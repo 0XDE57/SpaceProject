@@ -79,9 +79,8 @@ public class SoundSystem extends EntitySystem implements Disposable {
     
     public long asteroidShatter() {
         // play new sound and keep handle for further manipulation
-        //float pitch = MathUtils.random(0.5f, 2.0f);//pure random
-        //return f3ID = f3.play(0.25f, pitch, 0);
-        return ascendingTone();
+        float pitch = MathUtils.random(0.5f, 2.0f);//pure random
+        return f3ID = f3.play(0.25f, pitch, 0);
     }
     
     int curStep = 0;
