@@ -7,6 +7,7 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -28,10 +29,13 @@ import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.noise.NoiseBuffer;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.noise.NoiseThreadPoolExecutor;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Tile;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 
 public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
@@ -80,7 +84,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
             }
         }
     }
-    
+
     @Override
     public void update(float delta) {
         //if (!hasInit) { initTestDebugMobs(getEngine()); }
@@ -90,6 +94,28 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         
         // update/replace textures
         updatePlanetTextures();
+
+        //debug
+        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            /*
+            GameScreen.galaxy.objects.clear();
+            GameScreen.galaxy.points.clear();
+
+            unloadFarEntities(0);
+            GameScreen.noiseManager.clearQueue();
+
+            /*
+            AstroBody astroBody = new AstroBody(new Vector2(1337, 420));
+            astroBody.seed = MathUtils.random(Long.MIN_VALUE, Long.MAX_VALUE);
+            GameScreen.galaxy.points.add(new Vector2(astroBody.x, astroBody.y));
+            GameScreen.galaxy.objects.add(astroBody);*
+
+            for (Entity e : createPlanetarySystem(1337, 420, ThreadLocalRandom.current().nextLong())) {
+                getEngine().addEntity(e);
+            }
+
+            */
+        }
     }
     
     //region load
@@ -207,7 +233,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         Array<Entity> entities = new Array<Entity>();
         
         //add star to center of planetary system
-        Entity star = EntityFactory.createStar(seed, x, y, isRotateClockwise);
+        Entity star = EntityFactory.createStar(GameScreen.box2dWorld, seed, x, y, isRotateClockwise);
         BarycenterComponent barycenter = new BarycenterComponent();
         barycenter.bodyType = numPlanets == 0 ? BarycenterComponent.AstronomicalBodyType.loneStar : BarycenterComponent.AstronomicalBodyType.uniStellar;
         star.add(barycenter);
@@ -335,14 +361,14 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         float startAngle = MathUtils.random(MathUtils.PI2);
         float tangentialSpeed = MathUtils.random(celestCFG.minPlanetTangentialSpeed, celestCFG.maxPlanetTangentialSpeed);
         
-        Entity starA = EntityFactory.createStar(MyMath.getSeed(x + distance, y), x + distance, y, rotDir);
+        Entity starA = EntityFactory.createStar(GameScreen.box2dWorld, MyMath.getSeed(x + distance, y), x + distance, y, rotDir);
         OrbitComponent orbitA = starA.getComponent(OrbitComponent.class);
         orbitA.parent = anchorEntity;
         orbitA.radialDistance = distance;
         orbitA.startAngle = startAngle;
         orbitA.tangentialSpeed = tangentialSpeed;
         
-        Entity starB = EntityFactory.createStar(MyMath.getSeed(x - distance, y), x - distance, y, rotDir);
+        Entity starB = EntityFactory.createStar(GameScreen.box2dWorld, MyMath.getSeed(x - distance, y), x - distance, y, rotDir);
         OrbitComponent orbitB = starB.getComponent(OrbitComponent.class);
         orbitB.parent = anchorEntity;
         orbitB.radialDistance = distance;

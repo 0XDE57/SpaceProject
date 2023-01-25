@@ -164,7 +164,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         HealthComponent health = Mappers.health.get(entity);
         if (health != null) {
             long hurtTime = 1000;
-            if ((GameScreen.getGameTimeCurrent() - health.lastHit) < hurtTime) {
+            if ((GameScreen.getGameTimeCurrent() - health.lastHitTime) < hurtTime) {
                 state = -1;
             }
         }
