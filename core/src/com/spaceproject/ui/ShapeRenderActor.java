@@ -1,10 +1,8 @@
 package com.spaceproject.ui;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.spaceproject.math.BlackBodyColorSpectrum;
@@ -13,8 +11,7 @@ import com.spaceproject.math.Physics;
 public class ShapeRenderActor extends Actor {
     
     private ShapeRenderer shape;
-    Vector2 coords = new Vector2(getX(), getY());
-    
+
     public ShapeRenderActor() {
         shape = new ShapeRenderer();
     }
@@ -31,41 +28,51 @@ public class ShapeRenderActor extends Actor {
         //2. end the current batch
         batch.end();
         
-        //3. do our custom shape rendering
+        //3. set shapes projection to copy and match batch position
         shape.setProjectionMatrix(batch.getProjectionMatrix());
-        shape.begin(ShapeRenderer.ShapeType.Filled);
+        shape.setTransformMatrix(batch.getTransformMatrix());
+        shape.translate(getX(), getY(), 0);
+        
+        //4. do our custom shape rendering
+        shape.begin(ShapeRenderer.ShapeType.Line);
         //setBounds(getParent().getX(), getParent().getY(), getParent().getWidth(), getParent().getWidth());
         
-        coords.set(getX(), getY());
-        localToStageCoordinates(coords);
+        //coords.set(getX(), getY());
+        //localToStageCoordinates(coords);
+        
+        /*
         //debug corners
         shape.setColor(Color.SKY);
-        shape.circle(coords.x, coords.y, 10);
-        shape.circle(coords.x + getWidth() / 2, coords.y + getHeight() / 2, 10);
+        shape.circle(0, 0, 10);
+        shape.circle(getWidth() / 2, getHeight() / 2, 10);
         shape.setColor(Color.GREEN);
-        shape.circle(coords.x, coords.y + getHeight(), 10);
-        shape.circle(coords.x + getWidth(), coords.y, 10);
-        shape.circle(coords.x + getWidth(), coords.y + getHeight(), 10);
-        
+        shape.circle(0, getHeight(), 10);
+        shape.circle(getWidth(), 0, 10);
+        shape.circle(getWidth(), getHeight(), 10);
+       
+        shape.setColor(1, 1, 0, 1);
+        shape.rect(0, 0, getWidth(), getHeight());
+        */
         
         //debug black body radiation, color temperature
-        float x = coords.x + 50;
-        float y = coords.y + 100;
-        float width = getWidth() - x;
+        float x = 10;
+        float y = 10;
+        float width = getWidth() - x * 2 ;
         float height = 100;
         float lowestVisibleTemp  = (float) Physics.wavelengthToTemperature(380) * 1000000;
         float highestVisibleTemp = (float) Physics.wavelengthToTemperature(780) * 1000000;
         int fromKelvin = 1000;
         int toKelvin = 50000;
+        int gap = 20;
         
         //render full with black bars outside vision
-        renderSpectrum(x, y, width, height, lowestVisibleTemp, highestVisibleTemp, fromKelvin, toKelvin);
+        renderPeakWavelengthSpectrum(x, y, width, height, lowestVisibleTemp, highestVisibleTemp, fromKelvin, toKelvin);
         //render visible only
-        float y2 = y + height + 10;
-        renderSpectrum(x, y2, width, height, lowestVisibleTemp, highestVisibleTemp, highestVisibleTemp, lowestVisibleTemp);
+        float y2 = y + height + gap;
+        renderPeakWavelengthSpectrum(x, y2, width, height, lowestVisibleTemp, highestVisibleTemp, highestVisibleTemp, lowestVisibleTemp);
         //render blackbody specrend
-        float y3 = y2 + height + 10;
-        renderSpectrum(x, y3, width, height, fromKelvin, toKelvin);
+        float y3 = y2 + height + gap;
+        renderBlackBodySpectrum(x, y3, width, height, fromKelvin, toKelvin);
         
         
         //TODO: plot power spectrum for wavelength
@@ -81,13 +88,13 @@ public class ShapeRenderActor extends Actor {
         }*/
 
         
-        //4. end our shape
+        //5. end our shape
         shape.end();
-        //5. we must begin the batch again for actors that are drawn after us
+        //6. we must begin the batch again for actors that are drawn after us
         batch.begin();
     }
     
-    private void renderSpectrum(float x, float y, float width, float height, float lowestVisibleTemp, float highestVisibleTemp, float fromKelvin, float toKelvin) {
+    private void renderPeakWavelengthSpectrum(float x, float y, float width, float height, float lowestVisibleTemp, float highestVisibleTemp, float fromKelvin, float toKelvin) {
         int border = 4;
         
         for (int i = 0; i < width; i++) {
@@ -113,9 +120,12 @@ public class ShapeRenderActor extends Actor {
                     1); //alpha
             shape.line(x + i, y, x + i, y + height);
         }
+        
+        shape.setColor(1, 1, 1, 1);
+        shape.rect(x, y, width, height);
     }
     
-    private void renderSpectrum(float x, float y, float width, float height, float fromKelvin, float toKelvin) {
+    private void renderBlackBodySpectrum(float x, float y, float width, float height, float fromKelvin, float toKelvin) {
         int border = 4;
         
         for (int i = 0; i < width; i++) {
@@ -130,7 +140,7 @@ public class ShapeRenderActor extends Actor {
     
             //draw border
             if (constrained) {
-                shape.setColor(0, 0, 0, 1);
+                shape.setColor(1, 0, 0, 1);
             } else {
                 shape.setColor(1, 1, 1, 1);
             }
@@ -140,6 +150,9 @@ public class ShapeRenderActor extends Actor {
             shape.setColor(normal.x, normal.y, normal.z, 1);
             shape.line(x + i, y, x + i, y + height);
         }
+    
+        shape.setColor(1, 1, 1, 1);
+        shape.rect(x, y, width, height);
     }
     
 }
