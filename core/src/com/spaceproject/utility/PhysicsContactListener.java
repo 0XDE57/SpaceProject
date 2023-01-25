@@ -44,7 +44,7 @@ public class PhysicsContactListener implements ContactListener {
     private final float asteroidBreakOrbitThreshold = 250;
     private final float vehicleDamageThreshold = 15; //impulse threshold to apply damage to vehicles
     private final float impactMultiplier = 0.1f; //how much damage relative to impulse
-    private final float heatDamageRate = 10f;// how quickly stars to damage to health
+    private final float heatDamageRate = 20f;// how quickly stars to damage to health
     private float peakImpulse = 0; //highest recorded impact, stat just to gauge
     
     public PhysicsContactListener(Engine engine) {
@@ -361,9 +361,19 @@ public class PhysicsContactListener implements ContactListener {
             //could set bullet on fire so its more powerful on the other side
             return;
         }
+    
+        //shield protects from damage
+        ShieldComponent shield = Mappers.shield.get(burningEntity);
+        if ((shield != null) && (shield.state == ShieldComponent.State.on)) {
+            //todo: maybe shield can overheat and start turning red
+            // when shield is fully overheated shield will break
+            // shield can have heat resistance multiplier that you can upgrade
+            return;
+        }
 
         //do heat damage dps
         float damage = heatDamageRate * deltaTime;
+        //todo: hull heat resistance that can be upgraded: move health to hull?
         healthComponent.health -= damage;
         healthComponent.lastHitTime = GameScreen.getGameTimeCurrent();
         healthComponent.lastHitSource = starEntity;

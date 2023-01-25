@@ -343,10 +343,10 @@ Legend:
     [ ] ship body gets more red ship with health. body shader, inner black cells.
         outline shader for other states: blue shield, yellow engine, blue boost?
 
-[...] touch the sun and die! (does not affect you during hyper)
+[x] touch the sun and die! (does not affect you during hyper)
     [x] do damage to things with health
-    [ ] have to use shield to protect yourself from star if you accidentally fly into it
-    [ ] shield heats up turns red with shader
+    [x] have to use shield to protect yourself from star if you fly into it
+    [?] shield heats up turns red with shader
         perhaps this could be some sort of power up?
         or need to upgrade shield to handle higher temps
         fly through the sun with shield up to absorb energy and heal?
@@ -354,11 +354,12 @@ Legend:
 [ ] death message w/ reason:
     [ ] "stars are hot!"
     [ ] "asteroids are harder than your ship..."
-    [ ] "press [] to use your shield"
+    [ ] "press [] to activate your shield"
 
 [ ] better death visual
     [ ] respawn system
         (currently handled by: [RemovalSystem] Controlled entity assumed to be player; respawning...)
+        respawn at space station, docked
     [ ] emit explosion rings
     [ ] emit explosion rays
     [ ] explodey particle fx!
@@ -369,10 +370,6 @@ Legend:
     [ ] repair ship
 
 [ ] render layer: move hyper trail layer to render when hud off
-
-[ ] character eye color: magenta other. red when enemy attack
-    [ ] shader, eye brightness tied to health
-    [ ] flash different colors and brightness at other drones to communicate
 
 [ ] highlight planet when flying over and zoomed out to show when you can land
     glowy ring / halo
@@ -418,19 +415,21 @@ Legend:
         I believe this is to do with the noise threads shutting down?
 
 [ ] sound: there is no sound in the vacuum of space, therefore music sound effects are not required!
-    [ ] ship impact
-        [ ] hull
-            [x] light: hull tapped, impulse tied to volume
-            [x] heavy: ship took damage, impulse tied to volume
-        [ ] shield
-            [...] charge up
-            [x] activate
-            [...] sustain
-                this needs to loop better, it's clipping
-            [x] charge release
-            [ ] break
+    [ ] ship impact hull and ship sounds
+        [x] light: hull tapped, impulse tied to volume
+        [x] heavy: ship took damage, impulse tied to volume
+        [ ] alarm / hurt warning took damage
+        [ ] alarm panic when health low
+    [...] shield
+        [x] activated, max charge
+        [x] deactivated
+        [x] hit, volume set by impulse
+        [x] active hum while active
+        [ ] alternate hum while active in star and heating up, pitch tied to heat
+        [ ] shield broken, shatter / break
+        [ ] charge up, pitch tied to charge
     [ ] engine / movement
-        [ ] active, pitch tied to velocity
+        [ ] active continuous, pitch tied to velocity
         [ ] left right?
         [ ] boost
         [ ] barrel roll
@@ -443,20 +442,16 @@ Legend:
     [ ] charge cannon
         [x] fire - pitch tied to size
         [ ] charge up
-        [ ] max out
+        [ ] maxed out
     [ ] laser
         [ ] start
         [ ] active loop hum
-    [...] shield
-        [x] activated, max charge
-        [x] deactivated
-        [x] hit, volume set by impulse
-        [ ] shield broken, shatter
-        [ ] charge, pitch tied to charge
-        [ ] decharge, pitch tied to charge
     [ ] asteroid
         [ ] hit, volume set by impulse (how hard hit), pitch matching asteroid
         [...] shatter
+    [ ] enter / exit vehicle
+    [ ] transition sound
+    [ ]
     Apparently audio on android sucks?
         https://github.com/libgdx/libgdx/wiki/Audio
         https://github.com/barsoosayque/libgdx-oboe
@@ -495,6 +490,14 @@ Legend:
 
 ................above is focused on bug fix and polish phase for space demo..........................
 ................landing will be disabled until worlds are further developed..........................
+
+[ ] character eye color: magenta other. red when enemy attack
+    [ ] shader, eye brightness tied to health
+    [ ] flash different colors and brightness at other drones to communicate
+        morse code
+
+[ ] character drone base cold resistance / heat resistance for landing on more extreme planets
+    can be upgrade at garage / space station just like ship
 
 [ ] is this why its not picking up my controller over otg on mobile?
     https://github.com/libgdx/gdx-controllers/wiki/Declare-game-controller-support
