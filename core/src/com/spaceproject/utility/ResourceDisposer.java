@@ -4,8 +4,10 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
+import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.PhysicsComponent;
+import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 
@@ -39,6 +41,13 @@ public class ResourceDisposer {
         if (particle != null) {
             particle.pooledEffect.dispose();
             disposedParticle++;
+        }
+
+        //if entity was charging a projectile, make sure the projectile entity is also removed
+        ChargeCannonComponent chargeCannon = Mappers.chargeCannon.get(entity);
+        if (chargeCannon != null && chargeCannon.projectileEntity != null) {
+            //destroy or release
+            chargeCannon.projectileEntity.add(new RemoveComponent());
         }
     }
     
