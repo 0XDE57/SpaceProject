@@ -254,7 +254,7 @@ When animation hits `transition` state, this calls @GameScreen to begin switchin
 			end: remove transition component
 		takeOffPlanet:
 			screenEffectFadeIn: fade screen to white
-		-->	transition: <-- trigger @GameScreen to switch to planet.
+		-->	transition: <-- trigger @GameScreen to switch to space.
 			sync: ensure find planet landed on is loaded (based on seed), ensure found and texture loaded before allowing play
 			zoomOut: zoom camera from 0 to normal
 			grow: grow ship sprite from 0 to give illusion of taking off planet
