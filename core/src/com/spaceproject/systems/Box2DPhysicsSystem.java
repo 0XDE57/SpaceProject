@@ -26,7 +26,8 @@ public class Box2DPhysicsSystem extends EntitySystem {
     private float accumulator = 0f;
     
     private World world;
-    
+    private PhysicsContactListener damageContactListener;
+
     private ImmutableArray<Entity> entities;
     
     @Override
@@ -35,7 +36,8 @@ public class Box2DPhysicsSystem extends EntitySystem {
         entities = engine.getEntitiesFor(family);
     
         world = GameScreen.box2dWorld;
-        world.setContactListener(new PhysicsContactListener(engine));
+        damageContactListener = new PhysicsContactListener(engine);
+        world.setContactListener(damageContactListener);
     }
     
     @Override
@@ -44,7 +46,9 @@ public class Box2DPhysicsSystem extends EntitySystem {
         while (accumulator >= timeStep) {
             world.step(timeStep, velocityIterations, positionIterations);
             accumulator -= timeStep;
-            
+
+            damageContactListener.updateActiveContacts(deltaTime);
+
             updateTransform();
         }
         
@@ -54,7 +58,6 @@ public class Box2DPhysicsSystem extends EntitySystem {
     private void updateTransform() {
         for (Entity entity : entities) {
             PhysicsComponent physics = Mappers.physics.get(entity);
-            
             if (!physics.body.isActive()) {
                 return;
             }

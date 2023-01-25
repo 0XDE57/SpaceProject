@@ -16,7 +16,6 @@ import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AsteroidBeltComponent;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.CamTargetComponent;
-import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.ExpireComponent;
@@ -27,6 +26,7 @@ import com.spaceproject.components.RingEffectComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.SplineComponent;
 import com.spaceproject.components.Sprite3DComponent;
+import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.screens.GameScreen;
@@ -38,62 +38,82 @@ import com.spaceproject.systems.SoundSystem;
 public class PhysicsContactListener implements ContactListener {
     
     private final Engine engine;
+    private final Array<Contact> activeTouchStarContacts;
+
     private final int asteroidDamageThreshold = 15000; //impulse threshold to apply damage caused by impact
     private final float asteroidBreakOrbitThreshold = 250;
     private final float vehicleDamageThreshold = 15; //impulse threshold to apply damage to vehicles
     private final float impactMultiplier = 0.1f; //how much damage relative to impulse
+    private final float heatDamageRate = 0.1f;// how quickly stars to damage to health
     private float peakImpulse = 0; //highest recorded impact, stat just to gauge
     
     public PhysicsContactListener(Engine engine) {
         this.engine = engine;
+        activeTouchStarContacts = new Array<>();
     }
     
     @Override
     public void beginContact(Contact contact) {
         Object dataA = contact.getFixtureA().getBody().getUserData();
         Object dataB = contact.getFixtureB().getBody().getUserData();
-        if (dataA != null && dataB != null) {
-            onCollision(contact, (Entity) dataA, (Entity) dataB);
-        }
+        if (dataA == null || dataB == null) return;
+
+        onCollision(contact, (Entity) dataA, (Entity) dataB);
     }
     
     @Override
-    public void endContact(Contact contact) {}
+    public void endContact(Contact contact) {
+        Object dataA = contact.getFixtureA().getBody().getUserData();
+        Object dataB = contact.getFixtureB().getBody().getUserData();
+        if (dataA == null || dataB == null) return;
+
+        //remove active star contacts
+        StarComponent starA = Mappers.star.get((Entity) dataA);
+        if (starA != null) {
+            onStopTouchStar(contact);
+        }
+        StarComponent starB = Mappers.star.get((Entity) dataB);
+        if (starB != null) {
+            onStopTouchStar(contact);
+        }
+    }
     
     @Override
     public void preSolve(Contact contact, Manifold oldManifold) {}
     
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {
+        Object dataA = contact.getFixtureA().getBody().getUserData();
+        Object dataB = contact.getFixtureB().getBody().getUserData();
+        if (dataA == null || dataB == null) return;
+        Entity entityA = (Entity) dataA;
+        Entity entityB = (Entity) dataB;
+
+        //get largest impulse from impulse resolution
         float maxImpulse = 0;
         for (float normal : impulse.getNormalImpulses()) {
             maxImpulse = Math.max(maxImpulse, normal);
         }
         peakImpulse = Math.max(maxImpulse, peakImpulse);
-        
-        Object dataA = contact.getFixtureA().getBody().getUserData();
-        Object dataB = contact.getFixtureB().getBody().getUserData();
-        if (dataA != null && dataB != null) {
-            Entity entityA = (Entity) dataA;
-            Entity entityB = (Entity) dataB;
-            
-            AsteroidComponent asteroidA = Mappers.asteroid.get(entityA);
-            if (asteroidA != null) {
-                asteroidImpact(entityA, asteroidA, maxImpulse);
-            }
-            AsteroidComponent asteroidB = Mappers.asteroid.get(entityB);
-            if (asteroidB != null) {
-                asteroidImpact(entityB, asteroidB, maxImpulse);
-            }
-            
-            VehicleComponent vehicleA = Mappers.vehicle.get(entityA);
-            if (vehicleA != null) {
-                doVehicleDamage(entityA, maxImpulse);
-            }
-            VehicleComponent vehicleB = Mappers.vehicle.get(entityB);
-            if (vehicleB != null) {
-                doVehicleDamage(entityB, maxImpulse);
-            }
+
+        //check for asteroid
+        AsteroidComponent asteroidA = Mappers.asteroid.get(entityA);
+        if (asteroidA != null) {
+            asteroidImpact(entityA, asteroidA, maxImpulse);
+        }
+        AsteroidComponent asteroidB = Mappers.asteroid.get(entityB);
+        if (asteroidB != null) {
+            asteroidImpact(entityB, asteroidB, maxImpulse);
+        }
+
+        //check for vehicle
+        VehicleComponent vehicleA = Mappers.vehicle.get(entityA);
+        if (vehicleA != null) {
+            doVehicleDamage(entityA, maxImpulse);
+        }
+        VehicleComponent vehicleB = Mappers.vehicle.get(entityB);
+        if (vehicleB != null) {
+            doVehicleDamage(entityB, maxImpulse);
         }
     }
     
@@ -116,7 +136,7 @@ public class PhysicsContactListener implements ContactListener {
             //damage (potential could be optimization to remove health, add merge it with asteroid, one less mapper)
             HealthComponent health = Mappers.health.get(entity);
             health.health -= relativeDamage;
-            health.lastHit = GameScreen.getGameTimeCurrent();
+            health.lastHitTime = GameScreen.getGameTimeCurrent();
             if (health.health <= 0) {
                 asteroid.doShatter = true;
                 entity.add(new RemoveComponent());
@@ -166,7 +186,7 @@ public class PhysicsContactListener implements ContactListener {
         HealthComponent health = Mappers.health.get(entity);
         if (health != null) {
             health.health -= relativeDamage;
-            health.lastHit = GameScreen.getGameTimeCurrent();
+            health.lastHitTime = GameScreen.getGameTimeCurrent();
             if (health.health <= 0) {
                 entity.add(new RemoveComponent());
                 Gdx.app.debug(this.getClass().getSimpleName(), "vehicle destroyed: " + impulse + " -> damage: " + relativeDamage);
@@ -191,20 +211,32 @@ public class PhysicsContactListener implements ContactListener {
     
     private void onCollision(Contact contact, Entity a, Entity b) {
         //todo: collision filtering: http://www.iforce2d.net/b2dtut/collision-filtering
-        DamageComponent damageA = Mappers.damage.get(a);
-        DamageComponent damageB = Mappers.damage.get(b);
         HealthComponent healthA = Mappers.health.get(a);
-        HealthComponent healthB = Mappers.health.get(b);
-        
-        if (damageA != null && healthB != null) {
-            onAttacked(contact, a, b, damageA, healthB);
+        if (healthA != null) {
+            DamageComponent damageB = Mappers.damage.get(b);
+            if (damageB != null) {
+                onDamage(contact, b, a, damageB, healthA);
+            }
+            StarComponent starB = Mappers.star.get(b);
+            if (starB != null) {
+                onTouchStar(contact);
+            }
         }
-        if (damageB != null && healthA != null) {
-            onAttacked(contact, b, a, damageB, healthA);
+
+        HealthComponent healthB = Mappers.health.get(b);
+        if (healthB != null) {
+            DamageComponent damageA = Mappers.damage.get(a);
+            if (damageA != null) {
+                onDamage(contact, a, b, damageA, healthB);
+            }
+            StarComponent starA = Mappers.star.get(a);
+            if (starA != null) {
+                onTouchStar(contact);
+            }
         }
     }
-    
-    private void onAttacked(Contact contact, Entity damageEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent healthComponent) {
+
+    private void onDamage(Contact contact, Entity damageEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent healthComponent) {
         if (damageComponent.source == attackedEntity) {
             return; //ignore self-inflicted damage
         }
@@ -217,7 +249,7 @@ public class PhysicsContactListener implements ContactListener {
         AIComponent ai = Mappers.AI.get(attackedEntity);
         if (ai != null) {
             //focus camera on target
-            attackedEntity.add(new CamTargetComponent());
+            //attackedEntity.add(new CamTargetComponent());
             
             //focus ai on player
             ai.attackTarget = damageComponent.source;
@@ -242,11 +274,11 @@ public class PhysicsContactListener implements ContactListener {
             float roll = 50 * MathUtils.degRad;
             sprite3D.renderable.angle += MathUtils.randomBoolean() ? roll : -roll;
         }
-        
-        
+
         //do damage
         healthComponent.health -= damageComponent.damage;
-        healthComponent.lastHit = GameScreen.getGameTimeCurrent();
+        healthComponent.lastHitTime = GameScreen.getGameTimeCurrent();
+        healthComponent.lastHitSource = damageEntity;//damageComponent.source?
         
         //remove entity (kill)
         if (healthComponent.health <= 0) {
@@ -255,13 +287,14 @@ public class PhysicsContactListener implements ContactListener {
             for (Entity e : cluster) {
                 e.add(new RemoveComponent());
             }
-            
+
+            /*
             //if entity was charging a projectile, make sure the projectile entity is also removed
             ChargeCannonComponent chargeCannon = Mappers.chargeCannon.get(attackedEntity);
             if (chargeCannon != null && chargeCannon.projectileEntity != null) {
                 //destroy or release
                 chargeCannon.projectileEntity.add(new RemoveComponent());
-            }
+            }*/
     
             //if entity was asteroid, shatter
             AsteroidComponent asteroid = Mappers.asteroid.get(attackedEntity);
@@ -325,5 +358,84 @@ public class PhysicsContactListener implements ContactListener {
         
         engine.addEntity(contactP);
     }
-    
+
+    private void onTouchStar(Contact contact) {
+        if (activeTouchStarContacts.contains(contact, false)) {
+            Gdx.app.error(getClass().getSimpleName(), "contact already added. should only exist once");
+        } else {
+            Gdx.app.debug(getClass().getSimpleName(), "contact star added: " + contact.toString());
+        }
+        activeTouchStarContacts.add(contact);
+    }
+
+    private void onStopTouchStar(Contact contact) {
+        boolean removed = activeTouchStarContacts.removeValue(contact, false);
+        if (!removed) {
+            Gdx.app.error(getClass().getSimpleName(), "unable to remove: contact not found");
+        } else {
+            Gdx.app.debug(getClass().getSimpleName(), "contact star removed: "+ contact.toString());
+        }
+    }
+
+    //  DamageSystem?
+    //  family: health components
+    //  update {
+    //      if (touchingStar) { do DPS }
+    //  }
+    //
+    public void updateActiveContacts(/*ImmutableArray<Entity> entities,*/ float deltaTime) {
+        // kind of a pseudo entity system to keep physics stepping and damage calculation separate.
+        // we can reuse the entities and the we already have the listener reference
+        // in engine managed by the @Box2DPhysicsSystem
+        // i still want to keep damage stuff outside of physics stepping and interpolation.
+
+        for (Contact contact : activeTouchStarContacts) {
+            Object dataA = contact.getFixtureA().getBody().getUserData();
+            Object dataB = contact.getFixtureB().getBody().getUserData();
+            if (dataA == null || dataB == null) return;
+
+            Entity entityA = (Entity) dataA;
+            Entity entityB = (Entity) dataB;
+
+            StarComponent starA = Mappers.star.get(entityA);
+            if (starA != null) {
+                doHeatDamage(entityA, entityB, deltaTime);
+            }
+            StarComponent starB = Mappers.star.get(entityB);
+            if (starB != null) {
+                doHeatDamage(entityB, entityA, deltaTime);
+            }
+        }
+    }
+
+    private void doHeatDamage(Entity starEntity, Entity burningEntity, float deltaTime) {
+        HealthComponent healthComponent = Mappers.health.get(burningEntity);
+        if (healthComponent == null) return;
+
+        //do heat damage dps
+        float damage = heatDamageRate * deltaTime;
+        healthComponent.health -= damage;
+        healthComponent.lastHitTime = GameScreen.getGameTimeCurrent();
+        healthComponent.lastHitSource = starEntity;
+
+        //remove entity (kill)
+        if (healthComponent.health <= 0) {
+            //if entity was part of a cluster, remove all entities attached to cluster
+            Array<Entity> cluster = ECSUtil.getAttachedEntities(engine, burningEntity);
+            for (Entity e : cluster) {
+                e.add(new RemoveComponent());
+            }
+
+            //if entity was asteroid, shatter
+            AsteroidComponent asteroid = Mappers.asteroid.get(burningEntity);
+            if (asteroid != null) {
+                asteroid.doShatter = true;
+                engine.getSystem(SoundSystem.class).asteroidShatter();//todo -> asteroidBurn()
+            }
+
+            Gdx.app.log(getClass().getSimpleName(),
+                    "[" + DebugUtil.objString(burningEntity) + "] killed by: star");
+        }
+    }
+
 }

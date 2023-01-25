@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 import com.spaceproject.SpaceProject;
@@ -145,7 +146,7 @@ public class EntityFactory {
     
     
     //region Astronomical / Celestial objects and bodies
-    public static Entity createStar(long seed, float x, float y, boolean rotationDir) {
+    public static Entity createStar(World world, long seed, float x, float y, boolean rotationDir) {
         MathUtils.random.setSeed(seed);
         Entity entity = new Entity();
         
@@ -173,6 +174,11 @@ public class EntityFactory {
         texture.texture = TextureFactory.generateStar(seed, radius, 20);
         texture.scale = 4;
         entity.add(texture);
+
+        //sensor fixture to burn objects
+        PhysicsComponent physics = new PhysicsComponent();
+        physics.body = BodyFactory.createCircleCensor(x, y, radius * 4, world, entity);
+        entity.add(physics);
         
         // shader
         ShaderComponent shader = new ShaderComponent();
