@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.WorldManifold;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.AIComponent;
@@ -38,18 +39,16 @@ import com.spaceproject.systems.SoundSystem;
 public class PhysicsContactListener implements ContactListener {
     
     private final Engine engine;
-    private final Array<Contact> activeTouchStarContacts;
 
     private final int asteroidDamageThreshold = 15000; //impulse threshold to apply damage caused by impact
     private final float asteroidBreakOrbitThreshold = 250;
     private final float vehicleDamageThreshold = 15; //impulse threshold to apply damage to vehicles
     private final float impactMultiplier = 0.1f; //how much damage relative to impulse
-    private final float heatDamageRate = 0.1f;// how quickly stars to damage to health
+    private final float heatDamageRate = 10f;// how quickly stars to damage to health
     private float peakImpulse = 0; //highest recorded impact, stat just to gauge
     
     public PhysicsContactListener(Engine engine) {
         this.engine = engine;
-        activeTouchStarContacts = new Array<>();
     }
     
     @Override
@@ -62,21 +61,7 @@ public class PhysicsContactListener implements ContactListener {
     }
     
     @Override
-    public void endContact(Contact contact) {
-        Object dataA = contact.getFixtureA().getBody().getUserData();
-        Object dataB = contact.getFixtureB().getBody().getUserData();
-        if (dataA == null || dataB == null) return;
-
-        //remove active star contacts
-        StarComponent starA = Mappers.star.get((Entity) dataA);
-        if (starA != null) {
-            onStopTouchStar(contact);
-        }
-        StarComponent starB = Mappers.star.get((Entity) dataB);
-        if (starB != null) {
-            onStopTouchStar(contact);
-        }
-    }
+    public void endContact(Contact contact) {}
     
     @Override
     public void preSolve(Contact contact, Manifold oldManifold) {}
@@ -86,6 +71,7 @@ public class PhysicsContactListener implements ContactListener {
         Object dataA = contact.getFixtureA().getBody().getUserData();
         Object dataB = contact.getFixtureB().getBody().getUserData();
         if (dataA == null || dataB == null) return;
+        
         Entity entityA = (Entity) dataA;
         Entity entityB = (Entity) dataB;
 
@@ -140,8 +126,7 @@ public class PhysicsContactListener implements ContactListener {
             if (health.health <= 0) {
                 asteroid.doShatter = true;
                 entity.add(new RemoveComponent());
-                //warning: coupling
-                engine.getSystem(SoundSystem.class).asteroidShatter();
+                engine.getSystem(SoundSystem.class).asteroidShatter();//warning: coupling
                 //Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID shatter: " + impulse + " -> damage: " + relativeDamage);
             }
         }
@@ -164,25 +149,23 @@ public class PhysicsContactListener implements ContactListener {
         
             sound.shieldImpact(1);
             
-            Gdx.app.debug(this.getClass().getSimpleName(),
-                    "impulse: " + impulse + " -> " + relativeDamage +  " - <shield protect>"
-            );
+            Gdx.app.debug(getClass().getSimpleName(), "impulse: " + impulse + " -> " + relativeDamage +  " - <shield protect>");
             return; //protected by shield
         }
-        
-        
+    
+        //impact sound light and hull scrape
         if (impulse < vehicleDamageThreshold) {
             if (impulse > 1) {
                 sound.hullImpactLight(impulse / vehicleDamageThreshold);
             } else {
                 //todo: scrapping dragging hull across asteroid
-                //
+                //float friction = contact.getFriction();
+                //float tangent = contact.getTangentSpeed();
             }
-            
             return;
         }
         
-        
+        //do damage
         HealthComponent health = Mappers.health.get(entity);
         if (health != null) {
             health.health -= relativeDamage;
@@ -194,19 +177,15 @@ public class PhysicsContactListener implements ContactListener {
                 Gdx.app.debug(this.getClass().getSimpleName(), "high impact damage: " + impulse + " -> -" + relativeDamage);
             }
         }
-    
         
         ControlFocusComponent controlled = Mappers.controlFocus.get(entity);
         if (controlled != null) {
+            //warning: coupling
             engine.getSystem(ControllerInputSystem.class).vibrate(100, 1f);
-            CameraSystem camera = engine.getSystem(CameraSystem.class);
-            if (camera.getZoomLevel() > 10) {
-                camera.setZoomToDefault(entity);
-            } else if (camera.getZoomLevel() > 5) {
-                camera.zoomIn();
-            }
-            sound.hullImpactHeavy(1);
+            engine.getSystem(CameraSystem.class).impact(entity);
         }
+        //todo: should we hear only controlled, or AI if close enough
+        sound.hullImpactHeavy(1);
     }
     
     private void onCollision(Contact contact, Entity a, Entity b) {
@@ -217,10 +196,6 @@ public class PhysicsContactListener implements ContactListener {
             if (damageB != null) {
                 onDamage(contact, b, a, damageB, healthA);
             }
-            StarComponent starB = Mappers.star.get(b);
-            if (starB != null) {
-                onTouchStar(contact);
-            }
         }
 
         HealthComponent healthB = Mappers.health.get(b);
@@ -228,10 +203,6 @@ public class PhysicsContactListener implements ContactListener {
             DamageComponent damageA = Mappers.damage.get(a);
             if (damageA != null) {
                 onDamage(contact, a, b, damageA, healthB);
-            }
-            StarComponent starA = Mappers.star.get(a);
-            if (starA != null) {
-                onTouchStar(contact);
             }
         }
     }
@@ -359,40 +330,14 @@ public class PhysicsContactListener implements ContactListener {
         engine.addEntity(contactP);
     }
 
-    private void onTouchStar(Contact contact) {
-        if (activeTouchStarContacts.contains(contact, false)) {
-            Gdx.app.error(getClass().getSimpleName(), "contact already added. should only exist once");
-        } else {
-            Gdx.app.debug(getClass().getSimpleName(), "contact star added: " + contact.toString());
-        }
-        activeTouchStarContacts.add(contact);
-    }
-
-    private void onStopTouchStar(Contact contact) {
-        boolean removed = activeTouchStarContacts.removeValue(contact, false);
-        if (!removed) {
-            Gdx.app.error(getClass().getSimpleName(), "unable to remove: contact not found");
-        } else {
-            Gdx.app.debug(getClass().getSimpleName(), "contact star removed: "+ contact.toString());
-        }
-    }
-
-    //  DamageSystem?
-    //  family: health components
-    //  update {
-    //      if (touchingStar) { do DPS }
-    //  }
-    //
-    public void updateActiveContacts(/*ImmutableArray<Entity> entities,*/ float deltaTime) {
+    public void updateActiveContacts(World world, float deltaTime) {
         // kind of a pseudo entity system to keep physics stepping and damage calculation separate.
-        // we can reuse the entities and the we already have the listener reference
-        // in engine managed by the @Box2DPhysicsSystem
-        // i still want to keep damage stuff outside of physics stepping and interpolation.
-
-        for (Contact contact : activeTouchStarContacts) {
+        for (Contact contact : world.getContactList()) {
+            if (!contact.isTouching()) continue;
+            
             Object dataA = contact.getFixtureA().getBody().getUserData();
             Object dataB = contact.getFixtureB().getBody().getUserData();
-            if (dataA == null || dataB == null) return;
+            if (dataA == null || dataB == null) continue;
 
             Entity entityA = (Entity) dataA;
             Entity entityB = (Entity) dataB;
@@ -410,7 +355,12 @@ public class PhysicsContactListener implements ContactListener {
 
     private void doHeatDamage(Entity starEntity, Entity burningEntity, float deltaTime) {
         HealthComponent healthComponent = Mappers.health.get(burningEntity);
-        if (healthComponent == null) return;
+        if (healthComponent == null) {
+            //check if projectile
+            //DamageComponent, remove bullet? or could melt bullet?
+            //could set bullet on fire so its more powerful on the other side
+            return;
+        }
 
         //do heat damage dps
         float damage = heatDamageRate * deltaTime;

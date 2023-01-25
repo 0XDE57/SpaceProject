@@ -47,8 +47,8 @@ public class Box2DPhysicsSystem extends EntitySystem {
             world.step(timeStep, velocityIterations, positionIterations);
             accumulator -= timeStep;
 
-            damageContactListener.updateActiveContacts(deltaTime);
-
+            damageContactListener.updateActiveContacts(world, deltaTime);
+            
             updateTransform();
         }
         

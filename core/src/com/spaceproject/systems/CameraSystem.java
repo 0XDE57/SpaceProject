@@ -326,6 +326,14 @@ public class CameraSystem extends IteratingSystem {
         
         cam.zoom = MathUtils.clamp(cam.zoom, minZoom, maxZoom);
     }
+    
+    public void impact(Entity entity) {
+        if (getZoomLevel() > 10) {
+            setZoomToDefault(entity);
+        } else if (getZoomLevel() > 5) {
+            zoomIn();
+        }
+    }
     //endregion
     
     private void debugCameraControls(float delta) {

@@ -343,8 +343,8 @@ Legend:
     [ ] ship body gets more red ship with health. body shader, inner black cells.
         outline shader for other states: blue shield, yellow engine, blue boost?
 
-[ ] touch the sun and die! (does not affect you during hyper)
-    [ ] do damage to things with health
+[...] touch the sun and die! (does not affect you during hyper)
+    [x] do damage to things with health
     [ ] have to use shield to protect yourself from star if you accidentally fly into it
     [ ] shield heats up turns red with shader
         perhaps this could be some sort of power up?
