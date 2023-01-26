@@ -305,6 +305,19 @@ Legend:
     [ * ] = exceptions
 .....................................................................................................
 
+[...] pickup drops from asteroids
+    [ ] suck into ship when near
+
+[ ] cargo
+    [...] some sort of inventory
+    [ ] display count on UI
+
+[ ] space station
+    [ ] orbit
+    [ ] dock
+    [ ] garage / store UI
+    [ ] sell cargo for moneys
+
 [ ] convert fire to bpm
 
 [x] controller input stuck on desktop until joystick moved:

@@ -14,6 +14,7 @@ public class Mappers {
     public static final ComponentMapper<BarycenterComponent> barycenter = ComponentMapper.getFor(BarycenterComponent.class);
     public static final ComponentMapper<CameraFocusComponent> camFocus = ComponentMapper.getFor(CameraFocusComponent.class);
     public static final ComponentMapper<CannonComponent> cannon = ComponentMapper.getFor(CannonComponent.class);
+    public static final ComponentMapper<CargoComponent> cargo = ComponentMapper.getFor(CargoComponent.class);
     public static final ComponentMapper<CharacterComponent> character = ComponentMapper.getFor(CharacterComponent.class);
     public static final ComponentMapper<ChargeCannonComponent> chargeCannon = ComponentMapper.getFor(ChargeCannonComponent.class);
     public static final ComponentMapper<ControlFocusComponent> controlFocus = ComponentMapper.getFor(ControlFocusComponent.class);
@@ -23,6 +24,7 @@ public class Mappers {
     public static final ComponentMapper<ExpireComponent> expire = ComponentMapper.getFor(ExpireComponent.class);
     public static final ComponentMapper<HealthComponent> health = ComponentMapper.getFor(HealthComponent.class);
     public static final ComponentMapper<HyperDriveComponent> hyper = ComponentMapper.getFor(HyperDriveComponent.class);
+    public static final ComponentMapper<ItemDropComponent> itemDrop = ComponentMapper.getFor(ItemDropComponent.class);
     public static final ComponentMapper<MapComponent> map = ComponentMapper.getFor(MapComponent.class);
     public static final ComponentMapper<OrbitComponent> orbit = ComponentMapper.getFor(OrbitComponent.class);
     public static final ComponentMapper<ParticleComponent> particle = ComponentMapper.getFor(ParticleComponent.class);

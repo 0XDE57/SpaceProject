@@ -21,6 +21,7 @@ import com.spaceproject.components.AttachedToComponent;
 import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
+import com.spaceproject.components.CargoComponent;
 import com.spaceproject.components.CharacterComponent;
 import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
@@ -479,6 +480,10 @@ public class EntityFactory {
         spline.zOrder = 100;//should be on top of others
         spline.style = SplineComponent.Style.state;
         shipEntity.add(spline);
+        
+        //cargo
+        CargoComponent cargo = new CargoComponent();
+        shipEntity.add(cargo);
     
         //engine particle effect
         Entity mainEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineMain, new Vector2(0, height + 0.2f), 0);

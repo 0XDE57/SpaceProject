@@ -64,6 +64,27 @@ public class BodyFactory {
         return body;
     }
     
+    public static Body createDrop(float x, float y, float size, float radius, Entity entity) {
+        Body body;
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set(x, y);
+        body = GameScreen.box2dWorld.createBody(bodyDef);
+    
+        PolygonShape box = new PolygonShape();
+        box.setAsBox(size*0.5f, size*0.5f);
+        FixtureDef boxFixture = new FixtureDef();
+        boxFixture.shape = box;
+        boxFixture.density = 0.5f;
+        boxFixture.friction = 0.0f;
+        boxFixture.isSensor = true;
+        body.createFixture(boxFixture);
+        box.dispose();
+        body.setUserData(entity);
+    
+        return body;
+    }
+    
     public static Body createRect(float x, float y, float width, float height, BodyDef.BodyType bodyType, Entity entity) {
         Body body;
         BodyDef bodyDef = new BodyDef();
@@ -72,20 +93,16 @@ public class BodyFactory {
         body = GameScreen.box2dWorld.createBody(bodyDef);
         
         PolygonShape poly = new PolygonShape();
-        poly.setAsBox(width/2, height/2);
-        // Create a fixture definition to apply our shape to
+        poly.setAsBox(width*0.5f, height*0.5f);
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = poly;
         fixtureDef.density = 0.5f;
         fixtureDef.friction = 0.0f;
         fixtureDef.restitution = 0.6f; // Make it bounce a little bit
-        // Create our fixture and attach it to the body
         body.createFixture(fixtureDef);
-        // Remember to dispose of any shapes after you're done with them!
-        // BodyDef and FixtureDef don't need disposing, but shapes do.
         poly.dispose();
-    
         body.setUserData(entity);
+        
         return body;
     }
     
@@ -99,8 +116,34 @@ public class BodyFactory {
     }
     
     public static Body createShip(float x, float y, float width, float height, Entity entity, boolean inSpace) {
-        Body body = createRect(x, y, width, height, BodyDef.BodyType.DynamicBody, entity);
+        Body body;
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set(x, y);
+        body = GameScreen.box2dWorld.createBody(bodyDef);
+    
+        PolygonShape box = new PolygonShape();
+        box.setAsBox(width*0.5f, height*0.5f);
+        // Create a fixture definition to apply our shape to
+        FixtureDef boxFixture = new FixtureDef();
+        boxFixture.shape = box;
+        boxFixture.density = 0.5f;
+        boxFixture.friction = 0.0f;
+        boxFixture.restitution = 0.6f; // Make it bounce a little bit
+        body.createFixture(boxFixture);
+        box.dispose();
+    
+        CircleShape circle = new CircleShape();
+        circle.setRadius(2 * width * width);
+        FixtureDef circleFixture = new FixtureDef();
+        circleFixture.shape = circle;
+        circleFixture.isSensor = true;
+        //circleFixture.filter = ?
+        body.createFixture(circleFixture);
+        circle.dispose();
+        
         body.setUserData(entity);
+    
         if (inSpace) {
             body.setLinearDamping(0);
             body.setAngularDamping(0);
@@ -113,11 +156,10 @@ public class BodyFactory {
     }
     
     public static Body createWall(float x, float y, int width, int height, Entity entity) {
-        Body body = createRect(x, y, width, height, BodyDef.BodyType.StaticBody, entity);
-        return body;
+        return createRect(x, y, width, height, BodyDef.BodyType.StaticBody, entity);
     }
     
-    public static Body createRect(float x, float y, int width, int height, BodyDef.BodyType bodyType, Entity entity) {
+    public static Body createRect(float x, float y, int width, int height, BodyDef.BodyType bodyType, boolean isSensor, Entity entity) {
         // * 0.5f is half-width / half-height required by setAsBox()
         float scaledWidth  = engineCFG.meterPerUnit * width * 0.5f;
         float scaledHeight = engineCFG.meterPerUnit * height * 0.5f;
@@ -136,6 +178,7 @@ public class BodyFactory {
         fixtureDef.density = 0.5f;
         fixtureDef.friction = 0.0f;
         fixtureDef.restitution = 0.6f; // Make it bounce a little bit
+        fixtureDef.isSensor = isSensor;
         // Create our fixture and attach it to the body
         body.createFixture(fixtureDef);
         // Remember to dispose of any shapes after you're done with them!

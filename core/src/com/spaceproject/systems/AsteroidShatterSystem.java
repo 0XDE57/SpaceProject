@@ -13,9 +13,11 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.ExpireComponent;
+import com.spaceproject.components.ItemDropComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.generation.BodyFactory;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureFactory;
 import com.spaceproject.math.MyMath;
@@ -166,28 +168,37 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
     }
     
     private void dropResource(Entity entity, AsteroidComponent asteroid) {
-        
         Entity drop = new Entity();
         
         TextureComponent texture = new TextureComponent();
         texture.texture = TextureFactory.createTile(asteroid.color);
+        //todo: rng texture shape between circle, triangle, square
+        //texture.texture = TextureFactory.createCircle(asteroid.color);
         texture.scale = 1f;
     
         TransformComponent transform = new TransformComponent();
-        PhysicsComponent physics = Mappers.physics.get(entity);
-        transform.pos.set(physics.body.getPosition());
+        PhysicsComponent sourcePhysics = Mappers.physics.get(entity);
+        Vector2 pos = transform.pos.set(sourcePhysics.body.getPosition());
         
-        //attractee component, to be sucked up by vehicles with attractor component
-        //attractors handled in separate system
-        //drop.add(attractee)
-    
+        PhysicsComponent physics = new PhysicsComponent();
+        //todo: large circle BodyFactory.createCircle()
+        // do a bigger censor on same fixture that sucks into the player
+        physics.body = BodyFactory.createDrop(pos.x, pos.y, 1, 50, drop);
+        float spin = -0.2f;
+        physics.body.applyAngularImpulse(MathUtils.random(-spin, spin), true);
+        //todo: give momentum,
+        //either copy asteroids velocity
+        //or send in players direction
+        
         //expire time (self destruct)
         ExpireComponent expire = new ExpireComponent();
-        expire.timer = new SimpleTimer(100000, true);
-    
+        expire.timer = new SimpleTimer(60 * 1000, true);
+        
         drop.add(texture);
         drop.add(transform);
-        //drop.add(expire);
+        drop.add(physics);
+        drop.add(new ItemDropComponent());
+        drop.add(expire);
         getEngine().addEntity(drop);
     }
     

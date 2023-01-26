@@ -17,10 +17,12 @@ import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AsteroidBeltComponent;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.CamTargetComponent;
+import com.spaceproject.components.CargoComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
+import com.spaceproject.components.ItemDropComponent;
 import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.RingEffectComponent;
@@ -203,6 +205,31 @@ public class PhysicsContactListener implements ContactListener {
             DamageComponent damageA = Mappers.damage.get(a);
             if (damageA != null) {
                 onDamage(contact, a, b, damageA, healthB);
+            }
+        }
+    
+        
+        ItemDropComponent itemDropA = Mappers.itemDrop.get(a);
+        if (itemDropA != null) {
+            CargoComponent cargoB = Mappers.cargo.get(b);
+            if (cargoB != null) {
+                cargoB.count++;
+                //if (contact.getFixtureA().getFilterData())
+                //PhysicsComponent physicsA = Mappers.physics.get(a);
+                //float angleRad = physicsA.body.getPosition().angleRad(Mappers.physics.get(b).body.getPosition());
+                //physicsA.body.applyForceToCenter(MyMath.vector(angleRad, 10), true);
+                a.add(new RemoveComponent());
+            }
+        }
+        ItemDropComponent itemDropB = Mappers.itemDrop.get(b);
+        if (itemDropB != null) {
+            CargoComponent cargoA = Mappers.cargo.get(a);
+            if (cargoA != null) {
+                cargoA.count++;
+                //PhysicsComponent physicsB = Mappers.physics.get(b);
+                //float angleRad = physicsB.body.getPosition().angleRad(Mappers.physics.get(a).body.getPosition());
+                //physicsB.body.applyForceToCenter(MyMath.vector(angleRad, 10), true);
+                b.add(new RemoveComponent());
             }
         }
     }
