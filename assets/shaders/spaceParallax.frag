@@ -14,8 +14,9 @@ void main() {
         //invert for hyperspace
         color.rgb = 1.0 - color.rgb;
     } else {
-        //grayscale
-        float avg = (color.r + color.g + color.b) / 3.0;
+        //grayscale with weighted luminosity scaling
+        float avg = (0.21 * color.r + 0.71 * color.g + 0.07 * color.b) / 3.0;
+        //float avg = (color.r + color.g + color.b) / 3.0;
         color = mix(color, vec4(avg, avg, avg, color.a), u_blend);
     }
     gl_FragColor = color;
