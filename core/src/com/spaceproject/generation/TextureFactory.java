@@ -466,6 +466,21 @@ public class TextureFactory {
     }
     //endregion
     
+    public static Texture generateTriangle(int size, Color color) {
+        Pixmap pixmap = new Pixmap(size, size, Format.RGB565);
+    
+        //fill square
+        pixmap.setColor(color);
+        pixmap.fillTriangle(
+                size, (int) (size * 0.5f),
+                0, 0,
+                0, size);
+    
+        Texture t = new Texture(pixmap);
+        pixmap.dispose();
+        return t;
+    }
+    
     //region planet game objects
     public static Texture generateWall(int width, int height, Color color) {
         Pixmap pixmap = new Pixmap(width, height, Format.RGB565);
