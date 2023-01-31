@@ -198,7 +198,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     
     private void drawFPS(int x, int y) {
         int fps = Gdx.graphics.getFramesPerSecond();
-        Color fpsColor = fps >= 120 ? Color.SKY : fps > 45 ? Color.WHITE : fps > 30 ? Color.YELLOW : Color.RED;
+        Color fpsColor = fps >= 120 ? Color.SKY : fps > 60 ? Color.GREEN : fps > 45 ? Color.WHITE : fps > 30 ? Color.YELLOW : Color.RED;
         fontLarge.setColor(fpsColor);
         fontLarge.draw(batch, Integer.toString(fps), x, y);
     }
