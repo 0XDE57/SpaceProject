@@ -276,7 +276,7 @@ Simple but effective: 5 parallax layers
 Noise is heavy to generate at runtime so it's done in background threads.
 
 NOTE: we cannot generate textures in another thread due to glContext...
-https://github.com/libgdx/libgdx/wiki/Threading
+https://libgdx.com/wiki/app/threading
 https://www.opengl.org/wiki/OpenGL_and_multithreading
 
 We can however, generate noise data for the textures on a separate thread, and then pass the data to the rendering thread.
@@ -306,7 +306,8 @@ Legend:
 .....................................................................................................
 
 [...] pickup drops from asteroids
-    [ ] suck into ship when near
+    [x] suck into ship when near
+    [...] tune it
 
 [ ] cargo
     [...] some sort of inventory
@@ -318,7 +319,7 @@ Legend:
     [ ] garage / store UI
     [ ] sell cargo for moneys
 
-[ ] convert fire to bpm
+[ ] convert fire rate to rpm
 
 [x] controller input stuck on desktop until joystick moved:
     noticeable when shooting, or trying to shoot.
