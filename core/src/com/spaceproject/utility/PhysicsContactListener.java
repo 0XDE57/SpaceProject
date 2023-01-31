@@ -216,17 +216,11 @@ public class PhysicsContactListener implements ContactListener {
             //active item movement
             ItemDropComponent itemDropA = Mappers.itemDrop.get(entityA);
             if (itemDropA != null) {
-                CargoComponent cargoB = Mappers.cargo.get(entityB);
-                if (cargoB != null) {
-                    updateItemAttraction(contact.getFixtureB(), cargoB, entityA, entityB);
-                }
+                updateItemAttraction(entityA, entityB);
             }
             ItemDropComponent itemDropB = Mappers.itemDrop.get(entityB);
             if (itemDropB != null) {
-                CargoComponent cargoA = Mappers.cargo.get(entityA);
-                if (cargoA != null) {
-                    updateItemAttraction(contact.getFixtureA(), cargoA, entityB, entityA);
-                }
+                updateItemAttraction(entityB, entityA);
             }
         }
     }
@@ -276,7 +270,10 @@ public class PhysicsContactListener implements ContactListener {
         }
     }
     
-    private void updateItemAttraction(Fixture fixtureB, CargoComponent cargoB, Entity entityItem, Entity entityCollector) {
+    private void updateItemAttraction(Entity entityItem, Entity entityCollector) {
+        CargoComponent cargoCollector = Mappers.cargo.get(entityCollector);
+        if (cargoCollector == null) return;
+        
         PhysicsComponent physicsA = Mappers.physics.get(entityItem);
         //float angleRad = physicsA.body.getPosition().angleRad(Mappers.physics.get(entityCollector).body.getPosition());
         float angleRad = MyMath.angleTo(Mappers.physics.get(entityCollector).body.getPosition(), physicsA.body.getPosition());

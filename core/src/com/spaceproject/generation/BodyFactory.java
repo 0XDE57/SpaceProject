@@ -122,6 +122,7 @@ public class BodyFactory {
         bodyDef.position.set(x, y);
         body = GameScreen.box2dWorld.createBody(bodyDef);
     
+        //ship body
         PolygonShape box = new PolygonShape();
         box.setAsBox(width*0.5f, height*0.5f);
         // Create a fixture definition to apply our shape to
@@ -132,9 +133,11 @@ public class BodyFactory {
         boxFixture.restitution = 0.6f; // Make it bounce a little bit
         body.createFixture(boxFixture);
         box.dispose();
-    
+        
+        //outer sensor
+        float collisionRadius = 2 * width * width;
         CircleShape innerCollectSensor = new CircleShape();
-        innerCollectSensor.setRadius(2 * width * width);
+        innerCollectSensor.setRadius(collisionRadius);
         FixtureDef innerCircleFixture = new FixtureDef();
         innerCircleFixture.shape = innerCollectSensor;
         innerCircleFixture.isSensor = true;
@@ -142,9 +145,9 @@ public class BodyFactory {
         //innerCircleFixture.filter.categoryBits = 1; //inner ring: pickup
         body.createFixture(innerCircleFixture);
         innerCollectSensor.dispose();
-    
+        //inner sensor
         CircleShape outerCollectSensor = new CircleShape();
-        outerCollectSensor.setRadius(4 * 2 * width * width);
+        outerCollectSensor.setRadius(4 * collisionRadius);
         FixtureDef outerCircleFixture = new FixtureDef();
         outerCircleFixture.shape = outerCollectSensor;
         outerCircleFixture.isSensor = true;
