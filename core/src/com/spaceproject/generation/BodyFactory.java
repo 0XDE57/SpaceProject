@@ -133,14 +133,24 @@ public class BodyFactory {
         body.createFixture(boxFixture);
         box.dispose();
     
-        CircleShape circle = new CircleShape();
-        circle.setRadius(2 * width * width);
-        FixtureDef circleFixture = new FixtureDef();
-        circleFixture.shape = circle;
-        circleFixture.isSensor = true;
-        //circleFixture.filter = ?
-        body.createFixture(circleFixture);
-        circle.dispose();
+        CircleShape innerCollectSensor = new CircleShape();
+        innerCollectSensor.setRadius(2 * width * width);
+        FixtureDef innerCircleFixture = new FixtureDef();
+        innerCircleFixture.shape = innerCollectSensor;
+        innerCircleFixture.isSensor = true;
+        //0x0001 is default value
+        //innerCircleFixture.filter.categoryBits = 1; //inner ring: pickup
+        body.createFixture(innerCircleFixture);
+        innerCollectSensor.dispose();
+    
+        CircleShape outerCollectSensor = new CircleShape();
+        outerCollectSensor.setRadius(4 * 2 * width * width);
+        FixtureDef outerCircleFixture = new FixtureDef();
+        outerCircleFixture.shape = outerCollectSensor;
+        outerCircleFixture.isSensor = true;
+        outerCircleFixture.filter.categoryBits = 2; //outer ring: apply force, no pickup
+        body.createFixture(outerCircleFixture);
+        innerCollectSensor.dispose();
         
         body.setUserData(entity);
     

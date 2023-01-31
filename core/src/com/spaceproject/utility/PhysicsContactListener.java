@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.WorldManifold;
@@ -24,6 +25,7 @@ import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.ItemDropComponent;
 import com.spaceproject.components.ParticleComponent;
+import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.RingEffectComponent;
 import com.spaceproject.components.ShieldComponent;
@@ -32,6 +34,7 @@ import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.systems.CameraSystem;
 import com.spaceproject.systems.ControllerInputSystem;
@@ -53,6 +56,7 @@ public class PhysicsContactListener implements ContactListener {
         this.engine = engine;
     }
     
+    //region contact
     @Override
     public void beginContact(Contact contact) {
         Object dataA = contact.getFixtureA().getBody().getUserData();
@@ -62,48 +66,227 @@ public class PhysicsContactListener implements ContactListener {
         onCollision(contact, (Entity) dataA, (Entity) dataB);
     }
     
+    private void onCollision(Contact contact, Entity a, Entity b) {
+        //check damage collision
+        HealthComponent healthA = Mappers.health.get(a);
+        if (healthA != null) {
+            DamageComponent damageB = Mappers.damage.get(b);
+            if (damageB != null) {
+                handleDamage(contact, b, a, damageB, healthA);
+            }
+        }
+        HealthComponent healthB = Mappers.health.get(b);
+        if (healthB != null) {
+            DamageComponent damageA = Mappers.damage.get(a);
+            if (damageA != null) {
+                handleDamage(contact, a, b, damageA, healthB);
+            }
+        }
+        //check item collision
+        ItemDropComponent itemDropA = Mappers.itemDrop.get(a);
+        if (itemDropA != null) {
+            CargoComponent cargoB = Mappers.cargo.get(b);
+            if (cargoB != null) {
+                collectItemDrop(contact.getFixtureB(), cargoB, a);
+            }
+        }
+        ItemDropComponent itemDropB = Mappers.itemDrop.get(b);
+        if (itemDropB != null) {
+            CargoComponent cargoA = Mappers.cargo.get(a);
+            if (cargoA != null) {
+                collectItemDrop(contact.getFixtureA(), cargoA, b);
+            }
+        }
+    }
+    
+    private void handleDamage(Contact contact, Entity damageEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent healthComponent) {
+        if (damageComponent.source == attackedEntity) {
+            return; //ignore self-inflicted damage
+        }
+        /*
+        Gdx.app.debug(this.getClass().getSimpleName(),
+                "[" + DebugUtil.objString(attackedEntity) + "] attacked by: [" + DebugUtil.objString(damageComponent.source) + "]");
+        */
+        
+        //check if attacked entity was AI
+        AIComponent ai = Mappers.AI.get(attackedEntity);
+        if (ai != null) {
+            //focus camera on target
+            //attackedEntity.add(new CamTargetComponent());
+            
+            //focus ai on player
+            ai.attackTarget = damageComponent.source;
+            ai.state = AIComponent.State.attack;
+        } else if (Mappers.controlFocus.get(damageEntity) != null) {
+            //someone attacked player, focus on enemy
+            damageEntity.add(new CamTargetComponent());
+        }
+        
+        //check for shield
+        ShieldComponent shieldComp = Mappers.shield.get(attackedEntity);
+        if ((shieldComp != null) && (shieldComp.state == ShieldComponent.State.on)) {
+            //todo: "break effect", sound effect, particle effect
+            //shieldComp.state == ShieldComponent.State.break;??
+            damageEntity.add(new RemoveComponent());
+            return;
+        }
+        
+        //add roll to hit body
+        Sprite3DComponent sprite3D = Mappers.sprite3D.get(attackedEntity);
+        if (sprite3D != null) {
+            float roll = 50 * MathUtils.degRad;
+            sprite3D.renderable.angle += MathUtils.randomBoolean() ? roll : -roll;
+        }
+        
+        //do damage
+        healthComponent.health -= damageComponent.damage;
+        healthComponent.lastHitTime = GameScreen.getGameTimeCurrent();
+        healthComponent.lastHitSource = damageEntity;//damageComponent.source?
+        
+        //remove entity (kill)
+        if (healthComponent.health <= 0) {
+            //if entity was part of a cluster, remove all entities attached to cluster
+            Array<Entity> cluster = ECSUtil.getAttachedEntities(engine, attackedEntity);
+            for (Entity e : cluster) {
+                e.add(new RemoveComponent());
+            }
+
+            /*
+            //if entity was charging a projectile, make sure the projectile entity is also removed
+            ChargeCannonComponent chargeCannon = Mappers.chargeCannon.get(attackedEntity);
+            if (chargeCannon != null && chargeCannon.projectileEntity != null) {
+                //destroy or release
+                chargeCannon.projectileEntity.add(new RemoveComponent());
+            }*/
+            
+            //if entity was asteroid, shatter
+            AsteroidComponent asteroid = Mappers.asteroid.get(attackedEntity);
+            if (asteroid != null) {
+                asteroid.doShatter = true;
+                engine.getSystem(SoundSystem.class).asteroidShatter();
+            }
+            
+            /*
+            Gdx.app.log(this.getClass().getSimpleName(),
+                    "[" + DebugUtil.objString(attackedEntity) + "] killed by: [" + DebugUtil.objString(damageComponent.source) + "]");
+             */
+        }
+        
+        //add projectile ghost (fx)
+        explodeProjectile(contact, damageEntity, attackedEntity, healthComponent,true);
+        
+        //remove projectile
+        damageEntity.add(new RemoveComponent());
+    }
+    
+    private void collectItemDrop(Fixture collectorFixture, CargoComponent cargo, Entity item) {
+        if (collectorFixture.getFilterData().categoryBits != 1)
+            return;
+        
+        //collect
+        cargo.count++;
+        item.add(new RemoveComponent());
+    }
+    
     @Override
     public void endContact(Contact contact) {}
     
-    @Override
-    public void preSolve(Contact contact, Manifold oldManifold) {}
-    
-    @Override
-    public void postSolve(Contact contact, ContactImpulse impulse) {
-        Object dataA = contact.getFixtureA().getBody().getUserData();
-        Object dataB = contact.getFixtureB().getBody().getUserData();
-        if (dataA == null || dataB == null) return;
-        
-        Entity entityA = (Entity) dataA;
-        Entity entityB = (Entity) dataB;
-
-        //get largest impulse from impulse resolution
-        float maxImpulse = 0;
-        for (float normal : impulse.getNormalImpulses()) {
-            maxImpulse = Math.max(maxImpulse, normal);
-        }
-        peakImpulse = Math.max(maxImpulse, peakImpulse);
-
-        //check for asteroid
-        AsteroidComponent asteroidA = Mappers.asteroid.get(entityA);
-        if (asteroidA != null) {
-            asteroidImpact(entityA, asteroidA, maxImpulse);
-        }
-        AsteroidComponent asteroidB = Mappers.asteroid.get(entityB);
-        if (asteroidB != null) {
-            asteroidImpact(entityB, asteroidB, maxImpulse);
-        }
-
-        //check for vehicle
-        VehicleComponent vehicleA = Mappers.vehicle.get(entityA);
-        if (vehicleA != null) {
-            doVehicleDamage(entityA, maxImpulse);
-        }
-        VehicleComponent vehicleB = Mappers.vehicle.get(entityB);
-        if (vehicleB != null) {
-            doVehicleDamage(entityB, maxImpulse);
+    /** NOTE: Must be updated per physics step to retain accurate world!
+     * kind of a pseudo entity system to keep physics stepping and collision management separate. */
+    public void updateActiveContacts(World world, float deltaTime) {
+        for (Contact contact : world.getContactList()) {
+            if (!contact.isTouching()) continue;
+            
+            Object dataA = contact.getFixtureA().getBody().getUserData();
+            Object dataB = contact.getFixtureB().getBody().getUserData();
+            if (dataA == null || dataB == null) continue;
+            
+            Entity entityA = (Entity) dataA;
+            Entity entityB = (Entity) dataB;
+            
+            //active heat damage
+            StarComponent starA = Mappers.star.get(entityA);
+            if (starA != null) {
+                doActiveHeatDamage(entityA, entityB, deltaTime);
+            }
+            StarComponent starB = Mappers.star.get(entityB);
+            if (starB != null) {
+                doActiveHeatDamage(entityB, entityA, deltaTime);
+            }
+            //active item movement
+            ItemDropComponent itemDropA = Mappers.itemDrop.get(entityA);
+            if (itemDropA != null) {
+                CargoComponent cargoB = Mappers.cargo.get(entityB);
+                if (cargoB != null) {
+                    updateItemAttraction(contact.getFixtureB(), cargoB, entityA, entityB);
+                }
+            }
+            ItemDropComponent itemDropB = Mappers.itemDrop.get(entityB);
+            if (itemDropB != null) {
+                CargoComponent cargoA = Mappers.cargo.get(entityA);
+                if (cargoA != null) {
+                    updateItemAttraction(contact.getFixtureA(), cargoA, entityB, entityA);
+                }
+            }
         }
     }
+    
+    private void doActiveHeatDamage(Entity starEntity, Entity burningEntity, float deltaTime) {
+        HealthComponent healthComponent = Mappers.health.get(burningEntity);
+        if (healthComponent == null) {
+            //check if projectile
+            //DamageComponent, remove bullet? or could melt bullet?
+            //could set bullet on fire so its more powerful on the other side
+            return;
+        }
+        
+        //shield protects from damage
+        ShieldComponent shield = Mappers.shield.get(burningEntity);
+        if ((shield != null) && (shield.state == ShieldComponent.State.on)) {
+            //todo: maybe shield can overheat and start turning red
+            // when shield is fully overheated shield will break
+            // shield can have heat resistance multiplier that you can upgrade
+            return;
+        }
+        
+        //do heat damage dps
+        float damage = heatDamageRate * deltaTime;
+        //todo: hull heat resistance that can be upgraded: move health to hull?
+        healthComponent.health -= damage;
+        healthComponent.lastHitTime = GameScreen.getGameTimeCurrent();
+        healthComponent.lastHitSource = starEntity;
+        
+        //remove entity (kill)
+        if (healthComponent.health <= 0) {
+            //if entity was part of a cluster, remove all entities attached to cluster
+            Array<Entity> cluster = ECSUtil.getAttachedEntities(engine, burningEntity);
+            for (Entity e : cluster) {
+                e.add(new RemoveComponent());
+            }
+            
+            //if entity was asteroid, shatter
+            AsteroidComponent asteroid = Mappers.asteroid.get(burningEntity);
+            if (asteroid != null) {
+                asteroid.doShatter = true;
+                engine.getSystem(SoundSystem.class).asteroidShatter();//todo -> asteroidBurn()
+            }
+            
+            Gdx.app.log(getClass().getSimpleName(),
+                    "[" + DebugUtil.objString(burningEntity) + "] killed by: star");
+        }
+    }
+    
+    private void updateItemAttraction(Fixture fixtureB, CargoComponent cargoB, Entity entityItem, Entity entityCollector) {
+        PhysicsComponent physicsA = Mappers.physics.get(entityItem);
+        //float angleRad = physicsA.body.getPosition().angleRad(Mappers.physics.get(entityCollector).body.getPosition());
+        float angleRad = MyMath.angleTo(Mappers.physics.get(entityCollector).body.getPosition(), physicsA.body.getPosition());
+        physicsA.body.applyForceToCenter(MyMath.vector(angleRad, 20), true);
+    }
+    //endregion
+    
+    //region solve
+    @Override
+    public void preSolve(Contact contact, Manifold oldManifold) {}
     
     private void asteroidImpact(Entity entity, AsteroidComponent asteroid, float impulse) {
         if (impulse > asteroidBreakOrbitThreshold) {
@@ -190,130 +373,6 @@ public class PhysicsContactListener implements ContactListener {
         sound.hullImpactHeavy(1);
     }
     
-    private void onCollision(Contact contact, Entity a, Entity b) {
-        //todo: collision filtering: http://www.iforce2d.net/b2dtut/collision-filtering
-        HealthComponent healthA = Mappers.health.get(a);
-        if (healthA != null) {
-            DamageComponent damageB = Mappers.damage.get(b);
-            if (damageB != null) {
-                onDamage(contact, b, a, damageB, healthA);
-            }
-        }
-
-        HealthComponent healthB = Mappers.health.get(b);
-        if (healthB != null) {
-            DamageComponent damageA = Mappers.damage.get(a);
-            if (damageA != null) {
-                onDamage(contact, a, b, damageA, healthB);
-            }
-        }
-    
-        
-        ItemDropComponent itemDropA = Mappers.itemDrop.get(a);
-        if (itemDropA != null) {
-            CargoComponent cargoB = Mappers.cargo.get(b);
-            if (cargoB != null) {
-                cargoB.count++;
-                //if (contact.getFixtureA().getFilterData())
-                //PhysicsComponent physicsA = Mappers.physics.get(a);
-                //float angleRad = physicsA.body.getPosition().angleRad(Mappers.physics.get(b).body.getPosition());
-                //physicsA.body.applyForceToCenter(MyMath.vector(angleRad, 10), true);
-                a.add(new RemoveComponent());
-            }
-        }
-        ItemDropComponent itemDropB = Mappers.itemDrop.get(b);
-        if (itemDropB != null) {
-            CargoComponent cargoA = Mappers.cargo.get(a);
-            if (cargoA != null) {
-                cargoA.count++;
-                //PhysicsComponent physicsB = Mappers.physics.get(b);
-                //float angleRad = physicsB.body.getPosition().angleRad(Mappers.physics.get(a).body.getPosition());
-                //physicsB.body.applyForceToCenter(MyMath.vector(angleRad, 10), true);
-                b.add(new RemoveComponent());
-            }
-        }
-    }
-
-    private void onDamage(Contact contact, Entity damageEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent healthComponent) {
-        if (damageComponent.source == attackedEntity) {
-            return; //ignore self-inflicted damage
-        }
-        /*
-        Gdx.app.debug(this.getClass().getSimpleName(),
-                "[" + DebugUtil.objString(attackedEntity) + "] attacked by: [" + DebugUtil.objString(damageComponent.source) + "]");
-        */
-        
-        //check if attacked entity was AI
-        AIComponent ai = Mappers.AI.get(attackedEntity);
-        if (ai != null) {
-            //focus camera on target
-            //attackedEntity.add(new CamTargetComponent());
-            
-            //focus ai on player
-            ai.attackTarget = damageComponent.source;
-            ai.state = AIComponent.State.attack;
-        } else if (Mappers.controlFocus.get(damageEntity) != null) {
-            //someone attacked player, focus on enemy
-            damageEntity.add(new CamTargetComponent());
-        }
-        
-        //check for shield
-        ShieldComponent shieldComp = Mappers.shield.get(attackedEntity);
-        if ((shieldComp != null) && (shieldComp.state == ShieldComponent.State.on)) {
-            //todo: "break effect", sound effect, particle effect
-            //shieldComp.state == ShieldComponent.State.break;??
-            damageEntity.add(new RemoveComponent());
-            return;
-        }
-    
-        //add roll to hit body
-        Sprite3DComponent sprite3D = Mappers.sprite3D.get(attackedEntity);
-        if (sprite3D != null) {
-            float roll = 50 * MathUtils.degRad;
-            sprite3D.renderable.angle += MathUtils.randomBoolean() ? roll : -roll;
-        }
-
-        //do damage
-        healthComponent.health -= damageComponent.damage;
-        healthComponent.lastHitTime = GameScreen.getGameTimeCurrent();
-        healthComponent.lastHitSource = damageEntity;//damageComponent.source?
-        
-        //remove entity (kill)
-        if (healthComponent.health <= 0) {
-            //if entity was part of a cluster, remove all entities attached to cluster
-            Array<Entity> cluster = ECSUtil.getAttachedEntities(engine, attackedEntity);
-            for (Entity e : cluster) {
-                e.add(new RemoveComponent());
-            }
-
-            /*
-            //if entity was charging a projectile, make sure the projectile entity is also removed
-            ChargeCannonComponent chargeCannon = Mappers.chargeCannon.get(attackedEntity);
-            if (chargeCannon != null && chargeCannon.projectileEntity != null) {
-                //destroy or release
-                chargeCannon.projectileEntity.add(new RemoveComponent());
-            }*/
-    
-            //if entity was asteroid, shatter
-            AsteroidComponent asteroid = Mappers.asteroid.get(attackedEntity);
-            if (asteroid != null) {
-                asteroid.doShatter = true;
-                engine.getSystem(SoundSystem.class).asteroidShatter();
-            }
-            
-            /*
-            Gdx.app.log(this.getClass().getSimpleName(),
-                    "[" + DebugUtil.objString(attackedEntity) + "] killed by: [" + DebugUtil.objString(damageComponent.source) + "]");
-             */
-        }
-        
-        //add projectile ghost (fx)
-        explodeProjectile(contact, damageEntity, attackedEntity, healthComponent,true);
-    
-        //remove projectile
-        damageEntity.add(new RemoveComponent());
-    }
-    
     private void explodeProjectile(Contact contact, Entity entityHit, Entity attackedEntity, HealthComponent health, boolean showGhost) {
         WorldManifold manifold = contact.getWorldManifold();
         //for (Vector2 p : manifold.getPoints()) {
@@ -356,73 +415,43 @@ public class PhysicsContactListener implements ContactListener {
         
         engine.addEntity(contactP);
     }
-
-    public void updateActiveContacts(World world, float deltaTime) {
-        // kind of a pseudo entity system to keep physics stepping and damage calculation separate.
-        for (Contact contact : world.getContactList()) {
-            if (!contact.isTouching()) continue;
-            
-            Object dataA = contact.getFixtureA().getBody().getUserData();
-            Object dataB = contact.getFixtureB().getBody().getUserData();
-            if (dataA == null || dataB == null) continue;
-
-            Entity entityA = (Entity) dataA;
-            Entity entityB = (Entity) dataB;
-
-            StarComponent starA = Mappers.star.get(entityA);
-            if (starA != null) {
-                doHeatDamage(entityA, entityB, deltaTime);
-            }
-            StarComponent starB = Mappers.star.get(entityB);
-            if (starB != null) {
-                doHeatDamage(entityB, entityA, deltaTime);
-            }
-        }
-    }
-
-    private void doHeatDamage(Entity starEntity, Entity burningEntity, float deltaTime) {
-        HealthComponent healthComponent = Mappers.health.get(burningEntity);
-        if (healthComponent == null) {
-            //check if projectile
-            //DamageComponent, remove bullet? or could melt bullet?
-            //could set bullet on fire so its more powerful on the other side
-            return;
-        }
     
-        //shield protects from damage
-        ShieldComponent shield = Mappers.shield.get(burningEntity);
-        if ((shield != null) && (shield.state == ShieldComponent.State.on)) {
-            //todo: maybe shield can overheat and start turning red
-            // when shield is fully overheated shield will break
-            // shield can have heat resistance multiplier that you can upgrade
-            return;
+    @Override
+    public void postSolve(Contact contact, ContactImpulse impulse) {
+        Object dataA = contact.getFixtureA().getBody().getUserData();
+        Object dataB = contact.getFixtureB().getBody().getUserData();
+        if (dataA == null || dataB == null) return;
+        
+        Entity entityA = (Entity) dataA;
+        Entity entityB = (Entity) dataB;
+        
+        //get largest impulse from impulse resolution
+        float maxImpulse = 0;
+        for (float normal : impulse.getNormalImpulses()) {
+            maxImpulse = Math.max(maxImpulse, normal);
         }
-
-        //do heat damage dps
-        float damage = heatDamageRate * deltaTime;
-        //todo: hull heat resistance that can be upgraded: move health to hull?
-        healthComponent.health -= damage;
-        healthComponent.lastHitTime = GameScreen.getGameTimeCurrent();
-        healthComponent.lastHitSource = starEntity;
-
-        //remove entity (kill)
-        if (healthComponent.health <= 0) {
-            //if entity was part of a cluster, remove all entities attached to cluster
-            Array<Entity> cluster = ECSUtil.getAttachedEntities(engine, burningEntity);
-            for (Entity e : cluster) {
-                e.add(new RemoveComponent());
-            }
-
-            //if entity was asteroid, shatter
-            AsteroidComponent asteroid = Mappers.asteroid.get(burningEntity);
-            if (asteroid != null) {
-                asteroid.doShatter = true;
-                engine.getSystem(SoundSystem.class).asteroidShatter();//todo -> asteroidBurn()
-            }
-
-            Gdx.app.log(getClass().getSimpleName(),
-                    "[" + DebugUtil.objString(burningEntity) + "] killed by: star");
+        peakImpulse = Math.max(maxImpulse, peakImpulse);
+        
+        //check for asteroid
+        AsteroidComponent asteroidA = Mappers.asteroid.get(entityA);
+        if (asteroidA != null) {
+            asteroidImpact(entityA, asteroidA, maxImpulse);
+        }
+        AsteroidComponent asteroidB = Mappers.asteroid.get(entityB);
+        if (asteroidB != null) {
+            asteroidImpact(entityB, asteroidB, maxImpulse);
+        }
+        
+        //check for vehicle
+        VehicleComponent vehicleA = Mappers.vehicle.get(entityA);
+        if (vehicleA != null) {
+            doVehicleDamage(entityA, maxImpulse);
+        }
+        VehicleComponent vehicleB = Mappers.vehicle.get(entityB);
+        if (vehicleB != null) {
+            doVehicleDamage(entityB, maxImpulse);
         }
     }
-
+    //endregion
+    
 }
