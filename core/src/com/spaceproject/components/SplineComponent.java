@@ -10,7 +10,7 @@ public class SplineComponent implements Component {
     //xy = position, z = velocity
     public Vector3[] path;
     
-    // states: damage, off, on, boost, hyper -> -1, 0, 1, 2, 3
+    // states: shield protect,shield on, damage, off, on, boost, hyper -> -3, -2, -1, 0, 1, 2, 3
     public byte[] state;
     
     //the current head of the path
