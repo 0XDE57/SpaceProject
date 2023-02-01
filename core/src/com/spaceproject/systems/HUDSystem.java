@@ -28,6 +28,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CannonComponent;
+import com.spaceproject.components.CargoComponent;
 import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
@@ -65,7 +66,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private Matrix4 projectionMatrix;
     private ShapeRenderer shape;
     private SpriteBatch batch;
-    private BitmapFont font, subFont;
+    private BitmapFont font, subFont, inventoryFont;
     private GlyphLayout layout = new GlyphLayout();
     
     //entity storage
@@ -101,6 +102,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         parameter2.borderColor = Color.BLACK;
         parameter2.borderWidth = 3;
         subFont = FontFactory.createFont(FontFactory.fontPressStart, parameter2);
+    
+        FreeTypeFontGenerator.FreeTypeFontParameter inventoryParam = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        inventoryParam.size = 12;
+        inventoryParam.borderColor = Color.BLACK;
+        inventoryParam.borderWidth = 1;
+        inventoryFont = FontFactory.createFont(FontFactory.fontPressStart, inventoryParam);
         
         GameScreen.getStage().addListener(new InputListener() {
             @Override
@@ -220,9 +227,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape.end();
         
         batch.begin();
+    
+        drawInventory(player, 100, 100);
         
         //draw special state: hyper or landing / launching
         drawSpecialStateMessage(player);
+        
         //todo: if player is over planet
         //drawHint("press [T] to land");
         //drawHint("stars are hot");
@@ -349,14 +359,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         // 2. [ ] health when take damage (timer)
         // 3. [ ] shield when broken? (broken state not implemented yet)
         
-        CameraSystem cam = getEngine().getSystem(CameraSystem.class);
-        if (cam.getZoomLevel() == cam.getMaxZoomLevel()) {
-            return;
-        }
-    
         drawPlayerVelocity(entity, barX, hyperBarY, barWidth, barHeight);
         drawHyperDriveBar(entity, barX, hyperBarY, barWidth, barHeight);
     
+        CameraSystem cam = getEngine().getSystem(CameraSystem.class);
+        if (cam.getZoomLevel() == cam.getMaxZoomLevel()) return;
+        
         if (GameScreen.isHyper()) return;
         
         drawPlayerHealth(entity, barX, healthBarY, barWidth, barHeight);
@@ -419,9 +427,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
         float ratioShield = shield.radius / shield.maxRadius;
         if (shield.state == ShieldComponent.State.on) {
-            float hitTime = 500;
-            if ((GameScreen.getGameTimeCurrent() - shield.lastHit) < hitTime) {
-                float green = ((GameScreen.getGameTimeCurrent() - shield.lastHit)) / hitTime;
+            long hitTime = 500;
+            long timeSinceHit = GameScreen.getGameTimeCurrent() - shield.lastHit;
+            if (timeSinceHit < hitTime) {
+                float green = timeSinceHit / hitTime;
                 shape.setColor(0, 1-green, green, green);
             } else {
                 shape.setColor(0, 0, 1, 1);
@@ -538,6 +547,24 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 shape.rect(x + centerD, y, cooldown, height);
                 break;
         }
+    }
+    
+    private void drawInventory(Entity entity, float x, float y) {
+        CargoComponent cargo = Mappers.cargo.get(entity);
+        if (cargo == null) return;
+        
+        //if (cargo.lastChangeTime - GameScreen.getGameTimeCurrent() < 5000) return;
+        int barWidth = uiCFG.playerHPBarWidth;
+        int barHeight = uiCFG.playerHPBarHeight;
+        int barX = Gdx.graphics.getWidth() / 2 - barWidth / 2;
+        int healthBarY = uiCFG.playerHPBarY;
+        
+        long colorTime = 1000;
+        long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;
+        float ratio = (float) timeSinceCollect / (float) colorTime;
+        layout.setText(inventoryFont, cargo.count + "");
+        inventoryFont.setColor(ratio, 1, ratio, 1);
+        inventoryFont.draw(batch, layout, barX, healthBarY - barHeight - layout.height);
     }
     //endregion
     

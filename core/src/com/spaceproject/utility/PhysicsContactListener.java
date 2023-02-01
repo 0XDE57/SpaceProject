@@ -185,6 +185,7 @@ public class PhysicsContactListener implements ContactListener {
         
         //collect
         cargo.count++;
+        cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
         item.add(new RemoveComponent());
     }
     
@@ -274,10 +275,10 @@ public class PhysicsContactListener implements ContactListener {
         CargoComponent cargoCollector = Mappers.cargo.get(entityCollector);
         if (cargoCollector == null) return;
         
-        PhysicsComponent physicsA = Mappers.physics.get(entityItem);
-        //float angleRad = physicsA.body.getPosition().angleRad(Mappers.physics.get(entityCollector).body.getPosition());
-        float angleRad = MyMath.angleTo(Mappers.physics.get(entityCollector).body.getPosition(), physicsA.body.getPosition());
-        physicsA.body.applyForceToCenter(MyMath.vector(angleRad, 20), true);
+        PhysicsComponent physicsItem = Mappers.physics.get(entityItem);
+        //float angleRad = physicsItem.body.getPosition().angleRad(Mappers.physics.get(entityCollector).body.getPosition());
+        float angleRad = MyMath.angleTo(Mappers.physics.get(entityCollector).body.getPosition(), physicsItem.body.getPosition());
+        physicsItem.body.applyForceToCenter(MyMath.vector(angleRad, 20), true);
     }
     //endregion
     

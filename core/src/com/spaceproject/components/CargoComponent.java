@@ -12,6 +12,8 @@ public class CargoComponent implements Component {
     
     public int count; //single item just to place holder ideas
     
+    public long lastCollectTime;
+    
     //public float maxCapacity;//max what? volume? total mass?
     
 }
