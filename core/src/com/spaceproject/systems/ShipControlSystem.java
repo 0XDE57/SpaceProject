@@ -65,7 +65,7 @@ public class ShipControlSystem extends IteratingSystem {
         PhysicsComponent physicsComp = Mappers.physics.get(entity);
         
         if (GameScreen.isDebugMode) {
-            applyDebugControls(entity, transformComp, physicsComp);
+            //applyDebugControls(entity, transformComp, physicsComp);
         }
         
         //rotate ship
@@ -105,12 +105,14 @@ public class ShipControlSystem extends IteratingSystem {
             Entity planet = getPlanetNearPosition(transformComp.pos);
             control.canTransition = planet != null;
             if (control.transition && control.canTransition) {
-                beginLandOnPlanet(entity, planet);
+                //beginLandOnPlanet(entity, planet);
+                Gdx.app.log(getClass().getSimpleName(), "Landing on planets has been disabled for this demo. Please come back later!");
             }
         } else {
             control.canTransition = true;
             if (control.transition) {
-                takeOffPlanet(entity);
+                Gdx.app.log(getClass().getSimpleName(), "Landing on planets has been disabled for this demo. Please come back later!");
+                //takeOffPlanet(entity);
             }
         }
     }
