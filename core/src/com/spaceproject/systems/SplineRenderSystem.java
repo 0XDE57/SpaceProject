@@ -79,13 +79,12 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         //todo: z-index to render player trail above bullet trail
         //todo: fade nicely
         if (spline.style == null) {
-            spline.style = SplineComponent.Style.velocity;
+            spline.style = SplineComponent.Style.norender;
         }
         switch (spline.style) {
             case velocity: renderVelocityPath(spline); break;
             case state: renderStatePath(spline); break;
-            default:
-                renderDefaultPath(spline);
+            case solid: renderDefaultPath(spline); break;
         }
     }
     
@@ -115,57 +114,60 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         //off, on, boost, hyper -> 0, 1, 2, 3
         float velocity = 0;
         byte state = 0;
+        if (spline.style == SplineComponent.Style.state) {
+            if (physics != null) {
+                //set velocity
+                velocity = physics.body.getLinearVelocity().len2();
         
-        if (physics != null) {
-            //set velocity
-            velocity = physics.body.getLinearVelocity().len2();
-            
-            if (spline.style == SplineComponent.Style.state) {
-                //set state
-                ControllableComponent control = Mappers.controllable.get(entity);
-                if (control != null) {
-                    if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight || control.boost) {
-                        state = 1;
-                        if (control.boost) {
-                            state = 2;
+                if (spline.style == SplineComponent.Style.state) {
+                    //set state
+                    ControllableComponent control = Mappers.controllable.get(entity);
+                    if (control != null) {
+                        if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight || control.boost) {
+                            state = 1;
+                            if (control.boost) {
+                                state = 2;
+                            }
                         }
                     }
-                }
+            
+                    ShieldComponent shield = Mappers.shield.get(entity);
+                    if (shield != null) {
+                        if (shield.state == ShieldComponent.State.on) {
+                            state = -2;
+                        } else {
+                            //charge discharge
+                            //in out
+                            //state =- 4;?
+                        }
                 
-                ShieldComponent shield = Mappers.shield.get(entity);
-                if (shield != null) {
-                    if (shield.state == ShieldComponent.State.on) {
-                        state = -2;
-                    } else {
-                        //charge discharge
-                        //in out
-                        //state =- 4;?
+                        if ((GameScreen.getGameTimeCurrent() - shield.lastHit) < 500) {
+                            state = -3;
+                        }
+                
                     }
-                    
-                    if ((GameScreen.getGameTimeCurrent() - shield.lastHit) < 500) {
-                        state = -3;
+            
+                    if (!physics.body.isActive()) {
+                        state = 3;
+                
+                        HyperDriveComponent hyper = Mappers.hyper.get(entity);
+                        velocity = hyper.speed * hyper.speed;
                     }
-                    
+            
+                    //todo: state -1:
+                    // health compontent : lastHitTime -simple timer or timestamp relative to current time
                 }
-                
-                if (!physics.body.isActive()) {
-                    state = 3;
-    
-                    HyperDriveComponent hyper = Mappers.hyper.get(entity);
-                    velocity = hyper.speed * hyper.speed;
-                }
-                
-                //todo: state -1:
-                // health compontent : lastHitTime -simple timer or timestamp relative to current time
             }
         }
         
         //show hurt
-        HealthComponent health = Mappers.health.get(entity);
-        if (health != null) {
-            long hurtTime = 1000;
-            if ((GameScreen.getGameTimeCurrent() - health.lastHitTime) < hurtTime) {
-                state = -1;
+        if (spline.style == SplineComponent.Style.state) {
+            HealthComponent health = Mappers.health.get(entity);
+            if (health != null) {
+                long hurtTime = 1000;
+                if ((GameScreen.getGameTimeCurrent() - health.lastHitTime) < hurtTime) {
+                    state = -1;
+                }
             }
         }
         
