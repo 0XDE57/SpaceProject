@@ -31,8 +31,7 @@ MILESTONES:
  [x] very basic physics sim with separate position, velocity, acceleration in a 0G environment.
  [x] basic polygon asteroids with simple AABB collision detection
  [x] lose the original source because I don't understand git :p
- [x] realize engines are hard
- [x] cry and move to libGDX
+ [x] realize engines are hard, cry and move to libGDX
  [x] implement simple custom ECS
  [x] re-implement simple spaceship flight and basic asteroid polygons in new ECS style
  [x] collisions support for rotated bounding box with convex polygons
@@ -316,10 +315,10 @@ Legend:
 [ ] space station
     [ ] orbit
     [ ] dock
+    [ ] repair
     [ ] garage / store UI
     [ ] sell cargo for moneys
 
-[ ] convert fire rate to rpm
 
 [x] controller input stuck on desktop until joystick moved:
     noticeable when shooting, or trying to shoot.
@@ -379,9 +378,6 @@ Legend:
     [ ] explodey particle fx!
     [ ] maybe shatter player
 
-[ ] space station
-    [ ] orbit's around planet's, ship can dock at
-    [ ] repair ship
 
 [ ] render layer: move hyper trail layer to render when hud off
 
@@ -421,6 +417,7 @@ Legend:
     flashes for a moment.
         [SpaceLoadingSystem] Removing Planetary System: (29993.0,29365.0)
         [SpaceLoadingSystem] Planetary System: [128818954138294](29993.0, 29365.0) Bodies: 2
+
 [...] BUG! start game, leave to main menu, return to game: planets do not load
     [x] clean up, dispose and unload systems properly when return to main menu
     [ ] clean up threadpool, can find ways to spam fill q. not clearing properly
@@ -453,6 +450,7 @@ Legend:
             [ ] active
     [ ] rapid cannon
         [x] fire
+        [ ] convert fire rate to rpm?
     [ ] charge cannon
         [x] fire - pitch tied to size
         [ ] charge up
@@ -465,7 +463,6 @@ Legend:
         [...] shatter
     [ ] enter / exit vehicle
     [ ] transition sound
-    [ ]
     Apparently audio on android sucks?
         https://github.com/libgdx/libgdx/wiki/Audio
         https://github.com/barsoosayque/libgdx-oboe
