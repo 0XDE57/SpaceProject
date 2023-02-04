@@ -73,6 +73,7 @@ The code is bit rough in some places, littered with todo's, half-baked features,
 
 ## Libraries
 - [libGDX](https://github.com/libgdx/libgdx)
+- [Box2D](https://box2d.org/)
 - [Ashley](https://github.com/libgdx/ashley/wiki)
 - [OpenSimplexNoise](https://gist.github.com/KdotJPG/b1270127455a94ac5d19)
 - [VisUI](https://github.com/kotcrab/vis-ui)
