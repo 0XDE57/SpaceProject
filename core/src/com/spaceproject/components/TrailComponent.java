@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
 
 
-public class SplineComponent implements Component {
+public class TrailComponent implements Component {
     
     //xy = position, z = velocity
     public Vector3[] path;

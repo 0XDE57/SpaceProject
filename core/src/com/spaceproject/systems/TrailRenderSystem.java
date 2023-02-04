@@ -17,19 +17,19 @@ import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.SplineComponent;
+import com.spaceproject.components.TrailComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
 import java.util.Comparator;
 
-public class SplineRenderSystem extends SortedIteratingSystem implements Disposable {
+public class TrailRenderSystem extends SortedIteratingSystem implements Disposable {
     
     private static class ZComparator implements Comparator<Entity> {
         @Override
         public int compare(Entity entityA, Entity entityB) {
-            return (int)Math.signum(Mappers.spline.get(entityA).zOrder - Mappers.spline.get(entityB).zOrder);
+            return (int)Math.signum(Mappers.trail.get(entityA).zOrder - Mappers.trail.get(entityB).zOrder);
         }
     }
     
@@ -40,8 +40,8 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
     private float animation;
     private float animSpeed = 2f;
     
-    public SplineRenderSystem() {
-        super(Family.all(SplineComponent.class, TransformComponent.class).get(), new ZComparator());
+    public TrailRenderSystem() {
+        super(Family.all(TrailComponent.class, TransformComponent.class).get(), new ZComparator());
         shape = new ShapeRenderer();
     }
     
@@ -73,13 +73,13 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
     
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        SplineComponent spline = Mappers.spline.get(entity);
+        TrailComponent spline = Mappers.trail.get(entity);
         
         updateTail(spline, entity);
         //todo: z-index to render player trail above bullet trail
         //todo: fade nicely
         if (spline.style == null) {
-            spline.style = SplineComponent.Style.norender;
+            spline.style = TrailComponent.Style.norender;
         }
         switch (spline.style) {
             case velocity: renderVelocityPath(spline); break;
@@ -90,7 +90,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
     
     // these are more like paths than splines, but see also:
     // https://libgdx.com/wiki/math-utils/path-interface-and-splines
-    private void updateTail(SplineComponent spline, Entity entity) {
+    private void updateTail(TrailComponent spline, Entity entity) {
         TransformComponent transform = Mappers.transform.get(entity);
         PhysicsComponent physics = Mappers.physics.get(entity);
         
@@ -114,12 +114,12 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         //off, on, boost, hyper -> 0, 1, 2, 3
         float velocity = 0;
         byte state = 0;
-        if (spline.style == SplineComponent.Style.state) {
+        if (spline.style == TrailComponent.Style.state) {
             if (physics != null) {
                 //set velocity
                 velocity = physics.body.getLinearVelocity().len2();
         
-                if (spline.style == SplineComponent.Style.state) {
+                if (spline.style == TrailComponent.Style.state) {
                     //set state
                     ControllableComponent control = Mappers.controllable.get(entity);
                     if (control != null) {
@@ -161,7 +161,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         }
         
         //show hurt
-        if (spline.style == SplineComponent.Style.state) {
+        if (spline.style == TrailComponent.Style.state) {
             HealthComponent health = Mappers.health.get(entity);
             if (health != null) {
                 long hurtTime = 1000;
@@ -172,7 +172,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         }
         
         spline.path[spline.indexHead].set(transform.pos.x, transform.pos.y, velocity);
-        if (spline.style == SplineComponent.Style.state) {
+        if (spline.style == TrailComponent.Style.state) {
             spline.state[spline.indexHead] = state;
         }
         
@@ -184,7 +184,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         }
     }
     
-    public void renderVelocityPath(SplineComponent spline) {
+    public void renderVelocityPath(TrailComponent spline) {
         //todo: bug with tail index not properly rendered
         boolean debugDrawHeadTail = false;
     
@@ -221,7 +221,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
     }
     
     
-    public void renderStatePath(SplineComponent spline) {
+    public void renderStatePath(TrailComponent spline) {
         //todo: bug with tail index not properly rendered
         boolean debugDrawHeadTail = false;
         
@@ -261,7 +261,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         }
     }
     
-    public void renderDefaultPath(SplineComponent spline) {
+    public void renderDefaultPath(TrailComponent spline) {
         //todo: bug with tail index not properly rendered
         boolean debugDrawHeadTail = false;
         
@@ -292,7 +292,7 @@ public class SplineRenderSystem extends SortedIteratingSystem implements Disposa
         }
     }
     
-    public void renderRainbowPath(SplineComponent spline) {
+    public void renderRainbowPath(TrailComponent spline) {
         //todo: rainbow render
         //xy mode
         //change of angle: same color when going straight, 360 otherwise, doesnt care speed

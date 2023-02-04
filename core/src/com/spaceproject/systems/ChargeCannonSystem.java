@@ -17,7 +17,7 @@ import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.SplineComponent;
+import com.spaceproject.components.TrailComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.RenderOrder;
@@ -167,7 +167,7 @@ public class ChargeCannonSystem extends IteratingSystem {
         chargeCannon.projectileEntity.add(newParticle);
         
         //spline trail
-        chargeCannon.projectileEntity.add(new SplineComponent());
+        chargeCannon.projectileEntity.add(new TrailComponent());
         
         //release reference to "ghost"
         chargeCannon.projectileEntity = null;

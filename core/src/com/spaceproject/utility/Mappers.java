@@ -35,7 +35,7 @@ public class Mappers {
     public static final ComponentMapper<SeedComponent> seed = ComponentMapper.getFor(SeedComponent.class);
     public static final ComponentMapper<ShaderComponent> shader = ComponentMapper.getFor(ShaderComponent.class);
     public static final ComponentMapper<ShieldComponent> shield = ComponentMapper.getFor(ShieldComponent.class);
-    public static final ComponentMapper<SplineComponent> spline = ComponentMapper.getFor(SplineComponent.class);
+    public static final ComponentMapper<TrailComponent> trail = ComponentMapper.getFor(TrailComponent.class);
     public static final ComponentMapper<Sprite3DComponent> sprite3D = ComponentMapper.getFor(Sprite3DComponent.class);
     public static final ComponentMapper<StarComponent> star = ComponentMapper.getFor(StarComponent.class);
     public static final ComponentMapper<TextureComponent> texture = ComponentMapper.getFor(TextureComponent.class);

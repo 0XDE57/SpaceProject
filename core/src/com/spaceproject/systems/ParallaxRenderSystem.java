@@ -25,7 +25,7 @@ import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.OrbitComponent;
-import com.spaceproject.components.SplineComponent;
+import com.spaceproject.components.TrailComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.FontFactory;
@@ -349,7 +349,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     private void debugDrawCameraPath(Color color) {
         if (camMarker == null) {
             //add debug camera marker
-            SplineComponent spline = new SplineComponent();
+            TrailComponent spline = new TrailComponent();
             spline.color = color;
             camMarker = new Entity().add(spline).add(new TransformComponent());
             getEngine().addEntity(camMarker);
@@ -370,8 +370,8 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     
     private void debugDrawMousePath(){
         if (mouseMarker == null) {
-            mouseMarker = new Entity().add(new SplineComponent()).add(new TransformComponent());
-            mouseMarker.getComponent(SplineComponent.class).color = Color.YELLOW;
+            mouseMarker = new Entity().add(new TrailComponent()).add(new TransformComponent());
+            mouseMarker.getComponent(TrailComponent.class).color = Color.YELLOW;
             getEngine().addEntity(mouseMarker);
         }
         mouseProj.set(Gdx.input.getX(), Gdx.input.getY(), 0);

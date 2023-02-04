@@ -15,7 +15,7 @@ import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.SplineComponent;
+import com.spaceproject.components.TrailComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.EngineConfig;
@@ -150,7 +150,7 @@ public class CannonSystem extends IteratingSystem {
         newParticle.offset = new Vector2();
         entity.add(newParticle);
         
-        entity.add(new SplineComponent());
+        entity.add(new TrailComponent());
         
         entity.add(missile);
         entity.add(expire);

@@ -37,7 +37,7 @@ import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.ShaderComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.SplineComponent;
+import com.spaceproject.components.TrailComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TextureComponent;
@@ -476,9 +476,9 @@ public class EntityFactory {
         shipEntity.add(particle);
         
         //spline
-        SplineComponent spline = new SplineComponent();
+        TrailComponent spline = new TrailComponent();
         spline.zOrder = 100;//should be on top of others
-        spline.style = SplineComponent.Style.state;
+        spline.style = TrailComponent.Style.state;
         shipEntity.add(spline);
         
         //cargo
@@ -571,11 +571,11 @@ public class EntityFactory {
                 width * engineCFG.pixelPerUnit,
                 height * engineCFG.pixelPerUnit,
                 new Color(0.4f, 0.4f, 0.4f, 1));
-        texture.scale = 0.05f;
+        texture.scale = 0.25f;
         entity.add(texture);
     
         PhysicsComponent physics = new PhysicsComponent();
-        physics.body = BodyFactory.createWall(x, y, width, height, entity);
+        physics.body = BodyFactory.createWall(x, y, (int) (width * engineCFG.bodyScale), (int) (height * engineCFG.bodyScale), entity);
         entity.add(physics);
         
         TransformComponent transform = new TransformComponent();

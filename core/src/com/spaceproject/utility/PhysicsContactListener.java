@@ -29,7 +29,7 @@ import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.RingEffectComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.SplineComponent;
+import com.spaceproject.components.TrailComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TransformComponent;
@@ -396,7 +396,7 @@ public class PhysicsContactListener implements ContactListener {
         //contactP.add(particle);
         
         if (showGhost) {
-            SplineComponent transferred = (SplineComponent) ECSUtil.transferComponent(entityHit, contactP, SplineComponent.class);
+            TrailComponent transferred = (TrailComponent) ECSUtil.transferComponent(entityHit, contactP, TrailComponent.class);
             if (transferred != null) {
                 transferred.color = new Color(0, 0, 0, 0.15f);
                 AsteroidComponent asteroid = Mappers.asteroid.get(attackedEntity);
@@ -407,7 +407,7 @@ public class PhysicsContactListener implements ContactListener {
                         transferred.color.set(asteroid.color).a = 0.75f;
                     }
                 }
-                transferred.style = SplineComponent.Style.solid;
+                transferred.style = TrailComponent.Style.solid;
             }
         }
         
