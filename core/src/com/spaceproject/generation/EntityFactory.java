@@ -54,6 +54,7 @@ import com.spaceproject.math.PolygonUtil;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Sprite3D;
 import com.spaceproject.utility.ECSUtil;
+import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
 
@@ -156,7 +157,10 @@ public class EntityFactory {
         entity.add(seedComponent);
         
         //star properties
+        int radius = MathUtils.random(celestCFG.minStarSize, celestCFG.maxStarSize);
+        
         StarComponent star = new StarComponent();
+        star.radius = radius;
         star.temperature = MathUtils.random(1000, 50000); //typically (2,000K - 40,000K)
         //star.temperature = Physics.Sun.kelvin;//test sun color
         star.peakWavelength = Physics.temperatureToWavelength(star.temperature) * 1000000;
@@ -171,7 +175,6 @@ public class EntityFactory {
         
         // create star texture
         TextureComponent texture = new TextureComponent();
-        int radius = MathUtils.random(celestCFG.minStarSize, celestCFG.maxStarSize);
         texture.texture = TextureFactory.generateStar(seed, radius, 20);
         texture.scale = 4;
         entity.add(texture);
@@ -571,7 +574,7 @@ public class EntityFactory {
                 width * engineCFG.pixelPerUnit,
                 height * engineCFG.pixelPerUnit,
                 new Color(0.4f, 0.4f, 0.4f, 1));
-        texture.scale = 0.25f;
+        //texture.scale = 0.05f;
         entity.add(texture);
     
         PhysicsComponent physics = new PhysicsComponent();
@@ -582,6 +585,44 @@ public class EntityFactory {
         transform.pos.set(x, y);
         transform.zOrder = RenderOrder.WORLD_OBJECTS.getHierarchy();
         entity.add(transform);
+        
+        return entity;
+    }
+    
+    public static Entity createSpaceStation(Entity parentOrbitEntity, float radialDistance, boolean rotationDir) {
+        Entity entity = new Entity();
+    
+        int width = 320;
+        int height = 640;
+        Vector2 parentBody = Mappers.transform.get(parentOrbitEntity).pos;
+        float x = parentBody.x;
+        float y = parentBody.y + radialDistance;
+        
+        TextureComponent texture = new TextureComponent();
+        texture.texture = TextureFactory.generateWall(
+                width,
+                height,
+                new Color(0.4f, 0.4f, 0.4f, 1));
+        texture.scale = 0.05f;
+        entity.add(texture);
+    
+        PhysicsComponent physics = new PhysicsComponent();
+        physics.body = BodyFactory.createRect(x, y, (int) (width * engineCFG.bodyScale), (int) (height * engineCFG.bodyScale), BodyDef.BodyType.DynamicBody ,entity);
+        entity.add(physics);
+    
+        TransformComponent transform = new TransformComponent();
+        transform.pos.set(x, y);
+        transform.zOrder = RenderOrder.WORLD_OBJECTS.getHierarchy();
+        entity.add(transform);
+        
+        OrbitComponent orbit = new OrbitComponent();
+        orbit.parent = parentOrbitEntity;
+        orbit.radialDistance = radialDistance;
+        orbit.tangentialSpeed = MathUtils.random(celestCFG.minPlanetTangentialSpeed, celestCFG.maxPlanetTangentialSpeed);
+        orbit.startAngle = MathUtils.random(MathUtils.PI2);
+        orbit.rotSpeed = MathUtils.random(celestCFG.minPlanetRot, celestCFG.maxPlanetRot);
+        orbit.rotateClockwise = rotationDir;
+        entity.add(orbit);
         
         return entity;
     }

@@ -15,8 +15,8 @@ import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AISpawnComponent;
-import com.spaceproject.components.BarycenterComponent;
 import com.spaceproject.components.AsteroidBeltComponent;
+import com.spaceproject.components.BarycenterComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.RemoveComponent;
@@ -27,15 +27,12 @@ import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.generation.AstroBody;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureFactory;
-import com.spaceproject.noise.NoiseBuffer;
 import com.spaceproject.math.MyMath;
-import com.spaceproject.noise.NoiseThreadPoolExecutor;
+import com.spaceproject.noise.NoiseBuffer;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Tile;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
-
-import java.util.concurrent.ThreadLocalRandom;
 
 
 public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
@@ -247,7 +244,12 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         circumstellarDisc.clockwise = isRotateClockwise;
         star.add(circumstellarDisc);
         entities.add(star);
-        
+    
+        Entity spaceStation;
+        //if (numPlanets == 0) {
+        spaceStation = EntityFactory.createSpaceStation(star, Mappers.star.get(star).radius * 4 + 200, false);
+        entities.add(spaceStation);
+        //}
         
         //create planets around star
         for (int i = 0; i < numPlanets; ++i) {

@@ -4,9 +4,9 @@ import com.badlogic.ashley.core.Component;
 
 public class StarComponent implements Component {
     
-    //public double mass;
+    public float radius;
     
-    //public double radius;
+    //public double mass;
     
     //public double luminosity;
     
