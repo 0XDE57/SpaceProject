@@ -252,24 +252,12 @@ public class GameScreen extends MyScreenAdapter {
     
     private void pollGLProfiler() {
         profilerStringBuilder.setLength(0);
-        profilerStringBuilder.append("[GL calls]:         ");
-        profilerStringBuilder.append(glProfiler.getCalls());
-        
-        profilerStringBuilder.append("\n[Draw calls]:       ");
-        profilerStringBuilder.append(glProfiler.getDrawCalls());
-        
-        profilerStringBuilder.append("\n[Shader switches]:  ");
-        profilerStringBuilder.append(glProfiler.getShaderSwitches());
-        
-        profilerStringBuilder.append("\n[Texture bindings]: ");
-        profilerStringBuilder.append(glProfiler.getTextureBindings());
-        
-        profilerStringBuilder.append("\n[Vertices]:         ");
-        profilerStringBuilder.append(glProfiler.getVertexCount().total);
-    
-        profilerStringBuilder.append("\n-----[DISPOSED]----");
-        profilerStringBuilder.append(ResourceDisposer.getTotalDisposeCount());
-        
+        profilerStringBuilder.append("[GL calls]:         ").append(glProfiler.getCalls());
+        profilerStringBuilder.append("\n[Draw calls]:       ").append(glProfiler.getDrawCalls());
+        profilerStringBuilder.append("\n[Shader switches]:  ").append(glProfiler.getShaderSwitches());
+        profilerStringBuilder.append("\n[Texture bindings]: ").append(glProfiler.getTextureBindings());
+        profilerStringBuilder.append("\n[Vertices]:         ").append(glProfiler.getVertexCount().total);
+        profilerStringBuilder.append("\n-----[DISPOSED]----").append(ResourceDisposer.getTotalDisposeCount());
         glProfiler.reset();
     }
     
