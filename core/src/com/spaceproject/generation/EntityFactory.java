@@ -37,10 +37,11 @@ import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.ShaderComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.TrailComponent;
+import com.spaceproject.components.SpaceStationComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TextureComponent;
+import com.spaceproject.components.TrailComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.CelestialConfig;
@@ -605,24 +606,21 @@ public class EntityFactory {
                 new Color(0.4f, 0.4f, 0.4f, 1));
         texture.scale = 0.05f;
         entity.add(texture);
-    
+        
         PhysicsComponent physics = new PhysicsComponent();
         physics.body = BodyFactory.createRect(x, y, (int) (width * engineCFG.bodyScale), (int) (height * engineCFG.bodyScale), BodyDef.BodyType.DynamicBody ,entity);
+        //physics.body.setActive(false);
         entity.add(physics);
     
         TransformComponent transform = new TransformComponent();
         transform.pos.set(x, y);
         transform.zOrder = RenderOrder.WORLD_OBJECTS.getHierarchy();
         entity.add(transform);
-        
-        OrbitComponent orbit = new OrbitComponent();
-        orbit.parent = parentOrbitEntity;
-        orbit.radialDistance = radialDistance;
-        orbit.tangentialSpeed = MathUtils.random(celestCFG.minPlanetTangentialSpeed, celestCFG.maxPlanetTangentialSpeed);
-        orbit.startAngle = MathUtils.random(MathUtils.PI2);
-        orbit.rotSpeed = MathUtils.random(celestCFG.minPlanetRot, celestCFG.maxPlanetRot);
-        orbit.rotateClockwise = rotationDir;
-        entity.add(orbit);
+    
+        SpaceStationComponent station = new SpaceStationComponent();
+        station.parentOrbitBody = parentOrbitEntity;
+        station.velocity = 20f;
+        entity.add(station);
         
         return entity;
     }
