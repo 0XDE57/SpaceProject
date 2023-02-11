@@ -282,7 +282,8 @@ public class PhysicsContactListener implements ContactListener {
         PhysicsComponent physicsItem = Mappers.physics.get(entityItem);
         //float angleRad = physicsItem.body.getPosition().angleRad(Mappers.physics.get(entityCollector).body.getPosition());
         float angleRad = MyMath.angleTo(Mappers.physics.get(entityCollector).body.getPosition(), physicsItem.body.getPosition());
-        physicsItem.body.applyForceToCenter(MyMath.vector(angleRad, 20), true);
+        float magnitude = 20; //todo: scale based on distance Mappers.physics.get(entityCollector).body.getPosition().dst2(physicsItem.body.getPosition());
+        physicsItem.body.applyForceToCenter(MyMath.vector(angleRad, magnitude), true);
     }
     //endregion
     
