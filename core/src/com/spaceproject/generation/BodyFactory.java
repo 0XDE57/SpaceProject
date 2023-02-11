@@ -135,7 +135,7 @@ public class BodyFactory {
         box.dispose();
         
         //outer sensor
-        float collisionRadius = 2 * width * width;
+        float collisionRadius = 4 * width;
         CircleShape innerCollectSensor = new CircleShape();
         innerCollectSensor.setRadius(collisionRadius);
         FixtureDef innerCircleFixture = new FixtureDef();
@@ -147,7 +147,7 @@ public class BodyFactory {
         innerCollectSensor.dispose();
         //inner sensor
         CircleShape outerCollectSensor = new CircleShape();
-        outerCollectSensor.setRadius(4 * collisionRadius);
+        outerCollectSensor.setRadius(10 * collisionRadius);
         FixtureDef outerCircleFixture = new FixtureDef();
         outerCircleFixture.shape = outerCollectSensor;
         outerCircleFixture.isSensor = true;
