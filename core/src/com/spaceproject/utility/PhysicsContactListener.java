@@ -40,7 +40,8 @@ import com.spaceproject.systems.CameraSystem;
 import com.spaceproject.systems.ControllerInputSystem;
 import com.spaceproject.systems.SoundSystem;
 
-
+//todo: i feel like this belongs in systems. while not a system itself, its behavior is directly linked
+// to the @Box2DPhysicsSystem
 public class PhysicsContactListener implements ContactListener {
     
     private final Engine engine;
@@ -208,11 +209,11 @@ public class PhysicsContactListener implements ContactListener {
             //active heat damage
             StarComponent starA = Mappers.star.get(entityA);
             if (starA != null) {
-                doActiveHeatDamage(entityA, entityB, deltaTime);
+                doActiveHeatDamage(contact, entityA, entityB, deltaTime);
             }
             StarComponent starB = Mappers.star.get(entityB);
             if (starB != null) {
-                doActiveHeatDamage(entityB, entityA, deltaTime);
+                doActiveHeatDamage(contact, entityB, entityA, deltaTime);
             }
             //active item movement
             ItemDropComponent itemDropA = Mappers.itemDrop.get(entityA);
@@ -226,7 +227,10 @@ public class PhysicsContactListener implements ContactListener {
         }
     }
     
-    private void doActiveHeatDamage(Entity starEntity, Entity burningEntity, float deltaTime) {
+    private void doActiveHeatDamage(Contact contact, Entity starEntity, Entity burningEntity, float deltaTime) {
+        if (contact.getFixtureB().getFilterData().categoryBits == 2)
+            return;
+        
         HealthComponent healthComponent = Mappers.health.get(burningEntity);
         if (healthComponent == null) {
             //check if projectile
