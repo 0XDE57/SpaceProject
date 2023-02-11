@@ -320,6 +320,7 @@ public class EntityFactory {
         system with the z-axis pointing out of the plane.
         */
         AsteroidComponent asteroid = new AsteroidComponent();
+        GeometryUtils.ensureCCW(vertices);
         Polygon polygon = new Polygon(vertices);
         float area = Math.abs(GeometryUtils.polygonArea(polygon.getVertices(), 0, polygon.getVertices().length));
         asteroid.polygon = polygon;

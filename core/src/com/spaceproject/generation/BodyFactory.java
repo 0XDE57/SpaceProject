@@ -210,7 +210,9 @@ public class BodyFactory {
         bodyDef.position.set(x, y);
         bodyDef.angle = angle;
         body = world.createBody(bodyDef);
-        
+    
+        //it should already be CCW by this point, duplicate check
+        //GeometryUtils.ensureCCW(vertices);
         PolygonShape poly = new PolygonShape();
         poly.set(vertices);
         

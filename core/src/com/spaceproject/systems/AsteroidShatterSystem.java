@@ -113,6 +113,7 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
         https://libgdx.com/news/2022/05/gdx-1-11
         */
         
+        GeometryUtils.ensureCCW(vertices);
         ShortArray triangles = delaunay.computeTriangles(vertices, false);
         //Gdx.app.debug(this.getClass().getSimpleName(), "shatter into " + triangles.size);
         
@@ -181,14 +182,10 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
         Vector2 pos = transform.pos.set(sourcePhysics.body.getPosition());
         
         PhysicsComponent physics = new PhysicsComponent();
-        //todo: large circle BodyFactory.createCircle()
-        // do a bigger censor on same fixture that sucks into the player
         physics.body = BodyFactory.createDrop(pos.x, pos.y, 1, 50, drop);
         float spin = -0.2f;
         physics.body.applyAngularImpulse(MathUtils.random(-spin, spin), true);
-        //todo: give momentum,
-        //either copy asteroids velocity
-        //or send in players direction
+        //todo: give momentum? either copy asteroids velocity or send in players direction
         
         //expire time (self destruct)
         ExpireComponent expire = new ExpireComponent();
