@@ -218,11 +218,11 @@ public class Box2DContactListener implements ContactListener {
             //active item movement
             ItemDropComponent itemDropA = Mappers.itemDrop.get(entityA);
             if (itemDropA != null) {
-                updateItemAttraction(entityA, entityB);
+                updateItemAttraction(entityA, entityB, deltaTime);
             }
             ItemDropComponent itemDropB = Mappers.itemDrop.get(entityB);
             if (itemDropB != null) {
-                updateItemAttraction(entityB, entityA);
+                updateItemAttraction(entityB, entityA, deltaTime);
             }
         }
     }
@@ -275,14 +275,16 @@ public class Box2DContactListener implements ContactListener {
         }
     }
     
-    private void updateItemAttraction(Entity entityItem, Entity entityCollector) {
+    private void updateItemAttraction(Entity entityItem, Entity entityCollector, float deltaTime) {
         CargoComponent cargoCollector = Mappers.cargo.get(entityCollector);
         if (cargoCollector == null) return;
         
         PhysicsComponent physicsItem = Mappers.physics.get(entityItem);
-        //float angleRad = physicsItem.body.getPosition().angleRad(Mappers.physics.get(entityCollector).body.getPosition());
-        float angleRad = MyMath.angleTo(Mappers.physics.get(entityCollector).body.getPosition(), physicsItem.body.getPosition());
-        float magnitude = 20; //todo: scale based on distance Mappers.physics.get(entityCollector).body.getPosition().dst2(physicsItem.body.getPosition());
+        Vector2 collectorPos = Mappers.physics.get(entityCollector).body.getPosition();
+        Vector2 itemPos = physicsItem.body.getPosition();
+        float angleRad = MyMath.angleTo(collectorPos, itemPos);
+        float distance = collectorPos.dst2(itemPos);
+        float magnitude = distance * distance * deltaTime;
         physicsItem.body.applyForceToCenter(MyMath.vector(angleRad, magnitude), true);
     }
     //endregion
