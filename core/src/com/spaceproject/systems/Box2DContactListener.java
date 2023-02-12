@@ -198,6 +198,10 @@ public class Box2DContactListener implements ContactListener {
     public void updateActiveContacts(World world, float deltaTime) {
         for (Contact contact : world.getContactList()) {
             if (!contact.isTouching()) continue;
+    
+            //todo: check collision filters here instead before grabbing entity and components?
+            //contact.getFixtureA().getFilterData().categoryBits
+            //contact.getFixtureB().getFilterData().categoryBits
             
             Object dataA = contact.getFixtureA().getBody().getUserData();
             Object dataB = contact.getFixtureB().getBody().getUserData();
