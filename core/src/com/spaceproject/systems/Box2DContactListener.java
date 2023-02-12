@@ -1,4 +1,4 @@
-package com.spaceproject.utility;
+package com.spaceproject.systems;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -29,20 +29,20 @@ import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.RingEffectComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.TrailComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.StarComponent;
+import com.spaceproject.components.TrailComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.systems.CameraSystem;
-import com.spaceproject.systems.ControllerInputSystem;
-import com.spaceproject.systems.SoundSystem;
+import com.spaceproject.utility.DebugUtil;
+import com.spaceproject.utility.ECSUtil;
+import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.SimpleTimer;
 
-//todo: i feel like this belongs in systems. while not a system itself, its behavior is directly linked
-// to the @Box2DPhysicsSystem
-public class PhysicsContactListener implements ContactListener {
+//NOTE: while not a system itself, its behavior is directly linked to the @Box2DPhysicsSystem
+public class Box2DContactListener implements ContactListener {
     
     private final Engine engine;
 
@@ -53,7 +53,7 @@ public class PhysicsContactListener implements ContactListener {
     private final float heatDamageRate = 20f;// how quickly stars to damage to health
     private float peakImpulse = 0; //highest recorded impact, stat just to gauge
     
-    public PhysicsContactListener(Engine engine) {
+    public Box2DContactListener(Engine engine) {
         this.engine = engine;
     }
     

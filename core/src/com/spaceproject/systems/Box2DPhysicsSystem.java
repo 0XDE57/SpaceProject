@@ -12,7 +12,6 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.PhysicsContactListener;
 
 // based off:
 // http://gafferongames.com/game-physics/fix-your-timestep/
@@ -26,7 +25,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
     private float accumulator = 0f;
     
     private World world;
-    private PhysicsContactListener damageContactListener;
+    private Box2DContactListener damageContactListener;
 
     private ImmutableArray<Entity> entities;
     
@@ -36,7 +35,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
         entities = engine.getEntitiesFor(family);
     
         world = GameScreen.box2dWorld;
-        damageContactListener = new PhysicsContactListener(engine);
+        damageContactListener = new Box2DContactListener(engine);
         world.setContactListener(damageContactListener);
     }
     
