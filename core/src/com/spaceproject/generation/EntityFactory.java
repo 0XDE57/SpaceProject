@@ -333,7 +333,7 @@ public class EntityFactory {
         physics.body = BodyFactory.createPoly(transform.pos.x, transform.pos.y,
                 polygon.getVertices(), angle, density, BodyDef.BodyType.DynamicBody,
                 GameScreen.box2dWorld, entity);
-        asteroid.centerOfMass = physics.body.getLocalCenter();
+        asteroid.centerOfMass = physics.body.getLocalCenter().cpy();
         physics.body.setLinearVelocity(velX, velY);
         entity.add(physics);
         
