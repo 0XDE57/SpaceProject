@@ -272,7 +272,7 @@ public class Box2DContactListener implements ContactListener {
     }
     
     private void doActiveHeatDamage(Contact contact, Entity starEntity, Entity burningEntity, float deltaTime) {
-        if (contact.getFixtureB().getFilterData().categoryBits == 2)
+        if (contact.getFixtureA().getFilterData().categoryBits == 2)
             return;
         
         HealthComponent healthComponent = Mappers.health.get(burningEntity);
