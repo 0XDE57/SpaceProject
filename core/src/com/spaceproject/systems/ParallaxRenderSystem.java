@@ -116,8 +116,8 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         
         //draw grid
         gridColor.a = 0.15f;
-        //drawGrid(gridColor, gridBounds, calculateGridDensity(gridWidth), 0.5f, cam.position.x, cam.position.y);
-        drawGrid(gridColor, gridBounds, calculateGridDensity(gridWidth), 0.5f, -origin.x * cam.zoom, -origin.y * cam.zoom);
+        drawGrid(gridColor, gridBounds, calculateGridDensity(gridWidth), 0.5f, cam.position.x, cam.position.y);
+        //drawGrid(gridColor, gridBounds, calculateGridDensity(gridWidth), 0.5f, -origin.x * cam.zoom, -origin.y * cam.zoom);
         
         //debug override background
         if (clearScreen) debugClearScreen();
@@ -162,7 +162,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         return width;
     }
     
-    private void drawGrid(Color color, Rectangle rect, int gridSize, float width, float posX, float posY) {
+    private void drawGrid(Color color, Rectangle rect, int gridSize, float lineWidth, float posX, float posY) {
         shape.setColor(color);
         
         float halfWidth = rect.width * 0.5f;
@@ -178,25 +178,23 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         int endX = (int) (posX + (halfWidth * scale)) / gridSize;
         for (int i = startX; i < endX + 1; i++) {
             float finalX = (((i * gridSize) - posX) / scale) + centerX;
-            if (width > 1) {
-                finalX -= width * 0.5f;
+            if (lineWidth > 1) {
+                finalX -= lineWidth * 0.5f;
             }
             countX++;
-            shape.rect(finalX, rect.y, width, rect.height);
+            shape.rect(finalX, rect.y, lineWidth, rect.height);
         }
-        
-        //gridSize *= 1.0f / (16.0f / 9.0f);//test 16x9 asymmetrical grid
         
         //draw Y: vertical lines
         int startY = (int) (posY + (-halfHeight * scale)) / gridSize;
         int endY = (int) (posY + (halfHeight * scale)) / gridSize;
         for (int i = startY; i < endY + 1; i++) {
             float finalY = (((i * gridSize) - posY) /  scale) + centerY;
-            if (width > 1) {
-                finalY -= width * 0.5f;
+            if (lineWidth > 1) {
+                finalY -= lineWidth * 0.5f;
             }
             countY++;
-            shape.rect(rect.x, finalY, rect.width, width);
+            shape.rect(rect.x, finalY, rect.width, lineWidth);
         }
         
         //todo: highlight tile
