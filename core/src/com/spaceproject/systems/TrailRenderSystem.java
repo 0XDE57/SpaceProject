@@ -266,7 +266,7 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
         for (int i = 0; i < spline.path.length-1; i++) {
             Vector3 p = spline.path[i];
             
-            int indexWrap = i + 1 % spline.path.length;
+            int indexWrap = (i + 1) % spline.path.length;
             if (indexWrap <= 0) indexWrap += spline.path.length;
             Vector3 p2 = spline.path[indexWrap];
             
