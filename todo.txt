@@ -304,21 +304,37 @@ Legend:
     [ * ] = exceptions
 .....................................................................................................
 
-[...] pickup drops from asteroids
-    [x] suck into ship when near
-    [...] tune it
-
-[ ] cargo
-    [...] some sort of inventory
-    [ ] display count on UI
+[ ] terrible BUG! Space Parallax Render broken on resolutions above 1080p
+    eg: 4k or ultra wide
 
 [ ] space station
-    [ ] orbit
+    [x] orbit
     [ ] dock
     [ ] repair
     [ ] garage / store UI
     [ ] sell cargo for moneys
 
+[ ] death message w/ reason:
+    [ ] "stars are hot!"
+    [ ] "asteroids are harder than your ship..."
+    [ ] "press [] to activate your shield"
+
+[ ] better death visual
+    [ ] respawn system
+        (currently handled by: [RemovalSystem] Controlled entity assumed to be player; respawning...)
+        respawn at space station, docked
+    [ ] emit explosion rings
+    [ ] emit explosion rays
+    [ ] explodey particle fx!
+    [ ] maybe shatter player
+
+[x] pickup drops from asteroids
+    [x] suck into ship when near
+    [x] tune it
+
+[...] cargo
+    [...] some sort of inventory
+    [x] display count on UI
 
 [x] controller input stuck on desktop until joystick moved:
     noticeable when shooting, or trying to shoot.
@@ -364,20 +380,6 @@ Legend:
         or need to upgrade shield to handle higher temps
         fly through the sun with shield up to absorb energy and heal?
 
-[ ] death message w/ reason:
-    [ ] "stars are hot!"
-    [ ] "asteroids are harder than your ship..."
-    [ ] "press [] to activate your shield"
-
-[ ] better death visual
-    [ ] respawn system
-        (currently handled by: [RemovalSystem] Controlled entity assumed to be player; respawning...)
-        respawn at space station, docked
-    [ ] emit explosion rings
-    [ ] emit explosion rays
-    [ ] explodey particle fx!
-    [ ] maybe shatter player
-
 
 [ ] render layer: move hyper trail layer to render when hud off
 
@@ -392,9 +394,6 @@ Legend:
 [ ] put wings on ship
 
 [ ] scroll should over ride reset cam
-
-[ ] terrible BUG! Space Parallax Render broken on resolutions above 1080p
-    eg: 4k or ultra wide
 
 [...] terrible BUG! lerping camera movement is giving some jittering in the rendering when vsync on.
     this is caused by interpolation being a percentage from target and the value is
@@ -413,7 +412,7 @@ Legend:
         [ ] introduced new render issue at world border x,y < 0 when vsync off, lerp is rapidly switching between position teleporting
         [ ] camera too slow when close to lerp position -> percentage infinitely never reaching 0, should snap when close enough
 
-[ ] terrible BUG! space loadderr loading and unloading system near debug origin when shouldn't
+[ ] terrible BUG! space loader loading and unloading system near debug origin when shouldn't
     flashes for a moment.
         [SpaceLoadingSystem] Removing Planetary System: (29993.0,29365.0)
         [SpaceLoadingSystem] Planetary System: [128818954138294](29993.0, 29365.0) Bodies: 2
@@ -490,12 +489,9 @@ Legend:
     so maybe no breaks?
     [ ] X on controller
 
-[ ] the way i render splines is terribly inefficient. a new vector3 per frame...
-    naughty, i know. apologies for my sins while i prototype.
-    [ ] Potential optimization: don't record point on same location, or within epsilon equals
+[ ] Potential optimization: don't record point on same location, or within epsilon equals
     manhattan distance^2 for faster checking. this part doesn't need to be hyper accurate
-    accept for at event points (health reduced).
-    or use optimized spines to render the path with reduced amount of data points?
+    accept for at event points (health reduced). or use optimized spines to render the path with reduced amount of data points?
     [ ] plus were not even doing frustum culling of points outside the viewport...
 
 
