@@ -28,4 +28,6 @@ public class TrailComponent implements Component {
     
     public Color color;
     
+    public long time;
+    
 }

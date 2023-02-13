@@ -24,7 +24,6 @@ import com.spaceproject.components.DamageComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.ItemDropComponent;
-import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.RingEffectComponent;
@@ -174,10 +173,51 @@ public class Box2DContactListener implements ContactListener {
         }
         
         //add projectile ghost (fx)
-        explodeProjectile(contact, damageEntity, attackedEntity, healthComponent,true);
+        boolean showGhostTrail = (healthComponent.health <= 0);
+        explodeProjectile(contact, damageEntity, attackedEntity, showGhostTrail);
         
         //remove projectile
         damageEntity.add(new RemoveComponent());
+    }
+    
+    private void explodeProjectile(Contact contact, Entity entityHit, Entity attackedEntity, boolean showGhost) {
+        WorldManifold manifold = contact.getWorldManifold();
+        //for (Vector2 p : manifold.getPoints()) {
+        Vector2 p = manifold.getPoints()[0];
+        
+        Entity contactP = new Entity();
+        
+        //create entity at point of contact
+        TransformComponent transform = new TransformComponent();
+        transform.pos.set(p);
+        contactP.add(transform);
+        //todo: transfer velocity from object hit
+        
+        contactP.add(new RingEffectComponent());
+        
+        ExpireComponent expire = new ExpireComponent();
+        expire.timer = new SimpleTimer(1000, true);
+        contactP.add(expire);
+        
+        //todo: better particle this one is ugly
+        //ParticleComponent particle = new ParticleComponent();
+        //particle.type = ParticleComponent.EffectType.bulletExplode;
+        //contactP.add(particle);
+        
+        if (showGhost) {
+            TrailComponent trailComponent = (TrailComponent) ECSUtil.transferComponent(entityHit, contactP, TrailComponent.class);
+            if (trailComponent != null) {
+                trailComponent.time = GameScreen.getGameTimeCurrent();
+                trailComponent.color = new Color(0, 0, 0, 0.15f);
+                AsteroidComponent asteroid = Mappers.asteroid.get(attackedEntity);
+                if (asteroid != null) {
+                    trailComponent.color.set(asteroid.color);
+                }
+                trailComponent.style = TrailComponent.Style.solid;
+            }
+        }
+        
+        engine.addEntity(contactP);
     }
     
     private void collectItemDrop(Fixture collectorFixture, CargoComponent cargo, Entity item) {
@@ -366,9 +406,9 @@ public class Box2DContactListener implements ContactListener {
             health.lastHitTime = GameScreen.getGameTimeCurrent();
             if (health.health <= 0) {
                 entity.add(new RemoveComponent());
-                Gdx.app.debug(this.getClass().getSimpleName(), "vehicle destroyed: " + impulse + " -> damage: " + relativeDamage);
+                Gdx.app.debug(this.getClass().getSimpleName(), "vehicle destroyed: " + impulse + " -> " + relativeDamage);
             } else {
-                Gdx.app.debug(this.getClass().getSimpleName(), "high impact damage: " + impulse + " -> -" + relativeDamage);
+                Gdx.app.debug(this.getClass().getSimpleName(), "high impact damage: " + impulse + " -> " + relativeDamage);
             }
         }
         
@@ -380,49 +420,6 @@ public class Box2DContactListener implements ContactListener {
         }
         //todo: should we hear only controlled, or AI if close enough
         sound.hullImpactHeavy(1);
-    }
-    
-    private void explodeProjectile(Contact contact, Entity entityHit, Entity attackedEntity, HealthComponent health, boolean showGhost) {
-        WorldManifold manifold = contact.getWorldManifold();
-        //for (Vector2 p : manifold.getPoints()) {
-        Vector2 p = manifold.getPoints()[0];
-        
-        Entity contactP = new Entity();
-        
-        //create entity at point of contact
-        TransformComponent trans = new TransformComponent();
-        trans.pos.set(p);
-        contactP.add(trans);
-        //todo: transfer velocity from object hit
-        
-        contactP.add(new RingEffectComponent());
-        
-        ExpireComponent expire = new ExpireComponent();
-        expire.timer = new SimpleTimer(2000, true);
-        contactP.add(expire);
-        
-        //todo: better particle this one is ugly
-        ParticleComponent particle = new ParticleComponent();
-        particle.type = ParticleComponent.EffectType.bulletExplode;
-        //contactP.add(particle);
-        
-        if (showGhost) {
-            TrailComponent transferred = (TrailComponent) ECSUtil.transferComponent(entityHit, contactP, TrailComponent.class);
-            if (transferred != null) {
-                transferred.color = new Color(0, 0, 0, 0.15f);
-                AsteroidComponent asteroid = Mappers.asteroid.get(attackedEntity);
-                if (asteroid != null) {
-                    
-                    //only color when asteroid destroyed
-                    if (health.health <= 0) {
-                        transferred.color.set(asteroid.color).a = 0.75f;
-                    }
-                }
-                transferred.style = TrailComponent.Style.solid;
-            }
-        }
-        
-        engine.addEntity(contactP);
     }
     
     @Override

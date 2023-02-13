@@ -111,6 +111,7 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
         //    return;
         //}
         
+        //todo: elmiate these magic numbers
         //off, on, boost, hyper -> 0, 1, 2, 3
         float velocity = 0;
         byte state = 0;
@@ -153,9 +154,6 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
                         HyperDriveComponent hyper = Mappers.hyper.get(entity);
                         velocity = hyper.speed * hyper.speed;
                     }
-            
-                    //todo: state -1:
-                    // health compontent : lastHitTime -simple timer or timestamp relative to current time
                 }
             }
         }
@@ -277,6 +275,10 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
                 if (spline.color == null) {
                     shape.line(p.x, p.y, p2.x, p2.y, Color.GREEN, Color.BLUE);
                 } else {
+                    float fadeTime = 500;
+                    long diff = GameScreen.getGameTimeCurrent() - spline.time;
+                    if (diff >= fadeTime) continue;
+                    spline.color.a = 1.0f - ((float) diff / fadeTime);
                     shape.line(p.x, p.y, p2.x, p2.y, spline.color, spline.color);
                 }
             } else {
