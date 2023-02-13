@@ -7,7 +7,6 @@ import com.badlogic.ashley.systems.SortedIteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
@@ -194,8 +193,7 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
         for (int i = 0; i < spline.path.length-1; i++) {
             Vector3 p = spline.path[i];
             
-            int indexWrap = i + 1 % spline.path.length;
-            if (indexWrap <= 0) indexWrap += spline.path.length;
+            int indexWrap = (i + 1) % spline.path.length;
             Vector3 p2 = spline.path[indexWrap];
             
             // don't draw head to tail
@@ -226,10 +224,7 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
         for (int i = 0; i < spline.path.length-1; i++) {
             Vector3 p = spline.path[i];
             
-            int indexWrap = i + 1 % spline.path.length;
-            if (indexWrap <= 0) {
-                indexWrap += spline.path.length;
-            }
+            int indexWrap = (i + 1) % spline.path.length;
             Vector3 p2 = spline.path[indexWrap];
             
             // don't draw head to tail
@@ -267,7 +262,6 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
             Vector3 p = spline.path[i];
             
             int indexWrap = (i + 1) % spline.path.length;
-            if (indexWrap <= 0) indexWrap += spline.path.length;
             Vector3 p2 = spline.path[indexWrap];
             
             // don't draw head to tail
@@ -299,32 +293,6 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
         //xy mode
         //change of angle: same color when going straight, 360 otherwise, doesnt care speed
         //change of speed: 0-max, doesn't care angle
-    }
-    
-    private Color backgroundColor(OrthographicCamera cam) {
-        //still playing with these values to get the right feel/intensity of color...
-        float camZoomBlackScale = 500.0f;
-        float maxColor = 0.25f;
-        float ratio = 0.0001f;
-        float green = Math.abs(cam.position.x * ratio);
-        float blue = Math.abs(cam.position.y * ratio);
-        //green based on x position. range amount of green between 0 and maxColor
-        if ((int) (green / maxColor) % 2 == 0) {
-            green %= maxColor;
-        } else {
-            green = maxColor - green % maxColor;
-        }
-        //blue based on y position. range amount of blue between 0 and maxColor
-        if ((int) (blue / maxColor) % 2 == 0) {
-            blue %= maxColor;
-        } else {
-            blue = maxColor - blue % maxColor;
-        }
-        float red = blue + green;
-        tmpColor.set(red, green + (maxColor - red) + 0.2f, blue + (maxColor - red) + 0.1f, 1);
-        
-        tmpColor.lerp(Color.BLACK, MathUtils.clamp(cam.zoom / camZoomBlackScale, 0, 1)); //fade to black on zoom out
-        return tmpColor;
     }
     
     @Override
