@@ -65,6 +65,195 @@ public class EntityFactory {
     private static final EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);
     private static final CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
     
+    //region ships
+    public static Array<Entity> createBasicShip(float x, float y, boolean inSpace) {
+        return createBasicShip(x, y, null, inSpace);
+    }
+    
+    public static Array<Entity> createBasicShip(float x, float y, Entity driver, boolean inSpace) {
+        return createBasicShip(x, y, MyMath.getSeed(x, y), driver, inSpace);
+    }
+    
+    public static Array<Entity> createBasicShip(float x, float y, long seed, Entity driver, boolean inSpace) {
+        Array<Entity> entityCluster = new Array<>();
+        Entity shipEntity = new Entity();
+        
+        //seed
+        MathUtils.random.setSeed(seed);
+        SeedComponent seedComp = new SeedComponent();
+        seedComp.seed = seed;
+        shipEntity.add(seedComp);
+        
+        //transform
+        TransformComponent transform = new TransformComponent();
+        transform.pos.set(x, y);
+        transform.zOrder = RenderOrder.VEHICLES.getHierarchy();
+        transform.rotation = (float) Math.PI / 2; //face upwards
+        shipEntity.add(transform);
+        
+        //generate 3D sprite with random even size
+        int shipSize = MathUtils.random(entityCFG.shipSizeMin, entityCFG.shipSizeMax) * 2;
+        Texture shipTop = TextureFactory.generateShip(seed, shipSize);
+        Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
+        Sprite3DComponent sprite3DComp = new Sprite3DComponent();
+        sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom, engineCFG.sprite3DScale);
+        shipEntity.add(sprite3DComp);
+        
+        //collision detection
+        PhysicsComponent physics = new PhysicsComponent();
+        float width = shipTop.getWidth() * engineCFG.bodyScale;
+        float height = shipTop.getHeight() * engineCFG.bodyScale;
+        physics.body = BodyFactory.createShip(x, y, width, height, shipEntity, inSpace);
+        shipEntity.add(physics);
+        
+        //engine data and marks entity as drive-able
+        VehicleComponent vehicle = new VehicleComponent();
+        vehicle.dimensions = new Rectangle(0, 0, width, height);
+        vehicle.driver = driver;
+        vehicle.thrust = entityCFG.engineThrust;
+        shipEntity.add(vehicle);
+        
+        //health
+        HealthComponent health = new HealthComponent();
+        health.maxHealth = entityCFG.shipHealth;
+        health.health = health.maxHealth;
+        shipEntity.add(health);
+        
+        //weapon
+        if (true) {
+            CannonComponent cannon = makeCannon(vehicle.dimensions.width);
+            shipEntity.add(cannon);
+        } else {
+            ChargeCannonComponent chargeCannon = makeChargeCannon(vehicle.dimensions.width);
+            shipEntity.add(chargeCannon);
+        }
+        
+        //hyper drive
+        HyperDriveComponent hyperDrive = new HyperDriveComponent();
+        hyperDrive.speed = entityCFG.hyperSpeed;
+        hyperDrive.coolDownTimer = new SimpleTimer(2000);
+        hyperDrive.chargeTimer = new SimpleTimer(2000);
+        hyperDrive.graceTimer = new SimpleTimer(1000);
+        shipEntity.add(hyperDrive);
+        
+        //shield
+        ShieldComponent shield = new ShieldComponent();
+        shield.animTimer = new SimpleTimer(100, true);
+        shield.defence = 100f;
+        BoundingBox boundingBox = PolygonUtil.calculateBoundingBox(physics.body);
+        float radius = Math.max(boundingBox.getWidth(), boundingBox.getHeight());
+        shield.maxRadius = radius;
+        shipEntity.add(shield);
+        
+        //barrel roll
+        BarrelRollComponent barrelRoll = new BarrelRollComponent();
+        barrelRoll.cooldownTimer = new SimpleTimer(entityCFG.dodgeCooldown);
+        barrelRoll.animationTimer = new SimpleTimer(entityCFG.dodgeAnimationTimer, true);
+        barrelRoll.revolutions = 1;
+        barrelRoll.flipState = BarrelRollComponent.FlipState.off;
+        barrelRoll.force = entityCFG.dodgeForce;
+        shipEntity.add(barrelRoll);
+        
+        //map
+        MapComponent map = new MapComponent();
+        map.color = new Color(1, 1, 1, 0.9f);
+        map.distance = 3000;
+        shipEntity.add(map);
+        
+        //shield particle effect
+        ParticleComponent particle = new ParticleComponent();
+        particle.type = ParticleComponent.EffectType.shieldCharge;
+        particle.offset = new Vector2();
+        particle.angle = 0;
+        shipEntity.add(particle);
+        
+        //spline
+        TrailComponent spline = new TrailComponent();
+        spline.zOrder = 100;//should be on top of others
+        spline.style = TrailComponent.Style.state;
+        shipEntity.add(spline);
+        
+        //cargo
+        CargoComponent cargo = new CargoComponent();
+        shipEntity.add(cargo);
+        
+        //engine particle effect
+        Entity mainEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineMain, new Vector2(0, height + 0.2f), 0);
+        Entity leftEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineLeft, new Vector2(width/2 - 0.2f, 0), -90);
+        Entity rightEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineRight, new Vector2(-(width/2 - 0.2f), 0), 90);
+        
+        entityCluster.add(shipEntity);
+        entityCluster.add(mainEngine);
+        entityCluster.add(leftEngine);
+        entityCluster.add(rightEngine);
+        
+        return entityCluster;
+    }
+    
+    public static ChargeCannonComponent makeChargeCannon(float width) {
+        //width the anchor point relative to body
+        ChargeCannonComponent chargeCannon = new ChargeCannonComponent();
+        chargeCannon.anchorVec = new Vector2(width, 0);
+        chargeCannon.aimAngle = 0;
+        chargeCannon.velocity = entityCFG.cannonVelocity;
+        chargeCannon.maxSize = 0.30f;
+        chargeCannon.minSize = 0.1f;
+        chargeCannon.growRateTimer = new SimpleTimer(1500);
+        chargeCannon.baseDamage = 8f;
+        return chargeCannon;
+    }
+    
+    public static CannonComponent makeCannon(float width) {
+        //width the anchor point relative to body
+        CannonComponent cannon = new CannonComponent();
+        cannon.damage = entityCFG.cannonDamage;
+        cannon.maxAmmo = entityCFG.cannonAmmo;
+        cannon.curAmmo = cannon.maxAmmo;
+        cannon.baseRate = 300;
+        cannon.minRate = 40;
+        cannon.timerFireRate = new SimpleTimer(entityCFG.cannonFireRate);
+        cannon.size = entityCFG.cannonSize;
+        cannon.velocity = entityCFG.cannonVelocity;
+        cannon.acceleration = entityCFG.cannonAcceleration;
+        cannon.anchorVec = new Vector2(width, 0);
+        cannon.aimAngle = 0;
+        cannon.timerRechargeRate = new SimpleTimer(entityCFG.cannonRechargeRate);
+        return cannon;
+    }
+    
+    public static Entity createEngine(Entity parent, ParticleComponent.EffectType type, Vector2 offset, float angle) {
+        Entity entity = new Entity();
+        
+        AttachedToComponent attached = new AttachedToComponent();
+        attached.parentEntity = parent;
+        entity.add(attached);
+        
+        //EngineComponent->thrust?
+        //ShipEngineComponent engine = new ShipEngineComponent();
+        //engine.engineState = ShipEngineComponent.State.off;
+        //engine.thrust
+        //entity.add(engine);
+        
+        ParticleComponent particle = new ParticleComponent();
+        particle.type = type;
+        particle.offset = offset;
+        particle.angle = angle;
+        entity.add(particle);
+    
+        /*
+        todo: offset and angle like attached to?
+        todo: alternatively, move offset and angle into AttachedTo and allow chaining
+        SplineComponent test = new SplineComponent();
+        test.zOrder = 200;
+        test.style = SplineComponent.Style.solid;
+        test.color = Color.GOLD;
+        entity.add(test);
+        */
+        
+        return entity;
+    }
+    //endregion
+    
     //region characters
     public static Entity createCharacter(float x, float y) {
         Entity entity = new Entity();
@@ -146,7 +335,6 @@ public class EntityFactory {
         return aiShipCluster;
     }
     //endregion
-    
     
     //region Astronomical / Celestial objects and bodies
     public static Entity createStar(World world, long seed, float x, float y, boolean rotationDir) {
@@ -376,197 +564,6 @@ public class EntityFactory {
         return createAsteroid(seed, x, y, velX, velY, 0, hull);
     }
     //endregion
-    
-    
-    //region ships
-    public static Array<Entity> createBasicShip(float x, float y, boolean inSpace) {
-        return createBasicShip(x, y, null, inSpace);
-    }
-    
-    public static Array<Entity> createBasicShip(float x, float y, Entity driver, boolean inSpace) {
-        return createBasicShip(x, y, MyMath.getSeed(x, y), driver, inSpace);
-    }
-    
-    public static Array<Entity> createBasicShip(float x, float y, long seed, Entity driver, boolean inSpace) {
-        Array<Entity> entityCluster = new Array<>();
-        Entity shipEntity = new Entity();
-        
-        //seed
-        MathUtils.random.setSeed(seed);
-        SeedComponent seedComp = new SeedComponent();
-        seedComp.seed = seed;
-        shipEntity.add(seedComp);
-        
-        //transform
-        TransformComponent transform = new TransformComponent();
-        transform.pos.set(x, y);
-        transform.zOrder = RenderOrder.VEHICLES.getHierarchy();
-        transform.rotation = (float) Math.PI / 2; //face upwards
-        shipEntity.add(transform);
-        
-        //generate 3D sprite with random even size
-        int shipSize = MathUtils.random(entityCFG.shipSizeMin, entityCFG.shipSizeMax) * 2;
-        Texture shipTop = TextureFactory.generateShip(seed, shipSize);
-        Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
-        Sprite3DComponent sprite3DComp = new Sprite3DComponent();
-        sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom, engineCFG.sprite3DScale);
-        shipEntity.add(sprite3DComp);
-        
-        //collision detection
-        PhysicsComponent physics = new PhysicsComponent();
-        float width = shipTop.getWidth() * engineCFG.bodyScale;
-        float height = shipTop.getHeight() * engineCFG.bodyScale;
-        physics.body = BodyFactory.createShip(x, y, width, height, shipEntity, inSpace);
-        shipEntity.add(physics);
-        
-        //engine data and marks entity as drive-able
-        VehicleComponent vehicle = new VehicleComponent();
-        vehicle.dimensions = new Rectangle(0, 0, width, height);
-        vehicle.driver = driver;
-        vehicle.thrust = entityCFG.engineThrust;
-        shipEntity.add(vehicle);
-        
-        //health
-        HealthComponent health = new HealthComponent();
-        health.maxHealth = entityCFG.shipHealth;
-        health.health = health.maxHealth;
-        shipEntity.add(health);
-        
-        //weapon
-        if (true) {
-            CannonComponent cannon = makeCannon(vehicle.dimensions.width);
-            shipEntity.add(cannon);
-        } else {
-            ChargeCannonComponent chargeCannon = makeChargeCannon(vehicle.dimensions.width);
-            shipEntity.add(chargeCannon);
-        }
-        
-        //hyper drive
-        HyperDriveComponent hyperDrive = new HyperDriveComponent();
-        hyperDrive.speed = entityCFG.hyperSpeed;
-        hyperDrive.coolDownTimer = new SimpleTimer(2000);
-        hyperDrive.chargeTimer = new SimpleTimer(2000);
-        hyperDrive.graceTimer = new SimpleTimer(1000);
-        shipEntity.add(hyperDrive);
-        
-        //shield
-        ShieldComponent shield = new ShieldComponent();
-        shield.animTimer = new SimpleTimer(100, true);
-        shield.defence = 100f;
-        BoundingBox boundingBox = PolygonUtil.calculateBoundingBox(physics.body);
-        float radius = Math.max(boundingBox.getWidth(), boundingBox.getHeight());
-        shield.maxRadius = radius;
-        shipEntity.add(shield);
-        
-        //barrel roll
-        BarrelRollComponent barrelRoll = new BarrelRollComponent();
-        barrelRoll.cooldownTimer = new SimpleTimer(entityCFG.dodgeCooldown);
-        barrelRoll.animationTimer = new SimpleTimer(entityCFG.dodgeAnimationTimer, true);
-        barrelRoll.revolutions = 1;
-        barrelRoll.flipState = BarrelRollComponent.FlipState.off;
-        barrelRoll.force = entityCFG.dodgeForce;
-        shipEntity.add(barrelRoll);
-        
-        //map
-        MapComponent map = new MapComponent();
-        map.color = new Color(1, 1, 1, 0.9f);
-        map.distance = 3000;
-        shipEntity.add(map);
-        
-        //shield particle effect
-        ParticleComponent particle = new ParticleComponent();
-        particle.type = ParticleComponent.EffectType.shieldCharge;
-        particle.offset = new Vector2();
-        particle.angle = 0;
-        shipEntity.add(particle);
-        
-        //spline
-        TrailComponent spline = new TrailComponent();
-        spline.zOrder = 100;//should be on top of others
-        spline.style = TrailComponent.Style.state;
-        shipEntity.add(spline);
-        
-        //cargo
-        CargoComponent cargo = new CargoComponent();
-        shipEntity.add(cargo);
-    
-        //engine particle effect
-        Entity mainEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineMain, new Vector2(0, height + 0.2f), 0);
-        Entity leftEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineLeft, new Vector2(width/2 - 0.2f, 0), -90);
-        Entity rightEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineRight, new Vector2(-(width/2 - 0.2f), 0), 90);
-        
-        entityCluster.add(shipEntity);
-        entityCluster.add(mainEngine);
-        entityCluster.add(leftEngine);
-        entityCluster.add(rightEngine);
-        
-        return entityCluster;
-    }
-    
-    public static ChargeCannonComponent makeChargeCannon(float width) {
-        //width the anchor point relative to body
-        ChargeCannonComponent chargeCannon = new ChargeCannonComponent();
-        chargeCannon.anchorVec = new Vector2(width, 0);
-        chargeCannon.aimAngle = 0;
-        chargeCannon.velocity = entityCFG.cannonVelocity;
-        chargeCannon.maxSize = 0.30f;
-        chargeCannon.minSize = 0.1f;
-        chargeCannon.growRateTimer = new SimpleTimer(1500);
-        chargeCannon.baseDamage = 8f;
-        return chargeCannon;
-    }
-    
-    public static CannonComponent makeCannon(float width) {
-        //width the anchor point relative to body
-        CannonComponent cannon = new CannonComponent();
-        cannon.damage = entityCFG.cannonDamage;
-        cannon.maxAmmo = entityCFG.cannonAmmo;
-        cannon.curAmmo = cannon.maxAmmo;
-        cannon.baseRate = 300;
-        cannon.minRate = 40;
-        cannon.timerFireRate = new SimpleTimer(entityCFG.cannonFireRate);
-        cannon.size = entityCFG.cannonSize;
-        cannon.velocity = entityCFG.cannonVelocity;
-        cannon.acceleration = entityCFG.cannonAcceleration;
-        cannon.anchorVec = new Vector2(width, 0);
-        cannon.aimAngle = 0;
-        cannon.timerRechargeRate = new SimpleTimer(entityCFG.cannonRechargeRate);
-        return cannon;
-    }
-    
-    public static Entity createEngine(Entity parent, ParticleComponent.EffectType type, Vector2 offset, float angle) {
-        Entity entity = new Entity();
-    
-        AttachedToComponent attached = new AttachedToComponent();
-        attached.parentEntity = parent;
-        entity.add(attached);
-        
-        //EngineComponent->thrust?
-        //ShipEngineComponent engine = new ShipEngineComponent();
-        //engine.engineState = ShipEngineComponent.State.off;
-        //engine.thrust
-        //entity.add(engine);
-        
-        ParticleComponent particle = new ParticleComponent();
-        particle.type = type;
-        particle.offset = offset;
-        particle.angle = angle;
-        entity.add(particle);
-    
-        /*
-        todo: offset and angle like attached to?
-        todo: alternatively, move offset and angle into AttachedTo and allow chaining
-        SplineComponent test = new SplineComponent();
-        test.zOrder = 200;
-        test.style = SplineComponent.Style.solid;
-        test.color = Color.GOLD;
-        entity.add(test);
-        */
-        
-        return entity;
-    }
-    //endregion
-    
     
     public static Entity createWall(float x, float y, int width, int height) {
         Entity entity = new Entity();
