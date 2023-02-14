@@ -110,53 +110,52 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
             for (Entity e : createPlanetarySystem(1337, 420, ThreadLocalRandom.current().nextLong())) {
                 getEngine().addEntity(e);
             }
-
             */
         }
     }
     
     //region load
     private void updateLoadedBodies(float loadDistance) {
-        if (loadTimer.tryEvent()) {
-            loadDistance *= loadDistance;//square for dst2
-            
-            // remove stars from engine that are too far
-            unloadFarEntities(loadDistance);
-            
-            // add planetary systems to engine
-            loadCloseEntities(loadDistance);
-        }
+        if (!loadTimer.tryEvent()) return;
+        
+        loadDistance *= loadDistance;//square for dst2
+    
+        // remove stars from engine that are too far
+        unloadFarEntities(loadDistance);
+    
+        // add planetary systems to engine
+        loadCloseEntities(loadDistance);
     }
     
     private void loadCloseEntities(float loadDistance) {
         for (AstroBody astroBodies : GameScreen.galaxy.objects) {
             //check if point is close enough to be loaded
-            if (Vector2.dst2(astroBodies.x, astroBodies.y, GameScreen.cam.position.x, GameScreen.cam.position.y) < loadDistance) {
-                
-                // check if astro bodies already in world
-                boolean loaded = false;
-                for (Entity astroEntity : loadedAstronomicalBodies) {
-                    SeedComponent s = Mappers.seed.get(astroEntity);
-                    if (s.seed == astroBodies.seed) {
-                        loaded = true;
-                        break;
-                    }
+            if (Vector2.dst2(astroBodies.x, astroBodies.y, GameScreen.cam.position.x, GameScreen.cam.position.y) > loadDistance) {
+                continue;
+            }
+            
+            // check if astro bodies already in world
+            boolean loaded = false;
+            for (Entity loadedEntity : loadedAstronomicalBodies) {
+                SeedComponent seed = Mappers.seed.get(loadedEntity);
+                if (seed.seed == astroBodies.seed) {
+                    loaded = true;
+                    break;
                 }
-                
-                if (!loaded) {
-                    for (Entity e : createAstronomicalObjects(astroBodies.x, astroBodies.y)) {
-                        getEngine().addEntity(e);
-                    }
+            }
+            if (!loaded) {
+                for (Entity newEntity : createAstronomicalObjects(astroBodies.x, astroBodies.y)) {
+                    getEngine().addEntity(newEntity);
                 }
-                
             }
         }
     }
     
     private void unloadFarEntities(float loadDistance) {
         for (Entity entity : loadedAstronomicalBodies) {
-            TransformComponent t = Mappers.transform.get(entity);
-            if (Vector2.dst2(t.pos.x, t.pos.y, GameScreen.cam.position.x, GameScreen.cam.position.y) > loadDistance) {
+            TransformComponent transform = Mappers.transform.get(entity);
+            float distance = Vector2.dst2(transform.pos.x, transform.pos.y, GameScreen.cam.position.x, GameScreen.cam.position.y);
+            if (distance > loadDistance) {
                 entity.add(new RemoveComponent());
                 Gdx.app.log(getClass().getSimpleName(), "Removing Planetary System: " + entity.getComponent(TransformComponent.class).pos.toString());
             }
@@ -287,7 +286,6 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         Gdx.app.log(getClass().getSimpleName(), "Planetary System: [" + seed + "](" + x + ", " + y + ") Bodies: " + (numPlanets));
         
         return entities;
-        
     }
     
     private static void addLifeToPlanet(Entity planet) {
