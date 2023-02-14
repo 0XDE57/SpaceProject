@@ -16,7 +16,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.EntityConfig;
-import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 import com.spaceproject.ui.Sprite3D;
@@ -52,10 +52,10 @@ public class Test3DScreen extends ScreenAdapter {
     
     private void generateShip() {
         long seed = MathUtils.random(Long.MAX_VALUE);
-        Texture body = TextureFactory.generateShip(seed, MathUtils.random(20, 30));
-        Texture wing = TextureFactory.generateShipWingLeft(seed, (body.getWidth() + 1) / 2);
-        Texture shipTop = TextureFactory.combineShip(body, wing);
-        Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
+        Texture body = TextureGenerator.generateShip(seed, MathUtils.random(20, 30));
+        Texture wing = TextureGenerator.generateShipWingLeft(seed, (body.getWidth() + 1) / 2);
+        Texture shipTop = TextureGenerator.combineShip(body, wing);
+        Texture shipBottom = TextureGenerator.generateShipUnderSide(shipTop);
         
         ship3d = new Sprite3D(shipTop, shipBottom, 4);
     }

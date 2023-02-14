@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 
@@ -37,13 +37,13 @@ public class TestShipGenerationScreen extends ScreenAdapter {
         MathUtils.random.setSeed(seed);
         
         while (tex.size() < numShips) {
-            Texture body = TextureFactory.generateShip(MathUtils.random(Long.MAX_VALUE), MathUtils.random(10, 36));
-            Texture leftWing = TextureFactory.generateShipWingLeft(MathUtils.random(Long.MAX_VALUE), (body.getWidth() + 1) / 2);
-            Texture rightWing = TextureFactory.FlipTexture(leftWing, false, true);
+            Texture body = TextureGenerator.generateShip(MathUtils.random(Long.MAX_VALUE), MathUtils.random(10, 36));
+            Texture leftWing = TextureGenerator.generateShipWingLeft(MathUtils.random(Long.MAX_VALUE), (body.getWidth() + 1) / 2);
+            Texture rightWing = TextureGenerator.FlipTexture(leftWing, false, true);
             tex.add(leftWing);
             tex.add(rightWing);
             tex.add(body);
-            tex.add(TextureFactory.combineShip(body, leftWing));
+            tex.add(TextureGenerator.combineShip(body, leftWing));
         }
         
         

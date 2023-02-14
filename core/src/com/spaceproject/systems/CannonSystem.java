@@ -21,7 +21,7 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.RenderOrder;
 import com.spaceproject.generation.BodyFactory;
-import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
@@ -111,7 +111,7 @@ public class CannonSystem extends IteratingSystem {
         //create texture
         EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
         TextureComponent texture = new TextureComponent();
-        texture.texture = TextureFactory.generateProjectile();
+        texture.texture = TextureGenerator.generateProjectile();
         texture.scale = engineCFG.bodyScale;
         
         //physics

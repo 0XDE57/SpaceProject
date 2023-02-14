@@ -26,7 +26,7 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.generation.AstroBody;
 import com.spaceproject.generation.EntityFactory;
-import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.noise.NoiseBuffer;
 import com.spaceproject.screens.GameScreen;
@@ -180,7 +180,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         for (Entity p : getEngine().getEntitiesFor(Family.all(PlanetComponent.class).get())) {
             if (p.getComponent(SeedComponent.class).seed == noise.seed) {
                 // create planet texture from tileMap, replace texture
-                Texture newTex = TextureFactory.generatePlanet(noise.pixelatedTileMap, Tile.defaultTiles);
+                Texture newTex = TextureGenerator.generatePlanet(noise.pixelatedTileMap, Tile.defaultTiles);
                 p.getComponent(TextureComponent.class).texture = newTex;
                 Gdx.app.log(getClass().getSimpleName(), "Texture loaded: [" + noise.seed + "]");
                 return;

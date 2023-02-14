@@ -19,7 +19,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.BodyFactory;
 import com.spaceproject.generation.EntityFactory;
-import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
@@ -171,7 +171,7 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
         Entity drop = new Entity();
         
         TextureComponent texture = new TextureComponent();
-        texture.texture = TextureFactory.createTile(asteroid.color);
+        texture.texture = TextureGenerator.createTile(asteroid.color);
         //todo: rng texture shape between circle, triangle, square
         //texture.texture = TextureFactory.createCircle(asteroid.color);
         texture.scale = 1f;

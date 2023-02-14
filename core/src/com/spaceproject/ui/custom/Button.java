@@ -5,10 +5,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.generation.TextureGenerator;
 
 public class Button {
-    static Texture buttonTex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));
+    static Texture buttonTex = TextureGenerator.createTile(new Color(1f, 1f, 1f, 1f));
     
     private String text;
     private float x, y;

@@ -33,7 +33,7 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.DebugConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.generation.FontFactory;
-import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.debug.DebugText;
@@ -65,8 +65,8 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     private final Vector3 tempProjVector = new Vector3(); //for (un)/projecting screen coords
     
     //textures
-    private final Texture texCompBack = TextureFactory.createTile(Color.DARK_GRAY);
-    private final Texture texCompSeparator = TextureFactory.createTile(new Color(0.1f, 0.63f, 0.88f, 1f));
+    private final Texture texCompBack = TextureGenerator.createTile(Color.DARK_GRAY);
+    private final Texture texCompSeparator = TextureGenerator.createTile(new Color(0.1f, 0.63f, 0.88f, 1f));
     GlyphLayout versionLayout;
     
     //entity storage

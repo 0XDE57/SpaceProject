@@ -11,7 +11,7 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
-import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.screens.GameScreen;
 
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class SpaceDustSystem extends EntitySystem implements Disposable {
             Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + shader.getLog());
         }
         
-        dustTexture = TextureFactory.generateSpaceDust(MathUtils.random(Long.MAX_VALUE), tileSize, 200);
+        dustTexture = TextureGenerator.generateSpaceDust(MathUtils.random(Long.MAX_VALUE), tileSize, 200);
         //dustTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         //todo: is it possible to use GL_REPEAT and make the draw space take up the screen instead of drawing the same texture repeatedly?
         dustTexture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);

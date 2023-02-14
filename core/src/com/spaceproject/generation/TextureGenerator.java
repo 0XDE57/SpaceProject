@@ -15,7 +15,7 @@ import com.spaceproject.ui.Tile;
 
 import java.util.ArrayList;
 
-public class TextureFactory {
+public class TextureGenerator {
     
     public static Texture generateCharacter() {
         Pixmap pixmap = new Pixmap(4, 4, Format.RGB565);

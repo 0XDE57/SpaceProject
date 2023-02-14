@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.config.WorldConfig;
-import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.noise.NoiseBuffer;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Tile;
@@ -25,7 +25,7 @@ public class WorldRenderingSystem extends EntitySystem {
     
     private NoiseBuffer noiseMap = null;
     
-    private final Texture tileTex = TextureFactory.createTile(new Color(1f, 1f, 1f, 1f));
+    private final Texture tileTex = TextureGenerator.createTile(new Color(1f, 1f, 1f, 1f));
     private final WorldConfig worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
     
     private boolean debugShowEdgeTile = false;

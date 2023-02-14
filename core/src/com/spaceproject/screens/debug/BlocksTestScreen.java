@@ -11,7 +11,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.RenderOrder;
 import com.spaceproject.generation.BodyFactory;
-import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.systems.AsteroidRenderSystem;
 import com.spaceproject.systems.Box2DPhysicsSystem;
@@ -48,7 +48,7 @@ public class BlocksTestScreen extends MyScreenAdapter {
         
         int pixelPerUnit = 2;
         TextureComponent texture = new TextureComponent();
-        texture.texture = TextureFactory.generateWall(
+        texture.texture = TextureGenerator.generateWall(
                 width * pixelPerUnit,
                 height * pixelPerUnit,
                 new Color(0.4f, 0.4f, 0.4f, 1));

@@ -22,7 +22,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.RenderOrder;
 import com.spaceproject.generation.BodyFactory;
-import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
@@ -190,7 +190,7 @@ public class ChargeCannonSystem extends IteratingSystem {
         
         //create texture
         TextureComponent texture = new TextureComponent();
-        texture.texture = TextureFactory.generateProjectile();
+        texture.texture = TextureGenerator.generateProjectile();
         texture.scale = 0;//start at nothing
         entity.add(texture);
         

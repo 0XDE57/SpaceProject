@@ -2,7 +2,7 @@ package com.spaceproject.ui;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.spaceproject.generation.TextureFactory;
+import com.spaceproject.generation.TextureGenerator;
 
 public class SpaceBackgroundTile {
     
@@ -32,7 +32,7 @@ public class SpaceBackgroundTile {
         //generate texture
         switch (type) {
             case Stars:
-                tex = TextureFactory.generateSpaceBackgroundStars(tileX, tileY, tileSize, renderDepth);
+                tex = TextureGenerator.generateSpaceBackgroundStars(tileX, tileY, tileSize, renderDepth);
                 scale = 1;
                 break;
             case Dust:
@@ -43,7 +43,7 @@ public class SpaceBackgroundTile {
                 if (smoothRender) {
                     format = Pixmap.Format.RGBA8888;
                 }
-                tex = TextureFactory.generateSpaceBackgroundDust(tileX, tileY, tileSize, format);
+                tex = TextureGenerator.generateSpaceBackgroundDust(tileX, tileY, tileSize, format);
                 break;
             default:
                 tex = null;

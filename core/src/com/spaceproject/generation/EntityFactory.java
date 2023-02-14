@@ -93,8 +93,8 @@ public class EntityFactory {
         
         //generate 3D sprite with random even size
         int shipSize = MathUtils.random(entityCFG.shipSizeMin, entityCFG.shipSizeMax) * 2;
-        Texture shipTop = TextureFactory.generateShip(seed, shipSize);
-        Texture shipBottom = TextureFactory.generateShipUnderSide(shipTop);
+        Texture shipTop = TextureGenerator.generateShip(seed, shipSize);
+        Texture shipBottom = TextureGenerator.generateShipUnderSide(shipTop);
         Sprite3DComponent sprite3DComp = new Sprite3DComponent();
         sprite3DComp.renderable = new Sprite3D(shipTop, shipBottom, engineCFG.sprite3DScale);
         shipEntity.add(sprite3DComp);
@@ -264,7 +264,7 @@ public class EntityFactory {
         entity.add(transform);
         
         TextureComponent texture = new TextureComponent();
-        texture.texture = TextureFactory.generateCharacter();
+        texture.texture = TextureGenerator.generateCharacter();
         texture.scale = engineCFG.sprite2DScale;
         entity.add(texture);
         
@@ -364,7 +364,7 @@ public class EntityFactory {
         
         // create star texture
         TextureComponent texture = new TextureComponent();
-        texture.texture = TextureFactory.generateStar(seed, radius, 20);
+        texture.texture = TextureGenerator.generateStar(seed, radius, 20);
         texture.scale = 4;
         entity.add(texture);
 
@@ -412,7 +412,7 @@ public class EntityFactory {
         TextureComponent texture = new TextureComponent();
         int chunkSize = SpaceProject.configManager.getConfig(WorldConfig.class).chunkSize;
         int planetSize = (int) Math.pow(2, MathUtils.random(7, 10));
-        texture.texture = TextureFactory.generatePlanetPlaceholder(planetSize, chunkSize);
+        texture.texture = TextureGenerator.generatePlanetPlaceholder(planetSize, chunkSize);
         texture.scale = 16;
         entity.add(texture);
         
@@ -463,7 +463,7 @@ public class EntityFactory {
         TextureComponent texture = new TextureComponent();
         int size = (int) Math.pow(2, MathUtils.random(5, 7));
         int chunkSize = SpaceProject.configManager.getConfig(WorldConfig.class).chunkSize;
-        texture.texture = TextureFactory.generatePlanetPlaceholder(size, chunkSize);
+        texture.texture = TextureGenerator.generatePlanetPlaceholder(size, chunkSize);
         texture.scale = 16;
         entity.add(texture);
         
@@ -569,7 +569,7 @@ public class EntityFactory {
         Entity entity = new Entity();
         
         TextureComponent texture = new TextureComponent();
-        texture.texture = TextureFactory.generateWall(
+        texture.texture = TextureGenerator.generateWall(
                 width * engineCFG.pixelPerUnit,
                 height * engineCFG.pixelPerUnit,
                 new Color(0.4f, 0.4f, 0.4f, 1));
@@ -598,7 +598,7 @@ public class EntityFactory {
         float y = parentBody.y + radialDistance;
         
         TextureComponent texture = new TextureComponent();
-        texture.texture = TextureFactory.generateWall(
+        texture.texture = TextureGenerator.generateWall(
                 width,
                 height,
                 new Color(0.4f, 0.4f, 0.4f, 1));
