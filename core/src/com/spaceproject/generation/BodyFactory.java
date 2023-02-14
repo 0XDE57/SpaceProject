@@ -85,27 +85,6 @@ public class BodyFactory {
         return body;
     }
     
-    public static Body createRect(float x, float y, float width, float height, BodyDef.BodyType bodyType, Entity entity) {
-        Body body;
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = bodyType;
-        bodyDef.position.set(x, y);
-        body = GameScreen.box2dWorld.createBody(bodyDef);
-        
-        PolygonShape poly = new PolygonShape();
-        poly.setAsBox(width*0.5f, height*0.5f);
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = poly;
-        fixtureDef.density = 0.5f;
-        fixtureDef.friction = 0.0f;
-        fixtureDef.restitution = 0.6f; // Make it bounce a little bit
-        body.createFixture(fixtureDef);
-        poly.dispose();
-        body.setUserData(entity);
-        
-        return body;
-    }
-    
     public static Body createPlayerBody(float x, float y, Entity entity) {
         Texture texture = Mappers.texture.get(entity).texture;
         Body body = createRect(x, y,
@@ -145,6 +124,7 @@ public class BodyFactory {
         //innerCircleFixture.filter.categoryBits = 1; //inner ring: pickup
         body.createFixture(innerCircleFixture);
         innerCollectSensor.dispose();
+        
         //inner sensor
         CircleShape outerCollectSensor = new CircleShape();
         outerCollectSensor.setRadius(10 * collisionRadius);
@@ -183,23 +163,40 @@ public class BodyFactory {
         bodyDef.position.set(x, y);
         body = GameScreen.box2dWorld.createBody(bodyDef);
         
+        FixtureDef fixtureDef = new FixtureDef();
         PolygonShape poly = new PolygonShape();
         poly.setAsBox(scaledWidth, scaledHeight);
-        // Create a fixture definition to apply our shape to
+        fixtureDef.shape = poly;
+        fixtureDef.density = 0.5f;
+        fixtureDef.friction = 0.0f;
+        fixtureDef.restitution = 0.6f;
+        fixtureDef.isSensor = isSensor;
+        body.createFixture(fixtureDef);
+        poly.dispose();
+    
+        //tag user data with entity so contact listeners can access entities involved in the collision
+        body.setUserData(entity);
+        return body;
+    }
+    
+    public static Body createRect(float x, float y, float width, float height, BodyDef.BodyType bodyType, Entity entity) {
+        Body body;
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = bodyType;
+        bodyDef.position.set(x, y);
+        body = GameScreen.box2dWorld.createBody(bodyDef);
+        
+        PolygonShape poly = new PolygonShape();
+        poly.setAsBox(width*0.5f, height*0.5f);
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = poly;
         fixtureDef.density = 0.5f;
         fixtureDef.friction = 0.0f;
         fixtureDef.restitution = 0.6f; // Make it bounce a little bit
-        fixtureDef.isSensor = isSensor;
-        // Create our fixture and attach it to the body
         body.createFixture(fixtureDef);
-        // Remember to dispose of any shapes after you're done with them!
-        // BodyDef and FixtureDef don't need disposing, but shapes do.
         poly.dispose();
-    
-        //tag user data with entity so contact listeners can access entities involved in the collision
         body.setUserData(entity);
+        
         return body;
     }
     
