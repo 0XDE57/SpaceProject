@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.ConvexHull;
 import com.badlogic.gdx.math.DelaunayTriangulator;
+import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
@@ -45,6 +46,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     //convex hull
     float[] hull;
     Polygon hullPoly;
+    Vector2 centroid = new Vector2();
     
     //toggles
     boolean drawCircumcircle = false,
@@ -53,22 +55,25 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawDelaunay = true,
             drawVoronoi = true,
             drawMidpoints = false,
-            drawHull = true;
+            drawHull = true,
+            drawCentroid = true;
     
     int pSize = 6;
-    float dragRaduis = 20;
+    float dragRadius = 20;
     int focusedPoint = -1;//no index
     
     //todo: [x] fix grabbing points, focus point, don't lose it
     //todo: [x] highlight focused point
-    //todo: highlight when near grab-able point
-    //todo: center points
-    //todo: draw grid
-    //todo: discard points if too close? epsilon check remove duplicate points
-    //todo: fix scaling for window resize
-    //todo: fix voronoi cells for edge cases
-    //todo: extract voronoi cells
-    
+    //todo: [ ] highlight when near grab-able point
+    //todo: [ ] center points
+    //todo: [ ] draw grid
+    //todo: [ ] discard points if too close? epsilon check remove duplicate points
+    //todo: [ ] fix scaling for window resize
+    //todo: [ ] fix voronoi cells for edge cases
+    //todo: [ ] extract voronoi cells
+    //todo: [ ] display points as array both input and output
+    //todo: [x] display centroid
+    //todo: [ ] display centroid for sub poly
     
     public TestVoronoiScreen() {
         //center cam
@@ -151,6 +156,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         ConvexHull convex = new ConvexHull();
         hull = convex.computePolygon(points, false).toArray();
         hullPoly = new Polygon(hull);
+        
+        //center
+        GeometryUtils.polygonCentroid(hull, 0, hull.length, centroid);
     }
     
     /**
@@ -164,12 +172,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
      */
     public boolean collideWithHull(Vector2 a, Vector2 b, Vector2 intersect) {
         //for each line segment between two vertices
-        float[] verticies = hullPoly.getTransformedVertices();
-        for (int v = 0; v < verticies.length - 2; v += 2) {
-            float xA = verticies[v];
-            float yA = verticies[v + 1];
-            float xB = verticies[v + 2];
-            float yB = verticies[v + 3];
+        float[] vertices = hullPoly.getTransformedVertices();
+        for (int v = 0; v < vertices.length - 2; v += 2) {
+            float xA = vertices[v];
+            float yA = vertices[v + 1];
+            float xB = vertices[v + 2];
+            float yB = vertices[v + 3];
             // convex hull line between A and B
             Vector2 edgeA = new Vector2(xA, yA);
             Vector2 edgeB = new Vector2(xB, yB);
@@ -214,12 +222,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             
         } else {
             // check collision with convex hull, only draw within hull
-            float[] verticies = hullPoly.getTransformedVertices();
-            for (int v = 0; v < verticies.length - 2; v += 2) {
-                float xA = verticies[v];
-                float yA = verticies[v + 1];
-                float xB = verticies[v + 2];
-                float yB = verticies[v + 3];
+            float[] vertices = hullPoly.getTransformedVertices();
+            for (int v = 0; v < vertices.length - 2; v += 2) {
+                float xA = vertices[v];
+                float yA = vertices[v + 1];
+                float xB = vertices[v + 2];
+                float yB = vertices[v + 3];
                 // convex hull line
                 Vector2 edgeA = new Vector2(xA, yA);
                 Vector2 edgeB = new Vector2(xB, yB);
@@ -258,6 +266,10 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             }
         }
         
+        if (drawCentroid) {
+            shape.setColor(Color.CYAN);
+            shape.circle(centroid.x, centroid.y, pSize);
+        }
         
         for (DelaunayCell d : dCells) {
             //draw points
@@ -357,7 +369,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             float focusX = points.get(focusedPoint);
             float focusY = points.get(focusedPoint + 1);
             shape.setColor(Color.GREEN);
-            shape.circle(focusX, focusY, dragRaduis);
+            shape.circle(focusX, focusY, dragRadius);
         }
         
         if (drawHull && hullPoly != null) {
@@ -370,7 +382,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     
     @Override
     public void render(float delta) {
-        
         //clear screen
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -382,12 +393,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         updateControls();
         
         drawMenu();
-        
-        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
-            MyScreenAdapter.game.setScreen(new TitleScreen(MyScreenAdapter.game));
-        }
     }
-    
     
     private void drawMenu() {
         batch.begin();
@@ -413,11 +419,17 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         
         text.setColor(drawHull ? Color.GREEN : Color.BLACK);
         text.draw(batch, "7: Hull        ", 10, y - h * 6);
+        
+        text.setColor(drawCentroid ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "8: Centroid    ", 10, y - h * 7);
         batch.end();
     }
     
-    
     private void updateControls() {
+        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+            MyScreenAdapter.game.setScreen(new TitleScreen(MyScreenAdapter.game));
+        }
+        
         //reset. new test points
         if (Gdx.input.isKeyJustPressed(Keys.SPACE)) {
             generateNewPoints(3);
@@ -444,7 +456,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             for (int i = 0; i < points.size && !mod; i += 2) {
                 float px = points.get(i);
                 float py = points.get(i + 1);
-                if (Vector2.dst(x, y, px, py) < dragRaduis) {
+                if (Vector2.dst(x, y, px, py) < dragRadius) {
                     focusedPoint = i;
                     mod = true;
                 }
@@ -456,7 +468,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         } else {
             focusedPoint = -1;
         }
-        
         
         //toggle drawings
         if (Gdx.input.isKeyJustPressed(Keys.NUM_1)) {
@@ -479,6 +490,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         if (Gdx.input.isKeyJustPressed(Keys.NUM_7)) {
             drawHull = !drawHull;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.NUM_8)) {
+            drawCentroid = !drawCentroid;
         }
     }
     
