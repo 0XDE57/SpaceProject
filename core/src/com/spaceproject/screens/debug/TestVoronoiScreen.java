@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.ConvexHull;
 import com.badlogic.gdx.math.DelaunayTriangulator;
-import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
@@ -155,10 +154,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         //calculate the convex hull of all the points
         ConvexHull convex = new ConvexHull();
         hull = convex.computePolygon(points, false).toArray();
+        //computePolygon -> Returns convex hull in counter-clockwise order. Note: the last point in the returned list is the same as the first one.
+        //Gdx.app.log(getClass().getSimpleName(), "isCCW?" + GeometryUtils.isCCW(hull, 0, hull.length));
+        //todo: explore isCCW, start
         hullPoly = new Polygon(hull);
-        
-        //center
-        GeometryUtils.polygonCentroid(hull, 0, hull.length, centroid);
+        hullPoly.getCentroid(centroid); //-> GeometryUtils.polygonCentroid(hull, 0, hull.length, centroid);
     }
     
     /**
