@@ -6,7 +6,7 @@ Welcome to A Space Project. A project involving space...
 
 ![screenshot](/Capture.PNG?raw=true)
 
-***This game is in pre-alpha prototype phase. More of an sandbox than a game, there's not much content***
+***This game is in pre-alpha prototype phase. More of a sandbox than a game, there's not much content yet***
 
 ## Features
 * Fly around the starsystem in a spaceship
