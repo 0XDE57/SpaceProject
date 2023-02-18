@@ -1,5 +1,6 @@
 package com.spaceproject.math;
 
+import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
@@ -13,6 +14,7 @@ public class DelaunayCell {
     public DelaunayCell nAB, nBC, nCA;//neighbors (TODO: reference for now, index later)
     public Vector2 circumcenter;//center of circle that intersects each vertex a,b,c
     public float circumradius;//radius of circle that intersects each vertex a,b,c
+    public Vector2 centroid = new Vector2();
     
     public DelaunayCell(Vector2 a, Vector2 b, Vector2 c) {
         //set triangle points
@@ -29,6 +31,15 @@ public class DelaunayCell {
         Vector3 circle = PolygonUtil.circumcircle(a, b, c);
         circumcenter = new Vector2(circle.x, circle.y);
         circumradius = circle.z;
+        
+        //calculate centroid
+        float[] poly = new float[]{
+                a.x, a.y,
+                b.x, b.y,
+                c.x, c.y
+        };
+        //GeometryUtils.ensureCCW(poly);
+        GeometryUtils.polygonCentroid(poly, 0 , poly.length, centroid);
     }
     
     /**

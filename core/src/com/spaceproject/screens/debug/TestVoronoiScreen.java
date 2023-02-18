@@ -55,7 +55,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawVoronoi = true,
             drawMidpoints = false,
             drawHull = true,
-            drawCentroid = true;
+            drawCentroid = false;
     
     int pSize = 6;
     float dragRadius = 20;
@@ -72,7 +72,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     //todo: [ ] extract voronoi cells
     //todo: [ ] display points as array both input and output
     //todo: [x] display centroid
-    //todo: [ ] display centroid for sub poly
+    //todo: [x] display centroid for sub poly
     
     public TestVoronoiScreen() {
         //center cam
@@ -108,12 +108,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         //points.add(rectangle.x + rectangle.getWidth());
         //points.add(rectangle.y + rectangle.getHeight());
         
-        
-        //todo: center points
-        //consider polygon centroid as center of polygon (naturally)
-        //GeometryUtils.polygonCentroid()
-        
-        
         //create cells out of points
         calculateDelaunay();
     }
@@ -131,7 +125,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         //apply delaunay triangulation to points
         triangles = delaunay.computeTriangles(points, false);
         //triangles = new EarClippingTriangulator().computeTriangles(points);
-        
         
         //create cells for each triangle
         dCells.clear();
@@ -219,7 +212,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.circle(cellA.midBC.x, cellA.midBC.y, 8);
                 shape.circle(cellA.midCA.x, cellA.midCA.y, 8);
             }
-            
         } else {
             // check collision with convex hull, only draw within hull
             float[] vertices = hullPoly.getTransformedVertices();
@@ -279,6 +271,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.circle(d.b.x, d.b.y, pSize);
                 shape.circle(d.c.x, d.c.y, pSize);
             }
+    
+            if (drawCentroid) {
+                shape.setColor(Color.CYAN);
+                shape.circle(d.centroid.x, d.centroid.y, pSize);
+            }
             
             //draw delaunay triangles
             if (drawDelaunay) {
@@ -295,7 +292,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.circle(d.midCA.x, d.midCA.y, 2);
                 shape.circle(d.midBC.x, d.midBC.y, 3);
             }
-            
             
             //draw voronoi cells
             if (drawVoronoi) {
@@ -315,9 +311,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 drawCellEdge(d, d.nAB);
                 drawCellEdge(d, d.nBC);
                 drawCellEdge(d, d.nBC);
-				
-				
-				
+                
 				/*
 				if (hullPoly.contains(d.circumcenter)) {
 					/*
@@ -332,28 +326,24 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 					drawCellEdge(d, d.nBC);*
 
 				} else {
-					
 					//check collision with convex hull, only draw within hull
-					float[] verticies = hullPoly.getTransformedVertices();
-					for (int elocity = 0; elocity < verticies.length - 2; elocity += 2) {
-						float x1 = verticies[elocity];
-						float y1 = verticies[elocity + 1];
-						float x2 = verticies[elocity + 2];
-						float y2 = verticies[elocity + 3];
+					float[] vertices = hullPoly.getTransformedVertices();
+					for (int velocity = 0; velocity < vertices.length - 2; velocity += 2) {
+						float x1 = vertices[velocity];
+						float y1 = vertices[velocity + 1];
+						float x2 = vertices[velocity + 2];
+						float y2 = vertices[velocity + 3];
 						// convex hull line
 						Vector2 edgeA = new Vector2(x1, y1);
 						Vector2 edgeB = new Vector2(x2, y2);
 
-						
 						drawIntersectingLines(d, d.midAB, edgeA, edgeB);
 						drawIntersectingLines(d, d.midBC, edgeA, edgeB);
 						drawIntersectingLines(d, d.midCA, edgeA, edgeB);
 
 					}
 				}*/
-            
             }
-            
             
             //draw circumcircle
             if (!hullPoly.contains(d.circumcenter)) {
@@ -406,22 +396,22 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, "2: Circumcircle", 10, y - h * 1);
         
         text.setColor(drawPoints ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "3: Points  ", 10, y - h * 2);
+        text.draw(batch, "3: Points", 10, y - h * 2);
         
         text.setColor(drawMidpoints ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "4: Mid points  ", 10, y - h * 3);
+        text.draw(batch, "4: Mid points", 10, y - h * 3);
         
         text.setColor(drawVoronoi ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "5: Voronoi     ", 10, y - h * 4);
+        text.draw(batch, "5: Voronoi", 10, y - h * 4);
         
         text.setColor(drawDelaunay ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "6: Delaunay    ", 10, y - h * 5);
+        text.draw(batch, "6: Delaunay", 10, y - h * 5);
         
         text.setColor(drawHull ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "7: Hull        ", 10, y - h * 6);
+        text.draw(batch, "7: Hull", 10, y - h * 6);
         
         text.setColor(drawCentroid ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "8: Centroid    ", 10, y - h * 7);
+        text.draw(batch, "8: Delaunay Centroid", 10, y - h * 7);
         batch.end();
     }
     
