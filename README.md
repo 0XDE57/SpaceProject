@@ -6,7 +6,7 @@ Welcome to A Space Project. A project involving space...
 
 ![screenshot](/Capture.PNG?raw=true)
 
-***This game is in pre-alpha prototype phase. More of an sandbox than a game, there's not much content***
+***Game is in pre-alpha prototype phase. More of a sandbox than a game, there is not much content yet***
 
 ## Features
 * Fly around the starsystem in a spaceship
@@ -61,15 +61,14 @@ Welcome to A Space Project. A project involving space...
 
 ## Current Status
 A work in progress engine toy sandbox thing: scaffolding for what will hopefully one day be a game.
-Currently focused on figuring out some rendering issues with how shaders work.
-The code is bit rough in some places, littered with todo's, half-baked features, and of course the occasional bug.
-  
-
+The code is bit rough in some places, littered with todo's, half-baked features, and the occasional bug.
+See wiki and project for more documentation and current status.
 
 
 ## License
    Apache 2.0: see [LICENSE.md](/LICENSE.md)
    Credit appreciated.
+
 
 ## Libraries
 - [libGDX](https://github.com/libgdx/libgdx)
