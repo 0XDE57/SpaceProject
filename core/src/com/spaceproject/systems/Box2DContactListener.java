@@ -228,6 +228,8 @@ public class Box2DContactListener implements ContactListener {
         cargo.count++;
         cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
         item.add(new RemoveComponent());
+        
+        engine.getSystem(SoundSystem.class).pickup();
     }
     
     @Override

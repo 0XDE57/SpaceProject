@@ -44,6 +44,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     Sound shieldImpact;
     Sound shieldCharge, shieldOn, shieldOff, shieldAmbientLoop;
     Sound hyperdriveEngage;
+    Sound pickup;
     
     //these are maybe not necessary. will hold most recent handle.
     long laserSID, laserCID;
@@ -52,6 +53,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     long shieldImpactID;
     long shieldChargeID, shieldOnID, shieldOffID, shieldAmbientID;
     long hyperdriveEngageID;
+    long pickupID;
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -72,6 +74,8 @@ public class SoundSystem extends EntitySystem implements Disposable {
         
         //hyperdriveEngage = Gdx.audio.newSound(Gdx.files.internal("sound/hyperdriveInit.wav"));
         //hyperDriveDisengage = Gdx.audio.newSound(Gdx.files.internal("sound/hyperCharge.wav"));
+        
+        pickup = Gdx.audio.newSound(Gdx.files.internal("sound/pickup.wav"));
     }
     
     @Override
@@ -174,6 +178,11 @@ public class SoundSystem extends EntitySystem implements Disposable {
         //return hyperdriveEngageID = hyperdriveEngage.play();
     }
     
+    public long pickup() {
+        float pitch = MathUtils.random(0.5f, 2.0f);//pure random
+        return pickupID = pickup.play(0.25f, pitch, 0);
+    }
+    
     @Override
     public void dispose() {
         f3.dispose();
@@ -185,6 +194,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         shieldOn.dispose();
         shieldOff.dispose();
         shieldAmbientLoop.dispose();
+        pickup.dispose();
     }
     
 }
