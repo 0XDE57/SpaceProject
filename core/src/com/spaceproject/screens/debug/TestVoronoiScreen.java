@@ -71,8 +71,10 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     //todo: [ ] fix voronoi cells for edge cases
     //todo: [ ] extract voronoi cells
     //todo: [ ] display points as array both input and output
-    //todo: [x] display centroid
-    //todo: [x] display centroid for sub poly
+    //todo: [x] display centroid delaunay
+    //todo: [x] display centroid for sub delaunay
+    //todo: [x] display centroid voronoi
+    //todo: [x] display centroid for sub voronoi
     
     public TestVoronoiScreen() {
         //center cam
