@@ -41,7 +41,7 @@ Welcome to A Space Project. A project involving space...
 | Movement                       | WASD          | Left Stick + L1/R1    | Left Stick                              |
 | Aim                            | Mouse         | Left Stick            | Left Stick                              |
 | Boost                          | Space         | A                     | todo: needs button                      |
-| Breaks                         | S             | X                     | todo: needs button                      |
+| Brakes                         | S             | X                     | todo: needs button                      |
 | Attack: Shoot                  | Left-Click    | RT                    | bottom right button                     |
 | Defense: Shield                | Shift         | LT                    | todo: needs button                      |
 | Defense: Dodge (Barrel Roll)   | A/D + Space (or) Double Tap A/D | Double Tap R1/L1 | todo: swipe gesture?       |
