@@ -37,6 +37,7 @@ import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.ShaderComponent;
 import com.spaceproject.components.ShieldComponent;
+import com.spaceproject.components.SoundEmitterComponent;
 import com.spaceproject.components.SpaceStationComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.StarComponent;
@@ -177,6 +178,8 @@ public class EntityFactory {
         CargoComponent cargo = new CargoComponent();
         shipEntity.add(cargo);
         
+        shipEntity.add(new SoundEmitterComponent());
+        
         //engine particle effect
         Entity mainEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineMain, new Vector2(0, height + 0.2f), 0);
         Entity leftEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineLeft, new Vector2(width/2 - 0.2f, 0), -90);
@@ -239,6 +242,8 @@ public class EntityFactory {
         particle.offset = offset;
         particle.angle = angle;
         entity.add(particle);
+    
+        //entity.add(new SoundEmitterComponent());
     
         /*
         todo: offset and angle like attached to?
@@ -354,12 +359,16 @@ public class EntityFactory {
         //star.temperature = Physics.Sun.kelvin;//test sun color
         star.peakWavelength = Physics.temperatureToWavelength(star.temperature) * 1000000;
         int[] colorTemp = Physics.wavelengthToRGB(star.peakWavelength);
-        //convert from [0 to 255] -> [0 - 1]
-        star.colorTemp  = new float[]{
-                colorTemp[0] / 255.0f, // red
-                colorTemp[1] / 255.0f, // green
-                colorTemp[2] / 255.0f  // blue
-        };
+        star.colorTemp = new Color(colorTemp[0] / 255.0f,
+                colorTemp[1] / 255.0f,
+                colorTemp[2] / 255.0f, 1);
+        /*
+        Vector3 spectrum = BlackBodyColorSpectrum.spectrumToXYZ(star.temperature);
+        Vector3 color = BlackBodyColorSpectrum.xyzToRGB(BlackBodyColorSpectrum.SMPTEsystem, spectrum.x, spectrum.y, spectrum.z);
+        BlackBodyColorSpectrum.constrainRGB(color);
+        Vector3 normal = BlackBodyColorSpectrum.normRGB(color.x, color.y, color.z);
+        star.colorTemp = new Color(normal.x, normal.y, normal.z, 1);
+        */
         entity.add(star);
         
         // create star texture
@@ -393,7 +402,7 @@ public class EntityFactory {
         
         //mapState
         MapComponent map = new MapComponent();
-        map.color = new Color(0.9f, 0.9f, 0.15f, 0.9f);
+        map.color = star.colorTemp;
         map.distance = 80000;
         entity.add(map);
         

@@ -140,7 +140,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         if (control != null && shieldIsOff) {
             switch (particle.type) {
                 case shipEngineMain:
-                    if (control.moveForward || control.boost || hyperdriveIsActive) {
+                    if (((control.moveForward || control.boost) && !control.moveBack) || hyperdriveIsActive) {
                         particle.pooledEffect.start();
                     } else {
                         particle.pooledEffect.allowCompletion();

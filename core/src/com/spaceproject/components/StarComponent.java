@@ -1,6 +1,7 @@
 package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.gdx.graphics.Color;
 
 public class StarComponent implements Component {
     
@@ -15,7 +16,7 @@ public class StarComponent implements Component {
     
     public double peakWavelength; //nanometers
     
-    public float[] colorTemp; // Black Body Radiation!
+    public Color colorTemp; // Black Body Radiation!
     
     //public long age; //years
     

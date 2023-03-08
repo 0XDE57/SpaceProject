@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Disposable;
+import com.spaceproject.components.SoundEmitterComponent;
 
 public class SoundSystem extends EntitySystem implements Disposable {
     
@@ -38,6 +39,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     //  16-bit WAV -> MONO
     //  Roughly -3 to -6 db track rendering?
     
+    Sound shipEngineActiveLoop, shipEngineAmbientLoop;
     Sound f3;
     Sound laserShoot, laserShootCharge;
     Sound hullImpact, hullImpactHeavy;
@@ -47,6 +49,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     Sound pickup;
     
     //these are maybe not necessary. will hold most recent handle.
+    long shipEngineActiveID, shipEngineAmbientID;
     long laserSID, laserCID;
     long f3ID;
     long hullImpactID, hullImpactHeavyID;
@@ -55,9 +58,13 @@ public class SoundSystem extends EntitySystem implements Disposable {
     long hyperdriveEngageID;
     long pickupID;
     
+    
     @Override
     public void addedToEngine(Engine engine) {
         //  load sounds (should use assetmanager?)
+        shipEngineActiveLoop = Gdx.audio.newSound(Gdx.files.internal("sound/brownNoise.wav"));
+        shipEngineAmbientLoop = Gdx.audio.newSound(Gdx.files.internal("sound/60hz.wav"));
+        
         f3 = Gdx.audio.newSound(Gdx.files.internal("sound/f3.wav"));
         
         laserShoot = Gdx.audio.newSound(Gdx.files.internal("sound/laserShoot.wav"));// laserShootW2
@@ -78,12 +85,59 @@ public class SoundSystem extends EntitySystem implements Disposable {
         pickup = Gdx.audio.newSound(Gdx.files.internal("sound/pickup.wav"));
     }
     
-    @Override
-    public void update(float deltaTime) {}
+    boolean isEngineLooping = false;
+    public long shipEngineActive(boolean startLoop, float pitch) {
+        if (startLoop) {
+            if (!isEngineLooping) {
+                shipEngineActiveID = shipEngineActiveLoop.loop(1, pitch, 0);
+            }
+            isEngineLooping = true;
+            shipEngineActiveLoop.setPitch(shipEngineActiveID, pitch);
+        } else {
+            isEngineLooping = false;
+            shipEngineActiveLoop.stop();
+        }
+        return shipEngineActiveID;
+    }
+    
+    public long shipEngineAmbient(SoundEmitterComponent sound, boolean active, float velocity) {
+        if (active) {
+            if (sound.soundID == -1) {
+                sound.soundID = shipEngineAmbientLoop.loop();
+                sound.active = true;
+            }
+            float relVel = velocity / Box2DPhysicsSystem.getVelocityLimit();
+            float pitch = MathUtils.map(0f, 1f, 0.5f, 2.0f, relVel);
+            shipEngineAmbientLoop.setPitch(sound.soundID, pitch);
+            shipEngineAmbientLoop.setVolume(sound.soundID, 0.1f);
+        } else {
+            if (sound.soundID != -1) {
+                shipEngineAmbientLoop.setLooping(sound.soundID, false);
+                sound.soundID = -1;
+                sound.active = false;
+            }
+        }
+        return sound.soundID;
+    }
+    
+    boolean isShieldLoop = false;
+    public long shieldAmbient(boolean startLoop) {
+        if (startLoop) {
+            if (!isShieldLoop) {
+                shieldAmbientID = shieldAmbientLoop.play();
+            }
+            isShieldLoop = true;
+        } else {
+            isShieldLoop = false;
+            shieldAmbientLoop.stop();
+        }
+        shieldAmbientLoop.setLooping(shieldAmbientID, startLoop);
+        return shieldAmbientID;
+    }
     
     public long asteroidShatter() {
         // play new sound and keep handle for further manipulation
-        float pitch = MathUtils.random(0.5f, 2.0f);//pure random
+        float pitch = MathUtils.random(0.5f, 2.0f);
         return f3ID = f3.play(0.25f, pitch, 0);
     }
     
@@ -156,35 +210,20 @@ public class SoundSystem extends EntitySystem implements Disposable {
         return shieldOffID = shieldOff.play();
     }
     
-    boolean isAlreadyLooping = false;
-    public long shieldAmbient(boolean loop) {
-        //if (true) return 0;
-        if (loop) {
-            if (!isAlreadyLooping) {
-                shieldAmbientID = shieldAmbientLoop.play(0.5f);
-            }
-            isAlreadyLooping = true;
-        } else {
-            isAlreadyLooping = false;
-            shieldAmbientLoop.stop();
-        }
-        shieldAmbientLoop.setLooping(shieldAmbientID, loop);
-        return shieldAmbientID;
-    }
-    
     public long hyperdriveEngage() {
         return 0;//disable for now
-        
         //return hyperdriveEngageID = hyperdriveEngage.play();
     }
     
     public long pickup() {
-        float pitch = MathUtils.random(0.5f, 2.0f);//pure random
-        return pickupID = pickup.play(0.25f, pitch, 0);
+        float pitch = MathUtils.random(0.5f, 2.0f);
+        return pickupID = pickup.play(0.5f, pitch, 0);
     }
     
     @Override
     public void dispose() {
+        shipEngineActiveLoop.dispose();
+        shipEngineAmbientLoop.dispose();
         f3.dispose();
         laserShoot.dispose();
         laserShootCharge.dispose();

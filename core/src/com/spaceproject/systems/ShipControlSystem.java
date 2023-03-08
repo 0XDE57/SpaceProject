@@ -20,6 +20,7 @@ import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.ShieldComponent;
+import com.spaceproject.components.SoundEmitterComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
@@ -44,7 +45,8 @@ public class ShipControlSystem extends IteratingSystem {
     private ImmutableArray<Entity> planets;
     
     public ShipControlSystem() {
-        super(Family.all(ControllableComponent.class, TransformComponent.class, VehicleComponent.class).exclude(ScreenTransitionComponent.class).get());
+        super(Family.all(ControllableComponent.class, TransformComponent.class, VehicleComponent.class)
+                .exclude(ScreenTransitionComponent.class).get());
     }
     
     @Override
@@ -60,7 +62,6 @@ public class ShipControlSystem extends IteratingSystem {
     
     private void controlShip(Entity entity, float delta) {
         ControllableComponent control = Mappers.controllable.get(entity);
-        VehicleComponent vehicle = Mappers.vehicle.get(entity);
         TransformComponent transformComp = Mappers.transform.get(entity);
         PhysicsComponent physicsComp = Mappers.physics.get(entity);
         
@@ -69,31 +70,54 @@ public class ShipControlSystem extends IteratingSystem {
         }
         
         //rotate ship
-        faceTarget(control, physicsComp, delta);
+        if (!control.moveBack)
+            faceTarget(control, physicsComp, delta);
     
         if (!canControlShip(entity))
             return;
         
-        //movement
-        if (control.moveForward || control.boost) {
-            accelerate(control, physicsComp.body, vehicle, delta);
-        }
+        float angle = physicsComp.body.getAngle();
         if (control.moveBack) {
-            decelerate(control, physicsComp.body, vehicle, delta);
+            float velocityAngle = physicsComp.body.getLinearVelocity().angleRad();
+            control.angleTargetFace = velocityAngle;
+            faceTarget(control, physicsComp, delta);
+            angle += 180 * MathUtils.degRad;
+        } else {
+            if (control.moveLeft && !control.moveRight && !control.moveForward) angle += 90 * MathUtils.degRad;
+            if (control.moveRight && !control.moveLeft && !control.moveForward) angle -= 90 * MathUtils.degRad;
+            if (control.moveLeft && !control.moveRight && control.moveForward)  angle += 45 * MathUtils.degRad;
+            if (control.moveRight && !control.moveLeft && control.moveForward)  angle -= 45 * MathUtils.degRad;
         }
-        if (control.moveLeft) {
-            strafeLeft(vehicle, control, physicsComp, delta);
+        boolean engineActive = false;
+        if ((control.moveForward || control.moveLeft || control.moveRight || control.moveBack || control.boost)
+                && !(control.moveLeft && control.moveRight && !control.moveForward)) {
+            VehicleComponent vehicle = Mappers.vehicle.get(entity); //todo: switch to per attached engine thrust
+            float thrust = vehicle.thrust * control.movementMultiplier * delta;
+            if (control.boost) {
+                thrust *= boostMultiplier;
+            }
+            Vector2 force = MyMath.vector(angle, thrust);
+            physicsComp.body.applyForceToCenter(force, true);
+            engineActive = true;
         }
-        if (control.moveRight) {
-            strafeRight(vehicle, control, physicsComp, delta);
+        
+        SoundSystem soundSys = getEngine().getSystem(SoundSystem.class);
+        if (soundSys != null) {
+            float velocity = physicsComp.body.getLinearVelocity().len();
+            float pitch = physicsComp.body.getLinearVelocity().len2() / Box2DPhysicsSystem.getVelocityLimit2();
+            pitch = MathUtils.map(0f, 1f, 0.5f, 2.0f, pitch);
+            //todo: separate active sound per jet: forward,left,right,reverse(left+right)
+            //soundSys.shipEngineActive(move, pitch); //active noise from jets.
+            SoundEmitterComponent sound = Mappers.sound.get(entity);
+            //soundSys.shipEngineAmbient(sound, engineActive, velocity);
+            // 1. pitch modulation to indicate velocity
+            // 2. second modulation for change of dir, g-force?
+            // 3. active low noise
         }
         
         //exit vehicle
         if (control.changeVehicle) {
-            boolean canExit = !GameScreen.inSpace();
-            if (canExit) {
-                exitVehicle(entity, control);
-            }
+            exitVehicle(entity, control);
         }
         
         if (control.swapWeapon) {
@@ -121,47 +145,10 @@ public class ShipControlSystem extends IteratingSystem {
         physicsComp.body.applyAngularImpulse(impulse, true);
     }
     
-    private static void accelerate(ControllableComponent control, Body body, VehicleComponent vehicle, float delta) {
-        float thrust = vehicle.thrust * control.movementMultiplier * delta;
-        if (control.boost) {
-            thrust *= boostMultiplier;//booost!
-        }
-        body.applyForceToCenter(MyMath.vector(body.getAngle(), thrust), true);
-    }
-    
-    private static void decelerate(ControllableComponent control, Body body, VehicleComponent vehicle, float delta) {
-        float thrust = vehicle.thrust * control.movementMultiplier * delta;
-        if (control.boost) {
-            thrust *= boostMultiplier;//booost!
-        }
-        body.applyForceToCenter(MyMath.vector(body.getAngle()-(180*MathUtils.degreesToRadians), thrust), true);
-        /* todo: breaking mode that auto faces velocity angle and turns on reverse thrusters
-        float stopThreshold = 0.2f;
-        if (body.getLinearVelocity().len() <= stopThreshold) {
-            //completely stop if moving really slowly
-            body.setLinearVelocity(0, 0);
-        } else {
-            //add thrust opposite direction of velocity to slow down ship
-            float thrust = body.getLinearVelocity().len() * 20 * delta;
-            float angle = body.getLinearVelocity().angleRad() - 180 * MathUtils.degRad;
-            body.applyForceToCenter(MyMath.vector(angle, thrust), true);
-        }*/
-    }
-    
-    private void strafeRight(VehicleComponent vehicle, ControllableComponent control, PhysicsComponent physicsComp, float delta) {
-        float thrust = vehicle.thrust * control.movementMultiplier * delta;
-        Vector2 force = MyMath.vector(physicsComp.body.getAngle(), thrust).rotate90(-1);
-        physicsComp.body.applyForceToCenter(force, true);
-    }
-    
-    private void strafeLeft(VehicleComponent vehicle, ControllableComponent control, PhysicsComponent physicsComp, float delta) {
-        float thrust = vehicle.thrust * control.movementMultiplier * delta;
-        Vector2 force = MyMath.vector(physicsComp.body.getAngle(), thrust).rotate90(1);
-        physicsComp.body.applyForceToCenter(force, true);
-    }
-    
     private void exitVehicle(Entity vehicleEntity, ControllableComponent control) {
-        //action timer
+        if (GameScreen.inSpace())
+            return;
+      
         if (!control.timerVehicle.tryEvent())
             return;
         

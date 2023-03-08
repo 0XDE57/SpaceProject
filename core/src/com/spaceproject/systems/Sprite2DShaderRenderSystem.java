@@ -111,10 +111,7 @@ public class Sprite2DShaderRenderSystem extends IteratingSystem implements Dispo
             StarComponent star = Mappers.star.get(entity);
             if (star != null) {
                 //starShader.bind();
-                starShader.setUniformf("u_colorTemp",
-                        star.colorTemp[0],  // red
-                        star.colorTemp[1],  // green
-                        star.colorTemp[2]); // blue
+                starShader.setUniformf("u_colorTemp", star.colorTemp.r, star.colorTemp.g, star.colorTemp.b);
             }
             
             render(entity);
