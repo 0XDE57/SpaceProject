@@ -157,7 +157,7 @@ public class AISystem extends IteratingSystem {
         Vector2 linVel = body.getLinearVelocity();
         float zeroLinearSpeedThreshold = 0.001f;
         if (!linVel.isZero(zeroLinearSpeedThreshold)) {
-            float newOrientation = MyMath.vectorToAngle(linVel);
+            float newOrientation = linVel.angleRad();
             body.setAngularVelocity((newOrientation - body.getAngularVelocity()) * deltaTime); // this is superfluous if independentFacing is always true
             body.setTransform(body.getPosition(), newOrientation);
         }

@@ -26,24 +26,12 @@ public abstract class MyMath {
         return x + (largePrime * y);
     }
     
-    public static void testUnique() {
-        int distCheck = 10; //Integer.MAX_VALUE;
-        for (int x = 0; x <= distCheck; x++) {
-            for (int y = 0; y <= distCheck; x++) {
-                System.out.println(x + ", " + y + ": " + getSeed(x, y));
-                //System.out.println(x + ", " + y + ": " + test(x, y));
-            }
-        }
-    }
-    
     public static long getNewGalaxySeed() {
         long newSeed = new Random().nextLong();
-        
         if (GameScreen.isDebugMode) {
-            newSeed = 1; //test seed
+            newSeed = 1; //test seed. todo: select seed on game start
         }
         Gdx.app.log("MyMath", "galaxy seed: " + newSeed);
-        
         return newSeed;
     }
     //endregion
@@ -77,10 +65,6 @@ public abstract class MyMath {
         return (float) Math.atan2(x2 - x1, y2 - y1);
     }
     
-    public static float vectorToAngle(Vector2 vector) {
-        return (float)Math.atan2(-vector.x, vector.y);
-    }
-    
     public static float getAngularImpulse(Body body, float targetAngle, float delta) {
         //https://www.iforce2d.net/b2dtut/rotate-to-angle
         float nextAngle = body.getAngle() + body.getAngularVelocity() * delta;
@@ -107,7 +91,6 @@ public abstract class MyMath {
         return (value - min) / (max - min);
     }
     
-    
     //region formatting
     /** Convert bytes to a human readable format.
      * Eg: 26673720 -> 25.44MB
@@ -130,12 +113,9 @@ public abstract class MyMath {
         long seconds = (millis / 1000) % 60;
         long minutes = (millis / (1000 * 60)) % 60;
         long hours = millis / (1000 * 60 * 60);
-        
         builder.setLength(0);//clear
-        builder.append(hours == 0 ? "00" : hours < 10 ? "0" + hours : hours);
-        builder.append(":");
-        builder.append(minutes == 0 ? "00" : minutes < 10 ? "0" + minutes : minutes);
-        builder.append(":");
+        builder.append(hours == 0 ? "00" : hours < 10 ? "0" + hours : hours).append(":");
+        builder.append(minutes == 0 ? "00" : minutes < 10 ? "0" + minutes : minutes).append(":");
         builder.append(seconds == 0 ? "00" : seconds < 10 ? "0" + seconds : seconds);
         return builder.toString();
     }
@@ -149,6 +129,7 @@ public abstract class MyMath {
     }
     
     public static String formatVector3as2(Vector3 vec, int decimal) {
+        //ignore Z component in this case
         return round(vec.x, decimal) + ", " + round(vec.y, decimal);
     }
     
@@ -165,7 +146,6 @@ public abstract class MyMath {
     }
     //endregion
     
-    
     public static long fibonacci(int n) {
         if (n == 0) {
             return 0;
@@ -173,7 +153,6 @@ public abstract class MyMath {
         if (n <= 2) {
             return 1;
         }
-        
         return fibonacci(n - 1) + fibonacci(n - 2);
     }
     
