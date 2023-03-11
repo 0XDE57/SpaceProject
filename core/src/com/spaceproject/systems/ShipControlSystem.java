@@ -62,25 +62,29 @@ public class ShipControlSystem extends IteratingSystem {
     
     private void controlShip(Entity entity, float delta) {
         ControllableComponent control = Mappers.controllable.get(entity);
-        TransformComponent transformComp = Mappers.transform.get(entity);
-        PhysicsComponent physicsComp = Mappers.physics.get(entity);
+        TransformComponent transform = Mappers.transform.get(entity);
+        PhysicsComponent physics = Mappers.physics.get(entity);
         
         if (GameScreen.isDebugMode) {
-            applyDebugControls(entity, transformComp, physicsComp);
+            applyDebugControls(entity, transform, physics);
         }
         
         //rotate ship
         if (!control.moveBack)
-            faceTarget(control, physicsComp, delta);
+            faceTarget(control, physics, delta);
     
-        if (!canControlShip(entity))
+        SoundSystem soundSys = getEngine().getSystem(SoundSystem.class);
+        if (!canControlShip(entity)) {
+            SoundEmitterComponent sound = Mappers.sound.get(entity);
+            soundSys.shipEngineAmbient(sound, false, 0, 0);
             return;
+        }
         
-        float angle = physicsComp.body.getAngle();
+        float angle = physics.body.getAngle();
         if (control.moveBack) {
-            float velocityAngle = physicsComp.body.getLinearVelocity().angleRad();
+            float velocityAngle = physics.body.getLinearVelocity().angleRad();
             control.angleTargetFace = velocityAngle;
-            faceTarget(control, physicsComp, delta);
+            faceTarget(control, physics, delta);
             angle += 180 * MathUtils.degRad;
         } else {
             if (control.moveLeft && !control.moveRight && !control.moveForward) angle += 90 * MathUtils.degRad;
@@ -97,19 +101,20 @@ public class ShipControlSystem extends IteratingSystem {
                 thrust *= boostMultiplier;
             }
             Vector2 force = MyMath.vector(angle, thrust);
-            physicsComp.body.applyForceToCenter(force, true);
+            physics.body.applyForceToCenter(force, true);
             engineActive = true;
         }
         
-        SoundSystem soundSys = getEngine().getSystem(SoundSystem.class);
+        
         if (soundSys != null) {
-            float velocity = physicsComp.body.getLinearVelocity().len();
-            float pitch = physicsComp.body.getLinearVelocity().len2() / Box2DPhysicsSystem.getVelocityLimit2();
-            pitch = MathUtils.map(0f, 1f, 0.5f, 2.0f, pitch);
+            float velocity = physics.body.getLinearVelocity().len();
+            //float pitch = physics.body.getLinearVelocity().len2() / Box2DPhysicsSystem.getVelocityLimit2();
+            //pitch = MathUtils.map(0f, 1f, 0.5f, 2.0f, pitch);
             //todo: separate active sound per jet: forward,left,right,reverse(left+right)
-            //soundSys.shipEngineActive(move, pitch); //active noise from jets.
+            //soundSys.shipEngineActive(engineActive, 1); //active noise from jets.
             SoundEmitterComponent sound = Mappers.sound.get(entity);
-            //soundSys.shipEngineAmbient(sound, engineActive, velocity);
+            soundSys.shipEngineAmbient(sound, engineActive, velocity, delta);
+            //soundSys.shipEngineAmbient(sound, engineActive, velocity + 0.2f);
             // 1. pitch modulation to indicate velocity
             // 2. second modulation for change of dir, g-force?
             // 3. active low noise
@@ -126,7 +131,7 @@ public class ShipControlSystem extends IteratingSystem {
         
         //transition or take off from planet
         if (GameScreen.inSpace()) {
-            Entity planet = getPlanetNearPosition(transformComp.pos);
+            Entity planet = getPlanetNearPosition(transform.pos);
             control.canTransition = planet != null;
             if (control.transition && control.canTransition) {
                 beginLandOnPlanet(entity, planet);
@@ -195,10 +200,8 @@ public class ShipControlSystem extends IteratingSystem {
         }
         ScreenTransitionComponent trans = Mappers.screenTrans.get(entity);
         if (trans != null) {
-            
             return false;
         }
-        
         return true;
     }
     

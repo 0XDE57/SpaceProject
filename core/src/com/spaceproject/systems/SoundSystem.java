@@ -63,7 +63,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     public void addedToEngine(Engine engine) {
         //  load sounds (should use assetmanager?)
         shipEngineActiveLoop = Gdx.audio.newSound(Gdx.files.internal("sound/brownNoise.wav"));
-        shipEngineAmbientLoop = Gdx.audio.newSound(Gdx.files.internal("sound/60hz.wav"));
+        shipEngineAmbientLoop = Gdx.audio.newSound(Gdx.files.internal("sound/55hz.wav"));
         
         f3 = Gdx.audio.newSound(Gdx.files.internal("sound/f3.wav"));
         
@@ -92,7 +92,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
                 shipEngineActiveID = shipEngineActiveLoop.loop(1, pitch, 0);
             }
             isEngineLooping = true;
-            shipEngineActiveLoop.setPitch(shipEngineActiveID, pitch);
+            //shipEngineActiveLoop.setPitch(shipEngineActiveID, pitch);
         } else {
             isEngineLooping = false;
             shipEngineActiveLoop.stop();
@@ -100,16 +100,23 @@ public class SoundSystem extends EntitySystem implements Disposable {
         return shipEngineActiveID;
     }
     
-    public long shipEngineAmbient(SoundEmitterComponent sound, boolean active, float velocity) {
+    float accumulator;
+    public long shipEngineAmbient(SoundEmitterComponent sound, boolean active, float velocity, float delta) {
         if (active) {
             if (sound.soundID == -1) {
                 sound.soundID = shipEngineAmbientLoop.loop();
                 sound.active = true;
+                
+            }
+            //todo sound id of 0 seems to not play?
+            if (sound.soundID == 0) {
+                
             }
             float relVel = velocity / Box2DPhysicsSystem.getVelocityLimit();
             float pitch = MathUtils.map(0f, 1f, 0.5f, 2.0f, relVel);
+            accumulator += 30.0f * relVel * delta;
             shipEngineAmbientLoop.setPitch(sound.soundID, pitch);
-            shipEngineAmbientLoop.setVolume(sound.soundID, 0.1f);
+            shipEngineAmbientLoop.setVolume(sound.soundID, ((float) Math.abs(Math.sin(accumulator))));
         } else {
             if (sound.soundID != -1) {
                 shipEngineAmbientLoop.setLooping(sound.soundID, false);
