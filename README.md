@@ -63,7 +63,11 @@ Welcome to A Space Project. A project involving space...
 ## Current Status
 A work in progress engine toy sandbox thing: scaffolding for what will hopefully one day be a game.
 The code is bit rough in some places, littered with todo's, half-baked features, and the occasional bug.
-See wiki and project for more documentation and current status.
+For more documentation and current status see:
+
+wiki: https://github.com/0XDE57/SpaceProject/wiki
+
+project: https://github.com/users/0XDE57/projects/1
 
 
 ## License
