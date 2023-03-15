@@ -8,7 +8,7 @@ import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.RemoveComponent;
-import com.spaceproject.components.SoundEmitterComponent;
+import com.spaceproject.components.SoundComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.systems.SoundSystem;
@@ -47,7 +47,7 @@ public class ResourceDisposer {
             disposedParticle++;
         }
     
-        SoundEmitterComponent sound = Mappers.sound.get(entity);
+        SoundComponent sound = Mappers.sound.get(entity);
         if (sound != null) {
             if (sound.active) {
                 soundKilled++;

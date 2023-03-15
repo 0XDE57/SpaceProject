@@ -8,7 +8,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.Disposable;
-import com.spaceproject.components.SoundEmitterComponent;
+import com.spaceproject.components.SoundComponent;
 
 public class SoundSystem extends EntitySystem implements Disposable {
     
@@ -57,7 +57,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     Sound pickup;
     
     //these are maybe not necessary. will hold most recent handle.
-    //todo: kill these. id's will be held in activeloops if loop, or in
+    //todo: kill these. id's will be held in activeloops if loop, or in soundcomponent
     long laserSID, laserCID;
     long f3ID;
     long hullImpactID, hullImpactHeavyID;
@@ -102,7 +102,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         pickup = Gdx.audio.newSound(Gdx.files.internal("sound/pickup.wav"));
     }
     
-    public static void stopSound(SoundEmitterComponent soundComponent) {
+    public static void stopSound(SoundComponent soundComponent) {
         Sound sound = activeLoops.get(soundComponent.soundID);
         if (sound != null) {
             sound.stop(soundComponent.soundID);
@@ -132,7 +132,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     }
     
     float accumulator;
-    public long shipEngineAmbient(SoundEmitterComponent sound, boolean active, float velocity, float delta) {
+    public long shipEngineAmbient(SoundComponent sound, boolean active, float velocity, float delta) {
         if (active) {
             if (sound.soundID == -1) {
                 sound.soundID = shipEngineAmbientLoop.loop();

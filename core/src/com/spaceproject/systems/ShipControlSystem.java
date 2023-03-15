@@ -20,7 +20,7 @@ import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.ScreenTransitionComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.SoundEmitterComponent;
+import com.spaceproject.components.SoundComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
@@ -75,7 +75,7 @@ public class ShipControlSystem extends IteratingSystem {
     
         SoundSystem soundSys = getEngine().getSystem(SoundSystem.class);
         if (!canControlShip(entity)) {
-            SoundEmitterComponent sound = Mappers.sound.get(entity);
+            SoundComponent sound = Mappers.sound.get(entity);
             soundSys.shipEngineAmbient(sound, false, 0, 0);
             return;
         }
@@ -112,7 +112,7 @@ public class ShipControlSystem extends IteratingSystem {
             //pitch = MathUtils.map(0f, 1f, 0.5f, 2.0f, pitch);
             //todo: separate active sound per jet: forward,left,right,reverse(left+right)
             //soundSys.shipEngineActive(engineActive, 1); //active noise from jets.
-            SoundEmitterComponent sound = Mappers.sound.get(entity);
+            SoundComponent sound = Mappers.sound.get(entity);
             soundSys.shipEngineAmbient(sound, engineActive, velocity, delta);
             //soundSys.shipEngineAmbient(sound, engineActive, velocity + 0.2f);
             // 1. pitch modulation to indicate velocity
