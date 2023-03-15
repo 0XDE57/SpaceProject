@@ -8,14 +8,18 @@ import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.RemoveComponent;
+import com.spaceproject.components.SoundEmitterComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.TextureComponent;
+import com.spaceproject.systems.SoundSystem;
 
 public class ResourceDisposer {
     
     private static int disposedTextures, disposedS3D, destroyedBody, disposedParticle;
     private static int totalTextures, totalS3D, totalBody, totalParticle;
     private static int totalTotal;
+    private static int soundKilled;
+    private static int additionalRemove;
     private static StringBuilder info = new StringBuilder();
     
     public static void dispose(Entity entity) {
@@ -42,22 +46,30 @@ public class ResourceDisposer {
             particle.pooledEffect.dispose();
             disposedParticle++;
         }
+    
+        SoundEmitterComponent sound = Mappers.sound.get(entity);
+        if (sound != null) {
+            if (sound.active) {
+                soundKilled++;
+            }
+            SoundSystem.stopSound(sound);
+        }
 
         //if entity was charging a projectile, make sure the projectile entity is also removed
         ChargeCannonComponent chargeCannon = Mappers.chargeCannon.get(entity);
         if (chargeCannon != null && chargeCannon.projectileEntity != null) {
             //destroy or release
             chargeCannon.projectileEntity.add(new RemoveComponent());
+            additionalRemove++;
         }
     }
     
     public static void disposeAllExcept(ImmutableArray<Entity> entities, Array<Entity> ignoreEntities) {
         for (Entity entity : entities) {
             if (ignoreEntities != null && ignoreEntities.contains(entity, false)) {
-                Gdx.app.debug("ResourceDisposer", "Did NOT dispose: " + DebugUtil.objString(entity));
+                Gdx.app.debug("ResourceDisposer", "Skip dispose: " + DebugUtil.objString(entity));
                 continue;
             }
-            
             dispose(entity);
         }
     }
@@ -82,13 +94,13 @@ public class ResourceDisposer {
     }
     
     public static String getTotalDisposeCount() {
-        info.setLength(0);
-        info.append("\n     [Texture]:  " + totalTextures);
-        info.append("\n     [Sprite3D]: " + totalS3D);
-        info.append("\n     [Particle]: " + totalParticle);
-        info.append("\n     [B2D Body]: " + totalBody);
-        info.append("\n     [Total]:    " + totalTotal); // total ;)
         reset();
+        info.setLength(0);
+        info.append("\n     [Texture]:  ").append(totalTextures);
+        info.append("\n     [Sprite3D]: ").append(totalS3D);
+        info.append("\n     [Particle]: ").append(totalParticle);
+        info.append("\n     [B2D Body]: ").append(totalBody);
+        info.append("\n     [Total]:    ").append(totalTotal);
         return info.toString();
     }
     

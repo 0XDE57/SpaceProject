@@ -3,8 +3,10 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.SoundEmitterComponent;
 
@@ -39,6 +41,12 @@ public class SoundSystem extends EntitySystem implements Disposable {
     //  16-bit WAV -> MONO
     //  Roughly -3 to -6 db track rendering?
     
+    private float masterVolume = 1.0f;
+    private boolean soundEnabled = true;
+    
+    static ArrayMap<Long, Sound> activeLoops;
+    AssetManager assetManager;
+    
     Sound shipEngineActiveLoop, shipEngineAmbientLoop;
     Sound f3;
     Sound laserShoot, laserShootCharge;
@@ -49,19 +57,28 @@ public class SoundSystem extends EntitySystem implements Disposable {
     Sound pickup;
     
     //these are maybe not necessary. will hold most recent handle.
-    long shipEngineActiveID, shipEngineAmbientID;
+    //todo: kill these. id's will be held in activeloops if loop, or in
     long laserSID, laserCID;
     long f3ID;
     long hullImpactID, hullImpactHeavyID;
     long shieldImpactID;
     long shieldChargeID, shieldOnID, shieldOffID, shieldAmbientID;
-    long hyperdriveEngageID;
     long pickupID;
     
     
     @Override
     public void addedToEngine(Engine engine) {
-        //  load sounds (should use assetmanager?)
+        activeLoops = new ArrayMap<>();
+        
+        /*
+        //todo: should use assetmanager?
+        assetManager = new AssetManager();
+        assetManager.load("sound/brownNoise.wav", Sound.class);
+        assetManager.finishLoading();
+        shipEngineActiveLoop = assetManager.get("sound/55hz.wav", Sound.class);//fails: wrong path?
+         */
+        
+        //load sounds
         shipEngineActiveLoop = Gdx.audio.newSound(Gdx.files.internal("sound/brownNoise.wav"));
         shipEngineAmbientLoop = Gdx.audio.newSound(Gdx.files.internal("sound/55hz.wav"));
         
@@ -85,11 +102,25 @@ public class SoundSystem extends EntitySystem implements Disposable {
         pickup = Gdx.audio.newSound(Gdx.files.internal("sound/pickup.wav"));
     }
     
+    public static void stopSound(SoundEmitterComponent soundComponent) {
+        Sound sound = activeLoops.get(soundComponent.soundID);
+        if (sound != null) {
+            sound.stop(soundComponent.soundID);
+        }
+        activeLoops.removeKey(soundComponent.soundID);
+        soundComponent.soundID = -1;
+        soundComponent.active = false;
+    }
+    
     boolean isEngineLooping = false;
     public long shipEngineActive(boolean startLoop, float pitch) {
+        //if (!soundEnabled) return -1;
+        
+        long shipEngineActiveID = -1;
         if (startLoop) {
             if (!isEngineLooping) {
                 shipEngineActiveID = shipEngineActiveLoop.loop(1, pitch, 0);
+                //activeLoops.put(shipEngineActiveID, shipEngineActiveLoop);
             }
             isEngineLooping = true;
             //shipEngineActiveLoop.setPitch(shipEngineActiveID, pitch);
@@ -106,20 +137,23 @@ public class SoundSystem extends EntitySystem implements Disposable {
             if (sound.soundID == -1) {
                 sound.soundID = shipEngineAmbientLoop.loop();
                 sound.active = true;
-                
+                activeLoops.put(sound.soundID, shipEngineAmbientLoop);
             }
             //todo sound id of 0 seems to not play?
-            if (sound.soundID == 0) {
-                
-            }
+            if (sound.soundID == 0) { Gdx.app.error(getClass().getSimpleName(), sound.soundID + ""); }
+            
+            //pitch
             float relVel = velocity / Box2DPhysicsSystem.getVelocityLimit();
             float pitch = MathUtils.map(0f, 1f, 0.5f, 2.0f, relVel);
+            shipEngineAmbientLoop.setPitch(sound.soundID, pitch * masterVolume);
+            //volume
             accumulator += 30.0f * relVel * delta;
-            shipEngineAmbientLoop.setPitch(sound.soundID, pitch);
-            shipEngineAmbientLoop.setVolume(sound.soundID, ((float) Math.abs(Math.sin(accumulator))));
+            float oscillator = (float) Math.abs(Math.sin(accumulator));//todo move to sound component
+            shipEngineAmbientLoop.setVolume(sound.soundID, oscillator);
         } else {
             if (sound.soundID != -1) {
                 shipEngineAmbientLoop.setLooping(sound.soundID, false);
+                activeLoops.removeKey(sound.soundID);
                 sound.soundID = -1;
                 sound.active = false;
             }
@@ -143,7 +177,6 @@ public class SoundSystem extends EntitySystem implements Disposable {
     }
     
     public long asteroidShatter() {
-        // play new sound and keep handle for further manipulation
         float pitch = MathUtils.random(0.5f, 2.0f);
         return f3ID = f3.play(0.25f, pitch, 0);
     }

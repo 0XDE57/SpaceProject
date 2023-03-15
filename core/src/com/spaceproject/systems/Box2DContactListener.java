@@ -28,7 +28,6 @@ import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.RingEffectComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.SoundEmitterComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TrailComponent;
@@ -424,14 +423,6 @@ public class Box2DContactListener implements ContactListener {
             asteroid.doShatter = true;
             engine.getSystem(SoundSystem.class).asteroidShatter();
             //todo: if star -> sound.asteroidBurn()
-        }
-        
-        SoundEmitterComponent sound = Mappers.sound.get(entity);
-        if (sound != null) {
-            if (sound.active) {
-                //todo: how to determine soundType?
-                engine.getSystem(SoundSystem.class).shipEngineAmbient(sound, false, 0, 0);
-            }
         }
         
         Gdx.app.log(getClass().getSimpleName(),
