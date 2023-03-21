@@ -422,11 +422,15 @@ public class Box2DContactListener implements ContactListener {
         if (asteroid != null) {
             asteroid.doShatter = true;
             engine.getSystem(SoundSystem.class).asteroidShatter();
-            //todo: if star -> sound.asteroidBurn()
+            //todo: if source = star -> sound.asteroidBurn()
         }
         
-        Gdx.app.log(getClass().getSimpleName(),
-                "[" + DebugUtil.objString(entity) + "] killed by: [" + DebugUtil.objString(source) + "]");
+        VehicleComponent vehicle = Mappers.vehicle.get(entity);
+        if (vehicle != null) {
+            Gdx.app.log(getClass().getSimpleName(),
+                    "[" + DebugUtil.objString(entity) + "] destroyed by: [" + DebugUtil.objString(source) + "]");
+            engine.getSystem(SoundSystem.class).shipExplode();
+        }
     }
     
 }
