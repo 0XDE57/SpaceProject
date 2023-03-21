@@ -60,15 +60,6 @@ public class TitleScreenMenu {
             }
         });
         
-        TextButton btnMulti = new TextButton("multiplayer", VisUI.getSkin());
-        btnMulti.getLabel().setAlignment(Align.left);
-        btnMulti.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                Dialogs.showOKDialog(stage, "multiplayer", "hahahahahahahaha! no.");
-            }
-        });
-        
         TextButton btnLoad = new TextButton("load", VisUI.getSkin());
         btnLoad.getLabel().setAlignment(Align.left);
         btnLoad.addListener(new ChangeListener() {
@@ -115,7 +106,6 @@ public class TitleScreenMenu {
         
         
         table.add(btnPlay).fillX().row();
-        table.add(btnMulti).fillX().row();
         table.add(btnLoad).fillX().row();
         table.add(btnOption).fillX().row();
         table.add(btnAbout).fillX().row();
