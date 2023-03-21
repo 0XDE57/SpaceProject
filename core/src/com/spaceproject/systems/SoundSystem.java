@@ -56,16 +56,6 @@ public class SoundSystem extends EntitySystem implements Disposable {
     Sound hyperdriveEngage;
     Sound pickup;
     
-    //these are maybe not necessary. will hold most recent handle.
-    //todo: kill these. id's will be held in activeloops if loop, or in soundcomponent
-    long laserSID, laserCID;
-    long f3ID;
-    long hullImpactID, hullImpactHeavyID;
-    long shieldImpactID;
-    long shieldChargeID, shieldOnID, shieldOffID, shieldAmbientID;
-    long pickupID;
-    
-    
     @Override
     public void addedToEngine(Engine engine) {
         activeLoops = new ArrayMap<>();
@@ -140,7 +130,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
                 activeLoops.put(sound.soundID, shipEngineAmbientLoop);
             }
             //todo sound id of 0 seems to not play?
-            if (sound.soundID == 0) { Gdx.app.error(getClass().getSimpleName(), sound.soundID + ""); }
+            //if (sound.soundID == 0) { Gdx.app.error(getClass().getSimpleName(), sound.soundID + ""); }
             
             //pitch
             float relVel = velocity / Box2DPhysicsSystem.getVelocityLimit();
@@ -163,6 +153,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     
     boolean isShieldLoop = false;
     public long shieldAmbient(boolean startLoop) {
+        long shieldAmbientID = -1;
         if (startLoop) {
             if (!isShieldLoop) {
                 shieldAmbientID = shieldAmbientLoop.play();
@@ -178,7 +169,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     
     public long asteroidShatter() {
         float pitch = MathUtils.random(0.5f, 2.0f);
-        return f3ID = f3.play(0.25f, pitch, 0);
+        return f3.play(0.25f, pitch, 0);
     }
     
     int curStep = 0;
@@ -211,7 +202,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
             curStep = 0;
         }
         
-        return f3ID = f3.play(0.25f, pitch, 0);
+        return f3.play(0.25f, pitch, 0);
     }
     
     public void laserShoot() {
@@ -219,35 +210,35 @@ public class SoundSystem extends EntitySystem implements Disposable {
     }
     
     public long laserShoot(float volume, float pitch) {
-        return laserSID = laserShoot.play(volume, pitch, 0);
+        return laserShoot.play(volume, pitch, 0);
     }
     
     public long laserCharge(float volume, float pitch) {
-        return laserCID = laserShootCharge.play(volume, pitch, 0);
+        return laserShootCharge.play(volume, pitch, 0);
     }
     
     public long hullImpactLight(float volume) {
-        return hullImpactID = hullImpact.play(volume, 2, 0);
+        return hullImpact.play(volume, 2, 0);
     }
     
     public long hullImpactHeavy(float pitch) {
-        return hullImpactHeavyID = hullImpactHeavy.play(1, pitch, 0);
+        return hullImpactHeavy.play(1, pitch, 0);
     }
     
     public long shieldImpact(float volume) {
-        return shieldImpactID = shieldImpact.play(volume, 1, 0);
+        return shieldImpact.play(volume, 1, 0);
     }
     
     public long shieldCharge() {
-        return shieldChargeID = shieldCharge.play();
+        return shieldCharge.play();
     }
     
     public long shieldOn() {
-        return shieldOnID = shieldOn.play();
+        return shieldOn.play();
     }
     
     public long shieldOff() {
-        return shieldOffID = shieldOff.play();
+        return shieldOff.play();
     }
     
     public long hyperdriveEngage() {
@@ -257,7 +248,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     
     public long pickup() {
         float pitch = MathUtils.random(0.5f, 2.0f);
-        return pickupID = pickup.play(0.5f, pitch, 0);
+        return pickup.play(0.5f, pitch, 0);
     }
     
     @Override
