@@ -37,7 +37,7 @@ import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.ShaderComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.SoundEmitterComponent;
+import com.spaceproject.components.SoundComponent;
 import com.spaceproject.components.SpaceStationComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.StarComponent;
@@ -178,7 +178,7 @@ public class EntityFactory {
         CargoComponent cargo = new CargoComponent();
         shipEntity.add(cargo);
         
-        shipEntity.add(new SoundEmitterComponent());
+        shipEntity.add(new SoundComponent());
         
         //engine particle effect
         Entity mainEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineMain, new Vector2(0, height + 0.2f), 0);
