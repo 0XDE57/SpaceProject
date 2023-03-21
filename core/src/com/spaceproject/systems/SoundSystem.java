@@ -48,6 +48,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     AssetManager assetManager;
     
     Sound shipEngineActiveLoop, shipEngineAmbientLoop;
+    Sound shipExplode;
     Sound f3;
     Sound laserShoot, laserShootCharge;
     Sound hullImpact, hullImpactHeavy;
@@ -71,6 +72,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         //load sounds
         shipEngineActiveLoop = Gdx.audio.newSound(Gdx.files.internal("sound/brownNoise.wav"));
         shipEngineAmbientLoop = Gdx.audio.newSound(Gdx.files.internal("sound/55hz.wav"));
+        shipExplode = Gdx.audio.newSound(Gdx.files.internal("sound/explode.wav"));
         
         f3 = Gdx.audio.newSound(Gdx.files.internal("sound/f3.wav"));
         
@@ -251,10 +253,15 @@ public class SoundSystem extends EntitySystem implements Disposable {
         return pickup.play(0.5f, pitch, 0);
     }
     
+    public long shipExplode() {
+        return shipExplode.play();
+    }
+    
     @Override
     public void dispose() {
         shipEngineActiveLoop.dispose();
         shipEngineAmbientLoop.dispose();
+        shipExplode.dispose();
         f3.dispose();
         laserShoot.dispose();
         laserShootCharge.dispose();
