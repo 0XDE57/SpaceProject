@@ -126,7 +126,17 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
                     vertices[p2], vertices[p2 + 1], // xy: 2, 3
                     vertices[p3], vertices[p3 + 1]  // xy: 4, 5
             };
-            GeometryUtils.ensureCCW(hull);
+            
+            //GeometryUtils.ensureCCW(hull);
+            
+            //shift vertices to be centered around 0,0 relatively
+            Vector2 center = new Vector2();
+            GeometryUtils.polygonCentroid(hull, 0, hull.length, center);
+            for (int j = 0; j < hull.length; j += 2) {
+                hull[j] -= center.x;
+                hull[j + 1] -= center.y;
+            }
+            
             float triangleQuality = GeometryUtils.triangleQuality(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5]);
             //if (triangleQuality < 2.0f) {
             //todo: add new vertices to break in half

@@ -564,7 +564,6 @@ public class EntityFactory {
         //shift vertices to be centered around 0,0 relatively
         Vector2 center = new Vector2();
         GeometryUtils.polygonCentroid(hull, 0, hull.length, center);
-        center.add(minX, minY);
         for (int index = 0; index < hull.length; index += 2) {
             hull[index] -= center.x;
             hull[index + 1] -= center.y;
