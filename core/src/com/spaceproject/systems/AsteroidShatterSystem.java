@@ -20,7 +20,6 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.BodyFactory;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.generation.TextureGenerator;
-import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
@@ -28,7 +27,6 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
     
     private final DelaunayTriangulator delaunay = new DelaunayTriangulator();
     private final float minAsteroidSize = 100; //anything smaller than this will not create more
-    private final float maxDriftVel = 2.0f; //drift when shatter
     private final float maxDriftAngle = 0.25f; //angular drift when shatter
     
     @Override
@@ -62,21 +60,15 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
     private void shatterAsteroid(Entity parentAsteroid, AsteroidComponent asteroid) {
         float[] vertices = asteroid.polygon.getVertices();
         
-        //debug center of mass / origin
-        Vector2 center = new Vector2();
-        
-        GeometryUtils.polygonCentroid(vertices, 0, vertices.length, center);
-        if (!asteroid.centerOfMass.epsilonEquals(center)) {
-            Gdx.app.debug(this.getClass().getSimpleName(), "WARNING: polygonCentroid disagreement");
-        }
-        
         //create new polygons from vertices + center point to "sub shatter" into smaller polygon shards
         int length = vertices.length;
         float[] newPoly = new float[length + 2];
         System.arraycopy(vertices, 0, newPoly, 0, vertices.length);
-        //add new point in center of triangle
-        newPoly[length] = asteroid.centerOfMass.x;
-        newPoly[length + 1] = asteroid.centerOfMass.y;
+        //add new point in center of polygon
+        Vector2 center = new Vector2();
+        GeometryUtils.polygonCentroid(vertices, 0, vertices.length, center);
+        newPoly[length] = center.x;
+        newPoly[length + 1] = center.y;
         
         spawnChildAsteroid(parentAsteroid, newPoly);
     }
@@ -114,7 +106,7 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
         */
         
         ShortArray triangles = delaunay.computeTriangles(vertices, false);
-        //Gdx.app.debug(this.getClass().getSimpleName(), "shatter into " + triangles.size);
+        Gdx.app.debug(getClass().getSimpleName(), "shatter into " + triangles.size / 3);
         
         //create cells for each triangle
         for (int index = 0; index < triangles.size; index += 3) {
@@ -133,22 +125,10 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
             Vector2 center = new Vector2();
             GeometryUtils.polygonCentroid(hull, 0, hull.length, center);
             for (int j = 0; j < hull.length; j += 2) {
-                hull[j] -= center.x;
-                hull[j + 1] -= center.y;
+                //todo: shift, but fix spawn origin relative to parent body
+                //hull[j] -= center.x;
+                //hull[j + 1] -= center.y;
             }
-            
-            float triangleQuality = GeometryUtils.triangleQuality(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5]);
-            //if (triangleQuality < 2.0f) {
-            //todo: add new vertices to break in half
-            // because the current shatter creates long ugly slivers
-            //}
-            /*
-            Gdx.app.debug(this.getClass().getSimpleName(),
-                    MyMath.round(hull[0],1) + ", " + MyMath.round(hull[1],1) + " | " +
-                            MyMath.round(hull[2],1) + ", " + MyMath.round(hull[3],1) + " | " +
-                            MyMath.round(hull[4],1) + ", " + MyMath.round(hull[5],1) +
-                            " | clockwise: " + GeometryUtils.isClockwise(hull, 0, hull.length) + " | quality: " + triangleQuality);
-            */
             
             //discard duplicate points
             if ((hull[0] == hull[2] && hull[1] == hull[3]) || // p1 == p2 or
@@ -164,14 +144,11 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
     
             //add some variation in velocity and angular so pieces drift apart
             Body parentBody = Mappers.physics.get(parentAsteroid).body;
-            Vector2 pos = parentBody.getPosition();
+            Vector2 pos = parentBody.getPosition();//todo: .cpy().add(center); NOT WORKING, WHY??S
             Vector2 vel = parentBody.getLinearVelocity();
-            Vector2 driftVel = MyMath.vector(MathUtils.random(0, MathUtils.PI2), maxDriftVel);
-            vel.add(driftVel);
-            float angularDrift = MathUtils.random(-maxDriftAngle, maxDriftAngle);
-            
             Entity childAsteroid = EntityFactory.createAsteroid((long) (Math.random() * Long.MAX_VALUE),
                     pos.x, pos.y, vel.x, vel.y, parentBody.getAngle(), hull);
+            float angularDrift = MathUtils.random(-maxDriftAngle, maxDriftAngle);
             Mappers.physics.get(childAsteroid).body.setAngularVelocity(parentBody.getAngularVelocity() + angularDrift);
             getEngine().addEntity(childAsteroid);
         }
