@@ -509,6 +509,7 @@ public class EntityFactory {
         
         TransformComponent transform = new TransformComponent();
         transform.pos.set(x, y);
+        transform.rotation = angle;
         entity.add(transform);
     
         /*
