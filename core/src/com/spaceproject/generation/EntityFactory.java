@@ -544,18 +544,19 @@ public class EntityFactory {
     }
     
     public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float size) {
-        //create random set of points
+        float tolerance = 3f;
         int numPoints = 7;//Box2D poly vert limit is 8: Assertion `3 <= count && count <= 8' failed.
         FloatArray points = new FloatArray();
-        float minX = size;
-        float minY = size;
         for (int i = 0; i < numPoints * 2; i += 2) {
-            float pX = MathUtils.random(size);
-            float pY = MathUtils.random(size);
+            //generate unique: Duplicate points will result in undefined behavior.
+            float pX, pY;
+            do {
+                pX = MathUtils.random(size);
+                pY = MathUtils.random(size);
+            } while (containsPoint(points, pX, pY, tolerance));
+    
             points.add(pX);
             points.add(pY);
-            minX = Math.min(minX, pX);
-            minY = Math.min(minY, pY);
         }
         
         //generate hull poly from random points
@@ -571,6 +572,15 @@ public class EntityFactory {
         }
         
         return createAsteroid(seed, x, y, velX, velY, 0, hull);
+    }
+    
+    private static boolean containsPoint(FloatArray points, float pX, float pY, float tolerance) {
+        for (int i = 0; i < points.size; i += 2) {
+            if (Vector2.dst(points.get(i), points.get(i + 1), pX, pY) <= tolerance) {
+                return true;
+            }
+        }
+        return false;
     }
     //endregion
     

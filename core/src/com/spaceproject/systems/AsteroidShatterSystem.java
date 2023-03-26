@@ -58,13 +58,12 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
     }
     
     private void shatterAsteroid(Entity parentAsteroid, AsteroidComponent asteroid) {
-        float[] vertices = asteroid.polygon.getVertices();
-        
         //create new polygons from vertices + center point to "sub shatter" into smaller polygon shards
+        float[] vertices = asteroid.polygon.getVertices();
         int length = vertices.length;
         float[] newPoly = new float[length + 2];
         System.arraycopy(vertices, 0, newPoly, 0, vertices.length);
-        //add new point in center of polygon
+        
         Vector2 center = new Vector2();
         GeometryUtils.polygonCentroid(vertices, 0, vertices.length, center);
         newPoly[length] = center.x;
@@ -103,6 +102,12 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
         API Addition: Polygon methods setVertex, getVertex, getVertexCount, getCentroid.
         API Addition: GeometryUtils,polygons isCCW, ensureClockwise, reverseVertices
         https://libgdx.com/news/2022/05/gdx-1-11
+        
+        computeTriangles():
+            - Duplicate points will result in undefined behavior. sorted – If false, the points will be sorted by the x coordinate,
+              which is required by the triangulation algorithm. If sorting is done the input array is not modified,
+              the returned indices are for the input array, and count*2 additional working memory is needed.
+            - Returns: triples of indices into the points that describe the triangles in clockwise order.
         */
         
         ShortArray triangles = delaunay.computeTriangles(vertices, false);
@@ -119,37 +124,36 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
                     vertices[p3], vertices[p3 + 1]  // xy: 4, 5
             };
             
-            //GeometryUtils.ensureCCW(hull);
-            
-            //shift vertices to be centered around 0,0 relatively
-            Vector2 center = new Vector2();
-            GeometryUtils.polygonCentroid(hull, 0, hull.length, center);
-            for (int j = 0; j < hull.length; j += 2) {
-                //todo: shift, but fix spawn origin relative to parent body
-                //hull[j] -= center.x;
-                //hull[j + 1] -= center.y;
-            }
-            
             //discard duplicate points
             if ((hull[0] == hull[2] && hull[1] == hull[3]) || // p1 == p2 or
                     (hull[0] == hull[4] && hull[1] == hull[5]) || // p1 == p3 or
                     (hull[2] == hull[4] && hull[3] == hull[5])) { // p2 == p3
-                
-                Gdx.app.error(this.getClass().getSimpleName(), "Duplicate point! Discarding triangle");
-                
+                Gdx.app.error(getClass().getSimpleName(), "Duplicate point! Discarding triangle");
                 //duplicate points result in crash:
-                //java: ../b2PolygonShape.cpp:158: void b2PolygonShape::Set(const b2Vec2*, int32): Assertion `false' failed.
+                //../b2PolygonShape.cpp:158: void b2PolygonShape::Set(const b2Vec2*, int32): Assertion `false' failed.
                 continue;
             }
     
-            //add some variation in velocity and angular so pieces drift apart
+            //shift vertices to be centered
+            Vector2 center = new Vector2();
+            GeometryUtils.triangleCentroid(
+                    hull[0], hull[1],
+                    hull[2], hull[3],
+                    hull[4], hull[5],
+                    center);
+            for (int j = 0; j < hull.length; j += 2) {
+                //hull[j] -= center.x;
+                //hull[j + 1] -= center.y;
+            }
+            
+            long seed = (long) (Math.random() * Long.MAX_VALUE);
             Body parentBody = Mappers.physics.get(parentAsteroid).body;
-            Vector2 pos = parentBody.getPosition();//todo: .cpy().add(center); NOT WORKING, WHY??S
+            //todo: rotate center relative to parent by angle
+            Vector2 pos = parentBody.getPosition();//.cpy().mulAdd(center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle()), 1f);
             Vector2 vel = parentBody.getLinearVelocity();
-            Entity childAsteroid = EntityFactory.createAsteroid((long) (Math.random() * Long.MAX_VALUE),
-                    pos.x, pos.y, vel.x, vel.y, parentBody.getAngle(), hull);
-            float angularDrift = MathUtils.random(-maxDriftAngle, maxDriftAngle);
-            Mappers.physics.get(childAsteroid).body.setAngularVelocity(parentBody.getAngularVelocity() + angularDrift);
+            Entity childAsteroid = EntityFactory.createAsteroid(seed, pos.x, pos.y, vel.x, vel.y, parentBody.getAngle(), hull);
+            //float angularDrift = MathUtils.random(-maxDriftAngle, maxDriftAngle);
+            //Mappers.physics.get(childAsteroid).body.setAngularVelocity(parentBody.getAngularVelocity() + angularDrift);
             getEngine().addEntity(childAsteroid);
         }
     }
