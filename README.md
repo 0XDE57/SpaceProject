@@ -30,7 +30,7 @@ Welcome to A Space Project. A project involving space...
 * Developer Tools (in progress)
 * Cross-Platform Desktop and Mobile Support
   * Windows, OSX, Linux, Android, IOS
-  * (it may be difficult to find sensible touchscren controls, focus is desktop and controller)
+  * (it may be difficult to find sensible touchscreen controls, focus is desktop and controller)
 * Feature Creep and Unrealistic Scope!
    * Multiplayer is out of current scope :(
 
@@ -71,8 +71,9 @@ project: https://github.com/users/0XDE57/projects/1
 
 
 ## License
-   Apache 2.0: see [LICENSE.md](/LICENSE.md)
-   Credit appreciated.
+Apache 2.0: see [LICENSE.md](/LICENSE.md)
+
+Credit appreciated.
 
 
 ## Libraries
