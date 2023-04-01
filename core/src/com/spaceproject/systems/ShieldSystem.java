@@ -53,18 +53,21 @@ public class ShieldSystem extends IteratingSystem {
     
                 //start loop if entity is controlled player
                 if (controlFocus != null) {
-                    long id = sound.shieldAmbient(true);//todo
+                    //todo: store soundID, but where? ship has multiple sound sources
+                    // - engines (multiple engines)
+                    // - shield
+                    // - projectile fire
+                    // the SoundID component currently stores only one...
+                    long id = sound.shieldAmbient(true);
+                    //shield.soundID == ID?
+                    // - or -
+                    //Mappers.sound.get(entity).soundID?
                 }
                 break;
             case charge:
                 if (!shield.activate) {
                     shield.state = ShieldComponent.State.discharge;
                     break;
-                }
-                
-                //if entity is controlled player
-                if (controlFocus != null) {
-                    //sound.shieldCharge();
                 }
                 
                 //charge: gain energy
@@ -119,7 +122,6 @@ public class ShieldSystem extends IteratingSystem {
         body.destroyFixture(circleFixture);
         
         shield.animTimer.flipRatio();
-    
         
         //if entity is controlled player
         ControlFocusComponent controlFocus = Mappers.controlFocus.get(entity);
