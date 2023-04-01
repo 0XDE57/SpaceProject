@@ -67,15 +67,6 @@ public class BarrelRollSystem extends IteratingSystem {
                 barrelRoll(sprite3D, rollComp);
                 return;
             }
-            
-            if (control != null) {
-                if (control.moveLeft && control.boost) {
-                    dodgeLeft(entity, rollComp);
-                }
-                if (control.moveRight && control.boost) {
-                    dodgeRight(entity, rollComp);
-                }
-            }
         }
         
         //strafe roll
