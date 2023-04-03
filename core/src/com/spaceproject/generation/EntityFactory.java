@@ -571,7 +571,7 @@ public class EntityFactory {
             hull[index + 1] -= center.y;
         }
         
-        return createAsteroid(seed, x, y, velX, velY, 0, hull);
+        return createAsteroid(seed, x, y, velX, velY, MathUtils.random(MathUtils.PI2), hull);
     }
     
     private static boolean containsPoint(FloatArray points, float pX, float pY, float tolerance) {
@@ -625,7 +625,10 @@ public class EntityFactory {
         entity.add(texture);
         
         PhysicsComponent physics = new PhysicsComponent();
-        physics.body = BodyFactory.createRect(x, y, (int) (width * engineCFG.bodyScale), (int) (height * engineCFG.bodyScale), BodyDef.BodyType.DynamicBody ,entity);
+        physics.body = BodyFactory.createSpaceStation(x, y,
+                (int) (width * engineCFG.bodyScale),
+                (int) (height * engineCFG.bodyScale),
+                BodyDef.BodyType.DynamicBody, entity);
         //physics.body.setActive(false);
         entity.add(physics);
     

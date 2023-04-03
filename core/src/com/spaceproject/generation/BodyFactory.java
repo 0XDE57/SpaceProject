@@ -2,6 +2,7 @@ package com.spaceproject.generation;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
@@ -133,7 +134,7 @@ public class BodyFactory {
         outerCircleFixture.isSensor = true;
         outerCircleFixture.filter.categoryBits = 2; //outer ring: apply force, no pickup
         body.createFixture(outerCircleFixture);
-        innerCollectSensor.dispose();
+        outerCollectSensor.dispose();
         
         body.setUserData(entity);
     
@@ -145,6 +146,51 @@ public class BodyFactory {
             body.setAngularDamping(30);
             body.setLinearDamping(45);
         }
+        return body;
+    }
+    
+    public static Body createSpaceStation(float x, float y, float width, float height, BodyDef.BodyType bodyType, Entity entity) {
+        Body body;
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = bodyType;
+        bodyDef.position.set(x, y);
+        body = GameScreen.box2dWorld.createBody(bodyDef);
+        
+        PolygonShape poly = new PolygonShape();
+        poly.setAsBox(width*0.5f, height*0.5f);
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = poly;
+        fixtureDef.density = 0.5f;
+        fixtureDef.friction = 0.0f;
+        fixtureDef.restitution = 0.6f; // Make it bounce a little bit
+        body.createFixture(fixtureDef);
+        poly.dispose();
+    
+        //todo
+        //docking fixture offset by arm fixture?
+        //arm + landing pad? 2 fixtures
+        int dockRadius = 16;
+        //left dock
+        CircleShape dockingSensor = new CircleShape();
+        dockingSensor.setRadius(dockRadius);
+        dockingSensor.setPosition(new Vector2(dockRadius*2, 0));
+        FixtureDef dockFixture = new FixtureDef();
+        dockFixture.shape = dockingSensor;
+        dockFixture.isSensor = true;
+        body.createFixture(dockFixture);
+        dockingSensor.dispose();
+        //right dock
+        CircleShape dock2Sensor = new CircleShape();
+        dock2Sensor.setRadius(dockRadius);
+        dock2Sensor.setPosition(new Vector2(-dockRadius*2, 0));
+        FixtureDef dock2Fixture = new FixtureDef();
+        dock2Fixture.shape = dock2Sensor;
+        dock2Fixture.isSensor = true;
+        body.createFixture(dock2Fixture);
+        dock2Sensor.dispose();
+        
+        body.setUserData(entity);
+        
         return body;
     }
     

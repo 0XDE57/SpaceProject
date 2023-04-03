@@ -7,8 +7,6 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.MathUtils;
-import com.spaceproject.components.AsteroidBeltComponent;
-import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.SpaceStationComponent;
 import com.spaceproject.components.TransformComponent;
@@ -30,7 +28,7 @@ public class SpaceStationSystem extends EntitySystem {
     }
     
     private void updateStationOrbit() {
-        //keep asteroids orbit around parent body, don't fling everything out into universe...
+        //keep station in orbit around parent body, don't fling out into universe...
         for (Entity entity : stations) {
             SpaceStationComponent spaceStation = Mappers.spaceStation.get(entity);
             PhysicsComponent physics = Mappers.physics.get(entity);
