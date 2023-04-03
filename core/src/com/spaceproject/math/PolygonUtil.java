@@ -131,7 +131,7 @@ public class PolygonUtil {
         
         /* Check for coincident points */
         if (fabsy1y2 < EPSILON && fabsy2y3 < EPSILON) {
-            Gdx.app.log("cirumcircle", "Eek! Coincident points!");
+            Gdx.app.log("circumcircle", "Eek! Coincident points!");
         }
         
         if (fabsy1y2 < EPSILON) {
