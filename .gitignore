@@ -130,3 +130,11 @@ Thumbs.db
 ## SpaceProject local data
 android/assets/config/
 android/assets/save/
+assets/particles/box.png
+assets/particles/ring.png
+assets/particles/shipEngineFire2.particle
+assets/sound/engineActive.wav
+assets/sound/hyperdriveCharge.mp3
+assets/sound/hyperdriveInit.mp3
+assets/sound/laserShootRapid.wav
+assets/sound/laserShootW2.wav
