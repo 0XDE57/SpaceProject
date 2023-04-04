@@ -28,6 +28,7 @@ import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.components.RingEffectComponent;
 import com.spaceproject.components.ShieldComponent;
+import com.spaceproject.components.SpaceStationComponent;
 import com.spaceproject.components.Sprite3DComponent;
 import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TrailComponent;
@@ -40,7 +41,7 @@ import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
-//NOTE: while not a system itself, its behavior is directly linked to the @Box2DPhysicsSystem
+//NOTE: while this not a system itself, its behavior is directly linked to the @Box2DPhysicsSystem
 public class Box2DContactListener implements ContactListener {
     
     private final Engine engine;
@@ -68,6 +69,10 @@ public class Box2DContactListener implements ContactListener {
     }
     
     private void onCollision(Contact contact, Entity a, Entity b) {
+        //todo: check collision filters here instead before grabbing entity and components?
+        //contact.getFixtureA().getFilterData().categoryBits
+        //contact.getFixtureB().getFilterData().categoryBits
+        
         //check damage collision
         HealthComponent healthA = Mappers.health.get(a);
         if (healthA != null) {
@@ -98,9 +103,24 @@ public class Box2DContactListener implements ContactListener {
                 collectItemDrop(contact.getFixtureA(), cargoA, b);
             }
         }
+        //check space station dock with ship
+        VehicleComponent vehicleA = Mappers.vehicle.get(a);
+        if (vehicleA != null) {
+            SpaceStationComponent stationB = Mappers.spaceStation.get(b);
+            if (stationB != null) {
+                dock(a, b);
+            }
+        }
+        VehicleComponent vehicleB = Mappers.vehicle.get(b);
+        if (vehicleB != null) {
+            SpaceStationComponent stationA = Mappers.spaceStation.get(a);
+            if (stationA != null) {
+                dock(b, a);
+            }
+        }
     }
     
-    private void handleDamage(Contact contact, Entity damageEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent healthComponent) {
+    private void handleDamage(Contact contact, Entity damagedEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent healthComponent) {
         if (damageComponent.source == attackedEntity) {
             return; //ignore self-inflicted damage
         }
@@ -112,9 +132,9 @@ public class Box2DContactListener implements ContactListener {
             //focus ai on player
             ai.attackTarget = damageComponent.source;
             ai.state = AIComponent.State.attack;
-        } else if (Mappers.controlFocus.get(damageEntity) != null) {
+        } else if (Mappers.controlFocus.get(damagedEntity) != null) {
             //someone attacked player, focus on enemy
-            damageEntity.add(new CamTargetComponent());
+            damagedEntity.add(new CamTargetComponent());
         }
         
         //check for shield
@@ -143,30 +163,30 @@ public class Box2DContactListener implements ContactListener {
         
         //add projectile ghost (fx)
         boolean showGhostTrail = (healthComponent.health <= 0);
-        explodeProjectile(contact, damageEntity, attackedEntity, showGhostTrail);
+        explodeProjectile(contact, damagedEntity, attackedEntity, showGhostTrail);
         
         //remove projectile
-        damageEntity.add(new RemoveComponent());
+        damagedEntity.add(new RemoveComponent());
     }
     
     private void explodeProjectile(Contact contact, Entity entityHit, Entity attackedEntity, boolean showGhost) {
         WorldManifold manifold = contact.getWorldManifold();
-        //for (Vector2 p : manifold.getPoints()) {
+        //we only need the first point in this case
         Vector2 p = manifold.getPoints()[0];
         
-        Entity contactP = new Entity();
+        Entity contactPoint = new Entity();
         
         //create entity at point of contact
         TransformComponent transform = new TransformComponent();
         transform.pos.set(p);
-        contactP.add(transform);
+        contactPoint.add(transform);
         //todo: transfer velocity from object hit
         
-        contactP.add(new RingEffectComponent());
+        contactPoint.add(new RingEffectComponent());
         
         ExpireComponent expire = new ExpireComponent();
         expire.timer = new SimpleTimer(1000, true);
-        contactP.add(expire);
+        contactPoint.add(expire);
         
         //todo: better particle this one is ugly
         //ParticleComponent particle = new ParticleComponent();
@@ -174,7 +194,7 @@ public class Box2DContactListener implements ContactListener {
         //contactP.add(particle);
         
         if (showGhost) {
-            TrailComponent trailComponent = (TrailComponent) ECSUtil.transferComponent(entityHit, contactP, TrailComponent.class);
+            TrailComponent trailComponent = (TrailComponent) ECSUtil.transferComponent(entityHit, contactPoint, TrailComponent.class);
             if (trailComponent != null) {
                 trailComponent.time = GameScreen.getGameTimeCurrent();
                 trailComponent.color = new Color(0, 0, 0, 0.15f);
@@ -186,7 +206,7 @@ public class Box2DContactListener implements ContactListener {
             }
         }
         
-        engine.addEntity(contactP);
+        engine.addEntity(contactPoint);
     }
     
     private void collectItemDrop(Fixture collectorFixture, CargoComponent cargo, Entity item) {
@@ -199,6 +219,10 @@ public class Box2DContactListener implements ContactListener {
         item.add(new RemoveComponent());
         
         engine.getSystem(SoundSystem.class).pickup();
+    }
+    
+    private void dock(Entity vehicleEntity, Entity stationEntity) {
+        Gdx.app.log(getClass().getSimpleName(), "dock!?");
     }
     
     @Override
