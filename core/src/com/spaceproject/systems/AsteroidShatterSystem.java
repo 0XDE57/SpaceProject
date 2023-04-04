@@ -8,8 +8,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.ExpireComponent;
@@ -110,14 +112,14 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
             - Returns: triples of indices into the points that describe the triangles in clockwise order.
         */
         
-        ShortArray triangles = delaunay.computeTriangles(vertices, false);
-        Gdx.app.debug(getClass().getSimpleName(), "shatter into " + triangles.size / 3);
+        ShortArray triangleIndices = delaunay.computeTriangles(vertices, false);
+        Gdx.app.debug(getClass().getSimpleName(), "shatter into " + triangleIndices.size / 3);
         
         //create cells for each triangle
-        for (int index = 0; index < triangles.size; index += 3) {
-            int p1 = triangles.get(index) * 2;
-            int p2 = triangles.get(index + 1) * 2;
-            int p3 = triangles.get(index + 2) * 2;
+        for (int index = 0; index < triangleIndices.size; index += 3) {
+            int p1 = triangleIndices.get(index) * 2;
+            int p2 = triangleIndices.get(index + 1) * 2;
+            int p3 = triangleIndices.get(index + 2) * 2;
             float[] hull = new float[] {
                     vertices[p1], vertices[p1 + 1], // xy: 0, 1
                     vertices[p2], vertices[p2 + 1], // xy: 2, 3
@@ -134,6 +136,8 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
                 continue;
             }
     
+            GeometryUtils.ensureCCW(hull);
+    
             //shift vertices to be centered
             Vector2 center = new Vector2();
             GeometryUtils.triangleCentroid(
@@ -149,13 +153,38 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
             long seed = (long) (Math.random() * Long.MAX_VALUE);
             Body parentBody = Mappers.physics.get(parentAsteroid).body;
             //todo: rotate center relative to parent by angle
-            Vector2 pos = parentBody.getPosition();//.cpy().mulAdd(center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle()), 1f);
+            Vector2 pos = parentBody.getPosition().cpy();//.mulAdd(center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle()), 0.1f);
+            //center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle());
+            //Vector2 pos = parentBody.getPosition().cpy().add(center);
             Vector2 vel = parentBody.getLinearVelocity();
             Entity childAsteroid = EntityFactory.createAsteroid(seed, pos.x, pos.y, vel.x, vel.y, parentBody.getAngle(), hull);
             //float angularDrift = MathUtils.random(-maxDriftAngle, maxDriftAngle);
             //Mappers.physics.get(childAsteroid).body.setAngularVelocity(parentBody.getAngularVelocity() + angularDrift);
             getEngine().addEntity(childAsteroid);
         }
+    }
+    
+    public void breakPoly(Polygon p){
+        DelaunayTriangulator d = new DelaunayTriangulator();
+        ShortArray s = d.computeTriangles(p.getVertices(),false);
+        Array<Polygon> asteroids = new Array<>();
+        for(int i = 0; i < s.size-2; i+=3){
+            Polygon p1 = new Polygon();
+            Vector2 temp = new Vector2();
+            p1.setVertices(new float[]{
+                    p.getVertex(s.get(i), temp).x, p.getVertex(s.get(i), temp).y,
+                    p.getVertex(s.get(i+1), temp).x, p.getVertex(s.get(i+1), temp).y,
+                    p.getVertex(s.get(i+2), temp).x, p.getVertex(s.get(i+2), temp).y,
+            });
+            Vector2 t1 = p1.getCentroid(new Vector2());
+            Vector2 t2 = p.getCentroid(new Vector2());
+            Vector2 move = new Vector2((float) -Math.sqrt(t1.dst(t2)),0);
+            float r = MathUtils.atan2(t2.y - t1.y, t2.x - t1.x);
+            move.rotateRad(r);
+            p1.setPosition(move.x,move.y);
+            asteroids.add(p1);
+        }
+        //return asteroids;
     }
     
     private void dropResource(Entity entity, AsteroidComponent asteroid) {
