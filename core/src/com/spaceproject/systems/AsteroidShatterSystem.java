@@ -201,7 +201,7 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
         Vector2 pos = transform.pos.set(sourcePhysics.body.getPosition());
         
         PhysicsComponent physics = new PhysicsComponent();
-        physics.body = BodyBuilder.createDrop(pos.x, pos.y, 1, 50, drop);
+        physics.body = BodyBuilder.createDrop(pos.x, pos.y, 2, drop);
         float spin = -0.2f;
         physics.body.applyAngularImpulse(MathUtils.random(-spin, spin), true);
         //todo: give momentum? either copy asteroids velocity or send in players direction

@@ -16,7 +16,17 @@ import com.spaceproject.utility.Mappers;
 
 public class BodyBuilder {
     
-    private static EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
+    private static final EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
+    //NOTE: Box2D filters and masks are bit fields (must be power of 2) eg:
+    // 0000000000000001
+    // 0000000000000010
+    // 0000000000000100
+    final short BITS_PLAYER = 0x0001;
+    final short BITS_PROJECTILE = 0x0002;
+    final short BITS_ASTEROID = 0x0004;
+    final short BITS_STAR = 0x0008;
+    final short BITS_STATION = 0x0016;
+    
     
     public static Body createCircle(float x, float y, float radius, World world, Entity entity) {
         Body body;
@@ -65,7 +75,7 @@ public class BodyBuilder {
         return body;
     }
     
-    public static Body createDrop(float x, float y, float size, float radius, Entity entity) {
+    public static Body createDrop(float x, float y, float size, Entity entity) {
         Body body;
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
