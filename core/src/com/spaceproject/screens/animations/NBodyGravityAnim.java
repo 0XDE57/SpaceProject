@@ -6,9 +6,18 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
+import com.kotcrab.vis.ui.widget.VisSlider;
+import com.kotcrab.vis.ui.widget.VisTextButton;
+import com.kotcrab.vis.ui.widget.VisTextField;
+import com.kotcrab.vis.ui.widget.VisWindow;
 
-public class NBodyGravityAnim extends TitleAnimation {
+public class NBodyGravityAnim extends TitleAnimation implements Disposable {
+    
     
     class SimpleBody {
         
@@ -78,8 +87,85 @@ public class NBodyGravityAnim extends TitleAnimation {
     int releaseMS = 200;
     long dragTime;
     
-    public NBodyGravityAnim() {
+    Stage stage;
+    VisWindow window;
+    VisSlider simulationSpeedSlider;
+    VisSlider gravitySlider;
+    
+    public NBodyGravityAnim(Stage stage) {
         resetInitialBodies();
+        
+        this.stage = stage;
+        buildWindow();
+    }
+    
+    private void buildWindow() {
+        window = new VisWindow("n-body");
+        
+        //https://github.com/kotcrab/vis-ui/wiki/VisValidatableTextField
+        final VisTextField gravityValue = new VisTextField();
+        gravityValue.setText(gravity + "");
+        gravityValue.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                System.out.println();
+            }
+        });
+        gravityValue.pack();
+        float maxGravity = 5;
+        gravitySlider = new VisSlider(-maxGravity, maxGravity, 0.1f, false);
+        gravitySlider.setValue(gravity);
+        gravitySlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                gravity = gravitySlider.getValue();
+                gravityValue.setText(gravity + "");
+            }
+        });
+        gravitySlider.pack();
+    
+    
+        final VisTextField simSpeedValue = new VisTextField();
+        simSpeedValue.setText(simulationSpeed + "");
+        //gravityValue.addListener();
+        simSpeedValue.pack();
+        int maxSim = 100;
+        simulationSpeedSlider = new VisSlider(-maxSim, maxSim, 0.1f, false);
+        simulationSpeedSlider.setValue(simulationSpeed);
+        simulationSpeedSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                simulationSpeed = simulationSpeedSlider.getValue();
+                simSpeedValue.setText(simulationSpeed + "");
+            }
+        });
+        simulationSpeedSlider.pack();
+        
+        final VisTextButton resetButton = new VisTextButton("reset");
+        resetButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                resetInitialBodies();
+                gravitySlider.setValue(gravity);
+                simulationSpeedSlider.setValue(simulationSpeed);
+            }
+        });
+        
+        window.add(simSpeedValue);
+        window.add(simulationSpeedSlider);
+        window.add().row();
+        window.add(gravityValue);
+        window.add(gravitySlider);
+        window.add().row();
+        window.add(resetButton);
+        
+        //radio button: no-collision, bounce, absorb
+        //---
+        //num bodies, total mass
+        //---
+        //window.add(resetbutton);
+        
+        window.pack();
     }
     
     private void resetInitialBodies() {
@@ -110,7 +196,7 @@ public class NBodyGravityAnim extends TitleAnimation {
         //reset simulation parameters
         gravity = 1f;
         simulationSpeed = 15.0f;
-    
+        
         Gdx.app.log(this.getClass().getSimpleName(), "reset initial bodies. initial settings: " + gravity );
     }
     
@@ -119,31 +205,15 @@ public class NBodyGravityAnim extends TitleAnimation {
         //update simulation
         physicsStep(delta * simulationSpeed);
         timeAccumulator += delta;
-    
-        //input
-        if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            gravity += 0.1f;
-            Gdx.app.log(this.getClass().getSimpleName(), "gravity: " + gravity );
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            gravity -= 0.1f;
-            if (gravity <= 0.1f) {
-                gravity = 0.1f;
-            }
-            Gdx.app.log(this.getClass().getSimpleName(), "gravity: " + gravity );
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            simulationSpeed -= 0.2f;
-            Gdx.app.log(this.getClass().getSimpleName(), "sim speed: " + simulationSpeed);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            simulationSpeed += 0.2f;
-            Gdx.app.log(this.getClass().getSimpleName(), "sim speed: " + simulationSpeed);
-        }
         
         //reset to initial conditions
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            stage.addActor(window);
+            window.setPosition(stage.getWidth(), 0);
+            /*
             resetInitialBodies();
+            gravitySlider.setValue(gravity);
+            simulationSpeedSlider.setValue(simulationSpeed);*/
         }
         
         //mouse position
@@ -321,6 +391,11 @@ public class NBodyGravityAnim extends TitleAnimation {
     @Override
     public void resize(int width, int height) {
     
+    }
+    
+    @Override
+    public void dispose() {
+        window.remove();
     }
     
 }

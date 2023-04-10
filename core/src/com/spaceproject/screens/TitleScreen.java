@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.dialog.Dialogs;
@@ -45,11 +46,8 @@ public class TitleScreen extends MyScreenAdapter {
         }
         
         public static ForegroundAnimation next(ForegroundAnimation e) {
-            int index = e.ordinal();
-            int nextIndex = index + 1;
-            ForegroundAnimation[] cars = ForegroundAnimation.values();
-            nextIndex %= cars.length;
-            return cars[nextIndex];
+            int index = (e.ordinal() + 1) % ForegroundAnimation.values().length;
+            return ForegroundAnimation.values()[index];
         }
     }
     
@@ -150,7 +148,6 @@ public class TitleScreen extends MyScreenAdapter {
                     public void no () {
                         exitPromptUp = false;
                     }
-    
                     @Override
                     public void cancel () {
                         exitPromptUp = false;
@@ -194,10 +191,14 @@ public class TitleScreen extends MyScreenAdapter {
     private void initForegroundAnim() {
         ForegroundAnimation anim = ForegroundAnimation.random();
         
-        //don't allow same anim on refresh
+        //ensure new anim on refresh
         if (previousAnim != null && anim == previousAnim) {
             anim = ForegroundAnimation.next(anim);
         }
+    
+        //cleanup previous
+        if (foregroundAnimation instanceof Disposable)
+            ((Disposable)foregroundAnimation).dispose();
         
         switch (anim) {
             case delaunay:
@@ -213,7 +214,7 @@ public class TitleScreen extends MyScreenAdapter {
                 this.foregroundAnimation = new NoiseAnim(0, 0.01f, 3, 0.013f, true);
                 break;
             case nbody:
-                this.foregroundAnimation = new NBodyGravityAnim();
+                this.foregroundAnimation = new NBodyGravityAnim(stage);
                 break;
                 /*
 			case asteroid: /
@@ -229,6 +230,10 @@ public class TitleScreen extends MyScreenAdapter {
     public void dispose() {
         batch.dispose();
         shape.dispose();
+    
+        if (foregroundAnimation instanceof Disposable)
+            ((Disposable)foregroundAnimation).dispose();
+        
         VisUI.dispose(true);
         stage.dispose();
     }
