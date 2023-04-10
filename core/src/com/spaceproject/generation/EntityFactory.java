@@ -104,7 +104,7 @@ public class EntityFactory {
         PhysicsComponent physics = new PhysicsComponent();
         float width = shipTop.getWidth() * engineCFG.bodyScale;
         float height = shipTop.getHeight() * engineCFG.bodyScale;
-        physics.body = BodyFactory.createShip(x, y, width, height, shipEntity, inSpace);
+        physics.body = BodyBuilder.createShip(x, y, width, height, shipEntity, inSpace);
         shipEntity.add(physics);
         
         //engine data and marks entity as drive-able
@@ -274,7 +274,7 @@ public class EntityFactory {
         entity.add(texture);
         
         PhysicsComponent physics = new PhysicsComponent();
-        physics.body = BodyFactory.createPlayerBody(x, y, entity);
+        physics.body = BodyBuilder.createPlayerBody(x, y, entity);
         entity.add(physics);
         
         CharacterComponent character = new CharacterComponent();
@@ -379,7 +379,7 @@ public class EntityFactory {
 
         //sensor fixture to burn objects
         PhysicsComponent physics = new PhysicsComponent();
-        physics.body = BodyFactory.createCircleCensor(x, y, radius * 4, world, entity);
+        physics.body = BodyBuilder.createCircleCensor(x, y, radius * 4, world, entity);
         entity.add(physics);
         
         // shader
@@ -528,7 +528,7 @@ public class EntityFactory {
     
         PhysicsComponent physics = new PhysicsComponent();
         float density = 0.5f;
-        physics.body = BodyFactory.createPoly(transform.pos.x, transform.pos.y,
+        physics.body = BodyBuilder.createPoly(transform.pos.x, transform.pos.y,
                 polygon.getVertices(), angle, density, BodyDef.BodyType.DynamicBody,
                 GameScreen.box2dWorld, entity);
         asteroid.centerOfMass = physics.body.getLocalCenter().cpy();
@@ -596,7 +596,7 @@ public class EntityFactory {
         entity.add(texture);
     
         PhysicsComponent physics = new PhysicsComponent();
-        physics.body = BodyFactory.createWall(x, y, (int) (width * engineCFG.bodyScale), (int) (height * engineCFG.bodyScale), entity);
+        physics.body = BodyBuilder.createWall(x, y, (int) (width * engineCFG.bodyScale), (int) (height * engineCFG.bodyScale), entity);
         entity.add(physics);
         
         TransformComponent transform = new TransformComponent();
@@ -619,18 +619,17 @@ public class EntityFactory {
         TextureComponent texture = new TextureComponent();
         texture.texture = TextureGenerator.generateTexture(
                 (int) (width * engineCFG.sprite2DScale),
-                (int)(height * engineCFG.sprite2DScale),
-                new Color(0, 0, 0, 1),
+                (int) (height * engineCFG.sprite2DScale),
+                new Color(0.4f, 0.4f, 0.4f, 1),
                 new Color(1, 1, 1, 1));
         texture.scale = 1f;
         entity.add(texture);
         
         PhysicsComponent physics = new PhysicsComponent();
-        physics.body = BodyFactory.createSpaceStation(x, y,
+        physics.body = BodyBuilder.createSpaceStation(x, y,
                 (int) (width * engineCFG.bodyScale),
                 (int) (height * engineCFG.bodyScale),
                 BodyDef.BodyType.DynamicBody, entity);
-        //physics.body.setActive(false);
         entity.add(physics);
     
         TransformComponent transform = new TransformComponent();

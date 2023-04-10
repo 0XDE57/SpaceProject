@@ -21,7 +21,7 @@ import com.spaceproject.components.TrailComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.RenderOrder;
-import com.spaceproject.generation.BodyFactory;
+import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.Mappers;
@@ -132,7 +132,7 @@ public class ChargeCannonSystem extends IteratingSystem {
         float bodyHeight = textureComponent.texture.getHeight() * textureComponent.scale;
         TransformComponent transformComponent = Mappers.transform.get(chargeCannon.projectileEntity);
         PhysicsComponent physics = new PhysicsComponent();
-        physics.body = BodyFactory.createRect(transformComponent.pos.x, transformComponent.pos.y,
+        physics.body = BodyBuilder.createRect(transformComponent.pos.x, transformComponent.pos.y,
                 bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody, chargeCannon.projectileEntity);
         physics.body.setTransform(transformComponent.pos, transformComponent.rotation);
         //add parent velocity to projectile

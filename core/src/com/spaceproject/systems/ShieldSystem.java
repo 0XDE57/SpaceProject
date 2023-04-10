@@ -9,7 +9,7 @@ import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.generation.BodyFactory;
+import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.utility.Mappers;
 
 public class ShieldSystem extends IteratingSystem {
@@ -77,7 +77,7 @@ public class ShieldSystem extends IteratingSystem {
                     
                     //add shield fixture to body for protection
                     Body body = entity.getComponent(PhysicsComponent.class).body;
-                    BodyFactory.addShieldFixtureToBody(body, shield.radius);
+                    BodyBuilder.addShieldFixtureToBody(body, shield.radius);
     
                     //if entity is controlled player
                     if (controlFocus != null) {

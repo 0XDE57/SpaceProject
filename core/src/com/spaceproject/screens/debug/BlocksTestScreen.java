@@ -10,7 +10,7 @@ import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.RenderOrder;
-import com.spaceproject.generation.BodyFactory;
+import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.systems.AsteroidRenderSystem;
@@ -36,7 +36,7 @@ public class BlocksTestScreen extends MyScreenAdapter {
         engine.addEntity(paddle);
     
         Entity ball = new Entity();
-        BodyFactory.createCircle(0,0,10, box2dWorld, ball);
+        BodyBuilder.createCircle(0,0,10, box2dWorld, ball);
         engine.addEntity(ball);
     
         Entity brick = createWall(10, 10, 100, 1000);
@@ -57,7 +57,7 @@ public class BlocksTestScreen extends MyScreenAdapter {
         entity.add(texture);
         
         PhysicsComponent physics = new PhysicsComponent();
-        physics.body = BodyFactory.createWall(x, y, width, height, entity);
+        physics.body = BodyBuilder.createWall(x, y, width, height, entity);
         entity.add(physics);
         
         TransformComponent transform = new TransformComponent();

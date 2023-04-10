@@ -25,7 +25,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.EntityConfig;
-import com.spaceproject.generation.BodyFactory;
+import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.generation.EntityFactory;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
@@ -166,7 +166,7 @@ public class ShipControlSystem extends IteratingSystem {
         // re-create box2D body and set position near vehicle
         Vector2 vehiclePosition = Mappers.transform.get(vehicleEntity).pos;
         Vector2 playerPosition = vehiclePosition.add(MyMath.vector(MathUtils.random(360) * MathUtils.degRad, offsetDist));
-        Body body = BodyFactory.createPlayerBody(0, 0, characterEntity);
+        Body body = BodyBuilder.createPlayerBody(0, 0, characterEntity);
         body.setTransform(playerPosition, body.getAngle());
         body.setLinearVelocity(0, 0);
         Mappers.physics.get(characterEntity).body = body;

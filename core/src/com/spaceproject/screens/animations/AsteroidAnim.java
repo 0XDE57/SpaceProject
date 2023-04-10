@@ -19,7 +19,7 @@ import com.badlogic.gdx.physics.box2d.Transform;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
-import com.spaceproject.generation.BodyFactory;
+import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.ui.CustomShapeRenderer;
 
@@ -60,11 +60,11 @@ public class AsteroidAnim extends TitleAnimation {
         world = new World(new Vector2(), true);
         box2DDebugRenderer = new Box2DDebugRenderer(true, true, true, true, true, true);
         
-        Body body = BodyFactory.createPoly(200, 200, asteroid.hullPoly.getVertices(), 0, 0.5f, BodyDef.BodyType.DynamicBody, world, null);
+        Body body = BodyBuilder.createPoly(200, 200, asteroid.hullPoly.getVertices(), 0, 0.5f, BodyDef.BodyType.DynamicBody, world, null);
         body.applyForceToCenter(10,1,true);
         body.applyAngularImpulse(200, true);
         
-        bullet = BodyFactory.createCircle(Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f, 20, world, null);
+        bullet = BodyBuilder.createCircle(Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f, 20, world, null);
     }
     
     

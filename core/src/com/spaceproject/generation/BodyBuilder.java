@@ -14,7 +14,7 @@ import com.spaceproject.config.EngineConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
-public class BodyFactory {
+public class BodyBuilder {
     
     private static EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     

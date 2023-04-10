@@ -20,7 +20,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.RenderOrder;
-import com.spaceproject.generation.BodyFactory;
+import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
@@ -124,7 +124,7 @@ public class CannonSystem extends IteratingSystem {
         float bodyHeight = texture.texture.getHeight() * texture.scale;
         
         PhysicsComponent physics = new PhysicsComponent();
-        physics.body = BodyFactory.createRect(spawnPos.x, spawnPos.y, bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody, entity);
+        physics.body = BodyBuilder.createRect(spawnPos.x, spawnPos.y, bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody, entity);
         physics.body.setTransform(spawnPos, rot);
         physics.body.setLinearVelocity(projectileVel);
         physics.body.setBullet(true);//turn on CCD
