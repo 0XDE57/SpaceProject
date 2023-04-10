@@ -208,12 +208,11 @@ public class NBodyGravityAnim extends TitleAnimation implements Disposable {
         
         //reset to initial conditions
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            stage.addActor(window);
-            window.setPosition(stage.getWidth(), 0);
-            /*
+            if (!window.hasParent()) {
+                stage.addActor(window);
+                window.setPosition(stage.getWidth(), 0);
+            }
             resetInitialBodies();
-            gravitySlider.setValue(gravity);
-            simulationSpeedSlider.setValue(simulationSpeed);*/
         }
         
         //mouse position
@@ -222,6 +221,7 @@ public class NBodyGravityAnim extends TitleAnimation implements Disposable {
     
         //add new body
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+            //todo: input multiplex, don't create body when interacting with scene2d UI elements.
             if (ghostBody == null) {
                 ghostBody = new SimpleBody(0, 0, 5);
                 timeAccumulator = 0;
@@ -256,22 +256,18 @@ public class NBodyGravityAnim extends TitleAnimation implements Disposable {
             //release: fling
             if (isDrag) {
                 isDrag = false;
-                
                 //remove body if release was quick, and still in body
                 if (System.currentTimeMillis() - dragTime <= releaseMS) {
-                    //bodies.removeValue(selectedBody, true);
                     Circle circle = new Circle(selectedBody.pos, selectedBody.radius);
                     if (circle.contains(x, y)) {
                         bodies.removeValue(selectedBody, true);
-                        Gdx.app.log(this.getClass().getSimpleName(),
+                        Gdx.app.log(getClass().getSimpleName(),
                                 "removed body. (" + selectedBody.mass + ")  " + selectedBody.pos + " total: " + bodies.size);
                     }
                 }
-    
                 selectedBody = null;
             }
         }
-        
         
         shape.begin(ShapeRenderer.ShapeType.Filled);
         shape.setColor(0, 0, 0, 1);
@@ -289,7 +285,6 @@ public class NBodyGravityAnim extends TitleAnimation implements Disposable {
             for (int index = 0; index < body.tail.length; index++) {
                 Vector2 tail = body.tail[index];
                 shape.point(tail.x, tail.y, 0);
-                //shape.circle(tail.x, tail.y, 2);
             }
         }
         
@@ -308,7 +303,6 @@ public class NBodyGravityAnim extends TitleAnimation implements Disposable {
         }
         
         shape.end();
-
     }
     
     /** integration */
