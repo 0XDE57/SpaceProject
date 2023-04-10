@@ -588,11 +588,11 @@ public class EntityFactory {
         Entity entity = new Entity();
         
         TextureComponent texture = new TextureComponent();
-        texture.texture = TextureGenerator.generateWall(
+        texture.texture = TextureGenerator.generateTexture(
                 width * engineCFG.pixelPerUnit,
                 height * engineCFG.pixelPerUnit,
-                new Color(0.4f, 0.4f, 0.4f, 1));
-        //texture.scale = 0.05f;
+                new Color(0.4f, 0.4f, 0.4f, 1),
+                new Color(0, 0, 0, 1));
         entity.add(texture);
     
         PhysicsComponent physics = new PhysicsComponent();
@@ -617,11 +617,12 @@ public class EntityFactory {
         float y = parentBody.y + radialDistance;
         
         TextureComponent texture = new TextureComponent();
-        texture.texture = TextureGenerator.generateWall(
-                width,
-                height,
-                new Color(0.4f, 0.4f, 0.4f, 1));
-        texture.scale = 0.05f;
+        texture.texture = TextureGenerator.generateTexture(
+                (int) (width * engineCFG.sprite2DScale),
+                (int)(height * engineCFG.sprite2DScale),
+                new Color(0, 0, 0, 1),
+                new Color(1, 1, 1, 1));
+        texture.scale = 1f;
         entity.add(texture);
         
         PhysicsComponent physics = new PhysicsComponent();

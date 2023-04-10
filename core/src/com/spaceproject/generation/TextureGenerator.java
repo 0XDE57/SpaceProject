@@ -482,13 +482,13 @@ public class TextureGenerator {
     }
     
     //region planet game objects
-    public static Texture generateWall(int width, int height, Color color) {
+    public static Texture generateTexture(int width, int height, Color innerColor, Color outerColor) {
         Pixmap pixmap = new Pixmap(width, height, Format.RGB565);
         
         //fill square
-        pixmap.setColor(color);
+        pixmap.setColor(innerColor);
         pixmap.fill();
-        pixmap.setColor(0, 0, 0, 1);
+        pixmap.setColor(outerColor);
         pixmap.drawRectangle(0, 0, width, height);
         
         Texture t = new Texture(pixmap);

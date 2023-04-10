@@ -48,10 +48,11 @@ public class BlocksTestScreen extends MyScreenAdapter {
         
         int pixelPerUnit = 2;
         TextureComponent texture = new TextureComponent();
-        texture.texture = TextureGenerator.generateWall(
+        texture.texture = TextureGenerator.generateTexture(
                 width * pixelPerUnit,
                 height * pixelPerUnit,
-                new Color(0.4f, 0.4f, 0.4f, 1));
+                new Color(0.4f, 0.4f, 0.4f, 1),
+                new Color(1, 1, 1, 1));
         texture.scale = 0.05f;
         entity.add(texture);
         
