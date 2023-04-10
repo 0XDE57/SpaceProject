@@ -46,8 +46,8 @@ public class WorldLoadingSystem extends EntitySystem {
 		Mappers.AI.get(aiTest2).State = AIComponent.State.takeOffPlanet;
 		engine.addEntity(aiTest2);
 		*/
-        engine.addEntity(EntityFactory.createWall(position + 5, position + 5, 8, 16));
-        engine.addEntity(EntityFactory.createWall(position + 9, position + 5, 16, 8));
+        //engine.addEntity(EntityFactory.createWall(position + 5, position + 5, 8, 16));
+        //engine.addEntity(EntityFactory.createWall(position + 9, position + 5, 16, 8));
     }
     
 }
