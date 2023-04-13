@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
@@ -17,16 +18,12 @@ import com.spaceproject.utility.Mappers;
 public class BodyBuilder {
     
     private static final EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
-    //NOTE: Box2D filters and masks are bit fields (must be power of 2) eg:
-    // 0000000000000001
-    // 0000000000000010
-    // 0000000000000100
-    final short BITS_PLAYER = 0x0001;
-    final short BITS_PROJECTILE = 0x0002;
-    final short BITS_ASTEROID = 0x0004;
-    final short BITS_STAR = 0x0008;
-    final short BITS_STATION = 0x0016;
     
+    public static final int SHIP_FIXTURE_ID = 0;
+    public static final int SHIP_INNER_SENSOR_ID = 1;
+    public static final int SHIP_OUTER_SENSOR_ID = 2;
+    public static final int DOCK_A_ID = 0;
+    public static final int DOCK_B_ID = 1;
     
     public static Body createCircle(float x, float y, float radius, World world, Entity entity) {
         Body body;
@@ -121,29 +118,31 @@ public class BodyBuilder {
         boxFixture.density = 0.5f;
         boxFixture.friction = 0.0f;
         boxFixture.restitution = 0.6f; // Make it bounce a little bit
-        body.createFixture(boxFixture);
+        Fixture bodyFixture = body.createFixture(boxFixture);
+        bodyFixture.setUserData(SHIP_FIXTURE_ID);
         box.dispose();
         
-        //outer sensor
+        //inner sensor
         float collisionRadius = 4 * width;
         CircleShape innerCollectSensor = new CircleShape();
         innerCollectSensor.setRadius(collisionRadius);
         FixtureDef innerCircleFixture = new FixtureDef();
         innerCircleFixture.shape = innerCollectSensor;
         innerCircleFixture.isSensor = true;
-        //0x0001 is default value
-        //innerCircleFixture.filter.categoryBits = 1; //inner ring: pickup
-        body.createFixture(innerCircleFixture);
-        innerCollectSensor.dispose();
+        innerCircleFixture.filter.categoryBits = BITS_SENSOR; //pickup
+        Fixture innerFixture = body.createFixture(innerCircleFixture);
+        innerFixture.setUserData(SHIP_INNER_SENSOR_ID);
         
-        //inner sensor
+        innerCollectSensor.dispose();
+        //outer sensor
         CircleShape outerCollectSensor = new CircleShape();
         outerCollectSensor.setRadius(10 * collisionRadius);
         FixtureDef outerCircleFixture = new FixtureDef();
         outerCircleFixture.shape = outerCollectSensor;
         outerCircleFixture.isSensor = true;
-        outerCircleFixture.filter.categoryBits = 2; //outer ring: apply force, no pickup
-        body.createFixture(outerCircleFixture);
+        outerCircleFixture.filter.categoryBits = BITS_SENSOR; //outer ring: apply force, no pickup
+        Fixture outerFixture = body.createFixture(outerCircleFixture);
+        outerFixture.setUserData(SHIP_OUTER_SENSOR_ID);
         outerCollectSensor.dispose();
         
         body.setUserData(entity);
@@ -166,6 +165,7 @@ public class BodyBuilder {
         bodyDef.position.set(x, y);
         body = GameScreen.box2dWorld.createBody(bodyDef);
         
+        //station body
         PolygonShape poly = new PolygonShape();
         poly.setAsBox(width*0.5f, height*0.5f);
         FixtureDef fixtureDef = new FixtureDef();
@@ -176,28 +176,28 @@ public class BodyBuilder {
         body.createFixture(fixtureDef);
         poly.dispose();
     
-        //todo
-        //docking fixture offset by arm fixture?
-        //arm + landing pad? 2 fixtures
+        //docking fixtures
         int dockRadius = 16;
-        //left dock
-        CircleShape dockingSensor = new CircleShape();
-        dockingSensor.setRadius(dockRadius);
-        dockingSensor.setPosition(new Vector2(dockRadius*2, 0));
-        FixtureDef dockFixture = new FixtureDef();
-        dockFixture.shape = dockingSensor;
-        dockFixture.isSensor = true;
-        body.createFixture(dockFixture);
-        dockingSensor.dispose();
-        //right dock
-        CircleShape dock2Sensor = new CircleShape();
-        dock2Sensor.setRadius(dockRadius);
-        dock2Sensor.setPosition(new Vector2(-dockRadius*2, 0));
-        FixtureDef dock2Fixture = new FixtureDef();
-        dock2Fixture.shape = dock2Sensor;
-        dock2Fixture.isSensor = true;
-        body.createFixture(dock2Fixture);
-        dock2Sensor.dispose();
+        //dock A
+        CircleShape dockASensor = new CircleShape();
+        dockASensor.setRadius(dockRadius);
+        dockASensor.setPosition(new Vector2(dockRadius*2, 0));
+        FixtureDef dockAFixture = new FixtureDef();
+        dockAFixture.shape = dockASensor;
+        dockAFixture.isSensor = true;
+        Fixture dockA = body.createFixture(dockAFixture);
+        dockA.setUserData(DOCK_A_ID);
+        dockASensor.dispose();
+        //dock B
+        CircleShape dockBSensor = new CircleShape();
+        dockBSensor.setRadius(dockRadius);
+        dockBSensor.setPosition(new Vector2(-dockRadius*2, 0));
+        FixtureDef dockBFixture = new FixtureDef();
+        dockBFixture.shape = dockBSensor;
+        dockBFixture.isSensor = true;
+        Fixture dockB = body.createFixture(dockBFixture);
+        dockB.setUserData(DOCK_B_ID);
+        dockBSensor.dispose();
         
         body.setUserData(entity);
         
@@ -206,33 +206,6 @@ public class BodyBuilder {
     
     public static Body createWall(float x, float y, int width, int height, Entity entity) {
         return createRect(x, y, width, height, BodyDef.BodyType.StaticBody, entity);
-    }
-    
-    public static Body createRect(float x, float y, int width, int height, BodyDef.BodyType bodyType, boolean isSensor, Entity entity) {
-        // * 0.5f is half-width / half-height required by setAsBox()
-        float scaledWidth  = engineCFG.meterPerUnit * width * 0.5f;
-        float scaledHeight = engineCFG.meterPerUnit * height * 0.5f;
-        
-        Body body;
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = bodyType;
-        bodyDef.position.set(x, y);
-        body = GameScreen.box2dWorld.createBody(bodyDef);
-        
-        FixtureDef fixtureDef = new FixtureDef();
-        PolygonShape poly = new PolygonShape();
-        poly.setAsBox(scaledWidth, scaledHeight);
-        fixtureDef.shape = poly;
-        fixtureDef.density = 0.5f;
-        fixtureDef.friction = 0.0f;
-        fixtureDef.restitution = 0.6f;
-        fixtureDef.isSensor = isSensor;
-        body.createFixture(fixtureDef);
-        poly.dispose();
-    
-        //tag user data with entity so contact listeners can access entities involved in the collision
-        body.setUserData(entity);
-        return body;
     }
     
     public static Body createRect(float x, float y, float width, float height, BodyDef.BodyType bodyType, Entity entity) {
@@ -263,9 +236,8 @@ public class BodyBuilder {
         bodyDef.position.set(x, y);
         bodyDef.angle = angle;
         body = world.createBody(bodyDef);
-    
-        //it should already be CCW by this point, duplicate check
-        //GeometryUtils.ensureCCW(vertices);
+        
+        //GeometryUtils.ensureCCW(vertices); //should already be CCW by this point, duplicate check
         PolygonShape poly = new PolygonShape();
         poly.set(vertices);
         

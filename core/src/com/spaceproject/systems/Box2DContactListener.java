@@ -34,6 +34,7 @@ import com.spaceproject.components.StarComponent;
 import com.spaceproject.components.TrailComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.DebugUtil;
@@ -64,21 +65,27 @@ public class Box2DContactListener implements ContactListener {
         Object dataA = contact.getFixtureA().getBody().getUserData();
         Object dataB = contact.getFixtureB().getBody().getUserData();
         if (dataA == null || dataB == null) return;
+    
+        //todo: check collision filters here instead before grabbing entity and components?
+        //categoryBits = I am a ...
+        //maskBits     = I collide with ...
+        //contact.getFixtureA().getFilterData().categoryBits
+        //contact.getFixtureB().getFilterData().categoryBits
+        
+        //contact.getFixtureA().getUserData();
+        //contact.getFixtureB().getUserData();
 
         onCollision(contact, (Entity) dataA, (Entity) dataB);
     }
     
     private void onCollision(Contact contact, Entity a, Entity b) {
-        //todo: check collision filters here instead before grabbing entity and components?
-        //contact.getFixtureA().getFilterData().categoryBits
-        //contact.getFixtureB().getFilterData().categoryBits
-        
         //check damage collision
         HealthComponent healthA = Mappers.health.get(a);
         if (healthA != null) {
             DamageComponent damageB = Mappers.damage.get(b);
             if (damageB != null) {
                 handleDamage(contact, b, a, damageB, healthA);
+                return;
             }
         }
         HealthComponent healthB = Mappers.health.get(b);
@@ -86,6 +93,7 @@ public class Box2DContactListener implements ContactListener {
             DamageComponent damageA = Mappers.damage.get(a);
             if (damageA != null) {
                 handleDamage(contact, a, b, damageA, healthB);
+                return;
             }
         }
         //check item collision
@@ -94,6 +102,7 @@ public class Box2DContactListener implements ContactListener {
             CargoComponent cargoB = Mappers.cargo.get(b);
             if (cargoB != null) {
                 collectItemDrop(contact.getFixtureB(), cargoB, a);
+                return;
             }
         }
         ItemDropComponent itemDropB = Mappers.itemDrop.get(b);
@@ -101,6 +110,7 @@ public class Box2DContactListener implements ContactListener {
             CargoComponent cargoA = Mappers.cargo.get(a);
             if (cargoA != null) {
                 collectItemDrop(contact.getFixtureA(), cargoA, b);
+                return;
             }
         }
         //check space station dock with ship
@@ -108,14 +118,16 @@ public class Box2DContactListener implements ContactListener {
         if (vehicleA != null) {
             SpaceStationComponent stationB = Mappers.spaceStation.get(b);
             if (stationB != null) {
-                dock(a, b);
+                dock(contact.getFixtureA(), contact.getFixtureB(), a, b);
+                return;
             }
         }
         VehicleComponent vehicleB = Mappers.vehicle.get(b);
         if (vehicleB != null) {
             SpaceStationComponent stationA = Mappers.spaceStation.get(a);
             if (stationA != null) {
-                dock(b, a);
+                dock(contact.getFixtureB(), contact.getFixtureA(), b, a);
+                return;
             }
         }
     }
@@ -210,7 +222,7 @@ public class Box2DContactListener implements ContactListener {
     }
     
     private void collectItemDrop(Fixture collectorFixture, CargoComponent cargo, Entity item) {
-        if (collectorFixture.getFilterData().categoryBits != 1)
+        if ((int)collectorFixture.getUserData() != BodyBuilder.SHIP_INNER_SENSOR_ID)
             return;
         
         //collect
@@ -221,8 +233,26 @@ public class Box2DContactListener implements ContactListener {
         engine.getSystem(SoundSystem.class).pickup();
     }
     
-    private void dock(Entity vehicleEntity, Entity stationEntity) {
-        Gdx.app.log(getClass().getSimpleName(), "dock!?");
+    private void dock(Fixture shipFixture, Fixture dockFixture, Entity vehicleEntity, Entity stationEntity) {
+        if ((int)shipFixture.getUserData() != BodyBuilder.SHIP_FIXTURE_ID) {
+            Gdx.app.debug(getClass().getSimpleName(), "ignore sensor fixture");
+            return;
+        }
+        if (dockFixture.getUserData() == null) {
+            Gdx.app.error(getClass().getSimpleName(), "null data fixture");
+            return;
+        }
+        
+        SpaceStationComponent station = Mappers.spaceStation.get(stationEntity);
+        
+        if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_A_ID) {
+            station.dockedPortA = vehicleEntity;
+            Gdx.app.debug(getClass().getSimpleName(), "dock port A");
+        }
+        if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_B_ID) {
+            station.dockedPortB = vehicleEntity;
+            Gdx.app.debug(getClass().getSimpleName(), "dock port B");
+        }
     }
     
     @Override
@@ -234,7 +264,7 @@ public class Box2DContactListener implements ContactListener {
         for (Contact contact : world.getContactList()) {
             if (!contact.isTouching()) continue;
     
-            //todo: check collision filters here instead before grabbing entity and components?
+            //todo: check collision filters here instead before grabbing entity and components
             //contact.getFixtureA().getFilterData().categoryBits
             //contact.getFixtureB().getFilterData().categoryBits
             
