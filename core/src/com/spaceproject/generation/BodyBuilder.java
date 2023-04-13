@@ -129,7 +129,6 @@ public class BodyBuilder {
         FixtureDef innerCircleFixture = new FixtureDef();
         innerCircleFixture.shape = innerCollectSensor;
         innerCircleFixture.isSensor = true;
-        innerCircleFixture.filter.categoryBits = BITS_SENSOR; //pickup
         Fixture innerFixture = body.createFixture(innerCircleFixture);
         innerFixture.setUserData(SHIP_INNER_SENSOR_ID);
         
@@ -140,7 +139,6 @@ public class BodyBuilder {
         FixtureDef outerCircleFixture = new FixtureDef();
         outerCircleFixture.shape = outerCollectSensor;
         outerCircleFixture.isSensor = true;
-        outerCircleFixture.filter.categoryBits = BITS_SENSOR; //outer ring: apply force, no pickup
         Fixture outerFixture = body.createFixture(outerCircleFixture);
         outerFixture.setUserData(SHIP_OUTER_SENSOR_ID);
         outerCollectSensor.dispose();

@@ -235,11 +235,11 @@ public class Box2DContactListener implements ContactListener {
     
     private void dock(Fixture shipFixture, Fixture dockFixture, Entity vehicleEntity, Entity stationEntity) {
         if ((int)shipFixture.getUserData() != BodyBuilder.SHIP_FIXTURE_ID) {
-            Gdx.app.debug(getClass().getSimpleName(), "ignore sensor fixture");
+            //Gdx.app.debug(getClass().getSimpleName(), "ignore sensor fixture");
             return;
         }
         if (dockFixture.getUserData() == null) {
-            Gdx.app.error(getClass().getSimpleName(), "null data fixture");
+            //Gdx.app.error(getClass().getSimpleName(), "null data fixture");
             return;
         }
         

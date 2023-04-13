@@ -7,14 +7,20 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.Transform;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.SpaceStationComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.Mappers;
 
 public class SpaceStationSystem extends EntitySystem {
     
+    private final Vector2 tempVec = new Vector2();
     private ImmutableArray<Entity> stations;
     
     @Override
@@ -24,19 +30,40 @@ public class SpaceStationSystem extends EntitySystem {
     
     @Override
     public void update(float deltaTime) {
-        updateStationOrbit();
-    }
-    
-    private void updateStationOrbit() {
-        //keep station in orbit around parent body, don't fling out into universe...
+        
         for (Entity entity : stations) {
+            //keep station in orbit around parent body, don't fling out into universe...
             SpaceStationComponent spaceStation = Mappers.spaceStation.get(entity);
-            PhysicsComponent physics = Mappers.physics.get(entity);
+            PhysicsComponent stationPhysics = Mappers.physics.get(entity);
             if (spaceStation.parentOrbitBody != null) {
                 TransformComponent parentTransform = Mappers.transform.get(spaceStation.parentOrbitBody);
                 //set velocity perpendicular to parent body, (simplified 2-body model)
-                float angle = MyMath.angleTo(parentTransform.pos, physics.body.getPosition()) + (spaceStation.velocity > 0 ? -MathUtils.HALF_PI : MathUtils.HALF_PI);
-                physics.body.setLinearVelocity(MyMath.vector(angle, spaceStation.velocity));
+                float angle = MyMath.angleTo(parentTransform.pos, stationPhysics.body.getPosition()) + (spaceStation.velocity > 0 ? -MathUtils.HALF_PI : MathUtils.HALF_PI);
+                stationPhysics.body.setLinearVelocity(MyMath.vector(angle, spaceStation.velocity));
+            }
+            
+            //update docked ships
+            if (spaceStation.dockedPortA != null) {
+                updateShipInDock(stationPhysics, spaceStation.dockedPortA, BodyBuilder.DOCK_A_ID);
+            }
+            if (spaceStation.dockedPortB != null) {
+                updateShipInDock(stationPhysics, spaceStation.dockedPortB, BodyBuilder.DOCK_B_ID);
+            }
+        }
+    }
+    
+    private void updateShipInDock(PhysicsComponent stationPhysics, Entity dockedShip, int dockId) {
+        PhysicsComponent shipPhysics = Mappers.physics.get(dockedShip);
+        for (Fixture fixture : stationPhysics.body.getFixtureList()) {
+            if (fixture.getUserData() == null) continue;
+            
+            if ((int)fixture.getUserData() == dockId) {
+                CircleShape dock = (CircleShape) fixture.getShape();
+                tempVec.set(dock.getPosition());
+                Transform transform = stationPhysics.body.getTransform();
+                transform.mul(tempVec);
+                shipPhysics.body.setLinearVelocity(0, 0);
+                shipPhysics.body.setTransform(tempVec, 0);
             }
         }
     }
