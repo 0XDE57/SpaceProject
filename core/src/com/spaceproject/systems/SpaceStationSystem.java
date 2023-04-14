@@ -30,7 +30,6 @@ public class SpaceStationSystem extends EntitySystem {
     
     @Override
     public void update(float deltaTime) {
-        
         for (Entity entity : stations) {
             //keep station in orbit around parent body, don't fling out into universe...
             SpaceStationComponent spaceStation = Mappers.spaceStation.get(entity);

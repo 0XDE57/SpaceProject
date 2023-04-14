@@ -265,11 +265,11 @@ public class Box2DContactListener implements ContactListener {
             //active heat damage
             StarComponent starA = Mappers.star.get(entityA);
             if (starA != null) {
-                doActiveHeatDamage(contact, entityA, entityB, deltaTime);
+                doActiveHeatDamage(contact.getFixtureB(), entityA, entityB, deltaTime);
             }
             StarComponent starB = Mappers.star.get(entityB);
             if (starB != null) {
-                doActiveHeatDamage(contact, entityB, entityA, deltaTime);
+                doActiveHeatDamage(contact.getFixtureA(), entityB, entityA, deltaTime);
             }
             //active item movement
             ItemDropComponent itemDropA = Mappers.itemDrop.get(entityA);
@@ -283,9 +283,9 @@ public class Box2DContactListener implements ContactListener {
         }
     }
     
-    private void doActiveHeatDamage(Contact contact, Entity starEntity, Entity burningEntity, float deltaTime) {
-        if (contact.getFixtureA().getFilterData().categoryBits == 2 || contact.getFixtureB().getFilterData().categoryBits == 2)
-            return;
+    private void doActiveHeatDamage(Fixture burningFixture, Entity starEntity, Entity burningEntity, float deltaTime) {
+        if (burningFixture.isSensor())
+            return; //only burn bodies
         
         HealthComponent healthComponent = Mappers.health.get(burningEntity);
         if (healthComponent == null) {

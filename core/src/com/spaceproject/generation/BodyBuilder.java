@@ -131,7 +131,6 @@ public class BodyBuilder {
         innerCircleFixture.isSensor = true;
         Fixture innerFixture = body.createFixture(innerCircleFixture);
         innerFixture.setUserData(SHIP_INNER_SENSOR_ID);
-        
         innerCollectSensor.dispose();
         //outer sensor
         CircleShape outerCollectSensor = new CircleShape();
