@@ -139,7 +139,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         }
         
         if (buttonCode == controller.getMapping().buttonDpadDown) {
-            control.transition = buttonDown;
+            control.interact = buttonDown;
             handled = true;
         }
         

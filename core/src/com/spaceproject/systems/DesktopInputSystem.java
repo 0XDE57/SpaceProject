@@ -146,7 +146,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             handled = true;
         }
         if (keycode == keyCFG.land) {
-            control.transition = keyDown;
+            control.interact = keyDown;
             handled = true;
         }
     

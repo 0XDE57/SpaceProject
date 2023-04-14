@@ -80,7 +80,7 @@ public class AISystem extends IteratingSystem {
             case landOnPlanet: {
                 if (Mappers.screenTrans.get(entity) != null) {
                     ai.state = AIComponent.State.idle;
-                    control.transition = false;
+                    control.interact = false;
                     Gdx.app.debug(getClass().getSimpleName(), DebugUtil.objString(ai) + "AI landing. setting state: " + ai.state.name());
                     return;
                 }
@@ -135,7 +135,7 @@ public class AISystem extends IteratingSystem {
                 if (vehicle == null) {
                     seekAndEnterVehicle(entity, control, aiPos);
                 } else {
-                    control.transition = true;
+                    control.interact = true;
                     ai.state = AIComponent.State.idle;
                 }
                 break;

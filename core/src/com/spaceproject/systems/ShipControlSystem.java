@@ -133,12 +133,12 @@ public class ShipControlSystem extends IteratingSystem {
         if (GameScreen.inSpace()) {
             Entity planet = getPlanetNearPosition(transform.pos);
             control.canTransition = planet != null;
-            if (control.transition && control.canTransition) {
+            if (control.interact && control.canTransition) {
                 beginLandOnPlanet(entity, planet);
             }
         } else {
             control.canTransition = true;
-            if (control.transition) {
+            if (control.interact) {
                 takeOffPlanet(entity);
             }
         }

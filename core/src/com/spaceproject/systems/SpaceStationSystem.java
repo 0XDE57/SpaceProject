@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.CircleShape;
@@ -43,15 +44,19 @@ public class SpaceStationSystem extends EntitySystem {
             
             //update docked ships
             if (spaceStation.dockedPortA != null) {
-                updateShipInDock(stationPhysics, spaceStation.dockedPortA, BodyBuilder.DOCK_A_ID);
+                updateShipInDock(spaceStation, stationPhysics, spaceStation.dockedPortA, BodyBuilder.DOCK_A_ID);
             }
             if (spaceStation.dockedPortB != null) {
-                updateShipInDock(stationPhysics, spaceStation.dockedPortB, BodyBuilder.DOCK_B_ID);
+                updateShipInDock(spaceStation, stationPhysics, spaceStation.dockedPortB, BodyBuilder.DOCK_B_ID);
             }
         }
     }
     
-    private void updateShipInDock(PhysicsComponent stationPhysics, Entity dockedShip, int dockId) {
+    private void updateShipInDock(SpaceStationComponent spaceStation, PhysicsComponent stationPhysics, Entity dockedShip, int dockId) {
+        if (Mappers.controllable.get(dockedShip).interact) {
+            undock(spaceStation, dockedShip);
+        }
+        
         PhysicsComponent shipPhysics = Mappers.physics.get(dockedShip);
         for (Fixture fixture : stationPhysics.body.getFixtureList()) {
             if (fixture.getUserData() == null) continue;
@@ -64,6 +69,17 @@ public class SpaceStationSystem extends EntitySystem {
                 shipPhysics.body.setLinearVelocity(0, 0);
                 shipPhysics.body.setTransform(tempVec, shipPhysics.body.getAngle());
             }
+        }
+    }
+    
+    private void undock(SpaceStationComponent spaceStation, Entity dockedShip) {
+        if (spaceStation.dockedPortA == dockedShip) {
+            spaceStation.dockedPortA = null;
+            Gdx.app.debug(getClass().getSimpleName(), "undock port A");
+        }
+        if (spaceStation.dockedPortB == dockedShip) {
+            spaceStation.dockedPortB = null;
+            Gdx.app.debug(getClass().getSimpleName(), "undock port B");
         }
     }
     
