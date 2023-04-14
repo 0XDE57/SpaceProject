@@ -17,7 +17,7 @@ Welcome to A Space Project. A project involving space...
     * lonely rogue planets who lost their sun :(
 * Fight against other ship (disabled for now)
   * combat broken placeholder AI while I figure out the rest of the engine.
-* Then when you're bored of that you can land on a planet I guess (in theory, probably out of scope):
+* You can land on planets (in theory, probably out of scope):
    * The planets are flat (ha, take that Round Earthers!)
       * Actually the planets are ***donuts*** (ha, take that Flat Earthers!)
 * Controller Support (works in game but not menus)
