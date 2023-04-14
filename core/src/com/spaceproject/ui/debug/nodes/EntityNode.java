@@ -10,7 +10,7 @@ import com.spaceproject.ui.debug.ECSExplorerWindow;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.SimpleTimer;
 
-import static com.spaceproject.generation.FontFactory.skinSmallFont;
+import static com.spaceproject.generation.FontLoader.skinSmallFont;
 
 /**
  * Created by Whilow Schock on 25/09/2019.

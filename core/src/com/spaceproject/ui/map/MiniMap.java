@@ -23,7 +23,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.MiniMapConfig;
-import com.spaceproject.generation.FontFactory;
+import com.spaceproject.generation.FontLoader;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
@@ -55,7 +55,7 @@ public class MiniMap {
         updateMapPosition();
         resetMapScale();
         
-        font = FontFactory.createFont(FontFactory.fontPressStart, miniMapCFG.fontSize);
+        font = FontLoader.createFont(FontLoader.fontPressStart, miniMapCFG.fontSize);
     }
     
     public void drawMiniMap(ShapeRenderer shape, SpriteBatch batch, Entity player, ImmutableArray<Entity> entities) {

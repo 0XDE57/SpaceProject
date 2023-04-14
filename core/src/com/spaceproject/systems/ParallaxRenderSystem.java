@@ -28,7 +28,7 @@ import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.TrailComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.generation.FontFactory;
+import com.spaceproject.generation.FontLoader;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
@@ -79,7 +79,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         parameter2.size = 10;
         parameter2.borderColor = Color.BLACK;
         parameter2.borderWidth = 3;
-        subFont = FontFactory.createFont(FontFactory.fontPressStart, parameter2);
+        subFont = FontLoader.createFont(FontLoader.fontPressStart, parameter2);
     }
     
     @Override

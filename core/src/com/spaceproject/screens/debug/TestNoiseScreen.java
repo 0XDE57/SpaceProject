@@ -10,7 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
-import com.spaceproject.generation.FontFactory;
+import com.spaceproject.generation.FontLoader;
 import com.spaceproject.noise.NoiseGen;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
@@ -63,7 +63,7 @@ public class TestNoiseScreen extends MyScreenAdapter implements InputProcessor {
     public TestNoiseScreen() {
         getInputMultiplexer().addProcessor(this);
         
-        font = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 15);
+        font = FontLoader.createFont(FontLoader.fontBitstreamVMBold, 15);
         
         seed = MathUtils.random(Long.MAX_VALUE);
         

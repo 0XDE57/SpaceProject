@@ -16,7 +16,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ShortArray;
-import com.spaceproject.generation.FontFactory;
+import com.spaceproject.generation.FontLoader;
 import com.spaceproject.math.DelaunayCell;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
@@ -32,7 +32,7 @@ import java.util.ArrayList;
 //https://github.com/mjholtzem/Unity-2D-Destruction
 
 public class TestVoronoiScreen extends MyScreenAdapter {
-    BitmapFont text = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 20);
+    BitmapFont text = FontLoader.createFont(FontLoader.fontBitstreamVMBold, 20);
     
     //all points that define a polygon and any point inside the polygon
     FloatArray points;

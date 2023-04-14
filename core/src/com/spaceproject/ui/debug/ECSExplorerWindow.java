@@ -32,7 +32,7 @@ import com.spaceproject.utility.SimpleTimer;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.spaceproject.generation.FontFactory.skinSmallFont;
+import static com.spaceproject.generation.FontLoader.skinSmallFont;
 
 /**
  * A tree based debug/dev tool for exploring and inspecting the contents of the engine.

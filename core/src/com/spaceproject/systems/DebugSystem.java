@@ -32,7 +32,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.DebugConfig;
 import com.spaceproject.config.KeyConfig;
-import com.spaceproject.generation.FontFactory;
+import com.spaceproject.generation.FontLoader;
 import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
@@ -83,8 +83,8 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         batch = GameScreen.batch;
         shape = GameScreen.shape;
         projectionMatrix = new Matrix4();
-        fontSmall = FontFactory.createFont(FontFactory.fontBitstreamVM, 10);
-        fontLarge = FontFactory.createFont(FontFactory.fontBitstreamVMBold, 20);
+        fontSmall = FontLoader.createFont(FontLoader.fontBitstreamVM, 10);
+        fontLarge = FontLoader.createFont(FontLoader.fontBitstreamVMBold, 20);
         objects = new Array<>();
     
         debugRenderer = new Box2DDebugRenderer(

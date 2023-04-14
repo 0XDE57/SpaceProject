@@ -9,7 +9,7 @@ import com.spaceproject.utility.SimpleTimer;
 
 import java.lang.reflect.Field;
 
-import static com.spaceproject.generation.FontFactory.skinSmallFont;
+import static com.spaceproject.generation.FontLoader.skinSmallFont;
 
 
 public class ReflectionNode extends UpdateNode {

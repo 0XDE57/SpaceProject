@@ -25,7 +25,7 @@ import com.spaceproject.config.SysCFG;
 import com.spaceproject.config.SystemsConfig;
 import com.spaceproject.config.WorldConfig;
 import com.spaceproject.generation.EntityFactory;
-import com.spaceproject.generation.FontFactory;
+import com.spaceproject.generation.FontLoader;
 import com.spaceproject.generation.Galaxy;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.math.Physics;
@@ -86,8 +86,8 @@ public class GameScreen extends MyScreenAdapter {
         if (VisUI.isLoaded())
             VisUI.dispose(true);
         VisUI.load(SpaceProject.isMobile() ? VisUI.SkinScale.X2 : VisUI.SkinScale.X1);
-        BitmapFont font = FontFactory.createFont(FontFactory.fontBitstreamVM, 12);
-        VisUI.getSkin().add(FontFactory.skinSmallFont, font);
+        BitmapFont font = FontLoader.createFont(FontLoader.fontBitstreamVM, 12);
+        VisUI.getSkin().add(FontLoader.skinSmallFont, font);
     
         stage = new Stage(new ScreenViewport());
         getInputMultiplexer().addProcessor(0, stage);

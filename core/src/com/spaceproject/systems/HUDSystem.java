@@ -42,7 +42,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.config.UIConfig;
-import com.spaceproject.generation.FontFactory;
+import com.spaceproject.generation.FontLoader;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
@@ -95,19 +95,19 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         parameter.size = 26;
         parameter.borderColor = Color.BLACK;
         parameter.borderWidth = 3;
-        font = FontFactory.createFont(FontFactory.fontPressStart, parameter);
+        font = FontLoader.createFont(FontLoader.fontPressStart, parameter);
     
         FreeTypeFontGenerator.FreeTypeFontParameter parameter2 = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter2.size = 20;
         parameter2.borderColor = Color.BLACK;
         parameter2.borderWidth = 3;
-        subFont = FontFactory.createFont(FontFactory.fontPressStart, parameter2);
+        subFont = FontLoader.createFont(FontLoader.fontPressStart, parameter2);
     
         FreeTypeFontGenerator.FreeTypeFontParameter inventoryParam = new FreeTypeFontGenerator.FreeTypeFontParameter();
         inventoryParam.size = 12;
         inventoryParam.borderColor = Color.BLACK;
         inventoryParam.borderWidth = 1;
-        inventoryFont = FontFactory.createFont(FontFactory.fontPressStart, inventoryParam);
+        inventoryFont = FontLoader.createFont(FontLoader.fontPressStart, inventoryParam);
         
         GameScreen.getStage().addListener(new InputListener() {
             @Override

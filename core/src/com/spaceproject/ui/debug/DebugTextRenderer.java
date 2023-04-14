@@ -3,7 +3,7 @@ package com.spaceproject.ui.debug;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
-import com.spaceproject.generation.FontFactory;
+import com.spaceproject.generation.FontLoader;
 
 public class DebugTextRenderer {
     
@@ -12,7 +12,7 @@ public class DebugTextRenderer {
     
     public DebugTextRenderer() {
         debugTexts = new Array<>();
-        fontSmall = FontFactory.createFont(FontFactory.fontBitstreamVM, 10);
+        fontSmall = FontLoader.createFont(FontLoader.fontBitstreamVM, 10);
     }
     
     public void draw(SpriteBatch batch) {

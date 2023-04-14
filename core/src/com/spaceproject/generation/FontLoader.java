@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
-public class FontFactory {
+public class FontLoader {
     
     // fonts
     public static final String fontPressStart = "fonts/pressstart/PressStart2P.ttf";
@@ -35,12 +35,12 @@ public class FontFactory {
         } catch (GdxRuntimeException ex) {
             String msg = "Font not found: " + Gdx.files.getLocalStoragePath() + font;
             msg += ". Make sure '../assets' is appended to run configuration.";
-            Gdx.app.error(FontFactory.class.getSimpleName(), msg, ex);
+            Gdx.app.error(FontLoader.class.getSimpleName(), msg, ex);
             //https://github.com/libgdx/libgdx/wiki/Gradle-and-Intellij-IDEA
             //Set Working directory to <project_path>/assets/
         }
         
-        Gdx.app.log(FontFactory.class.getSimpleName(), "Loaded default font.");
+        Gdx.app.log(FontLoader.class.getSimpleName(), "Loaded default font.");
         return new BitmapFont();
     }
     

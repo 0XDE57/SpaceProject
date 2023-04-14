@@ -18,7 +18,7 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.dialog.Dialogs;
 import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.generation.FontFactory;
+import com.spaceproject.generation.FontLoader;
 import com.spaceproject.screens.animations.DelaunayAnim;
 import com.spaceproject.screens.animations.NBodyGravityAnim;
 import com.spaceproject.screens.animations.NoiseAnim;
@@ -175,7 +175,7 @@ public class TitleScreen extends MyScreenAdapter {
         parameter.size = 30;
         parameter.borderColor = Color.DARK_GRAY;
         parameter.borderWidth = 1;
-        BitmapFont fontComfortaaBold = FontFactory.createFont(FontFactory.fontComfortaaBold, parameter);
+        BitmapFont fontComfortaaBold = FontLoader.createFont(FontLoader.fontComfortaaBold, parameter);
         VisUI.getSkin().add(menuFont, fontComfortaaBold);
     }
     
@@ -184,7 +184,7 @@ public class TitleScreen extends MyScreenAdapter {
         parameter.size = 90;
         parameter.borderColor = Color.DARK_GRAY;
         parameter.borderWidth = 1;
-        BitmapFont fontComfortaaBold = FontFactory.createFont(FontFactory.fontComfortaaBold, parameter);
+        BitmapFont fontComfortaaBold = FontLoader.createFont(FontLoader.fontComfortaaBold, parameter);
         VisUI.getSkin().add(titleFont, fontComfortaaBold);
     }
     
