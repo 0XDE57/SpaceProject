@@ -303,8 +303,11 @@ public class Box2DContactListener implements ContactListener {
         HealthComponent healthComponent = Mappers.health.get(burningEntity);
         if (healthComponent == null) {
             //check if projectile
-            //DamageComponent, remove bullet? or could melt bullet?
-            //could set bullet on fire so its more powerful on the other side
+            DamageComponent damage = Mappers.damage.get(burningEntity);
+            if (damage != null) {
+                //could set bullet on fire so its more powerful on the other side?
+                burningEntity.add(new RemoveComponent());
+            }
             return;
         }
         
