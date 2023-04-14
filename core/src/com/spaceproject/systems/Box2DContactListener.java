@@ -238,10 +238,12 @@ public class Box2DContactListener implements ContactListener {
         
         if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_A_ID) {
             station.dockedPortA = vehicleEntity;
+            Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
             Gdx.app.debug(getClass().getSimpleName(), "dock port A");
         }
         if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_B_ID) {
             station.dockedPortB = vehicleEntity;
+            Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
             Gdx.app.debug(getClass().getSimpleName(), "dock port B");
         }
     }
