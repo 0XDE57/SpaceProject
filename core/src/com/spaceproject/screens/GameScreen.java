@@ -24,7 +24,7 @@ import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.SysCFG;
 import com.spaceproject.config.SystemsConfig;
 import com.spaceproject.config.WorldConfig;
-import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.generation.FontLoader;
 import com.spaceproject.generation.Galaxy;
 import com.spaceproject.math.MyMath;
@@ -125,12 +125,12 @@ public class GameScreen extends MyScreenAdapter {
         galaxySeed = MyMath.getNewGalaxySeed();
         galaxy = new Galaxy();
     
-        Array<Entity> playerShipCluster = EntityFactory.createPlayerShip(0, 0, inSpace);
+        Array<Entity> playerShipCluster = EntityBuilder.createPlayerShip(0, 0, inSpace);
         //init systems
         if (inSpace) {
             initSpace(playerShipCluster);
         } else {
-            Entity planet = EntityFactory.createPlanet(0, new Entity(), 0, false);
+            Entity planet = EntityBuilder.createPlanet(0, new Entity(), 0, false);
             Gdx.app.log(this.getClass().getSimpleName(), "DEBUG PLANET LOADED");
             
             initWorld(playerShipCluster, planet);

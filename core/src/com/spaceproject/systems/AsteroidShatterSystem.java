@@ -20,7 +20,7 @@ import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.BodyBuilder;
-import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
@@ -157,7 +157,7 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
             //center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle());
             //Vector2 pos = parentBody.getPosition().cpy().add(center);
             Vector2 vel = parentBody.getLinearVelocity();
-            Entity childAsteroid = EntityFactory.createAsteroid(seed, pos.x, pos.y, vel.x, vel.y, parentBody.getAngle(), hull);
+            Entity childAsteroid = EntityBuilder.createAsteroid(seed, pos.x, pos.y, vel.x, vel.y, parentBody.getAngle(), hull);
             //float angularDrift = MathUtils.random(-maxDriftAngle, maxDriftAngle);
             //Mappers.physics.get(childAsteroid).body.setAngularVelocity(parentBody.getAngularVelocity() + angularDrift);
             getEngine().addEntity(childAsteroid);

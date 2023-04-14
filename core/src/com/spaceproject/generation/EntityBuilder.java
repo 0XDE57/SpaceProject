@@ -60,7 +60,7 @@ import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
 
-public class EntityFactory {
+public class EntityBuilder {
     
     private static final EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     private static final EntityConfig entityCFG = SpaceProject.configManager.getConfig(EntityConfig.class);

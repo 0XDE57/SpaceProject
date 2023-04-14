@@ -10,7 +10,7 @@ import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.config.WorldConfig;
-import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.ResourceDisposer;
@@ -38,7 +38,7 @@ public class RemovalSystem extends IteratingSystem {
         if (controlFocusComp != null) {
             Gdx.app.log(this.getClass().getSimpleName(), "Controlled entity assumed to be player; respawning...");
             if (GameScreen.inSpace()) {
-                Array<Entity> newPlayer = EntityFactory.createPlayerShip(0, 0, true);
+                Array<Entity> newPlayer = EntityBuilder.createPlayerShip(0, 0, true);
                 for (Entity e : newPlayer) {
                     getEngine().addEntity(e);
                 }
@@ -46,7 +46,7 @@ public class RemovalSystem extends IteratingSystem {
                 WorldConfig worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
                 int mapSize = GameScreen.getCurrentPlanet().getComponent(PlanetComponent.class).mapSize;
                 int position = mapSize * worldCFG.tileSize / 2;//set  position to middle of planet
-                Entity newPlayer = EntityFactory.createPlayer(position, position);
+                Entity newPlayer = EntityBuilder.createPlayer(position, position);
                 getEngine().addEntity(newPlayer);
             }
         }

@@ -25,7 +25,7 @@ import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.generation.AstroBody;
-import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.noise.NoiseBuffer;
@@ -229,7 +229,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         Array<Entity> entities = new Array<Entity>();
         
         //add star to center of planetary system
-        Entity star = EntityFactory.createStar(GameScreen.box2dWorld, seed, x, y, isRotateClockwise);
+        Entity star = EntityBuilder.createStar(GameScreen.box2dWorld, seed, x, y, isRotateClockwise);
         BarycenterComponent barycenter = new BarycenterComponent();
         barycenter.bodyType = numPlanets == 0 ? BarycenterComponent.AstronomicalBodyType.loneStar : BarycenterComponent.AstronomicalBodyType.uniStellar;
         star.add(barycenter);
@@ -246,7 +246,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     
         Entity spaceStation;
         //if (numPlanets == 0) {
-        spaceStation = EntityFactory.createSpaceStation(star, Mappers.star.get(star).radius * 4 + 200, false);
+        spaceStation = EntityBuilder.createSpaceStation(star, Mappers.star.get(star).radius * 4 + 200, false);
         entities.add(spaceStation);
         //}
         
@@ -257,7 +257,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
             
             //create planet
             long planetSeed = MyMath.getSeed(x, y + distance);
-            Entity planet = EntityFactory.createPlanet(planetSeed, star, distance, isRotateClockwise);
+            Entity planet = EntityBuilder.createPlanet(planetSeed, star, distance, isRotateClockwise);
             
             //add moon
             boolean hasMoon = MathUtils.randomBoolean();
@@ -265,7 +265,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
                 float moonDist = planet.getComponent(TextureComponent.class).texture.getWidth() * planet.getComponent(TextureComponent.class).scale * 2;
                 moonDist *= 0.7f;
                 distance += moonDist;
-                Entity moon = EntityFactory.createMoon(MyMath.getSeed(x, y + distance), planet, moonDist, isRotateClockwise);
+                Entity moon = EntityBuilder.createMoon(MyMath.getSeed(x, y + distance), planet, moonDist, isRotateClockwise);
                 entities.add(moon);
                 
                 /*// nested test
@@ -312,7 +312,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         MathUtils.random.setSeed(seed);
         Array<Entity> entities = new Array<>();
         
-        Entity planet = EntityFactory.createPlanet(seed, null, 0, MathUtils.randomBoolean());
+        Entity planet = EntityBuilder.createPlanet(seed, null, 0, MathUtils.randomBoolean());
         planet.getComponent(OrbitComponent.class).tangentialSpeed = 0;
         
         BarycenterComponent barycenter = new BarycenterComponent();
@@ -325,7 +325,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         if (hasMoon) {
             float moonDist = planet.getComponent(TextureComponent.class).texture.getWidth() * planet.getComponent(TextureComponent.class).scale * 2;
             boolean rotDir = MathUtils.randomBoolean();
-            Entity moon = EntityFactory.createMoon(MyMath.getSeed(x, y + moonDist), planet, moonDist, rotDir);
+            Entity moon = EntityBuilder.createMoon(MyMath.getSeed(x, y + moonDist), planet, moonDist, rotDir);
             entities.add(moon);
         }
         
@@ -361,14 +361,14 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         float startAngle = MathUtils.random(MathUtils.PI2);
         float tangentialSpeed = MathUtils.random(celestCFG.minPlanetTangentialSpeed, celestCFG.maxPlanetTangentialSpeed);
         
-        Entity starA = EntityFactory.createStar(GameScreen.box2dWorld, MyMath.getSeed(x + distance, y), x + distance, y, rotDir);
+        Entity starA = EntityBuilder.createStar(GameScreen.box2dWorld, MyMath.getSeed(x + distance, y), x + distance, y, rotDir);
         OrbitComponent orbitA = starA.getComponent(OrbitComponent.class);
         orbitA.parent = anchorEntity;
         orbitA.radialDistance = distance;
         orbitA.startAngle = startAngle;
         orbitA.tangentialSpeed = tangentialSpeed;
         
-        Entity starB = EntityFactory.createStar(GameScreen.box2dWorld, MyMath.getSeed(x - distance, y), x - distance, y, rotDir);
+        Entity starB = EntityBuilder.createStar(GameScreen.box2dWorld, MyMath.getSeed(x - distance, y), x - distance, y, rotDir);
         OrbitComponent orbitB = starB.getComponent(OrbitComponent.class);
         orbitB.parent = anchorEntity;
         orbitB.radialDistance = distance;
@@ -390,29 +390,29 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         hasInit = true;
         
         //a placeholder to add dummy objects for now
-        for (Entity e : EntityFactory.createBasicShip(-20, 40, GameScreen.inSpace())) {
+        for (Entity e : EntityBuilder.createBasicShip(-20, 40, GameScreen.inSpace())) {
             engine.addEntity(e);
         }
-        for (Entity e : EntityFactory.createBasicShip(-30, 40, GameScreen.inSpace())) {
+        for (Entity e : EntityBuilder.createBasicShip(-30, 40, GameScreen.inSpace())) {
             engine.addEntity(e);
         }
-        for (Entity e : EntityFactory.createBasicShip(-40, 40, GameScreen.inSpace())) {
+        for (Entity e : EntityBuilder.createBasicShip(-40, 40, GameScreen.inSpace())) {
             engine.addEntity(e);
         }
-        for (Entity e : EntityFactory.createBasicShip(-60, 40, GameScreen.inSpace())) {
+        for (Entity e : EntityBuilder.createBasicShip(-60, 40, GameScreen.inSpace())) {
             engine.addEntity(e);
         }
         
-        Entity aiTest = EntityFactory.createCharacterAI(0, 40);
+        Entity aiTest = EntityBuilder.createCharacterAI(0, 40);
         Mappers.AI.get(aiTest).state = AIComponent.State.wander;
         //aiTest.add(new CameraFocusComponent());//test cam focus on AI
         engine.addEntity(aiTest);
         
-        Entity aiTest2 = EntityFactory.createCharacterAI(0, 60);
+        Entity aiTest2 = EntityBuilder.createCharacterAI(0, 60);
         Mappers.AI.get(aiTest2).state = AIComponent.State.idle;
         engine.addEntity(aiTest2);
         
-        Entity aiTest3 = EntityFactory.createCharacterAI(0, 80);
+        Entity aiTest3 = EntityBuilder.createCharacterAI(0, 80);
         Mappers.AI.get(aiTest3).state = AIComponent.State.landOnPlanet;
         //aiTest3.add(new CameraFocusComponent());
         engine.addEntity(aiTest3);

@@ -14,7 +14,7 @@ import com.spaceproject.components.AsteroidBeltComponent;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
@@ -92,7 +92,7 @@ public class AsteroidBeltSystem extends EntitySystem {
     private Entity spawnAsteroid(float x, float y, float velX, float velY) {
         int size = MathUtils.random(14, 120);
         long seed = MyMath.getSeed(x, y);
-        Entity asteroid = EntityFactory.createAsteroid(seed, x, y, velX, velY, size);
+        Entity asteroid = EntityBuilder.createAsteroid(seed, x, y, velX, velY, size);
         getEngine().addEntity(asteroid);
         return asteroid;
     }

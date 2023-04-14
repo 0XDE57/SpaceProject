@@ -9,7 +9,7 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.config.WorldConfig;
-import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
@@ -28,16 +28,16 @@ public class WorldLoadingSystem extends EntitySystem {
         // test ships
         int position = mapSize * worldCFG.tileSize / 2;//set  position to middle of planet
     
-        Array<Entity> basicShipCluster = EntityFactory.createBasicShip(position + 10, position + 10, GameScreen.inSpace());
+        Array<Entity> basicShipCluster = EntityBuilder.createBasicShip(position + 10, position + 10, GameScreen.inSpace());
         for (Entity e : basicShipCluster) {
             engine.addEntity(e);
         }
-        Array<Entity> basicShipCluster2 = EntityFactory.createBasicShip(position - 10, position + 10, GameScreen.inSpace());
+        Array<Entity> basicShipCluster2 = EntityBuilder.createBasicShip(position - 10, position + 10, GameScreen.inSpace());
         for (Entity e : basicShipCluster2) {
             engine.addEntity(e);
         }
         
-        Entity aiTest = EntityFactory.createCharacterAI(position, position + 10);
+        Entity aiTest = EntityBuilder.createCharacterAI(position, position + 10);
         Mappers.AI.get(aiTest).state = AIComponent.State.wander;
         engine.addEntity(aiTest);
 

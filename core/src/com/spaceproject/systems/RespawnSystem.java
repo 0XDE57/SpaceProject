@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.config.WorldConfig;
-import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
@@ -28,7 +28,7 @@ public class RespawnSystem extends EntitySystem implements EntityListener {
         Gdx.app.log(getClass().getSimpleName(), "Controlled entity assumed to be player; respawning...");
         
         if (GameScreen.inSpace()) {
-            Array<Entity> newPlayer = EntityFactory.createPlayerShip(0, 0, true);
+            Array<Entity> newPlayer = EntityBuilder.createPlayerShip(0, 0, true);
             for (Entity e : newPlayer) {
                 getEngine().addEntity(e);
             }
@@ -36,7 +36,7 @@ public class RespawnSystem extends EntitySystem implements EntityListener {
             WorldConfig worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
             int mapSize = GameScreen.getCurrentPlanet().getComponent(PlanetComponent.class).mapSize;
             int position = mapSize * worldCFG.tileSize / 2;//set  position to middle of planet
-            Entity newPlayer = EntityFactory.createPlayer(position, position);
+            Entity newPlayer = EntityBuilder.createPlayer(position, position);
             getEngine().addEntity(newPlayer);
         }
     }

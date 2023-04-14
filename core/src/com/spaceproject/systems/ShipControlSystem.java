@@ -26,7 +26,7 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.components.VehicleComponent;
 import com.spaceproject.config.EntityConfig;
 import com.spaceproject.generation.BodyBuilder;
-import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.DebugUtil;
@@ -243,7 +243,7 @@ public class ShipControlSystem extends IteratingSystem {
                 }
                 
                 //add new rapid cannon
-                CannonComponent cannon = EntityFactory.makeCannon(vehicle.dimensions.width);
+                CannonComponent cannon = EntityBuilder.makeCannon(vehicle.dimensions.width);
                 player.add(cannon);
                 vehicle.weaponIndex = 1;
                 Gdx.app.log(this.getClass().getSimpleName(), vehicle.weaponIndex + ": cannon");
@@ -253,7 +253,7 @@ public class ShipControlSystem extends IteratingSystem {
                 //assume has regular cannon equipped
                 CannonComponent removed = player.remove(CannonComponent.class);
                 //add new charge
-                ChargeCannonComponent chargeCannon = EntityFactory.makeChargeCannon(vehicle.dimensions.width);
+                ChargeCannonComponent chargeCannon = EntityBuilder.makeChargeCannon(vehicle.dimensions.width);
                 player.add(chargeCannon);
                 vehicle.weaponIndex = 0;
                 Gdx.app.log(this.getClass().getSimpleName(), vehicle.weaponIndex + ": charge cannon");

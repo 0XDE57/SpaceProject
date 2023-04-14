@@ -16,7 +16,7 @@ import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.PlanetComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.generation.EntityFactory;
+import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.DebugUtil;
@@ -71,7 +71,7 @@ public class PlanetAISpawnerSystem extends IteratingSystem implements EntityList
         
         //spawn ship at planets location
         TransformComponent transform = Mappers.transform.get(spawnSourceEntity);
-        Array<Entity> aiShipCluster = EntityFactory.createAIShip(transform.pos.x, transform.pos.y, GameScreen.inSpace());
+        Array<Entity> aiShipCluster = EntityBuilder.createAIShip(transform.pos.x, transform.pos.y, GameScreen.inSpace());
         Entity aiShip = aiShipCluster.first();
         
         //handle spawn state
