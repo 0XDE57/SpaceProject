@@ -213,7 +213,7 @@ public class Box2DContactListener implements ContactListener {
     }
     
     private void collectItemDrop(Fixture collectorFixture, CargoComponent cargo, Entity item) {
-        if ((int)collectorFixture.getUserData() != BodyBuilder.SHIP_INNER_SENSOR_ID)
+        if (collectorFixture.getUserData() != null && (int)collectorFixture.getUserData() != BodyBuilder.SHIP_INNER_SENSOR_ID)
             return;
         
         //collect
