@@ -62,7 +62,7 @@ public class SpaceStationSystem extends EntitySystem {
                 Transform transform = stationPhysics.body.getTransform();
                 transform.mul(tempVec);
                 shipPhysics.body.setLinearVelocity(0, 0);
-                shipPhysics.body.setTransform(tempVec, 0);
+                shipPhysics.body.setTransform(tempVec, shipPhysics.body.getAngle());
             }
         }
     }
