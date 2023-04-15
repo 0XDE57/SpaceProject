@@ -67,7 +67,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private ShapeRenderer shape;
     private SpriteBatch batch;
     private BitmapFont font, subFont, inventoryFont;
-    private GlyphLayout layout = new GlyphLayout();
+    private final GlyphLayout layout = new GlyphLayout();
     
     //entity storage
     private ImmutableArray<Entity> mapableEntities;
@@ -227,7 +227,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape.end();
         
         batch.begin();
-    
+        
         drawInventory(player, 100, 100);
         
         //draw special state: hyper or landing / launching
@@ -293,25 +293,27 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     //region player status
     private void drawSpecialStateMessage(Entity player) {
-        if (player == null) return;
-        
         messageState = SpecialState.off;
         
-        HyperDriveComponent hyper = Mappers.hyper.get(player);
-        if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
-            messageState = SpecialState.hyper;
-        }
-    
-        ScreenTransitionComponent trans = Mappers.screenTrans.get(player);
-        if (trans != null) {
-            if (trans.landStage != null) {
-                messageState = SpecialState.landing;
+        if (player == null) {
+            messageState = SpecialState.destroyed;
+        } else {
+            HyperDriveComponent hyper = Mappers.hyper.get(player);
+            if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
+                messageState = SpecialState.hyper;
             }
-            if (trans.takeOffStage != null) {
-                messageState = SpecialState.launching;
+    
+            ScreenTransitionComponent trans = Mappers.screenTrans.get(player);
+            if (trans != null) {
+                if (trans.landStage != null) {
+                    messageState = SpecialState.landing;
+                }
+                if (trans.takeOffStage != null) {
+                    messageState = SpecialState.launching;
+                }
             }
         }
-    
+        
         float ratio = 1 + (float) Math.sin(anim);
         Color c = Color.GOLD.cpy().lerp(Color.CYAN, ratio);
         switch (messageState) {
@@ -319,7 +321,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             case landing: layout.setText(font, "[ LANDING ]"); break;
             case launching: layout.setText(font, "[ LAUNCHING ]"); break;
             case destroyed:
-                layout.setText(font, ". . . DESTROYED . . .");
+                layout.setText(font, "[ DESTROYED ]");
                 c = Color.BLACK.cpy().lerp(Color.RED, ratio);
                 break;
             case off:
@@ -550,6 +552,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     private void drawInventory(Entity entity, float x, float y) {
+        if (entity == null) return;
         CargoComponent cargo = Mappers.cargo.get(entity);
         if (cargo == null) return;
         

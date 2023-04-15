@@ -14,22 +14,15 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.components.AsteroidComponent;
-import com.spaceproject.components.ExpireComponent;
-import com.spaceproject.components.ItemDropComponent;
-import com.spaceproject.components.PhysicsComponent;
-import com.spaceproject.components.TextureComponent;
-import com.spaceproject.components.TransformComponent;
-import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.generation.EntityBuilder;
-import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.utility.Mappers;
-import com.spaceproject.utility.SimpleTimer;
 
 public class AsteroidShatterSystem extends EntitySystem implements EntityListener {
     
     private final DelaunayTriangulator delaunay = new DelaunayTriangulator();
     private final float minAsteroidSize = 100; //anything smaller than this will not create more
     private final float maxDriftAngle = 0.25f; //angular drift when shatter
+    private final Vector2 center = new Vector2();
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -55,7 +48,9 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
         if (asteroid.doShatter && asteroid.area >= minAsteroidSize) {
             shatterAsteroid(entity, asteroid);
         } else {
-            dropResource(entity, asteroid);
+            Body sourceBody = Mappers.physics.get(entity).body;
+            Entity drop = EntityBuilder.dropResource(sourceBody.getPosition(), sourceBody.getLinearVelocity(), asteroid.color);
+            getEngine().addEntity(drop);
         }
     }
     
@@ -139,7 +134,6 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
             GeometryUtils.ensureCCW(hull);
     
             //shift vertices to be centered
-            Vector2 center = new Vector2();
             GeometryUtils.triangleCentroid(
                     hull[0], hull[1],
                     hull[2], hull[3],
@@ -185,37 +179,6 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
             asteroids.add(p1);
         }
         //return asteroids;
-    }
-    
-    private void dropResource(Entity entity, AsteroidComponent asteroid) {
-        Entity drop = new Entity();
-        
-        TextureComponent texture = new TextureComponent();
-        texture.texture = TextureGenerator.createTile(asteroid.color);
-        //todo: rng texture shape between circle, triangle, square
-        //texture.texture = TextureFactory.createCircle(asteroid.color);
-        texture.scale = 1f;
-    
-        TransformComponent transform = new TransformComponent();
-        PhysicsComponent sourcePhysics = Mappers.physics.get(entity);
-        Vector2 pos = transform.pos.set(sourcePhysics.body.getPosition());
-        
-        PhysicsComponent physics = new PhysicsComponent();
-        physics.body = BodyBuilder.createDrop(pos.x, pos.y, 2, drop);
-        float spin = -0.2f;
-        physics.body.applyAngularImpulse(MathUtils.random(-spin, spin), true);
-        physics.body.setLinearVelocity(sourcePhysics.body.getLinearVelocity());
-        
-        //expire time (self destruct)
-        ExpireComponent expire = new ExpireComponent();
-        expire.timer = new SimpleTimer(60 * 1000, true);
-        
-        drop.add(texture);
-        drop.add(transform);
-        drop.add(physics);
-        drop.add(new ItemDropComponent());
-        drop.add(expire);
-        getEngine().addEntity(drop);
     }
     
 }

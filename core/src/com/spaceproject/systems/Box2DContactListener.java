@@ -18,6 +18,7 @@ import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AsteroidBeltComponent;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.CamTargetComponent;
+import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.CargoComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.DamageComponent;
@@ -226,11 +227,9 @@ public class Box2DContactListener implements ContactListener {
     
     private void dock(Fixture shipFixture, Fixture dockFixture, Entity vehicleEntity, Entity stationEntity) {
         if (shipFixture.getUserData() != null && (int)shipFixture.getUserData() != BodyBuilder.SHIP_FIXTURE_ID) {
-            //Gdx.app.debug(getClass().getSimpleName(), "ignore sensor fixture");
             return;
         }
         if (dockFixture.getUserData() == null) {
-            //Gdx.app.error(getClass().getSimpleName(), "null data fixture");
             return;
         }
         
@@ -458,6 +457,29 @@ public class Box2DContactListener implements ContactListener {
     //endregion
     
     private void destroy(Entity entity, Entity source) {
+        //create respawn entity for player
+        if (Mappers.controllable.get(entity) != null) {
+            Entity respawnEntity = new Entity();
+            //set camera focus to temporary respawn object
+            TransformComponent transform = new TransformComponent();
+            transform.pos.set(Mappers.transform.get(entity).pos);
+            respawnEntity.add(transform);
+            respawnEntity.add(new CameraFocusComponent());
+            engine.addEntity(respawnEntity);
+        }
+    
+        /*
+        //drop inventory
+        CargoComponent cargoComponent = Mappers.cargo.get(entity);
+        if (cargoComponent != null) {
+            Body body = Mappers.physics.get(entity).body;
+            int items = cargoComponent.count;
+            for (int i = 0; i <= items; i++) {
+                Color color = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
+                EntityBuilder.dropResource(body.getPosition(), body.getLinearVelocity(), color);
+            }
+        }*/
+        
         //if entity was part of a cluster, remove all entities attached to cluster
         Array<Entity> cluster = ECSUtil.getAttachedEntities(engine, entity);
         for (Entity e : cluster) {

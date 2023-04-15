@@ -28,7 +28,7 @@ public class RemovalSystem extends IteratingSystem {
         getEngine().removeEntity(entity);
         
         //attempt to respawn player
-        respawnPlayer(entity); //todo: move to respawn system, subscribe entity removed
+        //respawnPlayer(entity); //todo: move to respawn system, subscribe entity removed
     }
     
     private void respawnPlayer(Entity entity) {

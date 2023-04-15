@@ -27,8 +27,10 @@ import com.spaceproject.components.ChargeCannonComponent;
 import com.spaceproject.components.ControlFocusComponent;
 import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.DashComponent;
+import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.HyperDriveComponent;
+import com.spaceproject.components.ItemDropComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.ParticleComponent;
@@ -643,6 +645,36 @@ public class EntityBuilder {
         entity.add(station);
         
         return entity;
+    }
+    
+    public static Entity dropResource(Vector2 position, Vector2 velocity, Color color) {
+        Entity drop = new Entity();
+        
+        TextureComponent texture = new TextureComponent();
+        texture.texture = TextureGenerator.createTile(color);
+        //todo: rng texture shape between circle, triangle, square
+        //texture.texture = TextureFactory.createCircle(asteroid.color);
+        texture.scale = 1f;
+        
+        TransformComponent transform = new TransformComponent();
+        Vector2 pos = transform.pos.set(position);
+        
+        PhysicsComponent physics = new PhysicsComponent();
+        physics.body = BodyBuilder.createDrop(pos.x, pos.y, 2, drop);
+        float spin = -0.2f;
+        physics.body.applyAngularImpulse(MathUtils.random(-spin, spin), true);
+        physics.body.setLinearVelocity(velocity);
+        
+        //expire time (self destruct)
+        ExpireComponent expire = new ExpireComponent();
+        expire.timer = new SimpleTimer(60 * 1000, true);
+        
+        drop.add(texture);
+        drop.add(transform);
+        drop.add(physics);
+        drop.add(new ItemDropComponent());
+        drop.add(expire);
+        return drop;
     }
     
 }
