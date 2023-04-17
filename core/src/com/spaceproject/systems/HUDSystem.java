@@ -565,9 +565,13 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         long colorTime = 1000;
         long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;
         float ratio = (float) timeSinceCollect / (float) colorTime;
-        layout.setText(inventoryFont, cargo.count + "");
+        layout.setText(inventoryFont, "Drops: " + cargo.count);
         inventoryFont.setColor(ratio, 1, ratio, 1);
         inventoryFont.draw(batch, layout, barX, healthBarY - barHeight - layout.height);
+        
+        //layout.setText(inventoryFont, "Credits: " + cargo.credits);
+        //inventoryFont.setColor(0, 1, 1, 1);
+        inventoryFont.draw(batch, "Credits: " + cargo.credits, barX, healthBarY - barHeight - (layout.height * 2.5f));
     }
     //endregion
     

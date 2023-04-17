@@ -238,13 +238,47 @@ public class Box2DContactListener implements ContactListener {
         if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_A_ID) {
             station.dockedPortA = vehicleEntity;
             Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
-            Gdx.app.debug(getClass().getSimpleName(), "dock port A");
+            CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
+            sellCargo(cargo);
+            heal(cargo, Mappers.health.get(vehicleEntity));
+            Gdx.app.debug(getClass().getSimpleName(), "dock port: A");
         }
         if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_B_ID) {
             station.dockedPortB = vehicleEntity;
             Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
-            Gdx.app.debug(getClass().getSimpleName(), "dock port B");
+            CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
+            sellCargo(cargo);
+            heal(cargo, Mappers.health.get(vehicleEntity));
+            Gdx.app.debug(getClass().getSimpleName(), "dock port: B");
         }
+    }
+    
+    private int sellCargo(CargoComponent cargo) {
+        if (cargo.count == 0) return 0;
+        
+        int sellRate = 10;
+        int newCredits = cargo.count * sellRate;
+        Gdx.app.debug(getClass().getSimpleName(), "sell: " + cargo.count + " for: " + newCredits);
+        cargo.credits += newCredits;
+        cargo.count = 0;
+        return newCredits;
+    }
+    
+    private void heal(CargoComponent cargo, HealthComponent health) {
+        if (health.maxHealth == health.health) return;
+        
+        float healthCostPerUnit = 15.0f;
+        float healthMissing = health.maxHealth - health.health;
+        float healedUnit = healthMissing;
+        int creditCost = (int) (healthMissing * healthCostPerUnit);
+        if (creditCost > cargo.credits) {
+            creditCost = cargo.credits;
+            healedUnit = cargo.credits / healthCostPerUnit;
+        }
+        health.health += healedUnit;
+        cargo.credits -= creditCost;
+        Gdx.app.debug(getClass().getSimpleName(), "heal:" + healthMissing + " for: " + creditCost);
+        
     }
     
     @Override
