@@ -77,7 +77,7 @@ public class ShieldSystem extends IteratingSystem {
                     
                     //add shield fixture to body for protection
                     Body body = entity.getComponent(PhysicsComponent.class).body;
-                    BodyBuilder.addShieldFixtureToBody(body, shield.radius);
+                    BodyBuilder.addShieldFixtureToBody(body, shield.maxRadius);
     
                     //if entity is controlled player
                     if (controlFocus != null) {
