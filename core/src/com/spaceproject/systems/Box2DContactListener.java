@@ -301,15 +301,18 @@ public class Box2DContactListener implements ContactListener {
             StarComponent starA = Mappers.star.get(entityA);
             if (starA != null) {
                 doActiveHeatDamage(contact.getFixtureB(), entityA, entityB, deltaTime);
+                continue;
             }
             StarComponent starB = Mappers.star.get(entityB);
             if (starB != null) {
                 doActiveHeatDamage(contact.getFixtureA(), entityB, entityA, deltaTime);
+                continue;
             }
             //active item movement
             ItemDropComponent itemDropA = Mappers.itemDrop.get(entityA);
             if (itemDropA != null) {
                 updateItemAttraction(entityA, entityB, deltaTime);
+                continue;
             }
             ItemDropComponent itemDropB = Mappers.itemDrop.get(entityB);
             if (itemDropB != null) {
@@ -393,15 +396,18 @@ public class Box2DContactListener implements ContactListener {
         AsteroidComponent asteroidA = Mappers.asteroid.get(entityA);
         if (asteroidA != null) {
             asteroidImpact(entityA, entityB, asteroidA, maxImpulse);
+            return;
         }
         AsteroidComponent asteroidB = Mappers.asteroid.get(entityB);
         if (asteroidB != null) {
             asteroidImpact(entityB, entityA, asteroidB, maxImpulse);
+            return;
         }
         //check for vehicle
         VehicleComponent vehicleA = Mappers.vehicle.get(entityA);
         if (vehicleA != null) {
             vehicleImpact(entityA, entityB, maxImpulse);
+            return;
         }
         VehicleComponent vehicleB = Mappers.vehicle.get(entityB);
         if (vehicleB != null) {
