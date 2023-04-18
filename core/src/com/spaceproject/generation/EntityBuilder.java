@@ -313,7 +313,7 @@ public class EntityBuilder {
         return character;
     }
     
-    public static Array<Entity> createPlayerShip(int x, int y, boolean inSpace) {
+    public static Array<Entity> createPlayerShip(float x, float y, boolean inSpace) {
         Entity player = createPlayer(x, y);
         
         PhysicsComponent physicsComponent = player.getComponent(PhysicsComponent.class);

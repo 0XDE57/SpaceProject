@@ -125,15 +125,15 @@ public class GameScreen extends MyScreenAdapter {
         galaxySeed = MyMath.getNewGalaxySeed();
         galaxy = new Galaxy();
     
-        Array<Entity> playerShipCluster = EntityBuilder.createPlayerShip(0, 0, inSpace);
+        //Array<Entity> playerShipCluster = EntityBuilder.createPlayerShip(0, 0, inSpace);
         //init systems
         if (inSpace) {
-            initSpace(playerShipCluster);
+            initSpace(null);
         } else {
             Entity planet = EntityBuilder.createPlanet(0, new Entity(), 0, false);
             Gdx.app.log(this.getClass().getSimpleName(), "DEBUG PLANET LOADED");
             
-            initWorld(playerShipCluster, planet);
+            initWorld(null, planet);
         }
         
         gameTimeStart = System.nanoTime();
@@ -152,11 +152,12 @@ public class GameScreen extends MyScreenAdapter {
             Body body = transitioningEntity.getComponent(PhysicsComponent.class).body;
             body.setTransform(position.x, position.y, body.getAngle());
         }
-        for (Entity entity : transitioningEntityCluster) {
-            engine.addEntity(entity);
+        if (transitioningEntityCluster != null) {
+            for (Entity entity : transitioningEntityCluster) {
+                engine.addEntity(entity);
+            }
+            adjustPhysics(transitioningEntityCluster);
         }
-        adjustPhysics(transitioningEntityCluster);
-    
         currentPlanet = null;
     }
     

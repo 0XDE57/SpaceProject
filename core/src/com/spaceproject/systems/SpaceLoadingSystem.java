@@ -248,9 +248,18 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         //if (numPlanets == 0) {
         spaceStation = EntityBuilder.createSpaceStation(star, Mappers.star.get(star).radius * 4 + 200, false);
         entities.add(spaceStation);
-        //}
         
-        //create planets around star
+        if (!hasInit) {
+            hasInit = true;
+            Vector2 pos = Mappers.physics.get(spaceStation).body.getPosition();
+            Array<Entity> playerShip = EntityBuilder.createPlayerShip(pos.x, pos.y, true);
+            for (Entity entity : playerShip) {
+                getEngine().addEntity(entity);
+            }
+            Mappers.spaceStation.get(spaceStation).dockedPortA = playerShip.first();
+        }
+        
+        //create planes around star
         for (int i = 0; i < numPlanets; ++i) {
             //add some distance from previous entity
             distance += MathUtils.random(celestCFG.minPlanetDist, celestCFG.maxPlanetDist);
