@@ -237,19 +237,20 @@ public class Box2DContactListener implements ContactListener {
         
         if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_A_ID) {
             station.dockedPortA = vehicleEntity;
+            Gdx.app.debug(getClass().getSimpleName(), "dock port: A");
             Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
             CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
             sellCargo(cargo);
             heal(cargo, Mappers.health.get(vehicleEntity));
-            Gdx.app.debug(getClass().getSimpleName(), "dock port: A");
+            
         }
         if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_B_ID) {
             station.dockedPortB = vehicleEntity;
+            Gdx.app.debug(getClass().getSimpleName(), "dock port: B");
             Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
             CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
             sellCargo(cargo);
             heal(cargo, Mappers.health.get(vehicleEntity));
-            Gdx.app.debug(getClass().getSimpleName(), "dock port: B");
         }
     }
     
@@ -266,6 +267,10 @@ public class Box2DContactListener implements ContactListener {
     
     private void heal(CargoComponent cargo, HealthComponent health) {
         if (health.maxHealth == health.health) return;
+        if (cargo.credits <= 0) {
+            Gdx.app.debug(getClass().getSimpleName(), "insufficient credits. no repairs done.");
+            return;
+        }
         
         float healthCostPerUnit = 15.0f;
         float healthMissing = health.maxHealth - health.health;
@@ -277,7 +282,7 @@ public class Box2DContactListener implements ContactListener {
         }
         health.health += healedUnit;
         cargo.credits -= creditCost;
-        Gdx.app.debug(getClass().getSimpleName(), "heal:" + healthMissing + " for: " + creditCost);
+        Gdx.app.debug(getClass().getSimpleName(), "repairs: " + healthMissing + " for: " + creditCost);
         
     }
     
