@@ -9,7 +9,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
@@ -54,7 +53,6 @@ import com.spaceproject.config.RenderOrder;
 import com.spaceproject.config.WorldConfig;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.math.Physics;
-import com.spaceproject.math.PolygonUtil;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.Sprite3D;
 import com.spaceproject.utility.ECSUtil;
@@ -143,8 +141,7 @@ public class EntityBuilder {
         ShieldComponent shield = new ShieldComponent();
         shield.animTimer = new SimpleTimer(100, true);
         shield.defence = 100f;
-        BoundingBox boundingBox = PolygonUtil.calculateBoundingBox(physics.body);
-        float radius = Math.max(boundingBox.getWidth(), boundingBox.getHeight());
+        float radius = Math.max(vehicle.dimensions.getWidth(), vehicle.dimensions.getHeight());
         shield.maxRadius = radius;
         shipEntity.add(shield);
         
