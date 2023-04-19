@@ -54,6 +54,8 @@ public class Box2DContactListener implements ContactListener {
     private float vehicleDamageMultiplier = 1f;
     private final float impactMultiplier = 0.1f; //how much damage relative to impulse
     private final float heatDamageRate = 20f;// how quickly stars to damage to health
+    private final int sellRate = 10; //multiplier for how much to sell cargo for
+    private final float healthCostPerUnit = 15.0f; //how many credits per unit of health
     private float peakImpulse = 0; //highest recorded impact, stat just to gauge
     
     public Box2DContactListener(Engine engine) {
@@ -119,7 +121,6 @@ public class Box2DContactListener implements ContactListener {
             SpaceStationComponent stationA = Mappers.spaceStation.get(a);
             if (stationA != null) {
                 dock(contact.getFixtureB(), contact.getFixtureA(), b, a);
-                return;
             }
         }
     }
@@ -242,7 +243,6 @@ public class Box2DContactListener implements ContactListener {
             CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
             sellCargo(cargo);
             heal(cargo, Mappers.health.get(vehicleEntity));
-            
         }
         if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_B_ID) {
             station.dockedPortB = vehicleEntity;
@@ -255,9 +255,9 @@ public class Box2DContactListener implements ContactListener {
     }
     
     private int sellCargo(CargoComponent cargo) {
+        if (cargo == null) return 0;
         if (cargo.count == 0) return 0;
         
-        int sellRate = 10;
         int newCredits = cargo.count * sellRate;
         Gdx.app.debug(getClass().getSimpleName(), "sell: " + cargo.count + " for: " + newCredits);
         cargo.credits += newCredits;
@@ -266,24 +266,23 @@ public class Box2DContactListener implements ContactListener {
     }
     
     private void heal(CargoComponent cargo, HealthComponent health) {
+        if (cargo == null || health == null) return;
         if (health.maxHealth == health.health) return;
         if (cargo.credits <= 0) {
             Gdx.app.debug(getClass().getSimpleName(), "insufficient credits. no repairs done.");
             return;
         }
         
-        float healthCostPerUnit = 15.0f;
         float healthMissing = health.maxHealth - health.health;
-        float healedUnit = healthMissing;
+        float healedUnits = healthMissing;
         int creditCost = (int) (healthMissing * healthCostPerUnit);
         if (creditCost > cargo.credits) {
             creditCost = cargo.credits;
-            healedUnit = cargo.credits / healthCostPerUnit;
+            healedUnits = cargo.credits / healthCostPerUnit;
         }
-        health.health += healedUnit;
+        health.health += healedUnits;
         cargo.credits -= creditCost;
         Gdx.app.debug(getClass().getSimpleName(), "repairs: " + healthMissing + " for: " + creditCost);
-        
     }
     
     @Override
