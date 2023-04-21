@@ -29,4 +29,7 @@ public class ChargeCannonComponent implements Component {
     //public SimpleTimer cooldownTimer;//between shots?
     
     public boolean isCharging;
+    
+    public int shotsFired;
+    
 }

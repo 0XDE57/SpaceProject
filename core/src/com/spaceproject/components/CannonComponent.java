@@ -32,4 +32,6 @@ public class CannonComponent implements Component {
     
     public float multiplier;
     
+    public int shotsFired;
+    
 }

@@ -171,7 +171,8 @@ public class ChargeCannonSystem extends IteratingSystem {
         
         //release reference to "ghost"
         chargeCannon.projectileEntity = null;
-    
+        chargeCannon.shotsFired++;
+        
         //normalize: size(min,max) to pitch [0.5-2.0]
         //min -> 2.0f
         //max -> 0.5f

@@ -93,6 +93,7 @@ public class CannonSystem extends IteratingSystem {
         
         //subtract ammo
         --cannon.curAmmo;
+        cannon.shotsFired++;
         
         //reset timer
         cannon.timerFireRate.reset();
