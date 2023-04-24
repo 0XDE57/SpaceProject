@@ -125,7 +125,7 @@ public class Box2DContactListener implements ContactListener {
         }
     }
     
-    private void handleDamage(Contact contact, Entity damagedEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent healthComponent) {
+    private void handleDamage(Contact contact, Entity damageEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent healthComponent) {
         if (damageComponent.source == attackedEntity) {
             return; //ignore self-inflicted damage
         }
@@ -137,9 +137,9 @@ public class Box2DContactListener implements ContactListener {
             //focus ai on player
             ai.attackTarget = damageComponent.source;
             ai.state = AIComponent.State.attack;
-        } else if (Mappers.controlFocus.get(damagedEntity) != null) {
+        } else if (Mappers.controlFocus.get(damageEntity) != null) {
             //someone attacked player, focus on enemy
-            damagedEntity.add(new CamTargetComponent());
+            damageEntity.add(new CamTargetComponent());
         }
         
         //check for shield
@@ -168,10 +168,10 @@ public class Box2DContactListener implements ContactListener {
         
         //add projectile ghost (fx)
         boolean showGhostTrail = (healthComponent.health <= 0);
-        explodeProjectile(contact, damagedEntity, attackedEntity, showGhostTrail);
+        explodeProjectile(contact, damageEntity, attackedEntity, showGhostTrail);
         
         //remove projectile
-        damagedEntity.add(new RemoveComponent());
+        damageEntity.add(new RemoveComponent());
     }
     
     private void explodeProjectile(Contact contact, Entity entityHit, Entity attackedEntity, boolean showGhost) {
