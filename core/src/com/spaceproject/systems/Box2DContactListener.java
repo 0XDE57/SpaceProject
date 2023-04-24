@@ -282,7 +282,7 @@ public class Box2DContactListener implements ContactListener {
         }
         health.health += healedUnits;
         cargo.credits -= creditCost;
-        Gdx.app.debug(getClass().getSimpleName(), "repairs: " + healthMissing + " for: " + creditCost);
+        Gdx.app.debug(getClass().getSimpleName(), "repairs: " + healedUnits + " for: " + creditCost);
     }
     
     @Override
