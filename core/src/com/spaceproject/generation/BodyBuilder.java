@@ -123,7 +123,7 @@ public class BodyBuilder {
         box.dispose();
         
         //inner sensor
-        float collisionRadius = 4 * width;
+        float collisionRadius = 10 * width;
         CircleShape innerCollectSensor = new CircleShape();
         innerCollectSensor.setRadius(collisionRadius);
         FixtureDef innerCircleFixture = new FixtureDef();
@@ -134,7 +134,7 @@ public class BodyBuilder {
         innerCollectSensor.dispose();
         //outer sensor
         CircleShape outerCollectSensor = new CircleShape();
-        outerCollectSensor.setRadius(10 * collisionRadius);
+        outerCollectSensor.setRadius(8 * collisionRadius);
         FixtureDef outerCircleFixture = new FixtureDef();
         outerCircleFixture.shape = outerCollectSensor;
         outerCircleFixture.isSensor = true;
