@@ -259,7 +259,7 @@ public class Box2DContactListener implements ContactListener {
         if (cargo.count == 0) return 0;
         
         int newCredits = cargo.count * sellRate;
-        Gdx.app.debug(getClass().getSimpleName(), "sell: " + cargo.count + " for: " + newCredits);
+        Gdx.app.debug(getClass().getSimpleName(), "sell: " + cargo.count + " drops for: " + newCredits + "c");
         cargo.credits += newCredits;
         cargo.count = 0;
         return newCredits;
@@ -281,8 +281,9 @@ public class Box2DContactListener implements ContactListener {
             healedUnits = cargo.credits / healthCostPerUnit;
         }
         health.health += healedUnits;
+        health.health = Math.min(health.health, health.maxHealth);
         cargo.credits -= creditCost;
-        Gdx.app.debug(getClass().getSimpleName(), "repairs: " + healedUnits + " for: " + creditCost);
+        Gdx.app.debug(getClass().getSimpleName(), "repairs: " + healedUnits + "hp for: " + creditCost + "c");
     }
     
     @Override

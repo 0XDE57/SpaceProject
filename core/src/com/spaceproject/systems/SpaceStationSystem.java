@@ -61,12 +61,12 @@ public class SpaceStationSystem extends EntitySystem {
             if (spaceStation.dockedPortA == dockedShip) {
                 spaceStation.dockedPortA = null;
                 shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
-                Gdx.app.debug(getClass().getSimpleName(), "undock port A");
+                Gdx.app.debug(getClass().getSimpleName(), "undock port: A");
             }
             if (spaceStation.dockedPortB == dockedShip) {
                 spaceStation.dockedPortB = null;
                 shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
-                Gdx.app.debug(getClass().getSimpleName(), "undock port B");
+                Gdx.app.debug(getClass().getSimpleName(), "undock port: B");
             }
         }
         
