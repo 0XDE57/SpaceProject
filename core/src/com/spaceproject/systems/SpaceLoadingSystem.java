@@ -7,7 +7,6 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -34,12 +33,15 @@ import com.spaceproject.ui.Tile;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
+import static com.spaceproject.screens.MyScreenAdapter.cam;
+
 
 public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     
     private final CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
     private ImmutableArray<Entity> loadedAstronomicalBodies;
     private ImmutableArray<Entity> orbitingBodies;
+    //private ImmutableArray<Entity> spaceStations;
     private SimpleTimer loadTimer;
     
     private boolean hasInit;
@@ -93,7 +95,21 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         updatePlanetTextures();
 
         //debug
+        /*
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            Vector2 camPos = new Vector2(cam.position.x, cam.position.y);
+            Entity spaceStation = ECSUtil.closestEntity(camPos, spaceStations);
+            if (spaceStation == null) {
+                return;
+            }
+            Vector2 pos = Mappers.physics.get(spaceStation).body.getPosition();
+            //todo: pos.add(dockedPortOffset)
+            Array<Entity> playerShip = EntityBuilder.createPlayerShip(pos.x, pos.y, true);
+            for (Entity entity : playerShip) {
+                getEngine().addEntity(entity);
+            }
+            Mappers.spaceStation.get(spaceStation).dockedPortA = playerShip.first();
+            
             /*
             GameScreen.galaxy.objects.clear();
             GameScreen.galaxy.points.clear();
@@ -110,8 +126,8 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
             for (Entity e : createPlanetarySystem(1337, 420, ThreadLocalRandom.current().nextLong())) {
                 getEngine().addEntity(e);
             }
-            */
-        }
+            
+        }*/
     }
     
     //region load
@@ -130,7 +146,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     private void loadCloseEntities(float loadDistance) {
         for (AstroBody astroBodies : GameScreen.galaxy.objects) {
             //check if point is close enough to be loaded
-            if (Vector2.dst2(astroBodies.x, astroBodies.y, GameScreen.cam.position.x, GameScreen.cam.position.y) > loadDistance) {
+            if (Vector2.dst2(astroBodies.x, astroBodies.y, cam.position.x, cam.position.y) > loadDistance) {
                 continue;
             }
             
@@ -154,7 +170,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
     private void unloadFarEntities(float loadDistance) {
         for (Entity entity : loadedAstronomicalBodies) {
             TransformComponent transform = Mappers.transform.get(entity);
-            float distance = Vector2.dst2(transform.pos.x, transform.pos.y, GameScreen.cam.position.x, GameScreen.cam.position.y);
+            float distance = Vector2.dst2(transform.pos.x, transform.pos.y, cam.position.x, cam.position.y);
             if (distance > loadDistance) {
                 entity.add(new RemoveComponent());
                 Gdx.app.log(getClass().getSimpleName(), "Removing Planetary System: " + entity.getComponent(TransformComponent.class).pos.toString());
@@ -249,6 +265,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         spaceStation = EntityBuilder.createSpaceStation(star, Mappers.star.get(star).radius * 4 + 200, false);
         entities.add(spaceStation);
         
+        /*
         if (!hasInit) {
             hasInit = true;
             Vector2 pos = Mappers.physics.get(spaceStation).body.getPosition();
@@ -257,7 +274,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
                 getEngine().addEntity(entity);
             }
             Mappers.spaceStation.get(spaceStation).dockedPortA = playerShip.first();
-        }
+        }*/
         
         //create planes around star
         for (int i = 0; i < numPlanets; ++i) {

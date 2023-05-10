@@ -24,7 +24,6 @@ import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.SysCFG;
 import com.spaceproject.config.SystemsConfig;
 import com.spaceproject.config.WorldConfig;
-import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.generation.FontLoader;
 import com.spaceproject.generation.Galaxy;
 import com.spaceproject.math.MyMath;
@@ -53,6 +52,7 @@ public class GameScreen extends MyScreenAdapter {
     private static boolean inSpace;
     private static boolean isHyper;
     private static Entity currentPlanet;
+    private static Entity currentStation;
     
     private static long galaxySeed;
     public static Galaxy galaxy;
@@ -60,13 +60,13 @@ public class GameScreen extends MyScreenAdapter {
     private static Stage stage;
     
     public static boolean isDebugMode = true;
-    static final StringBuilder profilerStringBuilder = new StringBuilder();
+    private static final StringBuilder profilerStringBuilder = new StringBuilder();
     
     public GameScreen() {
-        //LOG_NONE: mutes all logging.
+        //LOG_NONE:  mutes all logging.
         //LOG_DEBUG: logs all messages.
         //LOG_ERROR: logs only error messages.
-        //LOG_INFO: logs error and normal messages.
+        //LOG_INFO:  logs error and normal messages.
         Gdx.app.setLogLevel(isDebugMode ? Application.LOG_DEBUG : Application.LOG_INFO);
         
         if (isDebugMode) {
@@ -111,7 +111,7 @@ public class GameScreen extends MyScreenAdapter {
         //physics
         box2dWorld = new World(new Vector2(), true);
         
-        //worker
+        //noise threadpool
         if (noiseManager == null) {
             EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
             noiseManager = new NoiseManager(engineCFG.maxNoiseGenThreads);
@@ -124,17 +124,9 @@ public class GameScreen extends MyScreenAdapter {
         //init content and entities
         galaxySeed = MyMath.getNewGalaxySeed();
         galaxy = new Galaxy();
-    
-        //Array<Entity> playerShipCluster = EntityBuilder.createPlayerShip(0, 0, inSpace);
+        
         //init systems
-        if (inSpace) {
-            initSpace(null);
-        } else {
-            Entity planet = EntityBuilder.createPlanet(0, new Entity(), 0, false);
-            Gdx.app.log(this.getClass().getSimpleName(), "DEBUG PLANET LOADED");
-            
-            initWorld(null, planet);
-        }
+        initSpace(null);
         
         gameTimeStart = System.nanoTime();
     }
@@ -146,6 +138,7 @@ public class GameScreen extends MyScreenAdapter {
         SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
         SystemLoader.loadSystems(this, engine, inSpace, systemsCFG);
         
+        //load entity
         if (currentPlanet != null) {
             Vector2 position = Mappers.transform.get(currentPlanet).pos;
             Entity transitioningEntity = transitioningEntityCluster.first();
@@ -165,32 +158,32 @@ public class GameScreen extends MyScreenAdapter {
         inSpace = false;
         currentPlanet = planet;
         
-        Entity transitioningEntity = transitioningEntityCluster.first();
-        Gdx.app.log(this.getClass().getSimpleName(), "Landing " + DebugUtil.objString(transitioningEntity) + " on planet " + DebugUtil.objString(planet));
-    
         //load/unload relevant systems
         SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
         SystemLoader.loadSystems(this, engine, inSpace, systemsCFG);
         
         // add player
-        WorldConfig worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
-        int mapSize = planet.getComponent(PlanetComponent.class).mapSize;
-        int position = mapSize * worldCFG.tileSize / 2;//set position to middle of planet
-        Body body = transitioningEntity.getComponent(PhysicsComponent.class).body;
-        body.setTransform(position, position, body.getAngle());
-        for (Entity entity : transitioningEntityCluster) {
-            engine.addEntity(entity);
-        }
+        if (transitioningEntityCluster != null) {
+            WorldConfig worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
+            int mapSize = planet.getComponent(PlanetComponent.class).mapSize;
+            int position = mapSize * worldCFG.tileSize / 2;//set position to middle of planet
+            Entity transitioningEntity = transitioningEntityCluster.first();
+            Body body = transitioningEntity.getComponent(PhysicsComponent.class).body;
+            body.setTransform(position, position, body.getAngle());
+            for (Entity entity : transitioningEntityCluster) {
+                engine.addEntity(entity);
+            }
     
-        adjustPhysics(transitioningEntityCluster);
+            adjustPhysics(transitioningEntityCluster);
+        }
     }
     
     public void switchScreen(Entity transEntity, Entity planet) {
         Array<Entity> transEntityCluster = ECSUtil.getAttachedEntities(engine, transEntity);
         
-        //if AI, remove it
+        //if AI, remove it. todo: should happen in screen transition system. AI shouldn't make it to here
         if (Mappers.AI.get(transEntity) != null) {
-            Gdx.app.log(this.getClass().getSimpleName(), "REMOVING AI: " + DebugUtil.objString(transEntity));
+            Gdx.app.log(getClass().getSimpleName(), "REMOVING AI: " + DebugUtil.objString(transEntity));
             for (Entity e : transEntityCluster) {
                 e.add(new RemoveComponent());
             }
@@ -253,12 +246,12 @@ public class GameScreen extends MyScreenAdapter {
     
     private void pollGLProfiler() {
         profilerStringBuilder.setLength(0);
-        profilerStringBuilder.append("[GL calls]:         ").append(glProfiler.getCalls());
+        profilerStringBuilder.append("[GL calls]:           ").append(glProfiler.getCalls());
         profilerStringBuilder.append("\n[Draw calls]:       ").append(glProfiler.getDrawCalls());
         profilerStringBuilder.append("\n[Shader switches]:  ").append(glProfiler.getShaderSwitches());
         profilerStringBuilder.append("\n[Texture bindings]: ").append(glProfiler.getTextureBindings());
         profilerStringBuilder.append("\n[Vertices]:         ").append(glProfiler.getVertexCount().total);
-        profilerStringBuilder.append("\n-----[DISPOSED]----").append(ResourceDisposer.getTotalDisposeCount());
+        profilerStringBuilder.append("\n-----[DISPOSED]---- ").append(ResourceDisposer.getTotalDisposeCount());
         glProfiler.reset();
     }
     
@@ -308,6 +301,7 @@ public class GameScreen extends MyScreenAdapter {
         
         stage.getViewport().update(width, height, true);
         
+        //notify systems of resize
         for (EntitySystem system : engine.getSystems()) {
             if (system instanceof IScreenResizeListener) {
                 ((IScreenResizeListener) system).resize(width, height);
@@ -332,7 +326,7 @@ public class GameScreen extends MyScreenAdapter {
         }
         
         isPaused = !process;
-        Gdx.app.log(this.getClass().getSimpleName(), "paused [" + isPaused + "]");
+        Gdx.app.log(getClass().getSimpleName(), "paused [" + isPaused + "]");
         
         //adjust time
         if (isPaused) {
@@ -348,7 +342,7 @@ public class GameScreen extends MyScreenAdapter {
             SysCFG sysCFG = systemsCFG.getConfig(system);
             if (sysCFG.isHaltOnGamePause()) {
                 system.setProcessing(!isPaused);
-                Gdx.app.log(this.getClass().getSimpleName(), "processing " + (isPaused ? "disabled" : "enabled") + " for " + system.getClass().getSimpleName());
+                Gdx.app.log(getClass().getSimpleName(), "processing " + (isPaused ? "disabled" : "enabled") + " for " + system.getClass().getSimpleName());
             }
         }
     }
@@ -361,7 +355,7 @@ public class GameScreen extends MyScreenAdapter {
     
     @Override
     public void dispose() {
-        Gdx.app.log(this.getClass().getSimpleName(), "Disposing: " + this.getClass().getSimpleName());
+        Gdx.app.log(getClass().getSimpleName(), "Disposing...");
         
         // clean up after self
         SystemLoader.unLoadAll(engine);
@@ -382,4 +376,3 @@ public class GameScreen extends MyScreenAdapter {
     }
     
 }
-

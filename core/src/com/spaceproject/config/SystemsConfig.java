@@ -58,7 +58,7 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(AsteroidBeltSystem.class, 92, true, true, false, true, true));
         systems.add(new SysCFG(AsteroidShatterSystem.class, 93, true, true, false, true, true));
         systems.add(new SysCFG(SpaceStationSystem.class, 95, true, true, false, true, true));
-        //systems.add(new SysCFG(SpaceRespawnSystem.class, ??, true, true, false, true, true));
+        systems.add(new SysCFG(PlayerSpawnSystem.class, 99, true, true, false, true, true));
         //systems.add(new SysCFG(PlanetAISpawnerSystem.class, 93, true, true, false, true, true));
         
     
