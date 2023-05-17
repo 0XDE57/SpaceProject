@@ -246,7 +246,7 @@ public class GameScreen extends MyScreenAdapter {
     
     private void pollGLProfiler() {
         profilerStringBuilder.setLength(0);
-        profilerStringBuilder.append("[GL calls]:           ").append(glProfiler.getCalls());
+        profilerStringBuilder.append("[GL calls]:         "  ).append(glProfiler.getCalls());
         profilerStringBuilder.append("\n[Draw calls]:       ").append(glProfiler.getDrawCalls());
         profilerStringBuilder.append("\n[Shader switches]:  ").append(glProfiler.getShaderSwitches());
         profilerStringBuilder.append("\n[Texture bindings]: ").append(glProfiler.getTextureBindings());

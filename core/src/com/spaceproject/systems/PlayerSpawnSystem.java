@@ -1,14 +1,18 @@
 package com.spaceproject.systems;
 
-import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.EntityListener;
-import com.badlogic.ashley.core.EntitySystem;
+import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.spaceproject.components.CameraFocusComponent;
+import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.SpaceStationComponent;
 import com.spaceproject.generation.EntityBuilder;
+import com.spaceproject.math.MyMath;
+import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
 
@@ -50,28 +54,48 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
     //  land on planet -> spawn somewhere on planet
     //      > where on planet? don't want to land in water or lava (unless ship floats in water?)
     //
-    
+
+    private boolean initialSpawn = false;
+    //private ImmutableArray<Entity> players;
     private ImmutableArray<Entity> spaceStations;
-    
+
+    @Override
+    public void addedToEngine(Engine engine) {
+        //players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
+        spaceStations = engine.getEntitiesFor(Family.all(SpaceStationComponent.class).get());
+    }
+
     @Override
     public void update(float deltaTime) {
         //first spawn, nearest spacestation to 0, 0
+        if (!initialSpawn) {
+            initialSpawn = true;
+            spawnPlayer();
+        }
         //if (players.count == 0) spawn() //...?
-    
-        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-            Vector2 camPos = new Vector2(cam.position.x, cam.position.y);
-            Entity spaceStation = ECSUtil.closestEntity(camPos, spaceStations);
-            if (spaceStation == null) {
-                return;
-            }
-            Vector2 pos = Mappers.physics.get(spaceStation).body.getPosition();
-            //todo: pos.add(dockedPortOffset)
-            Array<Entity> playerShip = EntityBuilder.createPlayerShip(pos.x, pos.y, true);
-            for (Entity entity : playerShip) {
-                getEngine().addEntity(entity);
-            }
+    }
+
+    public void spawnPlayer() {
+        //start at nearest space station to 0, 0
+        //if no space station found: force spawn 0, 0
+        Vector2 spawnPosition = new Vector2(0, 0);
+        Entity spaceStation = ECSUtil.closestEntity(spawnPosition, spaceStations);
+        if (spaceStation != null) {
+            spawnPosition.set(Mappers.physics.get(spaceStation).body.getPosition());
+        } // else no station found, force spawn one at nearest body?
+
+        //spawn player
+        Array<Entity> playerShip = EntityBuilder.createPlayerShip(spawnPosition.x, spawnPosition.y, true);
+        for (Entity entity : playerShip) {
+            getEngine().addEntity(entity);
+        }
+
+        //auto dock
+        if (spaceStation != null) {
             Mappers.spaceStation.get(spaceStation).dockedPortA = playerShip.first();
         }
+
+        Gdx.app.log(getClass().getSimpleName(), "player spawned: " + MyMath.formatVector2(spawnPosition, 0));
     }
     
     @Override
