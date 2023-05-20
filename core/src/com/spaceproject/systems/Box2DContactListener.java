@@ -488,6 +488,7 @@ public class Box2DContactListener implements ContactListener {
             respawn.reason = "reason goes here";
             respawn.timeout = new SimpleTimer(3000, true);
             respawnEntity.add(respawn);
+            respawnEntity.add(new RingEffectComponent());
             engine.addEntity(respawnEntity);
         }
     
