@@ -30,6 +30,7 @@ public class Mappers {
     public static final ComponentMapper<ParticleComponent> particle = ComponentMapper.getFor(ParticleComponent.class);
     public static final ComponentMapper<PhysicsComponent> physics = ComponentMapper.getFor(PhysicsComponent.class);
     public static final ComponentMapper<PlanetComponent> planet = ComponentMapper.getFor(PlanetComponent.class);
+    public static final ComponentMapper<RespawnComponent> respawn = ComponentMapper.getFor(RespawnComponent.class);
     public static final ComponentMapper<RingEffectComponent> ring = ComponentMapper.getFor(RingEffectComponent.class);
     public static final ComponentMapper<ScreenTransitionComponent> screenTrans = ComponentMapper.getFor(ScreenTransitionComponent.class);
     public static final ComponentMapper<SeedComponent> seed = ComponentMapper.getFor(SeedComponent.class);
@@ -43,5 +44,5 @@ public class Mappers {
     public static final ComponentMapper<TrailComponent> trail = ComponentMapper.getFor(TrailComponent.class);
     public static final ComponentMapper<TransformComponent> transform = ComponentMapper.getFor(TransformComponent.class);
     public static final ComponentMapper<VehicleComponent> vehicle = ComponentMapper.getFor(VehicleComponent.class);
-    
+
 }

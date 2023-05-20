@@ -7,9 +7,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.spaceproject.components.CameraFocusComponent;
-import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.components.SpaceStationComponent;
+import com.spaceproject.components.*;
 import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.DebugUtil;
@@ -56,12 +54,12 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
     //
 
     private boolean initialSpawn = false;
-    //private ImmutableArray<Entity> players;
+    private ImmutableArray<Entity> respawn;
     private ImmutableArray<Entity> spaceStations;
 
     @Override
     public void addedToEngine(Engine engine) {
-        //players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
+        respawn = engine.getEntitiesFor(Family.all(RespawnComponent.class).get());
         spaceStations = engine.getEntitiesFor(Family.all(SpaceStationComponent.class).get());
     }
 
@@ -71,12 +69,28 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
             initialSpawn = true;
             spawnPlayer();
         }
+
+        if (respawn.size() > 0) {
+            Entity destroyedEntity = respawn.first();
+            RespawnComponent respawnC = Mappers.respawn.get(destroyedEntity);
+            if (respawnC.spawn) {
+                destroyedEntity.add(new RemoveComponent());
+                //todo: but not just nearest. last station docked at. space station is check point
+                spawnPlayer();
+            }
+        }
     }
 
     public void spawnPlayer() {
-        //start at nearest space station to 0, 0
         //if no space station found: force spawn 0, 0
         Vector2 spawnPosition = new Vector2(0, 0);
+
+        //try to start at last docked space station: checkpoint
+        //if (checkpointStation != null) {
+        //    spawnPosition.set();
+        //} else {
+
+        //start at nearest space station to 0, 0
         Entity spaceStation = ECSUtil.closestEntity(spawnPosition, spaceStations);
         if (spaceStation != null) {
             spawnPosition.set(Mappers.physics.get(spaceStation).body.getPosition());
@@ -92,6 +106,8 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
         //auto dock
         if (spaceStation != null) {
             Mappers.spaceStation.get(spaceStation).dockedPortA = player;
+            //todo: could force update position to mitigate camera jump when docked?
+            //getEngine().getSystem(SpaceStationSystem.class).updateShipInDock();
         }
 
         Gdx.app.log(getClass().getSimpleName(), "player [" + DebugUtil.objString(player) + "] spawned: " + MyMath.formatVector2(spawnPosition, 1) +

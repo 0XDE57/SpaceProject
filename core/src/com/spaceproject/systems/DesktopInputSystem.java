@@ -10,14 +10,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.BarrelRollComponent;
-import com.spaceproject.components.CannonComponent;
-import com.spaceproject.components.ControlFocusComponent;
-import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.components.DashComponent;
-import com.spaceproject.components.HyperDriveComponent;
-import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.TransformComponent;
+import com.spaceproject.components.*;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
@@ -57,8 +50,17 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     }
     
     private boolean playerControls(int keycode, boolean keyDown) {
-        if (players.size() == 0)
+        if (players.size() == 0) {
+            ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
+            if (respawnEntities.size() != 0) {
+                //set respawn flag!!!
+                RespawnComponent respawn = Mappers.respawn.get(respawnEntities.first());
+                if (respawn.timeout.canDoEvent()) {
+                    respawn.spawn = true;
+                }
+            }
             return false;
+        }
         
         boolean handled = false;
     
