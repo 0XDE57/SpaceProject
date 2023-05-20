@@ -67,12 +67,10 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
 
     @Override
     public void update(float deltaTime) {
-        //first spawn, nearest spacestation to 0, 0
         if (!initialSpawn) {
             initialSpawn = true;
             spawnPlayer();
         }
-        //if (players.count == 0) spawn() //...?
     }
 
     public void spawnPlayer() {
@@ -86,16 +84,18 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
 
         //spawn player
         Array<Entity> playerShip = EntityBuilder.createPlayerShip(spawnPosition.x, spawnPosition.y, true);
+        Entity player = playerShip.first();
         for (Entity entity : playerShip) {
             getEngine().addEntity(entity);
         }
 
         //auto dock
         if (spaceStation != null) {
-            Mappers.spaceStation.get(spaceStation).dockedPortA = playerShip.first();
+            Mappers.spaceStation.get(spaceStation).dockedPortA = player;
         }
 
-        Gdx.app.log(getClass().getSimpleName(), "player spawned: " + MyMath.formatVector2(spawnPosition, 0));
+        Gdx.app.log(getClass().getSimpleName(), "player [" + DebugUtil.objString(player) + "] spawned: " + MyMath.formatVector2(spawnPosition, 1) +
+                (spaceStation == null ? " NO STATION FOUND!!!" : " at station: [" + DebugUtil.objString(spaceStation) + "]"));
     }
     
     @Override

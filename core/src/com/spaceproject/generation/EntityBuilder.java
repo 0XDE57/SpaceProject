@@ -552,8 +552,8 @@ public class EntityBuilder {
             do {
                 pX = MathUtils.random(size);
                 pY = MathUtils.random(size);
-            } while (containsPoint(points, pX, pY, tolerance));
-    
+            } while (isValidPoint(points, pX, pY, tolerance));
+
             points.add(pX);
             points.add(pY);
         }
@@ -573,11 +573,19 @@ public class EntityBuilder {
         return createAsteroid(seed, x, y, velX, velY, MathUtils.random(MathUtils.PI2), hull);
     }
     
-    private static boolean containsPoint(FloatArray points, float pX, float pY, float tolerance) {
+    private static boolean isValidPoint(FloatArray points, float pX, float pY, float tolerance) {
         for (int i = 0; i < points.size; i += 2) {
             if (Vector2.dst(points.get(i), points.get(i + 1), pX, pY) <= tolerance) {
                 return true;
             }
+            /*
+            //if 3 or more points, check for colinear
+            if (i < 3 * 2) {
+                //todo: remove or push out center of colinear points:
+                if (GeometryUtils.colinear(i, i+1, i+2, i+3, i+4, i+5)) {
+                    return false;
+                }
+            }*/
         }
         return false;
     }
