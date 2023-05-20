@@ -3,6 +3,7 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -14,7 +15,9 @@ import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.WorldManifold;
 import com.badlogic.gdx.utils.Array;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
+import com.spaceproject.config.KeyConfig;
 import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
@@ -33,7 +36,7 @@ public class Box2DContactListener implements ContactListener {
     private final float vehicleDamageThreshold = 15; //impulse threshold to apply damage to vehicles
     private float vehicleDamageMultiplier = 1f;
     private final float impactMultiplier = 0.1f; //how much damage relative to impulse
-    private final float heatDamageRate = 200f;// how quickly stars to damage to health
+    private final float heatDamageRate = 400f;// how quickly stars to damage to health
     private final int sellRate = 10; //multiplier for how much to sell cargo for
     private final float healthCostPerUnit = 15.0f; //how many credits per unit of health
     private float peakImpulse = 0; //highest recorded impact, stat just to gauge
@@ -486,6 +489,15 @@ public class Box2DContactListener implements ContactListener {
             respawnEntity.add(new CameraFocusComponent());
             RespawnComponent respawn = new RespawnComponent();
             respawn.reason = "reason goes here";
+            if (Mappers.star.get(source) != null) {
+                respawn.reason = "stars are hot";
+            } else if (Mappers.asteroid.get(source) != null) {
+                String input = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).activateShield).toLowerCase();
+                if (engine.getSystem(DesktopInputSystem.class).getControllerHasFocus()) {
+                    input = "left-trigger";
+                }
+                respawn.reason = "press [" + input + "] to activate shield";
+            }
             respawn.timeout = new SimpleTimer(3000, true);
             respawnEntity.add(respawn);
             respawnEntity.add(new RingEffectComponent());
