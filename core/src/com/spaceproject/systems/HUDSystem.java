@@ -25,21 +25,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.AsteroidComponent;
-import com.spaceproject.components.CameraFocusComponent;
-import com.spaceproject.components.CannonComponent;
-import com.spaceproject.components.CargoComponent;
-import com.spaceproject.components.ChargeCannonComponent;
-import com.spaceproject.components.ControlFocusComponent;
-import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.components.HealthComponent;
-import com.spaceproject.components.HyperDriveComponent;
-import com.spaceproject.components.MapComponent;
-import com.spaceproject.components.PhysicsComponent;
-import com.spaceproject.components.ScreenTransitionComponent;
-import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.TextureComponent;
-import com.spaceproject.components.TransformComponent;
+import com.spaceproject.components.*;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.config.UIConfig;
 import com.spaceproject.generation.FontLoader;
@@ -82,7 +68,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     enum SpecialState {
         off, hyper, landing, launching, destroyed;
     }
-    SpecialState messageState = SpecialState.off;
+
     float anim = 0;
     
     public HUDSystem() {
@@ -232,6 +218,14 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         
         //draw special state: hyper or landing / launching
         drawSpecialStateMessage(player);
+
+        if (player == null) {
+            ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
+            if (respawnEntities.size() > 0) {
+                RespawnComponent respawn = Mappers.respawn.get(respawnEntities.first());
+                drawHint(respawn.reason);
+            }
+        }
         
         //todo: if player is over planet
         //drawHint("press [T] to land");
@@ -293,8 +287,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     //region player status
     private void drawSpecialStateMessage(Entity player) {
-        messageState = SpecialState.off;
-        
+        SpecialState messageState = SpecialState.off;
         if (player == null) {
             messageState = SpecialState.destroyed;
         } else {
@@ -302,7 +295,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
                 messageState = SpecialState.hyper;
             }
-    
             ScreenTransitionComponent trans = Mappers.screenTrans.get(player);
             if (trans != null) {
                 if (trans.landStage != null) {
