@@ -54,17 +54,23 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
     //
 
     private boolean initialSpawn = false;
+    private ImmutableArray<Entity> players;
     private ImmutableArray<Entity> respawn;
     private ImmutableArray<Entity> spaceStations;
 
     @Override
     public void addedToEngine(Engine engine) {
-        respawn = engine.getEntitiesFor(Family.all(RespawnComponent.class).get());
+        players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
+        respawn = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
         spaceStations = engine.getEntitiesFor(Family.all(SpaceStationComponent.class).get());
     }
 
     @Override
     public void update(float deltaTime) {
+        if (players.size() != 0) {
+            return;
+        }
+
         if (!initialSpawn) {
             initialSpawn = true;
             spawnPlayer();
