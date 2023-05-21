@@ -10,13 +10,7 @@ import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.math.MathUtils;
-import com.spaceproject.components.BarrelRollComponent;
-import com.spaceproject.components.CannonComponent;
-import com.spaceproject.components.ControlFocusComponent;
-import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.components.DashComponent;
-import com.spaceproject.components.HyperDriveComponent;
-import com.spaceproject.components.ShieldComponent;
+import com.spaceproject.components.*;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.menu.GameMenu;
@@ -92,6 +86,14 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         }
         
         if (players.size() == 0) {
+            ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
+            if (respawnEntities.size() != 0) {
+                //set respawn flag!!!
+                RespawnComponent respawn = Mappers.respawn.get(respawnEntities.first());
+                if (respawn.timeout.canDoEvent()) {
+                    respawn.spawn = true;
+                }
+            }
             return false;
         }
         
