@@ -53,7 +53,7 @@ public abstract class SystemLoader {
                 }
             } else {
                 if (isLoaded) {
-                    unLoad(engine, systemInEngine);
+                    unload(engine, systemInEngine);
                 }
             }
         } catch (Exception e) {
@@ -79,7 +79,7 @@ public abstract class SystemLoader {
         Gdx.app.log(logSource, "Loaded: " + String.format("%-4d ", systemToLoad.priority) + systemToLoad.getClass().getName());
     }
     
-    private static void unLoad(Engine engine, EntitySystem systemInEngine) {
+    private static void unload(Engine engine, EntitySystem systemInEngine) {
         // auto unhook listeners and cleanup. we could require that systems:
         //  - remove themselves as listeners on removedFromEngine()
         //  - dispose themselves on removedFromEngine()
@@ -97,10 +97,6 @@ public abstract class SystemLoader {
         if (systemInEngine instanceof InputProcessor) {
             GameScreen.getInputMultiplexer().removeProcessor((InputProcessor) systemInEngine);
         }
-        
-        engine.removeSystem(systemInEngine);
-        
-        //dispose AFTER remove in case a system has to access some data when removedFromEngine()
         if (systemInEngine instanceof Disposable) {
             ((Disposable)systemInEngine).dispose();
         }
@@ -108,10 +104,11 @@ public abstract class SystemLoader {
         Gdx.app.log(logSource, "Unload: " + String.format("%-4d ", systemInEngine.priority) + systemInEngine.getClass().getName());
     }
     
-    public static void unLoadAll(Engine engine) {
+    public static void unloadAll(Engine engine) {
         for (EntitySystem system : engine.getSystems()) {
-            unLoad(engine, system);
+            unload(engine, system);
         }
+        engine.removeAllSystems();
     }
     
     private void loadMods(){
