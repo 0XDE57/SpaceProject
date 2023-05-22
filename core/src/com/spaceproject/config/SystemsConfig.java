@@ -57,7 +57,6 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(SpaceLoadingSystem.class, 91, false, true, false, true, true));
         systems.add(new SysCFG(AsteroidBeltSystem.class, 92, true, true, false, true, true));
         systems.add(new SysCFG(AsteroidShatterSystem.class, 93, true, true, false, true, true));
-        systems.add(new SysCFG(SpaceStationSystem.class, 95, true, true, false, true, true));
         systems.add(new SysCFG(PlayerSpawnSystem.class, 99, true, true, false, true, true));
         //systems.add(new SysCFG(PlanetAISpawnerSystem.class, 93, true, true, false, true, true));
         
@@ -83,8 +82,8 @@ public class SystemsConfig extends Config {
         //      eg: particle layer pre sprite (under sprites), particle layer post sprite (over sprites)
         systems.add(new SysCFG(CameraSystem.class, 100, true, true, true, true, true));
         systems.add(new SysCFG(ParallaxRenderSystem.class, 101, false, true, true, true, true));
+        systems.add(new SysCFG(SpaceStationSystem.class, 102, true, true, false, true, true));
         systems.add(new SysCFG(SpaceParallaxSystem.class, 105, false, true, false, true, true));
-        
         //systems.add(new SysCFG(SpaceDustSystem.class, 106, false, true, false, true, true));
         systems.add(new SysCFG(WorldRenderingSystem.class, 110, false, false, true, true, true));
         systems.add(new SysCFG(TileGridSystem.class, 111, false, false, true, true, true));
