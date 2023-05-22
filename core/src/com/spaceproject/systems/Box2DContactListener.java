@@ -220,7 +220,7 @@ public class Box2DContactListener implements ContactListener {
         SpaceStationComponent station = Mappers.spaceStation.get(stationEntity);
         
         if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_A_ID) {
-            station.dockedPortA = vehicleEntity;
+            station.dockPortA = vehicleEntity;
             Gdx.app.debug(getClass().getSimpleName(), "dock port: A");
             Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
             CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
@@ -228,8 +228,24 @@ public class Box2DContactListener implements ContactListener {
             heal(cargo, Mappers.health.get(vehicleEntity));
         }
         if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_B_ID) {
-            station.dockedPortB = vehicleEntity;
+            station.dockPortB = vehicleEntity;
             Gdx.app.debug(getClass().getSimpleName(), "dock port: B");
+            Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
+            CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
+            sellCargo(cargo);
+            heal(cargo, Mappers.health.get(vehicleEntity));
+        }
+        if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_C_ID) {
+            station.dockPortC = vehicleEntity;
+            Gdx.app.debug(getClass().getSimpleName(), "dock port: C");
+            Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
+            CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
+            sellCargo(cargo);
+            heal(cargo, Mappers.health.get(vehicleEntity));
+        }
+        if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_D_ID) {
+            station.dockPortD = vehicleEntity;
+            Gdx.app.debug(getClass().getSimpleName(), "dock port: D");
             Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
             CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
             sellCargo(cargo);

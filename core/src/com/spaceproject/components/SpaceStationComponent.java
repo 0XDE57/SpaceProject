@@ -10,6 +10,6 @@ public class SpaceStationComponent implements Component {
     
     public Entity parentOrbitBody;
     
-    public Entity dockedPortA, dockedPortB;
+    public Entity dockPortA, dockPortB, dockPortC, dockPortD;
     
 }

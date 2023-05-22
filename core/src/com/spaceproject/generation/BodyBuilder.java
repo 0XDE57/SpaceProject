@@ -24,6 +24,8 @@ public class BodyBuilder {
     public static final int SHIP_OUTER_SENSOR_ID = 2;
     public static final int DOCK_A_ID = 0;
     public static final int DOCK_B_ID = 1;
+    public static final int DOCK_C_ID = 2;
+    public static final int DOCK_D_ID = 3;
     
     public static Body createCircle(float x, float y, float radius, World world, Entity entity) {
         Body body;
@@ -178,7 +180,7 @@ public class BodyBuilder {
         //dock A
         CircleShape dockASensor = new CircleShape();
         dockASensor.setRadius(dockRadius);
-        dockASensor.setPosition(new Vector2(dockRadius*2, 0));
+        dockASensor.setPosition(new Vector2(dockRadius*2, +width));
         FixtureDef dockAFixture = new FixtureDef();
         dockAFixture.shape = dockASensor;
         dockAFixture.isSensor = true;
@@ -188,13 +190,33 @@ public class BodyBuilder {
         //dock B
         CircleShape dockBSensor = new CircleShape();
         dockBSensor.setRadius(dockRadius);
-        dockBSensor.setPosition(new Vector2(-dockRadius*2, 0));
+        dockBSensor.setPosition(new Vector2(dockRadius*2, -width));
         FixtureDef dockBFixture = new FixtureDef();
         dockBFixture.shape = dockBSensor;
         dockBFixture.isSensor = true;
         Fixture dockB = body.createFixture(dockBFixture);
         dockB.setUserData(DOCK_B_ID);
         dockBSensor.dispose();
+        //dock C
+        CircleShape dockCSensor = new CircleShape();
+        dockCSensor.setRadius(dockRadius);
+        dockCSensor.setPosition(new Vector2(-dockRadius*2, +width));
+        FixtureDef dockCFixture = new FixtureDef();
+        dockCFixture.shape = dockBSensor;
+        dockCFixture.isSensor = true;
+        Fixture dockC = body.createFixture(dockCFixture);
+        dockC.setUserData(DOCK_C_ID);
+        dockCSensor.dispose();
+        //dock D
+        CircleShape dockDSensor = new CircleShape();
+        dockDSensor.setRadius(dockRadius);
+        dockDSensor.setPosition(new Vector2(-dockRadius*2, -width));
+        FixtureDef dockDFixture = new FixtureDef();
+        dockDFixture.shape = dockBSensor;
+        dockDFixture.isSensor = true;
+        Fixture dockD = body.createFixture(dockCFixture);
+        dockD.setUserData(DOCK_D_ID);
+        dockDSensor.dispose();
         
         body.setUserData(entity);
         

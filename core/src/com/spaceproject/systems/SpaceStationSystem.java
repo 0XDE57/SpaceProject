@@ -58,11 +58,17 @@ public class SpaceStationSystem extends IteratingSystem {
         }
 
         //update docked ships
-        if (spaceStation.dockedPortA != null) {
-            updateShipInDock(spaceStation, stationPhysics, spaceStation.dockedPortA, BodyBuilder.DOCK_A_ID);
+        if (spaceStation.dockPortA != null) {
+            updateShipInDock(spaceStation, stationPhysics, spaceStation.dockPortA, BodyBuilder.DOCK_A_ID);
         }
-        if (spaceStation.dockedPortB != null) {
-            updateShipInDock(spaceStation, stationPhysics, spaceStation.dockedPortB, BodyBuilder.DOCK_B_ID);
+        if (spaceStation.dockPortB != null) {
+            updateShipInDock(spaceStation, stationPhysics, spaceStation.dockPortB, BodyBuilder.DOCK_B_ID);
+        }
+        if (spaceStation.dockPortC != null) {
+            updateShipInDock(spaceStation, stationPhysics, spaceStation.dockPortC, BodyBuilder.DOCK_C_ID);
+        }
+        if (spaceStation.dockPortD != null) {
+            updateShipInDock(spaceStation, stationPhysics, spaceStation.dockPortD, BodyBuilder.DOCK_D_ID);
         }
 
         //draw docking pad
@@ -73,10 +79,16 @@ public class SpaceStationSystem extends IteratingSystem {
 
             shape.setColor(Color.BLACK);
             int dockID = (int) fixture.getUserData();
-            if (spaceStation.dockedPortA != null && dockID == BodyBuilder.DOCK_A_ID) {
+            if (spaceStation.dockPortA != null && dockID == BodyBuilder.DOCK_A_ID) {
                 shape.setColor(Color.WHITE);
             }
-            if (spaceStation.dockedPortB != null && dockID == BodyBuilder.DOCK_B_ID) {
+            if (spaceStation.dockPortB != null && dockID == BodyBuilder.DOCK_B_ID) {
+                shape.setColor(Color.WHITE);
+            }
+            if (spaceStation.dockPortC != null && dockID == BodyBuilder.DOCK_C_ID) {
+                shape.setColor(Color.WHITE);
+            }
+            if (spaceStation.dockPortD != null && dockID == BodyBuilder.DOCK_D_ID) {
                 shape.setColor(Color.WHITE);
             }
 
@@ -94,15 +106,25 @@ public class SpaceStationSystem extends IteratingSystem {
         
         //undock
         if (Mappers.controllable.get(dockedShip).interact) {
-            if (spaceStation.dockedPortA == dockedShip) {
-                spaceStation.dockedPortA = null;
+            if (spaceStation.dockPortA == dockedShip) {
+                spaceStation.dockPortA = null;
                 shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
                 Gdx.app.debug(getClass().getSimpleName(), "undock port: A");
             }
-            if (spaceStation.dockedPortB == dockedShip) {
-                spaceStation.dockedPortB = null;
+            if (spaceStation.dockPortB == dockedShip) {
+                spaceStation.dockPortB = null;
                 shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
                 Gdx.app.debug(getClass().getSimpleName(), "undock port: B");
+            }
+            if (spaceStation.dockPortC == dockedShip) {
+                spaceStation.dockPortC = null;
+                shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
+                Gdx.app.debug(getClass().getSimpleName(), "undock port: C");
+            }
+            if (spaceStation.dockPortD == dockedShip) {
+                spaceStation.dockPortD = null;
+                shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
+                Gdx.app.debug(getClass().getSimpleName(), "undock port: D");
             }
         }
         
