@@ -14,7 +14,6 @@ import com.spaceproject.config.SystemsConfig;
 import com.spaceproject.screens.GameScreen;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
 
 
 public abstract class SystemLoader {
@@ -107,6 +106,12 @@ public abstract class SystemLoader {
         }
         
         Gdx.app.log(logSource, "Unload: " + String.format("%-4d ", systemInEngine.priority) + systemInEngine.getClass().getName());
+    }
+    
+    public static void unLoadAll(Engine engine) {
+        for (EntitySystem system : engine.getSystems()) {
+            unLoad(engine, system);
+        }
     }
     
     private void loadMods(){

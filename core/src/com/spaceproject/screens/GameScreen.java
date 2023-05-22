@@ -358,7 +358,7 @@ public class GameScreen extends MyScreenAdapter {
         Gdx.app.log(getClass().getSimpleName(), "Disposing...");
         
         // clean up after self
-        engine.removeAllSystems();
+        SystemLoader.unLoadAll(engine);
         
         ResourceDisposer.disposeAll(engine.getEntities());
         
