@@ -33,12 +33,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     private Vector2 star1CenterTile;
     private Vector2 star2CenterTile;
     private Vector2 star3CenterTile;
-    
-    //todo: split surround into separate x/y, calculate tiles needed:
-    // tX = GDX.graphics.getWidth()/tileSize;
-    // tY = GDX.graphics.getHeight()/tileSize;
-    // load appropriate amount of tiles for any resolution
-    // or fixed size then scaled to extended viewport?
+
     private static final int tileSize = 512;//1024;//
     private int surroundX, surroundY;// how many tiles to load around center tile
     private final ShaderProgram spaceShader;
@@ -96,8 +91,8 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     private void updateTiles() {
         int prevX = surroundX;
         int prevY = surroundY;
-        surroundX = Gdx.graphics.getWidth() / tileSize;
-        surroundY = Gdx.graphics.getHeight() / tileSize;
+        surroundX = (Gdx.graphics.getWidth() / tileSize) + 1;
+        surroundY = (Gdx.graphics.getHeight() / tileSize) + 1;
         boolean resize = (prevX != surroundX || prevY != surroundY);
         dustCenterTile = updateLayer(resize, dustCenterTile, dustTileDepth, SpaceBackgroundTile.TileType.Dust);
         star0CenterTile = updateLayer(resize, star0CenterTile, 0, SpaceBackgroundTile.TileType.Stars);
