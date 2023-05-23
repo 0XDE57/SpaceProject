@@ -15,13 +15,11 @@ import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
 public class ShieldRenderSystem extends IteratingSystem implements Disposable {
-    
-    private final OrthographicCamera cam;
+
     private final ShapeRenderer shape;
     
     public ShieldRenderSystem() {
         super(Family.all(ShieldComponent.class, TransformComponent.class).get());
-        cam = GameScreen.cam;
         shape = new ShapeRenderer();
     }
     
@@ -31,7 +29,7 @@ public class ShieldRenderSystem extends IteratingSystem implements Disposable {
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     
-        shape.setProjectionMatrix(cam.combined);
+        shape.setProjectionMatrix(GameScreen.cam.combined);
         
         super.update(delta);
         
@@ -40,9 +38,13 @@ public class ShieldRenderSystem extends IteratingSystem implements Disposable {
     
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        TransformComponent transform = Mappers.transform.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
-        
+        if (shield.state == ShieldComponent.State.off) {
+            return;
+        }
+
+        TransformComponent transform = Mappers.transform.get(entity);
+
         //draw overlay
         shape.begin(ShapeRenderer.ShapeType.Filled);
         if (shield.state == ShieldComponent.State.on) {
@@ -56,7 +58,7 @@ public class ShieldRenderSystem extends IteratingSystem implements Disposable {
             shape.setColor(0, 1-green, 0, Math.max(1-green, 0.25f));
         }
         shape.circle(transform.pos.x, transform.pos.y, shield.radius);
-        shape.end();//flush inside loop = bad! (allegedly)
+        shape.end();//flush inside loop = bad?
         
         //draw outline
         shape.begin(ShapeRenderer.ShapeType.Line);
@@ -69,7 +71,7 @@ public class ShieldRenderSystem extends IteratingSystem implements Disposable {
             shape.setColor(0, 0, 1, 1f);
         }
         shape.circle(transform.pos.x, transform.pos.y, shield.radius);
-        shape.end();//double flush inside same loop. im a horrible person ;p
+        shape.end();//double flush inside same loop?
     }
     
     @Override
