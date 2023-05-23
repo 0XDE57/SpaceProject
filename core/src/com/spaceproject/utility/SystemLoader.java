@@ -3,6 +3,7 @@ package com.spaceproject.utility;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.EntitySystem;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.controllers.ControllerListener;
@@ -97,6 +98,10 @@ public abstract class SystemLoader {
         if (systemInEngine instanceof InputProcessor) {
             GameScreen.getInputMultiplexer().removeProcessor((InputProcessor) systemInEngine);
         }
+
+        engine.removeSystem(systemInEngine);
+
+        //dispose AFTER remove in case a system has to access some data when removedFromEngine()
         if (systemInEngine instanceof Disposable) {
             ((Disposable)systemInEngine).dispose();
         }
@@ -105,10 +110,10 @@ public abstract class SystemLoader {
     }
     
     public static void unloadAll(Engine engine) {
-        for (EntitySystem system : engine.getSystems()) {
-            unload(engine, system);
+        EntitySystem[] systems = engine.getSystems().toArray(EntitySystem.class);
+        for (int i = 0; i < systems.length; i++) {
+            unload(engine, systems[i]);
         }
-        engine.removeAllSystems();
     }
     
     private void loadMods(){
