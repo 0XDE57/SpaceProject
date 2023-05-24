@@ -58,7 +58,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
         for (Entity entity : entities) {
             PhysicsComponent physics = Mappers.physics.get(entity);
             if (!physics.body.isActive()) {
-                return;
+                continue;
             }
             
             TransformComponent transform = Mappers.transform.get(entity);
