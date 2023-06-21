@@ -424,7 +424,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             long hitTime = 500;
             long timeSinceHit = GameScreen.getGameTimeCurrent() - shield.lastHit;
             if (timeSinceHit < hitTime) {
-                float green = timeSinceHit / hitTime;
+                float green = (float) timeSinceHit / hitTime;
                 shape.setColor(0, 1-green, green, green);
             } else {
                 shape.setColor(0, 0, 1, 1);
@@ -547,23 +547,33 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (entity == null) return;
         CargoComponent cargo = Mappers.cargo.get(entity);
         if (cargo == null) return;
-        
-        //if (cargo.lastChangeTime - GameScreen.getGameTimeCurrent() < 5000) return;
+
         int barWidth = uiCFG.playerHPBarWidth;
         int barHeight = uiCFG.playerHPBarHeight;
         int barX = Gdx.graphics.getWidth() / 2 - barWidth / 2;
         int healthBarY = uiCFG.playerHPBarY;
-        
+
+        PhysicsComponent physics = Mappers.physics.get(entity);
+        if (physics != null) {
+            ControllableComponent control = Mappers.controllable.get(entity);
+            if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight || control.boost) {
+                inventoryFont.setColor(Color.GOLD);
+                if (control.boost) {
+                    inventoryFont.setColor(Color.CYAN);
+                }
+            }
+            inventoryFont.draw(batch, " " + MyMath.round(physics.body.getLinearVelocity().len(), 1), barX + barWidth, healthBarY + barHeight + layout.height);
+        }
+
         long colorTime = 1000;
         long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;
         float ratio = (float) timeSinceCollect / (float) colorTime;
-        layout.setText(inventoryFont, "Drops: " + cargo.count);
         inventoryFont.setColor(ratio, 1, ratio, 1);
-        inventoryFont.draw(batch, layout, barX, healthBarY - barHeight - layout.height);
-        
-        //layout.setText(inventoryFont, "Credits: " + cargo.credits);
-        //inventoryFont.setColor(0, 1, 1, 1);
-        inventoryFont.draw(batch, "Credits: " + cargo.credits, barX, healthBarY - barHeight - (layout.height * 2.5f));
+        layout.setText(inventoryFont, " Inv: " + cargo.count);
+        inventoryFont.draw(batch, layout, barX + barWidth, healthBarY + layout.height);
+
+        inventoryFont.setColor(1, 1, 1, 1);
+        inventoryFont.draw(batch, " Crd: " + cargo.credits, barX + barWidth, healthBarY - layout.height);
     }
     //endregion
     
