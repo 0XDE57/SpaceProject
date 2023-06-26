@@ -213,8 +213,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape.end();
         
         batch.begin();
-        
-        drawInventory(player, 100, 100);
+
+        CameraSystem camSystem = getEngine().getSystem(CameraSystem.class);
+        if (!GameScreen.isHyper() && camSystem.getZoomLevel() != camSystem.getMaxZoomLevel()) {
+            drawInventory(player, 100, 100);
+        }
         
         //draw special state: hyper or landing / launching
         drawSpecialStateMessage(player);
