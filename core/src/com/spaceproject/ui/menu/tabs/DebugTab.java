@@ -13,7 +13,16 @@ public class DebugTab extends HotKeyTab {
     public DebugTab() {
         super("Debug", Input.Keys.F4);
         final DebugConfig debugCFG = SpaceProject.configManager.getConfig(DebugConfig.class);
-        
+
+        final CheckBox toggleAsteroidSpawn = new CheckBox("spawn asteroid on [right-click]", VisUI.getSkin());
+        toggleAsteroidSpawn.setChecked(debugCFG.spawnAsteroid);
+        toggleAsteroidSpawn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                debugCFG.spawnAsteroid = toggleAsteroidSpawn.isChecked();
+            }
+        });
+
         final CheckBox toggleComponentList = new CheckBox("show components", VisUI.getSkin());
         toggleComponentList.setChecked(debugCFG.drawComponentList);
         toggleComponentList.addListener(new ChangeListener() {
@@ -100,7 +109,8 @@ public class DebugTab extends HotKeyTab {
             }
         });
         
-        
+
+        getContentTable().add(toggleAsteroidSpawn).left().row();
         getContentTable().add(toggleFPS).left();
         getContentTable().add(toggleExtraInfo).left().row();
         getContentTable().add(toggleMousePos).left().row();

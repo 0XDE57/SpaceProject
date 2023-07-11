@@ -10,10 +10,14 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AsteroidBeltComponent;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.config.Config;
+import com.spaceproject.config.DebugConfig;
+import com.spaceproject.config.EngineConfig;
 import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
@@ -42,9 +46,12 @@ public class AsteroidBeltSystem extends EntitySystem {
     
         //debug add asteroid at mouse position
         if (GameScreen.isDebugMode && Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
-            Vector3 unproject = GameScreen.cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-            spawnAsteroid(unproject.x, unproject.y, 0, 0);
-            //spawnAsteroidField(unproject.x, unproject.y, 0, 80, 20, 400);
+            DebugConfig debug = SpaceProject.configManager.getConfig(DebugConfig.class);
+            if (debug.spawnAsteroid) {
+                Vector3 unproject = GameScreen.cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+                spawnAsteroid(unproject.x, unproject.y, 0, 0);
+                //spawnAsteroidField(unproject.x, unproject.y, 0, 80, 20, 400);
+            }
         }
     }
     
