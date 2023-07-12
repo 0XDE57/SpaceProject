@@ -659,7 +659,7 @@ public class EntityBuilder {
         texture.texture = TextureGenerator.createTile(color);
         //todo: rng texture shape between circle, triangle, square
         //texture.texture = TextureFactory.createCircle(asteroid.color);
-        texture.scale = 1f;
+        texture.scale = 2f;
         
         TransformComponent transform = new TransformComponent();
         Vector2 pos = transform.pos.set(position);
