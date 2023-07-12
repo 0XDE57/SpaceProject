@@ -11,8 +11,8 @@ Welcome to A Space Project. A project involving space...
 ## Features
 * Fly around the starsystem in a spaceship
 * Faster Than Light Travel! (yeah it's real, cuz like quantum anti-dark matter n' stuff yo)
-* Destructible asteroids using cutting edge - ***t r i ▲ n g l e s*** -
 * Discover a plethora of astronomical bodies including:
+    * Destructible asteroids using cutting edge - ***t r i ▲ n g l e s*** -
     * Unary star systems, Binary star systems, Trinary star systems, and even ~~Quadri... quatro? quadrino-ary?~~
     * lonely rogue planets who lost their sun :(
 * Fight against other ship (disabled for now)
