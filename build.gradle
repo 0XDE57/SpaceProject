@@ -21,7 +21,7 @@ allprojects {
 	
     ext {
         appName = 'spaceproject'
-        gdxVersion = '1.11.0'
+        gdxVersion = '1.12.0'
         gdxControllersVersion = '2.2.2'
         roboVMVersion = '2.3.16'
         ashleyVersion = '1.7.4'
