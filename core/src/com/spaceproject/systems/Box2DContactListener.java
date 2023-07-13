@@ -452,7 +452,10 @@ public class Box2DContactListener implements ContactListener {
         long timestamp = GameScreen.getGameTimeCurrent();
         if (shield != null && shield.state == ShieldComponent.State.on) {
             shield.lastHit = timestamp;
-            Mappers.asteroid.get(otherBody).lastShieldHit = timestamp;
+            AsteroidComponent asteroid = Mappers.asteroid.get(otherBody);
+            if (asteroid != null) {
+                asteroid.lastShieldHit = timestamp;
+            }
             //todo: break shield if impact is hard enough
             //int shieldBreakThreshold = 500;
             //if (impulse > shieldBreakThreshold) { }
