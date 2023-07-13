@@ -388,24 +388,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape.rect(x, y, width, height);
     
         float ratioHP = health.health / health.maxHealth;
-        //shape.co
-        Color backBar = Color.GREEN;
-        if (ratioHP < 0.33f) {
-            backBar = Color.RED;
-        } else if (ratioHP < 0.66f) {
-            backBar = Color.YELLOW;
-        }
-        shape.setColor(backBar);
-        shape.rect(x, y + (height*0.5f), width, 1);
-    
-        float center = (width * 0.5f) - (ratioHP * 0.5f);
-        float barRatio = MathUtils.clamp(ratioHP * width, 0,  width);
         shape.setColor(1 - ratioHP, ratioHP, 0, uiCFG.entityHPbarOpacity);
         if (GameScreen.getGameTimeCurrent() - health.lastHitTime < 1000) {
             shape.setColor(1, 0, 0, 1);
         }
-        
-        //shape.rect(x, y, barRatio, height);
+
         shape.rect(x, y, width * ratioHP, height);
     }
     
