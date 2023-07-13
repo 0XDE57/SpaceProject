@@ -21,5 +21,7 @@ public class AsteroidComponent implements Component {
     public boolean doShatter = false;
     
     public Color color;
-    
+
+    public long lastShieldHit;
+
 }

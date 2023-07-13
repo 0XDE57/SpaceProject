@@ -59,6 +59,13 @@ public class AsteroidRenderSystem extends IteratingSystem {
             } else {
                 color.set(1, ratio, ratio, 1);//white to red
             }
+            
+            long hitTime = 500;
+            long timeSinceHit = GameScreen.getGameTimeCurrent() - asteroid.lastShieldHit;
+            if (timeSinceHit < hitTime) {
+                float fade = (float) timeSinceHit / hitTime;
+                color.lerp(asteroid.color, 1-fade);
+            }
         } else {
             //mesh outline
             color = asteroid.color.cpy();

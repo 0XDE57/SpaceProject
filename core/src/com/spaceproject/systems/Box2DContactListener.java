@@ -438,6 +438,7 @@ public class Box2DContactListener implements ContactListener {
                 destroy(impactedEntity, asteroidEntity);
             }
         }
+
     }
     
     private void vehicleImpact(Entity entity, Entity otherBody, float impulse) {
@@ -448,8 +449,10 @@ public class Box2DContactListener implements ContactListener {
         
         //don't apply damage while shield active
         ShieldComponent shield = Mappers.shield.get(entity);
+        long timestamp = GameScreen.getGameTimeCurrent();
         if (shield != null && shield.state == ShieldComponent.State.on) {
-            shield.lastHit = GameScreen.getGameTimeCurrent();
+            shield.lastHit = timestamp;
+            Mappers.asteroid.get(otherBody).lastShieldHit = timestamp;
             //todo: break shield if impact is hard enough
             //int shieldBreakThreshold = 500;
             //if (impulse > shieldBreakThreshold) { }
@@ -475,7 +478,7 @@ public class Box2DContactListener implements ContactListener {
         HealthComponent health = Mappers.health.get(entity);
         if (health != null) {
             health.health -= relativeDamage;
-            health.lastHitTime = GameScreen.getGameTimeCurrent();
+            health.lastHitTime = timestamp;
             health.lastHitSource = otherBody;
             if (health.health <= 0) {
                 destroy(entity, otherBody);
