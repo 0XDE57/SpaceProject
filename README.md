@@ -91,7 +91,7 @@ Credit appreciated.
 * If a "File not found" error occurs, check the working directory. Append "\assets" to the working directory in run configurations.
 
 
-**Android Studio**
+**IntelliJ / Android Studio**
 * Desktop
   * create Run Configuration
   * main class = com.spaceproject.desktop.DesktopLauncher
