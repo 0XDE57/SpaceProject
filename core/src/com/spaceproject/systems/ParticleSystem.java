@@ -137,7 +137,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         boolean shieldIsOff = shield != null && shield.state != ShieldComponent.State.on;
         boolean hyperdriveIsActive = hyper != null && hyper.state == HyperDriveComponent.State.on;
         
-        if (control != null && shieldIsOff) {
+        if (control != null && shieldIsOff && control.activelyControlled) {
             switch (particle.type) {
                 case shipEngineMain:
                     if (((control.moveForward || control.boost) && !control.moveBack) || hyperdriveIsActive) {

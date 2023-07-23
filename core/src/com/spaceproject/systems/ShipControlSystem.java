@@ -93,7 +93,8 @@ public class ShipControlSystem extends IteratingSystem {
             if (control.moveRight && !control.moveLeft && control.moveForward)  angle -= 45 * MathUtils.degRad;
         }
         boolean engineActive = false;
-        if ((control.moveForward || control.moveLeft || control.moveRight || control.moveBack || control.boost)
+        if (control.activelyControlled
+                && (control.moveForward || control.moveLeft || control.moveRight || control.moveBack || control.boost)
                 && !(control.moveLeft && control.moveRight && !control.moveForward)) {
             VehicleComponent vehicle = Mappers.vehicle.get(entity); //todo: switch to per attached engine thrust
             float thrust = vehicle.thrust * control.movementMultiplier * delta;
@@ -104,7 +105,6 @@ public class ShipControlSystem extends IteratingSystem {
             physics.body.applyForceToCenter(force, true);
             engineActive = true;
         }
-        
         
         if (soundSys != null) {
             float velocity = physics.body.getLinearVelocity().len();
