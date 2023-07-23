@@ -107,7 +107,7 @@ public class SpaceStationSystem extends IteratingSystem {
         
         //undock
         ControllableComponent control = Mappers.controllable.get(dockedShip);
-        if (control.moveForward || control.moveRight || control.moveLeft || control.boost) {
+        if (spaceStation.lastDockedTimer.canDoEvent() && (control.moveForward || control.moveRight || control.moveLeft || control.boost)) {
             if (spaceStation.dockPortA == dockedShip) {
                 spaceStation.dockPortA = null;
                 shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());

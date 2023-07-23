@@ -221,6 +221,7 @@ public class Box2DContactListener implements ContactListener {
         
         if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_A_ID) {
             station.dockPortA = vehicleEntity;
+            station.lastDockedTimer.reset();
             Gdx.app.debug(getClass().getSimpleName(), "dock port: A");
             Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
             Mappers.controllable.get(vehicleEntity).activelyControlled = false;
@@ -231,6 +232,7 @@ public class Box2DContactListener implements ContactListener {
         }
         if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_B_ID) {
             station.dockPortB = vehicleEntity;
+            station.lastDockedTimer.reset();
             Gdx.app.debug(getClass().getSimpleName(), "dock port: B");
             Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
             Mappers.controllable.get(vehicleEntity).activelyControlled = false;
@@ -240,6 +242,7 @@ public class Box2DContactListener implements ContactListener {
         }
         if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_C_ID) {
             station.dockPortC = vehicleEntity;
+            station.lastDockedTimer.reset();
             Gdx.app.debug(getClass().getSimpleName(), "dock port: C");
             Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
             Mappers.controllable.get(vehicleEntity).activelyControlled = false;
@@ -249,6 +252,7 @@ public class Box2DContactListener implements ContactListener {
         }
         if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_D_ID) {
             station.dockPortD = vehicleEntity;
+            station.lastDockedTimer.reset();
             Gdx.app.debug(getClass().getSimpleName(), "dock port: D");
             Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
             Mappers.controllable.get(vehicleEntity).activelyControlled = false;
