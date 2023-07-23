@@ -72,35 +72,35 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
     
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        TrailComponent spline = Mappers.trail.get(entity);
+        TrailComponent trail = Mappers.trail.get(entity);
         
-        updateTail(spline, entity);
+        updateTail(trail, entity);
         //todo: z-index to render player trail above bullet trail
         //todo: fade nicely
-        if (spline.style == null) {
-            spline.style = TrailComponent.Style.norender;
+        if (trail.style == null) {
+            trail.style = TrailComponent.Style.norender;
         }
-        switch (spline.style) {
-            case velocity: renderVelocityPath(spline); break;
-            case state: renderStatePath(spline); break;
-            case solid: renderDefaultPath(spline); break;
+        switch (trail.style) {
+            case velocity: renderVelocityPath(trail); break;
+            case state: renderStatePath(trail); break;
+            case solid: renderDefaultPath(trail); break;
         }
     }
     
     // these are more like paths than splines, but see also:
     // https://libgdx.com/wiki/math-utils/path-interface-and-splines
-    private void updateTail(TrailComponent spline, Entity entity) {
+    private void updateTail(TrailComponent trail, Entity entity) {
         TransformComponent transform = Mappers.transform.get(entity);
         PhysicsComponent physics = Mappers.physics.get(entity);
         
         //initialize
-        if (spline.path == null) {
+        if (trail.path == null) {
             //todo: cache. use pooled vectors
-            spline.path = new Vector3[maxPathSize];
+            trail.path = new Vector3[maxPathSize];
             for (int v = 0; v < maxPathSize; v++) {
-                spline.path[v] = new Vector3();
+                trail.path[v] = new Vector3();
             }
-            spline.state = new byte[maxPathSize];
+            trail.state = new byte[maxPathSize];
         }
         
         //
@@ -114,12 +114,12 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
         //off, on, boost, hyper -> 0, 1, 2, 3
         float velocity = 0;
         byte state = 0;
-        if (spline.style == TrailComponent.Style.state) {
+        if (trail.style == TrailComponent.Style.state) {
             if (physics != null) {
                 //set velocity
                 velocity = physics.body.getLinearVelocity().len2();
         
-                if (spline.style == TrailComponent.Style.state) {
+                if (trail.style == TrailComponent.Style.state) {
                     //set state
                     ControllableComponent control = Mappers.controllable.get(entity);
                     if (control != null) {
@@ -128,6 +128,9 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
                             if (control.boost) {
                                 state = 2;
                             }
+                        }
+                        if (!control.activelyControlled) {
+                            state = -4;
                         }
                     }
             
@@ -158,7 +161,7 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
         }
         
         //show hurt
-        if (spline.style == TrailComponent.Style.state) {
+        if (trail.style == TrailComponent.Style.state) {
             HealthComponent health = Mappers.health.get(entity);
             if (health != null) {
                 long hurtTime = 1000;
@@ -168,16 +171,16 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
             }
         }
         
-        spline.path[spline.indexHead].set(transform.pos.x, transform.pos.y, velocity);
-        if (spline.style == TrailComponent.Style.state) {
-            spline.state[spline.indexHead] = state;
+        trail.path[trail.indexHead].set(transform.pos.x, transform.pos.y, velocity);
+        if (trail.style == TrailComponent.Style.state) {
+            trail.state[trail.indexHead] = state;
         }
         
         //roll index
-        spline.stepCount++;
-        spline.indexHead++;
-        if (spline.indexHead >= spline.path.length) {
-            spline.indexHead = 0;
+        trail.stepCount++;
+        trail.indexHead++;
+        if (trail.indexHead >= trail.path.length) {
+            trail.indexHead = 0;
         }
     }
     
@@ -231,6 +234,7 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
             if (indexWrap != spline.indexHead) {
                 Color color;
                 switch (spline.state[indexWrap]) {
+                    case -4: continue; //don't render
                     case -3: color = Color.GREEN; break; //or color of asteroid hit?
                     case -2: color = Color.BLUE; break;
                     case -1: color = Color.RED; break;

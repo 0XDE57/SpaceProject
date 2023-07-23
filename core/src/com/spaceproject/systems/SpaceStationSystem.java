@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Transform;
+import com.spaceproject.components.ControllableComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.SpaceStationComponent;
 import com.spaceproject.components.TransformComponent;
@@ -105,26 +106,31 @@ public class SpaceStationSystem extends IteratingSystem {
         Transform transform = stationPhysics.body.getTransform();
         
         //undock
-        if (Mappers.controllable.get(dockedShip).interact) {
+        ControllableComponent control = Mappers.controllable.get(dockedShip);
+        if (control.moveForward || control.moveRight || control.moveLeft || control.boost) {
             if (spaceStation.dockPortA == dockedShip) {
                 spaceStation.dockPortA = null;
                 shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
                 Gdx.app.debug(getClass().getSimpleName(), "undock port: A");
+                control.activelyControlled = true;
             }
             if (spaceStation.dockPortB == dockedShip) {
                 spaceStation.dockPortB = null;
                 shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
                 Gdx.app.debug(getClass().getSimpleName(), "undock port: B");
+                control.activelyControlled = true;
             }
             if (spaceStation.dockPortC == dockedShip) {
                 spaceStation.dockPortC = null;
                 shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
                 Gdx.app.debug(getClass().getSimpleName(), "undock port: C");
+                control.activelyControlled = true;
             }
             if (spaceStation.dockPortD == dockedShip) {
                 spaceStation.dockPortD = null;
                 shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
                 Gdx.app.debug(getClass().getSimpleName(), "undock port: D");
+                control.activelyControlled = true;
             }
         }
         

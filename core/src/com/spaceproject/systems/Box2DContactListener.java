@@ -223,14 +223,17 @@ public class Box2DContactListener implements ContactListener {
             station.dockPortA = vehicleEntity;
             Gdx.app.debug(getClass().getSimpleName(), "dock port: A");
             Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
+            Mappers.controllable.get(vehicleEntity).activelyControlled = false;
             CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
             sellCargo(cargo);
             heal(cargo, Mappers.health.get(vehicleEntity));
+            //soundsystem.docked();
         }
         if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_B_ID) {
             station.dockPortB = vehicleEntity;
             Gdx.app.debug(getClass().getSimpleName(), "dock port: B");
             Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
+            Mappers.controllable.get(vehicleEntity).activelyControlled = false;
             CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
             sellCargo(cargo);
             heal(cargo, Mappers.health.get(vehicleEntity));
@@ -239,6 +242,7 @@ public class Box2DContactListener implements ContactListener {
             station.dockPortC = vehicleEntity;
             Gdx.app.debug(getClass().getSimpleName(), "dock port: C");
             Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
+            Mappers.controllable.get(vehicleEntity).activelyControlled = false;
             CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
             sellCargo(cargo);
             heal(cargo, Mappers.health.get(vehicleEntity));
@@ -247,6 +251,7 @@ public class Box2DContactListener implements ContactListener {
             station.dockPortD = vehicleEntity;
             Gdx.app.debug(getClass().getSimpleName(), "dock port: D");
             Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
+            Mappers.controllable.get(vehicleEntity).activelyControlled = false;
             CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
             sellCargo(cargo);
             heal(cargo, Mappers.health.get(vehicleEntity));

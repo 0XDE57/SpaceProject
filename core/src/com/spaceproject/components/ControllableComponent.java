@@ -25,4 +25,7 @@ public class ControllableComponent implements Component {
     public SimpleTimer timerVehicle;
     
     public boolean swapWeapon;
+
+    public boolean activelyControlled;//flag
+
 }
