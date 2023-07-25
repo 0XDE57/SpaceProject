@@ -118,6 +118,7 @@ public class EntityBuilder {
         HealthComponent health = new HealthComponent();
         health.maxHealth = entityCFG.shipHealth;
         health.health = health.maxHealth;
+        health.lastHitTime = GameScreen.getGameTimeCurrent() - 1000;
         shipEntity.add(health);
         
         //weapon
@@ -143,6 +144,7 @@ public class EntityBuilder {
         shield.defence = 100f;
         float radius = Math.max(vehicle.dimensions.getWidth(), vehicle.dimensions.getHeight());
         shield.maxRadius = radius;
+        shield.lastHit = GameScreen.getGameTimeCurrent() - 1000;
         shipEntity.add(shield);
         
         //barrel roll
