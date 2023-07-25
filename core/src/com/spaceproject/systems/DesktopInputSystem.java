@@ -293,7 +293,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         return false;
     }
 
-    @Override
+    //@Override
     public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
         return false;
     }
