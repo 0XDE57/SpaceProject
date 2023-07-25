@@ -26,6 +26,6 @@ public class ControllableComponent implements Component {
     
     public boolean swapWeapon;
 
-    public boolean activelyControlled;//flag
+    public boolean activelyControlled = true;//flag
 
 }
