@@ -145,6 +145,8 @@ public class EntityBuilder {
         float radius = Math.max(vehicle.dimensions.getWidth(), vehicle.dimensions.getHeight());
         shield.maxRadius = radius;
         shield.lastHit = GameScreen.getGameTimeCurrent() - 1000;
+        shield.heatResistance = 0f;
+        shield.cooldownRate = 0.1f;
         shipEntity.add(shield);
         
         //barrel roll

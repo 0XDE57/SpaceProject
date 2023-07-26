@@ -369,7 +369,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         drawPlayerAmmoBar(entity, barX, ammoBarY, barWidth, barHeight);
     }
     
-    private void drawPlayerHealth(Entity entity, int x, int y, int width, int height) {
+    private void drawPlayerHealth(Entity entity, float x, float y, float width, float height) {
         HealthComponent health = Mappers.health.get(entity);
         if (health == null) return;
         
@@ -391,17 +391,17 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape.rect(x, y, width * ratioHP, height);
     }
     
-    private void drawPlayerShield(Entity entity, int x, int y, int width, int height) {
+    private void drawPlayerShield(Entity entity, float x, float y, float width, float height) {
         ShieldComponent shield = Mappers.shield.get(entity);
         if (shield == null || shield.state == ShieldComponent.State.off) {
             return;
         }
     
-        //if shield not engaged, render bar half width
+        //if shield not engaged, render bar half height
+        float halfHeight = height * 0.5f;
         if (shield.state != ShieldComponent.State.on) {
-            int halfHeight = height / 2;
             height = halfHeight;
-            y += halfHeight / 2;
+            y += halfHeight * 0.5f;
         }
     
         float ratioShield = shield.radius / shield.maxRadius;
@@ -412,12 +412,23 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 float green = (float) timeSinceHit / hitTime;
                 shape.setColor(0, 1-green, green, green);
             } else {
-                shape.setColor(0, 0, 1, 1);
+                shape.setColor(shield.heat, 0, 1, 1);
             }
         } else {
-            shape.setColor(0, 0, 1, 0.25f);
+            shape.setColor(shield.heat, 0, 1, 0.25f + shield.heat);
         }
         shape.rect(x, y, width * ratioShield, height);
+
+        if (shield.state == ShieldComponent.State.on) {
+            drawPlayerHealth(entity, x, y + halfHeight * 0.5f, width, halfHeight);
+
+            shape.setColor(Color.BLUE);
+            int thickness = 2;
+            shape.rectLine(x, y + height, x + width, y + height, thickness);//top
+            shape.rectLine(x, y, x + width, y, thickness);//bottom
+            shape.rectLine(x, y + height, x, y, thickness);//left
+            shape.rectLine(x + width, y + height, x + width, y, thickness);//right
+        }
     }
     
     private void drawPlayerAmmoBar(Entity entity, int x, int y, int width, int height) {

@@ -3,6 +3,7 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.spaceproject.components.ControlFocusComponent;
@@ -34,6 +35,8 @@ public class ShieldSystem extends IteratingSystem {
         }
         SoundSystem sound = getEngine().getSystem(SoundSystem.class);
         ControlFocusComponent controlFocus = Mappers.controlFocus.get(entity);
+
+        updateCooldown(shield, deltaTime);
         
         switch (shield.state) {
             case off:
@@ -99,7 +102,14 @@ public class ShieldSystem extends IteratingSystem {
                 break;
         }
     }
-    
+
+    private void updateCooldown(ShieldComponent shield, float deltaTime) {
+        if (shield.heat == 0) return;
+
+        shield.heat -= shield.cooldownRate * deltaTime;
+        if (shield.heat < 0) shield.heat = 0;
+    }
+
     private void engage(ShieldComponent shield) {
         float shieldReactivateThreshold = 0.3f;
         

@@ -4,8 +4,8 @@ import com.badlogic.ashley.core.Component;
 import com.spaceproject.utility.SimpleTimer;
 
 public class ShieldComponent implements Component {
-    
-    public enum State { off, on, charge, discharge }
+
+    public enum State { off, on, charge, discharge, overheat }
     
     public State state = State.off;
     
@@ -20,6 +20,13 @@ public class ShieldComponent implements Component {
     public float maxRadius;
     
     public SimpleTimer animTimer;
-    
-    
+
+    public float heat;
+
+    public float overHeat;
+
+    public float heatResistance;
+
+    public float cooldownRate;
+
 }

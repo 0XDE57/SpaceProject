@@ -48,27 +48,33 @@ public class ShieldRenderSystem extends IteratingSystem implements Disposable {
         //draw overlay
         shape.begin(ShapeRenderer.ShapeType.Filled);
         if (shield.state == ShieldComponent.State.on) {
-            shape.setColor(0, 0, 1, 0.25f);
+            shape.setColor(shield.heat, 0, 1, 0.25f + shield.heat);
         } else {
-            shape.setColor(0, 0, 1, 0.15f);
+            shape.setColor(shield.heat, 0, 1, 0.15f + shield.heat);
         }
+        if (shield.heat >= 0.95f) {
+            shape.setColor(1, 0, 0, 1);
+        }
+
         float hitTime = 500;
-        if ((GameScreen.getGameTimeCurrent() - shield.lastHit) < hitTime) {
-            float green = ((GameScreen.getGameTimeCurrent() - shield.lastHit)) / hitTime;
-            shape.setColor(0, 1-green, 0, Math.max(1-green, 0.25f));
+        long lastHit = GameScreen.getGameTimeCurrent() - shield.lastHit;
+        if (lastHit < hitTime) {
+            float green = lastHit / hitTime;
+            shape.setColor(0, 1-green, green, Math.max(1-green, 0.25f));
         }
         shape.circle(transform.pos.x, transform.pos.y, shield.radius);
         shape.end();//flush inside loop = bad?
         
         //draw outline
         shape.begin(ShapeRenderer.ShapeType.Line);
-        if (shield.state == ShieldComponent.State.on) {
-            shape.setColor(Color.WHITE);
-            if ((GameScreen.getGameTimeCurrent() - shield.lastHit) < hitTime) {
-                shape.setColor(Color.MAGENTA);
-            }
-        } else {
-            shape.setColor(0, 0, 1, 1f);
+        shape.setColor(1, 1 - shield.heat, 1 - shield.heat, 1f);
+        if (lastHit < hitTime) {
+            float green = lastHit / hitTime;
+            //shape.setColor(1-green, 1-green, 1-green, 1);
+            shape.setColor(1, green, 1, 1);
+        }
+        if (shield.heat >= 0.95f) {
+            shape.setColor(1, 1, 0, 1);
         }
         shape.circle(transform.pos.x, transform.pos.y, shield.radius);
         shape.end();//double flush inside same loop?

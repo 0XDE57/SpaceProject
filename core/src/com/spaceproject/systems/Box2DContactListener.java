@@ -216,7 +216,13 @@ public class Box2DContactListener implements ContactListener {
         if (dockFixture.getUserData() == null) {
             return;
         }
-        
+
+
+        ShieldComponent shield = Mappers.shield.get(vehicleEntity);
+        if (shield != null && shield.state == ShieldComponent.State.on) {
+            //return;
+        }
+
         SpaceStationComponent station = Mappers.spaceStation.get(stationEntity);
         
         if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_A_ID) {
@@ -299,7 +305,7 @@ public class Box2DContactListener implements ContactListener {
     
     /** NOTE: Must be updated per physics step to retain accurate world!
      * kind of a pseudo entity system to keep physics stepping and collision management separate. */
-    public void updateActiveContacts(World world, float deltaTime) {
+    public void updateActiveContacts(World world, float timeStep) {
         for (Contact contact : world.getContactList()) {
             if (!contact.isTouching()) continue;
             
@@ -313,25 +319,25 @@ public class Box2DContactListener implements ContactListener {
             //active heat damage
             StarComponent starA = Mappers.star.get(entityA);
             if (starA != null) {
-                doActiveHeatDamage(contact.getFixtureB(), entityA, entityB, deltaTime);
+                doActiveHeatDamage(contact.getFixtureB(), entityA, entityB, timeStep);
             }
             StarComponent starB = Mappers.star.get(entityB);
             if (starB != null) {
-                doActiveHeatDamage(contact.getFixtureA(), entityB, entityA, deltaTime);
+                doActiveHeatDamage(contact.getFixtureA(), entityB, entityA, timeStep);
             }
             //active item movement
             ItemDropComponent itemDropA = Mappers.itemDrop.get(entityA);
             if (itemDropA != null) {
-                updateItemAttraction(entityA, entityB, deltaTime);
+                updateItemAttraction(entityA, entityB, timeStep);
             }
             ItemDropComponent itemDropB = Mappers.itemDrop.get(entityB);
             if (itemDropB != null) {
-                updateItemAttraction(entityB, entityA, deltaTime);
+                updateItemAttraction(entityB, entityA, timeStep);
             }
         }
     }
     
-    private void doActiveHeatDamage(Fixture burningFixture, Entity starEntity, Entity burningEntity, float deltaTime) {
+    private void doActiveHeatDamage(Fixture burningFixture, Entity starEntity, Entity burningEntity, float timeStep) {
         if (burningFixture.isSensor())
             return; //only burn bodies
         
@@ -345,18 +351,27 @@ public class Box2DContactListener implements ContactListener {
             }
             return;
         }
-        
+
+        //calculate heat damage dps
+        float damage = heatDamageRate * timeStep;
+        //DebugSystem.addDebugText(damage + ", " + timeStep, 500, 500);
+
+
         //shield protects from damage
         ShieldComponent shield = Mappers.shield.get(burningEntity);
         if ((shield != null) && (shield.state == ShieldComponent.State.on)) {
             //todo: maybe shield can overheat and start turning red
             // when shield is fully overheated shield will break
             // shield can have heat resistance multiplier that you can upgrade
+            shield.heat += damage * 0.0005f;// * (1.0f - shield.heatResistance);
+            if (shield.heat > 1) {
+                shield.overHeat += shield.heat-1;
+                shield.heat = 1f;
+            }
             return;
         }
-        
-        //do heat damage dps
-        float damage = heatDamageRate * deltaTime;
+
+
         //todo: hull heat resistance that can be upgraded: move health to hull?
         healthComponent.health -= damage;
         healthComponent.lastHitTime = GameScreen.getGameTimeCurrent();
@@ -368,7 +383,7 @@ public class Box2DContactListener implements ContactListener {
         }
     }
     
-    private void updateItemAttraction(Entity entityItem, Entity entityCollector, float deltaTime) {
+    private void updateItemAttraction(Entity entityItem, Entity entityCollector, float timeStep) {
         CargoComponent cargoCollector = Mappers.cargo.get(entityCollector);
         if (cargoCollector == null) return;
         
@@ -377,7 +392,7 @@ public class Box2DContactListener implements ContactListener {
         Vector2 itemPos = physicsItem.body.getPosition();
         float angleRad = MyMath.angleTo(collectorPos, itemPos);
         float distance = collectorPos.dst2(itemPos);
-        float magnitude = distance * distance * deltaTime;
+        float magnitude = distance * distance * timeStep;
         physicsItem.body.applyForceToCenter(MyMath.vector(angleRad, magnitude), true);
     }
     //endregion
