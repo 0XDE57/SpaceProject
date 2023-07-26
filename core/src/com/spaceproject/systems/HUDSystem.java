@@ -417,12 +417,17 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         } else {
             shape.setColor(shield.heat, 0, 1, 0.25f + shield.heat);
         }
+        if (shield.heat >= 0.95f) {
+            shape.setColor(1, 0, 0, 1);
+        }
         shape.rect(x, y, width * ratioShield, height);
 
         if (shield.state == ShieldComponent.State.on) {
             drawPlayerHealth(entity, x, y + halfHeight * 0.5f, width, halfHeight);
-
             shape.setColor(Color.BLUE);
+            if (shield.heat >= 0.95f) {
+                shape.setColor(1, 0, 0, 1);
+            }
             int thickness = 2;
             shape.rectLine(x, y + height, x + width, y + height, thickness);//top
             shape.rectLine(x, y, x + width, y, thickness);//bottom
