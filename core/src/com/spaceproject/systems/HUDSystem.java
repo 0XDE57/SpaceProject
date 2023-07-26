@@ -24,6 +24,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Null;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
 import com.spaceproject.config.KeyConfig;
@@ -66,7 +67,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private boolean drawEdgeMap = true;
     
     enum SpecialState {
-        off, hyper, landing, launching, destroyed;
+        off, docked, hyper, landing, launching, destroyed;
     }
 
     float anim = 0;
@@ -228,10 +229,17 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 RespawnComponent respawn = Mappers.respawn.get(respawnEntities.first());
                 drawHint(respawn.reason);
             }
+        } else {
+            //if player is over planet hint
+            if (GameScreen.inSpace()) {
+                ControllableComponent control = Mappers.controllable.get(player);
+                if (control != null && control.canTransition && (Mappers.screenTrans.get(player) == null)) {
+                    String input = getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad Down" : "T";
+                    drawHint("press [" + input + "] to land");
+                }
+            }
         }
-        
-        //todo: if player is over planet
-        //drawHint("press [T] to land");
+
         //drawHint("stars are hot");
         //drawHint("an object in motion remains in motion");
         float warningDist = 200000;
@@ -248,11 +256,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         //todo: move to desktop input
         if (Gdx.input.isKeyJustPressed(keyCFG.toggleHUD)) {
             drawHud = !drawHud;
-            Gdx.app.log(this.getClass().getSimpleName(), "HUD: " + drawHud);
+            Gdx.app.log(getClass().getSimpleName(), "HUD: " + drawHud);
         }
         if (Gdx.input.isKeyJustPressed(keyCFG.toggleEdgeMap)) {
             drawEdgeMap = !drawEdgeMap;
-            Gdx.app.log(this.getClass().getSimpleName(), "Edge mapState: " + drawEdgeMap);
+            Gdx.app.log(getClass().getSimpleName(), "Edge mapState: " + drawEdgeMap);
         }
         if (Gdx.input.isKeyJustPressed(keyCFG.toggleSpaceMap)) {
             miniMap.cycleMapState();
@@ -307,11 +315,20 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                     messageState = SpecialState.launching;
                 }
             }
+            ControllableComponent control = Mappers.controllable.get(player);
+            if (control != null && !control.activelyControlled) {
+                messageState = SpecialState.docked;
+            }
         }
         
         float ratio = 1 + (float) Math.sin(anim);
         Color c = Color.GOLD.cpy().lerp(Color.CYAN, ratio);
         switch (messageState) {
+            case docked:
+                String input = getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad ???" : "E";
+                drawHint("press [" + input + "] to interact");
+                layout.setText(font, "[ DOCKED ]");
+            break;
             case hyper: layout.setText(font, "[ HYPERDRIVE ]"); break;
             case landing: layout.setText(font, "[ LANDING ]"); break;
             case launching: layout.setText(font, "[ LAUNCHING ]"); break;
