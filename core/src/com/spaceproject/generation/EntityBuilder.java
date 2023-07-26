@@ -211,8 +211,9 @@ public class EntityBuilder {
         //width the anchor point relative to body
         CannonComponent cannon = new CannonComponent();
         cannon.damage = entityCFG.cannonDamage;
-        cannon.maxAmmo = entityCFG.cannonAmmo;
-        cannon.curAmmo = cannon.maxAmmo;
+        cannon.cooldownRate = 1;
+        cannon.heatRate = 0.1f;
+        cannon.heatInaccuracy = 0.15f;
         cannon.baseRate = 300;
         cannon.minRate = 40;
         cannon.timerFireRate = new SimpleTimer(entityCFG.cannonFireRate);

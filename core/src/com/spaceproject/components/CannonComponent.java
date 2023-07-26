@@ -9,13 +9,11 @@ public class CannonComponent implements Component {
     public Vector2 anchorVec; //offset relative to ship
     
     public float aimAngle; //relative to anchor
+
+    public float aimOffset; //spray
     
     public float damage;
-    
-    public int maxAmmo;
-    
-    public int curAmmo;
-    
+
     public int baseRate;
     
     public int minRate;
@@ -33,5 +31,13 @@ public class CannonComponent implements Component {
     public float multiplier;
     
     public int shotsFired;
-    
+
+    public float heat;
+
+    public float cooldownRate;
+
+    public float heatRate;
+
+    public float heatInaccuracy;
+
 }

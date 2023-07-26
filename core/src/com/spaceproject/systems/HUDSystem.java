@@ -48,11 +48,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private GameMenu gameMenu;
     
     //rendering
-    private OrthographicCamera cam;
-    private Matrix4 projectionMatrix;
-    private ShapeRenderer shape;
-    private SpriteBatch batch;
-    private BitmapFont font, subFont, inventoryFont;
+    private final OrthographicCamera cam;
+    private final Matrix4 projectionMatrix;
+    private final ShapeRenderer shape;
+    private final SpriteBatch batch;
+    private final BitmapFont font, subFont, inventoryFont;
     private final GlyphLayout layout = new GlyphLayout();
     
     //entity storage
@@ -367,17 +367,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         drawPlayerHealth(entity, barX, healthBarY, barWidth, barHeight);
         drawPlayerShield(entity, barX, healthBarY, barWidth, barHeight);
         drawPlayerAmmoBar(entity, barX, ammoBarY, barWidth, barHeight);
-
-		/*
-		//border
-		//shape.setColor(new Color(0.1f, 0.63f, 0.88f, 1f));
-        shape.setColor(Color.DARK_GRAY);
-		int thickness = 2;
-		shape.rectLine(barX, healthBarY+barHeight*2, barX+barWidth, healthBarY+barHeight*2, thickness);//top
-		shape.rectLine(barX, healthBarY-barHeight, barX+barWidth, healthBarY-barHeight,thickness);//bottom
-		shape.rectLine(barX, healthBarY+barHeight, barX, healthBarY-barHeight, thickness);//left
-		shape.rectLine(barX+barWidth, healthBarY+barHeight, barX+barWidth, healthBarY-barHeight, thickness);//right
-		*/
     }
     
     private void drawPlayerHealth(Entity entity, int x, int y, int width, int height) {
@@ -391,6 +380,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape.setColor(1 - ratioHP, ratioHP, 0, uiCFG.entityHPbarOpacity);
         if (GameScreen.getGameTimeCurrent() - health.lastHitTime < 1000) {
             shape.setColor(1, 0, 0, 1);
+
+            int thickness = 2;
+            shape.rectLine(x, y+height, x+width, y+height, thickness);//top
+            shape.rectLine(x, y, x+width, y,thickness);//bottom
+            shape.rectLine(x, y+height, x, y, thickness);//left
+            shape.rectLine(x+width, y+height, x+width, y, thickness);//right
         }
 
         shape.rect(x, y, width * ratioHP, height);
@@ -426,7 +421,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     private void drawPlayerAmmoBar(Entity entity, int x, int y, int width, int height) {
-        drawCannonAmmoBar(entity, x, y, width, height);
+        drawCannonHeatBar(entity, x, y, width, height);
         drawGrowCannonAmmoBar(entity, x, y, width, height);
     }
     
@@ -445,40 +440,16 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             shape.rect(x, y, width * ratioAmmo, height);
         }
     }
-    
-    private void drawCannonAmmoBar(Entity entity, int x, int y, int width, int height) {
+
+    private void drawCannonHeatBar(Entity entity, int x, int y, int width, int height) {
         CannonComponent cannon = Mappers.cannon.get(entity);
         if (cannon == null) return;
-        
-        float ratioAmmo = (float) cannon.curAmmo / (float) cannon.maxAmmo;
+
+        float heatRatio = cannon.heat;
         shape.setColor(uiCFG.entityHPbarBackground);
         shape.rect(x, y, width, height);
         shape.setColor(uiCFG.playerAmmoBarColor);
-        shape.rect(x, y, width * ratioAmmo, height);
-        
-        for (int i = 0; i < cannon.maxAmmo; i++) {
-            int xDiv = x + (i * width / cannon.maxAmmo);
-            //draw recharge bar
-            if (i == cannon.curAmmo) {
-                shape.setColor(uiCFG.playerAmmoBarRechargeColor);
-                shape.rect(xDiv, y, width / cannon.maxAmmo * cannon.timerRechargeRate.ratio(), height);
-            }
-            //draw divisions to mark individual ammo
-            if (i > 0) {
-                shape.setColor(Color.BLACK);
-                shape.rectLine(xDiv, y + height, xDiv, y, 3);
-            }
-        }
-        
-		/*
-		//draw recharge bar (style 2)
-		if (cannon.curAmmo < cannon.maxAmmo) {
-			int rechargeBarHeight = 2;
-			shape.setColor(Color.SLATE);
-			shape.rect(x, playerBarY, width * cannon.timerRechargeRate.ratio(), rechargeBarHeight);
-		}
-		*/
-    
+        shape.rect(x, y, width * heatRatio, height);
     }
     
     private void drawPlayerVelocity(Entity entity, int x, int y, int width, int height) {

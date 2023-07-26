@@ -3,6 +3,7 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.spaceproject.SpaceProject;
@@ -23,12 +24,11 @@ import com.spaceproject.config.RenderOrder;
 import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.math.MyMath;
-import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
 public class CannonSystem extends IteratingSystem {
-    
+
     public CannonSystem() {
         super(Family.all(CannonComponent.class, ControllableComponent.class).get());
     }
@@ -36,20 +36,16 @@ public class CannonSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         CannonComponent cannon = Mappers.cannon.get(entity);
-        
-        refillAmmo(cannon);
-         
-        if (canShoot(entity)) {
+
+        updateCoolDown(cannon, deltaTime);
+
+        ControllableComponent control = Mappers.controllable.get(entity);//todo: move control.attack into cannon property to decouple
+        if (control.attack && canShoot(entity)) {
             fireCannon(cannon, entity);
         }
     }
     
     private boolean canShoot(Entity entity) {
-        ControllableComponent control = Mappers.controllable.get(entity);//todo: move control.attack into cannon property to decouple
-        if (!control.attack) {
-            return false;
-        }
-    
         BarrelRollComponent roll = Mappers.barrelRoll.get(entity);
         ShieldComponent shield = Mappers.shield.get(entity);
         HyperDriveComponent hyper = Mappers.hyper.get(entity);
@@ -58,52 +54,49 @@ public class CannonSystem extends IteratingSystem {
         boolean isRolling = roll != null && roll.flipState != BarrelRollComponent.FlipState.off;
         return !shieldActive && !hyperActive && !isRolling;
     }
-    
+
+
     private void fireCannon(CannonComponent cannon, Entity parentEntity) {
-        if (GameScreen.isDebugMode) {
-            //Cheat for debug: fast firing and infinite ammo
-            cannon.curAmmo = cannon.maxAmmo;
-            //cannon.timerFireRate.setCanDoEvent();
-            //cannon.timerFireRate.setInterval(80, false);
-        }
-        
         //set dynamic rate of fire based on multiplier (max on MnK, analog on controller)
         int rateOfFire = (int) (cannon.baseRate * (1 - cannon.multiplier));
         if (rateOfFire < cannon.minRate) {
             rateOfFire = cannon.minRate;
         }
         cannon.timerFireRate.setInterval(rateOfFire, false);
-        
-        
+
         //check if can fire before shooting
-        if (!(cannon.curAmmo > 0 && cannon.timerFireRate.canDoEvent()))
+        if (!cannon.timerFireRate.canDoEvent() || (cannon.heat > 0.90f)) {
             return;
-        
-        //reset timer if ammo is full, to prevent instant recharge on next shot
-        if (cannon.curAmmo == cannon.maxAmmo) {
-            cannon.timerRechargeRate.reset();
         }
-        
+
         //create missile
         Entity missile = createMissile(cannon, parentEntity);
         getEngine().addEntity(missile);
-    
+
         //todo: state? beginFire (first shot), isFiring, endFire
         getEngine().getSystem(SoundSystem.class).laserShoot();
-        
+
         //subtract ammo
-        --cannon.curAmmo;
         cannon.shotsFired++;
-        
+        cannon.heat += cannon.heatRate;
+        if (cannon.heat >= 1f) {
+            cannon.heat = 1;
+        }
+
         //reset timer
         cannon.timerFireRate.reset();
+
     }
-    
-    private static void refillAmmo(CannonComponent cannon) {
-        if (cannon.curAmmo < cannon.maxAmmo && cannon.timerRechargeRate.canDoEvent()) {
-            cannon.curAmmo++;
-            cannon.timerRechargeRate.reset();
+
+    private static void  updateCoolDown(CannonComponent cannon, float deltaTime) {
+        cannon.heat -= cannon.cooldownRate * deltaTime;
+        if (cannon.heat <= 0) {
+            cannon.aimOffset = 0;
+            cannon.heat = 0;
+            return;
         }
+        float offset = (float) Math.sin(cannon.heat) * cannon.heatInaccuracy;
+        cannon.aimOffset = MathUtils.random(offset, -offset);
     }
     
     public static Entity createMissile(CannonComponent cannon, Entity parentEntity) {
@@ -118,7 +111,7 @@ public class CannonSystem extends IteratingSystem {
         //physics
         TransformComponent parentTransform = Mappers.transform.get(parentEntity);
         Vector2 spawnPos = cannon.anchorVec.cpy().rotateRad(parentTransform.rotation).add(parentTransform.pos);
-        float rot = parentTransform.rotation + cannon.aimAngle;
+        float rot = parentTransform.rotation + cannon.aimAngle + cannon.aimOffset;
         Vector2 sourceVel = Mappers.physics.get(parentEntity).body.getLinearVelocity();
         Vector2 projectileVel = MyMath.vector(rot, cannon.velocity).add(sourceVel);
         float bodyWidth = texture.texture.getWidth() * texture.scale;
