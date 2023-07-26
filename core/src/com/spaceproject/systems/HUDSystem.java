@@ -230,12 +230,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 drawHint(respawn.reason);
             }
         } else {
-            //if player is over planet hint
-            if (GameScreen.inSpace()) {
-                ControllableComponent control = Mappers.controllable.get(player);
-                if (control != null && control.canTransition && (Mappers.screenTrans.get(player) == null)) {
-                    String input = getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad Down" : "T";
+            ControllableComponent control = Mappers.controllable.get(player);
+            if (control != null && control.canTransition && (Mappers.screenTrans.get(player) == null)) {
+                String input = getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad Down" : "T";
+                if (GameScreen.inSpace()) {
                     drawHint("press [" + input + "] to land");
+                } else {
+                    if (Mappers.vehicle.get(player) != null) {
+                        drawHint("press [" + input + "] to take off");
+                    }
                 }
             }
         }
