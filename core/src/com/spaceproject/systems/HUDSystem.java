@@ -333,8 +333,14 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 layout.setText(font, "[ DOCKED ]");
             break;
             case hyper: layout.setText(font, "[ HYPERDRIVE ]"); break;
-            case landing: layout.setText(font, "[ LANDING ]"); break;
-            case launching: layout.setText(font, "[ LAUNCHING ]"); break;
+            case landing:
+                drawHint("<planet name> goes here");
+                layout.setText(font, "[ LANDING ]");
+                break;
+            case launching:
+                drawHint("leaving: <planet name>");
+                layout.setText(font, "[ LAUNCHING ]");
+                break;
             case destroyed:
                 layout.setText(font, "[ DESTROYED ]");
                 c = Color.BLACK.cpy().lerp(Color.RED, ratio);
