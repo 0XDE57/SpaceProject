@@ -565,7 +565,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                     inventoryFont.setColor(Color.CYAN);
                 }
             }
-            inventoryFont.draw(batch, " " + MyMath.round(physics.body.getLinearVelocity().len(), 1), barX + barWidth, healthBarY + barHeight + layout.height);
+            layout.setText(inventoryFont, " " + MyMath.round(physics.body.getLinearVelocity().len(), 1));
+            inventoryFont.draw(batch, layout, barX + barWidth, healthBarY + barHeight + layout.height);
         }
 
         long colorTime = 1000;
