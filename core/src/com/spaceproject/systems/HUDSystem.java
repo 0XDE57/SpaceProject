@@ -328,7 +328,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         Color c = Color.GOLD.cpy().lerp(Color.CYAN, ratio);
         switch (messageState) {
             case docked:
-                String input = getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad ???" : "E";
+                String input = getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad ???" : "???";
                 drawHint("press [" + input + "] to interact");
                 layout.setText(font, "[ DOCKED ]");
             break;
@@ -354,7 +354,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         int messageHeight = (int) (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3) + layout.height);
         font.draw(batch, layout, centerX, messageHeight);
     }
-    
+
     private void drawHint(String text) {
         float ratio = 1 + (float) Math.sin(anim*0.1);
         Color c = Color.GREEN.cpy().lerp(Color.PURPLE, ratio);
