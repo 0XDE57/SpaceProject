@@ -41,7 +41,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     //  16-bit WAV -> MONO
     //  Roughly -3 to -6 db track rendering?
     
-    private float masterVolume = 1.0f;
+    private float engineVolume = 0.5f;
     private boolean soundEnabled = true;
     
     static ArrayMap<Long, Sound> activeLoops;
@@ -98,16 +98,17 @@ public class SoundSystem extends EntitySystem implements Disposable {
         Sound sound = activeLoops.get(soundComponent.soundID);
         if (sound != null) {
             sound.stop(soundComponent.soundID);
+            sound.stop(soundComponent.soundID1);
         }
         activeLoops.removeKey(soundComponent.soundID);
+        activeLoops.removeKey(soundComponent.soundID1);
         soundComponent.soundID = -1;
+        soundComponent.soundID1 = -1;
         soundComponent.active = false;
     }
     
     boolean isEngineLooping = false;
     public long shipEngineActive(boolean startLoop, float pitch) {
-        //if (!soundEnabled) return -1;
-        
         long shipEngineActiveID = -1;
         if (startLoop) {
             if (!isEngineLooping) {
@@ -124,12 +125,14 @@ public class SoundSystem extends EntitySystem implements Disposable {
     }
     
     float accumulator;
-    public long shipEngineAmbient(SoundComponent sound, boolean active, float velocity, float delta) {
+    public long shipEngineAmbient(SoundComponent sound, boolean active, float velocity, float angleDelta, float deltaTime) {
         if (active) {
             if (sound.soundID == -1) {
                 sound.soundID = shipEngineAmbientLoop.loop();
+                sound.soundID1 = shipEngineAmbientLoop.loop();
                 sound.active = true;
                 activeLoops.put(sound.soundID, shipEngineAmbientLoop);
+                activeLoops.put(sound.soundID1, shipEngineActiveLoop);
             }
             //todo sound id of 0 seems to not play?
             //if (sound.soundID == 0) { Gdx.app.error(getClass().getSimpleName(), sound.soundID + ""); }
@@ -137,16 +140,25 @@ public class SoundSystem extends EntitySystem implements Disposable {
             //pitch
             float relVel = velocity / Box2DPhysicsSystem.getVelocityLimit();
             float pitch = MathUtils.map(0f, 1f, 0.5f, 2.0f, relVel);
-            shipEngineAmbientLoop.setPitch(sound.soundID, pitch * masterVolume);
+            shipEngineAmbientLoop.setPitch(sound.soundID, pitch);
+            shipEngineAmbientLoop.setPitch(sound.soundID1, pitch * (1.5f));
             //volume
-            accumulator += 30.0f * relVel * delta;
-            float oscillator = (float) Math.abs(Math.sin(accumulator));//todo move to sound component
-            shipEngineAmbientLoop.setVolume(sound.soundID, oscillator);
+            accumulator += 30.0f * relVel * deltaTime;
+            float oscillator = (float) Math.abs(Math.sin(accumulator*3));//todo move to sound component?
+            //shipEngineAmbientLoop.setVolume(sound.soundID, oscillator);
+            //shipEngineAmbientLoop.setVolume(sound.soundID1, masterVolume);
+            //DebugSystem.addDebugText(angleDelta + "", 500 ,550);
+            shipEngineAmbientLoop.setPan(sound.soundID1, (float) Math.sin(accumulator), oscillator * engineVolume * 0.45f);
+            shipEngineAmbientLoop.setPan(sound.soundID, 0, oscillator * engineVolume);
         } else {
+            //if (true) return 0;
             if (sound.soundID != -1) {
                 shipEngineAmbientLoop.setLooping(sound.soundID, false);
+                shipEngineAmbientLoop.setLooping(sound.soundID1, false);
                 activeLoops.removeKey(sound.soundID);
+                activeLoops.removeKey(sound.soundID1);
                 sound.soundID = -1;
+                sound.soundID1 = -1;
                 sound.active = false;
             }
         }

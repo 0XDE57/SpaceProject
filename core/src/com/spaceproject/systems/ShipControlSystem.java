@@ -60,7 +60,8 @@ public class ShipControlSystem extends IteratingSystem {
         controlShip(entity, delta);
     }
     
-    private void controlShip(Entity entity, float delta) {
+    private void controlShip(Entity entity, float deltaTime) {
+        SoundSystem soundSys = getEngine().getSystem(SoundSystem.class);
         ControllableComponent control = Mappers.controllable.get(entity);
         TransformComponent transform = Mappers.transform.get(entity);
         PhysicsComponent physics = Mappers.physics.get(entity);
@@ -71,12 +72,11 @@ public class ShipControlSystem extends IteratingSystem {
         
         //rotate ship
         if (!control.moveBack)
-            faceTarget(control, physics, delta);
-    
-        SoundSystem soundSys = getEngine().getSystem(SoundSystem.class);
+            faceTarget(control, physics, deltaTime);
+
         if (!canControlShip(entity)) {
             SoundComponent sound = Mappers.sound.get(entity);
-            soundSys.shipEngineAmbient(sound, false, 0, 0);
+            soundSys.shipEngineAmbient(sound, false, 0,  0,0);
             return;
         }
         
@@ -84,7 +84,7 @@ public class ShipControlSystem extends IteratingSystem {
         if (control.moveBack) {
             float velocityAngle = physics.body.getLinearVelocity().angleRad();
             control.angleTargetFace = velocityAngle;
-            faceTarget(control, physics, delta);
+            faceTarget(control, physics, deltaTime);
             angle += 180 * MathUtils.degRad;
         } else {
             if (control.moveLeft && !control.moveRight && !control.moveForward) angle += 90 * MathUtils.degRad;
@@ -97,7 +97,7 @@ public class ShipControlSystem extends IteratingSystem {
                 && (control.moveForward || control.moveLeft || control.moveRight || control.moveBack || control.boost)
                 && !(control.moveLeft && control.moveRight && !control.moveForward)) {
             VehicleComponent vehicle = Mappers.vehicle.get(entity); //todo: switch to per attached engine thrust
-            float thrust = vehicle.thrust * control.movementMultiplier * delta;
+            float thrust = vehicle.thrust * control.movementMultiplier * deltaTime;
             if (control.boost) {
                 thrust *= boostMultiplier;
             }
@@ -113,7 +113,8 @@ public class ShipControlSystem extends IteratingSystem {
             //todo: separate active sound per jet: forward,left,right,reverse(left+right)
             //soundSys.shipEngineActive(engineActive, 1); //active noise from jets.
             SoundComponent sound = Mappers.sound.get(entity);
-            soundSys.shipEngineAmbient(sound, engineActive, velocity, delta);
+            float deltaAngle = physics.body.getLinearVelocity().angleRad() - angle;
+            soundSys.shipEngineAmbient(sound, engineActive, velocity, deltaAngle, deltaTime);
             //soundSys.shipEngineAmbient(sound, engineActive, velocity + 0.2f);
             // 1. pitch modulation to indicate velocity
             // 2. second modulation for change of dir, g-force?
