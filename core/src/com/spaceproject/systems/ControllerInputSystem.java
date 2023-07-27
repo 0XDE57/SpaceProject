@@ -308,12 +308,18 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             control.movementMultiplier = MathUtils.clamp(dist, 0, 1);
             control.moveForward = true;
             
-            //notify mouse that controller has current focus
+            //notify desktop system that controller has current focus
             desktopInput.setFocusToController();
         } else {
             if (!control.boost && desktopInput.getControllerHasFocus()) {
                 control.moveForward = false;
             }
+        }
+
+        float distRight = Math.abs(MyMath.distance(0, 0, rightStickHorAxis, rightStickVertAxis));
+        if (distRight >= stickDeadzone) {
+            //notify desktop system that controller has current focus
+            desktopInput.setFocusToController();
         }
 
         return false;
