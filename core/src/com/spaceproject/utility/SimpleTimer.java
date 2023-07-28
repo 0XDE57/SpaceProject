@@ -7,12 +7,12 @@ public class SimpleTimer {
     private long interval;
     private long lastEvent;
     
-    public SimpleTimer(long time) {
-        this(time, false);
+    public SimpleTimer(long interval) {
+        this(interval, false);
     }
     
-    public SimpleTimer(long time, boolean setLastEventTime) {
-        interval = time;
+    public SimpleTimer(long interval, boolean setLastEventTime) {
+        this.interval = interval;
         if (setLastEventTime)
             reset();
     }
