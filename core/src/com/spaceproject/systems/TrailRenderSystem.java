@@ -75,8 +75,7 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
         TrailComponent trail = Mappers.trail.get(entity);
         
         updateTail(trail, entity);
-        //todo: z-index to render player trail above bullet trail
-        //todo: fade nicely
+
         if (trail.style == null) {
             trail.style = TrailComponent.Style.norender;
         }
@@ -218,8 +217,8 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
             }
         }
     }
-    
-    
+
+    Color color = new Color();
     public void renderStatePath(TrailComponent spline) {
         //todo: bug with tail index not properly rendered
         boolean debugDrawHeadTail = false;
@@ -232,17 +231,17 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
             
             // don't draw head to tail
             if (indexWrap != spline.indexHead) {
-                Color color;
                 switch (spline.state[indexWrap]) {
                     case -4: continue; //don't render
-                    case -3: color = Color.GREEN; break; //or color of asteroid hit?
-                    case -2: color = Color.BLUE; break;
-                    case -1: color = Color.RED; break;
-                    case 1: color = Color.GOLD; break;
-                    case 2: color = Color.CYAN; break;
-                    case 3: color = Color.WHITE; break;
-                    default: color = Color.BLACK;
+                    case -3: color.set(Color.GREEN); break; //or color of asteroid hit?
+                    case -2: color.set(Color.BLUE); break;
+                    case -1: color.set(Color.RED); break;
+                    case 1: color.set(Color.GOLD); break;
+                    case 2: color.set(Color.CYAN); break;
+                    case 3: color.set(Color.WHITE); break;
+                    default: color.set(Color.BLACK);
                 }
+                color.a -= (float) (spline.indexHead - indexWrap) / spline.path.length+1;
                 shape.line(p.x, p.y, p2.x, p2.y, color, color);
                 if (spline.state[indexWrap] == 3) {
                     shape.rectLine(p.x, p.y, p2.x, p2.y, (float) (0.5f * Math.sin(animation * 3.14 * 0.5)), Color.RED, Color.RED);
