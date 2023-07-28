@@ -406,7 +406,7 @@ public class EntityBuilder {
         
         //mapState
         MapComponent map = new MapComponent();
-        map.color = star.colorTemp;
+        map.color =  new Color(1, 1, 0, 1);//star.colorTemp;
         map.distance = 80000;
         entity.add(map);
         
@@ -653,7 +653,12 @@ public class EntityBuilder {
         station.parentOrbitBody = parentOrbitEntity;
         station.velocity = 20f;
         entity.add(station);
-        
+
+        MapComponent map = new MapComponent();
+        map.color = new Color(0, 1f, 0, 0.9f);
+        map.distance = 10000;
+        entity.add(map);
+
         return entity;
     }
     
