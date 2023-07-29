@@ -2,6 +2,7 @@ package com.spaceproject.systems;
 
 
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.SortedIteratingSystem;
 import com.badlogic.gdx.Gdx;
@@ -24,7 +25,7 @@ import com.spaceproject.utility.SimpleTimer;
 
 import java.util.Comparator;
 
-public class TrailRenderSystem extends SortedIteratingSystem implements Disposable {
+public class TrailRenderSystem extends SortedIteratingSystem implements EntityListener, Disposable {
     
     private static class ZComparator implements Comparator<Entity> {
         @Override
@@ -44,7 +45,30 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
         super(Family.all(TrailComponent.class, TransformComponent.class).get(), new ZComparator());
         shape = new ShapeRenderer();
     }
-    
+
+    @Override
+    public void entityAdded(Entity entity) {
+        super.entityAdded(entity);
+        TrailComponent trail = Mappers.trail.get(entity);
+
+        //initialize
+        if (trail.path == null) {
+            //todo: cache. use pooled vectors
+            trail.path = new Vector3[maxPathSize];
+            for (int v = 0; v < maxPathSize; v++) {
+                trail.path[v] = new Vector3();
+            }
+            trail.state = new byte[maxPathSize];
+        }
+        if (trail.style == null) {
+            trail.style = TrailComponent.Style.norender;
+        }
+        if (trail.updateTimer == null) {
+            trail.updateTimer = new SimpleTimer(10);
+            trail.updateTimer.setCanDoEvent();
+        }
+    }
+
     @Override
     public void update(float deltaTime) {
         //warning: system coupling -> todo: use signals?
@@ -75,27 +99,7 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
     protected void processEntity(Entity entity, float deltaTime) {
         TrailComponent trail = Mappers.trail.get(entity);
 
-        //initialize
-        if (trail.path == null) {
-            //todo: cache. use pooled vectors
-            trail.path = new Vector3[maxPathSize];
-            for (int v = 0; v < maxPathSize; v++) {
-                trail.path[v] = new Vector3();
-            }
-            trail.state = new byte[maxPathSize];
-        }
-        if (trail.style == null) {
-            trail.style = TrailComponent.Style.norender;
-        }
-        if (trail.updateTimer == null) {
-            trail.updateTimer = new SimpleTimer(10);
-            trail.updateTimer.setCanDoEvent();
-        }
-
-
-        if (trail.updateTimer.tryEvent()) {
-            updateTail(trail, entity);
-        }
+        updateTail(trail, entity);
 
         switch (trail.style) {
             case velocity: renderVelocityPath(trail); break;
@@ -107,10 +111,14 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
     // these are more like paths than splines, but see also:
     // https://libgdx.com/wiki/math-utils/path-interface-and-splines
     private void updateTail(TrailComponent trail, Entity entity) {
+        if (!trail.updateTimer.tryEvent()) {
+            return;
+        }
+
         TransformComponent transform = Mappers.transform.get(entity);
         PhysicsComponent physics = Mappers.physics.get(entity);
 
-        //todo: elmiate these magic numbers
+        //todo: eliminate these magic numbers
         //off, on, boost, hyper -> 0, 1, 2, 3
         float velocity = 0;
         byte state = 0;
