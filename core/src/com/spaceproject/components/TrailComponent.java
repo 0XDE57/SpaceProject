@@ -3,6 +3,7 @@ package com.spaceproject.components;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
+import com.spaceproject.utility.SimpleTimer;
 
 
 public class TrailComponent implements Component {
@@ -21,13 +22,15 @@ public class TrailComponent implements Component {
     public int zOrder;
     
     public Style style;
-    
+
     public enum Style {
         norender, solid, velocity, state, rainbow
     }
     
     public Color color;
-    
+
+    public SimpleTimer updateTimer;
+
     public long time;
     
 }

@@ -20,6 +20,7 @@ import com.spaceproject.components.TrailComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.SimpleTimer;
 
 import java.util.Comparator;
 
@@ -34,18 +35,18 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
     
     private final ShapeRenderer shape;
     private final Color tmpColor = new Color();
-    private int maxPathSize = 1000;
+    private int maxPathSize = 40;
     private float alpha = 1;
     private float animation;
     private float animSpeed = 2f;
-    
+
     public TrailRenderSystem() {
         super(Family.all(TrailComponent.class, TransformComponent.class).get(), new ZComparator());
         shape = new ShapeRenderer();
     }
     
     @Override
-    public void update(float delta) {
+    public void update(float deltaTime) {
         //warning: system coupling -> todo: use signals?
         HUDSystem hudSystem = getEngine().getSystem(HUDSystem.class);
         if (hudSystem != null && !hudSystem.isDraw()) {
@@ -55,7 +56,7 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
         alpha = MathUtils.clamp((GameScreen.cam.zoom / 100), 0, 1);
         if (MathUtils.isEqual(alpha, 0)) return;
         
-        animation += animSpeed * delta;
+        animation += animSpeed * deltaTime;
         
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -64,7 +65,7 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
         shape.setProjectionMatrix(GameScreen.cam.combined);
         
         shape.begin(ShapeRenderer.ShapeType.Line);
-        super.update(delta);
+        super.update(deltaTime);
         shape.end();
         
         Gdx.gl.glDisable(GL20.GL_BLEND);
@@ -73,12 +74,29 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         TrailComponent trail = Mappers.trail.get(entity);
-        
-        updateTail(trail, entity);
 
+        //initialize
+        if (trail.path == null) {
+            //todo: cache. use pooled vectors
+            trail.path = new Vector3[maxPathSize];
+            for (int v = 0; v < maxPathSize; v++) {
+                trail.path[v] = new Vector3();
+            }
+            trail.state = new byte[maxPathSize];
+        }
         if (trail.style == null) {
             trail.style = TrailComponent.Style.norender;
         }
+        if (trail.updateTimer == null) {
+            trail.updateTimer = new SimpleTimer(10);
+            trail.updateTimer.setCanDoEvent();
+        }
+
+
+        if (trail.updateTimer.tryEvent()) {
+            updateTail(trail, entity);
+        }
+
         switch (trail.style) {
             case velocity: renderVelocityPath(trail); break;
             case state: renderStatePath(trail); break;
@@ -91,24 +109,7 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
     private void updateTail(TrailComponent trail, Entity entity) {
         TransformComponent transform = Mappers.transform.get(entity);
         PhysicsComponent physics = Mappers.physics.get(entity);
-        
-        //initialize
-        if (trail.path == null) {
-            //todo: cache. use pooled vectors
-            trail.path = new Vector3[maxPathSize];
-            for (int v = 0; v < maxPathSize; v++) {
-                trail.path[v] = new Vector3();
-            }
-            trail.state = new byte[maxPathSize];
-        }
-        
-        //
-        //todo: don't record useless points (duplicate). consider resolution
-        //if (spline.path[spline.index-1].epsilonEquals(transform.pos.x, transform.pos.y, 10)) {
-            //delta too small skip update
-        //    return;
-        //}
-        
+
         //todo: elmiate these magic numbers
         //off, on, boost, hyper -> 0, 1, 2, 3
         float velocity = 0;
@@ -157,10 +158,8 @@ public class TrailRenderSystem extends SortedIteratingSystem implements Disposab
                     }
                 }
             }
-        }
-        
-        //show hurt
-        if (trail.style == TrailComponent.Style.state) {
+
+            //show hurt
             HealthComponent health = Mappers.health.get(entity);
             if (health != null) {
                 long hurtTime = 1000;
