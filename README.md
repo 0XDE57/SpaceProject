@@ -86,7 +86,6 @@ Credit appreciated.
 ## Building
 **General**
 * Set up your Development Environment: https://libgdx.com/wiki/start/setup
-* Make sure Android SDK is installed.
 * Import project in IDE of choice using gradle.
 * If a "File not found" error occurs, check the working directory. Append "\assets" to the working directory in run configurations.
 
