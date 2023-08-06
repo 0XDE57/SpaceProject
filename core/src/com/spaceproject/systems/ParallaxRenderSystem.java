@@ -31,9 +31,11 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.FontLoader;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 
 import static com.spaceproject.screens.MyScreenAdapter.cam;
+import static com.spaceproject.screens.MyScreenAdapter.viewport;
 
 //todo: rename? this is more of a grid render system / "under hud" frame of reference tool
 public class ParallaxRenderSystem extends EntitySystem implements Disposable {
@@ -55,8 +57,9 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     private final Vector3 mouseProj = new Vector3();
     private final Vector3 playerPos = new Vector3();
     
-    private final int gridWidth = 400;
-    private final Rectangle gridBounds = new Rectangle();
+    private final int gridWidth = 100;
+    private Vector3 topLeft = new Vector3();
+    private Vector3 bottomRight = new Vector3();
     private final Color gridColor = Color.BLACK.cpy();
     private final Color ringColor = Color.PURPLE.cpy();
     private final Color lineColor = Color.GREEN.cpy();
@@ -105,20 +108,14 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         GameScreen.viewport.project(origin);
         camWorldPos.set(cam.position);
         GameScreen.viewport.project(camWorldPos);
-        gridBounds.set(1, 1, Gdx.graphics.getWidth()-2, Gdx.graphics.getHeight()-2);
-    
+
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         
         //render
         shape.begin(ShapeRenderer.ShapeType.Line);
-        
-        //draw grid
-        gridColor.a = 0.15f;
-        drawGrid(gridColor, gridBounds, calculateGridDensity(gridWidth), 0.5f, cam.position.x, cam.position.y);
-        //drawGrid(gridColor, gridBounds, calculateGridDensity(gridWidth), 0.5f, -origin.x * cam.zoom, -origin.y * cam.zoom);
-        
+
         //debug override background
         if (clearScreen) debugClearScreen();
         //debug reference points
@@ -136,9 +133,9 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         }
         
         shape.setProjectionMatrix(cam.combined);
-        //if (!GameScreen.isHyper())
         drawOrbitPath();
-        
+        gridColor.a = 0.15f;
+        drawGrid(gridColor, calculateGridDensity(gridWidth));
         
         shape.end();
         
@@ -148,7 +145,32 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
-    
+
+    private void drawGrid(Color color, int gridSize) {
+        shape.setColor(color);
+        //unproject to get edges of viewport
+        topLeft.set(0, 0, 0);
+        topLeft = viewport.unproject(topLeft);
+        bottomRight.set(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0);
+        bottomRight = viewport.unproject(bottomRight);
+        //draw vertical along X axis
+        int i = 0;
+        int alignedX = (int) (topLeft.x/gridSize) * gridSize;
+        for (int x = alignedX; x < bottomRight.x; x += gridSize) {
+            float aX = alignedX + (i * gridSize);
+            i++;
+            shape.line(aX, topLeft.y, aX, bottomRight.y);
+        }
+        //draw horizontal along Y axis
+        int j = 0;
+        int alignedY = (int) (bottomRight.y/gridSize) * gridSize;
+        for (int y = alignedY; y < topLeft.y; y += gridSize) {
+            float aY = alignedY + (j * gridSize);
+            j++;
+            shape.line(topLeft.x, aY, bottomRight.x, aY);
+        }
+    }
+
     private int calculateGridDensity(int width) {
         // calculate "adaptive grid size"
         CameraSystem camera = getEngine().getSystem(CameraSystem.class);
@@ -160,69 +182,6 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
             }
         }
         return width;
-    }
-    
-    private void drawGrid(Color color, Rectangle rect, int gridSize, float lineWidth, float posX, float posY) {
-        shape.setColor(color);
-        
-        float halfWidth = rect.width * 0.5f;
-        float halfHeight = rect.height * 0.5f;
-        float centerX = rect.x + halfWidth;
-        float centerY = rect.y + halfHeight;
-        float scale = cam.zoom;
-        float relativeGridWidth = gridSize / scale;
-        int countX = 0, countY = 0;
-        
-        //draw X: horizontal lines
-        int startX = (int) (posX + (-halfWidth * scale)) / gridSize;
-        int endX = (int) (posX + (halfWidth * scale)) / gridSize;
-        for (int i = startX; i < endX + 1; i++) {
-            float finalX = (((i * gridSize) - posX) / scale) + centerX;
-            if (lineWidth > 1) {
-                finalX -= lineWidth * 0.5f;
-            }
-            countX++;
-            shape.rect(finalX, rect.y, lineWidth, rect.height);
-        }
-        
-        //draw Y: vertical lines
-        int startY = (int) (posY + (-halfHeight * scale)) / gridSize;
-        int endY = (int) (posY + (halfHeight * scale)) / gridSize;
-        for (int i = startY; i < endY + 1; i++) {
-            float finalY = (((i * gridSize) - posY) /  scale) + centerY;
-            if (lineWidth > 1) {
-                finalY -= lineWidth * 0.5f;
-            }
-            countY++;
-            shape.rect(rect.x, finalY, rect.width, lineWidth);
-        }
-        
-        //todo: highlight tile
-        //draw grid origin
-        //camera (center tile)
-        //mouse
-        //draw grid co'ods
-        //
-        
-        int tilesX = countX + 1;
-        int tilesY = countY + 1;
-        
-        boolean showDebug = false;
-        if (showDebug) {
-            DebugSystem.addDebugText(countX + ", " + countY
-                    + " | " + tilesX + ", " + tilesY
-                    + " | " + relativeGridWidth, rect.x + rect.width/2, rect.y + 20);
-            
-            //border
-            shape.setColor(new Color(0.1f, 0.63f, 0.88f, 1f));
-            shape.rect(rect.x, rect.y, rect.width, rect.height);
-    
-            //center
-            shape.setColor(Color.PURPLE);
-            shape.circle(centerX, centerY, 10);
-            shape.line(centerX, rect.x, centerX, rect.y + rect.height);
-            shape.line(rect.x, centerY, rect.x + rect.width, centerY);
-        }
     }
     
     private void drawOrbitPath() {
@@ -360,9 +319,6 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         shape.circle(origin.x, origin.y, 10);
         shape.line(origin.x, 0, origin.x, Gdx.graphics.getHeight());
         shape.line(0, origin.y, Gdx.graphics.getWidth(), origin.y);
-        
-        //shape.rect(screenCoords.x, rect.y, width, rect.height);
-        //shape.rect(0, screenCoords.y, rect.width, width);
     }
     
     private void debugDrawMousePath(){
@@ -414,13 +370,13 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
         shape.setColor(Color.GREEN);
         shape.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.getHeight());
     }
-    
+
     private void debugRenderTest(float deltaTime) {
         //drawGrid(Color.WHITE, boundingBox, 50, 3);
         //Color red = Color.RED.cpy();
         //red.a = 0.5f;
         //drawGrid(red, boundingBox, 50, 1);
-        
+        Rectangle gridBounds = new Rectangle(1, 1, Gdx.graphics.getWidth()-2, Gdx.graphics.getHeight()-2);
         animate += deltaTime;
         int edgePad = 200;
         Rectangle rectangle = new Rectangle(edgePad, edgePad,
