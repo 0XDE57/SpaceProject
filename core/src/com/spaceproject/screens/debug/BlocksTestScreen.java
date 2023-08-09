@@ -16,7 +16,7 @@ import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.systems.AsteroidRenderSystem;
 import com.spaceproject.systems.Box2DPhysicsSystem;
 import com.spaceproject.systems.ClearScreenSystem;
-import com.spaceproject.systems.ParallaxRenderSystem;
+import com.spaceproject.systems.GridRenderSystem;
 
 public class BlocksTestScreen extends MyScreenAdapter {
     
@@ -28,7 +28,7 @@ public class BlocksTestScreen extends MyScreenAdapter {
         
         engine = new Engine();
         engine.addSystem(new ClearScreenSystem());
-        engine.addSystem(new ParallaxRenderSystem());
+        engine.addSystem(new GridRenderSystem());
         engine.addSystem(new Box2DPhysicsSystem());
         engine.addSystem(new AsteroidRenderSystem());
         

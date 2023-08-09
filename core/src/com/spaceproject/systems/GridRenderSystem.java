@@ -31,14 +31,13 @@ import com.spaceproject.components.TransformComponent;
 import com.spaceproject.generation.FontLoader;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
 
 import static com.spaceproject.screens.MyScreenAdapter.cam;
 import static com.spaceproject.screens.MyScreenAdapter.viewport;
 
-//todo: rename? this is more of a grid render system / "under hud" frame of reference tool
-public class ParallaxRenderSystem extends EntitySystem implements Disposable {
+
+public class GridRenderSystem extends EntitySystem implements Disposable {
     
     //debug options
     public boolean clearScreen = false;
@@ -73,7 +72,7 @@ public class ParallaxRenderSystem extends EntitySystem implements Disposable {
     private SpriteBatch batch;
     private BitmapFont subFont;
     
-    public ParallaxRenderSystem() {
+    public GridRenderSystem() {
         shape = new ShapeRenderer();
         batch = new SpriteBatch();
         projectionMatrix = new Matrix4();
