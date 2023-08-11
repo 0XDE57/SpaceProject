@@ -217,55 +217,41 @@ public class Box2DContactListener implements ContactListener {
             return;
         }
 
-
         ShieldComponent shield = Mappers.shield.get(vehicleEntity);
         if (shield != null && shield.state == ShieldComponent.State.on) {
             return;
         }
 
         SpaceStationComponent station = Mappers.spaceStation.get(stationEntity);
-        
-        if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_A_ID) {
-            station.dockPortA = vehicleEntity;
-            station.lastDockedTimer.reset();
-            Gdx.app.debug(getClass().getSimpleName(), "dock port: A");
-            Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
-            Mappers.controllable.get(vehicleEntity).activelyControlled = false;
-            CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
-            sellCargo(cargo);
-            heal(cargo, Mappers.health.get(vehicleEntity));
-            //soundsystem.docked();
+        String dockedPort = "";
+        switch ((int) dockFixture.getUserData()) {
+            case BodyBuilder.DOCK_A_ID:
+                station.dockPortA = vehicleEntity;
+                dockedPort = "A";
+                break;
+            case BodyBuilder.DOCK_B_ID:
+                station.dockPortB = vehicleEntity;
+                dockedPort = "B";
+                break;
+            case BodyBuilder.DOCK_C_ID:
+                station.dockPortC = vehicleEntity;
+                dockedPort = "C";
+                break;
+            case BodyBuilder.DOCK_D_ID:
+                station.dockPortD = vehicleEntity;
+                dockedPort = "D";
+                break;
         }
-        if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_B_ID) {
-            station.dockPortB = vehicleEntity;
-            station.lastDockedTimer.reset();
-            Gdx.app.debug(getClass().getSimpleName(), "dock port: B");
-            Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
-            Mappers.controllable.get(vehicleEntity).activelyControlled = false;
-            CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
-            sellCargo(cargo);
-            heal(cargo, Mappers.health.get(vehicleEntity));
-        }
-        if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_C_ID) {
-            station.dockPortC = vehicleEntity;
-            station.lastDockedTimer.reset();
-            Gdx.app.debug(getClass().getSimpleName(), "dock port: C");
-            Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
-            Mappers.controllable.get(vehicleEntity).activelyControlled = false;
-            CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
-            sellCargo(cargo);
-            heal(cargo, Mappers.health.get(vehicleEntity));
-        }
-        if ((int)dockFixture.getUserData() == BodyBuilder.DOCK_D_ID) {
-            station.dockPortD = vehicleEntity;
-            station.lastDockedTimer.reset();
-            Gdx.app.debug(getClass().getSimpleName(), "dock port: D");
-            Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
-            Mappers.controllable.get(vehicleEntity).activelyControlled = false;
-            CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
-            sellCargo(cargo);
-            heal(cargo, Mappers.health.get(vehicleEntity));
-        }
+        Gdx.app.debug(getClass().getSimpleName(), "dock port: " + dockedPort);
+
+        station.lastDockedTimer.reset();
+
+        Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
+        Mappers.controllable.get(vehicleEntity).activelyControlled = false;
+
+        CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
+        sellCargo(cargo);
+        heal(cargo, Mappers.health.get(vehicleEntity));
     }
     
     private int sellCargo(CargoComponent cargo) {
