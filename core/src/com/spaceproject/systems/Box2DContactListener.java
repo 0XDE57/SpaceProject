@@ -220,7 +220,7 @@ public class Box2DContactListener implements ContactListener {
 
         ShieldComponent shield = Mappers.shield.get(vehicleEntity);
         if (shield != null && shield.state == ShieldComponent.State.on) {
-            //return;
+            return;
         }
 
         SpaceStationComponent station = Mappers.spaceStation.get(stationEntity);
