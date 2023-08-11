@@ -21,7 +21,8 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
     
     private final DelaunayTriangulator delaunay = new DelaunayTriangulator();
     private final float minAsteroidSize = 100; //anything smaller than this will not create more
-    private final float maxDriftAngle = 0.25f; //angular drift when shatter
+    private final float maxDriftAngle = 0.05f; //angular drift when shatter
+    private final float minDriftAngle = 0.01f;
     private final Vector2 center = new Vector2();
     
     @Override
@@ -152,8 +153,8 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
             //Vector2 pos = parentBody.getPosition().cpy().add(center);
             Vector2 vel = parentBody.getLinearVelocity();
             Entity childAsteroid = EntityBuilder.createAsteroid(seed, pos.x, pos.y, vel.x, vel.y, parentBody.getAngle(), hull);
-            //float angularDrift = MathUtils.random(-maxDriftAngle, maxDriftAngle);
-            //Mappers.physics.get(childAsteroid).body.setAngularVelocity(parentBody.getAngularVelocity() + angularDrift);
+            float angularDrift = Math.max(MathUtils.random(-maxDriftAngle, maxDriftAngle), minDriftAngle);
+            Mappers.physics.get(childAsteroid).body.setAngularVelocity(parentBody.getAngularVelocity() + angularDrift);
             getEngine().addEntity(childAsteroid);
         }
     }
