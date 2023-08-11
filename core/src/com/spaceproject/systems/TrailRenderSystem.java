@@ -246,7 +246,7 @@ public class TrailRenderSystem extends SortedIteratingSystem implements EntityLi
                     case 1: color.set(Color.GOLD); break;
                     case 2: color.set(Color.CYAN); break;
                     case 3: color.set(Color.WHITE); break;
-                    default: color.set(Color.BLACK);
+                    default: color.set(Color.GRAY);
                 }
                 color.a -= (float) (spline.indexHead - indexWrap) / spline.path.length+1;
                 shape.line(p.x, p.y, p2.x, p2.y, color, color);

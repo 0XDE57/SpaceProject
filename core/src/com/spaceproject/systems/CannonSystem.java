@@ -144,7 +144,7 @@ public class CannonSystem extends IteratingSystem {
         newParticle.offset = new Vector2();
         entity.add(newParticle);
         
-        entity.add(new TrailComponent());
+        //entity.add(new TrailComponent());
         
         entity.add(missile);
         entity.add(expire);
