@@ -133,7 +133,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         
         shape.setProjectionMatrix(cam.combined);
         drawOrbitPath();
-        drawGrid(gridColor, calculateGridDensity(gridWidth));
+        drawGrid(GameScreen.isHyper() ? Color.WHITE : gridColor, calculateGridDensity(gridWidth));
         shape.end();
         
         //batch.begin();
