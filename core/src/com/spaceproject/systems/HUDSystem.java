@@ -151,8 +151,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     public void addedToEngine(Engine engine) {
         mapableEntities = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
         players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
-        killableEntities = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class).exclude(
-                ControlFocusComponent.class, AsteroidComponent.class).get());
+        killableEntities = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class)
+                .exclude(ControlFocusComponent.class, AsteroidComponent.class).get());
     }
     
     @Override
@@ -203,14 +203,17 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
         
         drawHealthBars();
-    
-        /*
-        shape.setColor(Color.BLACK);
-        float padding = 10;
-        //shape.rectLine(centerX-padding, messageHeight-((layout.height-padding)*0.35f),
-        //        centerX+layout.width+(padding*2), messageHeight-((layout.height-padding)*0.35f), layout.height + (padding*2));
-        //shape.rectLine(0, messageHeight, , messageHeight, Gdx.graphics.getWidth(),layout.height);*/
-        
+
+        //draw background for state message
+        if (messageState != SpecialState.off) {
+            int offset = 50;
+            int messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3)) - offset;
+            float width =  40 + offset;
+            shape.rect(0, messageHeight, Gdx.graphics.getWidth(), width, Color.CLEAR, Color.CLEAR, Color.DARK_GRAY, Color.DARK_GRAY);
+            shape.setColor(messageState == SpecialState.destroyed ? Color.RED : new Color(0.1f, 0.63f, 0.88f, 1f));
+            //shape.rectLine(0, messageHeight, Gdx.graphics.getWidth(), messageHeight, 1);
+            shape.rectLine(0, messageHeight + width, Gdx.graphics.getWidth(), messageHeight + width, 1);
+        }
         shape.end();
         
         batch.begin();
@@ -286,7 +289,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 continue;
             }
             
-            Vector3 pos = cam.project(new Vector3(Mappers.transform.get(entity).pos.cpy(), 0));
+            Vector3 pos = cam.project(new Vector3(Mappers.transform.get(entity).pos.cpy(), 0));//new -> cache
             
             //background
             shape.setColor(uiCFG.entityHPbarBackground);
@@ -300,8 +303,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     //region player status
+    SpecialState messageState = SpecialState.off;
     private void drawSpecialStateMessage(Entity player) {
-        SpecialState messageState = SpecialState.off;
+        messageState = SpecialState.off;
         if (player == null) {
             messageState = SpecialState.destroyed;
         } else {
@@ -325,7 +329,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
         
         float ratio = 1 + (float) Math.sin(anim);
-        Color c = Color.GOLD.cpy().lerp(Color.CYAN, ratio);
+        Color c = Color.GOLD.cpy().lerp(Color.CYAN, ratio);//cache
         switch (messageState) {
             case docked:
                 String input = getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad ???" : "???";
@@ -357,7 +361,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
     private void drawHint(String text) {
         float ratio = 1 + (float) Math.sin(anim*0.1);
-        Color c = Color.GREEN.cpy().lerp(Color.PURPLE, ratio);
+        Color c = Color.GREEN.cpy().lerp(Color.PURPLE, ratio);//cpy() = new -> todo: cache color
         subFont.setColor(c);
         layout.setText(subFont, text);
         
