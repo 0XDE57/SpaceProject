@@ -56,6 +56,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     Sound shieldCharge, shieldOn, shieldOff, shieldAmbientLoop;
     Sound hyperdriveEngage;
     Sound pickup;
+    Sound dockStation, undockStation;
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -92,6 +93,9 @@ public class SoundSystem extends EntitySystem implements Disposable {
         //hyperDriveDisengage = Gdx.audio.newSound(Gdx.files.internal("sound/hyperCharge.wav"));
         
         pickup = Gdx.audio.newSound(Gdx.files.internal("sound/pickup.wav"));
+
+        dockStation = Gdx.audio.newSound(Gdx.files.internal("sound/dockStation.wav"));
+        undockStation = Gdx.audio.newSound(Gdx.files.internal("sound/undockStation.wav"));
     }
     
     public static void stopSound(SoundComponent soundComponent) {
@@ -186,39 +190,6 @@ public class SoundSystem extends EntitySystem implements Disposable {
         return f3.play(0.25f, pitch, 0);
     }
     
-    int curStep = 0;
-    public long ascendingTone() {
-        //  play new sound and keep handle for further manipulation
-        //  range -> 0.5 - 2.0 = half to double frequency
-        //  +/-1 octave from sample frequency
-        //  lower octave = 0.5 - 1.0 (eg: 440hz * 0.5 = 220)
-        //  upper octave = 1.0 - 2.0 (eg: 440hz * 2.0 = 880)
-        //  lower: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11
-        //  upper: 12,13,14,15,16,17,18,19,20,21,22,24
-        
-        //upper octave = 1.0 - 2.0 (eg: 440hz * 2.0 = 880)
-        //curStep 12 = 1.0 + ((1/12) * 0)  = 1.0;
-        //curStep 24 = 1.0 + ((1/12) * 12) = 2.0;
-        float step = 1.0f/12.0f; // = 0.08333
-        float pitch = 1.0f + (step * (curStep-12));
-        if (curStep < 12) {
-            //lower octave = 0.5 - <1.0 (eg: 440hz * 0.5 = 220)
-            //curStep 0  = 0.5 + ((1/12) * 0)  = 0.5;
-            //curStep 11 = 0.5 + ((1/12) * 11) = 0.916; (0.916 / 2) + 0.5f = 0.9583?;
-            //curStep 12 = 0.5 + ((1/12) * 12) = 1.5;
-            step *= 0.5f;//scale down 1.0 -> 0.5
-            pitch = 0.5f + (step * curStep);
-        }
-        //Gdx.app.debug(getClass().getSimpleName(), curStep + ": " + step + " -> " + pitch);
-        
-        //increase step but loop back
-        if (curStep++ > 24) {
-            curStep = 0;
-        }
-        
-        return f3.play(0.25f, pitch, 0);
-    }
-    
     public void laserShoot() {
         laserShoot(0.3f, 1 + MathUtils.random(-0.02f, 0.02f));
     }
@@ -268,7 +239,15 @@ public class SoundSystem extends EntitySystem implements Disposable {
     public long shipExplode() {
         return shipExplode.play();
     }
-    
+
+    public long dockStation() {
+        return dockStation.play(0.25f);
+    }
+
+    public long undockStation() {
+        return undockStation.play(0.25f);
+    }
+
     @Override
     public void dispose() {
         shipEngineActiveLoop.dispose();
@@ -284,6 +263,8 @@ public class SoundSystem extends EntitySystem implements Disposable {
         shieldOff.dispose();
         shieldAmbientLoop.dispose();
         pickup.dispose();
+        dockStation.dispose();
+        undockStation.dispose();
     }
-    
+
 }

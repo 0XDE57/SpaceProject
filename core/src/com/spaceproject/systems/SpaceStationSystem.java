@@ -110,30 +110,7 @@ public class SpaceStationSystem extends IteratingSystem {
         //undock
         ControllableComponent control = Mappers.controllable.get(dockedShip);
         if (spaceStation.lastDockedTimer.canDoEvent() && (control.moveForward || control.moveRight || control.moveLeft || control.boost)) {
-            if (spaceStation.dockPortA == dockedShip) {
-                spaceStation.dockPortA = null;
-                shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
-                Gdx.app.debug(getClass().getSimpleName(), "undock port: A");
-                control.activelyControlled = true;
-            }
-            if (spaceStation.dockPortB == dockedShip) {
-                spaceStation.dockPortB = null;
-                shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
-                Gdx.app.debug(getClass().getSimpleName(), "undock port: B");
-                control.activelyControlled = true;
-            }
-            if (spaceStation.dockPortC == dockedShip) {
-                spaceStation.dockPortC = null;
-                shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
-                Gdx.app.debug(getClass().getSimpleName(), "undock port: C");
-                control.activelyControlled = true;
-            }
-            if (spaceStation.dockPortD == dockedShip) {
-                spaceStation.dockPortD = null;
-                shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
-                Gdx.app.debug(getClass().getSimpleName(), "undock port: D");
-                control.activelyControlled = true;
-            }
+            undock(spaceStation, stationPhysics, dockedShip, shipPhysics, control);
         }
         
         //update ship position relative to space station
@@ -148,6 +125,31 @@ public class SpaceStationSystem extends IteratingSystem {
                 shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
             }
         }
+    }
+
+    private void undock(SpaceStationComponent spaceStation, PhysicsComponent stationPhysics, Entity dockedShip, PhysicsComponent shipPhysics, ControllableComponent control) {
+        String port = "";
+        if (spaceStation.dockPortA == dockedShip) {
+            spaceStation.dockPortA = null;
+            port = "A";
+        }
+        if (spaceStation.dockPortB == dockedShip) {
+            spaceStation.dockPortB = null;
+            port = "B";
+        }
+        if (spaceStation.dockPortC == dockedShip) {
+            spaceStation.dockPortC = null;
+            port = "C";
+        }
+        if (spaceStation.dockPortD == dockedShip) {
+            spaceStation.dockPortD = null;
+            port = "D";
+        }
+
+        control.activelyControlled = true;
+        shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
+        getEngine().getSystem(SoundSystem.class).undockStation();
+        Gdx.app.debug(getClass().getSimpleName(), "undock port: " + port);
     }
 
 }

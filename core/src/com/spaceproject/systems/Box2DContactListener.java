@@ -226,18 +226,22 @@ public class Box2DContactListener implements ContactListener {
         String dockedPort = "";
         switch ((int) dockFixture.getUserData()) {
             case BodyBuilder.DOCK_A_ID:
+                if (station.dockPortA != null) return;//port is in use
                 station.dockPortA = vehicleEntity;
                 dockedPort = "A";
                 break;
             case BodyBuilder.DOCK_B_ID:
+                if (station.dockPortB != null) return;
                 station.dockPortB = vehicleEntity;
                 dockedPort = "B";
                 break;
             case BodyBuilder.DOCK_C_ID:
+                if (station.dockPortC != null) return;
                 station.dockPortC = vehicleEntity;
                 dockedPort = "C";
                 break;
             case BodyBuilder.DOCK_D_ID:
+                if (station.dockPortD != null) return;
                 station.dockPortD = vehicleEntity;
                 dockedPort = "D";
                 break;
@@ -252,6 +256,8 @@ public class Box2DContactListener implements ContactListener {
         CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
         sellCargo(cargo);
         heal(cargo, Mappers.health.get(vehicleEntity));
+
+        engine.getSystem(SoundSystem.class).dockStation();
     }
     
     private int sellCargo(CargoComponent cargo) {
