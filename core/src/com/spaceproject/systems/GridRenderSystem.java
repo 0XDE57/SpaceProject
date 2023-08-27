@@ -100,13 +100,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         
         //update matrix and convert screen coords to world cords.
         projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        shape.setProjectionMatrix(projectionMatrix);
         batch.setProjectionMatrix(cam.combined);
-        
-        origin.set(0,0,0);
-        GameScreen.viewport.project(origin);
-        camWorldPos.set(cam.position);
-        GameScreen.viewport.project(camWorldPos);
 
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -114,6 +108,12 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         
         //render
         shape.begin(ShapeRenderer.ShapeType.Line);
+
+        shape.setProjectionMatrix(cam.combined);
+        drawGrid(GameScreen.isHyper() ? Color.WHITE : gridColor, calculateGridDensity(gridWidth));
+        drawOrbitPath();
+
+        shape.setProjectionMatrix(projectionMatrix);
 
         //debug override background
         if (clearScreen) debugClearScreen();
@@ -130,10 +130,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         if (players.size() > 0) {
             drawCompass(players.first());
         }
-        
-        shape.setProjectionMatrix(cam.combined);
-        drawOrbitPath();
-        drawGrid(GameScreen.isHyper() ? Color.WHITE : gridColor, calculateGridDensity(gridWidth));
+
         shape.end();
         
         //batch.begin();
@@ -293,6 +290,8 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     }
     
     private void drawDebugCameraPos(Color color) {
+        camWorldPos.set(cam.position);
+        GameScreen.viewport.project(camWorldPos);
         shape.setColor(color);
         shape.circle(camWorldPos.x, camWorldPos.y, 8);
         shape.line(camWorldPos.x, 0, camWorldPos.x, Gdx.graphics.getHeight());
@@ -312,6 +311,8 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     }
     
     private void drawWorldOrigin(Color color) {
+        origin.set(0,0,0);
+        GameScreen.viewport.project(origin);
         shape.setColor(color);
         shape.circle(origin.x, origin.y, 10);
         shape.line(origin.x, 0, origin.x, Gdx.graphics.getHeight());
