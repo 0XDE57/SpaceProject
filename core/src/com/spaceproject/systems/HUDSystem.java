@@ -235,7 +235,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         } else {
             ControllableComponent control = Mappers.controllable.get(player);
             if (control != null && control.canTransition && (Mappers.screenTrans.get(player) == null)) {
-                String input = getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad Down" : "T";
+                String input = (getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad Down" : "T").toUpperCase();
                 if (GameScreen.inSpace()) {
                     drawHint("press [" + input + "] to land");
                 } else {
@@ -332,7 +332,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         Color c = Color.GOLD.cpy().lerp(Color.CYAN, ratio);//cache
         switch (messageState) {
             case docked:
-                String input = getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad ???" : "???";
+                String input = (getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad ???" : "???").toUpperCase();
                 drawHint("press [" + input + "] to interact");
                 layout.setText(font, "[ DOCKED ]");
             break;

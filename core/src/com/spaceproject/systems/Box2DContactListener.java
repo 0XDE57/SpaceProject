@@ -531,11 +531,11 @@ public class Box2DContactListener implements ContactListener {
             if (Mappers.star.get(source) != null) {
                 respawn.reason = "stars are hot";
             } else if (Mappers.asteroid.get(source) != null) {
-                String input = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).activateShield).toLowerCase();
+                String input = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).activateShield);
                 if (engine.getSystem(DesktopInputSystem.class).getControllerHasFocus()) {
-                    input = "left-trigger";
+                    input = "l-trigger";
                 }
-                respawn.reason = "press [" + input + "] to activate shield";
+                respawn.reason = "press [" + input.toUpperCase() + "] to activate shield";
             }
             respawn.timeout = new SimpleTimer(3000, true);
             respawnEntity.add(respawn);
