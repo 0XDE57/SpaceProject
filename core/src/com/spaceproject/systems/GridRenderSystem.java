@@ -232,6 +232,10 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         float width = 0.5f;
         compassColor.a = alpha;
         shape.rectLine(pos.x, pos.y, facing.x, facing.y, width, compassColor, compassColor);
+        Vector2 lead = MyMath.vector(body.getAngle(), 70).add(pos.x, pos.y);
+        compassColor.a = 1;
+        shape.setColor(compassColor);
+        shape.circle(lead.x, lead.y, 2);
     
         //draw movement direction for navigation assistance, line up vector with target destination
         Color compassHighlight = compassColor;
