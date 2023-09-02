@@ -20,14 +20,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Disposable;
-import com.spaceproject.components.AsteroidBeltComponent;
-import com.spaceproject.components.CameraFocusComponent;
-import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.components.HyperDriveComponent;
-import com.spaceproject.components.OrbitComponent;
-import com.spaceproject.components.TrailComponent;
-import com.spaceproject.components.TextureComponent;
-import com.spaceproject.components.TransformComponent;
+import com.spaceproject.components.*;
 import com.spaceproject.generation.FontLoader;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
@@ -132,6 +125,10 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         }
 
         shape.end();
+
+        shape.begin(ShapeRenderer.ShapeType.Filled);
+
+        shape.end();
         
         //batch.begin();
         //drawHint("an object in motion, remains in motion");
@@ -227,7 +224,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         
         //draw movement direction for navigation assistance, line up vector with target destination
         Body body = Mappers.physics.get(entity).body;
-        Vector2 facing = MyMath.vector(body.getAngle(), 50000);
+        Vector2 facing = MyMath.vector(body.getAngle(), 500000);
         Vector2 originalPosition = Mappers.transform.get(entity).pos;
         playerPos.set(originalPosition, 0);
         Vector3 pos = cam.project(playerPos);
@@ -249,25 +246,24 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         compassHighlight.a = alpha;
         
         //draw velocity vector
-        float vel2 = body.getLinearVelocity().len2();
-        if (vel2 > 1) {
-            Vector2 vel = MyMath.vector(body.getLinearVelocity().angleRad(), 50000);
+        if (body.getLinearVelocity().len() >= 0.1f) {
+            Vector2 vel = MyMath.vector(body.getLinearVelocity().angleRad(), 500000).cpy();
             shape.rectLine(pos.x, pos.y, vel.x, vel.y, width, compassHighlight, compassHighlight);
+            vel.set(MyMath.vector(body.getLinearVelocity().angleRad(), 50)).add(pos.x, pos.y);
+            //draw arrow
+            compassHighlight.a = 1;
+            shape.setColor(compassHighlight);
+            HealthComponent health = Mappers.health.get(entity);
+            long hurtTime = 1000;
+            if (health != null && (GameScreen.getGameTimeCurrent() - health.lastHitTime < hurtTime)) {
+                shape.setColor(Color.RED.cpy());
+            }
+            int arrowSize = 10;
+            Vector2 arrowLeft  = MyMath.vector(body.getLinearVelocity().angleRad() + 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
+            shape.rectLine(vel, arrowLeft, 1);
+            Vector2 arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
+            shape.rectLine(vel, arrowRight, 1);
         }
-        
-        //draw circle; radius = velocity
-        //shape.setProjectionMatrix(GameScreen.cam.combined);
-        //yellow when engine engaged cyan when boost engaged
-        float relVel = vel2 / Box2DPhysicsSystem.getVelocityLimit2();
-        float radius = 2 + 2 * relVel;
-    
-        //compassHighlight.a = 1;
-        //shape.setColor(compassHighlight);
-        //shape.line(originalPosition.x, originalPosition.y,);
-        //shape.circle(originalPosition.x, originalPosition.y, radius);
-        //shape.circle(originalPosition.x, originalPosition.y, 2);
-        
-        //draw engine impulses
     }
     
     private GlyphLayout layout = new GlyphLayout();
@@ -331,8 +327,8 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     }
     
     private void drawThirdsGrid(Color color) {
-        float widthThirds = Gdx.graphics.getWidth()/3;
-        float heightThirds = Gdx.graphics.getHeight()/3;
+        float widthThirds = Gdx.graphics.getWidth() / 3.0f;
+        float heightThirds = Gdx.graphics.getHeight() / 3.0f;
         shape.setColor(color);
         
         //verticle

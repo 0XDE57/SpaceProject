@@ -359,10 +359,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         font.draw(batch, layout, centerX, messageHeight);
     }
 
+    private Color hintColor = new Color();
     private void drawHint(String text) {
         float ratio = 1 + (float) Math.sin(anim*0.1);
-        Color c = Color.GREEN.cpy().lerp(Color.PURPLE, ratio);//cpy() = new -> todo: cache color
-        subFont.setColor(c);
+        hintColor.set(0, 1, 0, 1).lerp(Color.PURPLE, ratio);
+        subFont.setColor(hintColor);
         layout.setText(subFont, text);
         
         float centerX = (Gdx.graphics.getWidth() - layout.width) * 0.5f;
@@ -408,6 +409,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
         float ratioHP = health.health / health.maxHealth;
         shape.setColor(1 - ratioHP, ratioHP, 0, uiCFG.entityHPbarOpacity);
+        //if (ratioHP < 1/4) {
+        // fade red border in and out anim
+        //  shape.setColor(sin(accumulator), 0, 0, 1);
+        // }
         if (GameScreen.getGameTimeCurrent() - health.lastHitTime < 1000) {
             shape.setColor(1, 0, 0, 1);
 
@@ -420,7 +425,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
         shape.rect(x, y, width * ratioHP, height);
     }
-    
+
     private void drawPlayerShield(Entity entity, float x, float y, float width, float height) {
         ShieldComponent shield = Mappers.shield.get(entity);
         if (shield == null || shield.state == ShieldComponent.State.off) {
@@ -618,11 +623,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
         Vector3 topLeft = cam.unproject(new Vector3(0, 0, 0));
         Vector3 bottomRight = cam.unproject(new Vector3(width, height, 0));
-
+        Vector3 screenPos = new Vector3();
         for (Entity mapable : mapableEntities) {
             MapComponent map = Mappers.map.get(mapable);
             Vector2 pos = Mappers.transform.get(mapable).pos.cpy();
-            Vector3 screenPos = new Vector3(pos, 0);
+            screenPos.set(pos, 0);
             
             if (screenPos.dst(MyScreenAdapter.cam.position) > map.distance) {
                 continue;
