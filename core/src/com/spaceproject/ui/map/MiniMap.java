@@ -144,28 +144,15 @@ public class MiniMap {
         
         
         batch.begin();
-        {
-            drawMapText(batch, player, centerMapX);
-        }
+        drawMapText(batch);
         batch.end();
     }
     
-    private void drawMapText(SpriteBatch batch, Entity player, float centerMapX) {
+    private void drawMapText(SpriteBatch batch) {
         float textPosX = mapContainer.x + 10;
         float textPosY = mapContainer.y + mapContainer.height;
         float lineHeight = font.getLineHeight() + 2;
-        
-        String mapString = "";//(int) MyScreenAdapter.cam.position.x + ", " + (int) MyScreenAdapter.cam.position.y;
-        if (player != null) {
-            Body body = Mappers.physics.get(player).body;
-            float vel = (float) MyMath.round(body.getLinearVelocity().len(), 1);
-            HyperDriveComponent hyper = Mappers.hyper.get(player);
-            if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
-                vel = (float) MyMath.round(hyper.velocity.len(), 1);
-            }
-            mapString = vel + "";
-        }
-        font.draw(batch, mapString, textPosX, textPosY - lineHeight);
+
         if (mapState == MapState.full) {
             //draw game time
             font.draw(batch, MyMath.formatDuration(GameScreen.getGameTimeCurrent()), textPosX, textPosY - lineHeight * 2);
@@ -174,10 +161,10 @@ public class MiniMap {
             if (!GameScreen.inSpace()) {
                 seed = GameScreen.getPlanetSeed();
             }
-            font.draw(batch, seed + "", textPosX, textPosY - mapContainer.height + lineHeight);
+            font.draw(batch, "seed: " + seed, textPosX, textPosY - lineHeight);
         }
         if (mapState == MapState.full && !drawScaleTimer.canDoEvent()) {
-            font.draw(batch, "scale: " + mapScale, centerMapX, textPosY - lineHeight);
+            font.draw(batch, "scale: " + mapScale, textPosX, textPosY - (lineHeight * 3));
         }
     }
     

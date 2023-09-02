@@ -60,7 +60,7 @@ public class MiniMapConfig extends Config {
         drawScaleTimer = 5000;
         fontSize = 12;
         debugDisableClipping = false;
-        debugDrawLoadDist = true;
+        debugDrawLoadDist = false;
         
         backingColor = new Color(0, 0, 0, 0.9f);
         borderColor = new Color(0.1f, 0.63f, 0.88f, 1f);
