@@ -77,10 +77,10 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
         }
 
         if (respawn.size() > 0) {
-            Entity destroyedEntity = respawn.first();
-            RespawnComponent respawnC = Mappers.respawn.get(destroyedEntity);
-            if (respawnC.spawn) {
-                destroyedEntity.add(new RemoveComponent());
+            Entity respawnEntity = respawn.first();
+            RespawnComponent respawn = Mappers.respawn.get(respawnEntity);
+            if (respawn.spawn) {
+                respawnEntity.add(new RemoveComponent());
                 //todo: but not just nearest. last station docked at. space station is check point
                 spawnPlayer();
             }
@@ -100,7 +100,10 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
         Entity spaceStation = ECSUtil.closestEntity(spawnPosition, spaceStations);
         if (spaceStation != null) {
             spawnPosition.set(Mappers.physics.get(spaceStation).body.getPosition());
-        } // else no station found, force spawn one at nearest body?
+        } else {
+            // else no station found, force spawn one at nearest body?
+            Gdx.app.error(getClass().getSimpleName(), "no space station found to respawn!!!");
+        }
 
         //spawn player
         Array<Entity> playerShip = EntityBuilder.createPlayerShip(spawnPosition.x, spawnPosition.y, true);
