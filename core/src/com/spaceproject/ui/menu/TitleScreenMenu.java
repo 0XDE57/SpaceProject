@@ -85,7 +85,6 @@ public class TitleScreenMenu {
         btnAbout.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                //kindly leave this part alone please. everything else is fair game ;)
                 showAboutDialog(stage);
             }
         });
@@ -183,20 +182,15 @@ public class TitleScreenMenu {
         final VisDialog dialog = new VisDialog("");
         dialog.closeOnEscape();
         dialog.centerWindow();
-    
-        String aboutText = "shoot some asteroids. they fall apart!";
-        aboutText += "\nversion: " + SpaceProject.VERSION + " [engine demo]"
-                + "\nlibgdx: v" +  com.badlogic.gdx.Version.VERSION;
+
+        String aboutText = "Shoot some asteroids, they fall apart!";
+        aboutText += "\nversion: " + SpaceProject.VERSION
+                + "\nlibGDX: " +  com.badlogic.gdx.Version.VERSION;
         aboutText += "\nDeveloped with <3";
         dialog.text(aboutText);
         
         LinkLabel link = new LinkLabel("https://github.com/0xDE57/SpaceProject");
-        link.setListener(new LinkLabel.LinkLabelListener() {
-            @Override
-            public void clicked (String url) {
-                Gdx.net.openURI(url);
-            }
-        });
+        link.setListener(url -> Gdx.net.openURI(url));
         dialog.getContentTable().row();
         dialog.getContentTable().add(link);
 
