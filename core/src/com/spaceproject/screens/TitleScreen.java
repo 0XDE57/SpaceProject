@@ -11,8 +11,11 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.dialog.Dialogs;
@@ -31,6 +34,7 @@ public class TitleScreen extends MyScreenAdapter {
     
     private SpaceProject game;
     private Stage stage;
+    private TitleScreenMenu menu;
     private Table versionTable;
     private Label titleLabel;
     private int edgePad;
@@ -58,9 +62,11 @@ public class TitleScreen extends MyScreenAdapter {
         if (VisUI.isLoaded())
             VisUI.dispose(true);
         VisUI.load(VisUI.SkinScale.X2);
+        TextButton.TextButtonStyle textButtonStyle = VisUI.getSkin().get(TextButton.TextButtonStyle.class);
+        textButtonStyle.focused = textButtonStyle.over; //set focused style to over for keyboard navigation because VisUI default focused style is null!
+
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
-        
         
         //init fonts
         String titleFont = "titleFontLarge";
@@ -69,29 +75,25 @@ public class TitleScreen extends MyScreenAdapter {
         initMenuFont(menuFont);
         
         titleLabel = new Label(SpaceProject.TITLE, VisUI.getSkin(), titleFont, Color.WHITE);
-        titleLabel.setPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight(), Align.top);
+        titleLabel.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight(), Align.top);
         stage.addActor(titleLabel);
         
-        
         //menu
-        Table menuTable = TitleScreenMenu.buildMenu(game, stage, false);
-        stage.addActor(menuTable);
-        menuTable.pack();
+        menu = new TitleScreenMenu(stage, game, false);
+        stage.addActor(menu.table);
+        menu.table.pack();
         edgePad = SpaceProject.isMobile() ? 20 : 10;
-        menuTable.setPosition(edgePad, edgePad);
-        
-        
+        menu.table.setPosition(edgePad, edgePad);
+
         //version note
         versionTable = new Table();
         versionTable.add(new Label(SpaceProject.VERSION, VisUI.getSkin(), menuFont, Color.WHITE));
         stage.addActor(versionTable);
         versionTable.pack();
-        
-        
+
         //init animations
         backgroundAnimation = new NoiseAnim();
         initForegroundAnim();
-        
         
         Gdx.graphics.setVSync(true);
     }
@@ -101,14 +103,12 @@ public class TitleScreen extends MyScreenAdapter {
         
         Gdx.gl20.glClearColor(1, 1, 1, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        
-        
-        cam.position.set(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, 0);
+
+        cam.position.set(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, 0);
         projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         shape.setProjectionMatrix(projectionMatrix);
         batch.setProjectionMatrix(projectionMatrix);
-        
-        
+
         backgroundAnimation.render(delta, shape);
         
         //enable transparency
@@ -118,58 +118,52 @@ public class TitleScreen extends MyScreenAdapter {
         foregroundAnimation.render(delta, shape);
         
         Gdx.gl.glDisable(GL20.GL_BLEND);
-        
-        
+
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
-        
-        
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.F5)) {
             initForegroundAnim();
         }
         
         if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
-            Table table = TitleScreenMenu.buildMenu(game, stage, true);
-            table.pack();
-            table.setPosition(edgePad, edgePad);
-            stage.clear();
-            stage.addActor(table);
+            menu.addDebugItems(game);
+            menu.table.pack();
         }
         
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            if (!exitPromptUp) {
-                exitPromptUp = true;
-                Dialogs.showOptionDialog(stage, "exit", "goodbye?", Dialogs.OptionDialogType.YES_NO, new OptionDialogAdapter() {
-                    @Override
-                    public void yes() {
-                        Gdx.app.exit();
-                    }
-                    @Override
-                    public void no () {
-                        exitPromptUp = false;
-                    }
-                    @Override
-                    public void cancel () {
-                        exitPromptUp = false;
-                    }
-                });
-            }
+            if (exitPromptUp) return;
+            exitPromptUp = true;
+            Dialogs.showOptionDialog(stage, "exit", "goodbye?", Dialogs.OptionDialogType.YES_NO, new OptionDialogAdapter() {
+                @Override
+                public void yes() {
+                    Gdx.app.exit();
+                }
+                @Override
+                public void no () {
+                    exitPromptUp = false;
+                }
+                @Override
+                public void cancel () {
+                    exitPromptUp = false;
+                }
+            });
         }
     }
     boolean exitPromptUp = false;
-    
+
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
-        
+
         stage.getViewport().update(width, height, true);
         versionTable.setPosition(Gdx.graphics.getWidth() - versionTable.getWidth() - edgePad, edgePad);
-        titleLabel.setPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight(), Align.top);
-        
+        titleLabel.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight(), Align.top);
+
         foregroundAnimation.resize(width, height);
         backgroundAnimation.resize(width, height);
     }
-    
+
     private void initMenuFont(String menuFont) {
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 30;
@@ -178,7 +172,7 @@ public class TitleScreen extends MyScreenAdapter {
         BitmapFont fontComfortaaBold = FontLoader.createFont(FontLoader.fontComfortaaBold, parameter);
         VisUI.getSkin().add(menuFont, fontComfortaaBold);
     }
-    
+
     private void initTitleFont(String titleFont) {
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 90;
