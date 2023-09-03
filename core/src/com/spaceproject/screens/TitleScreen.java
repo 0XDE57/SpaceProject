@@ -2,6 +2,7 @@ package com.spaceproject.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -84,6 +85,7 @@ public class TitleScreen extends MyScreenAdapter {
         menu.table.pack();
         edgePad = SpaceProject.isMobile() ? 20 : 10;
         menu.table.setPosition(edgePad, edgePad);
+        Controllers.addListener(menu);
 
         //version note
         versionTable = new Table();
@@ -230,5 +232,7 @@ public class TitleScreen extends MyScreenAdapter {
         
         VisUI.dispose(true);
         stage.dispose();
+
+        Controllers.removeListener(menu);
     }
 }

@@ -3,6 +3,9 @@ package com.spaceproject.ui.menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.controllers.Controller;
+import com.badlogic.gdx.controllers.ControllerListener;
+import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -23,18 +26,21 @@ import com.spaceproject.screens.debug.TestNoiseScreen;
 import com.spaceproject.screens.debug.TestShipGenerationScreen;
 import com.spaceproject.screens.debug.TestSpiralGalaxy;
 import com.spaceproject.screens.debug.TestVoronoiScreen;
+import com.spaceproject.utility.IndependentTimer;
 
-public class TitleScreenMenu {
+public class TitleScreenMenu implements ControllerListener {
 
     private final Stage stage;
     public Table table;
     private final Array<TextButton> buttons;
     private int focusIndex = -1;
+    private IndependentTimer lastFocusTimer;
 
     public TitleScreenMenu(final Stage stage, final SpaceProject game, boolean showDebugScreens) {
         this.stage = stage;
         table = new Table();
         buttons = new Array<>();
+        lastFocusTimer = new IndependentTimer(200, true);
 
         if (showDebugScreens) {
             addDebugItems(game);
@@ -75,15 +81,7 @@ public class TitleScreenMenu {
                         break;
                     case Input.Keys.SPACE:
                     case Input.Keys.ENTER:
-                        if (focusIndex >= 0 && focusIndex < buttons.size) {
-                            InputEvent touchEvent = new InputEvent();
-                            touchEvent.setType(InputEvent.Type.touchDown);
-                            buttons.get(focusIndex).fire(touchEvent);
-
-                            touchEvent = new InputEvent();
-                            touchEvent.setType(InputEvent.Type.touchUp);
-                            buttons.get(focusIndex).fire(touchEvent);
-                        }
+                        selectFocusedActor();
                         break;
                 }
                 return super.keyDown(event, keycode);
@@ -110,6 +108,18 @@ public class TitleScreenMenu {
     private void removeFocus() {
         focusIndex = -1;
         stage.setKeyboardFocus(null);
+    }
+
+    private void selectFocusedActor() {
+        if (focusIndex == -1) return;
+
+        InputEvent touchEvent = new InputEvent();
+        touchEvent.setType(InputEvent.Type.touchDown);
+        buttons.get(focusIndex).fire(touchEvent);
+
+        touchEvent = new InputEvent();
+        touchEvent.setType(InputEvent.Type.touchUp);
+        buttons.get(focusIndex).fire(touchEvent);
     }
 
     private void addMenuItems(final SpaceProject game) {
@@ -269,10 +279,59 @@ public class TitleScreenMenu {
         });
 
         dialog.pack();
-        
         stage.addActor(dialog.fadeIn());
-        
         return dialog;
+    }
+
+    @Override
+    public void connected(Controller controller) {}
+
+    @Override
+    public void disconnected(Controller controller) {}
+
+    @Override
+    public boolean buttonDown(Controller controller, int buttonCode) {
+        if (buttonCode == controller.getMapping().buttonDpadUp) {
+            focusIndex--;
+            updateFocus();
+            return true;
+        }
+        if (buttonCode == controller.getMapping().buttonDpadDown) {
+            focusIndex++;
+            updateFocus();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean buttonUp(Controller controller, int buttonCode) {
+        if (buttonCode == controller.getMapping().buttonA) {
+            selectFocusedActor();
+            return true;
+        }
+        return false;
+    }
+
+    float leftStickVertAxis;
+    @Override
+    public boolean axisMoved(Controller controller, int axisCode, float value) {
+        if (axisCode == controller.getMapping().axisLeftY) {
+            leftStickVertAxis = value;
+        }
+        if (Math.abs(leftStickVertAxis) > 0.6f && lastFocusTimer.tryEvent()) {
+            if (leftStickVertAxis > 0) {
+                focusIndex++;
+                updateFocus();
+                return true;
+            }
+            if (leftStickVertAxis < 0) {
+                focusIndex--;
+                updateFocus();
+                return true;
+            }
+        }
+        return false;
     }
 
 }
