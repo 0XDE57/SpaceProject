@@ -58,6 +58,7 @@ public class GameScreen extends MyScreenAdapter {
     public static Galaxy galaxy;
     
     private static Stage stage;
+    public static Cursor cursor;
     
     public static boolean isDebugMode = true;
     private static final StringBuilder profilerStringBuilder = new StringBuilder();
@@ -98,7 +99,7 @@ public class GameScreen extends MyScreenAdapter {
         scaled.drawPixmap(cursorImage,
                 0, 0, cursorImage.getWidth(), cursorImage.getHeight(),
                 0, 0, scaled.getWidth(), scaled.getHeight());
-        Cursor cursor = Gdx.graphics.newCursor(scaled, (int) (scaled.getWidth() * 0.5f)+1, (int) (scaled.getHeight() * 0.5f)+1);
+        cursor = Gdx.graphics.newCursor(scaled, (int) (scaled.getWidth() * 0.5f)+1, (int) (scaled.getHeight() * 0.5f)+1);
         Gdx.graphics.setCursor(cursor);
         cursorImage.dispose();
         scaled.dispose();
@@ -373,6 +374,7 @@ public class GameScreen extends MyScreenAdapter {
         noiseManager = null;
         
         stage.dispose();
+        cursor.dispose();
     }
     
 }

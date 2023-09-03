@@ -8,6 +8,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.math.Vector3;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
@@ -271,14 +272,17 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     public void setFocusToController() {
         if (!controllerHasFocus) {
-            Gdx.app.debug(this.getClass().getSimpleName(), "input focus -> controller");
+            Gdx.app.debug(getClass().getSimpleName(), "input focus -> controller");
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
         }
         controllerHasFocus = true;
     }
     
     private void setFocusToDesktop() {
         if (controllerHasFocus) {
-            Gdx.app.debug(this.getClass().getSimpleName(), "input focus -> desktop");
+            Gdx.app.debug(getClass().getSimpleName(), "input focus -> desktop");
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+            Gdx.graphics.setCursor(GameScreen.cursor);
         }
         controllerHasFocus = false;
     }
