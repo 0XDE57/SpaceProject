@@ -34,7 +34,7 @@ public class TitleScreenMenu implements ControllerListener {
     public Table table;
     private final Array<TextButton> buttons;
     private int focusIndex = -1;
-    private IndependentTimer lastFocusTimer;
+    private final IndependentTimer lastFocusTimer;
 
     public TitleScreenMenu(final Stage stage, final SpaceProject game, boolean showDebugScreens) {
         this.stage = stage;
@@ -71,13 +71,11 @@ public class TitleScreenMenu implements ControllerListener {
                 switch (keycode) {
                     case Input.Keys.W:
                     case Input.Keys.UP:
-                        focusIndex--;
-                        updateFocus();
+                        updateFocus(true);
                         break;
                     case Input.Keys.S:
                     case Input.Keys.DOWN:
-                        focusIndex++;
-                        updateFocus();
+                        updateFocus(false);
                         break;
                     case Input.Keys.SPACE:
                     case Input.Keys.ENTER:
@@ -96,11 +94,21 @@ public class TitleScreenMenu implements ControllerListener {
         }
     }
 
-    private void updateFocus() {
+    private void updateFocus(boolean up) {
         if (buttons.size == 0) return;
+        if (up) {
+            focusIndex--;
+        } else {
+            focusIndex++;
+        }
         focusIndex = focusIndex % buttons.size;
         if (focusIndex < 0) {
             focusIndex = buttons.size - 1;
+        }
+        //skip disabled elements, move to next item
+        if (buttons.get(focusIndex).isDisabled()) {
+            updateFocus(up); //warning: StackOverflow if ALL buttons are disabled (which shouldn't happen)
+            return;
         }
         stage.setKeyboardFocus(buttons.get(focusIndex));
     }
@@ -292,13 +300,11 @@ public class TitleScreenMenu implements ControllerListener {
     @Override
     public boolean buttonDown(Controller controller, int buttonCode) {
         if (buttonCode == controller.getMapping().buttonDpadUp) {
-            focusIndex--;
-            updateFocus();
+            updateFocus(true);
             return true;
         }
         if (buttonCode == controller.getMapping().buttonDpadDown) {
-            focusIndex++;
-            updateFocus();
+            updateFocus(false);
             return true;
         }
         return false;
@@ -321,13 +327,11 @@ public class TitleScreenMenu implements ControllerListener {
         }
         if (Math.abs(leftStickVertAxis) > 0.6f && lastFocusTimer.tryEvent()) {
             if (leftStickVertAxis > 0) {
-                focusIndex++;
-                updateFocus();
+                updateFocus(false);
                 return true;
             }
             if (leftStickVertAxis < 0) {
-                focusIndex--;
-                updateFocus();
+                updateFocus(true);
                 return true;
             }
         }
