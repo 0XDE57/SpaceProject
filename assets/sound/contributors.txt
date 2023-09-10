@@ -1,2 +1,3 @@
-Sound Design - Christian Paarup
-(AddVerseFx)
+SFX + Sound Design
+-0xDE57
+-Christian Paarup (AddVerseFx)
