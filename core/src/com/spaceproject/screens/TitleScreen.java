@@ -220,17 +220,19 @@ public class TitleScreen extends MyScreenAdapter {
         }
         previousAnim = anim;
         
-        Gdx.app.debug(this.getClass().getSimpleName(), "Animation: " + anim);
+        Gdx.app.debug(getClass().getSimpleName(), "Animation: " + anim);
     }
-    
+
+    @Override
+    public void hide() {
+        dispose();
+    }
+
+    @Override
     public void dispose() {
-        batch.dispose();
-        shape.dispose();
-    
         if (foregroundAnimation instanceof Disposable)
             ((Disposable)foregroundAnimation).dispose();
-        
-        VisUI.dispose(true);
+
         stage.dispose();
 
         Controllers.removeListener(menu);

@@ -1,11 +1,18 @@
 package com.spaceproject.ui.menu;
 
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.controllers.Controller;
+import com.badlogic.gdx.controllers.ControllerListener;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.SnapshotArray;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.TableUtils;
 import com.kotcrab.vis.ui.util.value.PrefHeightIfVisibleValue;
@@ -17,6 +24,7 @@ import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPaneAdapter;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.systems.DesktopInputSystem;
 import com.spaceproject.ui.ShapeRenderActor;
 import com.spaceproject.ui.menu.tabs.ConfigTab;
 import com.spaceproject.ui.menu.tabs.DebugTab;
@@ -24,9 +32,10 @@ import com.spaceproject.ui.menu.tabs.HotKeyTab;
 import com.spaceproject.ui.menu.tabs.KeyConfigTab;
 import com.spaceproject.ui.menu.tabs.MainMenuTab;
 import com.spaceproject.ui.menu.tabs.MyTab;
+import com.spaceproject.utility.IndependentTimer;
 
 
-public class GameMenu extends VisWindow {
+public class GameMenu extends VisWindow implements ControllerListener {
     
     private GameScreen game;
     
@@ -42,6 +51,9 @@ public class GameMenu extends VisWindow {
     private boolean isMovable = true;
     private float ratio = 0.66f;//scaling, how much screen does menu cover
     private boolean debugShowPlaceholderTests = true;
+    private int focusIndex = -1;
+    private float leftStickVertAxis;
+    private IndependentTimer lastFocusTimer = new IndependentTimer(200, true);
     
     public GameMenu(GameScreen game, boolean vertical) {
         super(SpaceProject.TITLE + " (" + SpaceProject.VERSION + ")");
@@ -78,8 +90,7 @@ public class GameMenu extends VisWindow {
             row();
             add(container).grow();
         }
-        
-        
+
         //add tabs
         mainMenuTab = new MainMenuTab(this);
         tabbedPane.add(mainMenuTab);
@@ -94,8 +105,75 @@ public class GameMenu extends VisWindow {
             addTestTabs();
         }
         
-        
         tabbedPane.switchTab(mainMenuTab);
+
+        game.getStage().addListener(new InputListener() {
+            @Override
+            public boolean mouseMoved(InputEvent event, float x, float y) {
+                if (isVisible()) {
+                    game.getEngine().getSystem(DesktopInputSystem.class).setFocusToDesktop();
+                    removeFocus(game.getStage());
+                }
+                return super.mouseMoved(event, x, y);
+            }
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+                if (!isVisible()) {
+                    return super.keyDown(event, keycode);
+                }
+                game.getEngine().getSystem(DesktopInputSystem.class).setFocusToDesktop();
+                switch (keycode) {
+                    case Input.Keys.W:
+                    case Input.Keys.UP:
+                        return updateFocus(game.getStage(), true);
+                    case Input.Keys.S:
+                    case Input.Keys.DOWN:
+                        return updateFocus(game.getStage(), false);
+                    case Input.Keys.SPACE:
+                    case Input.Keys.ENTER:
+                        return selectFocusedActor();
+                }
+                return super.keyDown(event, keycode);
+            }
+        });
+    }
+
+    private boolean updateFocus(Stage stage, boolean up) {
+        SnapshotArray<Actor> children = tabbedPane.getActiveTab().getContentTable().getChildren();
+        if (children.size == 0) return false;
+
+        if (up) {
+            focusIndex--;
+        } else {
+            focusIndex++;
+        }
+        focusIndex = focusIndex % children.size;
+        if (focusIndex < 0) {
+            focusIndex = children.size - 1;
+        }
+
+        stage.setKeyboardFocus(children.get(focusIndex));
+        return true;
+    }
+
+    private boolean removeFocus(Stage stage) {
+        focusIndex = -1;
+        stage.setKeyboardFocus(null);
+        return true;
+    }
+
+    private boolean selectFocusedActor() {
+        if (focusIndex == -1) return false;
+
+        Actor currentActor = tabbedPane.getActiveTab().getContentTable().getChildren().get(focusIndex);
+        InputEvent touchEvent = new InputEvent();
+        touchEvent.setType(InputEvent.Type.touchDown);
+        currentActor.fire(touchEvent);
+
+        touchEvent = new InputEvent();
+        touchEvent.setType(InputEvent.Type.touchUp);
+        currentActor.fire(touchEvent);
+        return true;
     }
     
     private void addTestTabs() {
@@ -157,7 +235,7 @@ public class GameMenu extends VisWindow {
     
     @Override
     public void close() {
-        Gdx.app.log(this.getClass().getSimpleName(), "menu close");
+        Gdx.app.log(getClass().getSimpleName(), "menu close");
         /*
         ConfigTab tab = checkTabChanges();
         if (tab != null) {
@@ -202,7 +280,6 @@ public class GameMenu extends VisWindow {
                         close();
                         return false;
                     }
-                    
                     tabbedPane.switchTab(tab);
                     return true;
                 }
@@ -219,5 +296,48 @@ public class GameMenu extends VisWindow {
     public Tab getKeyConfigTab() {
         return keyConfigTab;
     }
-    
+
+    @Override
+    public void connected(Controller controller) {}
+
+    @Override
+    public void disconnected(Controller controller) {}
+
+    @Override
+    public boolean buttonDown(Controller controller, int buttonCode) {
+        game.getEngine().getSystem(DesktopInputSystem.class).setFocusToController();
+        if (buttonCode == controller.getMapping().buttonDpadUp) {
+            return updateFocus(game.getStage(),true);
+        }
+        if (buttonCode == controller.getMapping().buttonDpadDown) {
+            return updateFocus(game.getStage(),false);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean buttonUp(Controller controller, int buttonCode) {
+        if (buttonCode == controller.getMapping().buttonA) {
+            return selectFocusedActor();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean axisMoved(Controller controller, int axisCode, float value) {
+        game.getEngine().getSystem(DesktopInputSystem.class).setFocusToController();
+        if (axisCode == controller.getMapping().axisLeftY) {
+            leftStickVertAxis = value;
+        }
+        if (Math.abs(leftStickVertAxis) > 0.6f && lastFocusTimer.tryEvent()) {
+            if (leftStickVertAxis > 0) {
+                return updateFocus(game.getStage(),false);
+            }
+            if (leftStickVertAxis < 0) {
+                return updateFocus(game.getStage(), true);
+            }
+        }
+        return false;
+    }
+
 }

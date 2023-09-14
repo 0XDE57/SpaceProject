@@ -7,6 +7,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -124,7 +125,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                         }
                     }
                 }
-                
                 super.touchDown(event, x, y, pointer, button);
                 return gameMenu.isVisible();
             }
@@ -134,17 +134,17 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 if (getMiniMap().scrolled(amountX, amountY)) {
                     return true;
                 }
-                
                 return super.scrolled(event, x, y, amountX, amountY);
             }
         });
-        
+
         miniMap = new MiniMap();
     }
     
     @Override
     public void initContext(GameScreen game) {
         gameMenu = new GameMenu(game, false);
+        Controllers.addListener(gameMenu);
     }
     
     @Override
@@ -717,5 +717,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     @Override
     public void dispose() {
         font.dispose();
+        Controllers.removeListener(gameMenu);
     }
+
 }

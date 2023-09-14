@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
@@ -47,7 +48,7 @@ public class GameScreen extends MyScreenAdapter {
     public static NoiseManager noiseManager;
     
     private static long gameTimeCurrent, gameTimeStart, timePaused;
-    private boolean isPaused = false;
+    private static boolean isPaused = false;
     
     private static boolean inSpace;
     private static boolean isHyper;
@@ -89,7 +90,9 @@ public class GameScreen extends MyScreenAdapter {
         VisUI.load(SpaceProject.isMobile() ? VisUI.SkinScale.X2 : VisUI.SkinScale.X1);
         BitmapFont font = FontLoader.createFont(FontLoader.fontBitstreamVM, 12);
         VisUI.getSkin().add(FontLoader.skinSmallFont, font);
-    
+        TextButton.TextButtonStyle textButtonStyle = VisUI.getSkin().get(TextButton.TextButtonStyle.class);
+        textButtonStyle.focused = textButtonStyle.over; //set focused style to over for keyboard navigation because VisUI default focused style is null!
+
         stage = new Stage(new ScreenViewport());
         getInputMultiplexer().addProcessor(0, stage);
         
@@ -174,7 +177,6 @@ public class GameScreen extends MyScreenAdapter {
             for (Entity entity : transitioningEntityCluster) {
                 engine.addEntity(entity);
             }
-    
             adjustPhysics(transitioningEntityCluster);
         }
     }
@@ -293,6 +295,14 @@ public class GameScreen extends MyScreenAdapter {
     
     public static Stage getStage() {
         return stage;
+    }
+
+    public static boolean isPaused() {
+        return isPaused;
+    }
+
+    public static Engine getEngine() {
+        return engine;
     }
     //endregion
     

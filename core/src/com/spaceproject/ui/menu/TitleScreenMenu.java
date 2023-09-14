@@ -18,6 +18,7 @@ import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
 import com.kotcrab.vis.ui.widget.ButtonBar;
 import com.kotcrab.vis.ui.widget.LinkLabel;
 import com.kotcrab.vis.ui.widget.VisDialog;
+import com.kotcrab.vis.ui.widget.VisWindow;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.screens.debug.BlocksTestScreen;
 import com.spaceproject.screens.GameScreen;
@@ -35,6 +36,7 @@ public class TitleScreenMenu implements ControllerListener {
     private final Array<TextButton> buttons;
     private int focusIndex = -1;
     private final IndependentTimer lastFocusTimer;
+    private float leftStickVertAxis;
 
     public TitleScreenMenu(final Stage stage, final SpaceProject game, boolean showDebugScreens) {
         this.stage = stage;
@@ -71,16 +73,13 @@ public class TitleScreenMenu implements ControllerListener {
                 switch (keycode) {
                     case Input.Keys.W:
                     case Input.Keys.UP:
-                        updateFocus(true);
-                        break;
+                        return updateFocus(true);
                     case Input.Keys.S:
                     case Input.Keys.DOWN:
-                        updateFocus(false);
-                        break;
+                        return updateFocus(false);
                     case Input.Keys.SPACE:
                     case Input.Keys.ENTER:
-                        selectFocusedActor();
-                        break;
+                        return selectFocusedActor();
                 }
                 return super.keyDown(event, keycode);
             }
@@ -94,8 +93,8 @@ public class TitleScreenMenu implements ControllerListener {
         }
     }
 
-    private void updateFocus(boolean up) {
-        if (buttons.size == 0) return;
+    private boolean updateFocus(boolean up) {
+        if (buttons.size == 0) return false;
         if (up) {
             focusIndex--;
         } else {
@@ -107,10 +106,10 @@ public class TitleScreenMenu implements ControllerListener {
         }
         //skip disabled elements, move to next item
         if (buttons.get(focusIndex).isDisabled()) {
-            updateFocus(up); //warning: StackOverflow if ALL buttons are disabled (which shouldn't happen)
-            return;
+            return updateFocus(up); //warning: StackOverflow if ALL buttons are disabled (which shouldn't happen)
         }
         stage.setKeyboardFocus(buttons.get(focusIndex));
+        return true;
     }
 
     private void removeFocus() {
@@ -118,8 +117,8 @@ public class TitleScreenMenu implements ControllerListener {
         stage.setKeyboardFocus(null);
     }
 
-    private void selectFocusedActor() {
-        if (focusIndex == -1) return;
+    private boolean selectFocusedActor() {
+        if (focusIndex == -1) return false;
 
         InputEvent touchEvent = new InputEvent();
         touchEvent.setType(InputEvent.Type.touchDown);
@@ -128,6 +127,7 @@ public class TitleScreenMenu implements ControllerListener {
         touchEvent = new InputEvent();
         touchEvent.setType(InputEvent.Type.touchUp);
         buttons.get(focusIndex).fire(touchEvent);
+        return true;
     }
 
     private void addMenuItems(final SpaceProject game) {
@@ -300,12 +300,10 @@ public class TitleScreenMenu implements ControllerListener {
     @Override
     public boolean buttonDown(Controller controller, int buttonCode) {
         if (buttonCode == controller.getMapping().buttonDpadUp) {
-            updateFocus(true);
-            return true;
+            return updateFocus(true);
         }
         if (buttonCode == controller.getMapping().buttonDpadDown) {
-            updateFocus(false);
-            return true;
+            return updateFocus(false);
         }
         return false;
     }
@@ -313,13 +311,11 @@ public class TitleScreenMenu implements ControllerListener {
     @Override
     public boolean buttonUp(Controller controller, int buttonCode) {
         if (buttonCode == controller.getMapping().buttonA) {
-            selectFocusedActor();
-            return true;
+            return selectFocusedActor();
         }
         return false;
     }
 
-    float leftStickVertAxis;
     @Override
     public boolean axisMoved(Controller controller, int axisCode, float value) {
         if (axisCode == controller.getMapping().axisLeftY) {
@@ -327,12 +323,10 @@ public class TitleScreenMenu implements ControllerListener {
         }
         if (Math.abs(leftStickVertAxis) > 0.6f && lastFocusTimer.tryEvent()) {
             if (leftStickVertAxis > 0) {
-                updateFocus(false);
-                return true;
+                return updateFocus(false);
             }
             if (leftStickVertAxis < 0) {
-                updateFocus(true);
-                return true;
+                return updateFocus(true);
             }
         }
         return false;

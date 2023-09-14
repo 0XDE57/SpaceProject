@@ -51,6 +51,8 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     }
     
     private boolean playerControls(int keycode, boolean keyDown) {
+        setFocusToDesktop();
+
         if (players.size() == 0) {
             ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
             if (respawnEntities.size() != 0) {
@@ -58,12 +60,11 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
                 RespawnComponent respawn = Mappers.respawn.get(respawnEntities.first());
                 if (respawn.timeout.canDoEvent()) {
                     respawn.spawn = true;
+                    return true;
                 }
             }
             return false;
         }
-        
-        boolean handled = false;
     
         Entity player = players.first();
         ControllableComponent control = Mappers.controllable.get(player);
@@ -72,11 +73,11 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         control.movementMultiplier = 1; // set multiplier to full power because a key switch is on or off
         if (keycode == keyCFG.forward) {
             control.moveForward = keyDown;
-            handled = true;
+            return true;
         }
+
         if (keycode == keyCFG.right) {
             control.moveRight = keyDown;
-    
             //check double tap
             if (!keyDown) {
                 tapCounterRight++;
@@ -96,12 +97,11 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             if (doubleTapRight.canDoEvent()) {
                 tapCounterRight = 0;
             }
-            
-            handled = true;
+            return true;
         }
+
         if (keycode == keyCFG.left) {
             control.moveLeft = keyDown;
-    
             //check double tap
             if (!keyDown) {
                 tapCounterLeft++;
@@ -121,9 +121,9 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             if (doubleTapLeft.canDoEvent()) {
                 tapCounterLeft = 0;
             }
-            
-            handled = true;
+            return true;
         }
+
         if (keycode == keyCFG.back) {
             //todo, back should be breaks
             //X on controller, S on keyboard
@@ -136,56 +136,53 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
                     HyperDriveSystem.disengageHyperDrive(player, hyper);
                 }
             }
-            handled = true;
+            return true;
         }
-        
+
         if (keycode == keyCFG.boost) {
             control.boost = keyDown;
-            handled = true;
+            return true;
         }
-        
+
         if (keycode == keyCFG.changeVehicle) {
             control.changeVehicle = keyDown;
-            handled = true;
+            return true;
         }
+
         if (keycode == keyCFG.land) {
             control.interact = keyDown;
-            handled = true;
+            return true;
         }
-    
+
         if (keycode == keyCFG.switchWeapon) {
             control.swapWeapon = keyDown;
-            handled = true;
+            return true;
         }
-    
+
         if (keycode == keyCFG.dash) {
             DashComponent dash = Mappers.dash.get(player);
             if (dash != null) {
                 dash.activate = keyDown;
-                handled = true;
+                return true;
             }
         }
-        
+
         if (keycode == keyCFG.activateShield) {
             ShieldComponent shield = Mappers.shield.get(player);
             if (shield != null) {
                 shield.activate = keyDown;
-                handled = true;
+                return true;
             }
         }
+
         if (keycode == keyCFG.activateHyperDrive) {
             HyperDriveComponent hyperDrive = Mappers.hyper.get(player);
             if (hyperDrive != null) {
                 hyperDrive.activate = keyDown;
-                handled = true;
+                return true;
             }
         }
-        
-        if (handled) {
-            setFocusToDesktop();
-        }
-        
-        return handled;
+        return false;
     }
     
     private boolean facePosition(int x, int y) {
@@ -232,6 +229,8 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        setFocusToDesktop();
+
         if (players.size() == 0) {
             return false;
         }
@@ -246,7 +245,6 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             if (cannon != null) {
                 cannon.multiplier = 1;
             }
-            setFocusToDesktop();
             return true;
         }
         
@@ -259,7 +257,6 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             } else {
                 system.setZoomToDefault(player);
             }
-            setFocusToDesktop();
             return true;
         }
         
@@ -278,7 +275,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         controllerHasFocus = true;
     }
     
-    private void setFocusToDesktop() {
+    public void setFocusToDesktop() {
         if (controllerHasFocus) {
             Gdx.app.debug(getClass().getSimpleName(), "input focus -> desktop");
             Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
@@ -312,5 +309,5 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         setFocusToDesktop();
         return false;
     }
-    
+
 }

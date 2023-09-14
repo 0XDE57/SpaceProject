@@ -68,7 +68,9 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
-    
+
+        if (GameScreen.isPaused()) return;
+
         if (Math.abs(rightStickVertAxis) >= stickDeadzone) {
             if (cameraDelayTimer.tryEvent()) {
                 if (rightStickVertAxis >= 0) {
@@ -84,7 +86,24 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         if (debugInput) {
             logInput(controller, buttonCode, buttonDown);
         }
-        
+
+        getEngine().getSystem(DesktopInputSystem.class).setFocusToController();
+
+        //toggle menu
+        if (buttonCode == controller.getMapping().buttonStart) {
+            if (buttonDown) {
+                GameMenu menu = getEngine().getSystem(HUDSystem.class).getGameMenu();
+                if (!menu.isVisible()) {
+                    menu.show();
+                } else {
+                    menu.close();
+                }
+            }
+            return true;
+        }
+
+        if (GameScreen.isPaused()) return false;
+
         if (players.size() == 0) {
             ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
             if (respawnEntities.size() != 0) {
@@ -96,9 +115,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             }
             return false;
         }
-        
-        
-        boolean handled = false;
+
         
         Entity player = players.first();
         ControllableComponent control = Mappers.controllable.get(player);
@@ -114,35 +131,35 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             if (dash != null) {
                 dash.activate = buttonDown;
             }
-            handled = true;
+            return true;
         }
         
         if (buttonCode == controller.getMapping().buttonB) {
             HyperDriveComponent hyperDrive = Mappers.hyper.get(player);
             if (hyperDrive != null) {
                 hyperDrive.activate = buttonDown;
-                handled = true;
+                return true;
             }
         }
         
         if (buttonCode == controller.getMapping().buttonY) {
             control.changeVehicle = buttonDown;
-            handled = true;
+            return true;
         }
         
         if (buttonCode == controller.getMapping().buttonX) {
             control.moveBack = buttonDown;
-            handled = true;
+            return true;
         }
     
         if (buttonCode == controller.getMapping().buttonDpadRight) {
             control.swapWeapon = buttonDown;
-            handled = true;
+            return true;
         }
         
         if (buttonCode == controller.getMapping().buttonDpadDown) {
             control.interact = buttonDown;
-            handled = true;
+            return true;
         }
         
         if (buttonCode == controller.getMapping().buttonR1) {
@@ -169,7 +186,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                 tapCounterRight = 0;
             }
             
-            handled = true;
+            return true;
         }
         
         if (buttonCode == controller.getMapping().buttonL1) {
@@ -196,20 +213,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                 tapCounterLeft = 0;
             }
             
-            handled = true;
-        }
-        
-        //toggle menu
-        if (buttonCode == controller.getMapping().buttonStart) {
-            if (buttonDown) {
-                GameMenu menu = getEngine().getSystem(HUDSystem.class).getGameMenu();
-                if (!menu.isVisible()) {
-                    menu.show();
-                } else {
-                    menu.close();
-                }
-            }
-            handled = true;
+            return true;
         }
         
         //reset cam
@@ -221,14 +225,10 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             } else {
                 camera.setZoomToDefault(player);
             }
-            handled = true;
+            return true;
         }
-        
-        if (handled) {
-            getEngine().getSystem(DesktopInputSystem.class).setFocusToController();
-        }
-        
-        return handled;
+
+        return false;
     }
     
     @Override
@@ -246,10 +246,9 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         if (debugInput) {
             logAxis(controller, axisCode, value);
         }
-        
-        if (players.size() == 0) {
-            return false;
-        }
+
+        if (GameScreen.isPaused()) return false;
+        if (players.size() == 0)  return false;
         
         //update axis
         if (axisCode == controller.getMapping().axisLeftX) {
