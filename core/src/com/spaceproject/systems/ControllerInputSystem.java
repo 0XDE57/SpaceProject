@@ -219,12 +219,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         //reset cam
         if ((buttonCode == controller.getMapping().buttonRightStick) && buttonDown) {
             GameScreen.resetRotation();
-            CameraSystem camera = getEngine().getSystem(CameraSystem.class);
-            if (camera.getZoomLevel() == 2) {
-                camera.zoomOutMax();
-            } else {
-                camera.setZoomToDefault(player);
-            }
+            getEngine().getSystem(CameraSystem.class).autoZoom(player);
             return true;
         }
 

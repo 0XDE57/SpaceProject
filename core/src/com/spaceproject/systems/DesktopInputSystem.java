@@ -201,7 +201,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     @Override
     public boolean scrolled(float amountX, float amountY) {
-        //todo: needs to overide middle clicks setZoomToDefault
+        //todo: needs to override middle clicks setZoomToDefault
         //  if I scroll while reseting, set to nearest zoom level
         if (amountY <= 0) {
             getEngine().getSystem(CameraSystem.class).zoomIn();
@@ -251,12 +251,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         //reset cam
         if (button == Input.Buttons.MIDDLE) {
             GameScreen.resetRotation();
-            CameraSystem system = getEngine().getSystem(CameraSystem.class);
-            if (system.getZoomLevel() == 2) {
-                system.zoomOutMax();
-            } else {
-                system.setZoomToDefault(player);
-            }
+            getEngine().getSystem(CameraSystem.class).autoZoom(player);
             return true;
         }
         
@@ -269,7 +264,8 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     public void setFocusToController() {
         if (!controllerHasFocus) {
-            Gdx.app.debug(getClass().getSimpleName(), "input focus -> controller");
+            //instead of removing cursor, perhaps could set cursor to a set distance away from player in stick direction?
+            Gdx.app.debug(getClass().getSimpleName(), "input focus set to controller");
             Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
         }
         controllerHasFocus = true;
@@ -277,7 +273,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     public void setFocusToDesktop() {
         if (controllerHasFocus) {
-            Gdx.app.debug(getClass().getSimpleName(), "input focus -> desktop");
+            Gdx.app.debug(getClass().getSimpleName(), "input focus set to desktop");
             Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
             Gdx.graphics.setCursor(GameScreen.cursor);
         }

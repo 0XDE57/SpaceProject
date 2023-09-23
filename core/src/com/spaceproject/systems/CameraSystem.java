@@ -44,7 +44,7 @@ public class CameraSystem extends IteratingSystem {
     private ImmutableArray<Entity> focalPoints;
     
     private Mode mode = Mode.lockTarget;
-    
+
     enum Mode {
         free, lerpTarget, lockTarget, combat
     }
@@ -332,6 +332,14 @@ public class CameraSystem extends IteratingSystem {
             setZoomToDefault(entity);
         } else if (getZoomLevel() > 5) {
             zoomIn();
+        }
+    }
+
+    public void autoZoom(Entity player) {
+        if (getZoomLevel() == 2) {
+            zoomOutMax();
+        } else {
+            setZoomToDefault(player);
         }
     }
     //endregion
