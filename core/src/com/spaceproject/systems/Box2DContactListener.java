@@ -74,7 +74,7 @@ public class Box2DContactListener implements ContactListener {
             }
         }
         //check item collision
-        ItemDropComponent itemDropA = Mappers.itemDrop.get(a);
+        ItemComponent itemDropA = Mappers.itemDrop.get(a);
         if (itemDropA != null) {
             CargoComponent cargoB = Mappers.cargo.get(b);
             if (cargoB != null) {
@@ -82,7 +82,7 @@ public class Box2DContactListener implements ContactListener {
                 return;
             }
         }
-        ItemDropComponent itemDropB = Mappers.itemDrop.get(b);
+        ItemComponent itemDropB = Mappers.itemDrop.get(b);
         if (itemDropB != null) {
             CargoComponent cargoA = Mappers.cargo.get(a);
             if (cargoA != null) {
@@ -318,11 +318,11 @@ public class Box2DContactListener implements ContactListener {
                 doActiveHeatDamage(contact.getFixtureA(), entityB, entityA, timeStep);
             }
             //active item movement
-            ItemDropComponent itemDropA = Mappers.itemDrop.get(entityA);
+            ItemComponent itemDropA = Mappers.itemDrop.get(entityA);
             if (itemDropA != null) {
                 updateItemAttraction(entityA, entityB, timeStep);
             }
-            ItemDropComponent itemDropB = Mappers.itemDrop.get(entityB);
+            ItemComponent itemDropB = Mappers.itemDrop.get(entityB);
             if (itemDropB != null) {
                 updateItemAttraction(entityB, entityA, timeStep);
             }

@@ -29,7 +29,7 @@ import com.spaceproject.components.DashComponent;
 import com.spaceproject.components.ExpireComponent;
 import com.spaceproject.components.HealthComponent;
 import com.spaceproject.components.HyperDriveComponent;
-import com.spaceproject.components.ItemDropComponent;
+import com.spaceproject.components.ItemComponent;
 import com.spaceproject.components.MapComponent;
 import com.spaceproject.components.OrbitComponent;
 import com.spaceproject.components.ParticleComponent;
@@ -58,6 +58,8 @@ import com.spaceproject.ui.Sprite3D;
 import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
+
+import java.util.HashMap;
 
 
 public class EntityBuilder {
@@ -662,7 +664,7 @@ public class EntityBuilder {
         return entity;
     }
     
-    public static Entity dropResource(Vector2 position, Vector2 velocity, Color color) {
+    public static Entity dropResource(Vector2 position, Vector2 velocity, HashMap<ItemComponent.Resource, Float> composition, Color color) {
         Entity drop = new Entity();
         
         TextureComponent texture = new TextureComponent();
@@ -679,7 +681,14 @@ public class EntityBuilder {
         float spin = -0.2f;
         physics.body.applyAngularImpulse(MathUtils.random(-spin, spin), true);
         physics.body.setLinearVelocity(velocity);
-        
+
+        ItemComponent item = new ItemComponent();
+        //todo: come up with some sort of composition and chance to drop eg: ruby 0.5%, emerald 0.5%, sapphire 0.5%. diamond 0.1%
+        /*
+        if */
+        item.resource = ItemComponent.Resource.random();
+
+
         //expire time (self destruct)
         ExpireComponent expire = new ExpireComponent();
         expire.timer = new SimpleTimer(60 * 1000, true);
@@ -687,7 +696,7 @@ public class EntityBuilder {
         drop.add(texture);
         drop.add(transform);
         drop.add(physics);
-        drop.add(new ItemDropComponent());
+        drop.add(item);
         drop.add(expire);
         return drop;
     }

@@ -50,7 +50,7 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
             shatterAsteroid(entity, asteroid);
         } else {
             Body sourceBody = Mappers.physics.get(entity).body;
-            Entity drop = EntityBuilder.dropResource(sourceBody.getPosition(), sourceBody.getLinearVelocity(), asteroid.color);
+            Entity drop = EntityBuilder.dropResource(sourceBody.getPosition(), sourceBody.getLinearVelocity(), asteroid.composition, asteroid.color);
             getEngine().addEntity(drop);
         }
     }
@@ -60,10 +60,11 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
         float[] vertices = asteroid.polygon.getVertices();
         int length = vertices.length;
         float[] newPoly = new float[length + 2];
-        System.arraycopy(vertices, 0, newPoly, 0, vertices.length);
-        
+        System.arraycopy(vertices, 0, newPoly, 0, length);
+
+        //center new point
         Vector2 center = new Vector2();
-        GeometryUtils.polygonCentroid(vertices, 0, vertices.length, center);
+        GeometryUtils.polygonCentroid(vertices, 0, length, center);
         newPoly[length] = center.x;
         newPoly[length + 1] = center.y;
         
