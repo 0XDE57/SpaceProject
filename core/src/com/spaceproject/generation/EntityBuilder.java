@@ -59,8 +59,6 @@ import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
-import java.util.HashMap;
-
 
 public class EntityBuilder {
     
@@ -505,7 +503,7 @@ public class EntityBuilder {
         return entity;
     }
     
-    public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float angle, float[] vertices) {
+    public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float angle, float[] vertices, ItemComponent.Resource resource) {
         MathUtils.random.setSeed(seed);
         Entity entity = new Entity();
     
@@ -529,7 +527,8 @@ public class EntityBuilder {
         float area = Math.abs(GeometryUtils.polygonArea(polygon.getVertices(), 0, polygon.getVertices().length));
         asteroid.polygon = polygon;
         asteroid.area = area;
-        asteroid.color = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
+        asteroid.composition = resource;
+        asteroid.color = resource.getColor();
         entity.add(asteroid);
     
         PhysicsComponent physics = new PhysicsComponent();
@@ -577,7 +576,7 @@ public class EntityBuilder {
             hull[index + 1] -= center.y;
         }
         
-        return createAsteroid(seed, x, y, velX, velY, MathUtils.random(MathUtils.PI2), hull);
+        return createAsteroid(seed, x, y, velX, velY, MathUtils.random(MathUtils.PI2), hull, ItemComponent.Resource.random());
     }
     
     private static boolean isValidPoint(FloatArray points, float pX, float pY, float tolerance) {
@@ -664,7 +663,7 @@ public class EntityBuilder {
         return entity;
     }
     
-    public static Entity dropResource(Vector2 position, Vector2 velocity, HashMap<ItemComponent.Resource, Float> composition, Color color) {
+    public static Entity dropResource(Vector2 position, Vector2 velocity, ItemComponent.Resource composition, Color color) {
         Entity drop = new Entity();
         
         TextureComponent texture = new TextureComponent();
@@ -684,10 +683,7 @@ public class EntityBuilder {
 
         ItemComponent item = new ItemComponent();
         //todo: come up with some sort of composition and chance to drop eg: ruby 0.5%, emerald 0.5%, sapphire 0.5%. diamond 0.1%
-        /*
-        if */
-        item.resource = ItemComponent.Resource.random();
-
+        item.resource = composition;
 
         //expire time (self destruct)
         ExpireComponent expire = new ExpireComponent();

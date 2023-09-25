@@ -75,7 +75,8 @@ public class AsteroidComponent implements Component {
         "Co", 14%,
         "H2O", 2%,
     }*/
-    public HashMap<ItemComponent.Resource, Float> composition = new HashMap<>();
+    //public HashMap<Integer, Float> composition = new HashMap<>();//resource ID, percent [0-1]
+    public ItemComponent.Resource composition;
 
     public float albedo;
     

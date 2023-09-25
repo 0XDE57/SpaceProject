@@ -25,7 +25,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.Null;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
 import com.spaceproject.config.KeyConfig;
@@ -43,7 +42,7 @@ import com.spaceproject.utility.Mappers;
 
 
 public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener, Disposable {
-    
+
     private final UIConfig uiCFG = SpaceProject.configManager.getConfig(UIConfig.class);
     private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     
@@ -56,7 +55,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private final SpriteBatch batch;
     private final BitmapFont font, subFont, inventoryFont;
     private final GlyphLayout layout = new GlyphLayout();
-    
+    Color engineFire = Color.GOLD;
+    Color engineBoost = Color.CYAN;
+
     //entity storage
     private ImmutableArray<Entity> mapableEntities;
     private ImmutableArray<Entity> players;
@@ -508,10 +509,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         
         ControllableComponent control = Mappers.controllable.get(entity);
         if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight || control.boost) {
-            shape.setColor(Color.GOLD);
-            if (control.boost) {
-                shape.setColor(Color.CYAN);
-            }
+            shape.setColor(control.boost ? engineBoost : engineFire);
         }
         shape.rect(x, y + (height*0.5f), width, 1);
         
@@ -569,24 +567,32 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (physics != null) {
             ControllableComponent control = Mappers.controllable.get(entity);
             if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight || control.boost) {
-                inventoryFont.setColor(Color.GOLD);
-                if (control.boost) {
-                    inventoryFont.setColor(Color.CYAN);
-                }
+                inventoryFont.setColor(control.boost ? engineBoost : engineFire);
+            } else {
+                inventoryFont.setColor(Color.WHITE);
             }
             layout.setText(inventoryFont, " " + MyMath.round(physics.body.getLinearVelocity().len(), 1));
             inventoryFont.draw(batch, layout, barX + barWidth, healthBarY + barHeight + layout.height);
         }
 
-        long colorTime = 1000;
-        long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;
+        long colorTime = 5000;
+        long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;//todo: per resource...
         float ratio = (float) timeSinceCollect / (float) colorTime;
-        inventoryFont.setColor(ratio, 1, ratio, 1);
-        layout.setText(inventoryFont, " Inv: " + cargo.count);
-        inventoryFont.draw(batch, layout, barX + barWidth, healthBarY + layout.height);
-
-        inventoryFont.setColor(1, 1, 1, 1);
-        inventoryFont.draw(batch, " Crd: " + cargo.credits, barX + barWidth, healthBarY - layout.height);
+        int inventoryY = 30;
+        int inventoryX = 20;
+        inventoryFont.setColor(1, 1, 1, 1-ratio);
+        inventoryFont.draw(batch, cargo.credits + " credits", inventoryX, inventoryY);
+        int c = 1;
+        for (ItemComponent.Resource resource : ItemComponent.Resource.values()) {
+            int id = resource.getId();
+            if (cargo.inventory.containsKey(id)) {
+                int quantity = cargo.inventory.get(id);
+                Color color = resource.getColor();
+                inventoryFont.setColor(color.r, color.g, color.b, 1-ratio);
+                layout.setText(inventoryFont, quantity + " " + resource.name().toLowerCase());
+                inventoryFont.draw(batch, layout, inventoryX, inventoryY + (layout.height * 1.5f * c++));
+            }
+        }
     }
     //endregion
     
@@ -641,7 +647,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             //set entity co'ords relative to center of screen
             screenPos.x -= MyScreenAdapter.cam.position.x;
             screenPos.y -= MyScreenAdapter.cam.position.y;
-            
             
             //position to draw marker
             float markerX, markerY;

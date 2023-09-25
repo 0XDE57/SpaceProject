@@ -2,20 +2,16 @@ package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
 
+import java.util.HashMap;
+
 public class CargoComponent implements Component {
-    //figure out some sort of item / slot layout and design.
-    //what are we storing and why?
-    //how much of it can we store?
-    //by amount? by weight? by size?
-    //are items stackable? and by how much
-    //are we storing itemID's? how are they generated
-    
-    public int count; //single item just to place holder ideas
+
+    public HashMap<Integer, Integer> inventory = new HashMap<>();
+
+    public float maxCapacity = -1;
     
     public int credits;
     
     public long lastCollectTime;
-    
-    //public float maxCapacity;//max what? volume? total mass?
     
 }

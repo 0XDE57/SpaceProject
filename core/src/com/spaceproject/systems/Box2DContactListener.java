@@ -74,7 +74,7 @@ public class Box2DContactListener implements ContactListener {
             }
         }
         //check item collision
-        ItemComponent itemDropA = Mappers.itemDrop.get(a);
+        ItemComponent itemDropA = Mappers.item.get(a);
         if (itemDropA != null) {
             CargoComponent cargoB = Mappers.cargo.get(b);
             if (cargoB != null) {
@@ -82,7 +82,7 @@ public class Box2DContactListener implements ContactListener {
                 return;
             }
         }
-        ItemComponent itemDropB = Mappers.itemDrop.get(b);
+        ItemComponent itemDropB = Mappers.item.get(b);
         if (itemDropB != null) {
             CargoComponent cargoA = Mappers.cargo.get(a);
             if (cargoA != null) {
@@ -202,7 +202,14 @@ public class Box2DContactListener implements ContactListener {
             return;
         
         //collect
-        cargo.count++;
+        int itemId = Mappers.item.get(item).resource.getId();
+        int quantity = 1;
+        if (cargo.inventory.containsKey(itemId)) {
+            int currentQuantity = cargo.inventory.get(itemId);
+            cargo.inventory.put(itemId, currentQuantity + quantity);
+        } else {
+            cargo.inventory.put(itemId, quantity);
+        }
         cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
         item.add(new RemoveComponent());
         
@@ -262,15 +269,33 @@ public class Box2DContactListener implements ContactListener {
     
     private int sellCargo(CargoComponent cargo) {
         if (cargo == null) return 0;
-        if (cargo.count == 0) return 0;
-        
-        int newCredits = cargo.count * sellRate;
-        Gdx.app.debug(getClass().getSimpleName(), "sell: " + cargo.count + " drops for: " + newCredits + "c");
-        cargo.credits += newCredits;
-        cargo.count = 0;
-        return newCredits;
+
+        int inventoryCount = 0;
+        int totalCredits = 0;
+        for (ItemComponent.Resource resource : ItemComponent.Resource.values()) {
+            int id = resource.getId();
+            if (cargo.inventory.containsKey(id)) {
+                /*todo: base local value on rarity of resource in that local system.
+                   eg: a system red is common so value local value will be less,
+                   or a system where gold is more rare than usual  so value will be more
+                float scarcity = 1.0f;
+                float localValue = scarcity * resource.getValue();
+                int credits = quantity * localValue;
+                */
+                int quantity = cargo.inventory.get(id);
+                int credits = quantity * resource.getValue();
+                cargo.credits += credits;
+                cargo.inventory.remove(id);
+                inventoryCount += quantity;
+                totalCredits += credits;
+                Gdx.app.debug(getClass().getSimpleName(), "+" + credits + "c. sold " + quantity + " " + resource.name() + " @"+ resource.getValue() + "c");
+            }
+        }
+        cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
+        Gdx.app.debug(getClass().getSimpleName(), "total: +" + totalCredits + "c. sold " + inventoryCount + " units");
+        return totalCredits;
     }
-    
+
     private void heal(CargoComponent cargo, HealthComponent health) {
         if (cargo == null || health == null) return;
         if (health.maxHealth == health.health) return;
@@ -289,7 +314,7 @@ public class Box2DContactListener implements ContactListener {
         health.health += healedUnits;
         health.health = Math.min(health.health, health.maxHealth);
         cargo.credits -= creditCost;
-        Gdx.app.debug(getClass().getSimpleName(), "repairs: " + healedUnits + "hp for: " + creditCost + "c");
+        Gdx.app.debug(getClass().getSimpleName(), "-" + creditCost + "c for repairs: +" + (int)healedUnits + "hp restored");
     }
     
     @Override
@@ -318,11 +343,11 @@ public class Box2DContactListener implements ContactListener {
                 doActiveHeatDamage(contact.getFixtureA(), entityB, entityA, timeStep);
             }
             //active item movement
-            ItemComponent itemDropA = Mappers.itemDrop.get(entityA);
+            ItemComponent itemDropA = Mappers.item.get(entityA);
             if (itemDropA != null) {
                 updateItemAttraction(entityA, entityB, timeStep);
             }
-            ItemComponent itemDropB = Mappers.itemDrop.get(entityB);
+            ItemComponent itemDropB = Mappers.item.get(entityB);
             if (itemDropB != null) {
                 updateItemAttraction(entityB, entityA, timeStep);
             }
@@ -346,8 +371,6 @@ public class Box2DContactListener implements ContactListener {
 
         //calculate heat damage dps
         float damage = heatDamageRate * timeStep;
-        //DebugSystem.addDebugText(damage + ", " + timeStep, 500, 500);
-
 
         //shield protects from damage
         ShieldComponent shield = Mappers.shield.get(burningEntity);
@@ -362,7 +385,6 @@ public class Box2DContactListener implements ContactListener {
             }
             return;
         }
-
 
         //todo: hull heat resistance that can be upgraded: move health to hull?
         healthComponent.health -= damage;
@@ -454,7 +476,6 @@ public class Box2DContactListener implements ContactListener {
                 destroy(impactedEntity, asteroidEntity);
             }
         }
-
     }
     
     private void vehicleImpact(Entity entity, Entity otherBody, float impulse) {

@@ -3,7 +3,9 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
@@ -18,7 +20,6 @@ public class AsteroidRenderSystem extends IteratingSystem {
     
     CustomShapeRenderer shapeRenderer;
     Color color = new Color();
-    boolean debugFloatingBodies = false;
     
     public AsteroidRenderSystem() {
         super(Family.all(AsteroidComponent.class, TransformComponent.class).get());
@@ -28,7 +29,7 @@ public class AsteroidRenderSystem extends IteratingSystem {
     @Override
     public void update(float deltaTime) {
         shapeRenderer.setProjectionMatrix(GameScreen.cam.combined);
-        
+
         //render filled inner poly
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         super.update(deltaTime);
@@ -54,12 +55,14 @@ public class AsteroidRenderSystem extends IteratingSystem {
         //set color based on fill type and health
         if (shapeRenderer.getCurrentType() == ShapeRenderer.ShapeType.Filled) {
             float ratio = health.health / health.maxHealth;
+            color.set(Color.BLACK).lerp(asteroid.color, 1-ratio);
+            /* determine orbit lock
             if (asteroid.parentOrbitBody == null) {
                 color.set(1-ratio, 0 ,0, 1);//black to red
             } else {
                 color.set(1, ratio, ratio, 1);//white to red
-            }
-            
+            }*/
+
             long hitTime = 500;
             long timeSinceHit = GameScreen.getGameTimeCurrent() - asteroid.lastShieldHit;
             if (timeSinceHit < hitTime) {
@@ -69,11 +72,6 @@ public class AsteroidRenderSystem extends IteratingSystem {
         } else {
             //mesh outline
             color = asteroid.color.cpy();
-        }
-        
-        //debug orbit lock
-        if (debugFloatingBodies && asteroid.parentOrbitBody == null) {
-            color.set(1, 1 , 0, 1);
         }
         
         shapeRenderer.fillPolygon(polygon.getTransformedVertices(), 0, polygon.getVertices().length, color);

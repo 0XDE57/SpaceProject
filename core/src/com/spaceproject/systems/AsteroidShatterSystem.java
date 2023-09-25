@@ -153,7 +153,7 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
             //center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle());
             //Vector2 pos = parentBody.getPosition().cpy().add(center);
             Vector2 vel = parentBody.getLinearVelocity();
-            Entity childAsteroid = EntityBuilder.createAsteroid(seed, pos.x, pos.y, vel.x, vel.y, parentBody.getAngle(), hull);
+            Entity childAsteroid = EntityBuilder.createAsteroid(seed, pos.x, pos.y, vel.x, vel.y, parentBody.getAngle(), hull, Mappers.asteroid.get(parentAsteroid).composition);
             float angularDrift = Math.max(MathUtils.random(-maxDriftAngle, maxDriftAngle), minDriftAngle);
             Mappers.physics.get(childAsteroid).body.setAngularVelocity(parentBody.getAngularVelocity() + angularDrift);
             getEngine().addEntity(childAsteroid);
