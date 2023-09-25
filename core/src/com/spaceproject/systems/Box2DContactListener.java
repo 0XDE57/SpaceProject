@@ -37,8 +37,6 @@ public class Box2DContactListener implements ContactListener {
     private float vehicleDamageMultiplier = 1f;
     private final float impactMultiplier = 0.1f; //how much damage relative to impulse
     private final float heatDamageRate = 400f;// how quickly stars to damage to health
-    private final int sellRate = 10; //multiplier for how much to sell cargo for
-    private final float healthCostPerUnit = 15.0f; //how many credits per unit of health
     private float peakImpulse = 0; //highest recorded impact, stat just to gauge
     
     public Box2DContactListener(Engine engine) {
@@ -95,7 +93,7 @@ public class Box2DContactListener implements ContactListener {
         if (vehicleA != null) {
             SpaceStationComponent stationB = Mappers.spaceStation.get(b);
             if (stationB != null) {
-                dock(contact.getFixtureA(), contact.getFixtureB(), a, b);
+                engine.getSystem(SpaceStationSystem.class).dock(contact.getFixtureA(), contact.getFixtureB(), a, b);
                 return;
             }
         }
@@ -103,7 +101,7 @@ public class Box2DContactListener implements ContactListener {
         if (vehicleB != null) {
             SpaceStationComponent stationA = Mappers.spaceStation.get(a);
             if (stationA != null) {
-                dock(contact.getFixtureB(), contact.getFixtureA(), b, a);
+                engine.getSystem(SpaceStationSystem.class).dock(contact.getFixtureB(), contact.getFixtureA(), b, a);
             }
         }
     }
@@ -215,108 +213,7 @@ public class Box2DContactListener implements ContactListener {
         
         engine.getSystem(SoundSystem.class).pickup();
     }
-    
-    private void dock(Fixture shipFixture, Fixture dockFixture, Entity vehicleEntity, Entity stationEntity) {
-        if (shipFixture.getUserData() != null && (int)shipFixture.getUserData() != BodyBuilder.SHIP_FIXTURE_ID) {
-            return;
-        }
-        if (dockFixture.getUserData() == null) {
-            return;
-        }
 
-        ShieldComponent shield = Mappers.shield.get(vehicleEntity);
-        if (shield != null && shield.state == ShieldComponent.State.on) {
-            return;
-        }
-
-        SpaceStationComponent station = Mappers.spaceStation.get(stationEntity);
-        String dockedPort = "";
-        switch ((int) dockFixture.getUserData()) {
-            case BodyBuilder.DOCK_A_ID:
-                if (station.dockPortA != null) return;//port is in use
-                station.dockPortA = vehicleEntity;
-                dockedPort = "A";
-                break;
-            case BodyBuilder.DOCK_B_ID:
-                if (station.dockPortB != null) return;
-                station.dockPortB = vehicleEntity;
-                dockedPort = "B";
-                break;
-            case BodyBuilder.DOCK_C_ID:
-                if (station.dockPortC != null) return;
-                station.dockPortC = vehicleEntity;
-                dockedPort = "C";
-                break;
-            case BodyBuilder.DOCK_D_ID:
-                if (station.dockPortD != null) return;
-                station.dockPortD = vehicleEntity;
-                dockedPort = "D";
-                break;
-        }
-        Gdx.app.debug(getClass().getSimpleName(), "dock port: " + dockedPort);
-
-        station.lastDockedTimer.reset();
-
-        Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
-        Mappers.controllable.get(vehicleEntity).activelyControlled = false;
-
-        CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
-        sellCargo(cargo);
-        heal(cargo, Mappers.health.get(vehicleEntity));
-
-        engine.getSystem(SoundSystem.class).dockStation();
-    }
-    
-    private int sellCargo(CargoComponent cargo) {
-        if (cargo == null) return 0;
-
-        int inventoryCount = 0;
-        int totalCredits = 0;
-        for (ItemComponent.Resource resource : ItemComponent.Resource.values()) {
-            int id = resource.getId();
-            if (cargo.inventory.containsKey(id)) {
-                /*todo: base local value on rarity of resource in that local system.
-                   eg: a system red is common so value local value will be less,
-                   or a system where gold is more rare than usual  so value will be more
-                float scarcity = 1.0f;
-                float localValue = scarcity * resource.getValue();
-                int credits = quantity * localValue;
-                */
-                int quantity = cargo.inventory.get(id);
-                int credits = quantity * resource.getValue();
-                cargo.credits += credits;
-                cargo.inventory.remove(id);
-                inventoryCount += quantity;
-                totalCredits += credits;
-                Gdx.app.debug(getClass().getSimpleName(), "+" + credits + "c. sold " + quantity + " " + resource.name() + " @"+ resource.getValue() + "c");
-            }
-        }
-        cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
-        Gdx.app.debug(getClass().getSimpleName(), "total: +" + totalCredits + "c. sold " + inventoryCount + " units");
-        return totalCredits;
-    }
-
-    private void heal(CargoComponent cargo, HealthComponent health) {
-        if (cargo == null || health == null) return;
-        if (health.maxHealth == health.health) return;
-        if (cargo.credits <= 0) {
-            Gdx.app.debug(getClass().getSimpleName(), "insufficient credits. no repairs done.");
-            return;
-        }
-        
-        float healthMissing = health.maxHealth - health.health;
-        float healedUnits = healthMissing;
-        int creditCost = (int) (healthMissing * healthCostPerUnit);
-        if (creditCost > cargo.credits) {
-            creditCost = cargo.credits;
-            healedUnits = cargo.credits / healthCostPerUnit;
-        }
-        health.health += healedUnits;
-        health.health = Math.min(health.health, health.maxHealth);
-        cargo.credits -= creditCost;
-        Gdx.app.debug(getClass().getSimpleName(), "-" + creditCost + "c for repairs: +" + (int)healedUnits + "hp restored");
-    }
-    
     @Override
     public void endContact(Contact contact) {}
     
@@ -361,9 +258,12 @@ public class Box2DContactListener implements ContactListener {
         HealthComponent healthComponent = Mappers.health.get(burningEntity);
         if (healthComponent == null) {
             //check if projectile
-            DamageComponent damage = Mappers.damage.get(burningEntity);
-            if (damage != null) {
+            if (Mappers.damage.get(burningEntity) != null) {
                 //could set bullet on fire so its more powerful on the other side?
+                burningEntity.add(new RemoveComponent());
+            }
+            //check if item
+            if (Mappers.item.get(burningEntity) != null) {
                 burningEntity.add(new RemoveComponent());
             }
             return;
@@ -521,10 +421,10 @@ public class Box2DContactListener implements ContactListener {
             health.health -= relativeDamage;
             health.lastHitTime = timestamp;
             health.lastHitSource = otherBody;
+            Gdx.app.debug(getClass().getSimpleName(), "high impact damage: " + relativeDamage + " to [" + DebugUtil.objString(entity) + "]");
             if (health.health <= 0) {
                 destroy(entity, otherBody);
             }
-            Gdx.app.debug(getClass().getSimpleName(), "high impact damage: " + impulse + " -> " + relativeDamage);
         }
         
         ControlFocusComponent controlled = Mappers.controlFocus.get(entity);
@@ -585,8 +485,6 @@ public class Box2DContactListener implements ContactListener {
         AsteroidComponent asteroid = Mappers.asteroid.get(entity);
         if (asteroid != null) {
             asteroid.doShatter = true;
-            engine.getSystem(SoundSystem.class).asteroidShatter();
-            //todo: if source = star -> sound.asteroidBurn()
         }
         
         VehicleComponent vehicle = Mappers.vehicle.get(entity);

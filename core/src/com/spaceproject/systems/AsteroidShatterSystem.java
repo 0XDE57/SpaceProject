@@ -45,7 +45,8 @@ public class AsteroidShatterSystem extends EntitySystem implements EntityListene
     public void entityRemoved(Entity entity) {
         AsteroidComponent asteroid = Mappers.asteroid.get(entity);
         if (asteroid == null) return;
-        
+
+        getEngine().getSystem(SoundSystem.class).asteroidShatter();
         if (asteroid.doShatter && asteroid.area >= minAsteroidSize) {
             shatterAsteroid(entity, asteroid);
         } else {
