@@ -8,6 +8,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.Disposable;
+import com.spaceproject.components.ItemComponent;
 import com.spaceproject.components.SoundComponent;
 
 public class SoundSystem extends EntitySystem implements Disposable {
@@ -50,6 +51,8 @@ public class SoundSystem extends EntitySystem implements Disposable {
     Sound shipEngineActiveLoop, shipEngineAmbientLoop;
     Sound shipExplode;
     Sound f3;
+    Sound break0, break1, break2;
+    Sound bounce0, bounce1, bounce2;
     Sound laserShoot, laserShootCharge;
     Sound hullImpact, hullImpactHeavy;
     Sound shieldImpact;
@@ -76,7 +79,13 @@ public class SoundSystem extends EntitySystem implements Disposable {
         shipExplode = Gdx.audio.newSound(Gdx.files.internal("sound/explode.wav"));
         
         f3 = Gdx.audio.newSound(Gdx.files.internal("sound/f3.wav"));
-        
+
+        //break0 = Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.RED.getSound()));
+        //Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.GREEN.getSound()));
+        //Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.BLUE.getSound()));
+        //Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.SILVER.getSound()));
+        //Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.GOLD.getSound()));
+
         laserShoot = Gdx.audio.newSound(Gdx.files.internal("sound/laserShoot.wav"));// laserShootW2
         laserShootCharge = Gdx.audio.newSound(Gdx.files.internal("sound/laserChargeW.mp3"));
         
@@ -185,8 +194,12 @@ public class SoundSystem extends EntitySystem implements Disposable {
         return shieldAmbientID;
     }
     
-    public long asteroidShatter() {
-        float pitch = MathUtils.random(0.5f, 2.0f);
+    public long asteroidShatter(float pitch, ItemComponent.Resource resource) {
+        //todo: load resource sound from resource?
+        //for now map ID -> break0(default),break1,break2,break3
+        //resource.getId()
+        //also: similar sound variation for bounce with shield: bounce0(default), bounce1, bounce2, bounce3
+
         return f3.play(0.25f, pitch, 0);
     }
     

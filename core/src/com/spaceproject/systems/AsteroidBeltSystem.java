@@ -19,6 +19,7 @@ import com.spaceproject.config.EngineConfig;
 import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
@@ -34,6 +35,8 @@ public class AsteroidBeltSystem extends EntitySystem implements EntityListener {
     private final float maxDriftAngle = 0.05f; //angular drift when shatter
     private final float minDriftAngle = 0.01f;
     private final Vector2 center = new Vector2();
+
+    private float minArea = Float.MAX_VALUE, maxArea = Float.MIN_VALUE;
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -145,9 +148,9 @@ public class AsteroidBeltSystem extends EntitySystem implements EntityListener {
         if (asteroid == null) return;
 
         float pitch = MathUtils.random(0.5f, 2.0f);
-        //todo: base on asteroid size
-        //pitch = MathUtils.map(minAsteroidSize, maxAsteroidSize, 0.5f, 2.0f, asteroid.area);
-        getEngine().getSystem(SoundSystem.class).asteroidShatter();
+        //todo: pitch based on asteroid size?
+        //pitch = MathUtils.map(minAsteroidSize, maxArea, 2f, 0.5f, asteroid.area);
+        getEngine().getSystem(SoundSystem.class).asteroidShatter(pitch, asteroid.composition);
         if (asteroid.doShatter && asteroid.area >= minAsteroidSize) {
             shatterAsteroid(entity, asteroid);
         } else {
@@ -174,9 +177,18 @@ public class AsteroidBeltSystem extends EntitySystem implements EntityListener {
     }
 
     private Entity spawnAsteroid(float x, float y, float velX, float velY) {
-        int size = MathUtils.random(14, 120);
+        int size = MathUtils.random(14, 120);//NOTE: does not guarantee final area
         long seed = MyMath.getSeed(x, y);
         Entity asteroid = EntityBuilder.createAsteroid(seed, x, y, velX, velY, size);
+        Polygon polygon = asteroid.getComponent(AsteroidComponent.class).polygon;
+        float area = Math.abs(GeometryUtils.polygonArea(polygon.getVertices(), 0, polygon.getVertices().length));
+        if (area > maxArea) {
+            maxArea = area;
+            Gdx.app.debug(getClass().getSimpleName(), "new max area: " + area + " > " + DebugUtil.objString(asteroid));
+        } else if (area < minArea) {
+            minArea = area;
+            Gdx.app.debug(getClass().getSimpleName(), "new min area: " + area + " > " + DebugUtil.objString(asteroid));
+        }
         getEngine().addEntity(asteroid);
         return asteroid;
     }

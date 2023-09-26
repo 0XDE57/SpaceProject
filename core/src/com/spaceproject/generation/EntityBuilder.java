@@ -575,6 +575,11 @@ public class EntityBuilder {
             hull[index] -= center.x;
             hull[index + 1] -= center.y;
         }
+
+        //todo: scale to desired size because current method is not great
+        //GeometryUtils.ensureCCW(hull);
+        //Polygon polygon = new Polygon(hull);
+        //float area = Math.abs(GeometryUtils.polygonArea(polygon.getVertices(), 0, polygon.getVertices().length));
         
         return createAsteroid(seed, x, y, velX, velY, MathUtils.random(MathUtils.PI2), hull, ItemComponent.Resource.random());
     }
