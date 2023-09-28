@@ -18,7 +18,6 @@ import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.DebugUtil;
-import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
 
 public class SpaceStationSystem extends IteratingSystem {
@@ -122,6 +121,13 @@ public class SpaceStationSystem extends IteratingSystem {
                 transform.mul(tempVec);
                 shipPhysics.body.setTransform(tempVec, shipPhysics.body.getAngle());
                 shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
+
+                CargoComponent cargo = Mappers.cargo.get(dockedShip);
+                if (cargo.inventory.size() == 0) {
+                    heal(cargo, Mappers.health.get(dockedShip));
+                } else {
+                    sellCargo(cargo);
+                }
             }
         }
     }
@@ -171,8 +177,9 @@ public class SpaceStationSystem extends IteratingSystem {
         Mappers.controllable.get(vehicleEntity).activelyControlled = false;
 
         CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
-        sellCargo(cargo);
-        heal(cargo, Mappers.health.get(vehicleEntity));
+        cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
+        //sellCargo(cargo);
+        //heal(cargo, Mappers.health.get(vehicleEntity));
 
         getEngine().getSystem(SoundSystem.class).dockStation();
     }
@@ -210,6 +217,8 @@ public class SpaceStationSystem extends IteratingSystem {
         for (ItemComponent.Resource resource : ItemComponent.Resource.values()) {
             int id = resource.getId();
             if (cargo.inventory.containsKey(id)) {
+                if (GameScreen.getGameTimeCurrent() - cargo.lastCollectTime < 400) return;
+                //if (!sellTimer.tryEvent()) return;
                 /*todo: base local value on rarity of resource in that local system.
                    eg: a system red is common so value local value will be less,
                    or a system where gold is more rare than usual  so value will be more
@@ -219,17 +228,24 @@ public class SpaceStationSystem extends IteratingSystem {
                 */
                 int quantity = cargo.inventory.get(id);
                 int credits = quantity * resource.getValue();
+                getEngine().getSystem(SoundSystem.class).addCredits(0.5f + ((((float) id /cargo.inventory.size()) + 1) * 0.12f));
                 cargo.credits += credits;
                 cargo.inventory.remove(id);
+                cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
                 inventoryCount += quantity;
                 totalCredits += credits;
+                //getEngine().getSystem(SoundSystem.class).addCredits(0.6f + (((id/cargo.inventory.size()) +1) * 0.1f));
+                //getEngine().getSystem(HUDSystem.class).addCredits(credits);
                 Gdx.app.debug(getClass().getSimpleName(), "+" + credits + "c. sold " + quantity + " " + resource.name() + " @"+ resource.getValue() + "c");
             }
         }
-        cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
-        if (totalCredits > 0) {
-            Gdx.app.debug(getClass().getSimpleName(), "total +" + totalCredits + "c for: " + inventoryCount + " units");
-        }
+
+        //cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
+        //if (totalCredits > 0) {
+            //Gdx.app.debug(getClass().getSimpleName(), "total +" + totalCredits + "c for: " + inventoryCount + " units");
+            //getEngine().getSystem(HUDSystem.class).addCredits(totalCredits);
+            //getEngine().getSystem(SoundSystem.class).addCredits(0.5f);
+        //}
     }
 
     private void heal(CargoComponent cargo, HealthComponent health) {

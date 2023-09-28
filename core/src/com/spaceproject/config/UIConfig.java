@@ -9,7 +9,10 @@ public class UIConfig extends Config {
     public int playerHPBarHeight;
     public Color playerAmmoBarColor;
     public Color playerAmmoBarRechargeColor;
-    
+
+    public Color engineFire;
+    public Color engineBoost;
+
     public boolean renderFullHealth;
     public int entityHPbarLength;
     public int entityHPbarWidth;
@@ -29,6 +32,9 @@ public class UIConfig extends Config {
         playerHPBarHeight = 20;
         playerAmmoBarColor = Color.MAGENTA;
         playerAmmoBarRechargeColor = Color.SLATE;
+
+        engineFire = Color.GOLD;
+        engineBoost = Color.CYAN;
         
         renderFullHealth = false;
         entityHPbarLength = 40;

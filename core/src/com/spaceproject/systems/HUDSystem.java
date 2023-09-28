@@ -39,6 +39,7 @@ import com.spaceproject.ui.menu.GameMenu;
 import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.SimpleTimer;
 
 
 public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener, Disposable {
@@ -55,8 +56,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private final SpriteBatch batch;
     private final BitmapFont font, subFont, inventoryFont;
     private final GlyphLayout layout = new GlyphLayout();
-    Color engineFire = Color.GOLD;
-    Color engineBoost = Color.CYAN;
 
     //entity storage
     private ImmutableArray<Entity> mapableEntities;
@@ -67,7 +66,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     private boolean drawHud = true;
     private boolean drawEdgeMap = true;
-    
+
     enum SpecialState {
         off, docked, hyper, landing, launching, destroyed;
     }
@@ -274,6 +273,22 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
             miniMap.cycleMiniMapPosition();
+        }
+        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.Y)) {
+            CargoComponent cargo = Mappers.cargo.get(players.first());
+            if (cargo != null) {
+                int amount = 1000;
+                for (ItemComponent.Resource resource : ItemComponent.Resource.values()) {
+                    int id = resource.getId();
+                    int currentQuantity = 0;
+                    if (cargo.inventory.containsKey(id)) {
+                        currentQuantity = cargo.inventory.get(id);
+                    }
+                    cargo.inventory.put(id, currentQuantity + amount);
+                }
+                cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
+                Gdx.app.debug(getClass().getSimpleName(), "cheat! add items");
+            }
         }
     }
     
@@ -509,7 +524,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         
         ControllableComponent control = Mappers.controllable.get(entity);
         if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight || control.boost) {
-            shape.setColor(control.boost ? engineBoost : engineFire);
+            shape.setColor(control.boost ? uiCFG.engineBoost : uiCFG.engineFire);
         }
         shape.rect(x, y + (height*0.5f), width, 1);
         
@@ -567,7 +582,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (physics != null) {
             ControllableComponent control = Mappers.controllable.get(entity);
             if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight || control.boost) {
-                inventoryFont.setColor(control.boost ? engineBoost : engineFire);
+                inventoryFont.setColor(control.boost ? uiCFG.engineBoost : uiCFG.engineFire);
             } else {
                 inventoryFont.setColor(Color.WHITE);
             }
@@ -593,6 +608,13 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 inventoryFont.draw(batch, layout, inventoryX, inventoryY + (layout.height * 1.5f * c++));
             }
         }
+    }
+
+    Vector2 animation;
+    SimpleTimer animTimer = new SimpleTimer(300);
+    public void addCredits(int totalCredits) {
+        inventoryFont.setColor(0, 1, 0, 1);
+        inventoryFont.draw(batch, "+" + totalCredits, animation.x, animation.y);
     }
     //endregion
     

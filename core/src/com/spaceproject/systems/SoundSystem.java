@@ -58,7 +58,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     Sound shieldImpact;
     Sound shieldCharge, shieldOn, shieldOff, shieldAmbientLoop;
     Sound hyperdriveEngage;
-    Sound pickup;
+    Sound pickup, credits;
     Sound dockStation, undockStation;
     
     @Override
@@ -102,9 +102,12 @@ public class SoundSystem extends EntitySystem implements Disposable {
         //hyperDriveDisengage = Gdx.audio.newSound(Gdx.files.internal("sound/hyperCharge.wav"));
         
         pickup = Gdx.audio.newSound(Gdx.files.internal("sound/pickup.wav"));
+        credits = Gdx.audio.newSound(Gdx.files.internal("sound/credits.wav"));
 
         dockStation = Gdx.audio.newSound(Gdx.files.internal("sound/dockStation.wav"));
         undockStation = Gdx.audio.newSound(Gdx.files.internal("sound/undockStation.wav"));
+
+
     }
     
     public static void stopSound(SoundComponent soundComponent) {
@@ -261,6 +264,10 @@ public class SoundSystem extends EntitySystem implements Disposable {
         return undockStation.play(0.25f);
     }
 
+    public void addCredits(float pitch) {
+        credits.play(0.5f, pitch, 0);
+    }
+
     @Override
     public void dispose() {
         shipEngineActiveLoop.dispose();
@@ -276,6 +283,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         shieldOff.dispose();
         shieldAmbientLoop.dispose();
         pickup.dispose();
+        credits.dispose();
         dockStation.dispose();
         undockStation.dispose();
     }
