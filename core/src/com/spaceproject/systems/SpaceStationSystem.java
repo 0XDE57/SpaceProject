@@ -230,7 +230,7 @@ public class SpaceStationSystem extends IteratingSystem {
                 cargo.credits += credits;
                 cargo.inventory.remove(id);
                 cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
-                getEngine().getSystem(HUDSystem.class).addCredits(credits, pos);
+                getEngine().getSystem(HUDSystem.class).addCredits(credits, pos, resource.getColor());
                 Gdx.app.debug(getClass().getSimpleName(), "+" + credits + "c. sold " + quantity + " " + resource.name() + " @"+ resource.getValue() + "c");
             }
         }

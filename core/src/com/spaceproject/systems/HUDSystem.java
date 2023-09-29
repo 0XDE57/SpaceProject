@@ -52,11 +52,13 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         final int value;
         Vector2 location;
         SimpleTimer animTimer;
-        CreditsMarker(int value, Vector2 pos) {
+        final Color color;
+        CreditsMarker(int value, Vector2 pos, Color color) {
             this.value = value;
             Vector3 screenPos = cam.project(new Vector3(pos.cpy(), 0));
             location = new Vector2(screenPos.x, screenPos.y);
             animTimer = new SimpleTimer(1000, true);
+            this.color = color;
         }
     }
     private List<CreditsMarker> markers;
@@ -643,7 +645,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private void drawCreditMarkers(float deltaTime) {
         float velocityY = 35f;
         for (CreditsMarker marker : markers) {
-            inventoryFont.setColor(0, 1, 0, 1-marker.animTimer.ratio());
+            inventoryFont.setColor(marker.color.r, marker.color.g, marker.color.b, 1-marker.animTimer.ratio());
             inventoryFont.draw(batch, "+" + marker.value, marker.location.x, marker.location.y += velocityY * deltaTime);
         }
         for (CreditsMarker marker : markers) {
@@ -654,8 +656,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
     }
 
-    public void addCredits(int totalCredits, Vector2 pos) {
-        markers.add(new CreditsMarker(totalCredits, pos));
+    public void addCredits(int totalCredits, Vector2 pos, Color color) {
+        markers.add(new CreditsMarker(totalCredits, pos, color));
     }
     //endregion
     
