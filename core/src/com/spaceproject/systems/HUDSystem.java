@@ -232,8 +232,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         batch.begin();
 
         CameraSystem camSystem = getEngine().getSystem(CameraSystem.class);
-        if (!GameScreen.isHyper() && camSystem.getZoomLevel() != camSystem.getMaxZoomLevel()) {
-            drawInventory(player, 100, 100);
+        if (GameScreen.isPaused() || (!GameScreen.isHyper() && camSystem.getZoomLevel() != camSystem.getMaxZoomLevel())) {
+            drawInventory(player, 20, 30);
         }
 
         drawCreditMarkers(deltaTime);
@@ -432,12 +432,14 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         
         drawPlayerVelocity(entity, barX, hyperBarY, barWidth, barHeight);
         drawHyperDriveBar(entity, barX, hyperBarY, barWidth, barHeight);
-    
-        CameraSystem cam = getEngine().getSystem(CameraSystem.class);
-        if (cam.getZoomLevel() == cam.getMaxZoomLevel()) return;
-        
-        if (GameScreen.isHyper()) return;
-        
+
+        if (!GameScreen.isPaused()) {
+            CameraSystem cam = getEngine().getSystem(CameraSystem.class);
+            if (cam.getZoomLevel() == cam.getMaxZoomLevel()) return;
+
+            if (GameScreen.isHyper()) return;
+        }
+
         drawPlayerHealth(entity, barX, healthBarY, barWidth, barHeight);
         drawPlayerShield(entity, barX, healthBarY, barWidth, barHeight);
         drawPlayerAmmoBar(entity, barX, ammoBarY, barWidth, barHeight);
@@ -595,7 +597,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
     }
     
-    private void drawInventory(Entity entity, float x, float y) {
+    private void drawInventory(Entity entity, float inventoryX, float inventoryY) {
         if (entity == null) return;
         CargoComponent cargo = Mappers.cargo.get(entity);
         if (cargo == null) return;
@@ -620,8 +622,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         long colorTime = 6000;
         long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;//todo: per resource...
         float ratio = (float) timeSinceCollect / (float) colorTime;
-        int inventoryY = 30;
-        int inventoryX = 20;
+        if (GameScreen.isPaused()) {
+            ratio = 0f;
+        }
         inventoryFont.setColor(1, 1, 1, 1-ratio);
         inventoryFont.draw(batch, cargo.credits + " credits", inventoryX, inventoryY);
         int offsetY = 1;
