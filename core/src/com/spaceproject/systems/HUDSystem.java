@@ -41,8 +41,25 @@ import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 
 public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener, Disposable {
+    
+    class CreditsMarker {
+        final int value;
+        Vector2 location;
+        SimpleTimer animTimer;
+        CreditsMarker(int value, Vector2 pos) {
+            this.value = value;
+            Vector3 screenPos = cam.project(new Vector3(pos.cpy(), 0));
+            location = new Vector2(screenPos.x, screenPos.y);
+            animTimer = new SimpleTimer(1000, true);
+        }
+    }
+    private List<CreditsMarker> markers;
 
     private final UIConfig uiCFG = SpaceProject.configManager.getConfig(UIConfig.class);
     private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
@@ -78,7 +95,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape = MyScreenAdapter.shape;
         batch = MyScreenAdapter.batch;
         projectionMatrix = new Matrix4();
-    
+
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 26;
         parameter.borderColor = Color.BLACK;
@@ -139,6 +156,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         });
 
         miniMap = new MiniMap();
+
+        markers = new ArrayList<>();
     }
     
     @Override
@@ -156,12 +175,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     @Override
-    public void update(float delta) {
+    public void update(float deltaTime) {
         checkInput();
     
         if (drawHud) {
-            anim += 4f * delta;
-            drawHUD();
+            anim += 4f * deltaTime;
+            drawHUD(deltaTime);
         
             if (miniMap.getState() != MapState.off) {
                 Entity p = players.size() > 0 ? players.first() : null;
@@ -180,7 +199,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         return drawHud;
     }
     
-    private void drawHUD() {
+    private void drawHUD(float deltaTime) {
         //set projection matrix so things render using correct coordinates
         projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         shape.setProjectionMatrix(projectionMatrix);
@@ -209,9 +228,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             int offset = 50;
             int messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3)) - offset;
             float width =  40 + offset;
-            shape.rect(0, messageHeight, Gdx.graphics.getWidth(), width, Color.CLEAR, Color.CLEAR, Color.DARK_GRAY, Color.DARK_GRAY);
+            Color backingColor = messageState == SpecialState.destroyed ? new Color(1, 0, 0, 0.2f) : Color.DARK_GRAY;
+            shape.rect(0, messageHeight, Gdx.graphics.getWidth(), width, Color.CLEAR, Color.CLEAR, backingColor, backingColor);
             shape.setColor(messageState == SpecialState.destroyed ? Color.RED : new Color(0.1f, 0.63f, 0.88f, 1f));
-            //shape.rectLine(0, messageHeight, Gdx.graphics.getWidth(), messageHeight, 1);
+            if (messageState == SpecialState.destroyed) {
+                shape.rectLine(0, messageHeight, Gdx.graphics.getWidth(), messageHeight, 1);
+            }
             shape.rectLine(0, messageHeight + width, Gdx.graphics.getWidth(), messageHeight + width, 1);
         }
         shape.end();
@@ -222,6 +244,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (!GameScreen.isHyper() && camSystem.getZoomLevel() != camSystem.getMaxZoomLevel()) {
             drawInventory(player, 100, 100);
         }
+
+        drawCreditMarkers(deltaTime);
         
         //draw special state: hyper or landing / launching
         drawSpecialStateMessage(player);
@@ -590,14 +614,14 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             inventoryFont.draw(batch, layout, barX + barWidth, healthBarY + barHeight + layout.height);
         }
 
-        long colorTime = 5000;
+        long colorTime = 6000;
         long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;//todo: per resource...
         float ratio = (float) timeSinceCollect / (float) colorTime;
         int inventoryY = 30;
         int inventoryX = 20;
         inventoryFont.setColor(1, 1, 1, 1-ratio);
         inventoryFont.draw(batch, cargo.credits + " credits", inventoryX, inventoryY);
-        int c = 1;
+        int offsetY = 1;
         for (ItemComponent.Resource resource : ItemComponent.Resource.values()) {
             int id = resource.getId();
             if (cargo.inventory.containsKey(id)) {
@@ -605,16 +629,27 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 Color color = resource.getColor();
                 inventoryFont.setColor(color.r, color.g, color.b, 1-ratio);
                 layout.setText(inventoryFont, quantity + " " + resource.name().toLowerCase());
-                inventoryFont.draw(batch, layout, inventoryX, inventoryY + (layout.height * 1.5f * c++));
+                inventoryFont.draw(batch, layout, inventoryX, inventoryY + (layout.height * 1.5f * offsetY++));
             }
         }
     }
 
-    Vector2 animation;
-    SimpleTimer animTimer = new SimpleTimer(300);
-    public void addCredits(int totalCredits) {
-        inventoryFont.setColor(0, 1, 0, 1);
-        inventoryFont.draw(batch, "+" + totalCredits, animation.x, animation.y);
+    private void drawCreditMarkers(float deltaTime) {
+        float velocityY = 35f;
+        for (CreditsMarker marker : markers) {
+            inventoryFont.setColor(0, 1, 0, 1-marker.animTimer.ratio());
+            inventoryFont.draw(batch, "+" + marker.value, marker.location.x, marker.location.y += velocityY * deltaTime);
+        }
+        for (CreditsMarker marker : markers) {
+            if (marker.animTimer.tryEvent()) {
+                markers.remove(marker);
+                return;
+            }
+        }
+    }
+
+    public void addCredits(int totalCredits, Vector2 pos) {
+        markers.add(new CreditsMarker(totalCredits, pos));
     }
     //endregion
     
