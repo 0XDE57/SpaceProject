@@ -41,7 +41,7 @@ public class NoiseThread implements Runnable {
         long startTime = System.currentTimeMillis();
         long heightTime = 0, tileTime = 0, pixelTime = 0;
 
-        Gdx.app.log(this.getClass().getSimpleName(), "Started: " + toString());
+        Gdx.app.log(getClass().getSimpleName(), "Started: " + toString());
 
         try {
             //Thread.sleep(10000);//debug delay to see loading effects
@@ -67,12 +67,12 @@ public class NoiseThread implements Runnable {
             //finish
             isDone = true;
             long endTime = System.currentTimeMillis() - startTime;
-            Gdx.app.log(this.getClass().getSimpleName(),
-                    toString() + " complete: " + endTime + "ms -> heightmap("
+            Gdx.app.log(getClass().getSimpleName(),
+                    this + " complete: " + endTime + "ms -> heightmap("
                             + heightTime + ") tilemap(" + tileTime + ") pixelate(" + pixelTime + ")");
 
         } catch (Exception e) {
-            Gdx.app.error(this.getClass().getSimpleName(), "Interrupt", e);
+            Gdx.app.error(getClass().getSimpleName(), "Interrupt", e);
         }
     }
 
@@ -99,7 +99,6 @@ public class NoiseThread implements Runnable {
         if (o instanceof NoiseThread) {
             return ((NoiseThread) o).getSeed() == this.getSeed();
         }
-        
         return false;
     }
     
@@ -110,7 +109,7 @@ public class NoiseThread implements Runnable {
     
     @Override
     public String toString() {
-        return "{Seed:" + Long.toHexString(seed) + " @ " + mapSize + "}";
+        return "seed: " + seed + " @ " + mapSize;
     }
 
 }
