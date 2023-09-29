@@ -60,16 +60,16 @@ public class SpaceStationSystem extends IteratingSystem {
 
         //update docked ships
         if (spaceStation.dockPortA != null) {
-            updateShipInDock(spaceStation, stationPhysics, spaceStation.dockPortA, BodyBuilder.DOCK_A_ID);
+            updateShipInDock(entity, spaceStation, stationPhysics, spaceStation.dockPortA, BodyBuilder.DOCK_A_ID);
         }
         if (spaceStation.dockPortB != null) {
-            updateShipInDock(spaceStation, stationPhysics, spaceStation.dockPortB, BodyBuilder.DOCK_B_ID);
+            updateShipInDock(entity, spaceStation, stationPhysics, spaceStation.dockPortB, BodyBuilder.DOCK_B_ID);
         }
         if (spaceStation.dockPortC != null) {
-            updateShipInDock(spaceStation, stationPhysics, spaceStation.dockPortC, BodyBuilder.DOCK_C_ID);
+            updateShipInDock(entity, spaceStation, stationPhysics, spaceStation.dockPortC, BodyBuilder.DOCK_C_ID);
         }
         if (spaceStation.dockPortD != null) {
-            updateShipInDock(spaceStation, stationPhysics, spaceStation.dockPortD, BodyBuilder.DOCK_D_ID);
+            updateShipInDock(entity, spaceStation, stationPhysics, spaceStation.dockPortD, BodyBuilder.DOCK_D_ID);
         }
 
         //draw docking pad
@@ -101,14 +101,14 @@ public class SpaceStationSystem extends IteratingSystem {
         shape.end();
     }
 
-    private void updateShipInDock(SpaceStationComponent spaceStation, PhysicsComponent stationPhysics, Entity dockedShip, int dockId) {
+    private void updateShipInDock(Entity stationEntity, SpaceStationComponent spaceStation, PhysicsComponent stationPhysics, Entity dockedShip, int dockId) {
         PhysicsComponent shipPhysics = Mappers.physics.get(dockedShip);
         Transform transform = stationPhysics.body.getTransform();
         
         //undock
         ControllableComponent control = Mappers.controllable.get(dockedShip);
         if (spaceStation.lastDockedTimer.canDoEvent() && (control.moveForward || control.moveRight || control.moveLeft || control.boost)) {
-            undock(spaceStation, stationPhysics, dockedShip, shipPhysics, control);
+            undock(stationEntity, spaceStation, stationPhysics, dockedShip, shipPhysics, control);
         }
         
         //update ship position relative to space station
@@ -184,7 +184,7 @@ public class SpaceStationSystem extends IteratingSystem {
         getEngine().getSystem(SoundSystem.class).dockStation();
     }
 
-    private void undock(SpaceStationComponent spaceStation, PhysicsComponent stationPhysics, Entity dockedShip, PhysicsComponent shipPhysics, ControllableComponent control) {
+    private void undock(Entity stationEntity, SpaceStationComponent spaceStation, PhysicsComponent stationPhysics, Entity dockedShip, PhysicsComponent shipPhysics, ControllableComponent control) {
         String port = "";
         if (spaceStation.dockPortA == dockedShip) {
             spaceStation.dockPortA = null;
@@ -202,11 +202,10 @@ public class SpaceStationSystem extends IteratingSystem {
             spaceStation.dockPortD = null;
             port = "D";
         }
-
         control.activelyControlled = true;
         shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
         getEngine().getSystem(SoundSystem.class).undockStation();
-        Gdx.app.debug(getClass().getSimpleName(), "undock [" + DebugUtil.objString(dockedShip) + "] from station: [" + DebugUtil.objString(spaceStation) + "] port: " + port);
+        Gdx.app.debug(getClass().getSimpleName(), "undock [" + DebugUtil.objString(dockedShip) + "] from station: [" + DebugUtil.objString(stationEntity) + "] port: " + port);
     }
 
     private void sellCargo(CargoComponent cargo, Vector2 pos) {
@@ -226,7 +225,8 @@ public class SpaceStationSystem extends IteratingSystem {
                 */
                 int quantity = cargo.inventory.get(id);
                 int credits = quantity * resource.getValue();
-                getEngine().getSystem(SoundSystem.class).addCredits(0.5f + ((((float) id / cargo.inventory.size()) + 1) * 0.12f));
+                float pitch = 0.5f + ((((float) id / cargo.inventory.size()) + 1) * 0.12f);
+                getEngine().getSystem(SoundSystem.class).addCredits(pitch);
                 cargo.credits += credits;
                 cargo.inventory.remove(id);
                 cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
@@ -240,7 +240,7 @@ public class SpaceStationSystem extends IteratingSystem {
         if (cargo == null || health == null) return;
         if (health.maxHealth == health.health) return;
         if (cargo.credits <= 0) {
-              Gdx.app.debug(getClass().getSimpleName(), "insufficient credits. no repairs done.");
+            //Gdx.app.debug(getClass().getSimpleName(), "insufficient credits. no repairs done.");
             return;
         }
 
