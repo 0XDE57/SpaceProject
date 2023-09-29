@@ -225,16 +225,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
         //draw background for state message
         if (messageState != SpecialState.off) {
-            int offset = 50;
-            int messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3)) - offset;
-            float width =  40 + offset;
-            Color backingColor = messageState == SpecialState.destroyed ? new Color(1, 0, 0, 0.2f) : Color.DARK_GRAY;
-            shape.rect(0, messageHeight, Gdx.graphics.getWidth(), width, Color.CLEAR, Color.CLEAR, backingColor, backingColor);
-            shape.setColor(messageState == SpecialState.destroyed ? Color.RED : new Color(0.1f, 0.63f, 0.88f, 1f));
-            if (messageState == SpecialState.destroyed) {
-                shape.rectLine(0, messageHeight, Gdx.graphics.getWidth(), messageHeight, 1);
-            }
-            shape.rectLine(0, messageHeight + width, Gdx.graphics.getWidth(), messageHeight + width, 1);
+            drawMessageBacking();
         }
         shape.end();
         
@@ -281,7 +272,19 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         batch.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
-    
+
+    private void drawMessageBacking() {
+        int offset = 50;
+        int messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3)) - offset;
+        float width =  40 + offset;
+        shape.rect(0, messageHeight, Gdx.graphics.getWidth(), width, Color.CLEAR, Color.CLEAR, Color.DARK_GRAY, Color.DARK_GRAY);
+        shape.setColor(messageState == SpecialState.destroyed ? Color.RED : new Color(0.1f, 0.63f, 0.88f, 1f));
+        if (messageState == SpecialState.destroyed) {
+            shape.rectLine(0, messageHeight, Gdx.graphics.getWidth(), messageHeight, 1);
+        }
+        shape.rectLine(0, messageHeight + width, Gdx.graphics.getWidth(), messageHeight + width, 1);
+    }
+
     private void checkInput() {
         //todo: move to desktop input
         if (Gdx.input.isKeyJustPressed(keyCFG.toggleHUD)) {
