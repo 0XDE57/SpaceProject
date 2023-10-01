@@ -3,8 +3,6 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.components.*;
@@ -13,8 +11,6 @@ import com.spaceproject.math.MyMath;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
-
-import static com.spaceproject.screens.MyScreenAdapter.cam;
 
 public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
     
@@ -60,7 +56,7 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
 
     @Override
     public void addedToEngine(Engine engine) {
-        players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
+        players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class).get());
         respawn = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
         spaceStations = engine.getEntitiesFor(Family.all(SpaceStationComponent.class).get());
     }
@@ -69,6 +65,9 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
     public void update(float deltaTime) {
         if (players.size() != 0) {
             return;
+        }
+        if (players.size() > 1) {
+            Gdx.app.error(getClass().getSimpleName(), "warning! multiple players");
         }
 
         if (!initialSpawn) {
@@ -79,10 +78,25 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
         if (respawn.size() > 0) {
             Entity respawnEntity = respawn.first();
             RespawnComponent respawn = Mappers.respawn.get(respawnEntity);
-            if (respawn.spawn) {
-                respawnEntity.add(new RemoveComponent());
-                //todo: but not just nearest. last station docked at. space station is check point
-                spawnPlayer();
+            switch(respawn.spawn) {
+                case pan:
+                    Entity closestSpaceStation = ECSUtil.closestEntity(Mappers.transform.get(respawnEntity).pos, spaceStations);
+                    Vector2 target = Mappers.transform.get(closestSpaceStation).pos;
+                    Vector2 cam = Mappers.transform.get(respawnEntity).pos.cpy().lerp(target, respawn.timeout.ratio());
+                    Mappers.transform.get(respawnEntity).pos.set(cam);
+                    //todo: lerp to spawn location
+                    if (respawn.timeout.tryEvent()) {
+                        respawn.spawn = RespawnComponent.AnimState.spawn;
+                        getEngine().getSystem(CameraSystem.class).setZoomTarget((byte) 3);
+                    }
+                    break;
+                case spawn:
+                    respawn.spawn = RespawnComponent.AnimState.end;
+                    respawnEntity.add(new RemoveComponent());
+                    //todo: but not just nearest. last station docked at. space station is check point
+                    spawnPlayer();
+                    break;
+                //default: Gdx.app.debug(getClass().getSimpleName(), respawn.spawn.name());
             }
         }
     }
@@ -123,6 +137,17 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
         Gdx.app.log(getClass().getSimpleName(), "player [" + DebugUtil.objString(player) + "] spawned: " + MyMath.formatVector2(spawnPosition, 1) +
                 (spaceStation == null ? " NO STATION FOUND!!!" : " at station: [" + DebugUtil.objString(spaceStation) + "]"));
     }
+
+    public boolean pan(Entity entity) {
+        RespawnComponent respawn = Mappers.respawn.get(entity);
+        if ((respawn.spawn == RespawnComponent.AnimState.pause) && respawn.timeout.tryEvent()) {
+            respawn.spawn = RespawnComponent.AnimState.pan;
+            respawn.timeout.setInterval(500, true);
+            Gdx.app.debug(getClass().getSimpleName(), "respawn pan");
+            return true;
+        }
+        return false;
+    }
     
     @Override
     public void entityAdded(Entity entity) {
@@ -154,5 +179,5 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
             getEngine().addEntity(newPlayer);
         }*/
     }
-  
+
 }

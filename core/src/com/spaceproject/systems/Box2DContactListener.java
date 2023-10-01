@@ -448,6 +448,8 @@ public class Box2DContactListener implements ContactListener {
             respawnEntity.add(transform);
             respawnEntity.add(new CameraFocusComponent());
             RespawnComponent respawn = new RespawnComponent();
+            respawn.spawn = RespawnComponent.AnimState.pause;
+            respawn.timeout = new SimpleTimer(3000, true);
             respawn.reason = "reason goes here";
             if (Mappers.star.get(source) != null) {
                 respawn.reason = "stars are hot";
@@ -458,10 +460,10 @@ public class Box2DContactListener implements ContactListener {
                 }
                 respawn.reason = "press [" + input.toUpperCase() + "] to activate shield";
             }
-            respawn.timeout = new SimpleTimer(3000, true);
             respawnEntity.add(respawn);
             respawnEntity.add(new RingEffectComponent());
             engine.addEntity(respawnEntity);
+            Gdx.app.debug(getClass().getSimpleName(), "respawn: " + respawn.reason);
         }
     
         /*

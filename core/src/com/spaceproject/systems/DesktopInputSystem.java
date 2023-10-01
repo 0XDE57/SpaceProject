@@ -56,10 +56,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         if (players.size() == 0) {
             ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
             if (respawnEntities.size() != 0) {
-                //set respawn flag!!!
-                RespawnComponent respawn = Mappers.respawn.get(respawnEntities.first());
-                if (respawn.timeout.canDoEvent()) {
-                    respawn.spawn = true;
+                if (getEngine().getSystem(PlayerSpawnSystem.class).pan(respawnEntities.first())) {
                     return true;
                 }
             }

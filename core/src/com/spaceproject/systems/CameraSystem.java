@@ -262,18 +262,21 @@ public class CameraSystem extends IteratingSystem {
     
     //region zoom
     public void setZoomZero() {
-        zoomLevel = -1;
-        zoomTarget = getZoomForLevel(zoomLevel);
+        setZoomTarget((byte) -1);
         //Gdx.app.debug(this.getClass().getSimpleName(), "zoom0: " + zoomTarget + " : " + zoomLevel);
     }
-    
+
+    public void setZoomTarget(byte level) {
+        zoomLevel = level;
+        zoomTarget = getZoomForLevel(level);
+    }
+
     public float setZoomToDefault(Entity entity) {
-        if (Mappers.vehicle.get(entity) != null) {
-            zoomLevel = 2;//-> 1f
+        if (entity != null && Mappers.vehicle.get(entity) != null) {
+            setZoomTarget((byte) 2);//-> 1f
         } else {
-            zoomLevel = 1;//-> 0.5f
+            setZoomTarget((byte) 1);//-> 0.5f
         }
-        zoomTarget = getZoomForLevel(zoomLevel);
         //Gdx.app.debug(this.getClass().getSimpleName(), "default zoom: " + zoomTarget + " : " + zoomLevel);
         return zoomTarget;
     }

@@ -229,6 +229,20 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (messageState != SpecialState.off) {
             drawMessageBacking();
         }
+
+        if (player == null) {
+            ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
+            if (respawnEntities.size() > 0) {
+                RespawnComponent respawn = Mappers.respawn.get(respawnEntities.first());
+                if (respawn.spawn == RespawnComponent.AnimState.pause || respawn.spawn == RespawnComponent.AnimState.pan) {
+                    int messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3) - 6);
+                    float ratio = 1-respawn.timeout.ratio();
+                    float halfWidth = Gdx.graphics.getWidth()*0.5f;
+                    shape.setColor(Color.WHITE);
+                    shape.rectLine(halfWidth - (halfWidth*ratio), messageHeight, halfWidth + (ratio * halfWidth), messageHeight, 2);
+                }
+            }
+        }
         shape.end();
         
         batch.begin();
