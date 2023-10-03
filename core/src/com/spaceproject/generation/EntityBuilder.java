@@ -541,7 +541,7 @@ public class EntityBuilder {
         entity.add(physics);
         
         HealthComponent health = new HealthComponent();
-        health.maxHealth = area * 0.1f;
+        health.maxHealth = area * 0.1f * resource.getHardness();
         health.health = health.maxHealth;
         entity.add(health);
         

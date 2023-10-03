@@ -51,8 +51,8 @@ public class SoundSystem extends EntitySystem implements Disposable {
     Sound shipEngineActiveLoop, shipEngineAmbientLoop;
     Sound shipExplode;
     Sound f3;
-    Sound break0, break1, break2;
-    Sound bounce0, bounce1, bounce2;
+    Sound break0, break1, break2, break3, break4;
+    //Sound bounce0, bounce1, bounce2;
     Sound laserShoot, laserShootCharge;
     Sound hullImpact, hullImpactHeavy;
     Sound shieldImpact;
@@ -79,13 +79,13 @@ public class SoundSystem extends EntitySystem implements Disposable {
         shipEngineAmbientLoop = Gdx.audio.newSound(Gdx.files.internal("sound/55hz.wav"));
         shipExplode = Gdx.audio.newSound(Gdx.files.internal("sound/explode.wav"));
         
-        f3 = Gdx.audio.newSound(Gdx.files.internal("sound/f3.wav")); //"sound/Amethyst_step11.ogg"
+        f3 = Gdx.audio.newSound(Gdx.files.internal("sound/f3.wav"));
 
         //break0 = Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.RED.getSound()));
-        //Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.GREEN.getSound()));
-        //Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.BLUE.getSound()));
-        //Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.SILVER.getSound()));
-        //Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.GOLD.getSound()));
+        //break1 = Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.GREEN.getSound()));
+        //break2 = Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.BLUE.getSound()));
+        //break3 = Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.SILVER.getSound()));
+        break4 = Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.GOLD.getSound()));
 
         laserShoot = Gdx.audio.newSound(Gdx.files.internal("sound/laserShoot.wav"));
         laserShootCharge = Gdx.audio.newSound(Gdx.files.internal("sound/laserChargeW.mp3"));
@@ -141,7 +141,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         return shipEngineActiveID;
     }
     
-    float accumulator;
+    float accumulator;//todo move to sound component?
     public long shipEngineAmbient(SoundComponent sound, boolean active, float velocity, float angleDelta, float deltaTime) {
         if (active) {
             if (sound.soundID == -1) {
@@ -161,7 +161,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
             shipEngineAmbientLoop.setPitch(sound.soundID1, pitch * (1.5f));
             //volume
             accumulator += 30.0f * relVel * deltaTime;
-            float oscillator = (float) Math.abs(Math.sin(accumulator*3));//todo move to sound component?
+            float oscillator = (float) Math.abs(Math.sin(accumulator*3));
             //shipEngineAmbientLoop.setVolume(sound.soundID, oscillator);
             //shipEngineAmbientLoop.setVolume(sound.soundID1, masterVolume);
             //DebugSystem.addDebugText(angleDelta + "", 500 ,550);
@@ -199,12 +199,14 @@ public class SoundSystem extends EntitySystem implements Disposable {
     }
     
     public long asteroidShatter(float pitch, ItemComponent.Resource resource) {
-        //todo: load resource sound from resource?
-        //for now map ID -> break0(default),break1,break2,break3
-        //resource.getId()
-        //also: similar sound variation for bounce with shield: bounce0(default), bounce1, bounce2, bounce3
-
-        return f3.play(0.25f, pitch, 0);
+        switch (resource) {
+            //case RED: return break0.play(1, pitch, 0);
+            //case GREEN: return break1.play(1, pitch, 0);
+            //case BLUE: return break2.play(1, pitch, 0);
+            //case SILVER: return break3.play(1, pitch, 0);
+            case GOLD: return break4.play(1, pitch, 0);
+            default: return f3.play(0.25f, pitch, 0);
+        }
     }
     
     public void laserShoot(float pitch) {
@@ -280,6 +282,11 @@ public class SoundSystem extends EntitySystem implements Disposable {
         shipEngineAmbientLoop.dispose();
         shipExplode.dispose();
         f3.dispose();
+        //break0.dispose();
+        //break1.dispose();
+        //break2.dispose();
+        //break3.dispose();
+        break4.dispose();
         laserShoot.dispose();
         laserShootCharge.dispose();
         hullImpact.dispose();
