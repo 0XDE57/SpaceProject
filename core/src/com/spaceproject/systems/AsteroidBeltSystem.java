@@ -232,7 +232,7 @@ public class AsteroidBeltSystem extends EntitySystem implements EntityListener {
         */
 
         ShortArray triangleIndices = delaunay.computeTriangles(vertices, false);
-        Gdx.app.debug(getClass().getSimpleName(), "shatter into " + triangleIndices.size / 3);
+        //Gdx.app.debug(getClass().getSimpleName(), "shatter into " + triangleIndices.size / 3);
 
         //create cells for each triangle
         for (int index = 0; index < triangleIndices.size; index += 3) {
