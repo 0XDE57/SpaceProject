@@ -59,6 +59,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     Sound shieldCharge, shieldOn, shieldOff, shieldAmbientLoop;
     Sound hyperdriveEngage;
     Sound pickup, credits;
+    Sound heal;
     Sound dockStation, undockStation;
     
     @Override
@@ -78,7 +79,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         shipEngineAmbientLoop = Gdx.audio.newSound(Gdx.files.internal("sound/55hz.wav"));
         shipExplode = Gdx.audio.newSound(Gdx.files.internal("sound/explode.wav"));
         
-        f3 = Gdx.audio.newSound(Gdx.files.internal("sound/f3.wav"));
+        f3 = Gdx.audio.newSound(Gdx.files.internal("sound/f3.wav")); //"sound/Amethyst_step11.ogg"
 
         //break0 = Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.RED.getSound()));
         //Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.GREEN.getSound()));
@@ -86,7 +87,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         //Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.SILVER.getSound()));
         //Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.GOLD.getSound()));
 
-        laserShoot = Gdx.audio.newSound(Gdx.files.internal("sound/laserShoot.wav"));// laserShootW2
+        laserShoot = Gdx.audio.newSound(Gdx.files.internal("sound/laserShoot.wav"));
         laserShootCharge = Gdx.audio.newSound(Gdx.files.internal("sound/laserChargeW.mp3"));
         
         hullImpact = Gdx.audio.newSound(Gdx.files.internal("sound/hullImpactLight.mp3"));
@@ -104,10 +105,10 @@ public class SoundSystem extends EntitySystem implements Disposable {
         pickup = Gdx.audio.newSound(Gdx.files.internal("sound/pickup.wav"));
         credits = Gdx.audio.newSound(Gdx.files.internal("sound/credits.wav"));
 
+        //heal = Gdx.audio.newSound(Gdx.files.internal("sound/heal.wav"));
+
         dockStation = Gdx.audio.newSound(Gdx.files.internal("sound/dockStation.wav"));
         undockStation = Gdx.audio.newSound(Gdx.files.internal("sound/undockStation.wav"));
-
-
     }
     
     public static void stopSound(SoundComponent soundComponent) {
@@ -206,8 +207,9 @@ public class SoundSystem extends EntitySystem implements Disposable {
         return f3.play(0.25f, pitch, 0);
     }
     
-    public void laserShoot() {
-        laserShoot(0.3f, 1 + MathUtils.random(-0.02f, 0.02f));
+    public void laserShoot(float pitch) {
+        float offset = 0.02f;
+        laserShoot(0.2f, pitch + MathUtils.random(-offset, offset));
     }
     
     public long laserShoot(float volume, float pitch) {
@@ -268,6 +270,10 @@ public class SoundSystem extends EntitySystem implements Disposable {
         credits.play(0.5f, pitch, 0);
     }
 
+    public void heal() {
+        heal.play();
+    }
+
     @Override
     public void dispose() {
         shipEngineActiveLoop.dispose();
@@ -284,6 +290,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         shieldAmbientLoop.dispose();
         pickup.dispose();
         credits.dispose();
+        //heal.dispose();
         dockStation.dispose();
         undockStation.dispose();
     }

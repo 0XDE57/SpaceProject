@@ -65,27 +65,21 @@ public class CannonSystem extends IteratingSystem {
         cannon.timerFireRate.setInterval(rateOfFire, false);
 
         //check if can fire before shooting
-        if (!cannon.timerFireRate.canDoEvent() || (cannon.heat > 0.90f)) {
+        float overheatThreshold = 0.90f;
+        if (!cannon.timerFireRate.canDoEvent() || (cannon.heat > overheatThreshold)) {
             return;
         }
-
-        //create missile
-        Entity missile = createMissile(cannon, parentEntity);
-        getEngine().addEntity(missile);
-
-        //todo: state? beginFire (first shot), isFiring, endFire
-        getEngine().getSystem(SoundSystem.class).laserShoot();
-
-        //subtract ammo
+        cannon.timerFireRate.reset();
         cannon.shotsFired++;
         cannon.heat += cannon.heatRate;
         if (cannon.heat >= 1f) {
             cannon.heat = 1;
         }
 
-        //reset timer
-        cannon.timerFireRate.reset();
-
+        //create missile
+        Entity missile = createMissile(cannon, parentEntity);
+        getEngine().addEntity(missile);
+        getEngine().getSystem(SoundSystem.class).laserShoot(0.4f + (1-cannon.heat * 0.5f));
     }
 
     private static void  updateCoolDown(CannonComponent cannon, float deltaTime) {
