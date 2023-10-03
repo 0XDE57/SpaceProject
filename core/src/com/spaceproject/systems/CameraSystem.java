@@ -273,9 +273,9 @@ public class CameraSystem extends IteratingSystem {
 
     public float setZoomToDefault(Entity entity) {
         if (entity != null && Mappers.vehicle.get(entity) != null) {
-            setZoomTarget((byte) 2);//-> 1f
+            setZoomTarget((byte) 3);
         } else {
-            setZoomTarget((byte) 1);//-> 0.5f
+            setZoomTarget((byte) 1);
         }
         //Gdx.app.debug(this.getClass().getSimpleName(), "default zoom: " + zoomTarget + " : " + zoomLevel);
         return zoomTarget;
