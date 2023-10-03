@@ -41,6 +41,7 @@ import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
+import javax.print.attribute.standard.SheetCollate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -249,6 +250,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
         CameraSystem camSystem = getEngine().getSystem(CameraSystem.class);
         if (GameScreen.isPaused() || (!GameScreen.isHyper() && camSystem.getZoomLevel() != camSystem.getMaxZoomLevel())) {
+            drawStatusInfo(player);
             drawInventory(player, 20, 30);
         }
 
@@ -612,17 +614,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 break;
         }
     }
-    
-    private void drawInventory(Entity entity, float inventoryX, float inventoryY) {
+
+    private void drawStatusInfo(Entity entity) {
         if (entity == null) return;
-        CargoComponent cargo = Mappers.cargo.get(entity);
-        if (cargo == null) return;
 
         int barWidth = uiCFG.playerHPBarWidth;
         int barHeight = uiCFG.playerHPBarHeight;
         int barX = Gdx.graphics.getWidth() / 2 - barWidth / 2;
-        int healthBarY = uiCFG.playerHPBarY;
-
+        int healthBarY = uiCFG.playerHPBarY + 5;
+        //draw velocity
         PhysicsComponent physics = Mappers.physics.get(entity);
         if (physics != null) {
             ControllableComponent control = Mappers.controllable.get(entity);
@@ -634,6 +634,27 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             layout.setText(inventoryFont, " " + MyMath.round(physics.body.getLinearVelocity().len(), 1));
             inventoryFont.draw(batch, layout, barX + barWidth, healthBarY + barHeight + layout.height);
         }
+        //draw HP
+        HealthComponent health = Mappers.health.get(entity);
+        if (health != null) {
+            float ratio = health.health / health.maxHealth;
+            Color color = ratio > 0.66 ? Color.GREEN : ratio > 0.33 ? Color.WHITE : Color.RED;
+            if (GameScreen.getGameTimeCurrent() - health.lastHitTime < 1000) {
+                color = Color.RED;
+            }
+            ShieldComponent shield = Mappers.shield.get(entity);
+            if (shield != null && shield.state == ShieldComponent.State.on) {
+                color = Color.BLUE;
+            }
+            inventoryFont.setColor(color);
+            inventoryFont.draw(batch, " " + MyMath.round(health.health, 1), barX + barWidth, healthBarY + layout.height);
+        }
+    }
+    
+    private void drawInventory(Entity entity, float inventoryX, float inventoryY) {
+        if (entity == null) return;
+        CargoComponent cargo = Mappers.cargo.get(entity);
+        if (cargo == null) return;
 
         long colorTime = 6000;
         long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;//todo: per resource...
