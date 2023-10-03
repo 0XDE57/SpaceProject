@@ -163,6 +163,7 @@ public class GameMenu extends VisWindow implements ControllerListener {
     }
 
     private boolean selectFocusedActor() {
+        if (!isVisible()) return false;
         if (focusIndex == -1) return false;
 
         Actor currentActor = tabbedPane.getActiveTab().getContentTable().getChildren().get(focusIndex);
