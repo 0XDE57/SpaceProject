@@ -40,7 +40,7 @@ public class EngineConfig extends Config {
         
         physicsVelocityIterations = 6;
         physicsPositionIterations = 2;
-        physicsStepPerFrame = 60;
+        physicsStepPerFrame = 120;
         
         int availableCPU = Runtime.getRuntime().availableProcessors();
         if (SpaceProject.isMobile()) {
