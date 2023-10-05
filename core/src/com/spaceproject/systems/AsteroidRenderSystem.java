@@ -3,9 +3,7 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
@@ -45,7 +43,6 @@ public class AsteroidRenderSystem extends IteratingSystem {
     protected void processEntity(Entity entity, float deltaTime) {
         AsteroidComponent asteroid = Mappers.asteroid.get(entity);
         TransformComponent transform = Mappers.transform.get(entity);
-        HealthComponent health = Mappers.health.get(entity);
     
         //set polygon translation and rotation
         Polygon polygon = asteroid.polygon;
@@ -54,21 +51,26 @@ public class AsteroidRenderSystem extends IteratingSystem {
         
         //set color based on fill type and health
         if (shapeRenderer.getCurrentType() == ShapeRenderer.ShapeType.Filled) {
+            HealthComponent health = Mappers.health.get(entity);
             float ratio = health.health / health.maxHealth;
+            long timeSinceDmg = GameScreen.getGameTimeCurrent() - health.lastHitTime;
+            long hitTime = 10;
+            if (timeSinceDmg < hitTime) {
+                ratio -= ratio * 0.125f;
+            }
             color.set(Color.BLACK).lerp(asteroid.color, 1-ratio);
+            hitTime = 500;
+            long timeSinceHit = GameScreen.getGameTimeCurrent() - asteroid.lastShieldHit;
+            if (timeSinceHit < hitTime) {
+                float fade = (float) timeSinceHit / hitTime;
+                color.lerp(asteroid.color, 1-fade);
+            }
             /* determine orbit lock
             if (asteroid.parentOrbitBody == null) {
                 color.set(1-ratio, 0 ,0, 1);//black to red
             } else {
                 color.set(1, ratio, ratio, 1);//white to red
             }*/
-
-            long hitTime = 500;
-            long timeSinceHit = GameScreen.getGameTimeCurrent() - asteroid.lastShieldHit;
-            if (timeSinceHit < hitTime) {
-                float fade = (float) timeSinceHit / hitTime;
-                color.lerp(asteroid.color, 1-fade);
-            }
         } else {
             //mesh outline
             color = asteroid.color.cpy();
