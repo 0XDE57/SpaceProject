@@ -17,11 +17,14 @@ import com.spaceproject.utility.Mappers;
 public class AsteroidRenderSystem extends IteratingSystem {
     
     CustomShapeRenderer shapeRenderer;
-    Color color = new Color();
-    
+    Color tempColor;
+    Color defaultOutline;
+
     public AsteroidRenderSystem() {
         super(Family.all(AsteroidComponent.class, TransformComponent.class).get());
         shapeRenderer = new CustomShapeRenderer();
+        tempColor = new Color();
+        defaultOutline = new Color(0.5f, 0.5f, 0.5f, 1);
     }
     
     @Override
@@ -43,7 +46,7 @@ public class AsteroidRenderSystem extends IteratingSystem {
     protected void processEntity(Entity entity, float deltaTime) {
         AsteroidComponent asteroid = Mappers.asteroid.get(entity);
         TransformComponent transform = Mappers.transform.get(entity);
-    
+
         //set polygon translation and rotation
         Polygon polygon = asteroid.polygon;
         polygon.setRotation(transform.rotation * MathUtils.radiansToDegrees);
@@ -58,12 +61,12 @@ public class AsteroidRenderSystem extends IteratingSystem {
             if (timeSinceDmg < hitTime) {
                 ratio -= ratio * 0.125f;
             }
-            color.set(Color.BLACK).lerp(asteroid.color, 1-ratio);
+            tempColor.set(Color.BLACK).lerp(asteroid.revealed ? asteroid.color : defaultOutline, 1 - ratio);
             hitTime = 500;
             long timeSinceHit = GameScreen.getGameTimeCurrent() - asteroid.lastShieldHit;
             if (timeSinceHit < hitTime) {
                 float fade = (float) timeSinceHit / hitTime;
-                color.lerp(asteroid.color, 1-fade);
+                tempColor.lerp(asteroid.color, 1 - fade);
             }
             /* determine orbit lock
             if (asteroid.parentOrbitBody == null) {
@@ -73,10 +76,13 @@ public class AsteroidRenderSystem extends IteratingSystem {
             }*/
         } else {
             //mesh outline
-            color = asteroid.color.cpy();
+            if (asteroid.revealed) {
+                tempColor = asteroid.color.cpy();
+            } else {
+                tempColor = defaultOutline.cpy();
+            }
         }
-        
-        shapeRenderer.fillPolygon(polygon.getTransformedVertices(), 0, polygon.getVertices().length, color);
+        shapeRenderer.fillPolygon(polygon.getTransformedVertices(), 0, polygon.getVertices().length, tempColor);
     }
     
 }

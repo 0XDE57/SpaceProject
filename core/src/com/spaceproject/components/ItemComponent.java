@@ -7,11 +7,11 @@ import com.badlogic.gdx.math.MathUtils;
 public class ItemComponent implements Component {
 
     public enum Resource {
-        RED(1, Color.RED, 5, 0.2f, 1.5f, "Amethyst_break2.ogg"),
-        GREEN(2, Color.GREEN, 6, 0.2f, 3f, null),
-        BLUE(3, new Color(0.1f, 0.3f, 1f, 1), 5, 0.2f, 1f, null),
-        SILVER(4, new Color(0.97f, 0.97f, 1, 1), 10, 0.2f, 0.3f, null),
-        GOLD(5, Color.GOLD, 20, 0.2f, 10f, "Amethyst_step11.ogg");
+        RED(1, Color.RED, 5, 0.2f, 1.5f, "break0.wav"),
+        GREEN(2, Color.GREEN, 6, 0.2f, 3f, "break1.wav"),
+        BLUE(3, new Color(0.1f, 0.3f, 1f, 1), 5, 0.2f, 1f, "break2.wav"),
+        SILVER(4, new Color(0.97f, 0.97f, 1, 1), 10, 0.2f, 0.3f, "break3.wav"),
+        GOLD(5, Color.GOLD, 20, 0.2f, 10f, "break4.wav");
 
         /*
         NICKEL(0.1f, new Color(192f/255f, 192f/255f, 192f/255f, 1)),

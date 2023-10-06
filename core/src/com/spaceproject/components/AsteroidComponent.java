@@ -10,7 +10,6 @@ import java.util.HashMap;
 
 public class AsteroidComponent implements Component {
 
-
     //public enum Composition { rock, ice } todo: different asteroid types?
     /*todo: research C-type, S-Type, M-Type
     1. Composition-based Classification: Asteroids can be broadly classified into three main compositional groups:
@@ -93,5 +92,7 @@ public class AsteroidComponent implements Component {
     public Color color;
 
     public long lastShieldHit;
+
+    public boolean revealed;
 
 }

@@ -217,7 +217,7 @@ public class Box2DContactListener implements ContactListener {
     @Override
     public void endContact(Contact contact) {}
     
-    /** NOTE: Must be updated per physics step to retain accurate world!
+    /** NOTE: Must be updated per physics step to retain accurate world and time step!
      * kind of a pseudo entity system to keep physics stepping and collision management separate. */
     public void updateActiveContacts(World world, float timeStep) {
         for (Contact contact : world.getContactList()) {
@@ -442,10 +442,10 @@ public class Box2DContactListener implements ContactListener {
         //create respawn entity for player
         if (Mappers.controllable.get(entity) != null) {
             Entity respawnEntity = new Entity();
-            //set camera focus to temporary respawn object
             TransformComponent transform = new TransformComponent();
             transform.pos.set(Mappers.transform.get(entity).pos);
             respawnEntity.add(transform);
+            //set camera focus to temporary respawn object
             respawnEntity.add(new CameraFocusComponent());
             RespawnComponent respawn = new RespawnComponent();
             respawn.spawn = RespawnComponent.AnimState.pause;
@@ -463,7 +463,7 @@ public class Box2DContactListener implements ContactListener {
             respawnEntity.add(respawn);
             respawnEntity.add(new RingEffectComponent());
             engine.addEntity(respawnEntity);
-            Gdx.app.debug(getClass().getSimpleName(), "respawn: " + respawn.reason);
+            Gdx.app.debug(getClass().getSimpleName(), "create respawn(" + respawn.reason + ") marker: " + DebugUtil.objString(respawnEntity) + " for " + DebugUtil.objString(entity));
         }
     
         /*

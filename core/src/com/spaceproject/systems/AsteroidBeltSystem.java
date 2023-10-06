@@ -264,6 +264,7 @@ public class AsteroidBeltSystem extends EntitySystem implements EntityListener {
                     hull[4], hull[5],
                     center);
             for (int j = 0; j < hull.length; j += 2) {
+                //todo: this is a fix for #30, but causes #2 to get worse
                 //hull[j] -= center.x;
                 //hull[j + 1] -= center.y;
             }
@@ -275,7 +276,7 @@ public class AsteroidBeltSystem extends EntitySystem implements EntityListener {
             //center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle());
             //Vector2 pos = parentBody.getPosition().cpy().add(center);
             Vector2 vel = parentBody.getLinearVelocity();
-            Entity childAsteroid = EntityBuilder.createAsteroid(seed, pos.x, pos.y, vel.x, vel.y, parentBody.getAngle(), hull, Mappers.asteroid.get(parentAsteroid).composition);
+            Entity childAsteroid = EntityBuilder.createAsteroid(seed, pos.x, pos.y, vel.x, vel.y, parentBody.getAngle(), hull, Mappers.asteroid.get(parentAsteroid).composition, true);
             float angularDrift = Math.max(MathUtils.random(-maxDriftAngle, maxDriftAngle), minDriftAngle);
             Mappers.physics.get(childAsteroid).body.setAngularVelocity(parentBody.getAngularVelocity() + angularDrift);
             getEngine().addEntity(childAsteroid);

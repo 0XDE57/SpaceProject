@@ -503,7 +503,7 @@ public class EntityBuilder {
         return entity;
     }
     
-    public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float angle, float[] vertices, ItemComponent.Resource resource) {
+    public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float angle, float[] vertices, ItemComponent.Resource resource, boolean revealed) {
         MathUtils.random.setSeed(seed);
         Entity entity = new Entity();
     
@@ -529,6 +529,7 @@ public class EntityBuilder {
         asteroid.area = area;
         asteroid.composition = resource;
         asteroid.color = resource.getColor();
+        asteroid.revealed = revealed;
         entity.add(asteroid);
     
         PhysicsComponent physics = new PhysicsComponent();
@@ -581,7 +582,7 @@ public class EntityBuilder {
         //Polygon polygon = new Polygon(hull);
         //float area = Math.abs(GeometryUtils.polygonArea(polygon.getVertices(), 0, polygon.getVertices().length));
         
-        return createAsteroid(seed, x, y, velX, velY, MathUtils.random(MathUtils.PI2), hull, ItemComponent.Resource.random());
+        return createAsteroid(seed, x, y, velX, velY, MathUtils.random(MathUtils.PI2), hull, ItemComponent.Resource.random(), false);
     }
     
     private static boolean isValidPoint(FloatArray points, float pX, float pY, float tolerance) {

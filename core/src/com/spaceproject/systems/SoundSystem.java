@@ -85,7 +85,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         //break1 = Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.GREEN.getSound()));
         //break2 = Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.BLUE.getSound()));
         //break3 = Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.SILVER.getSound()));
-        break4 = Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.GOLD.getSound()));
+        //break4 = Gdx.audio.newSound(Gdx.files.internal("sound/" + ItemComponent.Resource.GOLD.getSound()));
 
         laserShoot = Gdx.audio.newSound(Gdx.files.internal("sound/laserShoot.wav"));
         laserShootCharge = Gdx.audio.newSound(Gdx.files.internal("sound/laserChargeW.mp3"));
@@ -204,7 +204,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
             //case GREEN: return break1.play(1, pitch, 0);
             //case BLUE: return break2.play(1, pitch, 0);
             //case SILVER: return break3.play(1, pitch, 0);
-            case GOLD: return break4.play(1, pitch, 0);
+            //case GOLD: return break4.play(1, pitch, 0);
             default: return f3.play(0.25f, pitch, 0);
         }
     }
