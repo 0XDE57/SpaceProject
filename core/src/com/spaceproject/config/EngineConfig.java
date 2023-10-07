@@ -30,7 +30,7 @@ public class EngineConfig extends Config {
         
         renderScale = 30f;
         viewportWidth = 1280;
-        viewportHeight = 720;
+        viewportHeight = 800;
         
         sprite2DScale = 0.1f;
         sprite3DScale = 0.1f;
