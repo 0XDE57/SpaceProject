@@ -454,7 +454,7 @@ public class Box2DContactListener implements ContactListener {
                 if (engine.getSystem(DesktopInputSystem.class).getControllerHasFocus()) {
                     input = "l-trigger";
                 }
-                respawn.reason = "press [" + input.toUpperCase() + "] to activate shield";
+                respawn.reason = "hold [" + input.toUpperCase() + "] to activate shield";
             }
             respawnEntity.add(respawn);
             respawnEntity.add(new RingEffectComponent());//todo: replace with explode particle effect
