@@ -294,13 +294,14 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private void drawMessageBacking() {
         int offset = 50;
         int messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3)) - offset;
-        float width =  40 + offset;
-        shape.rect(0, messageHeight, Gdx.graphics.getWidth(), width, Color.CLEAR, Color.CLEAR, Color.DARK_GRAY, Color.DARK_GRAY);
-        shape.setColor(messageState == SpecialState.destroyed ? Color.RED : new Color(0.1f, 0.63f, 0.88f, 1f));
+        float height =  40 + offset;
+        shape.rect(0, messageHeight, Gdx.graphics.getWidth(), height, Color.CLEAR, Color.CLEAR, Color.DARK_GRAY, Color.DARK_GRAY);
+        Color color = messageState == SpecialState.destroyed ? Color.RED : new Color(0.1f, 0.63f, 0.88f, 1f);
+        shape.setColor(color);
+        shape.rectLine(0, messageHeight + height, Gdx.graphics.getWidth(), messageHeight + height, 3);
         if (messageState == SpecialState.destroyed) {
             shape.rectLine(0, messageHeight, Gdx.graphics.getWidth(), messageHeight, 1);
         }
-        shape.rectLine(0, messageHeight + width, Gdx.graphics.getWidth(), messageHeight + width, 1);
     }
 
     private void checkInput() {
