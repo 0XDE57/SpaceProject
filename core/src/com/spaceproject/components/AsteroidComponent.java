@@ -87,8 +87,6 @@ public class AsteroidComponent implements Component {
     
     public float area;
     
-    public boolean doShatter;
-    
     public Color color;
 
     public long lastShieldHit;

@@ -5,7 +5,6 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.SpaceProject;
@@ -13,9 +12,7 @@ import com.spaceproject.components.AsteroidBeltComponent;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.config.Config;
 import com.spaceproject.config.DebugConfig;
-import com.spaceproject.config.EngineConfig;
 import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
@@ -23,12 +20,31 @@ import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
-public class AsteroidBeltSystem extends EntitySystem implements EntityListener {
+import java.util.ArrayList;
+
+public class AsteroidBeltSystem extends EntitySystem {
+
+    class AsteroidRemovedQueue {
+        public final AsteroidComponent asteroidComponent;
+        public final Vector2 position;
+        public final Vector2 velocity;
+        public final float angle;
+        public final float angularVelocity;
+
+        AsteroidRemovedQueue(AsteroidComponent asteroidComponent, Vector2 position, Vector2 velocity, float angle, float angularVelocity) {
+            this.asteroidComponent = asteroidComponent;
+            this.position = position;
+            this.velocity = velocity;
+            this.angle = angle;
+            this.angularVelocity = angularVelocity;
+        }
+    }
 
     private ImmutableArray<Entity> asteroids;
     private ImmutableArray<Entity> spawnBelt;
     
     private final SimpleTimer lastSpawnedTimer = new SimpleTimer(1000);
+    private final ArrayList<AsteroidRemovedQueue> spawnQ = new ArrayList<>();
 
     private final DelaunayTriangulator delaunay = new DelaunayTriangulator();
     private final float minAsteroidSize = 100; //anything smaller than this will not create more
@@ -43,21 +59,20 @@ public class AsteroidBeltSystem extends EntitySystem implements EntityListener {
         asteroids = engine.getEntitiesFor(Family.all(AsteroidComponent.class, TransformComponent.class).get());
         spawnBelt = engine.getEntitiesFor(Family.all(AsteroidBeltComponent.class).get());
         lastSpawnedTimer.setCanDoEvent();
-        engine.addEntityListener(this);
-    }
-
-    @Override
-    public void removedFromEngine(Engine engine) {
-        engine.removeEntityListener(this);
     }
     
     @Override
     public void update(float deltaTime) {
+        //create initial belt
         spawnAsteroidBelt();
-        
+
+        //artificial gravity to rotate bodies around belt
         updateBeltOrbit();
+
+        //spawn child asteroids or resource drops when asteroids destroyed
+        processAstroidDestructionQueue();
     
-        //debug add asteroid at mouse position
+        //debug spawn asteroid at mouse position
         if (GameScreen.isDebugMode && Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             DebugConfig debug = SpaceProject.configManager.getConfig(DebugConfig.class);
             if (debug.spawnAsteroid) {
@@ -80,9 +95,7 @@ public class AsteroidBeltSystem extends EntitySystem implements EntityListener {
                 float angle = MyMath.angleTo(parentTransform.pos, physics.body.getPosition()) + (asteroidBelt.clockwise ? -MathUtils.HALF_PI : MathUtils.HALF_PI);
                 physics.body.setLinearVelocity(MyMath.vector(angle, asteroidBelt.velocity));
             } else {
-                //todo: gravity pull into belt if close enough
-
-                // re-entry?
+                //todo: gravity pull into belt if close enough: re-entry?
                 for (Entity parentEntity : spawnBelt) {
                     AsteroidBeltComponent asteroidBelt = Mappers.asteroidBelt.get(parentEntity);
                     TransformComponent parentTransform = Mappers.transform.get(parentEntity);
@@ -136,44 +149,32 @@ public class AsteroidBeltSystem extends EntitySystem implements EntityListener {
             float newY = MathUtils.random(y - range, y + range);
             spawnAsteroid(newX, newY, vel.x, vel.y);
         }
-        Gdx.app.log(this.getClass().getSimpleName(), "spawn field: " + clusterSize);
+        Gdx.app.log(getClass().getSimpleName(), "spawn field: " + clusterSize);
     }
 
-    @Override
-    public void entityAdded(Entity entity) { }
+    public void destroyAsteroid(AsteroidComponent asteroid, Vector2 pos, Vector2 vel, float angle, float angularVel) {
+        //NOTE: cannot CreateBody() during physics step
+        //  jni/Box2D/Dynamics/b2World.cpp:109: b2Body* b2World::CreateBody(const b2BodyDef*): Assertion `IsLocked() == false' failed.
+        //just like we cannot destroy a body during a physics step (hence removing entities at end of frame)
 
-    @Override
-    public void entityRemoved(Entity entity) {
-        AsteroidComponent asteroid = Mappers.asteroid.get(entity);
-        if (asteroid == null) return;
+        //so we instead add to a spawn queue to be processed next system tick
+        spawnQ.add(new AsteroidRemovedQueue(asteroid, pos, vel, angle, angularVel));
+    }
 
-        float pitch = MathUtils.random(0.5f, 2.0f);
-        //todo: pitch based on asteroid size?
-        //pitch = MathUtils.map(minAsteroidSize, maxArea, 2f, 0.5f, asteroid.area);
-        getEngine().getSystem(SoundSystem.class).asteroidShatter(pitch, asteroid.composition);
-        if (asteroid.doShatter && asteroid.area >= minAsteroidSize) {
-            shatterAsteroid(entity, asteroid);
+    private void processAstroidDestructionQueue() {
+        for (AsteroidRemovedQueue asteroid : spawnQ) {
+            asteroidDestroyed(asteroid.asteroidComponent, asteroid.position, asteroid.velocity, asteroid.angle, asteroid.angularVelocity);
+        }
+        spawnQ.clear();
+    }
+
+    private void asteroidDestroyed(AsteroidComponent asteroid, Vector2 parentPos, Vector2 parentVel, float parentAngle, float parentAngularVel) {
+        if (asteroid.area >= minAsteroidSize) {
+            shatterAsteroid(parentPos, parentVel, parentAngle, parentAngularVel, asteroid);
         } else {
-            Body sourceBody = Mappers.physics.get(entity).body;
-            Entity drop = EntityBuilder.dropResource(sourceBody.getPosition(), sourceBody.getLinearVelocity(), asteroid.composition, asteroid.color);
+            Entity drop = EntityBuilder.dropResource(parentPos, parentVel, asteroid.composition, asteroid.color);
             getEngine().addEntity(drop);
         }
-    }
-
-    private void shatterAsteroid(Entity parentAsteroid, AsteroidComponent asteroid) {
-        //create new polygons from vertices + center point to "sub shatter" into smaller polygon shards
-        float[] vertices = asteroid.polygon.getVertices();
-        int length = vertices.length;
-        float[] newPoly = new float[length + 2];
-        System.arraycopy(vertices, 0, newPoly, 0, length);
-
-        //center new point
-        Vector2 center = new Vector2();
-        GeometryUtils.polygonCentroid(vertices, 0, length, center);
-        newPoly[length] = center.x;
-        newPoly[length + 1] = center.y;
-
-        spawnChildAsteroid(parentAsteroid, newPoly);
     }
 
     private Entity spawnAsteroid(float x, float y, float velX, float velY) {
@@ -193,7 +194,23 @@ public class AsteroidBeltSystem extends EntitySystem implements EntityListener {
         return asteroid;
     }
 
-    private void spawnChildAsteroid(Entity parentAsteroid, float[] vertices) {
+    private void shatterAsteroid(Vector2 parentPos, Vector2 parentVel, float parentAngle, float parentAngularVel, AsteroidComponent asteroid) {
+        //create new polygons from vertices + center point to "sub shatter" into smaller polygon shards
+        float[] vertices = asteroid.polygon.getVertices();
+        int length = vertices.length;
+        float[] newPoly = new float[length + 2];
+        System.arraycopy(vertices, 0, newPoly, 0, length);
+
+        //center new point
+        Vector2 center = new Vector2();
+        GeometryUtils.polygonCentroid(vertices, 0, length, center);
+        newPoly[length] = center.x;
+        newPoly[length + 1] = center.y;
+
+        spawnChildAsteroid(parentPos, parentVel, parentAngle, parentAngularVel, asteroid, newPoly);
+    }
+
+    private void spawnChildAsteroid(Vector2 parentPos, Vector2 parentVel, float parentAngle, float parentAngularVel, AsteroidComponent asteroidComponent, float[] vertices) {
         /* todo: re shatter issues; if we turn on b2d debug we can see the velocity is not the origin of child shards
         NOTE: Box2D expects Polygons vertices are stored with a counter clockwise winding (CCW).
         We must be careful because the notion of CCW is with respect to a right-handed
@@ -270,20 +287,19 @@ public class AsteroidBeltSystem extends EntitySystem implements EntityListener {
             }
 
             long seed = (long) (Math.random() * Long.MAX_VALUE);
-            Body parentBody = Mappers.physics.get(parentAsteroid).body;
-            //todo: rotate center relative to parent by angle
-            Vector2 pos = parentBody.getPosition().cpy();//.mulAdd(center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle()), 0.1f);
+            float angularDrift = Math.max(MathUtils.random(-maxDriftAngle, maxDriftAngle), minDriftAngle);
+            //todo: rotate center relative to parent by angle?
+            //Vector2 pos = parentBody.getPosition().cpy();//.mulAdd(center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle()), 0.1f);
             //center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle());
             //Vector2 pos = parentBody.getPosition().cpy().add(center);
-            Vector2 vel = parentBody.getLinearVelocity();
-            Entity childAsteroid = EntityBuilder.createAsteroid(seed, pos.x, pos.y, vel.x, vel.y, parentBody.getAngle(), hull, Mappers.asteroid.get(parentAsteroid).composition, true);
-            float angularDrift = Math.max(MathUtils.random(-maxDriftAngle, maxDriftAngle), minDriftAngle);
-            Mappers.physics.get(childAsteroid).body.setAngularVelocity(parentBody.getAngularVelocity() + angularDrift);
+            //Vector2 vel = parentBody.getLinearVelocity().cpy();
+            Entity childAsteroid = EntityBuilder.createAsteroid(seed, parentPos.x, parentPos.y, parentVel.x, parentVel.y, parentAngle, hull, asteroidComponent.composition, true);
+            childAsteroid.getComponent(PhysicsComponent.class).body.setAngularVelocity(parentAngularVel + angularDrift);
             getEngine().addEntity(childAsteroid);
         }
     }
 
-    public void breakPoly(Polygon p){
+    public Array<Polygon> breakPoly(Polygon p){
         DelaunayTriangulator d = new DelaunayTriangulator();
         ShortArray s = d.computeTriangles(p.getVertices(),false);
         Array<Polygon> asteroids = new Array<>();
@@ -303,7 +319,7 @@ public class AsteroidBeltSystem extends EntitySystem implements EntityListener {
             p1.setPosition(move.x,move.y);
             asteroids.add(p1);
         }
-        //return asteroids;
+        return asteroids;
     }
 
 }

@@ -94,7 +94,7 @@ public class ShieldSystem extends IteratingSystem {
                     break;
                 }
                 
-                //discharge: loose energy
+                //discharge: lose energy
                 shield.radius = shield.maxRadius * (1 - shield.animTimer.ratio());
                 if (shield.radius <= 0  || shield.animTimer.canDoEvent()) {
                     shield.state = ShieldComponent.State.off;
@@ -139,7 +139,6 @@ public class ShieldSystem extends IteratingSystem {
             SoundSystem sound = getEngine().getSystem(SoundSystem.class);
             sound.shieldOff();
         }
-        
     }
     
 }

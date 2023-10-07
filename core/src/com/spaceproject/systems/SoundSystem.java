@@ -198,7 +198,10 @@ public class SoundSystem extends EntitySystem implements Disposable {
         return shieldAmbientID;
     }
     
-    public long asteroidShatter(float pitch, ItemComponent.Resource resource) {
+    public long asteroidShatter(ItemComponent.Resource resource) {
+        float pitch = MathUtils.random(0.5f, 2.0f);
+        //pitch based on asteroid size?
+        //pitch = MathUtils.map(minAsteroidSize, maxArea, 2f, 0.5f, asteroid.area);
         switch (resource) {
             //case RED: return break0.play(1, pitch, 0);
             //case GREEN: return break1.play(1, pitch, 0);

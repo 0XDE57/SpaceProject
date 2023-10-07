@@ -20,30 +20,34 @@ public class ResourceDisposer {
     private static int totalTotal;
     private static int soundKilled;
     private static int additionalRemove;
-    private static StringBuilder info = new StringBuilder();
+    private static final StringBuilder info = new StringBuilder();
     
     public static void dispose(Entity entity) {
         TextureComponent tex = Mappers.texture.get(entity);
         if (tex != null) {
             tex.texture.dispose();
+            tex.texture = null;
             disposedTextures++;
         }
         
         Sprite3DComponent s3d = Mappers.sprite3D.get(entity);
         if (s3d != null) {
             s3d.renderable.dispose();
+            s3d.renderable = null;
             disposedS3D++;
         }
     
         PhysicsComponent physics = Mappers.physics.get(entity);
         if (physics != null) {
             physics.body.getWorld().destroyBody(physics.body);
+            physics.body = null;
             destroyedBody++;
         }
     
         ParticleComponent particle = Mappers.particle.get(entity);
         if (particle != null) {
             particle.pooledEffect.dispose();
+            particle.pooledEffect = null;
             disposedParticle++;
         }
     
@@ -60,6 +64,7 @@ public class ResourceDisposer {
         if (chargeCannon != null && chargeCannon.projectileEntity != null) {
             //destroy or release
             chargeCannon.projectileEntity.add(new RemoveComponent());
+            chargeCannon.projectileEntity = null;
             additionalRemove++;
         }
     }
@@ -84,7 +89,7 @@ public class ResourceDisposer {
         totalS3D += disposedS3D;
         totalParticle += disposedParticle;
         totalBody += destroyedBody;
-        totalTotal = totalTextures + totalS3D + totalParticle + totalBody;
+        totalTotal = totalTextures + totalS3D + totalParticle + totalBody;//<-in case it wasn't clear, this is the total
         
         //reset per frame data: should be called at very end of frame
         disposedTextures = 0;
@@ -101,6 +106,9 @@ public class ResourceDisposer {
         info.append("\n     [Particle]: ").append(totalParticle);
         info.append("\n     [B2D Body]: ").append(totalBody);
         info.append("\n     [Total]:    ").append(totalTotal);
+        //not disposed so maybe doesn't belong but maybe useful
+        info.append("\n     [Sound]:    ").append(soundKilled);
+        info.append("\n     [Other]:    ").append(additionalRemove);//?
         return info.toString();
     }
     

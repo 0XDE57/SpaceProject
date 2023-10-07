@@ -7,13 +7,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Contact;
-import com.badlogic.gdx.physics.box2d.ContactImpulse;
-import com.badlogic.gdx.physics.box2d.ContactListener;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.Manifold;
-import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.physics.box2d.WorldManifold;
+import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
@@ -252,21 +246,12 @@ public class Box2DContactListener implements ContactListener {
     }
     
     private void doActiveHeatDamage(Fixture burningFixture, Entity starEntity, Entity burningEntity, float timeStep) {
-        if (burningFixture.isSensor())
-            return; //only burn bodies
-        
-        HealthComponent healthComponent = Mappers.health.get(burningEntity);
-        if (healthComponent == null) {
-            //check if projectile
-            if (Mappers.damage.get(burningEntity) != null) {
-                //could set bullet on fire so its more powerful on the other side?
-                burningEntity.add(new RemoveComponent());
-            }
+        if (burningFixture.isSensor()) {
             //check if item
             if (Mappers.item.get(burningEntity) != null) {
                 burningEntity.add(new RemoveComponent());
             }
-            return;
+            return; //only burn bodies
         }
 
         //calculate heat damage dps
@@ -278,6 +263,7 @@ public class Box2DContactListener implements ContactListener {
             //todo: maybe shield can overheat and start turning red
             // when shield is fully overheated shield will break
             // shield can have heat resistance multiplier that you can upgrade
+            // hull heat resistance that can be upgraded?
             shield.heat += damage * 0.0005f;// * (1.0f - shield.heatResistance);
             if (shield.heat > 1) {
                 shield.overHeat += shield.heat-1;
@@ -286,14 +272,14 @@ public class Box2DContactListener implements ContactListener {
             return;
         }
 
-        //todo: hull heat resistance that can be upgraded: move health to hull?
-        healthComponent.health -= damage;
-        healthComponent.lastHitTime = GameScreen.getGameTimeCurrent();
-        healthComponent.lastHitSource = starEntity;
-        
-        //remove entity (kill)
-        if (healthComponent.health <= 0) {
-            destroy(burningEntity, starEntity);
+        //do damage
+        HealthComponent healthComponent = damage(burningEntity, starEntity, damage);
+
+        //destroy other body if has damage payload. eg: projectile
+        if (healthComponent == null) {
+            if (Mappers.damage.get(burningEntity) != null) {
+                burningEntity.add(new RemoveComponent());
+            }
         }
     }
     
@@ -366,15 +352,7 @@ public class Box2DContactListener implements ContactListener {
         if (impulse > asteroidDamageThreshold) {
             //calc damage relative to size of bodies and how hard impact impulse was
             float relativeDamage = (impulse * impactMultiplier) * asteroid.area;
-            
-            //damage (potential could be optimization to remove health, add merge it with asteroid, one less mapper)
-            HealthComponent health = Mappers.health.get(impactedEntity);
-            health.health -= relativeDamage;
-            health.lastHitTime = GameScreen.getGameTimeCurrent();
-            health.lastHitSource = asteroidEntity;
-            if (health.health <= 0) {
-                destroy(impactedEntity, asteroidEntity);
-            }
+            damage(impactedEntity, asteroidEntity, relativeDamage);
         }
     }
     
@@ -386,12 +364,16 @@ public class Box2DContactListener implements ContactListener {
         
         //don't apply damage while shield active
         ShieldComponent shield = Mappers.shield.get(entity);
-        long timestamp = GameScreen.getGameTimeCurrent();
         if (shield != null && shield.state == ShieldComponent.State.on) {
+            long timestamp = GameScreen.getGameTimeCurrent();
             shield.lastHit = timestamp;
-            AsteroidComponent asteroid = Mappers.asteroid.get(otherBody);
-            if (asteroid != null) {
-                asteroid.lastShieldHit = timestamp;
+            if (impulse > vehicleDamageThreshold) {
+                //todo: apply damage saved as heat
+                //shield.heat += relativeDamage * 0.0001f; //shield.heatResistance;
+                if (shield.heat > 1) {
+                    shield.overHeat += shield.heat-1;
+                    shield.heat = 1f;
+                }
             }
             //todo: break shield if impact is hard enough
             //int shieldBreakThreshold = 500;
@@ -399,6 +381,11 @@ public class Box2DContactListener implements ContactListener {
             if (impulse > 1) {
                 sound.shieldImpact(impulse / vehicleDamageThreshold * 2);
                 Gdx.app.debug(getClass().getSimpleName(),"shield protect from: " + relativeDamage);
+            }
+
+            AsteroidComponent asteroid = Mappers.asteroid.get(otherBody);
+            if (asteroid != null) {
+                asteroid.lastShieldHit = timestamp;
             }
             return; //protected by shield
         }
@@ -416,27 +403,36 @@ public class Box2DContactListener implements ContactListener {
         }
         
         //do damage
-        HealthComponent health = Mappers.health.get(entity);
-        if (health != null) {
-            health.health -= relativeDamage;
-            health.lastHitTime = timestamp;
-            health.lastHitSource = otherBody;
-            Gdx.app.debug(getClass().getSimpleName(), "high impact damage: " + relativeDamage + " to [" + DebugUtil.objString(entity) + "]");
-            if (health.health <= 0) {
-                destroy(entity, otherBody);
-            }
-        }
-        
-        ControlFocusComponent controlled = Mappers.controlFocus.get(entity);
-        if (controlled != null) {
-            //warning: coupling
+        Gdx.app.debug(getClass().getSimpleName(), "high impact damage: " + relativeDamage + " to [" + DebugUtil.objString(entity) + "]");
+        damage(entity, otherBody, relativeDamage);
+
+        //damaged entity was controlled by player, vibrate on impact
+        if (Mappers.controlFocus.get(entity) != null) {
+            //warning: system coupling
             engine.getSystem(ControllerInputSystem.class).vibrate(100, 1f);
             engine.getSystem(CameraSystem.class).impact(entity);
+            sound.hullImpactHeavy(1);
         }
-        //todo: should we hear only controlled, or AI if close enough
-        sound.hullImpactHeavy(1);
     }
     //endregion
+
+    private HealthComponent damage(Entity entity, Entity otherBody, float relativeDamage) {
+        HealthComponent health = Mappers.health.get(entity);
+        if (health == null) return null;
+        if (health.health <= 0) {
+            boolean hasRemove = entity.getComponent(RemoveComponent.class) != null;
+            Gdx.app.error(getClass().getSimpleName(), "warning! damage to already dead entity? return here? hasRemove: " + hasRemove);
+            return null;
+        }
+
+        health.lastHitTime = GameScreen.getGameTimeCurrent();
+        health.lastHitSource = otherBody;
+        health.health -= relativeDamage;
+        if (health.health <= 0) {
+            destroy(entity, otherBody);
+        }
+        return health;
+    }
     
     private void destroy(Entity entity, Entity source) {
         //create respawn entity for player
@@ -461,7 +457,7 @@ public class Box2DContactListener implements ContactListener {
                 respawn.reason = "press [" + input.toUpperCase() + "] to activate shield";
             }
             respawnEntity.add(respawn);
-            respawnEntity.add(new RingEffectComponent());
+            respawnEntity.add(new RingEffectComponent());//todo: replace with explode particle effect
             engine.addEntity(respawnEntity);
             Gdx.app.debug(getClass().getSimpleName(), "create respawn(" + respawn.reason + ") marker: " + DebugUtil.objString(respawnEntity) + " for " + DebugUtil.objString(entity));
         }
@@ -486,13 +482,15 @@ public class Box2DContactListener implements ContactListener {
         
         AsteroidComponent asteroid = Mappers.asteroid.get(entity);
         if (asteroid != null) {
-            asteroid.doShatter = true;
+            //NOTE: cannot CreateBody() during physics step
+            Body body = Mappers.physics.get(entity).body;
+            engine.getSystem(AsteroidBeltSystem.class).destroyAsteroid(asteroid, body.getPosition().cpy(), body.getLinearVelocity().cpy(), body.getAngle(), body.getAngularVelocity());
+            engine.getSystem(SoundSystem.class).asteroidShatter(asteroid.composition);
         }
         
         VehicleComponent vehicle = Mappers.vehicle.get(entity);
         if (vehicle != null) {
-            Gdx.app.log(getClass().getSimpleName(),
-                    "[" + DebugUtil.objString(entity) + "] destroyed by: [" + DebugUtil.objString(source) + "]");
+            Gdx.app.log(getClass().getSimpleName(), "[" + DebugUtil.objString(entity) + "] destroyed by: [" + DebugUtil.objString(source) + "]");
             engine.getSystem(SoundSystem.class).shipExplode();
         }
     }

@@ -25,6 +25,7 @@ public class SpaceStationSystem extends IteratingSystem {
     private final ShapeRenderer shape;
     private final Vector2 tempVec = new Vector2();
     private final float healthCostPerUnit = 15.0f; //how many credits per unit of health
+    private final long inventorySellTimer = 400;
 
     public SpaceStationSystem() {
         super(Family.all(SpaceStationComponent.class, TransformComponent.class).get());
@@ -103,14 +104,9 @@ public class SpaceStationSystem extends IteratingSystem {
 
     private void updateShipInDock(Entity stationEntity, SpaceStationComponent spaceStation, PhysicsComponent stationPhysics, Entity dockedShip, int dockId) {
         PhysicsComponent shipPhysics = Mappers.physics.get(dockedShip);
+        if (shipPhysics.body == null) return;
         Transform transform = stationPhysics.body.getTransform();
-        
-        //undock
-        ControllableComponent control = Mappers.controllable.get(dockedShip);
-        if (spaceStation.lastDockedTimer.canDoEvent() && (control.moveForward || control.moveRight || control.moveLeft || control.boost)) {
-            undock(stationEntity, spaceStation, stationPhysics, dockedShip, shipPhysics, control);
-        }
-        
+
         //update ship position relative to space station
         for (Fixture fixture : stationPhysics.body.getFixtureList()) {
             if (fixture.getUserData() == null) continue;
@@ -130,6 +126,12 @@ public class SpaceStationSystem extends IteratingSystem {
                 }
             }
         }
+
+        //undock
+        ControllableComponent control = Mappers.controllable.get(dockedShip);
+        if (spaceStation.lastDockedTimer.canDoEvent() && (control.moveForward || control.moveRight || control.moveLeft || control.boost)) {
+            undock(stationEntity, spaceStation, stationPhysics, dockedShip, shipPhysics, control);
+        }
     }
 
     public void dock(Fixture shipFixture, Fixture dockFixture, Entity vehicleEntity, Entity stationEntity) {
@@ -139,10 +141,9 @@ public class SpaceStationSystem extends IteratingSystem {
         if (dockFixture.getUserData() == null) {
             return;
         }
-
         ShieldComponent shield = Mappers.shield.get(vehicleEntity);
         if (shield != null && shield.state == ShieldComponent.State.on) {
-            return;
+            return; //ignore shielded entities
         }
 
         SpaceStationComponent station = Mappers.spaceStation.get(stationEntity);
@@ -169,19 +170,14 @@ public class SpaceStationSystem extends IteratingSystem {
                 dockedPort = "D";
                 break;
         }
-        Gdx.app.debug(getClass().getSimpleName(), "dock [" + DebugUtil.objString(vehicleEntity) + "] at station: [" + DebugUtil.objString(stationEntity) + "] port: " + dockedPort);
-
         station.lastDockedTimer.reset();
 
         Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
         Mappers.controllable.get(vehicleEntity).activelyControlled = false;
-
-        CargoComponent cargo = Mappers.cargo.get(vehicleEntity);
-        cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
-        //sellCargo(cargo);
-        //heal(cargo, Mappers.health.get(vehicleEntity));
+        Mappers.cargo.get(vehicleEntity).lastCollectTime = GameScreen.getGameTimeCurrent();//show inventory
 
         getEngine().getSystem(SoundSystem.class).dockStation();
+        Gdx.app.debug(getClass().getSimpleName(), "dock [" + DebugUtil.objString(vehicleEntity) + "] at station: [" + DebugUtil.objString(stationEntity) + "] port: " + dockedPort);
     }
 
     private void undock(Entity stationEntity, SpaceStationComponent spaceStation, PhysicsComponent stationPhysics, Entity dockedShip, PhysicsComponent shipPhysics, ControllableComponent control) {
@@ -204,6 +200,8 @@ public class SpaceStationSystem extends IteratingSystem {
         }
         control.activelyControlled = true;
         shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
+        Mappers.cargo.get(dockedShip).lastCollectTime = GameScreen.getGameTimeCurrent();//show inventory
+
         getEngine().getSystem(SoundSystem.class).undockStation();
         Gdx.app.debug(getClass().getSimpleName(), "undock [" + DebugUtil.objString(dockedShip) + "] from station: [" + DebugUtil.objString(stationEntity) + "] port: " + port);
     }
@@ -214,8 +212,7 @@ public class SpaceStationSystem extends IteratingSystem {
         for (ItemComponent.Resource resource : ItemComponent.Resource.values()) {
             int id = resource.getId();
             if (cargo.inventory.containsKey(id)) {
-                if (GameScreen.getGameTimeCurrent() - cargo.lastCollectTime < 400) return;
-
+                if (GameScreen.getGameTimeCurrent() - cargo.lastCollectTime < inventorySellTimer) return;
                 /*todo: base local value on rarity of resource in that local system.
                    eg: a system red is common so value local value will be less,
                    or a system where gold is more rare than usual  so value will be more
@@ -239,10 +236,9 @@ public class SpaceStationSystem extends IteratingSystem {
     private void heal(CargoComponent cargo, HealthComponent health) {
         if (cargo == null || health == null) return;
         if (health.maxHealth == health.health) return;
-        if (cargo.credits <= 0) {
-            //Gdx.app.debug(getClass().getSimpleName(), "insufficient credits. no repairs done.");
-            return;
-        }
+        if (cargo.credits <= 0) return;
+
+        if (GameScreen.getGameTimeCurrent() - cargo.lastCollectTime < inventorySellTimer) return;
 
         float healthMissing = health.maxHealth - health.health;
         float healedUnits = healthMissing;
