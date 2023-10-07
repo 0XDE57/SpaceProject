@@ -32,7 +32,8 @@ public class CameraSystem extends IteratingSystem {
     private final float zoomSetThreshold = 0.001f;
     private final float minZoom = 0f;
     private final float maxZoom = 100000;
-    
+    private final byte vehicleDefault = 3;
+
     private final float smoothFollowSpeed = 10f;
     private float maxOffsetFromTarget = 5f;
     private final Vector2 offsetFromTarget = new Vector2();
@@ -273,7 +274,7 @@ public class CameraSystem extends IteratingSystem {
 
     public float setZoomToDefault(Entity entity) {
         if (entity != null && Mappers.vehicle.get(entity) != null) {
-            setZoomTarget((byte) 3);
+            setZoomTarget(vehicleDefault);
         } else {
             setZoomTarget((byte) 1);
         }
@@ -339,7 +340,7 @@ public class CameraSystem extends IteratingSystem {
     }
 
     public void autoZoom(Entity player) {
-        if (getZoomLevel() == 2) {
+        if (getZoomLevel() == vehicleDefault) {
             zoomOutMax();
         } else {
             setZoomToDefault(player);
