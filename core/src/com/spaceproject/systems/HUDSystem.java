@@ -24,6 +24,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
@@ -75,7 +76,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private final ShapeRenderer shape;
     private final SpriteBatch batch;
     private final BitmapFont font, subFont, inventoryFont;
-    private final GlyphLayout layout = new GlyphLayout();
+    private final GlyphLayout layout;
 
     //entity storage
     private ImmutableArray<Entity> mapableEntities;
@@ -88,7 +89,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private boolean drawEdgeMap = true;
 
     enum SpecialState {
-        off, docked, hyper, landing, launching, destroyed;
+        off, docked, landing, launching, destroyed;
     }
 
     float anim = 0;
@@ -98,6 +99,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape = MyScreenAdapter.shape;
         batch = MyScreenAdapter.batch;
         projectionMatrix = new Matrix4();
+        layout = new GlyphLayout();
+
+        miniMap = new MiniMap();
+        markers = new ArrayList<>();
 
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 26;
@@ -120,13 +125,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         GameScreen.getStage().addListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
+                //Gdx.app.debug(getClass().getSimpleName(), "hud: " + keycode);
                 if (gameMenu.switchTabForKey(keycode)) {
                     if (!gameMenu.isVisible()) {
                         gameMenu.show();
                     }
                     return true;
                 }
-                return gameMenu.isVisible();
+                //return gameMenu.isVisible();
+                return super.keyDown(event, keycode);
             }
         
             @Override
@@ -157,10 +164,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 return super.scrolled(event, x, y, amountX, amountY);
             }
         });
-
-        miniMap = new MiniMap();
-
-        markers = new ArrayList<>();
     }
     
     @Override
@@ -245,17 +248,14 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             }
         }
         shape.end();
-        
-        batch.begin();
 
-        CameraSystem camSystem = getEngine().getSystem(CameraSystem.class);
-        if (GameScreen.isPaused() || (!GameScreen.isHyper() && camSystem.getZoomLevel() != camSystem.getMaxZoomLevel())) {
-            drawStatusInfo(player);
-            drawInventory(player, 20, 30);
-        }
+
+        batch.begin();
+        drawStatusInfo(player, uiCFG.playerHPBarWidth, uiCFG.playerHPBarHeight, uiCFG.playerHPBarY + 5);
+        drawInventory(player, 20, 30);
 
         drawCreditMarkers(deltaTime);
-        
+
         //draw special state: hyper or landing / launching
         drawSpecialStateMessage(player);
 
@@ -370,10 +370,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (player == null) {
             messageState = SpecialState.destroyed;
         } else {
-            HyperDriveComponent hyper = Mappers.hyper.get(player);
-            if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
-                messageState = SpecialState.hyper;
-            }
             ScreenTransitionComponent trans = Mappers.screenTrans.get(player);
             if (trans != null) {
                 if (trans.landStage != null) {
@@ -390,16 +386,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
         
         float ratio = 1 + (float) Math.sin(anim);
-        Color c = Color.GOLD.cpy().lerp(Color.CYAN, ratio);//cache
+        Color c = Color.GOLD.cpy().lerp(Color.CYAN, ratio);//todo: cache
         switch (messageState) {
             case docked:
-                String input = (getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad ???" : "???").toUpperCase();
-                drawHint("press [" + input + "] to interact");
+                String input = (getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad ???" : "E").toUpperCase();
+                drawHint("hold [" + input + "] to interact");
                 layout.setText(font, "[ DOCKED ]");
             break;
-            case hyper: layout.setText(font, "[ HYPERDRIVE ]"); break;
             case landing:
-                drawHint("<planet name> goes here");
+                drawHint("<planet name goes here>");
                 layout.setText(font, "[ LANDING ]");
                 break;
             case launching:
@@ -615,13 +610,22 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
     }
 
-    private void drawStatusInfo(Entity entity) {
+    private void drawStatusInfo(Entity entity, int barWidth, int barHeight, int healthBarY) {
         if (entity == null) return;
 
-        int barWidth = uiCFG.playerHPBarWidth;
-        int barHeight = uiCFG.playerHPBarHeight;
         int barX = Gdx.graphics.getWidth() / 2 - barWidth / 2;
-        int healthBarY = uiCFG.playerHPBarY + 5;
+        HyperDriveComponent hyper = Mappers.hyper.get(entity);
+        if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
+            Color c = Color.GOLD.cpy().lerp(Color.CYAN, 1 + (float) Math.sin(anim));
+            layout.setText(inventoryFont, "[ HYPER-DRIVE ]", c, 0, Align.center, false);
+            inventoryFont.draw(batch, layout, barX + layout.width - 37, healthBarY + barHeight + layout.height -1);
+            return;
+        }
+        CameraSystem camSystem = getEngine().getSystem(CameraSystem.class);
+        if (camSystem.getZoomLevel() == camSystem.getMaxZoomLevel()) {
+            return;
+        }
+
         //draw velocity
         PhysicsComponent physics = Mappers.physics.get(entity);
         if (physics != null) {
