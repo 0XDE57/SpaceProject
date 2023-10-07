@@ -40,7 +40,7 @@ public class MiniMapConfig extends Config {
     
     
     public void loadDefault() {
-        miniMapPosition = MiniMapPosition.bottomRight;
+        miniMapPosition = MiniMapPosition.topRight;
         if (SpaceProject.isMobile()) {
             miniMapPosition = MiniMapPosition.topLeft;
         }
