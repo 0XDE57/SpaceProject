@@ -30,6 +30,7 @@ import com.spaceproject.generation.Galaxy;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.math.Physics;
 import com.spaceproject.noise.NoiseManager;
+import com.spaceproject.systems.Box2DPhysicsSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.ECSUtil;
@@ -249,12 +250,15 @@ public class GameScreen extends MyScreenAdapter {
     
     private void pollGLProfiler() {
         profilerStringBuilder.setLength(0);
-        profilerStringBuilder.append("[GL calls]:         "  ).append(glProfiler.getCalls());
+        profilerStringBuilder.append(Gdx.graphics.getGLVersion().getDebugVersionString());
+        profilerStringBuilder.append("\n[Frame ID]:         ").append(Gdx.graphics.getFrameId());
+        profilerStringBuilder.append("\n[GL calls]:         ").append(glProfiler.getCalls());
         profilerStringBuilder.append("\n[Draw calls]:       ").append(glProfiler.getDrawCalls());
         profilerStringBuilder.append("\n[Shader switches]:  ").append(glProfiler.getShaderSwitches());
         profilerStringBuilder.append("\n[Texture bindings]: ").append(glProfiler.getTextureBindings());
         profilerStringBuilder.append("\n[Vertices]:         ").append(glProfiler.getVertexCount().total);
-        profilerStringBuilder.append("\n-----[DISPOSED]---- ").append(ResourceDisposer.getTotalDisposeCount());
+        profilerStringBuilder.append("\n").append(engine.getSystem(Box2DPhysicsSystem.class).toString());
+        profilerStringBuilder.append("\n------ DISPOSED ------ ").append(ResourceDisposer.getTotalDisposeCount());
         glProfiler.reset();
     }
     

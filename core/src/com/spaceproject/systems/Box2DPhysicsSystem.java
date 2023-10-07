@@ -23,12 +23,15 @@ public class Box2DPhysicsSystem extends EntitySystem {
     private final int positionIterations = engineCFG.physicsPositionIterations;
     private final float timeStep = 1 / (float) engineCFG.physicsStepPerFrame;
     private float accumulator = 0f;
+    private long stepCount;
     
     private World world;
     private Box2DContactListener contactListener;
 
     private ImmutableArray<Entity> entities;
-    
+
+    StringBuilder physicsInfo = new StringBuilder();
+
     @Override
     public void addedToEngine(Engine engine) {
         Family family = Family.all(PhysicsComponent.class, TransformComponent.class).get();
@@ -46,10 +49,10 @@ public class Box2DPhysicsSystem extends EntitySystem {
             world.step(timeStep, velocityIterations, positionIterations);
             contactListener.updateActiveContacts(world, timeStep);
             accumulator -= timeStep;
-
+            stepCount++;
             updateTransform();
         }
-        
+
         //interpolate(deltaTime, accumulator);
     }
     
@@ -85,5 +88,16 @@ public class Box2DPhysicsSystem extends EntitySystem {
     public static int getVelocityLimit2() {
         return getVelocityLimit() * getVelocityLimit();
     }
-    
+
+    @Override
+    public String toString() {
+        physicsInfo.setLength(0);
+        physicsInfo.append("[Physics steps]:    ").append(stepCount);
+        physicsInfo.append("\n[Bodies]:           ").append(world.getBodyCount());
+        physicsInfo.append("\n[Fixtures]:         ").append(world.getFixtureCount());
+        physicsInfo.append("\n[Joints]:           ").append(world.getJointCount());
+        physicsInfo.append("\n[Contacts]:         ").append(world.getContactCount());
+        return physicsInfo.toString();
+    }
+
 }
