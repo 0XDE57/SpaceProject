@@ -176,6 +176,7 @@ public class SpaceStationSystem extends IteratingSystem {
         Mappers.controllable.get(vehicleEntity).activelyControlled = false;
         Mappers.cargo.get(vehicleEntity).lastCollectTime = GameScreen.getGameTimeCurrent();//show inventory
 
+        getEngine().getSystem(CameraSystem.class).impact(vehicleEntity);
         getEngine().getSystem(SoundSystem.class).dockStation();
         Gdx.app.debug(getClass().getSimpleName(), "dock [" + DebugUtil.objString(vehicleEntity) + "] at station: [" + DebugUtil.objString(stationEntity) + "] port: " + dockedPort);
     }
