@@ -13,9 +13,12 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Queue;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CamTargetComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.config.ConfigManager;
+import com.spaceproject.config.DebugConfig;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
@@ -49,7 +52,9 @@ public class CameraSystem extends IteratingSystem {
     enum Mode {
         free, lerpTarget, lockTarget, combat
     }
-    
+
+    final DebugConfig debugCFG = SpaceProject.configManager.getConfig(DebugConfig.class);
+
     public CameraSystem() {
         super(Family.all(CameraFocusComponent.class, TransformComponent.class).get());
         cam = MyScreenAdapter.cam;
@@ -65,11 +70,11 @@ public class CameraSystem extends IteratingSystem {
     public void processEntity(Entity entity, float delta) {
         Vector2 pos = Mappers.transform.get(entity).pos;
         //Vector2 vel = pos.cpy().add(Mappers.physics.get(entity).body.getLinearVelocity().cpy().scl(0.02f));
-        
-        if (GameScreen.inSpace()) {
-            mode = Mode.lockTarget;
-        } else {
+
+        if (debugCFG.lerpCam) {
             mode = Mode.lerpTarget;
+        } else {
+            mode = Mode.lockTarget;
         }
         
         switch (mode) {

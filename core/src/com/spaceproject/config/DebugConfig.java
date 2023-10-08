@@ -18,6 +18,7 @@ public class DebugConfig extends Config {
     public boolean drawOrbitPath;
     public boolean drawMousePos;
     public boolean drawEntityList;
+    public boolean lerpCam;
 
     @Override
     public void loadDefault() {
@@ -37,6 +38,7 @@ public class DebugConfig extends Config {
         drawOrbitPath = false;
         drawMousePos = false;
         drawEntityList = false;
+        lerpCam = false;
     }
     
 }

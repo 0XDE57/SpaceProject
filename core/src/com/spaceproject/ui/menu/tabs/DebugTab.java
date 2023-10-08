@@ -23,6 +23,15 @@ public class DebugTab extends HotKeyTab {
             }
         });
 
+        final CheckBox toggleCameraLerp = new CheckBox("lerp camera", VisUI.getSkin());
+        toggleCameraLerp.setChecked(debugCFG.spawnAsteroid);
+        toggleCameraLerp.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                debugCFG.lerpCam = toggleCameraLerp.isChecked();
+            }
+        });
+
         final CheckBox toggleComponentList = new CheckBox("show components", VisUI.getSkin());
         toggleComponentList.setChecked(debugCFG.drawComponentList);
         toggleComponentList.addListener(new ChangeListener() {
@@ -111,6 +120,7 @@ public class DebugTab extends HotKeyTab {
         
 
         getContentTable().add(toggleAsteroidSpawn).left().row();
+        getContentTable().add(toggleCameraLerp).left().row();
         getContentTable().add(toggleFPS).left();
         getContentTable().add(toggleExtraInfo).left().row();
         getContentTable().add(toggleMousePos).left().row();
