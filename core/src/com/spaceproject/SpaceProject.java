@@ -22,7 +22,7 @@ public class SpaceProject extends Game {
         
         isMobile = Gdx.app.getType() != Application.ApplicationType.Desktop;
     
-        Gdx.graphics.setTitle(TITLE + "  -  " + VERSION);
+        Gdx.graphics.setTitle(TITLE + "  (" + VERSION + ")");
         
         loadConfigs();
         
