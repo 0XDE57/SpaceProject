@@ -68,7 +68,7 @@ public class NoiseThread implements Runnable {
             isDone = true;
             long endTime = System.currentTimeMillis() - startTime;
             Gdx.app.log(getClass().getSimpleName(),
-                    this + " complete: " + endTime + "ms -> heightmap("
+                    "complete: " + this + " in " + endTime + "ms -> heightmap("
                             + heightTime + ") tilemap(" + tileTime + ") pixelate(" + pixelTime + ")");
 
         } catch (Exception e) {
@@ -109,7 +109,7 @@ public class NoiseThread implements Runnable {
     
     @Override
     public String toString() {
-        return "seed: " + seed + " @ " + mapSize;
+        return seed + " @ " + mapSize + "x" + mapSize;
     }
 
 }
