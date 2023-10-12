@@ -2,54 +2,38 @@ package com.spaceproject.ui.menu;
 
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.controllers.Controller;
-import com.badlogic.gdx.controllers.ControllerListener;
-import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
-import com.kotcrab.vis.ui.util.dialog.Dialogs;
 import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
-import com.kotcrab.vis.ui.widget.ButtonBar;
-import com.kotcrab.vis.ui.widget.LinkLabel;
 import com.kotcrab.vis.ui.widget.VisDialog;
-import com.kotcrab.vis.ui.widget.VisWindow;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.screens.debug.BlocksTestScreen;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.screens.debug.Test3DScreen;
-import com.spaceproject.screens.debug.TestNoiseScreen;
-import com.spaceproject.screens.debug.TestShipGenerationScreen;
-import com.spaceproject.screens.debug.TestSpiralGalaxy;
-import com.spaceproject.screens.debug.TestVoronoiScreen;
-import com.spaceproject.utility.IndependentTimer;
+import com.spaceproject.screens.debug.*;
+import com.spaceproject.ui.ControllerMenuStage;
 
-public class TitleScreenMenu implements ControllerListener {
+public class TitleScreenMenu {
 
-    private final Stage stage;
+    private final ControllerMenuStage stage;
     public Table table;
-    private final Array<TextButton> buttons;
-    private int focusIndex = -1;
-    private final IndependentTimer lastFocusTimer;
-    private float leftStickVertAxis;
 
-    public TitleScreenMenu(final Stage stage, final SpaceProject game, boolean showDebugScreens) {
+    public TitleScreenMenu(final ControllerMenuStage stage, final SpaceProject game, boolean showDebugScreens) {
         this.stage = stage;
         table = new Table();
-        buttons = new Array<>();
-        lastFocusTimer = new IndependentTimer(200, true);
 
         if (showDebugScreens) {
             addDebugItems(game);
         }
     
         addMenuItems(game);
-    
+        for (Actor button : table.getChildren()) {
+            stage.addFocusableActor(button);
+        }
+
         //set bigger labels on mobile
         if (SpaceProject.isMobile()) {
             for (Actor button : table.getChildren()) {
@@ -58,76 +42,6 @@ public class TitleScreenMenu implements ControllerListener {
                 }
             }
         }
-
-        setFocusItems();
-
-        stage.addListener(new InputListener() {
-            @Override
-            public boolean mouseMoved(InputEvent event, float x, float y) {
-                removeFocus();
-                return super.mouseMoved(event, x, y);
-            }
-
-            @Override
-            public boolean keyDown(InputEvent event, int keycode) {
-                switch (keycode) {
-                    case Input.Keys.W:
-                    case Input.Keys.UP:
-                        return updateFocus(true);
-                    case Input.Keys.S:
-                    case Input.Keys.DOWN:
-                        return updateFocus(false);
-                    case Input.Keys.SPACE:
-                    case Input.Keys.ENTER:
-                        return selectFocusedActor();
-                }
-                return super.keyDown(event, keycode);
-            }
-        });
-    }
-
-    private void setFocusItems() {
-        buttons.clear();
-        for (Actor element : table.getChildren()) {
-            buttons.add((TextButton) element);
-        }
-    }
-
-    private boolean updateFocus(boolean up) {
-        if (buttons.size == 0) return false;
-        if (up) {
-            focusIndex--;
-        } else {
-            focusIndex++;
-        }
-        focusIndex = focusIndex % buttons.size;
-        if (focusIndex < 0) {
-            focusIndex = buttons.size - 1;
-        }
-        //skip disabled elements, move to next item
-        if (buttons.get(focusIndex).isDisabled()) {
-            return updateFocus(up); //warning: StackOverflow if ALL buttons are disabled (which shouldn't happen)
-        }
-        stage.setKeyboardFocus(buttons.get(focusIndex));
-        return true;
-    }
-
-    private void removeFocus() {
-        focusIndex = -1;
-        stage.setKeyboardFocus(null);
-    }
-
-    private boolean selectFocusedActor() {
-        if (focusIndex == -1) return false;
-
-        InputEvent touchEvent = new InputEvent();
-        touchEvent.setType(InputEvent.Type.touchDown);
-        buttons.get(focusIndex).fire(touchEvent);
-
-        touchEvent = new InputEvent();
-        touchEvent.setType(InputEvent.Type.touchUp);
-        buttons.get(focusIndex).fire(touchEvent);
-        return true;
     }
 
     private void addMenuItems(final SpaceProject game) {
@@ -145,7 +59,13 @@ public class TitleScreenMenu implements ControllerListener {
         btnLoad.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Dialogs.showOKDialog(stage, "load", "not implemented yet");
+                VisDialog dialog = MyDialogs.showOKDialog(stage, "load", "not implemented yet");
+                dialog.addListener(new ChangeListener() {
+                    @Override
+                    public void changed(ChangeEvent event, Actor actor) {
+                        System.out.println("changed?");
+                    }
+                });
             }
         });
 
@@ -156,7 +76,7 @@ public class TitleScreenMenu implements ControllerListener {
             public void changed(ChangeEvent event, Actor actor) {
                 // todo: open settings panel with key mapping and such
                 // todo: make settings panel
-                Dialogs.showOKDialog(stage, "options", "not implemented yet");
+                MyDialogs.showMultiDialog(stage, "[multibuttondialog]",  "[WASD] or arrow keys or [D-Pad] or Left-Joystick to navigate");
             }
         });
 
@@ -165,16 +85,17 @@ public class TitleScreenMenu implements ControllerListener {
         btnAbout.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                showAboutDialog(stage);
+                MyDialogs.showAboutDialog(stage);
             }
         });
 
         TextButton btnExit = new TextButton("exit", VisUI.getSkin());
         btnExit.getLabel().setAlignment(Align.left);
+
         btnExit.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Dialogs.showOptionDialog(stage, "exit", "goodbye?", Dialogs.OptionDialogType.YES_NO, new OptionDialogAdapter() {
+                MyDialogs.showYesNoDialog(stage, "exit", "goodbye?", new OptionDialogAdapter() {
                     @Override
                     public void yes() {
                         Gdx.app.exit();
@@ -182,7 +103,42 @@ public class TitleScreenMenu implements ControllerListener {
                 });
             }
         });
+        stage.setEscapeActor(btnExit);
 
+/*
+        btnExit.addListener(new ChangeListener() {
+            @Override
+            public void changed (ChangeEvent event, Actor actor) {
+                final int nothing = 1;
+                final int everything = 2;
+                final int something = 3;
+
+                //confirmdialog may return result of any type, here we are just using ints
+                Dialogs.showConfirmDialog(stage, "confirm dialog", "what do you want?",
+                        new String[]{"nothing", "everything", "something"}, new Integer[]{nothing, everything, something},
+                        result -> {
+                            switch (result) {
+                                case nothing: Dialogs.showOKDialog(stage, "result", "pressed: nothing"); break;
+                                case everything: Dialogs.showOKDialog(stage, "result", "pressed: everything"); break;
+                                case something: Dialogs.showOKDialog(stage, "result", "pressed: something"); break;
+                            }
+                        });
+
+                MyDialogs.showCustomDialog(stage, "confirm dialog", "what do you want?",
+                        new String[]{"nothing", "everything", "something"}, new Integer[]{nothing, everything, something},
+                        result -> {
+                            switch (result) {
+                                case nothing: Dialogs.showOKDialog(stage, "result", "pressed: nothing"); break;
+                                case everything: Dialogs.showOKDialog(stage, "result", "pressed: everything"); break;
+                                case something: Dialogs.showOKDialog(stage, "result", "pressed: something"); break;
+                            }
+                        });
+
+                }
+        });*/
+
+        btnLoad.setDisabled(true);
+        //btnOption.setDisabled(true);
         table.add(btnPlay).fillX().row();
         table.add(btnLoad).fillX().row();
         table.add(btnOption).fillX().row();
@@ -252,84 +208,6 @@ public class TitleScreenMenu implements ControllerListener {
         table.add(btn3D).fillX().row();
         table.add(btnShip).fillX().row();
 
-        removeFocus();
-        setFocusItems();
-    }
-    
-    private VisDialog showAboutDialog(Stage stage) {
-        final VisDialog dialog = new VisDialog("");
-        dialog.closeOnEscape();
-        dialog.centerWindow();
-
-        String aboutText = "Shoot some asteroids, they fall apart!";
-        aboutText += "\nversion: " + SpaceProject.VERSION
-                + "\nlibGDX: " +  com.badlogic.gdx.Version.VERSION;
-        aboutText += "\nDeveloped with <3";
-        dialog.text(aboutText);
-        
-        LinkLabel link = new LinkLabel("https://github.com/0xDE57/SpaceProject");
-        link.setListener(url -> Gdx.net.openURI(url));
-        dialog.getContentTable().row();
-        dialog.getContentTable().add(link);
-
-        dialog.button(ButtonBar.ButtonType.OK.getText());
-        dialog.pad(30.0f).padBottom(10.0f);
-        
-        dialog.addListener(new InputListener() {
-            public boolean keyDown(InputEvent event, int keycode) {
-                if (keycode == Input.Keys.ESCAPE) {
-                    dialog.fadeOut();
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        });
-
-        dialog.pack();
-        stage.addActor(dialog.fadeIn());
-        return dialog;
-    }
-
-    @Override
-    public void connected(Controller controller) {}
-
-    @Override
-    public void disconnected(Controller controller) {}
-
-    @Override
-    public boolean buttonDown(Controller controller, int buttonCode) {
-        if (buttonCode == controller.getMapping().buttonDpadUp) {
-            return updateFocus(true);
-        }
-        if (buttonCode == controller.getMapping().buttonDpadDown) {
-            return updateFocus(false);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean buttonUp(Controller controller, int buttonCode) {
-        if (buttonCode == controller.getMapping().buttonA) {
-            return selectFocusedActor();
-        }
-        return false;
-    }
-
-    @Override
-    public boolean axisMoved(Controller controller, int axisCode, float value) {
-        if (axisCode == controller.getMapping().axisLeftY) {
-            leftStickVertAxis = value;
-        }
-        if (Math.abs(leftStickVertAxis) > 0.6f && lastFocusTimer.tryEvent()) {
-            if (leftStickVertAxis > 0) {
-                return updateFocus(false);
-            }
-            if (leftStickVertAxis < 0) {
-                return updateFocus(true);
-            }
-        }
-        return false;
     }
 
 }

@@ -9,18 +9,13 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
-import com.kotcrab.vis.ui.util.dialog.Dialogs;
-import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.FontLoader;
 import com.spaceproject.screens.animations.DelaunayAnim;
@@ -29,20 +24,21 @@ import com.spaceproject.screens.animations.NoiseAnim;
 import com.spaceproject.screens.animations.OrbitAnim;
 import com.spaceproject.screens.animations.TitleAnimation;
 import com.spaceproject.screens.animations.TreeAnim;
+import com.spaceproject.ui.ControllerMenuStage;
 import com.spaceproject.ui.menu.TitleScreenMenu;
 
 public class TitleScreen extends MyScreenAdapter {
     
     private SpaceProject game;
-    private Stage stage;
+    private ControllerMenuStage stage;
     private TitleScreenMenu menu;
     private Table versionTable;
     private Label titleLabel;
     private int edgePad;
     private Matrix4 projectionMatrix = new Matrix4();
+
     private TitleAnimation foregroundAnimation, backgroundAnimation;
     private ForegroundAnimation previousAnim;
-    
     enum ForegroundAnimation {
         tree, delaunay, orbit, crossNoise, nbody;/*, asteroid*/;
         
@@ -66,9 +62,10 @@ public class TitleScreen extends MyScreenAdapter {
         TextButton.TextButtonStyle textButtonStyle = VisUI.getSkin().get(TextButton.TextButtonStyle.class);
         textButtonStyle.focused = textButtonStyle.over; //set focused style to over for keyboard navigation because VisUI default focused style is null!
 
-        stage = new Stage(new ScreenViewport());
-        Gdx.input.setInputProcessor(stage);
-        
+        stage = new ControllerMenuStage(new ScreenViewport());
+        getInputMultiplexer().addProcessor(stage); // instead of Gdx.input.setInputProcessor(stage);
+        Controllers.addListener(stage);
+
         //init fonts
         String titleFont = "titleFontLarge";
         initTitleFont(titleFont);
@@ -85,7 +82,9 @@ public class TitleScreen extends MyScreenAdapter {
         menu.table.pack();
         edgePad = SpaceProject.isMobile() ? 20 : 10;
         menu.table.setPosition(edgePad, edgePad);
-        Controllers.addListener(menu);
+        menu.table.validate();
+        //must set one focused actor first, otherwise controller stage won't focus
+        //stage.setFocusedActor(menu.table.getChildren().first());
 
         //version note
         versionTable = new Table();
@@ -132,7 +131,7 @@ public class TitleScreen extends MyScreenAdapter {
             menu.addDebugItems(game);
             menu.table.pack();
         }
-        
+        /*
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             if (exitPromptUp) return;
             exitPromptUp = true;
@@ -150,7 +149,7 @@ public class TitleScreen extends MyScreenAdapter {
                     exitPromptUp = false;
                 }
             });
-        }
+        }*/
     }
     boolean exitPromptUp = false;
 
@@ -233,8 +232,9 @@ public class TitleScreen extends MyScreenAdapter {
         if (foregroundAnimation instanceof Disposable)
             ((Disposable)foregroundAnimation).dispose();
 
-        stage.dispose();
+        Controllers.removeListener(stage);
 
-        Controllers.removeListener(menu);
+        stage.dispose();
     }
+
 }
