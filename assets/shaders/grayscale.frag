@@ -9,7 +9,8 @@ uniform float u_blend;
 
 void main() {
     vec4 c = v_color * texture2D(u_texture, v_texCoords);
-    float grey = (c.r + c.g + c.b) / 3.0; //avg color per pixel
-    //blend beteen gray and actual color
+    //CIE weighted avg color per pixel
+    float grey = (0.21 * c.r + 0.72 * c.g + 0.07 * c.b) / 3.0;
+    //blend between gray and actual color
     gl_FragColor = mix(c, vec4(grey, grey, grey, c.a), u_blend);
 }
