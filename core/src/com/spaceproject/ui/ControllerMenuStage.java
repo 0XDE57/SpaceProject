@@ -154,12 +154,11 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
 
     /**
      * fired when focus was set, override for your own special actions
-     *
      * @param focusedActor the actor that gained focus
      */
     protected void onFocusGained(Actor focusedActor, Actor oldFocused) {
-        String old = oldFocused == null ? "" : " old focus: " + ((TextButton) oldFocused).getText().toString();
-        Gdx.app.error(getClass().getSimpleName(), "focused gained: " + ((TextButton) focusedActor).getText().toString() + " pressed: " + isPressed + old);
+        //String old = oldFocused == null ? "" : " old focus: " + ((TextButton) oldFocused).getText().toString();
+        //Gdx.app.error(getClass().getSimpleName(), "focused gained: " + ((TextButton) focusedActor).getText().toString() + " pressed: " + isPressed + old);
         if (sendMouseOverEvents) {
             fireEventOnActor(focusedActor, InputEvent.Type.enter, -1, oldFocused);
         }
@@ -169,12 +168,11 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
 
     /**
      * fired when focus was lost, override for your own special actions
-     *
      * @param focusedActor the actor that lost focus
      */
     protected void onFocusLost(Actor focusedActor, Actor newFocused) {
-        String newFocus = newFocused == null ? "" : " new focus: " + ((TextButton) newFocused).getText().toString();
-        Gdx.app.error(getClass().getSimpleName(), "focused lost: " + ((TextButton) focusedActor).getText().toString() + " pressed: "  + isPressed + newFocus);
+        //String newFocus = newFocused == null ? "" : " new focus: " + ((TextButton) newFocused).getText().toString();
+        //Gdx.app.error(getClass().getSimpleName(), "focused lost: " + ((TextButton) focusedActor).getText().toString() + " pressed: "  + isPressed + newFocus);
         if (isPressed) {
             cancelTouchFocus();
             isPressed = false;
@@ -187,7 +185,6 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
 
     /**
      * checks if the given actor is focusable: in the list of focusable actors, visible, touchable, and on the stage
-     *
      * @param actor
      * @return true if focusable
      */
@@ -225,13 +222,14 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
      * @return true if the event was handled
      */
     protected boolean triggerActionOnActor(boolean keyDown, Actor actor) {
-        if (actor instanceof IControllerActable && keyDown) {
-            return ((IControllerActable) actor).onControllerDefaultKeyDown();
-        } else if (actor instanceof IControllerActable) {
-            return ((IControllerActable) actor).onControllerDefaultKeyUp();
-        } else{
-            return fireEventOnActor(actor, keyDown ? InputEvent.Type.touchDown : InputEvent.Type.touchUp, 0, null);
+        if (actor instanceof IControllerActable) {
+            if (keyDown) {
+                return ((IControllerActable) actor).onControllerDefaultKeyDown();
+            } else {
+                return ((IControllerActable) actor).onControllerDefaultKeyUp();
+            }
         }
+        return fireEventOnActor(actor, keyDown ? InputEvent.Type.touchDown : InputEvent.Type.touchUp, 0, null);
     }
 
     @Override
@@ -262,13 +260,14 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
             case Input.Keys.BACK:
             case Input.Keys.BACKSPACE:
             case Input.Keys.ESCAPE:
-                handled = triggerActionOnActor(true, escapeActor);
-                isPressed = handled;
+                if (escapeActor != null) {
+                    handled = triggerActionOnActor(true, escapeActor);
+                    isPressed = handled;
+                }
                 break;
         }
 
-        ///if (handled)
-        Gdx.app.error(getClass().getSimpleName(), "keydown: [" + keyCode + "]" +  Input.Keys.toString(keyCode) + " handled: " + handled + " pressed: " + isPressed);
+        //Gdx.app.error(getClass().getSimpleName(), "keydown: [" + keyCode + "]" +  Input.Keys.toString(keyCode) + " handled: " + handled + " pressed: " + isPressed);
 
         if (!handled)
             handled = super.keyDown(keyCode);
@@ -285,6 +284,7 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
         } else if (isEscapeActionKeyCode(keyCode) && escapeActor != null) {
             handled = triggerActionOnActor(false, escapeActor);
             isPressed = handled;
+            //Gdx.app.error(getClass().getSimpleName(), "keyUp escape action. pressed: " + isPressed);
         } else
             handled = false;
 
@@ -311,7 +311,6 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
                 }
             }
         }
-
         return super.touchDown(screenX, screenY, pointer, button);
     }
 
@@ -368,7 +367,7 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
 
         boolean handled = event.isHandled();
         Pools.free(event);
-        Gdx.app.error(getClass().getSimpleName(), event.toString() + " handled: " +  handled);
+        //Gdx.app.error(getClass().getSimpleName(), event + " handled: " +  handled);
         return handled;
     }
 
@@ -453,7 +452,7 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
             if ((actor instanceof TextButton) && ((TextButton)actor).isDisabled()) continue;
             //may have to skip more types here in future as add controller support to other actors
             //eg: VisTextField
-            if (setFocusedActor(actor)){
+            if (setFocusedActor(actor)) {
                 return true;
             }
         }
@@ -489,7 +488,7 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
                 if (currentDist < distance) {
                     nearestInDirection = currentActor;
                     distance = currentDist;
-                    Gdx.app.error(getClass().getSimpleName(), ((TextButton)currentActor).getText() + ": " + direction + " " + distance + " pressed:" + isPressed);
+                    //Gdx.app.error(getClass().getSimpleName(), ((TextButton)currentActor).getText() + ": " + direction + " " + distance + " pressed:" + isPressed);
                 }
             }
         }

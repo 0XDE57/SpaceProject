@@ -20,24 +20,11 @@ import com.spaceproject.ui.VisControllerDialog;
 public class MyDialogs {
 
     public static VisControllerDialog showOKDialog (Stage stage, String title, String text) {
-        /*
-        final VisDialog dialog = new VisDialog(title);
-
-        dialog.text(text);
-        Actor button = dialog.button("ok").padBottom(5);
-        dialog.pack();
-        dialog.centerWindow();
-
-        addListener(dialog);
-        stage.addActor(dialog.fadeIn());
-        //stage.setKeyboardFocus(button);
-         */
-
         final VisControllerDialog dialog = new VisControllerDialog(title);
         dialog.text(text).padLeft(12).padRight(12);
         dialog.button("ok", null).padBottom(5);
         dialog.pack();
-        addDismissListener(dialog);
+        addOkDismissListener(dialog);
 
         dialog.show(stage);
         return dialog;
@@ -93,7 +80,7 @@ public class MyDialogs {
     }
 
     public static VisDialog showAboutDialog(Stage stage) {
-        final VisDialog dialog = new VisDialog("");
+        final VisControllerDialog dialog = new VisControllerDialog("");
         dialog.centerWindow();
 
         String aboutText = "Shoot some asteroids, they fall apart!";
@@ -108,33 +95,44 @@ public class MyDialogs {
             public void yes() {
                 Gdx.net.openURI(url);
             }
-        })
-
-        );
+        }));
         dialog.getContentTable().row();
         dialog.getContentTable().add(link);
 
         dialog.button("ok");
         dialog.pad(10.0f);
 
-        addDismissListener(dialog);
+        addOkDismissListener(dialog);
 
         dialog.pack();
         stage.addActor(dialog.fadeIn());
         return dialog;
     }
 
-    private static void addDismissListener(VisDialog dialog) {
+    private static void addDismissListener(VisControllerDialog dialog) {
         dialog.addListener(new InputListener() {
             @Override
             public boolean keyDown (InputEvent event, int keycode) {
-                //Gdx.app.error(getClass().getSimpleName(), "mydialog listener " + keycode);
                 switch (keycode) {
                     case Keys.ESCAPE:
-                    case Keys.DEL:
+                    case Keys.BACKSPACE:
+                        dialog.hide();
+                        return true;
+                }
+                return false;
+            }
+        });
+    }
+    private static void addOkDismissListener(VisControllerDialog dialog) {
+        dialog.addListener(new InputListener() {
+            @Override
+            public boolean keyDown (InputEvent event, int keycode) {
+                switch (keycode) {
+                    case Keys.ESCAPE:
+                    case Keys.BACKSPACE:
                     case Keys.SPACE:
                     case Keys.ENTER:
-                        dialog.fadeOut();
+                        dialog.hide();
                         return true;
                 }
                 return false;
