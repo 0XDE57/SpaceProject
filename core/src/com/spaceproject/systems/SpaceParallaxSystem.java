@@ -45,9 +45,9 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         spaceShader = new ShaderProgram(Gdx.files.internal("shaders/spaceParallax.vert"), Gdx.files.internal("shaders/spaceParallax.frag"));
         if (spaceShader.isCompiled()) {
             spriteBatch.setShader(spaceShader);
-            Gdx.app.log(this.getClass().getSimpleName(), "shader compiled successfully!");
+            Gdx.app.log(getClass().getSimpleName(), "shader compiled successfully!");
         } else {
-            Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + spaceShader.getLog());
+            Gdx.app.error(getClass().getSimpleName(), "shader failed to compile:\n" + spaceShader.getLog());
         }
     }
     
@@ -58,7 +58,8 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         
         float invert = GameScreen.isHyper() ? 1 : 0;
         CameraSystem cam = getEngine().getSystem(CameraSystem.class);
-        float blend = cam.getZoomLevel() / cam.getMaxZoomLevel();
+        float blend = GameScreen.cam.zoom / cam.getZoomForLevel(cam.getMaxZoomLevel());
+        //blend = cam.z
         spaceShader.bind();
         spaceShader.setUniformf("u_blend", blend);
         spaceShader.setUniformf("u_invert", invert);

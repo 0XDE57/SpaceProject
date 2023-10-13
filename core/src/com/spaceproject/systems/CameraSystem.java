@@ -304,7 +304,7 @@ public class CameraSystem extends IteratingSystem {
         zoomOut();
     }
     
-    public float getMaxZoomLevel() {
+    public byte getMaxZoomLevel() {
         return maxZoomLevel;
     }
     
