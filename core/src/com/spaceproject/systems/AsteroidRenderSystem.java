@@ -59,7 +59,8 @@ public class AsteroidRenderSystem extends IteratingSystem {
             long timeSinceDmg = GameScreen.getGameTimeCurrent() - health.lastHitTime;
             long hitTime = 10;
             if (timeSinceDmg < hitTime) {
-                ratio -= ratio * 0.125f;
+                float fade = (float) timeSinceDmg / hitTime;
+                ratio -= fade * 0.125f;
             }
             tempColor.set(Color.BLACK).lerp(asteroid.revealed ? asteroid.color : defaultOutline, 1 - ratio);
             hitTime = 500;
