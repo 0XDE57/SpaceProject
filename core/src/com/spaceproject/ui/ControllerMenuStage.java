@@ -233,8 +233,9 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
 
     @Override
     public boolean keyDown(int keyCode) {
+        //no actors on stage
         if (!getRoot().hasChildren()) {
-            return false; //no actors on stage
+            return super.keyDown(keyCode);
         }
 
         boolean handled = false;
@@ -280,8 +281,9 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
 
     @Override
     public boolean keyUp(int keyCode) {
+        //no actors on stage
         if (!getRoot().hasChildren()) {
-            return false; //no actors on stage
+            return super.keyUp(keyCode);
         }
 
         boolean handled;
@@ -303,8 +305,9 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        //no actors on stage
         if (!getRoot().hasChildren()) {
-            return false; //no actors on stage
+            return super.touchDown(screenX, screenY, pointer, button);
         }
 
         if (isFocusOnTouchdown()) {
