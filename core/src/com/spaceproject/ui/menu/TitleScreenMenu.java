@@ -207,7 +207,6 @@ public class TitleScreenMenu {
         table.add(btnNoise).fillX().row();
         table.add(btn3D).fillX().row();
         table.add(btnShip).fillX().row();
-
     }
 
 }

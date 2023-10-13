@@ -22,6 +22,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.Align;
@@ -121,27 +122,19 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         inventoryParam.borderColor = Color.BLACK;
         inventoryParam.borderWidth = 1;
         inventoryFont = FontLoader.createFont(FontLoader.fontPressStart, inventoryParam);
-        
+
         GameScreen.getStage().addListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
-                //Gdx.app.debug(getClass().getSimpleName(), "hud: " + keycode);
                 if (gameMenu.switchTabForKey(keycode)) {
                     if (!gameMenu.isVisible()) {
                         gameMenu.show();
                     }
                     return true;
                 }
-                //return gameMenu.isVisible();
                 return super.keyDown(event, keycode);
             }
-        
-            @Override
-            public boolean keyUp(InputEvent event, int keycode) {
-                super.keyUp(event, keycode);
-                return gameMenu.isVisible();
-            }
-        
+
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 if (button == Input.Buttons.MIDDLE) {
@@ -155,7 +148,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 super.touchDown(event, x, y, pointer, button);
                 return gameMenu.isVisible();
             }
-    
+
             @Override
             public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY) {
                 if (getMiniMap().scrolled(amountX, amountY)) {
@@ -169,7 +162,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     @Override
     public void initContext(GameScreen game) {
         gameMenu = new GameMenu(game, false);
-        Controllers.addListener(gameMenu);
     }
     
     @Override
@@ -827,7 +819,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     @Override
     public void dispose() {
         font.dispose();
-        Controllers.removeListener(gameMenu);
     }
 
 }

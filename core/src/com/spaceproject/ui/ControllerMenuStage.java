@@ -16,7 +16,6 @@ import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.spaceproject.utility.IndependentTimer;
 
-
 /**
  * Modified version of: https://github.com/MrStahlfelge/gdx-controllerutils
  */
@@ -234,6 +233,10 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
 
     @Override
     public boolean keyDown(int keyCode) {
+        if (!getRoot().hasChildren()) {
+            return false; //no actors on stage
+        }
+
         boolean handled = false;
 
         switch (keyCode) {
@@ -277,6 +280,10 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
 
     @Override
     public boolean keyUp(int keyCode) {
+        if (!getRoot().hasChildren()) {
+            return false; //no actors on stage
+        }
+
         boolean handled;
         if (isDefaultActionKeyCode(keyCode)) {
             isPressed = false;
@@ -296,6 +303,10 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if (!getRoot().hasChildren()) {
+            return false; //no actors on stage
+        }
+
         if (isFocusOnTouchdown()) {
             screenToStageCoordinates(controllerTempCoords.set(screenX, screenY));
             Actor target = hit(controllerTempCoords.x, controllerTempCoords.y, true);
@@ -369,6 +380,16 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
         Pools.free(event);
         //Gdx.app.error(getClass().getSimpleName(), event + " handled: " +  handled);
         return handled;
+    }
+
+    protected void simpleFire(Actor actor) {
+        InputEvent touchEvent = new InputEvent();
+        touchEvent.setType(InputEvent.Type.touchDown);
+        actor.fire(touchEvent);
+
+        touchEvent = new InputEvent();
+        touchEvent.setType(InputEvent.Type.touchUp);
+        actor.fire(touchEvent);
     }
 
     /**
@@ -651,16 +672,20 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
         float threshold = 0.6f;
         if (Math.abs(leftStickVertAxis) > threshold && lastFocusTimer.tryEvent()) {
             if (leftStickVertAxis > 0) {
-                return moveFocusByDirection(MoveFocusDirection.south);
+                //return moveFocusByDirection(MoveFocusDirection.south);
+                return keyDown(Input.Keys.DOWN);
             } else {
-                return moveFocusByDirection(MoveFocusDirection.north);
+                //return moveFocusByDirection(MoveFocusDirection.north);
+                return keyDown(Input.Keys.UP);
             }
         }
         if (Math.abs(leftStickHorAxis) > threshold && lastFocusTimer.tryEvent()) {
             if (leftStickHorAxis > 0) {
-                return moveFocusByDirection(MoveFocusDirection.east);
+                //return moveFocusByDirection(MoveFocusDirection.east);
+                return keyDown(Input.Keys.RIGHT);
             } else {
-                return moveFocusByDirection(MoveFocusDirection.west);
+                //return moveFocusByDirection(MoveFocusDirection.west);
+                return keyDown(Input.Keys.LEFT);
             }
         }
         return false;

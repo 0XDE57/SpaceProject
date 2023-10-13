@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -32,6 +33,7 @@ import com.spaceproject.math.Physics;
 import com.spaceproject.noise.NoiseManager;
 import com.spaceproject.systems.Box2DPhysicsSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
+import com.spaceproject.ui.ControllerMenuStage;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.IScreenResizeListener;
@@ -59,7 +61,7 @@ public class GameScreen extends MyScreenAdapter {
     private static long galaxySeed;
     public static Galaxy galaxy;
     
-    private static Stage stage;
+    private static ControllerMenuStage stage;
     public static Cursor cursor;
     
     public static boolean isDebugMode = true;
@@ -74,7 +76,7 @@ public class GameScreen extends MyScreenAdapter {
         
         if (isDebugMode) {
             //test
-            Physics.test();
+            //Physics.test();
         }
         
         initUI();
@@ -94,9 +96,10 @@ public class GameScreen extends MyScreenAdapter {
         TextButton.TextButtonStyle textButtonStyle = VisUI.getSkin().get(TextButton.TextButtonStyle.class);
         textButtonStyle.focused = textButtonStyle.over; //set focused style to over for keyboard navigation because VisUI default focused style is null!
 
-        stage = new Stage(new ScreenViewport());
+        stage = new ControllerMenuStage(new ScreenViewport());
         getInputMultiplexer().addProcessor(0, stage);
-        
+        Controllers.addListener(stage);
+
         //cursor
         Pixmap cursorImage = new Pixmap(Gdx.files.internal("cursor/simple-01-hit.png"));
         Pixmap scaled = new Pixmap(64, 64, cursorImage.getFormat());
@@ -297,7 +300,7 @@ public class GameScreen extends MyScreenAdapter {
         gameTimeStart += deltaMillis * 1000000;
     }
     
-    public static Stage getStage() {
+    public static ControllerMenuStage getStage() {
         return stage;
     }
 
@@ -386,7 +389,8 @@ public class GameScreen extends MyScreenAdapter {
         galaxy = null;
         noiseManager.dispose();
         noiseManager = null;
-        
+
+        Controllers.removeListener(stage);
         stage.dispose();
         cursor.dispose();
     }

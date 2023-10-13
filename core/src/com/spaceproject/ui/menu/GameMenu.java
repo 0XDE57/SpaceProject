@@ -1,7 +1,6 @@
 package com.spaceproject.ui.menu;
 
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.controllers.Controller;
@@ -11,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.SnapshotArray;
 import com.kotcrab.vis.ui.VisUI;
@@ -35,7 +35,7 @@ import com.spaceproject.ui.menu.tabs.MyTab;
 import com.spaceproject.utility.IndependentTimer;
 
 
-public class GameMenu extends VisWindow implements ControllerListener {
+public class GameMenu extends VisWindow {
     
     private GameScreen game;
     
@@ -51,9 +51,6 @@ public class GameMenu extends VisWindow implements ControllerListener {
     private boolean isMovable = true;
     private float ratio = 0.66f;//scaling, how much screen does menu cover
     private boolean debugShowPlaceholderTests = true;
-    private int focusIndex = -1;
-    private float leftStickVertAxis;
-    private IndependentTimer lastFocusTimer = new IndependentTimer(200, true);
     
     public GameMenu(GameScreen game, boolean vertical) {
         super(SpaceProject.TITLE + " (" + SpaceProject.VERSION + ")");
@@ -107,76 +104,11 @@ public class GameMenu extends VisWindow implements ControllerListener {
         
         tabbedPane.switchTab(mainMenuTab);
 
-        game.getStage().addListener(new InputListener() {
-            @Override
-            public boolean mouseMoved(InputEvent event, float x, float y) {
-                if (isVisible()) {
-                    game.getEngine().getSystem(DesktopInputSystem.class).setFocusToDesktop();
-                    removeFocus(game.getStage());
-                }
-                return super.mouseMoved(event, x, y);
-            }
-            @Override
-            public boolean keyDown(InputEvent event, int keycode) {
-                if (!isVisible()) {
-                    return super.keyDown(event, keycode);
-                }
-                game.getEngine().getSystem(DesktopInputSystem.class).setFocusToDesktop();
-                switch (keycode) {
-                    case Input.Keys.W:
-                    case Input.Keys.UP:
-                        return updateFocus(game.getStage(), true);
-                    case Input.Keys.S:
-                    case Input.Keys.DOWN:
-                        return updateFocus(game.getStage(), false);
-                    case Input.Keys.SPACE:
-                    case Input.Keys.ENTER:
-                        return selectFocusedActor();
-                }
-                return super.keyDown(event, keycode);
-            }
-        });
-    }
-
-    private boolean updateFocus(Stage stage, boolean up) {
-        SnapshotArray<Actor> children = tabbedPane.getActiveTab().getContentTable().getChildren();
-        if (children.size == 0) return false;
-
-        if (up) {
-            focusIndex--;
-        } else {
-            focusIndex++;
+        for (Actor button : mainMenuTab.getContentTable().getChildren()) {
+            GameScreen.getStage().addFocusableActor(button);
         }
-        focusIndex = focusIndex % children.size;
-        if (focusIndex < 0) {
-            focusIndex = children.size - 1;
-        }
-
-        stage.setKeyboardFocus(children.get(focusIndex));
-        return true;
     }
 
-    private boolean removeFocus(Stage stage) {
-        focusIndex = -1;
-        stage.setKeyboardFocus(null);
-        return true;
-    }
-
-    private boolean selectFocusedActor() {
-        if (!isVisible()) return false;
-        if (focusIndex == -1) return false;
-
-        Actor currentActor = tabbedPane.getActiveTab().getContentTable().getChildren().get(focusIndex);
-        InputEvent touchEvent = new InputEvent();
-        touchEvent.setType(InputEvent.Type.touchDown);
-        currentActor.fire(touchEvent);
-
-        touchEvent = new InputEvent();
-        touchEvent.setType(InputEvent.Type.touchUp);
-        currentActor.fire(touchEvent);
-        return true;
-    }
-    
     private void addTestTabs() {
         Tab customRenderTab = new MyTab("Debug spectrum render");
         ShapeRenderActor shapeRenderActor = new ShapeRenderActor();
@@ -268,9 +200,8 @@ public class GameMenu extends VisWindow implements ControllerListener {
                     close();
                 } else {
                     tabbedPane.switchTab(mainMenuTab);
-                    return true;
                 }
-                return false;
+                return true;
             }
         }
         
@@ -296,49 +227,6 @@ public class GameMenu extends VisWindow implements ControllerListener {
     
     public Tab getKeyConfigTab() {
         return keyConfigTab;
-    }
-
-    @Override
-    public void connected(Controller controller) {}
-
-    @Override
-    public void disconnected(Controller controller) {}
-
-    @Override
-    public boolean buttonDown(Controller controller, int buttonCode) {
-        game.getEngine().getSystem(DesktopInputSystem.class).setFocusToController();
-        if (buttonCode == controller.getMapping().buttonDpadUp) {
-            return updateFocus(game.getStage(),true);
-        }
-        if (buttonCode == controller.getMapping().buttonDpadDown) {
-            return updateFocus(game.getStage(),false);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean buttonUp(Controller controller, int buttonCode) {
-        if (buttonCode == controller.getMapping().buttonA) {
-            return selectFocusedActor();
-        }
-        return false;
-    }
-
-    @Override
-    public boolean axisMoved(Controller controller, int axisCode, float value) {
-        game.getEngine().getSystem(DesktopInputSystem.class).setFocusToController();
-        if (axisCode == controller.getMapping().axisLeftY) {
-            leftStickVertAxis = value;
-        }
-        if (Math.abs(leftStickVertAxis) > 0.6f && lastFocusTimer.tryEvent()) {
-            if (leftStickVertAxis > 0) {
-                return updateFocus(game.getStage(),false);
-            }
-            if (leftStickVertAxis < 0) {
-                return updateFocus(game.getStage(), true);
-            }
-        }
-        return false;
     }
 
 }
