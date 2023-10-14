@@ -1,8 +1,6 @@
 # a space project
 Welcome to A Space Project. A project involving space...
-> Enjoy Galactic Space Exploration in a sate-of-the-art, hyper-realistic physics simulation of the entire universe!
-
-> Get a realistic sense of the cosmic scale; there's literally dozens of planets and traveling between them could take up to entire minutes!
+> Get a realistic sense of the cosmic scale; there's literally dozens of planets and traveling between them could take up to entire minutes! Enjoy Galactic Space Exploration in a sate-of-the-art, hyper-realistic physics simulation of the entire universe!
 
 ![screenshot](/Capture.PNG?raw=true)
 
@@ -12,9 +10,9 @@ Welcome to A Space Project. A project involving space...
 * Fly around the starsystem in a spaceship
 * Faster Than Light Travel! (yeah it's real, cuz like quantum anti-dark matter n' stuff yo)
 * Discover a plethora of astronomical bodies including:
-    * Destructible asteroids using cutting edge - ***t r i ▲ n g l e s*** -
     * Unary star systems, Binary star systems, Trinary star systems, and even ~~Quadri... quatro? quadrino-ary?~~
     * lonely rogue planets who lost their sun :(
+    * Destructible asteroids using cutting edge - ***t r i ▲ n g l e s*** -
 * Fight against other ship (disabled for now)
   * combat broken placeholder AI while I figure out the rest of the engine.
 * Land on and explore planets (in theory, probably out of scope):
