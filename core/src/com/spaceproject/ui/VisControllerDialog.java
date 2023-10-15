@@ -7,6 +7,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.widget.VisDialog;
 
+/**
+ * Modified version of ControllerMenuDialog as a custom VisUI actor.
+ * https://github.com/MrStahlfelge/gdx-controllerutils
+ */
 public class VisControllerDialog extends VisDialog {
 
     protected Array<Actor> buttonsToAdd = new Array<>();
