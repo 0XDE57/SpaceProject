@@ -49,7 +49,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     private final Vector3 mouseProj = new Vector3();
     private final Vector3 playerPos = new Vector3();
     
-    private final int gridWidth = 100;
+    private final int gridWidth = 50;
     private Vector3 topLeft = new Vector3();
     private Vector3 bottomRight = new Vector3();
     private final Color gridColor = Color.BLACK.cpy();
@@ -214,7 +214,9 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     
     private void drawCompass(Entity entity) {
         //set alpha
-        float alpha = MathUtils.clamp((cam.zoom / 150 / 2), 0, 1);
+        float min = 0.05f;
+        float maxZoom = CameraSystem.getZoomForLevel(getEngine().getSystem(CameraSystem.class).getMaxZoomLevel());
+        float alpha = MathUtils.map(1, maxZoom,min, 1, Math.max(Math.min(GameScreen.cam.zoom*10, maxZoom), 1));
         if (MathUtils.isEqual(alpha, 0)) return;
         
         HyperDriveComponent hyper = Mappers.hyper.get(entity);
