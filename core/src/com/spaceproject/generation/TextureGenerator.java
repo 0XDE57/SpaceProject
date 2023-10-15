@@ -1,8 +1,11 @@
 package com.spaceproject.generation;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
+import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
@@ -41,6 +44,8 @@ public class TextureGenerator {
     
     public static Texture generateSpaceBackgroundDust(int tX, int tY, int tileSize, Pixmap.Format format) {
         Pixmap pixmap = new Pixmap(tileSize, tileSize, format);
+        boolean debugVisual = false;
+        boolean debugSave = false;
         
         double featureSize = 100;
         for (int y = 0; y < pixmap.getHeight(); y++) {
@@ -66,15 +71,21 @@ public class TextureGenerator {
                 pixmap.drawPixel(x, pixmap.getHeight() - 1 - y);
             }
         }
-        /*
-        //DEBUG - fill tile to visualize boundaries
-        pixmap.setColor(MathUtils.random(), MathUtils.random(), MathUtils.random(), 0.5f);
-        pixmap.fill();
-        pixmap.setColor(1, 1, 1, 1);
-        pixmap.drawPixel(0, 0);
-        */
+
+        if (debugVisual) {
+            //DEBUG - fill tile to visualize boundaries
+            pixmap.setColor(MathUtils.random(), MathUtils.random(), MathUtils.random(), 0.5f);
+            pixmap.fill();
+            pixmap.setColor(1, 1, 1, 1);
+            pixmap.drawPixel(0, 0);
+        }
         
         Texture tex = new Texture(pixmap);
+        if (debugSave) {
+            FileHandle file = Gdx.files.external("test/" + tX + "," + tY + ".png");
+            Gdx.app.error("saved pixmap", file.path());
+            PixmapIO.writePNG(file, pixmap);
+        }
         pixmap.dispose();
         return tex;
     }
@@ -110,22 +121,22 @@ public class TextureGenerator {
     public static Texture generateSpaceBackgroundStars(int tileX, int tileY, int tileSize, float depth) {
         MathUtils.random.setSeed((long) (MyMath.getSeed(tileX, tileY) * (depth * 1000)));
         Pixmap pixmap = new Pixmap(tileSize, tileSize, Format.RGBA4444);
-        
+        boolean debugVisual = false;
         int numStars = 200;
         for (int i = 0; i < numStars; ++i) {
             int x = MathUtils.random(tileSize);
             int y = MathUtils.random(tileSize);
-    
+
             //give star a random temperature
             double temperature = MathUtils.random(1000, 40000); //kelvin
-            
+
             //calculate black body radiation color for temperature
             Vector3 spectrum = BlackBodyColorSpectrum.spectrumToXYZ(temperature);
             Vector3 color = BlackBodyColorSpectrum.xyzToRGB(BlackBodyColorSpectrum.SMPTEsystem, spectrum.x, spectrum.y, spectrum.z);
             BlackBodyColorSpectrum.constrainRGB(color);
             Vector3 normal = BlackBodyColorSpectrum.normRGB(color.x, color.y, color.z);
             pixmap.setColor(normal.x, normal.y, normal.z, 1);
-            
+
             /*
             double peakWavelength = Physics.temperatureToWavelength(temperature) * 1000000;
             int[] colorTemp = Physics.wavelengthToRGB(peakWavelength);
@@ -139,15 +150,15 @@ public class TextureGenerator {
                         colorTemp[2] / 255.0f, // blue
                         MathUtils.random(0.1f, 1f));
             }*/
-            
+
             pixmap.drawPixel(x, y);
         }
-		
-		/*
-		//DEBUG - fill tile to visualize boundaries
-		pixmap.setColor(MathUtils.random(), MathUtils.random(), MathUtils.random(), 0.5f);
-		pixmap.fill();
-		*/
+
+        if (debugVisual) {
+            //DEBUG - fill tile to visualize boundaries
+            pixmap.setColor(MathUtils.random(), MathUtils.random(), MathUtils.random(), 0.5f);
+            pixmap.fill();
+        }
         
         //create texture and dispose pixmap to prevent memory leak
         Texture texture = new Texture(pixmap);
