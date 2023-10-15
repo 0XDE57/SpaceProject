@@ -92,7 +92,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
     @Override
     public String toString() {
         physicsInfo.setLength(0);
-        physicsInfo.append("[Physics steps]:    ").append(stepCount);
+        physicsInfo.append("[Physics Steps]:    ").append(stepCount);
         physicsInfo.append("\n[Bodies]:           ").append(world.getBodyCount());
         physicsInfo.append("\n[Fixtures]:         ").append(world.getFixtureCount());
         physicsInfo.append("\n[Joints]:           ").append(world.getJointCount());

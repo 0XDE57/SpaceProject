@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.controllers.Controllers;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -52,6 +53,7 @@ public class GameScreen extends MyScreenAdapter {
     
     private static long gameTimeCurrent, gameTimeStart, timePaused;
     private static boolean isPaused = false;
+    private int engineTicks;
     
     private static boolean inSpace;
     private static boolean isHyper;
@@ -128,6 +130,10 @@ public class GameScreen extends MyScreenAdapter {
     
     private void initGame(boolean space) {
         inSpace = space;
+        gameTimeStart = System.currentTimeMillis();
+        gameTimeCurrent = 0;
+        timePaused = 0;
+        isPaused = false;
         
         //init content and entities
         galaxySeed = MyMath.getNewGalaxySeed();
@@ -135,8 +141,6 @@ public class GameScreen extends MyScreenAdapter {
         
         //init systems
         initSpace(null);
-        
-        gameTimeStart = System.nanoTime();
     }
     
     //region system loading
@@ -241,13 +245,14 @@ public class GameScreen extends MyScreenAdapter {
         
         // update engine
         if (!isPaused) {
-            gameTimeCurrent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - gameTimeStart);
+            gameTimeCurrent = System.currentTimeMillis() - gameTimeStart;
         }
         engine.update(delta);
-        
+        engineTicks++;
+
         stage.act(Math.min(delta, 1 / 30f));
         stage.draw();
-        
+
         pollGLProfiler();
     }
     
@@ -255,12 +260,13 @@ public class GameScreen extends MyScreenAdapter {
         profilerStringBuilder.setLength(0);
         profilerStringBuilder.append(Gdx.graphics.getGLVersion().getDebugVersionString());
         profilerStringBuilder.append("\n[Frame ID]:         ").append(Gdx.graphics.getFrameId());
+        profilerStringBuilder.append("\n[Engine Steps]:     ").append(engineTicks);
+        profilerStringBuilder.append("\n").append(engine.getSystem(Box2DPhysicsSystem.class).toString());
         profilerStringBuilder.append("\n[GL calls]:         ").append(glProfiler.getCalls());
         profilerStringBuilder.append("\n[Draw calls]:       ").append(glProfiler.getDrawCalls());
         profilerStringBuilder.append("\n[Shader switches]:  ").append(glProfiler.getShaderSwitches());
         profilerStringBuilder.append("\n[Texture bindings]: ").append(glProfiler.getTextureBindings());
         profilerStringBuilder.append("\n[Vertices]:         ").append(glProfiler.getVertexCount().total);
-        profilerStringBuilder.append("\n").append(engine.getSystem(Box2DPhysicsSystem.class).toString());
         profilerStringBuilder.append("\n------ DISPOSED ------ ").append(ResourceDisposer.getTotalDisposeCount());
         glProfiler.reset();
     }
@@ -342,18 +348,19 @@ public class GameScreen extends MyScreenAdapter {
         if (isPaused != process) {
             return;
         }
-        
+
         isPaused = !process;
         Gdx.app.log(getClass().getSimpleName(), "paused [" + isPaused + "]");
         
         //adjust time
         if (isPaused) {
-            timePaused = System.nanoTime();
+            timePaused = System.currentTimeMillis();
         } else {
-            long delta = System.nanoTime() - timePaused;
+            long delta = System.currentTimeMillis() - timePaused;
             gameTimeStart += delta;
+            timePaused = 0;
         }
-        
+
         //enable/disable systems
         SystemsConfig systemsCFG = SpaceProject.configManager.getConfig(SystemsConfig.class);
         for (EntitySystem system : engine.getSystems()) {
