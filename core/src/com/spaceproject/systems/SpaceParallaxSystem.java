@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
@@ -55,15 +56,17 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     public void update(float delta) {
         // load and unload tiles
         updateTiles();
-        
+
+        //update shader
         float invert = GameScreen.isHyper() ? 1 : 0;
         CameraSystem cam = getEngine().getSystem(CameraSystem.class);
-        float blend = GameScreen.cam.zoom / cam.getZoomForLevel(cam.getMaxZoomLevel());
-        //blend = cam.z
+        float min = 0.30f;
+        float blend = MathUtils.map(1, CameraSystem.getZoomForLevel(cam.getMaxZoomLevel()),min, 1, Math.max(GameScreen.cam.zoom, 1));
         spaceShader.bind();
         spaceShader.setUniformf("u_blend", blend);
         spaceShader.setUniformf("u_invert", invert);
-        
+
+        //draw
         projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         spriteBatch.setProjectionMatrix(projectionMatrix);
         spriteBatch.begin();
