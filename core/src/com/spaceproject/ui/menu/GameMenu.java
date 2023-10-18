@@ -26,12 +26,7 @@ import com.spaceproject.config.KeyConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.systems.DesktopInputSystem;
 import com.spaceproject.ui.ShapeRenderActor;
-import com.spaceproject.ui.menu.tabs.ConfigTab;
-import com.spaceproject.ui.menu.tabs.DebugTab;
-import com.spaceproject.ui.menu.tabs.HotKeyTab;
-import com.spaceproject.ui.menu.tabs.KeyConfigTab;
-import com.spaceproject.ui.menu.tabs.MainMenuTab;
-import com.spaceproject.ui.menu.tabs.MyTab;
+import com.spaceproject.ui.menu.tabs.*;
 import com.spaceproject.utility.IndependentTimer;
 
 
@@ -91,8 +86,11 @@ public class GameMenu extends VisWindow {
         //add tabs
         mainMenuTab = new MainMenuTab(this);
         tabbedPane.add(mainMenuTab);
+
+        OptionsTab optionsTab = new OptionsTab("   settings   ", game);
+        tabbedPane.add(optionsTab);
         
-        keyConfigTab = new KeyConfigTab(getStage(), SpaceProject.configManager.getConfig(KeyConfig.class), "Input Settings");
+        keyConfigTab = new KeyConfigTab(getStage(), SpaceProject.configManager.getConfig(KeyConfig.class), "input settings");
         //keyConfigTab = new ConfigTab(this, SpaceProject.configManager.getConfig(KeyConfig.class));
         //tabbedPane.add(keyConfigTab);
         
@@ -110,7 +108,7 @@ public class GameMenu extends VisWindow {
     }
 
     private void addTestTabs() {
-        Tab customRenderTab = new MyTab("Debug spectrum render");
+        Tab customRenderTab = new MyTab("   debug spectrum render   ");
         ShapeRenderActor shapeRenderActor = new ShapeRenderActor();
         customRenderTab.getContentTable().add(shapeRenderActor).grow();
         customRenderTab.getContentTable().row();

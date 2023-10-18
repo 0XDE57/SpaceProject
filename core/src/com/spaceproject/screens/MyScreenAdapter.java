@@ -59,8 +59,8 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
         glProfiler = new GLProfiler(Gdx.graphics);
         glProfiler.enable();
         
-        //debug
-        toggleVsync();
+        //init on
+        setVsync(true);
     }
     
     @Override
@@ -83,7 +83,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
-        Gdx.app.log(this.getClass().getSimpleName(), "resize: " + width + ", " + height);
+        Gdx.app.log(getClass().getSimpleName(), "resize: " + width + ", " + height);
     }
     
     /**
@@ -91,31 +91,45 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
      */
     public void toggleFullscreen() {
         if (Gdx.graphics.isFullscreen()) {
-            //set window to previous window size
-            Gdx.graphics.setWindowedMode(prevWindowWidth, prevWindowHeight);
-            Gdx.app.log(this.getClass().getSimpleName(), "Set to windowed.");
+            setWindowedMode();
         } else {
-            //save window size
-            prevWindowWidth = Gdx.graphics.getWidth();
-            prevWindowHeight = Gdx.graphics.getHeight();
-            
-            //set to fullscreen
-            if (Gdx.graphics.supportsDisplayModeChange()) {
-                Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-                Gdx.app.log(this.getClass().getSimpleName(), "Set to fullscreen.");
-            } else {
-                Gdx.app.log(this.getClass().getSimpleName(), "DisplayModeChange not supported.");
-            }
+            setFullscreen();
         }
     }
-    
+
+    public void setFullscreen() {
+        //save window size
+        prevWindowWidth = Gdx.graphics.getWidth();
+        prevWindowHeight = Gdx.graphics.getHeight();
+
+        //set to fullscreen
+        if (Gdx.graphics.supportsDisplayModeChange()) {
+            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+            Gdx.app.log(getClass().getSimpleName(), "Set to fullscreen.");
+        } else {
+            Gdx.app.log(getClass().getSimpleName(), "DisplayModeChange not supported.");
+        }
+    }
+
+    public void setWindowedMode() {
+        //set window to previous window size
+        Gdx.graphics.setWindowedMode(prevWindowWidth, prevWindowHeight);
+        Gdx.app.log(getClass().getSimpleName(), "Set to windowed.");
+    }
+
     /**
      * Turn vsync on or off
      */
     private void toggleVsync() {
         engineCFG.vsync = !engineCFG.vsync;
         Gdx.graphics.setVSync(engineCFG.vsync);
-        Gdx.app.log(this.getClass().getSimpleName(), "vsync = " + engineCFG.vsync);
+        Gdx.app.log(getClass().getSimpleName(), "toggle vsync = " + engineCFG.vsync);
+    }
+
+    public void setVsync(boolean enable) {
+        engineCFG.vsync = enable;
+        Gdx.graphics.setVSync(engineCFG.vsync);
+        Gdx.app.log(getClass().getSimpleName(), "set vsync = " + engineCFG.vsync);
     }
     
     public static void resetCamera() {

@@ -14,7 +14,7 @@ public class HotKeyTab extends Tab {
     public HotKeyTab(String title, int hotKey) {
         super(false, false);
         this.hotKey = hotKey;
-        this.title = title + " [" + Input.Keys.toString(hotKey) + "]";
+        this.title = "  " + title + "  ";// + " [" + Input.Keys.toString(hotKey) + "]";
         
         content = new VisTable();
         content.setFillParent(true);

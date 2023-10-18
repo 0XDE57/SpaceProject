@@ -11,7 +11,7 @@ import com.spaceproject.config.DebugConfig;
 public class DebugTab extends HotKeyTab {
     
     public DebugTab() {
-        super("Debug", Input.Keys.F4);
+        super("debug", Input.Keys.F4);
         final DebugConfig debugCFG = SpaceProject.configManager.getConfig(DebugConfig.class);
 
         final CheckBox toggleAsteroidSpawn = new CheckBox("spawn asteroid on [right-click]", VisUI.getSkin());
