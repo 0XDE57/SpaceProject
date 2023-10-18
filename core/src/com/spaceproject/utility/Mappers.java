@@ -21,6 +21,7 @@ public class Mappers {
     public static final ComponentMapper<ControllableComponent> controllable = ComponentMapper.getFor(ControllableComponent.class);
     public static final ComponentMapper<DamageComponent> damage = ComponentMapper.getFor(DamageComponent.class);
     public static final ComponentMapper<DashComponent> dash = ComponentMapper.getFor(DashComponent.class);
+    public static final ComponentMapper<DockedComponent> docked = ComponentMapper.getFor(DockedComponent.class);
     public static final ComponentMapper<ExpireComponent> expire = ComponentMapper.getFor(ExpireComponent.class);
     public static final ComponentMapper<HealthComponent> health = ComponentMapper.getFor(HealthComponent.class);
     public static final ComponentMapper<HyperDriveComponent> hyper = ComponentMapper.getFor(HyperDriveComponent.class);

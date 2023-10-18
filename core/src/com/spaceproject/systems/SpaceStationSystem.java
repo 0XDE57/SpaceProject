@@ -152,25 +152,29 @@ public class SpaceStationSystem extends IteratingSystem {
             case BodyBuilder.DOCK_A_ID:
                 if (station.dockPortA != null) return;//port is in use
                 station.dockPortA = vehicleEntity;
-                dockedPort = "A";
+                dockedPort = "01";
                 break;
             case BodyBuilder.DOCK_B_ID:
                 if (station.dockPortB != null) return;
                 station.dockPortB = vehicleEntity;
-                dockedPort = "B";
+                dockedPort = "02";
                 break;
             case BodyBuilder.DOCK_C_ID:
                 if (station.dockPortC != null) return;
                 station.dockPortC = vehicleEntity;
-                dockedPort = "C";
+                dockedPort = "03";
                 break;
             case BodyBuilder.DOCK_D_ID:
                 if (station.dockPortD != null) return;
                 station.dockPortD = vehicleEntity;
-                dockedPort = "D";
+                dockedPort = "04";
                 break;
         }
         station.lastDockedTimer.reset();
+        DockedComponent docked = new DockedComponent();
+        docked.parent = stationEntity;
+        docked.dockID = dockedPort;
+        vehicleEntity.add(docked);
 
         Mappers.physics.get(vehicleEntity).body.setLinearVelocity(0, 0);
         Mappers.controllable.get(vehicleEntity).activelyControlled = false;
@@ -185,23 +189,24 @@ public class SpaceStationSystem extends IteratingSystem {
         String port = "";
         if (spaceStation.dockPortA == dockedShip) {
             spaceStation.dockPortA = null;
-            port = "A";
+            port = "01";
         }
         if (spaceStation.dockPortB == dockedShip) {
             spaceStation.dockPortB = null;
-            port = "B";
+            port = "02";
         }
         if (spaceStation.dockPortC == dockedShip) {
             spaceStation.dockPortC = null;
-            port = "C";
+            port = "03";
         }
         if (spaceStation.dockPortD == dockedShip) {
             spaceStation.dockPortD = null;
-            port = "D";
+            port = "04";
         }
         control.activelyControlled = true;
         shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
         Mappers.cargo.get(dockedShip).lastCollectTime = GameScreen.getGameTimeCurrent();//show inventory
+        dockedShip.remove(DockedComponent.class);
 
         getEngine().getSystem(SoundSystem.class).undockStation();
         Gdx.app.debug(getClass().getSimpleName(), "undock [" + DebugUtil.objString(dockedShip) + "] from station: [" + DebugUtil.objString(stationEntity) + "] port: " + port);

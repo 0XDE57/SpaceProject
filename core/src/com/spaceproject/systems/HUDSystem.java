@@ -384,14 +384,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             case docked:
                 String input = (getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad ???" : "E").toUpperCase();
                 drawHint("hold [" + input + "] to interact");
-                layout.setText(font, "[ DOCKED ]");
+                String port = Mappers.docked.get(player).dockID;
+                layout.setText(font, "[ DOCKED: port " + port + " ]");
             break;
             case landing:
                 drawHint("<planet name goes here>");
                 layout.setText(font, "[ LANDING ]");
                 break;
             case launching:
-                drawHint("leaving: <planet name>");
+                drawHint("entering space");
                 layout.setText(font, "[ LAUNCHING ]");
                 break;
             case destroyed:

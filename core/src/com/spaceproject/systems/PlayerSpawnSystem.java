@@ -129,6 +129,10 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
         //auto dock
         if (spaceStation != null) {
             Mappers.spaceStation.get(spaceStation).dockPortA = player;
+            DockedComponent docked = new DockedComponent();
+            docked.parent = spaceStation;
+            docked.dockID = "01";
+            player.add(docked);
             Mappers.controllable.get(player).activelyControlled = false;
             //todo: could force update position to mitigate camera jump when docked?
             //getEngine().getSystem(SpaceStationSystem.class).updateShipInDock();
