@@ -141,7 +141,7 @@ public class NBodyGravityAnim extends TitleAnimation implements Disposable {
         });
         simulationSpeedSlider.pack();
         
-        final VisTextButton resetButton = new VisTextButton("reset");
+        final VisTextButton resetButton = new VisTextButton("[R]eset");
         resetButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -197,7 +197,7 @@ public class NBodyGravityAnim extends TitleAnimation implements Disposable {
         gravity = 1f;
         simulationSpeed = 15.0f;
         
-        Gdx.app.log(this.getClass().getSimpleName(), "reset initial bodies. initial settings: " + gravity );
+        Gdx.app.log(getClass().getSimpleName(), "reset initial bodies. initial settings: " + gravity );
     }
     
     @Override
@@ -207,12 +207,15 @@ public class NBodyGravityAnim extends TitleAnimation implements Disposable {
         timeAccumulator += delta;
         
         //reset to initial conditions
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.N)) {//n for n-body
             if (!window.hasParent()) {
                 stage.addActor(window);
                 window.setPosition(stage.getWidth(), 0);
             }
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {//R for reset
             resetInitialBodies();
+            window.getTitleLabel().setText("n-body (" + bodies.size + ")");
         }
         
         //mouse position
@@ -230,7 +233,8 @@ public class NBodyGravityAnim extends TitleAnimation implements Disposable {
             if (ghostBody != null) {
                 ghostBody.calculateMass();//recalc mass due to radius change
                 bodies.add(ghostBody);
-                Gdx.app.log(this.getClass().getSimpleName(), "added body.(" + ghostBody.mass + ") total: " + bodies.size);
+                Gdx.app.log(getClass().getSimpleName(), "added body.(" + ghostBody.mass + ") total: " + bodies.size);
+                window.getTitleLabel().setText("n-body (" + bodies.size + ")");
                 ghostBody = null;
             }
         }
@@ -244,7 +248,7 @@ public class NBodyGravityAnim extends TitleAnimation implements Disposable {
                         isDrag = true;
                         selectedBody = body;
                         dragTime = System.currentTimeMillis();
-                        Gdx.app.log(this.getClass().getSimpleName(), "selected body: (" + body.mass + ")  " + body.pos);
+                        Gdx.app.log(getClass().getSimpleName(), "selected body: (" + body.mass + ")  " + body.pos);
                         break;
                     }
                 }
@@ -263,6 +267,7 @@ public class NBodyGravityAnim extends TitleAnimation implements Disposable {
                         bodies.removeValue(selectedBody, true);
                         Gdx.app.log(getClass().getSimpleName(),
                                 "removed body. (" + selectedBody.mass + ")  " + selectedBody.pos + " total: " + bodies.size);
+                        window.getTitleLabel().setText("n-body (" + bodies.size + ")");
                     }
                 }
                 selectedBody = null;
