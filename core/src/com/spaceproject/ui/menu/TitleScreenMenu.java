@@ -74,8 +74,6 @@ public class TitleScreenMenu {
         btnOption.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                // todo: open settings panel with key mapping and such
-                // todo: make settings panel
                 MyDialogs.showMultiDialog(stage, "[multibuttondialog]",  "[WASD] or arrow keys or [D-Pad] or Left-Joystick to navigate");
             }
         });
@@ -140,8 +138,8 @@ public class TitleScreenMenu {
         btnLoad.setDisabled(true);
         //btnOption.setDisabled(true);
         table.add(btnPlay).fillX().row();
-        table.add(btnLoad).fillX().row();
-        table.add(btnOption).fillX().row();
+        //table.add(btnLoad).fillX().row();
+        //table.add(btnOption).fillX().row();
         table.add(btnAbout).fillX().row();
         table.add(btnExit).fillX().row();
     }
