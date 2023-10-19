@@ -25,36 +25,34 @@ Welcome to A Space Project. A project involving space...
 * Unit Tests?
    * pfft... my code is perfect. the first time. every time.
 * Developer Tools (in progress)
-* Cross-Platform Desktop and Mobile Support
-  * Windows, OSX, Linux, Android, IOS
-  * (it may be difficult to find sensible touchscreen controls, focus is desktop and controller)
+* Cross-Platform Desktop
+  * Linux, Windows, OSX
 * Feature Creep and Unrealistic Scope!
    * Multiplayer is out of current scope :(
 
 
 ### Controls
-| Control                        | Desktop       | Controller/Gamepad    | Mobile (Android, iOS)                   |
-|------------------------------- | ------------  | ------------------    | ----------------------------------------|
-| Movement                       | WASD          | Left Stick + L1/R1    | Left Stick                              |
-| Aim                            | Mouse         | Left Stick            | Left Stick                              |
-| Boost                          | Space         | A                     | todo: needs button                      |
-| Brakes                         | S             | X                     | todo: needs button                      |
-| Attack: Shoot                  | Left-Click    | RT                    | bottom right button                     |
-| Defense: Shield                | Shift         | LT                    | todo: needs button                      |
-| Defense: Dodge (Barrel Roll)   | Double Tap A/D | Double Tap R1/L1     | todo: swipe gesture?                    |
-| Switch Weapon                  | E             | D-Pad Right           | idk at this point, mobile might not have space for controls
-| Toggle HyperDrive              | Hold 1        | Hold B                | todo: needs button                      |
-| Land/Take Off Planet           | T             | D-Pad Down            | top center when over planet |
-| Enter/Exit vehicle             | G             | Y                     | bottom right small button when in/near vehicle |
-| Zoom                           | Scroll Wheel  | Right JoyStick        | todo: Pinch Zoom                        |
-| Reset Zoom                     | Middle-Click  | Click in Right stick  | todo: double tap                        |
-| Toggle Map State               | M             |                       | top left corner button                  |
-| Toggle HUD                     | H             |                       |                                         |
-| Full screen                    | F11           |                       |                                         |
-| Menu (Pause)                   | Escape        | Start                 | top right corner button                 |
-| Vsync                          | F8            |                       |                                         |
-| ECS Debug Viewer               | F9            |                       |                                         |
-| Misc debug keys I am too lazy to document rn and won't be permanent anyway |                                     |
+| Control                        | Desktop       | Controller/Gamepad |
+|------------------------------- | ------------  | ------------------ |
+| Movement                       | WASD          | Left Stick + L1/R1 |
+| Boost                          | Space         | A                  |
+| Brakes                         | S             | X                  |
+| Aim                            | Mouse         | Left Stick         |
+| Attack: Shoot                  | Left-Click    | RT                 |
+| Defense: Shield                | Shift         | LT                 |
+| Defense: Dodge (Barrel Roll)   | Double Tap A/D | Double Tap R1/L1  |
+| Interact                       | E             | D-Pad Down         |
+| Toggle HyperDrive              | Hold 1        | Hold B             |
+| Enter/Exit vehicle             | G             | Y                  |
+| Zoom                           | Scroll Wheel  | Right JoyStick     |
+| Reset Zoom                     | Middle-Click  | Click in Right stick |
+| Toggle Map State               | M             |                      |
+| Toggle HUD                     | H             |                      |
+| Full screen                    | F11           |                      |
+| Menu (Pause)                   | Escape        | Start                | 
+| Vsync                          | F8            |                      |
+| ECS Debug Viewer               | F9            |                      |
+| Misc debug keys | too lazy to document, won't be permanent |
 
 
 ## Current Status
@@ -88,7 +86,7 @@ Credit appreciated.
 * If a "File not found" error occurs, check the working directory. Append "\assets" to the working directory in run configurations.
 
 
-**IntelliJ / Android Studio**
+**IntelliJ**
 * Desktop
   * create Run Configuration
   * main class = com.spaceproject.desktop.DesktopLauncher
@@ -96,10 +94,4 @@ Credit appreciated.
   * working directory = ...\SpaceProject\assets
       * (must ensure working directory includes assets so data like fonts, particles, shaders, configs can be loaded)
   * build and run!
-* Android
-  * enable dev options, enable usb debugging
-  * connect phone, android studio should detect it
-  * build and run!
-* IOS
-  * https://libgdx.com/dev/import_and_running/#ios
 
