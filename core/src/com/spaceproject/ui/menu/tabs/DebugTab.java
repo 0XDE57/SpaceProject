@@ -57,28 +57,63 @@ public class DebugTab extends HotKeyTab {
         });
         
         
-        final VisCheckBox toggleBounds = new VisCheckBox("show box2d debug", debugCFG.box2DDebugRender);
-        toggleBounds.addListener(new ChangeListener() {
+        final VisCheckBox toggleB2Debug = new VisCheckBox("show box2d debug", debugCFG.box2DDebugRender);
+        toggleB2Debug.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                debugCFG.box2DDebugRender = toggleBounds.isChecked();
+                debugCFG.box2DDebugRender = toggleB2Debug.isChecked();
+            }
+        });
+
+        final VisCheckBox toggleBodies = new VisCheckBox("bodies", debugCFG.drawBodies);
+        toggleBodies.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                debugCFG.drawBodies = toggleBodies.isChecked();
+            }
+        });
+        final VisCheckBox toggleInactiveBodies = new VisCheckBox("inactive bodies", debugCFG.drawInactiveBodies);
+        toggleInactiveBodies.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                debugCFG.drawInactiveBodies = toggleInactiveBodies.isChecked();
+            }
+        });
+        final VisCheckBox toggleAABB = new VisCheckBox("AABB", debugCFG.drawAABBs);
+        toggleAABB.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                debugCFG.drawAABBs = toggleAABB.isChecked();
+            }
+        });
+        final VisCheckBox toggleContacts = new VisCheckBox("contacts", debugCFG.drawContacts);
+        toggleContacts.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                debugCFG.drawContacts = toggleContacts.isChecked();
+            }
+        });
+        final VisCheckBox toggleJoints = new VisCheckBox("joints", debugCFG.drawJoints);
+        toggleJoints.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                debugCFG.drawJoints = toggleJoints.isChecked();
             }
         });
         
-        final VisCheckBox toggleOrbitPath = new VisCheckBox("show orbit path", debugCFG.drawOrbitPath);
-        toggleOrbitPath.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                debugCFG.drawOrbitPath = toggleOrbitPath.isChecked();
-            }
-        });
-        
-        
-        final VisCheckBox toggleVectors = new VisCheckBox("show velocity vectors", debugCFG.drawVelocities);
+        final VisCheckBox toggleVectors = new VisCheckBox("velocity vectors", debugCFG.drawVelocities);
         toggleVectors.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 debugCFG.drawVelocities = toggleVectors.isChecked();
+            }
+        });
+
+        final VisCheckBox toggleOrbitPath = new VisCheckBox("orbit path", debugCFG.drawOrbitPath);
+        toggleOrbitPath.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                debugCFG.drawOrbitPath = toggleOrbitPath.isChecked();
             }
         });
         
@@ -90,7 +125,7 @@ public class DebugTab extends HotKeyTab {
                 debugCFG.drawMousePos = toggleMousePos.isChecked();
             }
         });
-        
+
         
         final VisCheckBox toggleFPS = new VisCheckBox("show fps", debugCFG.drawFPS);
         toggleFPS.addListener(new ChangeListener() {
@@ -126,9 +161,14 @@ public class DebugTab extends HotKeyTab {
         getContentTable().add(toggleEntityList).left().row();
         getContentTable().add(togglePos).left();
         getContentTable().add(toggleComponentList).left().row();
-        getContentTable().add(toggleBounds).left().row();
-        getContentTable().add(toggleVectors).left().row();
         getContentTable().add(toggleOrbitPath).left().row();
+        getContentTable().add(toggleB2Debug).left().row();
+        getContentTable().add(toggleBodies).left();
+        getContentTable().add(toggleInactiveBodies).left();
+        getContentTable().add(toggleAABB).left().row();
+        getContentTable().add(toggleJoints).left().row();
+        getContentTable().add(toggleContacts).left().row();
+        getContentTable().add(toggleVectors).left().row();
     }
     
 }
