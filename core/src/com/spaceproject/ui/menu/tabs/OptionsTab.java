@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.widget.VisCheckBox;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.tabbedpane.Tab;
 import com.spaceproject.SpaceProject;
@@ -30,8 +31,7 @@ public class OptionsTab extends Tab {
         EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
         KeyConfig keyConfig = SpaceProject.configManager.getConfig(KeyConfig.class);
 
-        final CheckBox toggleFullscreen = new CheckBox(" fullscreen [" + Input.Keys.toString(keyConfig.fullscreen) + "]", VisUI.getSkin());
-        toggleFullscreen.setChecked(Gdx.graphics.isFullscreen());
+        final VisCheckBox toggleFullscreen = new VisCheckBox("fullscreen [" + Input.Keys.toString(keyConfig.fullscreen) + "]", Gdx.graphics.isFullscreen());
         toggleFullscreen.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -43,8 +43,7 @@ public class OptionsTab extends Tab {
             }
         });
 
-        final CheckBox toggleVsync = new CheckBox(" vsync ["+ Input.Keys.toString(keyConfig.vsync) + "]", VisUI.getSkin());
-        toggleVsync.setChecked(engineConfig.vsync);
+        final VisCheckBox toggleVsync = new VisCheckBox("vsync ["+ Input.Keys.toString(keyConfig.vsync) + "]", engineConfig.vsync);
         toggleVsync.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {

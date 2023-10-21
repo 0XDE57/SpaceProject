@@ -60,6 +60,7 @@ public class GameMenu extends VisWindow {
         container = new VisTable();
         
         TabbedPane.TabbedPaneStyle style = VisUI.getSkin().get(vertical ? "vertical" : "default", TabbedPane.TabbedPaneStyle.class);
+        style.draggable = false;//make tabs not dragable / reorderable
         tabbedPane = new TabbedPane(style);
         tabbedPane.addListener(new TabbedPaneAdapter() {
             @Override
