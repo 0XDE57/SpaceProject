@@ -14,6 +14,15 @@ public class DebugTab extends HotKeyTab {
         super("debug", Input.Keys.F4);
         final DebugConfig debugCFG = SpaceProject.configManager.getConfig(DebugConfig.class);
 
+        final CheckBox toggleInfiniteFire = new CheckBox("infinite fire!".toUpperCase(), VisUI.getSkin());
+        toggleInfiniteFire.setChecked(debugCFG.infiniteFire);
+        toggleInfiniteFire.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                debugCFG.infiniteFire = toggleInfiniteFire.isChecked();
+            }
+        });
+
         final CheckBox toggleAsteroidSpawn = new CheckBox("spawn asteroid on [right-click]", VisUI.getSkin());
         toggleAsteroidSpawn.setChecked(debugCFG.spawnAsteroid);
         toggleAsteroidSpawn.addListener(new ChangeListener() {
@@ -119,6 +128,7 @@ public class DebugTab extends HotKeyTab {
         });
         
 
+        getContentTable().add(toggleInfiniteFire).left().row();
         getContentTable().add(toggleAsteroidSpawn).left().row();
         getContentTable().add(toggleCameraLerp).left().row();
         getContentTable().add(toggleFPS).left();

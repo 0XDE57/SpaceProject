@@ -19,6 +19,7 @@ import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TrailComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.config.DebugConfig;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.RenderOrder;
 import com.spaceproject.generation.BodyBuilder;
@@ -67,7 +68,11 @@ public class CannonSystem extends IteratingSystem {
         //check if can fire before shooting
         float overheatThreshold = 0.90f;
         if (!cannon.timerFireRate.canDoEvent() || (cannon.heat > overheatThreshold)) {
-            return;
+            if (SpaceProject.configManager.getConfig(DebugConfig.class).infiniteFire) {
+                cannon.velocity = 999999;
+            } else {
+                return;
+            }
         }
         cannon.timerFireRate.reset();
         cannon.shotsFired++;
