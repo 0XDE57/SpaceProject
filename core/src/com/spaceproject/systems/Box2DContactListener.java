@@ -102,6 +102,7 @@ public class Box2DContactListener implements ContactListener {
     
     private void handleDamage(Contact contact, Entity damageEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent healthComponent) {
         if (damageComponent.source == attackedEntity) {
+            //Gdx.app.debug(getClass().getSimpleName(), "ignore damage to self");
             return; //ignore self-inflicted damage
         }
      
@@ -134,12 +135,7 @@ public class Box2DContactListener implements ContactListener {
         }
         
         //do damage
-        healthComponent.health -= damageComponent.damage;
-        healthComponent.lastHitTime = GameScreen.getGameTimeCurrent();
-        healthComponent.lastHitSource = damageComponent.source;
-        if (healthComponent.health <= 0) {
-            destroy(attackedEntity, damageComponent.source);
-        }
+        damage(attackedEntity, damageComponent.source, damageComponent.damage);
         
         //add projectile ghost (fx)
         boolean showGhostTrail = (healthComponent.health <= 0);
@@ -416,20 +412,20 @@ public class Box2DContactListener implements ContactListener {
     }
     //endregion
 
-    private HealthComponent damage(Entity entity, Entity otherBody, float relativeDamage) {
+    private HealthComponent damage(Entity entity, Entity source, float damage) {
         HealthComponent health = Mappers.health.get(entity);
         if (health == null) return null;
         if (health.health <= 0) {
             boolean hasRemove = entity.getComponent(RemoveComponent.class) != null;
-            Gdx.app.error(getClass().getSimpleName(), "warning! damage to already dead entity? return here? hasRemove: " + hasRemove);
+            Gdx.app.error(getClass().getSimpleName(), "damage to [" + DebugUtil.objString(entity) + "] ignored. marked for removal: " + hasRemove);
             return null;
         }
 
         health.lastHitTime = GameScreen.getGameTimeCurrent();
-        health.lastHitSource = otherBody;
-        health.health -= relativeDamage;
+        health.lastHitSource = source;
+        health.health -= damage;
         if (health.health <= 0) {
-            destroy(entity, otherBody);
+            destroy(entity, source);
         }
         return health;
     }
