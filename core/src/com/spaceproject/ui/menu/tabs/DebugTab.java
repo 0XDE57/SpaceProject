@@ -5,9 +5,11 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.widget.Separator;
 import com.kotcrab.vis.ui.widget.VisCheckBox;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.DebugConfig;
+import com.spaceproject.config.KeyConfig;
 import com.spaceproject.screens.GameScreen;
 
 public class DebugTab extends HotKeyTab {
@@ -15,6 +17,15 @@ public class DebugTab extends HotKeyTab {
     public DebugTab() {
         super("debug", Input.Keys.F4);
         final DebugConfig debugCFG = SpaceProject.configManager.getConfig(DebugConfig.class);
+
+        String key = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).toggleDebug);
+        final VisCheckBox toggleDebugMaster = new VisCheckBox("debug render [" + key + "]", debugCFG.drawDebugUI);
+        toggleDebugMaster.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                debugCFG.drawDebugUI = toggleDebugMaster.isChecked();
+            }
+        });
 
         final VisCheckBox toggleInfiniteFire = new VisCheckBox("infinite fire!".toUpperCase(), debugCFG.infiniteFire);
         toggleInfiniteFire.addListener(new ChangeListener() {
@@ -161,20 +172,24 @@ public class DebugTab extends HotKeyTab {
         });
 
 
+        getContentTable().add(toggleInfiniteFire).left().row();
+        getContentTable().add(toggleAsteroidSpawn).left().row();
+        getContentTable().add(toggleCameraLerp).left().row();
+        getContentTable().add(new Separator()).fillX();
+        getContentTable().add(new Separator()).fillX().row();
+        getContentTable().add(toggleDebugMaster).left().row();
         getContentTable().add(toggleFPS).left();
         getContentTable().add(toggleExtraInfo).left().row();
         getContentTable().add(toggleUIDebug).left().row();
-        getContentTable().add(toggleCameraLerp).left().row();
-
-        getContentTable().add(toggleInfiniteFire).left().row();
-        getContentTable().add(toggleAsteroidSpawn).left().row();
-
+        getContentTable().add(new Separator()).fillX();
+        getContentTable().add(new Separator()).fillX().row();
         getContentTable().add(toggleMousePos).left().row();
         getContentTable().add(toggleEntityList).left().row();
         getContentTable().add(togglePos).left();
         getContentTable().add(toggleComponentList).left().row();
         getContentTable().add(toggleOrbitPath).left().row();
-
+        getContentTable().add(new Separator()).fillX();
+        getContentTable().add(new Separator()).fillX().row();
         getContentTable().add(toggleB2Debug).left().row();
         getContentTable().add(toggleBodies).left();
         getContentTable().add(toggleInactiveBodies).left();
