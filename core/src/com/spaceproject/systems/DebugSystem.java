@@ -491,10 +491,6 @@ public class DebugSystem extends IteratingSystem implements Disposable {
             engineView.toggle();
         }
         
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
-            GameScreen.getStage().setDebugAll(!GameScreen.getStage().isDebugAll());
-        }
-        
         //toggle debug
         if (Gdx.input.isKeyJustPressed(keyCFG.toggleDebug)) {
             debugCFG.drawDebugUI = !debugCFG.drawDebugUI;

@@ -8,6 +8,7 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisCheckBox;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.DebugConfig;
+import com.spaceproject.screens.GameScreen;
 
 public class DebugTab extends HotKeyTab {
     
@@ -150,18 +151,30 @@ public class DebugTab extends HotKeyTab {
                 debugCFG.drawEntityList = toggleEntityList.isChecked();
             }
         });
-        
+
+        final VisCheckBox toggleUIDebug = new VisCheckBox("UI debug", false);
+        toggleUIDebug.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                GameScreen.getStage().setDebugAll(toggleUIDebug.isChecked());
+            }
+        });
+
+
+        getContentTable().add(toggleFPS).left();
+        getContentTable().add(toggleExtraInfo).left().row();
+        getContentTable().add(toggleUIDebug).left().row();
+        getContentTable().add(toggleCameraLerp).left().row();
 
         getContentTable().add(toggleInfiniteFire).left().row();
         getContentTable().add(toggleAsteroidSpawn).left().row();
-        getContentTable().add(toggleCameraLerp).left().row();
-        getContentTable().add(toggleFPS).left();
-        getContentTable().add(toggleExtraInfo).left().row();
+
         getContentTable().add(toggleMousePos).left().row();
         getContentTable().add(toggleEntityList).left().row();
         getContentTable().add(togglePos).left();
         getContentTable().add(toggleComponentList).left().row();
         getContentTable().add(toggleOrbitPath).left().row();
+
         getContentTable().add(toggleB2Debug).left().row();
         getContentTable().add(toggleBodies).left();
         getContentTable().add(toggleInactiveBodies).left();
