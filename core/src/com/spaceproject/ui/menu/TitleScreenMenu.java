@@ -7,9 +7,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
-import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
 import com.kotcrab.vis.ui.widget.VisDialog;
+import com.kotcrab.vis.ui.widget.VisTable;
+import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.screens.debug.BlocksTestScreen;
 import com.spaceproject.screens.GameScreen;
@@ -23,7 +24,7 @@ public class TitleScreenMenu {
 
     public TitleScreenMenu(final ControllerMenuStage stage, final SpaceProject game, boolean showDebugScreens) {
         this.stage = stage;
-        table = new Table();
+        table = new VisTable();
 
         if (showDebugScreens) {
             addDebugItems(game);
@@ -45,7 +46,7 @@ public class TitleScreenMenu {
     }
 
     private void addMenuItems(final SpaceProject game) {
-        TextButton btnPlay = new TextButton("play", VisUI.getSkin());
+        TextButton btnPlay = new VisTextButton("play");
         btnPlay.getLabel().setAlignment(Align.left);
         btnPlay.addListener(new ChangeListener() {
             @Override
@@ -54,7 +55,7 @@ public class TitleScreenMenu {
             }
         });
 
-        TextButton btnLoad = new TextButton("load", VisUI.getSkin());
+        TextButton btnLoad = new VisTextButton("load");
         btnLoad.getLabel().setAlignment(Align.left);
         btnLoad.addListener(new ChangeListener() {
             @Override
@@ -69,7 +70,7 @@ public class TitleScreenMenu {
             }
         });
 
-        TextButton btnOption = new TextButton("options", VisUI.getSkin());
+        TextButton btnOption = new VisTextButton("options");
         btnOption.getLabel().setAlignment(Align.left);
         btnOption.addListener(new ChangeListener() {
             @Override
@@ -78,7 +79,7 @@ public class TitleScreenMenu {
             }
         });
 
-        TextButton btnAbout = new TextButton("about", VisUI.getSkin());
+        TextButton btnAbout = new VisTextButton("about");
         btnAbout.getLabel().setAlignment(Align.left);
         btnAbout.addListener(new ChangeListener() {
             @Override
@@ -87,7 +88,7 @@ public class TitleScreenMenu {
             }
         });
 
-        TextButton btnExit = new TextButton("exit", VisUI.getSkin());
+        TextButton btnExit = new VisTextButton("exit");
         btnExit.getLabel().setAlignment(Align.left);
 
         btnExit.addListener(new ChangeListener() {
@@ -145,7 +146,7 @@ public class TitleScreenMenu {
     }
 
     public void addDebugItems(final SpaceProject game) {
-        TextButton btnVoronoi = new TextButton("[DEBUG] voronoi", VisUI.getSkin());
+        TextButton btnVoronoi = new VisTextButton("[DEBUG] voronoi");
         btnVoronoi.getLabel().setAlignment(Align.left);
         btnVoronoi.addListener(new ChangeListener() {
             @Override
@@ -154,7 +155,7 @@ public class TitleScreenMenu {
             }
         });
 
-        TextButton btnNoise = new TextButton("[DEBUG] noise", VisUI.getSkin());
+        TextButton btnNoise = new VisTextButton("[DEBUG] noise");
         btnNoise.getLabel().setAlignment(Align.left);
         btnNoise.addListener(new ChangeListener() {
             @Override
@@ -163,7 +164,7 @@ public class TitleScreenMenu {
             }
         });
 
-        TextButton btnShip = new TextButton("[DEBUG] ship gen", VisUI.getSkin());
+        TextButton btnShip = new VisTextButton("[DEBUG] ship gen");
         btnShip.getLabel().setAlignment(Align.left);
         btnShip.addListener(new ChangeListener() {
             @Override
@@ -172,7 +173,7 @@ public class TitleScreenMenu {
             }
         });
 
-        TextButton btn3D = new TextButton("[DEBUG] 3D rotate", VisUI.getSkin());
+        TextButton btn3D = new VisTextButton("[DEBUG] 3D rotate");
         btn3D.getLabel().setAlignment(Align.left);
         btn3D.addListener(new ChangeListener() {
             @Override
@@ -181,7 +182,7 @@ public class TitleScreenMenu {
             }
         });
         
-        TextButton btnSpiral = new TextButton("[DEBUG] Spiral Gen", VisUI.getSkin());
+        TextButton btnSpiral = new VisTextButton("[DEBUG] Spiral Gen");
         btnSpiral.getLabel().setAlignment(Align.left);
         btnSpiral.addListener(new ChangeListener() {
             @Override
@@ -190,7 +191,7 @@ public class TitleScreenMenu {
             }
         });
     
-        TextButton btnBlock = new TextButton("[DEBUG] Block Engine Test", VisUI.getSkin());
+        TextButton btnBlock = new VisTextButton("[DEBUG] Block Engine Test");
         btnBlock.getLabel().setAlignment(Align.left);
         btnBlock.addListener(new ChangeListener() {
             @Override
