@@ -141,12 +141,12 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             return true;
         }
 
-        if (keycode == keyCFG.changeVehicle) {
+        if (keycode == keyCFG.changeVehicle) {//replace with general interact?
             control.changeVehicle = keyDown;
             return true;
         }
 
-        if (keycode == keyCFG.land) {
+        if (keycode == keyCFG.interact) {
             control.interact = keyDown;
             return true;
         }

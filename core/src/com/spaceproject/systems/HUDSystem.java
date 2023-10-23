@@ -7,7 +7,6 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -22,9 +21,9 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
@@ -38,15 +37,14 @@ import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.ui.map.MapState;
 import com.spaceproject.ui.map.MiniMap;
 import com.spaceproject.ui.menu.GameMenu;
+import com.spaceproject.ui.menu.SpaceStationMenu;
 import com.spaceproject.utility.IRequireGameContext;
 import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
-import javax.print.attribute.standard.SheetCollate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 
 public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener, Disposable {
@@ -70,6 +68,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     
     private GameMenu gameMenu;
+    private Table stationMenu;
+    private SimpleTimer interactTimer;
     
     //rendering
     private final OrthographicCamera cam;
@@ -126,6 +126,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         GameScreen.getStage().addListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
+                //todo alternatively?
+                //if (E ) and at station
+                //    stationmenu.show
                 if (gameMenu.switchTabForKey(keycode)) {
                     if (!gameMenu.isVisible()) {
                         gameMenu.show();
@@ -157,6 +160,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 return super.scrolled(event, x, y, amountX, amountY);
             }
         });
+
+        interactTimer = new SimpleTimer(500);
     }
     
     @Override
@@ -223,22 +228,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
         //draw background for state message
         if (messageState != SpecialState.off) {
-            drawMessageBacking();
+            drawMessageBacking(player);
         }
-
-        if (player == null) {
-            ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
-            if (respawnEntities.size() > 0) {
-                RespawnComponent respawn = Mappers.respawn.get(respawnEntities.first());
-                if (respawn.spawn == RespawnComponent.AnimState.pause || respawn.spawn == RespawnComponent.AnimState.pan) {
-                    int messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3) - 6);
-                    float ratio = 1-respawn.timeout.ratio();
-                    float halfWidth = Gdx.graphics.getWidth()*0.5f;
-                    shape.setColor(Color.WHITE);
-                    shape.rectLine(halfWidth - (halfWidth*ratio), messageHeight, halfWidth + (ratio * halfWidth), messageHeight, 2);
-                }
+        if (messageState != SpecialState.docked) {
+            if (stationMenu != null) {
+                stationMenu.remove();
+                stationMenu = null;
             }
         }
+
         shape.end();
 
 
@@ -260,7 +258,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         } else {
             ControllableComponent control = Mappers.controllable.get(player);
             if (control != null && control.canTransition && (Mappers.screenTrans.get(player) == null)) {
-                String input = (getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad Down" : "T").toUpperCase();
+                String key = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).interact);
+                String input = (getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad Down" : key).toUpperCase();
                 if (GameScreen.inSpace()) {
                     drawHint("press [" + input + "] to land");
                 } else {
@@ -283,7 +282,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
-    private void drawMessageBacking() {
+    private void drawMessageBacking(Entity player) {
         int offset = 50;
         int messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3)) - offset;
         float height =  40 + offset;
@@ -294,25 +293,59 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (messageState == SpecialState.destroyed) {
             shape.rectLine(0, messageHeight, Gdx.graphics.getWidth(), messageHeight, 1);
         }
+
+        int timerHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3) - 6);
+        float halfWidth = Gdx.graphics.getWidth()*0.5f;
+
+        //draw respawn line
+        if (messageState == SpecialState.destroyed) {
+            ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
+            if (respawnEntities.size() > 0) {
+                RespawnComponent respawn = Mappers.respawn.get(respawnEntities.first());
+                if (respawn.spawn == RespawnComponent.AnimState.pause || respawn.spawn == RespawnComponent.AnimState.pan) {
+                    float ratio = 1-respawn.timeout.ratio();
+                    shape.setColor(Color.WHITE);
+                    shape.rectLine(halfWidth - (halfWidth*ratio), timerHeight, halfWidth + (ratio * halfWidth), timerHeight, 2);
+                }
+            }
+        }
+
+        if (messageState == SpecialState.docked) {
+            if (player != null) {
+                //Entity stationEntity = Mappers.docked.get(player).parent;
+                ControllableComponent control = Mappers.controllable.get(player);
+                if (control.interact) {
+                    if (stationMenu == null) {
+                        float ratio = interactTimer.ratio();
+                        shape.setColor(Color.WHITE);
+                        shape.rectLine(halfWidth - (halfWidth * ratio), timerHeight, halfWidth + (ratio * halfWidth), timerHeight, 2);
+                        if (interactTimer.tryEvent()) {
+                            stationMenu = SpaceStationMenu.SpaceStationMenu(GameScreen.getStage());
+                        }
+                    }
+                } else {
+                    interactTimer.reset();
+                }
+            }
+        }
     }
 
     private void checkInput() {
-        //todo: move to desktop input
-        if (Gdx.input.isKeyJustPressed(keyCFG.toggleHUD)) {
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleHUD)) {//todo: kill key toggle move to debug
             drawHud = !drawHud;
             Gdx.app.log(getClass().getSimpleName(), "HUD: " + drawHud);
         }
-        if (Gdx.input.isKeyJustPressed(keyCFG.toggleEdgeMap)) {
+        if (Gdx.input.isKeyJustPressed(keyCFG.toggleEdgeMap)) {//kill or move to UI option
             drawEdgeMap = !drawEdgeMap;
             Gdx.app.log(getClass().getSimpleName(), "Edge mapState: " + drawEdgeMap);
         }
         if (Gdx.input.isKeyJustPressed(keyCFG.toggleSpaceMap)) {
             miniMap.cycleMapState();
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.K)) { //kill or move to UI option
             miniMap.cycleMiniMapPosition();
         }
-        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.Y)) {
+        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.Y)) {//kill our move to debug menu
             CargoComponent cargo = Mappers.cargo.get(players.first());
             if (cargo != null) {
                 int amount = 1000;
@@ -379,10 +412,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
         
         float ratio = 1 + (float) Math.sin(anim);
-        Color c = Color.GOLD.cpy().lerp(Color.CYAN, ratio);//todo: cache
+        Color c = Color.GOLD.cpy().lerp(Color.CYAN, ratio);
         switch (messageState) {
             case docked:
-                String input = (getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad ???" : "E").toUpperCase();
+                String key = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).interact);
+                String input = (getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad Down" : key).toUpperCase();
                 drawHint("hold [" + input + "] to interact");
                 String port = Mappers.docked.get(player).dockID;
                 layout.setText(font, "[ DOCKED: port " + port + " ]");
@@ -431,11 +465,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         int healthBarY = uiCFG.playerHPBarY;
         int ammoBarY = healthBarY - barHeight - 1;
         int hyperBarY = healthBarY + barHeight + 1;
-        
-        //todo: force certain elements when hud is off (bypass)
-        // 1. [x] hyperdrive should bring up velocity
-        // 2. [ ] health when take damage (timer)
-        // 3. [ ] shield when broken? (broken state not implemented yet)
         
         drawPlayerVelocity(entity, barX, hyperBarY, barWidth, barHeight);
         drawHyperDriveBar(entity, barX, hyperBarY, barWidth, barHeight);
@@ -813,7 +842,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     @Override
     public void resize(int width, int height) {
         gameMenu.resetPosition();
-        
+        if (stationMenu != null) {
+            stationMenu.setPosition(Gdx.graphics.getWidth() / 3f, Gdx.graphics.getHeight() / 2f, Align.center);
+        }
         miniMap.updateMapPosition();
     }
     

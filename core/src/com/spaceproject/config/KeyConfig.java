@@ -15,7 +15,7 @@ public class KeyConfig extends Config {
     public int switchWeapon;
     public int activateShield;
     public int changeVehicle;
-    public int land;
+    public int interact;
     public int activateHyperDrive;
     
     //---UI controls---
@@ -53,10 +53,10 @@ public class KeyConfig extends Config {
         back = Keys.S;
         boost = Keys.SPACE;
         dash = Keys.SPACE;
-        switchWeapon = Keys.E;
+        switchWeapon = Keys.Q;
         activateShield = Keys.SHIFT_LEFT;
-        changeVehicle = Keys.G;
-        land = Keys.T;
+        changeVehicle = Keys.G;//E ?
+        interact = Keys.E;
         activateHyperDrive = Keys.NUM_1;
         
         //ui
