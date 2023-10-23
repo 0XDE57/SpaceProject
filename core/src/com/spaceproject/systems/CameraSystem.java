@@ -288,12 +288,14 @@ public class CameraSystem extends IteratingSystem {
     }
     
     public void zoomIn() {
+        if (GameScreen.isPaused()) return;
         if (zoomLevel <= 0) return;
         zoomTarget = getZoomForLevel(--zoomLevel);
         //Gdx.app.debug(this.getClass().getSimpleName(), "zoomIn: " + zoomTarget + " : " + zoomLevel);
     }
     
     public void zoomOut() {
+        if (GameScreen.isPaused()) return;
         if (zoomLevel >= maxZoomLevel) return;
         zoomTarget = getZoomForLevel(++zoomLevel);
         //Gdx.app.debug(this.getClass().getSimpleName(), "zoomOut: " + zoomTarget + " : " + zoomLevel);
