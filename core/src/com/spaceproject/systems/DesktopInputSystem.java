@@ -15,6 +15,7 @@ import com.spaceproject.components.*;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.ui.menu.GameMenu;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
@@ -52,6 +53,11 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     
     private boolean playerControls(int keycode, boolean keyDown) {
         setFocusToDesktop();
+        if (keycode == Input.Keys.ESCAPE) {
+            GameMenu menu = getEngine().getSystem(HUDSystem.class).getGameMenu();
+            if (!menu.isVisible()) menu.show();
+        }
+
 
         if (players.size() == 0) {
             ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
@@ -122,8 +128,6 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         }
 
         if (keycode == keyCFG.back) {
-            //todo, back should be breaks
-            //X on controller, S on keyboard
             control.moveBack = keyDown;
             
             if (control.moveBack) {

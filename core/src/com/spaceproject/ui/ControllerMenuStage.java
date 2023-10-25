@@ -20,6 +20,7 @@ import com.spaceproject.utility.IndependentTimer;
  * Modified version of: https://github.com/MrStahlfelge/gdx-controllerutils
  */
 public class ControllerMenuStage extends Stage implements ControllerListener {
+
     private static final float INITIAL_DIRECTION_EMPH_FACTOR = 3.1f;
     private final Vector2 controllerTempCoords = new Vector2();
     private Array<Actor> focusableActors = new Array<>();
@@ -29,6 +30,12 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
     private Actor focusedActor;
     private Actor escapeActor;
     private float directionEmphFactor = INITIAL_DIRECTION_EMPH_FACTOR;
+
+    int mapButtonA = Input.Keys.ENTER;
+    int mapButtonB = Input.Keys.BACKSPACE;
+    private float leftStickVertAxis, leftStickHorAxis;
+    private final IndependentTimer lastFocusTimer = new IndependentTimer(200, true);
+
 
     public ControllerMenuStage(Viewport viewport) {
         super(viewport);
@@ -235,7 +242,7 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
     public boolean keyDown(int keyCode) {
         //no actors on stage
         if (!getRoot().hasChildren()) {
-            return super.keyDown(keyCode);
+            return false;
         }
 
         boolean handled = false;
@@ -283,7 +290,7 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
     public boolean keyUp(int keyCode) {
         //no actors on stage
         if (!getRoot().hasChildren()) {
-            return super.keyUp(keyCode);
+            return false;
         }
 
         boolean handled;
@@ -294,8 +301,9 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
             handled = triggerActionOnActor(false, escapeActor);
             isPressed = handled;
             //Gdx.app.error(getClass().getSimpleName(), "keyUp escape action. pressed: " + isPressed);
-        } else
+        } else {
             handled = false;
+        }
 
         if (!handled)
             handled = super.keyUp(keyCode);
@@ -307,7 +315,7 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         //no actors on stage
         if (!getRoot().hasChildren()) {
-            return super.touchDown(screenX, screenY, pointer, button);
+            return false;
         }
 
         if (isFocusOnTouchdown()) {
@@ -333,7 +341,6 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
      */
     public boolean isDefaultActionKeyCode(int keyCode) {
         switch (keyCode) {
-            //case Input.Keys.CENTER:?
             case Input.Keys.ENTER:
             case Input.Keys.SPACE:
                 return true;
@@ -356,14 +363,6 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
         }
     }
 
-    public boolean isGoNextKeyCode(int keyCode) {
-        return (keyCode == Input.Keys.TAB && !UIUtils.shift());
-    }
-
-    public boolean isGoBackKeyCode(int keyCode) {
-        return (keyCode == Input.Keys.TAB && UIUtils.shift());
-    }
-
     protected boolean fireEventOnActor(Actor actor, InputEvent.Type type, int pointer, Actor related) {
         if (actor == null || !isActorFocusable(actor) || !isActorHittable(actor))
             return false;
@@ -381,18 +380,7 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
 
         boolean handled = event.isHandled();
         Pools.free(event);
-        //Gdx.app.error(getClass().getSimpleName(), event + " handled: " +  handled);
         return handled;
-    }
-
-    protected void simpleFire(Actor actor) {
-        InputEvent touchEvent = new InputEvent();
-        touchEvent.setType(InputEvent.Type.touchDown);
-        actor.fire(touchEvent);
-
-        touchEvent = new InputEvent();
-        touchEvent.setType(InputEvent.Type.touchUp);
-        actor.fire(touchEvent);
     }
 
     /**
@@ -600,11 +588,6 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
     }
 
     //region controller
-    int mapButtonA = Input.Keys.ENTER;
-    int mapButtonB = Input.Keys.ESCAPE;
-    private float leftStickVertAxis, leftStickHorAxis;
-    private final IndependentTimer lastFocusTimer = new IndependentTimer(200, true);
-
     @Override
     public void connected(Controller controller) {
         logControllerStatus(controller, "Connected", true);

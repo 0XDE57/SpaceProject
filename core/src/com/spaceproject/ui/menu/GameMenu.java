@@ -40,7 +40,6 @@ public class GameMenu extends VisWindow {
     private final Tab keyConfigTab;
     
     private boolean pauseOnMenuOpen = true;
-    private boolean alwaysHideOnEscape = false;
     private boolean retainPositionOnOpen = true;
     private boolean isResizable = true;
     private boolean isMovable = true;
@@ -88,7 +87,7 @@ public class GameMenu extends VisWindow {
         mainMenuTab = new MainMenuTab(this);
         tabbedPane.add(mainMenuTab);
 
-        OptionsTab optionsTab = new OptionsTab("   settings   ", game);
+        OptionsTab optionsTab = new OptionsTab("setting", game);
         tabbedPane.add(optionsTab);
         
         keyConfigTab = new KeyConfigTab(getStage(), SpaceProject.configManager.getConfig(KeyConfig.class), "input settings");
@@ -109,7 +108,7 @@ public class GameMenu extends VisWindow {
     }
 
     private void addTestTabs() {
-        Tab customRenderTab = new MyTab("   debug spectrum render   ");
+        Tab customRenderTab = new MyTab("debug spectrum render");
         ShapeRenderActor shapeRenderActor = new ShapeRenderActor();
         customRenderTab.getContentTable().add(shapeRenderActor).grow();
         customRenderTab.getContentTable().row();
@@ -193,17 +192,18 @@ public class GameMenu extends VisWindow {
     
     public boolean switchTabForKey(int keycode) {
         //exception for escape key, always hide if shown, or focus main
-        if (alwaysHideOnEscape) {
-            if (keycode == Input.Keys.ESCAPE) {
-                if (isVisible()) {
-                    close();
-                } else {
-                    tabbedPane.switchTab(mainMenuTab);
-                }
-                return true;
+        if (keycode == Input.Keys.ESCAPE) {
+            if (isVisible()) {
+                close();
+            } else {
+                tabbedPane.switchTab(mainMenuTab);
             }
+            return true;
         }
-        
+
+
+        //todo: kill off this key tabs, [Q][E] for left and right tab, [RB][LB] controller
+        //tab should auto say
         for (Tab tab : tabbedPane.getTabs()) {
             if (tab instanceof HotKeyTab) {
                 if (((HotKeyTab) tab).getHotKey() == keycode) {
