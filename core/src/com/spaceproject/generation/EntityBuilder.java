@@ -136,7 +136,7 @@ public class EntityBuilder {
         hyperDrive.coolDownTimer = new SimpleTimer(2000);
         hyperDrive.chargeTimer = new SimpleTimer(2000);
         hyperDrive.graceTimer = new SimpleTimer(1000);
-        shipEntity.add(hyperDrive);
+        //shipEntity.add(hyperDrive);
         
         //shield
         ShieldComponent shield = new ShieldComponent();
@@ -147,7 +147,7 @@ public class EntityBuilder {
         shield.lastHit = GameScreen.getGameTimeCurrent() - 1000;
         shield.heatResistance = 0f;
         shield.cooldownRate = 0.1f;
-        shipEntity.add(shield);
+        //shipEntity.add(shield);
         
         //barrel roll
         BarrelRollComponent barrelRoll = new BarrelRollComponent();

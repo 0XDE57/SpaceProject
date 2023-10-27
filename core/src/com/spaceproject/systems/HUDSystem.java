@@ -21,9 +21,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
@@ -320,7 +322,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                         shape.setColor(Color.WHITE);
                         shape.rectLine(halfWidth - (halfWidth * ratio), timerHeight, halfWidth + (ratio * halfWidth), timerHeight, 2);
                         if (interactTimer.tryEvent()) {
-                            stationMenu = SpaceStationMenu.SpaceStationMenu(GameScreen.getStage());
+                            stationMenu = SpaceStationMenu.SpaceStationMenu(GameScreen.getStage(), player);
                         }
                     }
                 } else {
