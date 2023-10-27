@@ -214,7 +214,9 @@ public class ShipControlSystem extends IteratingSystem {
             physicsComp.body.setTransform(transformComp.pos, transformComp.rotation);
             
             HyperDriveComponent hyperDrive = Mappers.hyper.get(entity);
-            hyperDrive.state = HyperDriveComponent.State.off;
+            if (hyperDrive != null) {
+                hyperDrive.state = HyperDriveComponent.State.off;
+            }
         }
         if (Gdx.input.isKeyPressed(Keys.Z)) {
             //physicsComp.body.setLinearVelocity(physicsComp.body.getLinearVelocity().add(physicsComp.body.getLinearVelocity()));
