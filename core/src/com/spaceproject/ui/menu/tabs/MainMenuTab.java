@@ -7,7 +7,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
-import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.tabbedpane.Tab;
 import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPane;
 import com.spaceproject.screens.GameScreen;
@@ -24,7 +23,7 @@ public class MainMenuTab extends HotKeyTab {
     public MainMenuTab(final GameMenu gameMenu) {
         super("menu", Input.Keys.ESCAPE);
 
-        TextButton btnGotoMain = new VisTextButton("main menu");
+        TextButton btnGotoMain = new TextButton("main menu", VisUI.getSkin());
         btnGotoMain.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -37,7 +36,7 @@ public class MainMenuTab extends HotKeyTab {
             }
         });
 
-        TextButton btnLoad = new VisTextButton("load");
+        TextButton btnLoad = new TextButton("load", VisUI.getSkin());
         btnLoad.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -45,7 +44,7 @@ public class MainMenuTab extends HotKeyTab {
             }
         });
 
-        TextButton btnSave = new VisTextButton("save");
+        TextButton btnSave = new TextButton("save", VisUI.getSkin());
         btnSave.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -53,7 +52,7 @@ public class MainMenuTab extends HotKeyTab {
             }
         });
 
-        TextButton btnOptions = new VisTextButton("keybinds");
+        TextButton btnOptions = new TextButton("keybinds", VisUI.getSkin());
         btnOptions.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -66,7 +65,7 @@ public class MainMenuTab extends HotKeyTab {
             }
         });
     
-        TextButton btnExit = new VisTextButton("exit");
+        TextButton btnExit = new TextButton("exit", VisUI.getSkin());
         btnExit.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {

@@ -16,8 +16,6 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
-import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisTable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.FontLoader;
 import com.spaceproject.screens.animations.DelaunayAnim;
@@ -74,7 +72,7 @@ public class TitleScreen extends MyScreenAdapter {
         String menuFont = "menuFont";
         initMenuFont(menuFont);
         
-        titleLabel = new VisLabel(SpaceProject.TITLE, titleFont, Color.WHITE);
+        titleLabel = new Label(SpaceProject.TITLE, VisUI.getSkin(), titleFont, Color.WHITE);
         titleLabel.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight(), Align.top);
         stage.addActor(titleLabel);
         
@@ -89,8 +87,8 @@ public class TitleScreen extends MyScreenAdapter {
         //stage.setFocusedActor(menu.table.getChildren().first());
 
         //version note
-        versionTable = new VisTable();
-        versionTable.add(new VisLabel(SpaceProject.VERSION, menuFont, Color.WHITE));
+        versionTable = new Table();
+        versionTable.add(new Label(SpaceProject.VERSION, VisUI.getSkin(), menuFont, Color.WHITE));
         stage.addActor(versionTable);
         versionTable.pack();
 
