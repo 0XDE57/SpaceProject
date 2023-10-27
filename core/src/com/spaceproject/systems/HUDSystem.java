@@ -688,7 +688,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         long colorTime = 6000;
         long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;//todo: per resource...
         float ratio = (float) timeSinceCollect / (float) colorTime;
-        if (GameScreen.isPaused()) {
+        if (GameScreen.isPaused() || messageState == SpecialState.docked) {
             ratio = 0f;
         }
         inventoryFont.setColor(1, 1, 1, 1-ratio);
