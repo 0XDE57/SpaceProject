@@ -419,7 +419,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             case docked:
                 String key = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).interact);
                 String input = (getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad Down" : key).toUpperCase();
-                drawHint("hold [" + input + "] to interact");
+                if (stationMenu == null) {
+                    drawHint("hold [" + input + "] to interact");
+                }
                 String port = Mappers.docked.get(player).dockID;
                 layout.setText(font, "[ DOCKED: port " + port + " ]");
             break;
