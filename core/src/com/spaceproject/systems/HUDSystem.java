@@ -70,7 +70,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     
     private GameMenu gameMenu;
-    private Table stationMenu;
+    private Actor stationMenu;
     private SimpleTimer interactTimer;
     
     //rendering
@@ -314,7 +314,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
         if (messageState == SpecialState.docked) {
             if (player != null) {
-                //Entity stationEntity = Mappers.docked.get(player).parent;
                 ControllableComponent control = Mappers.controllable.get(player);
                 if (control.interact) {
                     if (stationMenu == null) {
@@ -322,7 +321,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                         shape.setColor(Color.WHITE);
                         shape.rectLine(halfWidth - (halfWidth * ratio), timerHeight, halfWidth + (ratio * halfWidth), timerHeight, 2);
                         if (interactTimer.tryEvent()) {
-                            stationMenu = SpaceStationMenu.SpaceStationMenu(GameScreen.getStage(), player);
+                            stationMenu = SpaceStationMenu.SpaceStationMenu(GameScreen.getStage(), player, getEngine());
+                            //todo: move camera over
                         }
                     }
                 } else {

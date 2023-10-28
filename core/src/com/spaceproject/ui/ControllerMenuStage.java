@@ -484,7 +484,7 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
             Actor currentActor = focusableActors.get(i);
             if (currentActor == focusedActor) continue;
             if (!isActorFocusable(currentActor) || !isActorHittable(currentActor) ||!isActorInViewportArea(currentActor)) continue;
-            if (((TextButton)currentActor).isDisabled()) continue;
+            if ((currentActor instanceof TextButton) && ((TextButton)currentActor).isDisabled()) continue;
 
             Vector2 currentActorPos = currentActor.localToStageCoordinates(new Vector2(
                     direction == MoveFocusDirection.west ? currentActor.getWidth() : direction == MoveFocusDirection.east ? 0 : currentActor.getWidth() / 2,
