@@ -29,6 +29,7 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
     boolean reflecting = false;
 
     boolean drawNormal = false;
+    boolean reflectAsteroidColor = false;
 
     public LaserSystem() {
         super(Family.all(LaserComponent.class, PhysicsComponent.class).get());
@@ -64,11 +65,11 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
         laser.a.set(body.getPosition());
         incidentRay.set(MyMath.vector(body.getAngle(), laser.maxDist).add(laser.a));
 
-        reflect(entity, laser, body.getPosition(), incidentRay, laser.maxDist, maxReflections, deltaTime);
+        reflect(entity, laser, body.getPosition(), incidentRay, Color.RED.cpy(), laser.maxDist, maxReflections, deltaTime);
 
     }
 
-    private boolean reflect(Entity entity, LaserComponent laser, Vector2 a, Vector2 b, float length, int maxBounce, float deltaTime) {
+    private boolean reflect(Entity entity, LaserComponent laser, Vector2 a, Vector2 b, Color color, float length, int maxBounce, float deltaTime) {
         if (maxBounce <= 0) return false;
 
         reflecting = false;
@@ -76,14 +77,13 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
         castFixture = null;
         GameScreen.box2dWorld.rayCast(this, a, b);
         b.set(castPoint);
-        Color startColor = reflecting ? Color.RED : Color.FIREBRICK;
-        Color endColor = Color.CLEAR.cpy().lerp(Color.FIREBRICK, MathUtils.random()*0.25f);
+        Color endColor = Color.CLEAR.cpy().lerp(color, MathUtils.random()*0.25f);
 
         Vector2 incidentVector = new Vector2(b).sub(a);
         float distanceToHit = incidentVector.len();
         float range = distanceToHit / length;
-        Color ratio = startColor.cpy().lerp(endColor, range - MathUtils.random()*0.15f);
-        shape.rectLine(a.x, a.y, b.x, b.y, 0.3f, startColor, ratio);
+        Color ratio = color.cpy().lerp(endColor, range - MathUtils.random()*0.15f);
+        shape.rectLine(a.x, a.y, b.x, b.y, 0.3f, color, ratio);
 
         if (reflecting) {
             Object userData = castFixture.getBody().getUserData();
@@ -92,6 +92,12 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
                 if (entity != hitEntity) {
                     float damage = laser.damage * (1 - range) * deltaTime;
                     Box2DContactListener.damage(getEngine(), hitEntity, entity, damage);
+                }
+                if (reflectAsteroidColor) {
+                    AsteroidComponent asteroid = Mappers.asteroid.get(hitEntity);
+                    if (asteroid != null) {
+                        color.set(asteroid.color.cpy());
+                    }
                 }
             }
 
@@ -103,7 +109,7 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
 
             //calculate reflection
             Vector2 reflectedVector = new Vector2(incidentVector).sub(castNormal.scl(2 * incidentVector.dot(castNormal))).setLength(length - distanceToHit).add(b);
-            reflecting = reflect(entity, laser, b, reflectedVector, length - distanceToHit, --maxBounce, deltaTime);
+            reflecting = reflect(entity, laser, b, reflectedVector, color, length - distanceToHit, --maxBounce, deltaTime);
         }
         return reflecting;
     }
