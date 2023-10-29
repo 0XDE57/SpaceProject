@@ -45,7 +45,7 @@ public class ResourceDisposer {
         }
     
         ParticleComponent particle = Mappers.particle.get(entity);
-        if (particle != null) {
+        if (particle != null && particle.pooledEffect != null) {
             particle.pooledEffect.dispose();
             particle.pooledEffect = null;
             disposedParticle++;

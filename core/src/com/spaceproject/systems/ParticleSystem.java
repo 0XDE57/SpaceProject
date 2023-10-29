@@ -93,6 +93,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     public void update(float deltaTime) {
         spriteBatch.setProjectionMatrix(GameScreen.cam.combined);
         spriteBatch.begin();
+        count = 0;
         super.update(deltaTime);
         spriteBatch.end();
     }
@@ -123,10 +124,14 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                 updateShieldChargeParticle(entity, particle);
                 break;
         }
-        
+
         particle.pooledEffect.draw(spriteBatch, deltaTime);
+
+        for (ParticleEmitter emitter : particle.pooledEffect.getEmitters()) {
+            count += emitter.getActiveCount();
+        }
     }
-    
+    int count;
     private void updateEngineParticle(Entity entity, ParticleComponent particle) {
         ControllableComponent control = Mappers.controllable.get(entity);
         TransformComponent transform = Mappers.transform.get(entity);
@@ -181,7 +186,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
             }
             angle.setHigh(relativeAngle);
             angle.setLow(relativeAngle);
-        
+
             //change color during boost
             if (hyperdriveIsActive) {
                 ParticleEmitter.GradientColorValue tint = emitters.get(i).getTint();
@@ -315,6 +320,10 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                 shieldEffectPool.free(particle.pooledEffect);
                 break;
         }
+    }
+
+    public int getParticleCount() {
+        return count;
     }
     
     @Override

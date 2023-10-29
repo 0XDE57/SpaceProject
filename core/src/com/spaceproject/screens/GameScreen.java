@@ -6,14 +6,12 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.controllers.Controllers;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -30,9 +28,9 @@ import com.spaceproject.config.WorldConfig;
 import com.spaceproject.generation.FontLoader;
 import com.spaceproject.generation.Galaxy;
 import com.spaceproject.math.MyMath;
-import com.spaceproject.math.Physics;
 import com.spaceproject.noise.NoiseManager;
 import com.spaceproject.systems.Box2DPhysicsSystem;
+import com.spaceproject.systems.ParticleSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.ui.ControllerMenuStage;
 import com.spaceproject.utility.DebugUtil;
@@ -41,8 +39,6 @@ import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.ResourceDisposer;
 import com.spaceproject.utility.SystemLoader;
-
-import java.util.concurrent.TimeUnit;
 
 public class GameScreen extends MyScreenAdapter {
     
@@ -261,12 +257,15 @@ public class GameScreen extends MyScreenAdapter {
         profilerStringBuilder.append(Gdx.graphics.getGLVersion().getDebugVersionString());
         profilerStringBuilder.append("\n[Frame ID]:         ").append(Gdx.graphics.getFrameId());
         profilerStringBuilder.append("\n[Engine Steps]:     ").append(engineTicks);
-        profilerStringBuilder.append("\n").append(engine.getSystem(Box2DPhysicsSystem.class).toString());
+        Box2DPhysicsSystem box2DSystem = engine.getSystem(Box2DPhysicsSystem.class);
+        if (box2DSystem != null) profilerStringBuilder.append("\n").append(box2DSystem);
         profilerStringBuilder.append("\n[GL calls]:         ").append(glProfiler.getCalls());
         profilerStringBuilder.append("\n[Draw calls]:       ").append(glProfiler.getDrawCalls());
         profilerStringBuilder.append("\n[Shader switches]:  ").append(glProfiler.getShaderSwitches());
         profilerStringBuilder.append("\n[Texture bindings]: ").append(glProfiler.getTextureBindings());
         profilerStringBuilder.append("\n[Vertices]:         ").append(glProfiler.getVertexCount().total);
+        ParticleSystem particleSystem = engine.getSystem(ParticleSystem.class);
+        if (particleSystem != null) profilerStringBuilder.append("\n[Particles]:        ").append(particleSystem.getParticleCount());
         profilerStringBuilder.append("\n------ DISPOSED ------ ").append(ResourceDisposer.getTotalDisposeCount());
         glProfiler.reset();
     }
