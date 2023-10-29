@@ -20,6 +20,7 @@ import com.kotcrab.vis.ui.widget.*;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
 import com.spaceproject.config.KeyConfig;
+import com.spaceproject.math.Physics;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.systems.DesktopInputSystem;
 import com.spaceproject.ui.ControllerMenuStage;
@@ -55,6 +56,7 @@ public class SpaceStationMenu {
         int costLaser = 10000;
 
         ScrollableTextArea text = new ScrollableTextArea("");
+        text.removeListener(text.getDefaultInputListener());
         Table creditsTable = new VisTable();
         Label creditsText = new VisLabel("CREDITS: ");
         creditsTable.add(creditsText);
@@ -162,7 +164,8 @@ public class SpaceStationMenu {
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
 
                 LaserComponent laser = new LaserComponent();
-                laser.color = Color.GREEN.cpy();
+                int[] rgb = Physics.wavelengthToRGB(520, 1);
+                laser.color = new Color(rgb[0]/255f, rgb[1]/255f, rgb[2]/255f, 1);
                 vehicle.tools.put(VehicleComponent.Tool.laser.ordinal(), laser);
             }
         });
@@ -183,6 +186,7 @@ public class SpaceStationMenu {
         buttonTable.add(new TextButton("[" + colorItem + "]Item C                      [" + colorCredits + "]" + 30, VisUI.getSkin())).fillX().row();
 
         Table descTable = new VisTable();
+        text.setReadOnly(true);
         descTable.add(text.createCompatibleScrollPane()).growX().height(150).row();
 
         VisWindow window = new VisWindow("[" + titleColor + "]STATION DELTA");
