@@ -1,5 +1,6 @@
 package com.spaceproject.systems;
 
+import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -12,18 +13,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.CannonComponent;
-import com.spaceproject.components.ChargeCannonComponent;
-import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.components.HyperDriveComponent;
-import com.spaceproject.components.PhysicsComponent;
-import com.spaceproject.components.PlanetComponent;
-import com.spaceproject.components.ScreenTransitionComponent;
-import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.SoundComponent;
-import com.spaceproject.components.TextureComponent;
-import com.spaceproject.components.TransformComponent;
-import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.components.*;
 import com.spaceproject.config.EntityConfig;
 import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.generation.EntityBuilder;
@@ -33,6 +23,8 @@ import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
+
+import java.util.HashMap;
 
 
 public class ShipControlSystem extends IteratingSystem {
@@ -233,33 +225,28 @@ public class ShipControlSystem extends IteratingSystem {
         }
         
         if (!vehicle.weaponSwapTimer.tryEvent()) return;
-        
-        //swap: [burst cannon] <-> [charge cannon]
-        //remove one, install the other
-        switch (vehicle.weaponIndex) {
-            case 0: { //default charge cannon
-                //assume has charge equipped
-                ChargeCannonComponent removed = player.remove(ChargeCannonComponent.class);
-                if (removed != null && removed.projectileEntity != null) {
-                    getEngine().removeEntity(removed.projectileEntity);
-                    removed.projectileEntity = null;
-                }
-                
-                //add new rapid cannon
-                CannonComponent cannon = EntityBuilder.makeCannon(vehicle.dimensions.width);
-                player.add(cannon);
-                vehicle.weaponIndex = 1;
-                Gdx.app.log(this.getClass().getSimpleName(), vehicle.weaponIndex + ": cannon");
+
+        switch (vehicle.currentTool) {
+            case cannon: {
+                if (!vehicle.tools.containsKey(VehicleComponent.Tool.laser.ordinal())) break;
+                //remove cannon component from entity and place in cargo
+                vehicle.tools.put(VehicleComponent.Tool.cannon.ordinal(), player.remove(CannonComponent.class));
+                //pull laser from cargo and apply to entity
+                LaserComponent laser = (LaserComponent) vehicle.tools.get(VehicleComponent.Tool.laser.ordinal());
+                player.add(laser);
+                vehicle.currentTool = VehicleComponent.Tool.laser;
+                Gdx.app.log(getClass().getSimpleName(), "equipped:" + vehicle.currentTool);
                 break;
             }
-            case 1: { //rapid cannon
-                //assume has regular cannon equipped
-                CannonComponent removed = player.remove(CannonComponent.class);
-                //add new charge
-                ChargeCannonComponent chargeCannon = EntityBuilder.makeChargeCannon(vehicle.dimensions.width);
-                player.add(chargeCannon);
-                vehicle.weaponIndex = 0;
-                Gdx.app.log(this.getClass().getSimpleName(), vehicle.weaponIndex + ": charge cannon");
+            case laser: {
+                if (!vehicle.tools.containsKey(VehicleComponent.Tool.cannon.ordinal())) break;
+                //remove cannon component from entity and place in cargo
+                vehicle.tools.put(VehicleComponent.Tool.laser.ordinal(), player.remove(LaserComponent.class));
+                //pull laser from cargo and apply to entity
+                CannonComponent cannon = (CannonComponent) vehicle.tools.get(VehicleComponent.Tool.cannon.ordinal());
+                player.add(cannon);
+                vehicle.currentTool = VehicleComponent.Tool.cannon;
+                Gdx.app.log(getClass().getSimpleName(), "equipped: " + vehicle.currentTool);
                 break;
             }
         }

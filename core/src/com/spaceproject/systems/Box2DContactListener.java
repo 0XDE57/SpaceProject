@@ -135,7 +135,7 @@ public class Box2DContactListener implements ContactListener {
         }
         
         //do damage
-        damage(attackedEntity, damageComponent.source, damageComponent.damage);
+        damage(engine, attackedEntity, damageComponent.source, damageComponent.damage);
         
         //add projectile ghost (fx)
         boolean showGhostTrail = (healthComponent.health <= 0);
@@ -269,7 +269,7 @@ public class Box2DContactListener implements ContactListener {
         }
 
         //do damage
-        HealthComponent healthComponent = damage(burningEntity, starEntity, damage);
+        HealthComponent healthComponent = damage(engine, burningEntity, starEntity, damage);
 
         //destroy other body if has damage payload. eg: projectile
         if (healthComponent == null) {
@@ -348,7 +348,7 @@ public class Box2DContactListener implements ContactListener {
         if (impulse > asteroidDamageThreshold) {
             //calc damage relative to size of bodies and how hard impact impulse was
             float relativeDamage = (impulse * impactMultiplier) * asteroid.area;
-            damage(impactedEntity, asteroidEntity, relativeDamage);
+            damage(engine, impactedEntity, asteroidEntity, relativeDamage);
         }
     }
     
@@ -400,7 +400,7 @@ public class Box2DContactListener implements ContactListener {
         
         //do damage
         Gdx.app.debug(getClass().getSimpleName(), "high impact damage: " + relativeDamage + " to [" + DebugUtil.objString(entity) + "]");
-        damage(entity, otherBody, relativeDamage);
+        damage(engine, entity, otherBody, relativeDamage);
 
         //damaged entity was controlled by player, vibrate on impact
         if (Mappers.controlFocus.get(entity) != null) {
@@ -412,12 +412,12 @@ public class Box2DContactListener implements ContactListener {
     }
     //endregion
 
-    private HealthComponent damage(Entity entity, Entity source, float damage) {
+    public static HealthComponent damage(Engine engine, Entity entity, Entity source, float damage) {
         HealthComponent health = Mappers.health.get(entity);
         if (health == null) return null;
         if (health.health <= 0) {
             boolean hasRemove = entity.getComponent(RemoveComponent.class) != null;
-            Gdx.app.error(getClass().getSimpleName(), "damage to [" + DebugUtil.objString(entity) + "] ignored. marked for removal: " + hasRemove);
+            Gdx.app.error(Box2DContactListener.class.getSimpleName(), "damage to [" + DebugUtil.objString(entity) + "] ignored. marked for removal: " + hasRemove);
             return null;
         }
 
@@ -425,12 +425,12 @@ public class Box2DContactListener implements ContactListener {
         health.lastHitSource = source;
         health.health -= damage;
         if (health.health <= 0) {
-            destroy(entity, source);
+            destroy(engine, entity, source);
         }
         return health;
     }
     
-    private void destroy(Entity entity, Entity source) {
+    private static void destroy(Engine engine, Entity entity, Entity source) {
         //create respawn entity for player
         if (Mappers.controllable.get(entity) != null) {
             Entity respawnEntity = new Entity();
@@ -455,7 +455,7 @@ public class Box2DContactListener implements ContactListener {
             respawnEntity.add(respawn);
             respawnEntity.add(new RingEffectComponent());//todo: replace with explode particle effect
             engine.addEntity(respawnEntity);
-            Gdx.app.debug(getClass().getSimpleName(), "create respawn(" + respawn.reason + ") marker: " + DebugUtil.objString(respawnEntity) + " for " + DebugUtil.objString(entity));
+            Gdx.app.debug(Box2DContactListener.class.getSimpleName(), "create respawn(" + respawn.reason + ") marker: " + DebugUtil.objString(respawnEntity) + " for " + DebugUtil.objString(entity));
         }
     
         /*
@@ -486,7 +486,7 @@ public class Box2DContactListener implements ContactListener {
         
         VehicleComponent vehicle = Mappers.vehicle.get(entity);
         if (vehicle != null) {
-            Gdx.app.log(getClass().getSimpleName(), "[" + DebugUtil.objString(entity) + "] destroyed by: [" + DebugUtil.objString(source) + "]");
+            Gdx.app.log(Box2DContactListener.class.getSimpleName(), "[" + DebugUtil.objString(entity) + "] destroyed by: [" + DebugUtil.objString(source) + "]");
             engine.getSystem(SoundSystem.class).shipExplode();
         }
     }
