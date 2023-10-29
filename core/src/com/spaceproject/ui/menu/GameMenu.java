@@ -87,7 +87,7 @@ public class GameMenu extends VisWindow {
         mainMenuTab = new MainMenuTab(this);
         tabbedPane.add(mainMenuTab);
 
-        OptionsTab optionsTab = new OptionsTab("setting", game);
+        OptionsTab optionsTab = new OptionsTab("settings", game);
         tabbedPane.add(optionsTab);
         
         keyConfigTab = new KeyConfigTab(getStage(), SpaceProject.configManager.getConfig(KeyConfig.class), "input settings");
