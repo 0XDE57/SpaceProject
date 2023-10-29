@@ -26,6 +26,7 @@ public class Mappers {
     public static final ComponentMapper<HealthComponent> health = ComponentMapper.getFor(HealthComponent.class);
     public static final ComponentMapper<HyperDriveComponent> hyper = ComponentMapper.getFor(HyperDriveComponent.class);
     public static final ComponentMapper<ItemComponent> item = ComponentMapper.getFor(ItemComponent.class);
+    public static final ComponentMapper<LaserComponent> laser = ComponentMapper.getFor(LaserComponent.class);
     public static final ComponentMapper<MapComponent> map = ComponentMapper.getFor(MapComponent.class);
     public static final ComponentMapper<OrbitComponent> orbit = ComponentMapper.getFor(OrbitComponent.class);
     public static final ComponentMapper<ParticleComponent> particle = ComponentMapper.getFor(ParticleComponent.class);

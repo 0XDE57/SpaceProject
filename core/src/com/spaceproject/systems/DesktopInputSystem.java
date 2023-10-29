@@ -62,9 +62,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         if (players.size() == 0) {
             ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
             if (respawnEntities.size() != 0) {
-                if (getEngine().getSystem(PlayerSpawnSystem.class).pan(respawnEntities.first())) {
-                    return true;
-                }
+                return getEngine().getSystem(PlayerSpawnSystem.class).pan(respawnEntities.first());
             }
             return false;
         }
@@ -246,6 +244,11 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             if (cannon != null) {
                 cannon.multiplier = 1;
             }
+
+            LaserComponent laser = Mappers.laser.get(player);
+            if (laser != null) {
+                laser.state = LaserComponent.State.on;
+            }
             return true;
         }
         
@@ -258,34 +261,17 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         
         return false;
     }
-    
-    public boolean getControllerHasFocus() {
-        return controllerHasFocus;
-    }
-    
-    public void setFocusToController() {
-        if (!controllerHasFocus) {
-            //instead of removing cursor, perhaps could set cursor to a set distance away from player in stick direction?
-            Gdx.app.debug(getClass().getSimpleName(), "input focus set to controller");
-            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
-        }
-        controllerHasFocus = true;
-    }
-    
-    public void setFocusToDesktop() {
-        if (controllerHasFocus) {
-            Gdx.app.debug(getClass().getSimpleName(), "input focus set to desktop");
-            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
-            Gdx.graphics.setCursor(GameScreen.cursor);
-        }
-        controllerHasFocus = false;
-    }
-    
+
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         if (players.size() != 0) {
             ControllableComponent control = Mappers.controllable.get(players.first());
             control.attack = false;
+
+            LaserComponent laser = Mappers.laser.get(players.first());
+            if (laser != null) {
+                laser.state = LaserComponent.State.off;
+            }
             return true;
         }
         return false;
@@ -305,6 +291,28 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     public boolean mouseMoved(int screenX, int screenY) {
         setFocusToDesktop();
         return false;
+    }
+
+    public boolean getControllerHasFocus() {
+        return controllerHasFocus;
+    }
+
+    public void setFocusToController() {
+        if (!controllerHasFocus) {
+            //instead of removing cursor, perhaps could set cursor to a set distance away from player in stick direction?
+            Gdx.app.debug(getClass().getSimpleName(), "input focus set to controller");
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+        }
+        controllerHasFocus = true;
+    }
+
+    public void setFocusToDesktop() {
+        if (controllerHasFocus) {
+            Gdx.app.debug(getClass().getSimpleName(), "input focus set to desktop");
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+            Gdx.graphics.setCursor(GameScreen.cursor);
+        }
+        controllerHasFocus = false;
     }
 
 }

@@ -107,9 +107,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         if (players.size() == 0) {
             ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
             if (respawnEntities.size() != 0) {
-                if (getEngine().getSystem(PlayerSpawnSystem.class).pan(respawnEntities.first())) {
-                    return true;
-                }
+                return getEngine().getSystem(PlayerSpawnSystem.class).pan(respawnEntities.first());
             }
             return false;
         }
@@ -274,12 +272,21 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             if (cannon != null) {
                 cannon.multiplier = r2;
             }
-            
+
+            LaserComponent laser = Mappers.laser.get(player);
+            if (laser != null) {
+                laser.state = LaserComponent.State.on;
+            }
             desktopInput.setFocusToController();
         } else {
             //todo: bug, stick drift and minor inputs seem to be interfering with mouse input
             if (desktopInput.getControllerHasFocus()) {
                 control.attack = false;
+
+                LaserComponent laser = Mappers.laser.get(player);
+                if (laser != null) {
+                    laser.state = LaserComponent.State.off;
+                }
             }
         }
     
