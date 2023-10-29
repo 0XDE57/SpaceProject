@@ -154,14 +154,6 @@ public class DebugTab extends HotKeyTab {
                 debugCFG.drawDiagnosticInfo = toggleExtraInfo.isChecked();
             }
         });
-        
-        final VisCheckBox toggleEntityList = new VisCheckBox("show entity list", debugCFG.drawEntityList);
-        toggleEntityList.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                debugCFG.drawEntityList = toggleEntityList.isChecked();
-            }
-        });
 
         final VisCheckBox toggleUIDebug = new VisCheckBox("UI debug", false);
         toggleUIDebug.addListener(new ChangeListener() {
@@ -184,7 +176,6 @@ public class DebugTab extends HotKeyTab {
         getContentTable().add(new Separator()).fillX();
         getContentTable().add(new Separator()).fillX().row();
         getContentTable().add(toggleMousePos).left().row();
-        getContentTable().add(toggleEntityList).left().row();
         getContentTable().add(togglePos).left();
         getContentTable().add(toggleComponentList).left().row();
         getContentTable().add(toggleOrbitPath).left().row();

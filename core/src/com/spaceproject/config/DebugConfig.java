@@ -17,7 +17,6 @@ public class DebugConfig extends Config {
     public boolean drawContacts;
     public boolean drawOrbitPath;
     public boolean drawMousePos;
-    public boolean drawEntityList;
     public boolean lerpCam;
     public boolean infiniteFire;
 
@@ -38,7 +37,6 @@ public class DebugConfig extends Config {
         drawContacts = true;
         drawOrbitPath = false;
         drawMousePos = false;
-        drawEntityList = false;
         lerpCam = false;
         infiniteFire = false;
     }

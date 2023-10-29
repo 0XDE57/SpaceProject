@@ -173,9 +173,6 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     
             if (debugCFG.drawMousePos)
                 drawMousePos();
-    
-            if (debugCFG.drawEntityList)
-                drawEntityList();
             
             if (debugCFG.drawComponentList)
                 drawComponentList();
@@ -254,16 +251,6 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         }
     
         fontLarge.draw(batch, versionLayout, Gdx.graphics.getWidth() - versionLayout.width -10, lineHeight + 10);
-    }
-
-    private void drawEntityList() {
-        float fontHeight = fontSmall.getLineHeight();
-        int x = 30;
-        int y = 30;
-        int i = 0;
-        for (Entity entity : getEngine().getEntities()) {
-            fontSmall.draw(batch, Integer.toHexString(entity.hashCode()), x, y + (fontHeight * i++));
-        }
     }
     
     /** Draw all Entity components and fields */
