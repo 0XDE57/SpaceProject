@@ -20,14 +20,15 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Disposable;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
+import com.spaceproject.config.EngineConfig;
 import com.spaceproject.generation.FontLoader;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
-import static com.spaceproject.screens.MyScreenAdapter.cam;
-import static com.spaceproject.screens.MyScreenAdapter.viewport;
+import static com.spaceproject.screens.MyScreenAdapter.*;
 
 
 public class GridRenderSystem extends EntitySystem implements Disposable {
@@ -53,6 +54,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     private Vector3 topLeft = new Vector3();
     private Vector3 bottomRight = new Vector3();
     private final Color gridColor = Color.BLACK.cpy();
+    private final Color gridColorB = new Color(.51f, .5f, .5f, 0.3f);
     private final Color ringColor = Color.PURPLE.cpy();
     private final Color lineColor = Color.GREEN.cpy();
     
@@ -100,10 +102,12 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         
         //render
-        shape.begin(ShapeRenderer.ShapeType.Line);
-
         shape.setProjectionMatrix(cam.combined);
-        drawGrid(GameScreen.isHyper() ? Color.WHITE : gridColor, calculateGridDensity(gridWidth));
+        shape.begin(ShapeRenderer.ShapeType.Filled);
+        drawGrid(GameScreen.isHyper() ? Color.WHITE : gridColor, gridColorB, calculateGridDensity(gridWidth), 2f, 5);
+        shape.end();
+
+        shape.begin(ShapeRenderer.ShapeType.Line);
         drawOrbitPath();
 
         shape.setProjectionMatrix(projectionMatrix);
@@ -137,28 +141,34 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
-    private void drawGrid(Color color, int gridSize) {
-        shape.setColor(color);
+    private void drawGrid(Color colorA, Color colorB, int gridSize, float width, int emphasisDivisor) {
         //unproject to get edges of viewport
         topLeft.set(0, 0, 0);
         topLeft = viewport.unproject(topLeft);
         bottomRight.set(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0);
         bottomRight = viewport.unproject(bottomRight);
         //draw vertical along X axis
+        float thickness = (1/SpaceProject.configManager.getConfig(EngineConfig.class).renderScale) * cam.zoom * width;
         int i = 0;
-        int alignedX = (int) (topLeft.x/gridSize) * gridSize;
+        int referenceX = (int) (topLeft.x/gridSize);
+        int alignedX = referenceX * gridSize;
         for (int x = alignedX; x < bottomRight.x; x += gridSize) {
             float aX = alignedX + (i * gridSize);
+            boolean emphasis = (referenceX + i) % emphasisDivisor == 0;
             i++;
-            shape.line(aX, topLeft.y, aX, bottomRight.y);
+            shape.setColor(emphasis ? colorB : colorA);
+            shape.rectLine(aX, topLeft.y, aX, bottomRight.y, emphasis ? thickness * 2 : thickness);
         }
         //draw horizontal along Y axis
         int j = 0;
-        int alignedY = (int) (bottomRight.y/gridSize) * gridSize;
+        int referenceY = (int) (bottomRight.y / gridSize);
+        int alignedY = referenceY * gridSize;
         for (int y = alignedY; y < topLeft.y; y += gridSize) {
             float aY = alignedY + (j * gridSize);
+            boolean emphasis = (referenceY + j) % emphasisDivisor == 0;
             j++;
-            shape.line(topLeft.x, aY, bottomRight.x, aY);
+            shape.setColor(emphasis ? colorB : colorA);
+            shape.rectLine(topLeft.x, aY, bottomRight.x, aY, emphasis ? thickness * 2 : thickness);
         }
     }
 
