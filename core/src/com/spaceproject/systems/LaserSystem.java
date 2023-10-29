@@ -97,11 +97,8 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
 
             if (drawNormal) {
                 //draw normal
-                b.set(MyMath.vector(castNormal.angleRad(), laser.maxDist).add(b));
                 shape.setColor(Color.GREEN);
-                shape.rectLine(laser.b, incidentRay, 0.3f);
-                shape.setColor(Color.SLATE);
-                shape.rectLine(laser.b, incidentRay, 0.1f);
+                shape.rectLine(b, MyMath.vector(castNormal.angleRad(), length).add(b), 0.2f);
             }
 
             //calculate reflection
