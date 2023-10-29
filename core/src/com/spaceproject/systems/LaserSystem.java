@@ -65,7 +65,7 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
         laser.a.set(body.getPosition());
         incidentRay.set(MyMath.vector(body.getAngle(), laser.maxDist).add(laser.a));
 
-        reflect(entity, laser, body.getPosition(), incidentRay, Color.RED.cpy(), laser.maxDist, maxReflections, deltaTime);
+        reflect(entity, laser, body.getPosition(), incidentRay, laser.color.cpy(), laser.maxDist, maxReflections, deltaTime);
 
     }
 

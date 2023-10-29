@@ -162,6 +162,7 @@ public class SpaceStationMenu {
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
 
                 LaserComponent laser = new LaserComponent();
+                laser.color = Color.GREEN.cpy();
                 vehicle.tools.put(VehicleComponent.Tool.laser.ordinal(), laser);
             }
         });
