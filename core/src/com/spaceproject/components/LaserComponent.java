@@ -13,7 +13,7 @@ public class LaserComponent implements Component {
 
    public Vector2 a = new Vector2();
    public Vector2 b = new Vector2();
-   public float maxLaserDist = 100;
-   public float damage = 200;
+   public float maxDist = 500;
+   public float damage = 100;
 
 }

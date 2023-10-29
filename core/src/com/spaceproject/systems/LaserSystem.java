@@ -16,11 +16,11 @@ import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.components.*;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
-import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.Mappers;
 
 public class LaserSystem extends IteratingSystem implements Disposable, RayCastCallback {
 
+    final int maxReflections = 10;
     final Vector2 incidentRay = new Vector2();
     final Vector2 castPoint = new Vector2();
     final Vector2 castNormal = new Vector2();
@@ -60,37 +60,44 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
         }
 
         Body body = Mappers.physics.get(entity).body;
+
         laser.a.set(body.getPosition());
-        incidentRay.set(MyMath.vector(body.getAngle(), laser.maxLaserDist).add(laser.a));
+        incidentRay.set(MyMath.vector(body.getAngle(), laser.maxDist).add(laser.a));
+
+        reflect(entity, laser, body.getPosition(), incidentRay, laser.maxDist, maxReflections, deltaTime);
+
+    }
+
+    private boolean reflect(Entity entity, LaserComponent laser, Vector2 a, Vector2 b, float length, int maxBounce, float deltaTime) {
+        if (maxBounce <= 0) return false;
+
         reflecting = false;
-        castPoint.set(incidentRay);
+        castPoint.set(b);
         castFixture = null;
-        GameScreen.box2dWorld.rayCast(this, laser.a, incidentRay);
-        laser.b.set(castPoint);
-        //shape.setColor(reflecting ? Color.RED : Color.FIREBRICK);
-        //shape.rectLine(laser.a, laser.b, 0.3f);
+        GameScreen.box2dWorld.rayCast(this, a, b);
+        b.set(castPoint);
         Color startColor = reflecting ? Color.RED : Color.FIREBRICK;
         Color endColor = Color.CLEAR.cpy().lerp(Color.FIREBRICK, MathUtils.random()*0.25f);
 
-        Vector2 incidentVector = new Vector2(laser.b).sub(laser.a);
+        Vector2 incidentVector = new Vector2(b).sub(a);
         float distanceToHit = incidentVector.len();
-        float range = distanceToHit / laser.maxLaserDist;
-        Color ratio = startColor.cpy().lerp(endColor, (distanceToHit / laser.maxLaserDist) - MathUtils.random()*0.15f);
-        shape.rectLine(laser.a.x, laser.a.y, laser.b.x, laser.b.y, 0.3f, startColor, ratio);
-        //shape.setColor(Color.SLATE);
-        //shape.rectLine(laser.a, laser.b, 0.1f);
+        float range = distanceToHit / length;
+        Color ratio = startColor.cpy().lerp(endColor, range - MathUtils.random()*0.15f);
+        shape.rectLine(a.x, a.y, b.x, b.y, 0.3f, startColor, ratio);
 
         if (reflecting) {
             Object userData = castFixture.getBody().getUserData();
             if (userData != null) {
                 Entity hitEntity = (Entity) userData;
-                float damage = laser.damage * (1-range) * deltaTime;
-                Box2DContactListener.damage(getEngine(), hitEntity, entity, damage);
+                if (entity != hitEntity) {
+                    float damage = laser.damage * (1 - range) * deltaTime;
+                    Box2DContactListener.damage(getEngine(), hitEntity, entity, damage);
+                }
             }
 
             if (drawNormal) {
                 //draw normal
-                incidentRay.set(MyMath.vector(castNormal.angleRad(), laser.maxLaserDist).add(laser.b));
+                b.set(MyMath.vector(castNormal.angleRad(), laser.maxDist).add(b));
                 shape.setColor(Color.GREEN);
                 shape.rectLine(laser.b, incidentRay, 0.3f);
                 shape.setColor(Color.SLATE);
@@ -98,20 +105,10 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
             }
 
             //calculate reflection
-            Vector2 reflectedVector = new Vector2(incidentVector).sub(castNormal.scl(2 * incidentVector.dot(castNormal))).setLength(laser.maxLaserDist - distanceToHit).add(laser.b);
-            castPoint.set(reflectedVector);
-            reflecting = false;
-            GameScreen.box2dWorld.rayCast(this, laser.b, reflectedVector);
-            //shape.setColor(Color.RED);
-            //shape.rectLine(laser.b, castPoint, 0.3f);
-            shape.rectLine(laser.b.x, laser.b.y, castPoint.x, castPoint.y, 0.3f, ratio, endColor);
-            //shape.setColor(Color.SLATE);
-            //shape.rectLine(laser.b, castPoint, 0.1f);
-
-            if (reflecting) {
-
-            }
+            Vector2 reflectedVector = new Vector2(incidentVector).sub(castNormal.scl(2 * incidentVector.dot(castNormal))).setLength(length - distanceToHit).add(b);
+            reflecting = reflect(entity, laser, b, reflectedVector, length - distanceToHit, --maxBounce, deltaTime);
         }
+        return reflecting;
     }
 
     @Override
@@ -121,7 +118,6 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
         castNormal.set(normal);
         castFixture = fixture;
         reflecting = true;
-        //Gdx.app.debug(getClass().getSimpleName(), MyMath.formatVector2(point, 1) + " - " + MyMath.formatVector2(normal, 1));
         return fraction;
     }
 
