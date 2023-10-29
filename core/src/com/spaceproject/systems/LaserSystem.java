@@ -99,11 +99,14 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
                         color.set(asteroid.color.cpy());
                     }
                 }
+                if (Mappers.damage.get(hitEntity) != null) {
+                    hitEntity.add(new RemoveComponent());
+                }
             }
 
             if (drawNormal) {
                 //draw normal
-                shape.setColor(Color.GREEN);
+                shape.setColor(Color.SKY);
                 shape.rectLine(b, MyMath.vector(castNormal.angleRad(), length).add(b), 0.2f);
             }
 
