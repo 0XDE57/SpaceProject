@@ -14,38 +14,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.AIComponent;
-import com.spaceproject.components.AsteroidComponent;
-import com.spaceproject.components.AttachedToComponent;
-import com.spaceproject.components.BarrelRollComponent;
-import com.spaceproject.components.CameraFocusComponent;
-import com.spaceproject.components.CannonComponent;
-import com.spaceproject.components.CargoComponent;
-import com.spaceproject.components.CharacterComponent;
-import com.spaceproject.components.ChargeCannonComponent;
-import com.spaceproject.components.ControlFocusComponent;
-import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.components.DashComponent;
-import com.spaceproject.components.ExpireComponent;
-import com.spaceproject.components.HealthComponent;
-import com.spaceproject.components.HyperDriveComponent;
-import com.spaceproject.components.ItemComponent;
-import com.spaceproject.components.MapComponent;
-import com.spaceproject.components.OrbitComponent;
-import com.spaceproject.components.ParticleComponent;
-import com.spaceproject.components.PhysicsComponent;
-import com.spaceproject.components.PlanetComponent;
-import com.spaceproject.components.SeedComponent;
-import com.spaceproject.components.ShaderComponent;
-import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.SoundComponent;
-import com.spaceproject.components.SpaceStationComponent;
-import com.spaceproject.components.Sprite3DComponent;
-import com.spaceproject.components.StarComponent;
-import com.spaceproject.components.TextureComponent;
-import com.spaceproject.components.TrailComponent;
-import com.spaceproject.components.TransformComponent;
-import com.spaceproject.components.VehicleComponent;
+import com.spaceproject.components.*;
 import com.spaceproject.config.CelestialConfig;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.EntityConfig;
@@ -545,7 +514,17 @@ public class EntityBuilder {
         health.maxHealth = area * 0.1f * resource.getHardness();
         health.health = health.maxHealth;
         entity.add(health);
-        
+
+        boolean crazyLaserTest = false;
+        if (crazyLaserTest) {
+            LaserComponent laser = new LaserComponent();
+            laser.state = LaserComponent.State.on;
+            laser.color = asteroid.color.cpy();
+            laser.maxDist = 20000;
+            laser.damage = 1;
+            entity.add(laser);
+        }
+
         return entity;
     }
     

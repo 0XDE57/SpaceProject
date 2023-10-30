@@ -27,7 +27,7 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
     final Vector2 incidentVector = new Vector2();
     Fixture castFixture = null;
     final ShapeRenderer shape;
-    boolean reflecting = false;
+    boolean reflect = false;
 
     int rayCount;
     int callbackCount;
@@ -74,10 +74,11 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
         reflect(entity, laser, body.getPosition(), incidentRay, laser.color.cpy(), laser.maxDist, maxReflections, deltaTime);
     }
 
-    private boolean reflect(Entity entity, LaserComponent laser, Vector2 a, Vector2 b, Color color, float length, int maxBounce, float deltaTime) {
-        if (maxBounce <= 0) return false;
+    private boolean reflect(Entity entity, LaserComponent laser, Vector2 a, Vector2 b, Color color, float length, int reflections, float deltaTime) {
+        if (reflections <= 0) return false;
+        if (incidentVector.set(b).sub(a).len2() < 0.1f) return false;
 
-        reflecting = false;
+        reflect = false;
         castPoint.set(b);
         castFixture = null;
         GameScreen.box2dWorld.rayCast(this, a, b);
@@ -91,7 +92,7 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
         Color ratio = color.cpy().lerp(endColor, range - MathUtils.random()*0.15f);
         shape.rectLine(a.x, a.y, b.x, b.y, 0.3f, color, ratio);
 
-        if (reflecting) {
+        if (reflect) {
             Object userData = castFixture.getBody().getUserData();
             if (userData != null) {
                 Entity hitEntity = (Entity) userData;
@@ -119,9 +120,9 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
             //calculate reflection: reflectedVector = incidentVector - 2 * (incidentVector dot normal) * normal
             float remainingDistance = length - distanceToHit;
             Vector2 reflectedVector = new Vector2(incidentVector).sub(castNormal.scl(2 * incidentVector.dot(castNormal))).setLength(remainingDistance).add(b);
-            reflecting = reflect(entity, laser, b, reflectedVector, color, remainingDistance, --maxBounce, deltaTime);
+            return reflect(entity, laser, b, reflectedVector, color, remainingDistance, --reflections, deltaTime);
         }
-        return reflecting;
+        return false;
     }
 
     @Override
@@ -131,7 +132,7 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
         castPoint.set(point);
         castNormal.set(normal);
         castFixture = fixture;
-        reflecting = true;
+        reflect = true;
         return fraction;
     }
 
