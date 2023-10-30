@@ -2,7 +2,6 @@ package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Vector2;
 
 public class LaserComponent implements Component {
 
@@ -12,10 +11,8 @@ public class LaserComponent implements Component {
 
    public State state = State.off;
 
-   public Vector2 a = new Vector2();
-   public Vector2 b = new Vector2();
-   public float maxDist = 500;
-   public float damage = 100;
+   public float maxDist;
+   public float damage;
    public Color color;
 
 }

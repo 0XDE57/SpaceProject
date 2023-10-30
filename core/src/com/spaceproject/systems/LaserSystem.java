@@ -61,12 +61,8 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
         }
 
         Body body = Mappers.physics.get(entity).body;
-
-        laser.a.set(body.getPosition());
-        incidentRay.set(MyMath.vector(body.getAngle(), laser.maxDist).add(laser.a));
-
+        incidentRay.set(MyMath.vector(body.getAngle(), laser.maxDist).add(body.getPosition()));
         reflect(entity, laser, body.getPosition(), incidentRay, laser.color.cpy(), laser.maxDist, maxReflections, deltaTime);
-
     }
 
     private boolean reflect(Entity entity, LaserComponent laser, Vector2 a, Vector2 b, Color color, float length, int maxBounce, float deltaTime) {
@@ -110,9 +106,10 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
                 shape.rectLine(b, MyMath.vector(castNormal.angleRad(), length).add(b), 0.2f);
             }
 
-            //calculate reflection
-            Vector2 reflectedVector = new Vector2(incidentVector).sub(castNormal.scl(2 * incidentVector.dot(castNormal))).setLength(length - distanceToHit).add(b);
-            reflecting = reflect(entity, laser, b, reflectedVector, color, length - distanceToHit, --maxBounce, deltaTime);
+            //calculate reflection: reflectedVector = incidentVector - 2 * (incidentVector dot normal) * normal
+            float remainingDistance = length - distanceToHit;
+            Vector2 reflectedVector = new Vector2(incidentVector).sub(castNormal.scl(2 * incidentVector.dot(castNormal))).setLength(remainingDistance).add(b);
+            reflecting = reflect(entity, laser, b, reflectedVector, color, remainingDistance, --maxBounce, deltaTime);
         }
         return reflecting;
     }

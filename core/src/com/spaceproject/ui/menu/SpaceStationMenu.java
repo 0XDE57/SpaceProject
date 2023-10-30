@@ -166,6 +166,8 @@ public class SpaceStationMenu {
                 LaserComponent laser = new LaserComponent();
                 int[] rgb = Physics.wavelengthToRGB(520, 1);
                 laser.color = new Color(rgb[0]/255f, rgb[1]/255f, rgb[2]/255f, 1);
+                laser.maxDist = 250;
+                laser.damage = 50;
                 vehicle.tools.put(VehicleComponent.Tool.laser.ordinal(), laser);
             }
         });
