@@ -416,8 +416,9 @@ public class Box2DContactListener implements ContactListener {
         HealthComponent health = Mappers.health.get(entity);
         if (health == null) return null;
         if (health.health <= 0) {
-            boolean hasRemove = entity.getComponent(RemoveComponent.class) != null;
-            Gdx.app.error(Box2DContactListener.class.getSimpleName(), "damage to [" + DebugUtil.objString(entity) + "] ignored. marked for removal: " + hasRemove);
+            if (entity.getComponent(RemoveComponent.class) == null) {
+                Gdx.app.error(Box2DContactListener.class.getSimpleName(), "damage to [" + DebugUtil.objString(entity) + "] ignored. ENTITY NOT MARKED FOR REMOVAL!");
+            }
             return null;
         }
 
