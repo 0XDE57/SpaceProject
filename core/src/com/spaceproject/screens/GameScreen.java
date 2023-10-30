@@ -30,6 +30,7 @@ import com.spaceproject.generation.Galaxy;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.noise.NoiseManager;
 import com.spaceproject.systems.Box2DPhysicsSystem;
+import com.spaceproject.systems.LaserSystem;
 import com.spaceproject.systems.ParticleSystem;
 import com.spaceproject.systems.ScreenTransitionSystem;
 import com.spaceproject.ui.ControllerMenuStage;
@@ -259,6 +260,8 @@ public class GameScreen extends MyScreenAdapter {
         profilerStringBuilder.append("\n[Engine Steps]:     ").append(engineTicks);
         Box2DPhysicsSystem box2DSystem = engine.getSystem(Box2DPhysicsSystem.class);
         if (box2DSystem != null) profilerStringBuilder.append("\n").append(box2DSystem);
+        LaserSystem laser = engine.getSystem(LaserSystem.class);
+        if (laser != null) profilerStringBuilder.append("\n").append(laser);
         profilerStringBuilder.append("\n[GL calls]:         ").append(glProfiler.getCalls());
         profilerStringBuilder.append("\n[Draw calls]:       ").append(glProfiler.getDrawCalls());
         profilerStringBuilder.append("\n[Shader switches]:  ").append(glProfiler.getShaderSwitches());

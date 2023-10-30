@@ -18,7 +18,7 @@ import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
-public class LaserSystem extends IteratingSystem implements Disposable, RayCastCallback {
+public class LaserSystem extends IteratingSystem implements RayCastCallback, Disposable {
 
     final int maxReflections = 10;
     final Vector2 incidentRay = new Vector2();
@@ -27,6 +27,10 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
     Fixture castFixture = null;
     final ShapeRenderer shape;
     boolean reflecting = false;
+
+    int rayCount;
+    int callbackCount;
+    StringBuilder infoString = new StringBuilder();
 
     boolean drawNormal = false;
     boolean reflectAsteroidColor = false;
@@ -38,6 +42,10 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
 
     @Override
     public void update(float deltaTime) {
+        //reset stats
+        rayCount = 0;
+        callbackCount = 0;
+
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -72,6 +80,7 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
         castPoint.set(b);
         castFixture = null;
         GameScreen.box2dWorld.rayCast(this, a, b);
+        rayCount++;
         b.set(castPoint);
         Color endColor = Color.CLEAR.cpy().lerp(color, MathUtils.random()*0.25f);
 
@@ -116,6 +125,7 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
 
     @Override
     public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
+        callbackCount++;
         if (fixture.isSensor()) return -1;
         castPoint.set(point);
         castNormal.set(normal);
@@ -127,6 +137,14 @@ public class LaserSystem extends IteratingSystem implements Disposable, RayCastC
     @Override
     public void dispose() {
         shape.dispose();
+    }
+
+    @Override
+    public String toString() {
+        infoString.setLength(0);
+        infoString.append("[Raycasts]:         ").append(rayCount);
+        infoString.append("\n[Ray callbacks]:    ").append(callbackCount);
+        return infoString.toString();
     }
 
 }
