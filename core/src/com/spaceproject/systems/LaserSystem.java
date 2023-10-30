@@ -27,7 +27,7 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
     final Vector2 incidentVector = new Vector2();
     Fixture castFixture = null;
     final ShapeRenderer shape;
-    boolean reflect = false;
+    boolean hit = false;
 
     int rayCount;
     int callbackCount;
@@ -78,7 +78,7 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
         if (reflections <= 0) return false;
         if (incidentVector.set(b).sub(a).len2() < 0.1f) return false;
 
-        reflect = false;
+        hit = false;
         castPoint.set(b);
         castFixture = null;
         GameScreen.box2dWorld.rayCast(this, a, b);
@@ -92,7 +92,7 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
         Color ratio = color.cpy().lerp(endColor, range - MathUtils.random()*0.15f);
         shape.rectLine(a.x, a.y, b.x, b.y, 0.3f, color, ratio);
 
-        if (reflect) {
+        if (hit) {
             Object userData = castFixture.getBody().getUserData();
             if (userData != null) {
                 Entity hitEntity = (Entity) userData;
@@ -132,7 +132,7 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
         castPoint.set(point);
         castNormal.set(normal);
         castFixture = fixture;
-        reflect = true;
+        hit = true;
         return fraction;
     }
 
