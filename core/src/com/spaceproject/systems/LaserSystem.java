@@ -24,6 +24,7 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
     final Vector2 incidentRay = new Vector2();
     final Vector2 castPoint = new Vector2();
     final Vector2 castNormal = new Vector2();
+    final Vector2 incidentVector = new Vector2();
     Fixture castFixture = null;
     final ShapeRenderer shape;
     boolean reflecting = false;
@@ -84,7 +85,7 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
         b.set(castPoint);
         Color endColor = Color.CLEAR.cpy().lerp(color, MathUtils.random()*0.25f);
 
-        Vector2 incidentVector = new Vector2(b).sub(a);
+        incidentVector.set(b).sub(a);
         float distanceToHit = incidentVector.len();
         float range = distanceToHit / length;
         Color ratio = color.cpy().lerp(endColor, range - MathUtils.random()*0.15f);
