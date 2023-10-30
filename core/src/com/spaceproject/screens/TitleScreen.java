@@ -61,6 +61,7 @@ public class TitleScreen extends MyScreenAdapter {
         VisUI.load(VisUI.SkinScale.X2);
         TextButton.TextButtonStyle textButtonStyle = VisUI.getSkin().get(TextButton.TextButtonStyle.class);
         textButtonStyle.focused = textButtonStyle.over; //set focused style to over for keyboard navigation because VisUI default focused style is null!
+        VisUI.setDefaultTitleAlign(Align.center);
 
         stage = new ControllerMenuStage(new ScreenViewport());
         getInputMultiplexer().addProcessor(stage); // instead of Gdx.input.setInputProcessor(stage);

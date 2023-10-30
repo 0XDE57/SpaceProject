@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
@@ -90,6 +91,7 @@ public class GameScreen extends MyScreenAdapter {
         if (VisUI.isLoaded())
             VisUI.dispose(true);
         VisUI.load(SpaceProject.isMobile() ? VisUI.SkinScale.X2 : VisUI.SkinScale.X1);
+        VisUI.setDefaultTitleAlign(Align.center);
         BitmapFont font = FontLoader.createFont(FontLoader.fontBitstreamVM, 12);
         VisUI.getSkin().add(FontLoader.skinSmallFont, font);
         TextButton.TextButtonStyle textButtonStyle = VisUI.getSkin().get(TextButton.TextButtonStyle.class);
