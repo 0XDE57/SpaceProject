@@ -646,6 +646,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             Color c = Color.GOLD.cpy().lerp(Color.CYAN, 1 + (float) Math.sin(anim));
             layout.setText(inventoryFont, "[ HYPER-DRIVE ]", c, 0, Align.center, false);
             inventoryFont.draw(batch, layout, barX + layout.width - 37, healthBarY + barHeight + layout.height -1);
+            //draw hyper drive key
             return;
         }
         CameraSystem camSystem = getEngine().getSystem(CameraSystem.class);
@@ -674,11 +675,29 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 color = Color.RED;
             }
             ShieldComponent shield = Mappers.shield.get(entity);
-            if (shield != null && shield.state == ShieldComponent.State.on) {
-                color = Color.BLUE;
+            if (shield != null) {
+                //draw shield key
+                String input = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).activateShield);
+                if (getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus()) {
+                    input = "LT";
+                }
+                layout.setText(inventoryFont, "[" + input + "] ", Color.WHITE, 0, Align.right, false);
+                inventoryFont.draw(batch, layout, barX, healthBarY + layout.height);
+                if (shield.state == ShieldComponent.State.on) {
+                    color = Color.BLUE;
+                }
             }
             inventoryFont.setColor(color);
             inventoryFont.draw(batch, " " + MyMath.round(health.health, 1), barX + barWidth, healthBarY + layout.height);
+        }
+
+        VehicleComponent vehicleComponent = Mappers.vehicle.get(entity);
+        if (vehicleComponent != null && vehicleComponent.tools.size() > 0) {
+            inventoryFont.setColor(Color.WHITE);
+            String key = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).switchWeapon);
+            String input = getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? " [D-Pad Right] " : " [" + key + "] ";
+            layout.setText(inventoryFont, vehicleComponent.currentTool + input, Color.WHITE, 0, Align.right, false);
+            inventoryFont.draw(batch, layout, barX, healthBarY - barHeight + layout.height - 3);
         }
     }
     
