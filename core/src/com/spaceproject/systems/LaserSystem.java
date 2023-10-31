@@ -129,9 +129,10 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
 
             Vector2 refract = new Vector2();
             refract(refract, incidentVector.nor(), rayNormal.nor(), 1f, 1.5f);
-            shape.setColor(Color.YELLOW);
-            shape.rectLine(b, MyMath.vector(refract.angleRad(), 10).add(b), 0.2f);
-
+            if (refract.len() > 0) {
+                shape.setColor(Color.YELLOW);
+                shape.rectLine(b, MyMath.vector(refract.angleRad(), 10).add(b), 0.2f);
+            }
 
             //calculate reflection: reflectedVector = incidentVector - 2 * (incidentVector dot normal) * normal
             float remainingDistance = length - distanceToHit;
@@ -152,7 +153,7 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
             out.set(eta * incidentVec.x - (eta * dot + (float)Math.sqrt(k)) * normal.x,
                     eta * incidentVec.y - (eta * dot + (float)Math.sqrt(k)) * normal.y);
         }
-        //DebugSystem.addDebugText(dot + " -> "+ angleA + " - " + sinA, b.x, b.y, true);
+        DebugSystem.addDebugText(k + " -> "+ eta, out.x, out.y, true);
     }
 
     @Override

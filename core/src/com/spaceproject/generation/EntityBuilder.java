@@ -93,16 +93,16 @@ public class EntityBuilder {
         //weapon
         if (true) {
             CannonComponent cannon = makeCannon(vehicle.dimensions.width);
-            shipEntity.add(cannon);
+            //shipEntity.add(cannon);
         } else {
             ChargeCannonComponent chargeCannon = makeChargeCannon(vehicle.dimensions.width);
             shipEntity.add(chargeCannon);
         }
         LaserComponent laser = new LaserComponent();
-        laser.state = LaserComponent.State.on;
+        laser.state = LaserComponent.State.off;
         laser.color = Color.PURPLE;
         laser.maxDist = 200;
-        laser.damage = 1;
+        laser.damage = 20;
         shipEntity.add(laser);
         
         //hyper drive
