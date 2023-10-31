@@ -14,7 +14,7 @@ import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
 public class ProjectileHitRenderSystem extends IteratingSystem implements Disposable {
-    
+    //todo: change from iterating to entitystem, get rid of ring component entities and call this system directly to add one from ring pool
     private final ShapeRenderer shape;
     private final float growthRate = 2.0f;
     

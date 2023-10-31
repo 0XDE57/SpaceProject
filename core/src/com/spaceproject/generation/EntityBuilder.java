@@ -98,6 +98,12 @@ public class EntityBuilder {
             ChargeCannonComponent chargeCannon = makeChargeCannon(vehicle.dimensions.width);
             shipEntity.add(chargeCannon);
         }
+        LaserComponent laser = new LaserComponent();
+        laser.state = LaserComponent.State.on;
+        laser.color = Color.PURPLE;
+        laser.maxDist = 200;
+        laser.damage = 1;
+        shipEntity.add(laser);
         
         //hyper drive
         HyperDriveComponent hyperDrive = new HyperDriveComponent();

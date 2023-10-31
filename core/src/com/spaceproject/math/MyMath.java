@@ -123,7 +123,11 @@ public abstract class MyMath {
     public static String formatVector2(Vector2 vec, int decimal) {
         return round(vec.x, decimal) + ", " + round(vec.y, decimal);
     }
-    
+
+    public static String formatVector2Full(Vector2 vec, int decimal) {
+        return round(vec.x, decimal) + ", " + round(vec.y, decimal) + " (" + round(vec.len(), decimal) + ") -> [" + round(vec.angleRad(), decimal + 1) + " == " + round(vec.angleDeg(), decimal + 1);
+    }
+
     public static String formatVector3(Vector3 vec, int decimal) {
         return round(vec.x, decimal) + ", " + round(vec.y, decimal) + ", " + round(vec.z, decimal);
     }
