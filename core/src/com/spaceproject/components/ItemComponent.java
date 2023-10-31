@@ -7,11 +7,11 @@ import com.badlogic.gdx.math.MathUtils;
 public class ItemComponent implements Component {
 
     public enum Resource {
-        RED(1, Color.RED, 50, 0.2f, 1.5f, "break0.wav"),
-        GREEN(2, Color.GREEN, 60, 0.2f, 3f, "break1.wav"),
-        BLUE(3, new Color(0.1f, 0.3f, 1f, 1), 50, 0.2f, 1f, "break2.wav"),
-        SILVER(4, new Color(0.97f, 0.97f, 1, 1), 100, 0.2f, 0.3f, "break3.wav"),
-        GOLD(5, Color.GOLD, 200, 0.2f, 8f, "break4.wav");
+        RED(1, Color.RED, 50, 0.2f, 1.5f, 1.5f, "break0.wav"),
+        GREEN(2, Color.GREEN, 60, 0.2f, 3f, 1.7f, "break1.wav"),
+        BLUE(3, new Color(0.1f, 0.3f, 1f, 1), 50, 0.2f, 1f, 1.3f, "break2.wav"),
+        SILVER(4, new Color(0.97f, 0.97f, 1, 1), 100, 0.2f, 0.3f, 1f, "break3.wav"),
+        GOLD(5, Color.GOLD, 200, 0.2f, 8f, 3, "break4.wav");
 
         /*
         NICKEL(0.1f, new Color(192f/255f, 192f/255f, 192f/255f, 1)),
@@ -42,14 +42,16 @@ public class ItemComponent implements Component {
         private final int value;
         private final float rarity;// maybe not here but in composition?
         private final float hardness;
+        private final float refractiveIndex;
         private final String sound; // ID for which sound to play when interacted with (asteroid hit, resource collected)
 
-        Resource(int id, Color color, int value, float rarity, float hardness, String sound) {
+        Resource(int id, Color color, int value, float rarity, float hardness, float refractiveIndex, String sound) {
             this.id = id;
             this.color = color;
             this.value = value;
             this.rarity = rarity;
             this.hardness = hardness;
+            this.refractiveIndex = refractiveIndex;
             this.sound = sound;
         }
 
@@ -71,6 +73,10 @@ public class ItemComponent implements Component {
 
         public float getHardness() {
             return hardness;
+        }
+
+        public float getRefractiveIndex() {
+            return refractiveIndex;
         }
 
         public String getSound() {

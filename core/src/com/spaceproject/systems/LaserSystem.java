@@ -21,11 +21,13 @@ import com.spaceproject.utility.Mappers;
 
 public class LaserSystem extends IteratingSystem implements RayCastCallback, Disposable {
 
+    final float refractiveIndexVacuum = 1; //vacuum = 1, water = 1.33, glass = 1.52, diamond = 2.4
     final int maxReflections = 10;
     final Vector2 incidentRay = new Vector2();
     final Vector2 rayPoint = new Vector2();
     final Vector2 rayNormal = new Vector2();
     final Vector2 incidentVector = new Vector2();
+    final Vector2 refract = new Vector2();
     Fixture rayFixture = null;
     final ShapeRenderer shape;
     boolean hit = false;
@@ -34,8 +36,9 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
     int callbackCount;
     StringBuilder infoString = new StringBuilder();
 
-    boolean drawNormal = true;
+    boolean drawNormal = false;
     boolean reflectAsteroidColor = false;
+    boolean refractRay = false; //internal refraction
 
     public LaserSystem() {
         super(Family.all(LaserComponent.class, PhysicsComponent.class).get());
@@ -72,8 +75,6 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
 
         Body body = Mappers.physics.get(entity).body;
         incidentRay.set(MyMath.vector(body.getAngle(), laser.maxDist).add(body.getPosition()));
-        //DebugSystem.addDebugText(MyMath.round(body.getAngle(),2) + " " + MyMath.round(body.getAngle() * MathUtils.radiansToDegrees, 2), body.getPosition().x, body.getPosition().y, true);
-        //DebugSystem.addDebugText(MyMath.formatVector2Full(MyMath.vector(body.getAngle(), laser.maxDist), 1), body.getPosition().x, body.getPosition().y-2, true);
         reflect(entity, laser, body.getPosition(), incidentRay, laser.color.cpy(), laser.maxDist, maxReflections, deltaTime);
     }
 
@@ -93,31 +94,32 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
         float distanceToHit = incidentVector.len();
         float range = distanceToHit / length;
         Color ratio = color.cpy().lerp(endColor, range - MathUtils.random()*0.15f);
-        shape.rectLine(a.x, a.y, b.x, b.y, 0.3f, color, ratio);
-
-        //DebugSystem.addDebugVec(a, b, Color.ORANGE);
-        //DebugSystem.addDebugVec(incidentVector, a, Color.RED);
-        //
-        //DebugSystem.addDebugText(MyMath.formatVector2Full(b, 1), b.x, b.y, true);
+        shape.rectLine(a.x, a.y, b.x, b.y, 0.2f, color, ratio);
 
         if (hit) {
-            //DebugSystem.addDebugText(MyMath.formatVector2Full(incidentVector, 1), b.x, b.y - 2, true);
-
             Object userData = rayFixture.getBody().getUserData();
             if (userData != null) {
                 Entity hitEntity = (Entity) userData;
                 if (entity != hitEntity) {
+                    //do laser damage!
                     float damage = laser.damage * (1 - range) * deltaTime;
                     Box2DContactListener.damage(getEngine(), hitEntity, entity, damage);
                 }
-                if (reflectAsteroidColor) {
-                    AsteroidComponent asteroid = Mappers.asteroid.get(hitEntity);
-                    if (asteroid != null) {
-                        color.set(asteroid.color.cpy());
-                    }
-                }
                 if (Mappers.damage.get(hitEntity) != null) {
                     hitEntity.add(new RemoveComponent());
+                }
+                AsteroidComponent asteroid = Mappers.asteroid.get(hitEntity);
+                if (asteroid != null) {
+                    if (refractRay && asteroid.refractiveIndex != 0) {
+                        refract(refract, incidentVector.nor(), rayNormal.nor(), refractiveIndexVacuum, asteroid.refractiveIndex);
+                        if (refract.len2() > 0) {
+                            shape.setColor(Color.YELLOW);
+                            shape.rectLine(b, MyMath.vector(refract.angleRad(), 10).add(b), 0.2f);
+                        }
+                    }
+                    if (reflectAsteroidColor) {
+                        color.set(asteroid.color.cpy());
+                    }
                 }
             }
 
@@ -125,13 +127,6 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
                 //draw normal
                 shape.setColor(Color.SKY);
                 shape.rectLine(b, MyMath.vector(rayNormal.angleRad(), length).add(b), 0.2f);
-            }
-
-            Vector2 refract = new Vector2();
-            refract(refract, incidentVector.nor(), rayNormal.nor(), 1f, 1.5f);
-            if (refract.len() > 0) {
-                shape.setColor(Color.YELLOW);
-                shape.rectLine(b, MyMath.vector(refract.angleRad(), 10).add(b), 0.2f);
             }
 
             //calculate reflection: reflectedVector = incidentVector - 2 * (incidentVector dot normal) * normal
@@ -142,18 +137,28 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
         return false;
     }
 
+    /** Calculate angle of refraction using Snell's Law
+     * θ₁ = angle of incidence
+     * θ₂ = angle of refraction
+     * n₁sin(θ₁) = n₂sin(θ₂)
+     * https://asawicki.info/news_1301_reflect_and_refract_functions.html
+     * @param out
+     * @param incidentVec
+     * @param normal
+     * @param n1 refractive index
+     * @param n2 refractive index
+     */
     private void refract(Vector2 out, Vector2 incidentVec, Vector2 normal, float n1, float n2) {
         float eta = n2/n1;
         float dot = incidentVec.dot(normal);
         float k = 1.0f - eta * eta * (1.0f - dot * dot);
-
         if (k < 0.f) {
+            //past critical angle -> total internal reflection
             out.set(0.f, 0.f);
         } else {
             out.set(eta * incidentVec.x - (eta * dot + (float)Math.sqrt(k)) * normal.x,
                     eta * incidentVec.y - (eta * dot + (float)Math.sqrt(k)) * normal.y);
         }
-        DebugSystem.addDebugText(k + " -> "+ eta, out.x, out.y, true);
     }
 
     @Override

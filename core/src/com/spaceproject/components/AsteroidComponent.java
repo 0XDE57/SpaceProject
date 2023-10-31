@@ -76,8 +76,6 @@ public class AsteroidComponent implements Component {
     }*/
     //public HashMap<Integer, Float> composition = new HashMap<>();//resource ID, percent [0-1]
     public ItemComponent.Resource composition;
-
-    public float albedo;
     
     public Entity parentOrbitBody;
     
@@ -92,5 +90,9 @@ public class AsteroidComponent implements Component {
     public long lastShieldHit;
 
     public boolean revealed;
+
+    public float albedo;
+
+    public float refractiveIndex; //eg: vacuum = 1, Diamond = 2.4
 
 }

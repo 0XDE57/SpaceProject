@@ -93,17 +93,17 @@ public class EntityBuilder {
         //weapon
         if (true) {
             CannonComponent cannon = makeCannon(vehicle.dimensions.width);
-            //shipEntity.add(cannon);
+            shipEntity.add(cannon);
         } else {
             ChargeCannonComponent chargeCannon = makeChargeCannon(vehicle.dimensions.width);
             shipEntity.add(chargeCannon);
         }
         LaserComponent laser = new LaserComponent();
         laser.state = LaserComponent.State.off;
-        laser.color = Color.PURPLE;
+        laser.color = Color.GREEN;
         laser.maxDist = 200;
-        laser.damage = 20;
-        shipEntity.add(laser);
+        laser.damage = 10;
+        //shipEntity.add(laser);
         
         //hyper drive
         HyperDriveComponent hyperDrive = new HyperDriveComponent();
@@ -505,6 +505,7 @@ public class EntityBuilder {
         asteroid.composition = resource;
         asteroid.color = resource.getColor();
         asteroid.revealed = revealed;
+        asteroid.refractiveIndex = resource.getRefractiveIndex();
         entity.add(asteroid);
     
         PhysicsComponent physics = new PhysicsComponent();
