@@ -3,12 +3,15 @@ package com.spaceproject.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.spaceproject.components.AsteroidComponent;
 import com.spaceproject.components.HealthComponent;
+import com.spaceproject.components.ItemComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.CustomShapeRenderer;
@@ -31,6 +34,11 @@ public class AsteroidRenderSystem extends IteratingSystem {
     public void update(float deltaTime) {
         shapeRenderer.setProjectionMatrix(GameScreen.cam.combined);
 
+        //todo: not all asteroids need transparency, only glass. could potentially sort enable blending for only glassteroids
+        //enable transparency
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
         //render filled inner poly
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         super.update(deltaTime);
@@ -40,6 +48,8 @@ public class AsteroidRenderSystem extends IteratingSystem {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         super.update(deltaTime);
         shapeRenderer.end();
+
+        Gdx.gl.glDisable(GL20.GL_BLEND);
     }
     
     @Override
@@ -62,7 +72,11 @@ public class AsteroidRenderSystem extends IteratingSystem {
                 float fade = (float) timeSinceDmg / hitTime;
                 ratio -= fade * 0.125f;
             }
-            tempColor.set(Color.BLACK).lerp(asteroid.revealed ? asteroid.color : defaultOutline, 1 - ratio);
+            if (asteroid.composition == ItemComponent.Resource.GLASS) {
+                tempColor.set(asteroid.color);
+            } else {
+                tempColor.set(Color.BLACK).lerp(asteroid.revealed ? asteroid.color : defaultOutline, 1 - ratio);
+            }
             hitTime = 500;
             long timeSinceHit = GameScreen.getGameTimeCurrent() - asteroid.lastShieldHit;
             if (timeSinceHit < hitTime) {

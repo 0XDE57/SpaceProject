@@ -348,19 +348,21 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             miniMap.cycleMiniMapPosition();
         }
         if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.Y)) {//kill our move to debug menu
-            CargoComponent cargo = Mappers.cargo.get(players.first());
-            if (cargo != null) {
-                int amount = 1000;
-                for (ItemComponent.Resource resource : ItemComponent.Resource.values()) {
-                    int id = resource.getId();
-                    int currentQuantity = 0;
-                    if (cargo.inventory.containsKey(id)) {
-                        currentQuantity = cargo.inventory.get(id);
+            if (players.size() > 0) {
+                CargoComponent cargo = Mappers.cargo.get(players.first());
+                if (cargo != null) {
+                    int amount = 1000;
+                    for (ItemComponent.Resource resource : ItemComponent.Resource.values()) {
+                        int id = resource.getId();
+                        int currentQuantity = 0;
+                        if (cargo.inventory.containsKey(id)) {
+                            currentQuantity = cargo.inventory.get(id);
+                        }
+                        cargo.inventory.put(id, currentQuantity + amount);
                     }
-                    cargo.inventory.put(id, currentQuantity + amount);
+                    cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
+                    Gdx.app.debug(getClass().getSimpleName(), "cheat! add items");
                 }
-                cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
-                Gdx.app.debug(getClass().getSimpleName(), "cheat! add items");
             }
         }
     }

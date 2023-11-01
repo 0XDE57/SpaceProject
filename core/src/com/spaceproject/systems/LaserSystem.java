@@ -38,7 +38,6 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
 
     boolean drawNormal = false;
     boolean reflectAsteroidColor = false;
-    boolean refractRay = false; //internal refraction
 
     public LaserSystem() {
         super(Family.all(LaserComponent.class, PhysicsComponent.class).get());
@@ -100,26 +99,31 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
             Object userData = rayFixture.getBody().getUserData();
             if (userData != null) {
                 Entity hitEntity = (Entity) userData;
-                if (entity != hitEntity) {
-                    //do laser damage!
-                    float damage = laser.damage * (1 - range) * deltaTime;
-                    Box2DContactListener.damage(getEngine(), hitEntity, entity, damage);
-                }
-                if (Mappers.damage.get(hitEntity) != null) {
-                    hitEntity.add(new RemoveComponent());
-                }
+                boolean glass = false;
                 AsteroidComponent asteroid = Mappers.asteroid.get(hitEntity);
                 if (asteroid != null) {
-                    if (refractRay && asteroid.refractiveIndex != 0) {
+                    if (asteroid.composition == ItemComponent.Resource.GLASS && asteroid.refractiveIndex != 0) {
+                        glass = true;
                         refract(refract, incidentVector.nor(), rayNormal.nor(), refractiveIndexVacuum, asteroid.refractiveIndex);
                         if (refract.len2() > 0) {
-                            shape.setColor(Color.YELLOW);
-                            shape.rectLine(b, MyMath.vector(refract.angleRad(), 10).add(b), 0.2f);
+                            shape.setColor(color.r, color.g, color.b, asteroid.color.a);
+                            shape.rectLine(b, MyMath.vector(refract.angleRad(), 10).add(b), 0.1f);
                         }
                     }
                     if (reflectAsteroidColor) {
                         color.set(asteroid.color.cpy());
                     }
+                }
+                if (entity != hitEntity) {
+                    //do laser damage!
+                    float damage = laser.damage * (1 - range) * deltaTime;
+                    if (glass) {
+                        damage *= 0.01f;
+                    }
+                    Box2DContactListener.damage(getEngine(), hitEntity, entity, damage);
+                }
+                if (Mappers.damage.get(hitEntity) != null) {
+                    hitEntity.add(new RemoveComponent());
                 }
             }
 
