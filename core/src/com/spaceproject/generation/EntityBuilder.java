@@ -91,20 +91,22 @@ public class EntityBuilder {
         shipEntity.add(health);
         
         //weapon
-        if (true) {
-            CannonComponent cannon = makeCannon(vehicle.dimensions.width);
-            shipEntity.add(cannon);
-        } else {
-            ChargeCannonComponent chargeCannon = makeChargeCannon(vehicle.dimensions.width);
-            shipEntity.add(chargeCannon);
+        int index = 0;
+        switch(index) {
+            case 0:
+                CannonComponent cannon = makeCannon(vehicle.dimensions.width);
+                shipEntity.add(cannon);
+                break;
+            case 1:
+                ChargeCannonComponent chargeCannon = makeChargeCannon(vehicle.dimensions.width);
+                shipEntity.add(chargeCannon);
+                break;
+            case 2:
+                LaserComponent laser = new LaserComponent(480, 250, 30, 1);
+                shipEntity.add(laser);
+                break;
         }
-        LaserComponent laser = new LaserComponent();
-        laser.state = LaserComponent.State.off;
-        laser.color = Color.GREEN;
-        laser.maxDist = 200;
-        laser.damage = 10;
-        //shipEntity.add(laser);
-        
+
         //hyper drive
         HyperDriveComponent hyperDrive = new HyperDriveComponent();
         hyperDrive.speed = entityCFG.hyperSpeed;
@@ -524,11 +526,7 @@ public class EntityBuilder {
 
         boolean crazyLaserTest = false;
         if (crazyLaserTest) {
-            LaserComponent laser = new LaserComponent();
-            laser.state = LaserComponent.State.on;
-            laser.color = asteroid.color.cpy();
-            laser.maxDist = 20000;
-            laser.damage = 1;
+            LaserComponent laser = new LaserComponent(650, 2000, 1, 1);
             entity.add(laser);
         }
 

@@ -163,15 +163,7 @@ public class SpaceStationMenu {
                 creditsValue.setText(Mappers.cargo.get(player).credits);
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
 
-                LaserComponent laser = new LaserComponent();
-                float wavelength = 520;
-                laser.wavelength = wavelength;
-                laser.frequency = (float) Physics.wavelengthToFrequency(wavelength);
-                int[] rgb = Physics.wavelengthToRGB(wavelength, 1);
-                laser.color = new Color(rgb[0]/255f, rgb[1]/255f, rgb[2]/255f, 1);
-                laser.maxDist = 250;
-                laser.damage = 30;
-                laser.power = 1;
+                LaserComponent laser = new LaserComponent(520, 250, 30, 1);
                 vehicle.tools.put(VehicleComponent.Tool.laser.ordinal(), laser);
             }
         });
