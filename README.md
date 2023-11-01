@@ -34,10 +34,10 @@ Welcome to A Space Project. A project involving space...
 ### Controls
 | Control                        | Desktop       | Controller/Gamepad |
 |------------------------------- | ------------  | ------------------ |
+| Aim                            | Mouse         | Left Stick         |
 | Movement                       | WASD          | Left Stick + L1/R1 |
 | Boost                          | Space         | A                  |
 | Brakes                         | S             | X                  |
-| Aim                            | Mouse         | Left Stick         |
 | Attack: Shoot                  | Left-Click    | RT                 |
 | Defense: Shield                | Shift         | LT                 |
 | Defense: Dodge (Barrel Roll)   | Double Tap A/D | Double Tap R1/L1  |
