@@ -42,6 +42,7 @@ Welcome to A Space Project. A project involving space...
 | Defense: Shield                | Shift         | LT                 |
 | Defense: Dodge (Barrel Roll)   | Double Tap A/D | Double Tap R1/L1  |
 | Interact                       | E             | D-Pad Down         |
+| Switch Equiped Tool            | Q             | D-Pad Right        |
 | Toggle HyperDrive              | Hold 1        | Hold B             |
 | Enter/Exit vehicle             | G             | Y                  |
 | Zoom                           | Scroll Wheel  | Right JoyStick     |
