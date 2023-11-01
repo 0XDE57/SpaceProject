@@ -509,7 +509,7 @@ public class EntityBuilder {
         entity.add(asteroid);
     
         PhysicsComponent physics = new PhysicsComponent();
-        float density = 0.5f;
+        float density = resource.getDensity();
         physics.body = BodyBuilder.createPoly(transform.pos.x, transform.pos.y,
                 polygon.getVertices(), angle, density, BodyDef.BodyType.DynamicBody,
                 GameScreen.box2dWorld, entity);
