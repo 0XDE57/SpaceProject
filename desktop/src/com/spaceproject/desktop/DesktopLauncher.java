@@ -13,7 +13,7 @@ public class DesktopLauncher {
         config.useVsync(true);
         config.setForegroundFPS(0);//disable limit for when vsync off
         
-        new Lwjgl3Application(new SpaceProject(), config);
+        new Lwjgl3Application(new SpaceProject(arg), config);
     }
     
 }
