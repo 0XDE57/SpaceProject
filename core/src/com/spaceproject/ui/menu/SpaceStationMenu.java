@@ -125,7 +125,7 @@ public class SpaceStationMenu {
 
                 //add new shield
                 ShieldComponent shield = new ShieldComponent();
-                shield.animTimer = new SimpleTimer(100, true);
+                shield.animTimer = new SimpleTimer(50, true);
                 shield.defence = 100f;
                 Rectangle dimensions = vehicle.dimensions;
                 float radius = Math.max(dimensions.getWidth(), dimensions.getHeight());
