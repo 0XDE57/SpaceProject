@@ -264,7 +264,9 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        if (players.size() != 0) {
+        if (players.size() == 0) return false;
+
+        if (button == Input.Buttons.LEFT) {
             ControllableComponent control = Mappers.controllable.get(players.first());
             control.attack = false;
 
