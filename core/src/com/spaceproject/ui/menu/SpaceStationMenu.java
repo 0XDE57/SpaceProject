@@ -20,7 +20,6 @@ import com.kotcrab.vis.ui.widget.*;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
 import com.spaceproject.config.KeyConfig;
-import com.spaceproject.math.Physics;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.systems.DesktopInputSystem;
 import com.spaceproject.ui.ControllerMenuStage;
@@ -55,6 +54,7 @@ public class SpaceStationMenu {
         int costShield = 10000;
         int costLaser = 10000;
         int costHP = 10000;
+        int costThrust = 1000;
 
         ScrollableTextArea text = new ScrollableTextArea("");
         text.removeListener(text.getDefaultInputListener());
@@ -62,7 +62,7 @@ public class SpaceStationMenu {
         Label creditsText = new VisLabel("CREDITS: ");
         creditsTable.add(creditsText);
         Label creditsValue = new VisLabel("[" + colorCredits + "]" + Mappers.cargo.get(player).credits);
-        //creditsValue.addAction(forever(sequence(color(Color.RED,0.2f), color(Color.BLUE, 0.2f), delay(0.5f))));
+        creditsValue.addAction(forever(sequence(color(Color.RED,0.2f), color(Color.BLUE, 0.2f), delay(0.5f))));
         creditsTable.add(creditsText);
         creditsTable.add(creditsValue);
 
@@ -143,6 +143,7 @@ public class SpaceStationMenu {
                 return super.handle(event);
             }
         });
+
         TextButton buttonLaser = new TextButton("[" + colorItem + "]" + laserUpgrade + "  [" + colorCredits + "]               " + costLaser, VisUI.getSkin());
         buttonLaser.getLabel().setAlignment(Align.left);
         buttonLaser.addListener(new ChangeListener() {
@@ -175,7 +176,8 @@ public class SpaceStationMenu {
             }
         });
 
-        TextButton buttonAddHealth = new TextButton("[" + colorItem + "]Increase Health  [" + colorCredits + "]" + costHP, VisUI.getSkin());
+        int hp = 100;
+        TextButton buttonAddHealth = new TextButton("Increase [" + colorItem + "]Health [" + colorCredits + "]" + costHP, VisUI.getSkin());
         buttonAddHealth.getLabel().setAlignment(Align.left);
         buttonAddHealth.addListener(new ChangeListener() {
             @Override
@@ -192,30 +194,76 @@ public class SpaceStationMenu {
                 creditsValue.setText(Mappers.cargo.get(player).credits);
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
 
-                Mappers.health.get(player).maxHealth += 10;
+                Mappers.health.get(player).maxHealth += hp;
             }
         });
         buttonAddHealth.addListener(new FocusListener() {
             @Override
             public boolean handle(Event event) {
-                text.setText("increase hp by xx");
+                text.setText("Increase [" + colorItem + "]HP[]\nby [" + colorCredits + "]" + hp +"[]\nCurrent: "+ Mappers.health.get(player).maxHealth);
                 return super.handle(event);
             }
         });
 
+        TextButton buttonAddThrust = new TextButton("Increase [" + colorItem + "]Thrust  [" + colorCredits + "]" + costThrust, VisUI.getSkin());
+        buttonAddThrust.getLabel().setAlignment(Align.left);
+        int thrust = 200;
+        buttonAddThrust.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                CargoComponent cargo = Mappers.cargo.get(player);
+                if (cargo.credits < costThrust) {
+                    //error soundfx if not enough moneys
+                    Gdx.app.debug(getClass().getSimpleName(), "insufficient credits for  thrust");
+                    creditsValue.addAction(sequence(color(Color.RED),color(Color.WHITE, 0.5f)));
+                    return;
+                }
+                //purchase
+                cargo.credits -= costThrust;
+                creditsValue.setText(Mappers.cargo.get(player).credits);
+                creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
+
+                Mappers.vehicle.get(player).thrust += thrust;
+            }
+        });
+        buttonAddThrust.addListener(new FocusListener() {
+            @Override
+            public boolean handle(Event event) {
+                text.setText("Increase [" + colorItem + "]THRUST[]\nby [" + colorCredits + "]" + thrust +"[]\nCurrent: "+ Mappers.vehicle.get(player).thrust);
+                return super.handle(event);
+            }
+        });
+
+        TextButton buttonDebugGiveMoney = new TextButton("[" + colorItem + "]DEBUG: []ADD CREDITS", VisUI.getSkin());
+        buttonDebugGiveMoney.getLabel().setAlignment(Align.left);
+        buttonDebugGiveMoney.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                CargoComponent cargo = Mappers.cargo.get(player);
+                cargo.credits += 999999;
+                creditsValue.setText(Mappers.cargo.get(player).credits);
+                creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
+
+            }
+        });
+        buttonDebugGiveMoney.addListener(new FocusListener() {
+            @Override
+            public boolean handle(Event event) {
+                text.setText("");
+                return super.handle(event);
+            }
+        });
         Table buttonTable = new VisTable();
         buttonTable.add(buttonShield).fillX().row();
         buttonTable.add(buttonLaser).fillX().row();
         buttonTable.add(buttonHyperDrive).fillX().row();
-        buttonTable.add(buttonAddHealth).fillX().row();
-        //buttonTable.add(new TextButton("[" + colorItem + "]Increase Health        [" + colorCredits + "]" + 30, VisUI.getSkin())).fillX().row();
-        buttonTable.add(new TextButton("[" + colorItem + "]Item A                      [" + colorCredits + "]" + 10, VisUI.getSkin())).fillX().row();
-        buttonTable.add(new TextButton("[" + colorItem + "]Item B                      [" + colorCredits + "]" + 20, VisUI.getSkin())).fillX().row();
-        buttonTable.add(new TextButton("[" + colorItem + "]Item C                      [" + colorCredits + "]" + 30, VisUI.getSkin())).fillX().row();
+        buttonTable.add(buttonAddHealth).row();
+        buttonTable.add(buttonAddThrust).fillX().row();
+        buttonTable.add(buttonDebugGiveMoney).fillX().row();
 
         Table descTable = new VisTable();
         text.setReadOnly(true);
-        descTable.add(text.createCompatibleScrollPane()).growX().height(150).row();
+        descTable.add(text.createCompatibleScrollPane()).growX().height(150).width(180).row();
 
         VisWindow window = new VisWindow("[" + titleColor + "]STATION DELTA");
         window.getTitleLabel().setAlignment(Align.center);
@@ -231,7 +279,7 @@ public class SpaceStationMenu {
 
         window.pack();
         stage.addActor(window);
-        window.setPosition(Gdx.graphics.getWidth() / 3f, Gdx.graphics.getHeight() / 2f, Align.center);
+        window.setPosition(Gdx.graphics.getWidth() / 3f, Gdx.graphics.getHeight() / 2f, Align.right);
         stage.setFocusedActor(buttonTable.getChildren().first());
 
         return window;
