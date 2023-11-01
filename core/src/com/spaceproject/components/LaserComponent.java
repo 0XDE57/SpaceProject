@@ -12,7 +12,15 @@ public class LaserComponent implements Component {
    public State state = State.off;
 
    public float maxDist;
+
    public float damage;
+
    public Color color;
+
+   public float wavelength;
+
+   public float frequency;
+
+   public float power; // [0-1] where 1 = full output
 
 }
