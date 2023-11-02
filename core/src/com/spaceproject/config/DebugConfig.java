@@ -4,6 +4,7 @@ public class DebugConfig extends Config {
     
     public boolean spawnAsteroid;
     public boolean spawnCluster;
+    public boolean glassOnly;
     public boolean drawDebugUI;
     public boolean drawFPS;
     public boolean drawDiagnosticInfo;
@@ -47,6 +48,7 @@ public class DebugConfig extends Config {
         infiniteFire = false;
         reflectAsteroidColor = false;
         discoLaser = false;
+        glassOnly = false;
     }
     
 }

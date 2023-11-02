@@ -71,6 +71,13 @@ public class DebugTab extends HotKeyTab {
                 debugCFG.spawnCluster = toggleAsteroidCluster.isChecked();
             }
         });
+        final VisCheckBox toggleGlassOnly = new VisCheckBox("glass only", debugCFG.glassOnly);
+        toggleGlassOnly.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                debugCFG.glassOnly = toggleGlassOnly.isChecked();
+            }
+        });
 
         final VisCheckBox toggleCameraLerp = new VisCheckBox("lerp camera", debugCFG.spawnAsteroid);
         toggleCameraLerp.addListener(new ChangeListener() {
@@ -197,7 +204,8 @@ public class DebugTab extends HotKeyTab {
         getContentTable().add(toggleDisco).left();
         getContentTable().add(toggleReflect).left().row();
         getContentTable().add(toggleAsteroidSpawn).left();
-        getContentTable().add(toggleAsteroidCluster).left().row();
+        getContentTable().add(toggleAsteroidCluster).left();
+        getContentTable().add(toggleGlassOnly).left().row();
         //getContentTable().add(background) solid color? grid color? also locked parralax test?
         getContentTable().add(toggleCameraLerp).left().row();
         getContentTable().add(new Separator()).fillX();

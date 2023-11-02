@@ -15,11 +15,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
-import com.spaceproject.config.CelestialConfig;
-import com.spaceproject.config.EngineConfig;
-import com.spaceproject.config.EntityConfig;
-import com.spaceproject.config.RenderOrder;
-import com.spaceproject.config.WorldConfig;
+import com.spaceproject.config.*;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.math.Physics;
 import com.spaceproject.screens.GameScreen;
@@ -565,8 +561,12 @@ public class EntityBuilder {
         //GeometryUtils.ensureCCW(hull);
         //Polygon polygon = new Polygon(hull);
         //float area = Math.abs(GeometryUtils.polygonArea(polygon.getVertices(), 0, polygon.getVertices().length));
-        
-        return createAsteroid(seed, x, y, velX, velY, MathUtils.random(MathUtils.PI2), hull, ItemComponent.Resource.random(), false);
+
+        ItemComponent.Resource resource = ItemComponent.Resource.random();
+        if (SpaceProject.configManager.getConfig(DebugConfig.class).glassOnly) {
+            resource = ItemComponent.Resource.GLASS;
+        }
+        return createAsteroid(seed, x, y, velX, velY, MathUtils.random(MathUtils.PI2), hull, resource, false);
     }
     
     private static boolean isValidPoint(FloatArray points, float pX, float pY, float tolerance) {
