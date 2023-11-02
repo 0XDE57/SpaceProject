@@ -77,8 +77,11 @@ public class AsteroidBeltSystem extends EntitySystem {
             DebugConfig debug = SpaceProject.configManager.getConfig(DebugConfig.class);
             if (debug.spawnAsteroid) {
                 Vector3 unproject = GameScreen.cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-                spawnAsteroid(unproject.x, unproject.y, 0, 0);
-                //spawnAsteroidField(unproject.x, unproject.y, 0, 80, 20, 400);
+                if (debug.spawnCluster) {
+                    spawnAsteroidField(unproject.x, unproject.y, 0, 0, 20, 400);
+                } else {
+                    spawnAsteroid(unproject.x, unproject.y, 0, 0);
+                }
             }
         }
     }

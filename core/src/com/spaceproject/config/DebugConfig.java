@@ -3,6 +3,7 @@ package com.spaceproject.config;
 public class DebugConfig extends Config {
     
     public boolean spawnAsteroid;
+    public boolean spawnCluster;
     public boolean drawDebugUI;
     public boolean drawFPS;
     public boolean drawDiagnosticInfo;
@@ -26,6 +27,7 @@ public class DebugConfig extends Config {
     @Override
     public void loadDefault() {
         spawnAsteroid = false;
+        spawnCluster = false;
         drawDebugUI = true;
         drawFPS = true;
         drawDiagnosticInfo = false;
