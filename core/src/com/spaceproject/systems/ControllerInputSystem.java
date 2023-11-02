@@ -305,7 +305,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             //face stick direction
             control.angleTargetFace = MyMath.angle2(0, 0, -leftStickVertAxis, leftStickHorAxis);
             control.movementMultiplier = MathUtils.clamp(dist, 0, 1);
-            control.moveForward = control.movementMultiplier > engageThreshold;
+            //control.moveForward = control.movementMultiplier > engageThreshold;
             
             //notify desktop system that controller has current focus
             desktopInput.setFocusToController();
