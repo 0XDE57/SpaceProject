@@ -13,8 +13,12 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.RayCastCallback;
 import com.badlogic.gdx.utils.Disposable;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
+import com.spaceproject.config.Config;
+import com.spaceproject.config.DebugConfig;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.math.Physics;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.Mappers;
@@ -37,7 +41,7 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
     StringBuilder infoString = new StringBuilder();
 
     boolean drawNormal = false;
-    boolean reflectAsteroidColor = false;
+    DebugConfig debug = SpaceProject.configManager.getConfig(DebugConfig.class);
 
     public LaserSystem() {
         super(Family.all(LaserComponent.class, PhysicsComponent.class).get());
@@ -74,6 +78,13 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
 
         Body body = Mappers.physics.get(entity).body;
         incidentRay.set(MyMath.vector(body.getAngle(), laser.maxDist).add(body.getPosition()));
+        if (debug.discoLaser) {
+            float wavelength = MathUtils.random(380, 780);
+            laser.wavelength = wavelength;
+            laser.frequency = (float) Physics.wavelengthToFrequency(wavelength);
+            int[] rgb = Physics.wavelengthToRGB(wavelength, 1);
+            laser.color.set(rgb[0] / 255f, rgb[1] / 255f, rgb[2] / 255f, 1);
+        }
         reflect(entity, laser, body.getPosition(), incidentRay, laser.color.cpy(), laser.maxDist, maxReflections, deltaTime);
     }
 
@@ -104,13 +115,16 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
                 if (asteroid != null) {
                     if (asteroid.composition == ItemComponent.Resource.GLASS && asteroid.refractiveIndex != 0) {
                         glass = true;
+                        //float mediumIndexOfRefraction =  environmentMediumProperty.value.getIndexOfRefraction( this.laser.getWavelength() );
+                        float waveLengthInN1 = laser.wavelength / refractiveIndexVacuum;
+
                         refract(refract, incidentVector.nor(), rayNormal.nor(), refractiveIndexVacuum, asteroid.refractiveIndex);
                         if (refract.len2() > 0) {
                             shape.setColor(color.r, color.g, color.b, asteroid.color.a);
                             shape.rectLine(b, MyMath.vector(refract.angleRad(), 10).add(b), 0.1f);
                         }
                     }
-                    if (reflectAsteroidColor) {
+                    if (debug.reflectAsteroidColor) {
                         color.set(asteroid.color.cpy());
                     }
                 }
@@ -163,6 +177,62 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
             out.set(eta * incidentVec.x - (eta * dot + (float)Math.sqrt(k)) * normal.x,
                     eta * incidentVec.y - (eta * dot + (float)Math.sqrt(k)) * normal.y);
         }
+    }
+
+    /**
+     * http://en.wikipedia.org/wiki/Sellmeier_equation
+     * Approximation using hardcoded properties from known materials
+     * @param wavelength in meters
+     * @return n2 refractive index
+     */
+    private double getSellmeierValue(float wavelength)  {
+        float l2 = wavelength * wavelength;
+        //coefficients for common borosilicate crown glass known as BK7
+        float b1 = 1.03961212f;
+        float b2 = 0.231792344f;
+        float b3 = 1.01046945f;
+        // convert to metric
+        float c1 = 6.00069867E-3f * 1E-12f;
+        float c2 = 2.00179144E-2f * 1E-12f;
+        float c3 = 1.03560653E2f * 1E-12f;
+        /*
+        //coefficients for sapphire (ordinary)
+        float b1 = 1.43134930f;
+        float b2 = 0.65054713f;
+        float b3 = 5.3414021f;
+        // convert to metric
+        float c1 = 5.2799261E-3f * 1E-12f;
+        float c2 = 1.42382647E-2f * 1E-12f;
+        float c3 = 3.25017834E2f * 1E-12f;
+        */
+        return Math.sqrt( 1 + b1 * l2 / (l2 - c1) + b2 * l2 / (l2 - c2) + b3 * l2 / (l2 - c3));
+    }
+
+    /*
+    public float getIndexOfRefraction(float wavelength) {
+        // get the reference values
+        float nAirReference = getAirIndex(referenceWavelength);
+        float nGlassReference = this.getSellmeierValue(referenceWavelength);
+
+        // determine the mapping and make sure it is in a good range
+        float delta = nGlassReference - nAirReference;
+
+        // 0 to 1 (air to glass)
+        float x = ( referenceIndexOfRefraction - nAirReference ) / delta;
+        x = MathUtils.clamp(x, 0, );
+
+        // take a linear combination of glass and air equations
+        return x * this.getSellmeierValue(wavelength) + (1 - x) * this.getAirIndex(wavelength);
+    }*/
+
+    /**
+     * See http://refractiveindex.info/?group=GASES&material=Air
+     * @param wavelength - wavelength in meters
+     */
+    private double getAirIndex(float wavelength) {
+        return 1 +
+                5792105E-8f / ( 238.0185f - Math.pow(wavelength * 1E6f, -2)) +
+                167917E-8f / ( 57.362f - Math.pow(wavelength * 1E6f, -2));
     }
 
     @Override

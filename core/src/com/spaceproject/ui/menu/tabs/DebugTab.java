@@ -35,6 +35,21 @@ public class DebugTab extends HotKeyTab {
             }
         });
 
+        final VisCheckBox toggleDisco = new VisCheckBox("disco laser!".toUpperCase(), debugCFG.discoLaser);
+        toggleDisco.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                debugCFG.discoLaser = toggleDisco.isChecked();
+            }
+        });
+        final VisCheckBox toggleReflect = new VisCheckBox("laser assumes asteroid color!".toUpperCase(), debugCFG.reflectAsteroidColor);
+        toggleReflect.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                debugCFG.reflectAsteroidColor = toggleReflect.isChecked();
+            }
+        });
+
         final VisCheckBox toggleAsteroidSpawn = new VisCheckBox("spawn asteroid on [right-click]", debugCFG.spawnAsteroid);
         toggleAsteroidSpawn.addListener(new ChangeListener() {
             @Override
@@ -163,9 +178,12 @@ public class DebugTab extends HotKeyTab {
             }
         });
 
-
+        //getContentTable().add(invicibility)
         getContentTable().add(toggleInfiniteFire).left().row();
+        getContentTable().add(toggleDisco).left();
+        getContentTable().add(toggleReflect).left().row();
         getContentTable().add(toggleAsteroidSpawn).left().row();
+        //getContentTable().add(background) solid color? grid color? also locked parralax test?
         getContentTable().add(toggleCameraLerp).left().row();
         getContentTable().add(new Separator()).fillX();
         getContentTable().add(new Separator()).fillX().row();

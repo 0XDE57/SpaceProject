@@ -19,6 +19,9 @@ public class DebugConfig extends Config {
     public boolean drawMousePos;
     public boolean lerpCam;
     public boolean infiniteFire;
+    public boolean invincible;
+    public boolean reflectAsteroidColor;
+    public boolean discoLaser;
 
     @Override
     public void loadDefault() {
@@ -38,7 +41,10 @@ public class DebugConfig extends Config {
         drawOrbitPath = false;
         drawMousePos = false;
         lerpCam = false;
+        invincible = false;
         infiniteFire = false;
+        reflectAsteroidColor = false;
+        discoLaser = false;
     }
     
 }
