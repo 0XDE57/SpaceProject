@@ -13,7 +13,8 @@ public class OrbitAnim extends TitleAnimation {
     Vector2 centerScreen = new Vector2();
     Array<Body> bodies;
     float angleSyncEpsilon = 0.1f;
-    
+
+    //todo: calculate center of mass of all bodies, then set all bodies relavtive (or move camera) to center of mass
     //todo: render sine, and later explore x / y lissajous
     //todo: test render resonance ghost, leave marker when planets align
     //todo: overlay delaunay, and later voronoi when fixed
