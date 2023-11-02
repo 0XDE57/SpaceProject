@@ -11,6 +11,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
+import com.spaceproject.config.DebugConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.math.MyMath;
@@ -426,7 +427,12 @@ public class Box2DContactListener implements ContactListener {
         health.lastHitSource = source;
         health.health -= damage;
         if (health.health <= 0) {
-            destroy(engine, entity, source);
+            if (SpaceProject.configManager.getConfig(DebugConfig.class).invincible && Mappers.controlFocus.get(entity) != null) {
+                health.health = health.maxHealth; //debug hack!!!!!
+                Gdx.app.log(Box2DContactListener.class.getSimpleName(),"saved your life");
+            } else {
+                destroy(engine, entity, source);
+            }
         }
         return health;
     }

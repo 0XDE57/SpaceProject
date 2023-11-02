@@ -34,6 +34,13 @@ public class DebugTab extends HotKeyTab {
                 debugCFG.infiniteFire = toggleInfiniteFire.isChecked();
             }
         });
+        final VisCheckBox toggleInvincibility = new VisCheckBox("invincible!".toUpperCase(), debugCFG.invincible);
+        toggleInvincibility.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                debugCFG.invincible = toggleInvincibility.isChecked();
+            }
+        });
 
         final VisCheckBox toggleDisco = new VisCheckBox("disco laser!".toUpperCase(), debugCFG.discoLaser);
         toggleDisco.addListener(new ChangeListener() {
@@ -178,7 +185,7 @@ public class DebugTab extends HotKeyTab {
             }
         });
 
-        //getContentTable().add(invicibility)
+        getContentTable().add(toggleInvincibility).left();
         getContentTable().add(toggleInfiniteFire).left().row();
         getContentTable().add(toggleDisco).left();
         getContentTable().add(toggleReflect).left().row();
