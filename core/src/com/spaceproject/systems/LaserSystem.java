@@ -103,6 +103,7 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
         incidentVector.set(b).sub(a);
         float distanceToHit = incidentVector.len();
         float range = distanceToHit / length;
+        float remainingDistance = length - distanceToHit;
         Color ratio = color.cpy().lerp(endColor, range - MathUtils.random()*0.15f);
         shape.rectLine(a.x, a.y, b.x, b.y, 0.2f, color, ratio);
 
@@ -115,13 +116,13 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
                 if (asteroid != null) {
                     if (asteroid.composition == ItemComponent.Resource.GLASS && asteroid.refractiveIndex != 0) {
                         glass = true;
-                        //float mediumIndexOfRefraction =  environmentMediumProperty.value.getIndexOfRefraction( this.laser.getWavelength() );
+                        //float mediumIndexOfRefraction =  getIndexOfRefraction(laser.wavelength);
                         float waveLengthInN1 = laser.wavelength / refractiveIndexVacuum;
-
                         refract(refract, incidentVector.nor(), rayNormal.nor(), refractiveIndexVacuum, asteroid.refractiveIndex);
                         if (refract.len2() > 0) {
                             shape.setColor(color.r, color.g, color.b, asteroid.color.a);
-                            shape.rectLine(b, MyMath.vector(refract.angleRad(), 10).add(b), 0.1f);
+                            //todo: raycast refraction
+                            shape.rectLine(b, MyMath.vector(refract.angleRad(), remainingDistance).add(b), 0.1f);
                         }
                     }
                     if (debug.reflectAsteroidColor) {
@@ -148,7 +149,6 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
             }
 
             //calculate reflection: reflectedVector = incidentVector - 2 * (incidentVector dot normal) * normal
-            float remainingDistance = length - distanceToHit;
             Vector2 reflectedVector = new Vector2(incidentVector).sub(rayNormal.scl(2 * incidentVector.dot(rayNormal))).setLength(remainingDistance).add(b);
             return reflect(entity, laser, b, reflectedVector, color, remainingDistance, --reflections, deltaTime);
         }
@@ -185,7 +185,7 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
      * @param wavelength in meters
      * @return n2 refractive index
      */
-    private double getSellmeierValue(float wavelength)  {
+    private float getSellmeierValue(float wavelength)  {
         float l2 = wavelength * wavelength;
         //coefficients for common borosilicate crown glass known as BK7
         float b1 = 1.03961212f;
@@ -205,34 +205,34 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
         float c2 = 1.42382647E-2f * 1E-12f;
         float c3 = 3.25017834E2f * 1E-12f;
         */
-        return Math.sqrt( 1 + b1 * l2 / (l2 - c1) + b2 * l2 / (l2 - c2) + b3 * l2 / (l2 - c3));
+        return (float) Math.sqrt( 1 + b1 * l2 / (l2 - c1) + b2 * l2 / (l2 - c2) + b3 * l2 / (l2 - c3));
     }
 
-    /*
-    public float getIndexOfRefraction(float wavelength) {
+
+    public float getIndexOfRefraction(float wavelength, float referenceWavelength, float referenceIndexOfRefraction) {
         // get the reference values
         float nAirReference = getAirIndex(referenceWavelength);
-        float nGlassReference = this.getSellmeierValue(referenceWavelength);
+        float nGlassReference = getSellmeierValue(referenceWavelength);
 
         // determine the mapping and make sure it is in a good range
         float delta = nGlassReference - nAirReference;
 
         // 0 to 1 (air to glass)
-        float x = ( referenceIndexOfRefraction - nAirReference ) / delta;
-        x = MathUtils.clamp(x, 0, );
+        float x = (referenceIndexOfRefraction - nAirReference) / delta;
+        x = MathUtils.clamp(x, 0, Float.POSITIVE_INFINITY);
 
         // take a linear combination of glass and air equations
         return x * this.getSellmeierValue(wavelength) + (1 - x) * this.getAirIndex(wavelength);
-    }*/
+    }
 
     /**
      * See http://refractiveindex.info/?group=GASES&material=Air
      * @param wavelength - wavelength in meters
      */
-    private double getAirIndex(float wavelength) {
-        return 1 +
-                5792105E-8f / ( 238.0185f - Math.pow(wavelength * 1E6f, -2)) +
-                167917E-8f / ( 57.362f - Math.pow(wavelength * 1E6f, -2));
+    private float getAirIndex(float wavelength) {
+        return (float) (1 +
+                        5792105E-8f / ( 238.0185f - Math.pow(wavelength * 1E6f, -2)) +
+                        167917E-8f / ( 57.362f - Math.pow(wavelength * 1E6f, -2)));
     }
 
     @Override
