@@ -124,9 +124,10 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
                             //todo: raycast refraction
                             shape.rectLine(b, MyMath.vector(refract.angleRad(), remainingDistance).add(b), 0.1f);
                         }
-                    }
-                    if (debug.reflectAsteroidColor) {
-                        color.set(asteroid.color.cpy());
+                    } else {
+                        if (debug.reflectAsteroidColor) {
+                            color.set(asteroid.color.cpy());
+                        }
                     }
                 }
                 if (entity != hitEntity) {
