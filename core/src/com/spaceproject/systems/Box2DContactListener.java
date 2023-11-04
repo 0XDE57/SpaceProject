@@ -136,7 +136,7 @@ public class Box2DContactListener implements ContactListener {
         }
         
         //do damage
-        damage(engine, attackedEntity, damageComponent.source, damageComponent.damage);
+        damage(engine, attackedEntity, damageComponent.source, damageComponent.damage, contact);
         
         //add projectile ghost (fx)
         boolean showGhostTrail = (healthComponent.health <= 0);
@@ -195,10 +195,9 @@ public class Box2DContactListener implements ContactListener {
         int quantity = 1;
         if (cargo.inventory.containsKey(itemId)) {
             int currentQuantity = cargo.inventory.get(itemId);
-            cargo.inventory.put(itemId, currentQuantity + quantity);
-        } else {
-            cargo.inventory.put(itemId, quantity);
+            quantity += currentQuantity + quantity;
         }
+        cargo.inventory.put(itemId, quantity);
         cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
         item.add(new RemoveComponent());
         
@@ -224,11 +223,11 @@ public class Box2DContactListener implements ContactListener {
             //active heat damage
             StarComponent starA = Mappers.star.get(entityA);
             if (starA != null) {
-                doActiveHeatDamage(contact.getFixtureB(), entityA, entityB, timeStep);
+                doActiveHeatDamage(contact, contact.getFixtureB(), entityA, entityB, timeStep);
             }
             StarComponent starB = Mappers.star.get(entityB);
             if (starB != null) {
-                doActiveHeatDamage(contact.getFixtureA(), entityB, entityA, timeStep);
+                doActiveHeatDamage(contact, contact.getFixtureA(), entityB, entityA, timeStep);
             }
             //active item movement
             ItemComponent itemDropA = Mappers.item.get(entityA);
@@ -242,7 +241,7 @@ public class Box2DContactListener implements ContactListener {
         }
     }
     
-    private void doActiveHeatDamage(Fixture burningFixture, Entity starEntity, Entity burningEntity, float timeStep) {
+    private void doActiveHeatDamage(Contact contact, Fixture burningFixture, Entity starEntity, Entity burningEntity, float timeStep) {
         if (burningFixture.isSensor()) {
             //check if item
             if (Mappers.item.get(burningEntity) != null) {
@@ -270,7 +269,7 @@ public class Box2DContactListener implements ContactListener {
         }
 
         //do damage
-        HealthComponent healthComponent = damage(engine, burningEntity, starEntity, damage);
+        HealthComponent healthComponent = damage(engine, burningEntity, starEntity, damage, burningFixture.getBody().getPosition());
 
         //destroy other body if has damage payload. eg: projectile
         if (healthComponent == null) {
@@ -284,7 +283,7 @@ public class Box2DContactListener implements ContactListener {
         CargoComponent cargoCollector = Mappers.cargo.get(entityCollector);
         if (cargoCollector == null) return;
         
-        PhysicsComponent physicsItem = Mappers.physics.get(entityItem);
+        PhysicsComponent physicsItem = Mappers.physics.get(entityItem);//todo: use fixture body instead
         Vector2 collectorPos = Mappers.physics.get(entityCollector).body.getPosition();
         Vector2 itemPos = physicsItem.body.getPosition();
         float angleRad = MyMath.angleTo(collectorPos, itemPos);
@@ -317,24 +316,24 @@ public class Box2DContactListener implements ContactListener {
         //check for asteroid
         AsteroidComponent asteroidA = Mappers.asteroid.get(entityA);
         if (asteroidA != null) {
-            asteroidImpact(entityA, entityB, asteroidA, maxImpulse);
+            asteroidImpact(entityA, entityB, asteroidA, contact,  maxImpulse);
         }
         AsteroidComponent asteroidB = Mappers.asteroid.get(entityB);
         if (asteroidB != null) {
-            asteroidImpact(entityB, entityA, asteroidB, maxImpulse);
+            asteroidImpact(entityB, entityA, asteroidB, contact, maxImpulse);
         }
         //check for vehicle
         VehicleComponent vehicleA = Mappers.vehicle.get(entityA);
         if (vehicleA != null) {
-            vehicleImpact(entityA, entityB, maxImpulse);
+            vehicleImpact(entityA, entityB, contact, maxImpulse);
         }
         VehicleComponent vehicleB = Mappers.vehicle.get(entityB);
         if (vehicleB != null) {
-            vehicleImpact(entityB, entityA, maxImpulse);
+            vehicleImpact(entityB, entityA, contact, maxImpulse);
         }
     }
     
-    private void asteroidImpact(Entity impactedEntity, Entity asteroidEntity, AsteroidComponent asteroid, float impulse) {
+    private void asteroidImpact(Entity impactedEntity, Entity asteroidEntity, AsteroidComponent asteroid, Contact contact, float impulse) {
         if (impulse > asteroidBreakOrbitThreshold) {
             if (asteroid.parentOrbitBody != null) {
                 AsteroidBeltComponent circumstellar = Mappers.asteroidBelt.get(asteroid.parentOrbitBody);
@@ -349,11 +348,11 @@ public class Box2DContactListener implements ContactListener {
         if (impulse > asteroidDamageThreshold) {
             //calc damage relative to size of bodies and how hard impact impulse was
             float relativeDamage = (impulse * impactMultiplier) * asteroid.area;
-            damage(engine, impactedEntity, asteroidEntity, relativeDamage);
+            damage(engine, impactedEntity, asteroidEntity, relativeDamage, contact);
         }
     }
     
-    private void vehicleImpact(Entity entity, Entity otherBody, float impulse) {
+    private void vehicleImpact(Entity entity, Entity otherBody, Contact contact, float impulse) {
         //calc damage relative to how hard impact impulse was
         float relativeDamage = (impulse * vehicleDamageMultiplier);
         
@@ -401,7 +400,7 @@ public class Box2DContactListener implements ContactListener {
         
         //do damage
         Gdx.app.debug(getClass().getSimpleName(), "high impact damage: " + relativeDamage + " to [" + DebugUtil.objString(entity) + "]");
-        damage(engine, entity, otherBody, relativeDamage);
+        damage(engine, entity, otherBody, relativeDamage, contact);
 
         //damaged entity was controlled by player, vibrate on impact
         if (Mappers.controlFocus.get(entity) != null) {
@@ -413,7 +412,14 @@ public class Box2DContactListener implements ContactListener {
     }
     //endregion
 
-    public static HealthComponent damage(Engine engine, Entity entity, Entity source, float damage) {
+    public static HealthComponent damage(Engine engine, Entity entity, Entity source, float damage, Contact contact) {
+        WorldManifold manifold = contact.getWorldManifold();
+        //we only need the first point in this case
+        Vector2 p1 = manifold.getPoints()[0];
+        return damage(engine, entity, source, damage, p1);
+    }
+
+    public static HealthComponent damage(Engine engine, Entity entity, Entity source, float damage, Vector2 location) {
         HealthComponent health = Mappers.health.get(entity);
         if (health == null) return null;
         if (health.health <= 0) {
@@ -434,6 +440,7 @@ public class Box2DContactListener implements ContactListener {
                 destroy(engine, entity, source);
             }
         }
+        HUDSystem.damageMarker(location, damage, health.lastHitTime);
         return health;
     }
     

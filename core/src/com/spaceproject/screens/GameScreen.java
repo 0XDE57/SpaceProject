@@ -30,10 +30,7 @@ import com.spaceproject.generation.FontLoader;
 import com.spaceproject.generation.Galaxy;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.noise.NoiseManager;
-import com.spaceproject.systems.Box2DPhysicsSystem;
-import com.spaceproject.systems.LaserSystem;
-import com.spaceproject.systems.ParticleSystem;
-import com.spaceproject.systems.ScreenTransitionSystem;
+import com.spaceproject.systems.*;
 import com.spaceproject.ui.ControllerMenuStage;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.ECSUtil;
@@ -262,8 +259,8 @@ public class GameScreen extends MyScreenAdapter {
         profilerStringBuilder.append("\n[Engine Steps]:     ").append(engineTicks);
         Box2DPhysicsSystem box2DSystem = engine.getSystem(Box2DPhysicsSystem.class);
         if (box2DSystem != null) profilerStringBuilder.append("\n").append(box2DSystem);
-        LaserSystem laser = engine.getSystem(LaserSystem.class);
-        if (laser != null) profilerStringBuilder.append("\n").append(laser);
+        LaserSystem laserSystem = engine.getSystem(LaserSystem.class);
+        if (laserSystem != null) profilerStringBuilder.append("\n").append(laserSystem);
         profilerStringBuilder.append("\n[GL calls]:         ").append(glProfiler.getCalls());
         profilerStringBuilder.append("\n[Draw calls]:       ").append(glProfiler.getDrawCalls());
         profilerStringBuilder.append("\n[Shader switches]:  ").append(glProfiler.getShaderSwitches());
@@ -271,6 +268,8 @@ public class GameScreen extends MyScreenAdapter {
         profilerStringBuilder.append("\n[Vertices]:         ").append(glProfiler.getVertexCount().total);
         ParticleSystem particleSystem = engine.getSystem(ParticleSystem.class);
         if (particleSystem != null) profilerStringBuilder.append("\n[Particles]:        ").append(particleSystem.getParticleCount());
+        HUDSystem hudSystem = engine.getSystem(HUDSystem.class);
+        if (hudSystem != null) profilerStringBuilder.append("\n").append(hudSystem);
         profilerStringBuilder.append("\n------ DISPOSED ------ ").append(ResourceDisposer.getTotalDisposeCount());
         glProfiler.reset();
     }

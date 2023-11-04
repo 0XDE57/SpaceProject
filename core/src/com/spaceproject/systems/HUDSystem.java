@@ -24,10 +24,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.*;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
 import com.spaceproject.config.KeyConfig;
@@ -45,13 +42,46 @@ import com.spaceproject.utility.IScreenResizeListener;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
+import java.lang.StringBuilder;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener, Disposable {
-    
-    class CreditsMarker {
+
+    public static class DamageText implements Pool.Poolable {
+        public float damage;
+        public Vector2 pos;
+        public long timestamp;
+        public boolean project;
+
+        public DamageText() {
+            pos = new Vector2();
+        }
+
+        public void init(Vector2 pos, float damage, long lastHitTime, boolean project) {
+            this.pos.set(pos);
+            this.damage = damage;
+            this.timestamp = lastHitTime;
+            this.project = project;
+        }
+
+        @Override
+        public void reset() {
+            pos.set(0,0);
+            damage = 0;
+            timestamp = 0;
+            project = false;
+        }
+    }
+    private static final Array<DamageText> activeNumbers = new Array<>();
+    private static final Pool<DamageText> numbersPool = Pools.get(DamageText.class);
+    public static boolean showDamageNumbers = false;
+    public static int damageTime = 750;
+    public static int activePeak;
+    StringBuilder infoString = new StringBuilder();
+
+    class CreditsMarker {//can this fit into the same damage pool?
         final int value;
         Vector2 location;
         SimpleTimer animTimer;
@@ -80,6 +110,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private final SpriteBatch batch;
     private final BitmapFont font, subFont, inventoryFont;
     private final GlyphLayout layout;
+    private static final Vector3 tempProj = new Vector3();
 
     //entity storage
     private ImmutableArray<Entity> mapableEntities;
@@ -88,7 +119,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     private MiniMap miniMap;
     
-    private boolean drawHud = true;
+    private static boolean drawHud = true;
     private boolean drawEdgeMap = true;
 
     enum SpecialState {
@@ -199,7 +230,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (mobileUI != null)
             mobileUI.drawControls();
     }
-    
+
     public boolean isDraw() {
         return drawHud;
     }
@@ -247,6 +278,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         drawInventory(player, 20, 30);
 
         drawCreditMarkers(deltaTime);
+        drawDamageText(deltaTime);
 
         //draw special state: hyper or landing / launching
         drawSpecialStateMessage(player);
@@ -729,6 +761,42 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
     }
 
+    private void drawDamageText(float deltaTime) {
+        //float up = 5;
+        for (DamageText text : activeNumbers) {
+            //text.pos.y += up * deltaTime;
+            float x = text.pos.x;
+            float y = text.pos.y;
+            if (text.project) {
+                tempProj.set(text.pos.x, text.pos.y, 0);
+                Vector3 screenPos = MyScreenAdapter.cam.project(tempProj);
+                x = screenPos.x;
+                y = screenPos.y;
+            }
+            inventoryFont.setColor(Color.RED.cpy().lerp(Color.CLEAR, (float) (GameScreen.getGameTimeCurrent() - text.timestamp) / damageTime));
+            inventoryFont.draw(batch, "" + (int)text.damage, x, y);
+        }
+
+        //free up expired items back into pool
+        DamageText item;
+        for (int i = activeNumbers.size; --i >= 0;) {
+            item = activeNumbers.get(i);
+            if (item.timestamp < GameScreen.getGameTimeCurrent() - damageTime) {
+                activeNumbers.removeIndex(i);
+                numbersPool.free(item);
+            }
+        }
+    }
+
+    public static void damageMarker(Vector2 pos, float damage, long lastHitTime) {
+        if (!showDamageNumbers || !drawHud) return;
+        //https://libgdx.com/wiki/articles/memory-management#object-pooling
+        DamageText test = numbersPool.obtain();
+        test.init(pos, damage, lastHitTime, true);
+        activeNumbers.add(test);
+        activePeak = Math.max(activePeak, activeNumbers.size);
+    }
+
     private void drawCreditMarkers(float deltaTime) {
         float velocityY = 35f;
         for (CreditsMarker marker : markers) {
@@ -744,7 +812,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
 
     public void addCredits(int totalCredits, Vector2 pos, Color color) {
-        markers.add(new CreditsMarker(totalCredits, pos, color));
+        markers.add(new CreditsMarker(totalCredits, pos, color));//todo: replace with pool
     }
     //endregion
     
@@ -876,6 +944,17 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     @Override
     public void dispose() {
         font.dispose();
+    }
+
+    @Override
+    public String toString() {
+        infoString.setLength(0);
+        infoString.append("[HUD Pool]:         active: ").append(activeNumbers.size)
+                .append(", active peak: ").append(activePeak)
+                .append(", free: ").append(numbersPool.getFree())
+                .append(", peak: ").append(numbersPool.peak)
+                .append(", max: ").append(numbersPool.max);
+        return infoString.toString();
     }
 
 }
