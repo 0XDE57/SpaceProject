@@ -49,7 +49,7 @@ public class DebugTab extends HotKeyTab {
                 debugCFG.discoLaser = toggleDisco.isChecked();
             }
         });
-        final VisCheckBox toggleReflect = new VisCheckBox("laser assumes asteroid color!".toUpperCase(), debugCFG.reflectAsteroidColor);
+        final VisCheckBox toggleReflect = new VisCheckBox("laser reflects asteroid color!".toUpperCase(), debugCFG.reflectAsteroidColor);
         toggleReflect.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -94,7 +94,7 @@ public class DebugTab extends HotKeyTab {
             }
         });
 
-        final VisCheckBox toggleComponentList = new VisCheckBox("show components", debugCFG.drawComponentList);
+        final VisCheckBox toggleComponentList = new VisCheckBox("show components (heavy)", debugCFG.drawComponentList);
         toggleComponentList.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
