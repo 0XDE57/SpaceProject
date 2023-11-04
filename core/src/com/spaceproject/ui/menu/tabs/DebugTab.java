@@ -78,6 +78,13 @@ public class DebugTab extends HotKeyTab {
                 debugCFG.glassOnly = toggleGlassOnly.isChecked();
             }
         });
+        final VisCheckBox toggleRegBodies = new VisCheckBox("regular bodies (experimental)", debugCFG.spawnRegularBodies);
+        toggleRegBodies.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                debugCFG.spawnRegularBodies = toggleRegBodies.isChecked();
+            }
+        });
 
         final VisCheckBox toggleCameraLerp = new VisCheckBox("lerp camera", debugCFG.spawnAsteroid);
         toggleCameraLerp.addListener(new ChangeListener() {
@@ -205,9 +212,12 @@ public class DebugTab extends HotKeyTab {
         getContentTable().add(toggleReflect).left().row();
         getContentTable().add(toggleAsteroidSpawn).left();
         getContentTable().add(toggleAsteroidCluster).left();
-        getContentTable().add(toggleGlassOnly).left().row();
+        getContentTable().add(toggleGlassOnly).left();
+        getContentTable().add(toggleRegBodies).left().row();
         //getContentTable().add(background) solid color? grid color? also locked parralax test?
         getContentTable().add(toggleCameraLerp).left().row();
+        getContentTable().add(new Separator()).fillX();
+        getContentTable().add(new Separator()).fillX();
         getContentTable().add(new Separator()).fillX();
         getContentTable().add(new Separator()).fillX().row();
         getContentTable().add(toggleDebugMaster).left().row();
@@ -215,11 +225,15 @@ public class DebugTab extends HotKeyTab {
         getContentTable().add(toggleExtraInfo).left().row();
         getContentTable().add(toggleUIDebug).left().row();
         getContentTable().add(new Separator()).fillX();
+        getContentTable().add(new Separator()).fillX();
+        getContentTable().add(new Separator()).fillX();
         getContentTable().add(new Separator()).fillX().row();
         getContentTable().add(toggleMousePos).left().row();
         getContentTable().add(togglePos).left();
         getContentTable().add(toggleComponentList).left().row();
         getContentTable().add(toggleOrbitPath).left().row();
+        getContentTable().add(new Separator()).fillX();
+        getContentTable().add(new Separator()).fillX();
         getContentTable().add(new Separator()).fillX();
         getContentTable().add(new Separator()).fillX().row();
         getContentTable().add(toggleB2Debug).left().row();

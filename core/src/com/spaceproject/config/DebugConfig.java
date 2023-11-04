@@ -4,6 +4,7 @@ public class DebugConfig extends Config {
     
     public boolean spawnAsteroid;
     public boolean spawnCluster;
+    public boolean spawnRegularBodies;
     public boolean glassOnly;
     public boolean drawDebugUI;
     public boolean drawFPS;
@@ -29,6 +30,8 @@ public class DebugConfig extends Config {
     public void loadDefault() {
         spawnAsteroid = false;
         spawnCluster = false;
+        spawnRegularBodies = false;
+        glassOnly = false;
         drawDebugUI = true;
         drawFPS = true;
         drawDiagnosticInfo = false;
@@ -48,7 +51,6 @@ public class DebugConfig extends Config {
         infiniteFire = false;
         reflectAsteroidColor = false;
         discoLaser = false;
-        glassOnly = false;
     }
     
 }
