@@ -18,6 +18,7 @@ import com.spaceproject.utility.IndependentTimer;
 
 /**
  * Modified version of: https://github.com/MrStahlfelge/gdx-controllerutils
+ * More compatible with VisUI and some other custom components and behaviors.
  */
 public class ControllerMenuStage extends Stage implements ControllerListener {
 
