@@ -135,7 +135,7 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
                     if (glass) {
                         damage *= 0.01f;
                     }
-                    Box2DContactListener.damage(getEngine(), hitEntity, entity, damage, b);
+                    Box2DContactListener.damage(getEngine(), hitEntity, entity, damage, b, rayFixture.getBody());
                 }
                 if (Mappers.damage.get(hitEntity) != null) {
                     hitEntity.add(new RemoveComponent());
