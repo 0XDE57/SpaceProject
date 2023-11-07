@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.WorldDef;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
@@ -115,7 +116,12 @@ public class GameScreen extends MyScreenAdapter {
         engine = new Engine();
         
         //physics
-        box2dWorld = new World(new Vector2(), true);
+        final WorldDef worldDef = new WorldDef(new Vector2(0f, 0f), true);
+        worldDef.bodyPoolMax       = 4096;
+        worldDef.contactPoolMax    = 4096;
+        worldDef.fixturePoolMax    = 4096;
+        worldDef.initialCapacities = 4096;
+        box2dWorld = new World(worldDef);
         
         //noise threadpool
         if (noiseManager == null) {
