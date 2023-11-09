@@ -34,7 +34,7 @@ public class AsteroidRenderSystem extends IteratingSystem {
     public void update(float deltaTime) {
         shapeRenderer.setProjectionMatrix(GameScreen.cam.combined);
 
-        //todo: not all asteroids need transparency, only glass. could potentially sort enable blending for only glassteroids
+        //todo: not all asteroids need transparency, only glass. could potentially sort enable blending for only glassteroids? profiler.
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -43,13 +43,13 @@ public class AsteroidRenderSystem extends IteratingSystem {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         super.update(deltaTime);
         shapeRenderer.end();
-    
+
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+
         //render outer polygon triangle mesh outline
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         super.update(deltaTime);
         shapeRenderer.end();
-
-        Gdx.gl.glDisable(GL20.GL_BLEND);
     }
     
     @Override
