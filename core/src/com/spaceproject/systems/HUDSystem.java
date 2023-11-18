@@ -194,7 +194,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             }
         });
 
-        interactTimer = new SimpleTimer(500);
+        interactTimer = new SimpleTimer(250);
     }
     
     @Override
@@ -452,9 +452,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         switch (messageState) {
             case docked:
                 String key = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).interact);
-                String input = (getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad Down" : key).toUpperCase();
+                boolean controllerHasFocus = getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus();
                 if (stationMenu == null) {
-                    drawHint("hold [" + input + "] to interact");
+                    String input = (controllerHasFocus ? "D-Pad Down" : key).toUpperCase();
+                    drawHint("[" + input + "] open shop");
+                } else {
+                    drawHint("[" + (controllerHasFocus ? "B" : key).toUpperCase() + "] close shop");
                 }
                 String port = Mappers.docked.get(player).dockID;
                 layout.setText(font, "[ DOCKED: port " + port + " ]");
