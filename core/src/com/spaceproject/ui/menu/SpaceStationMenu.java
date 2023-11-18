@@ -165,6 +165,7 @@ public class SpaceStationMenu {
                 creditsValue.setText(Mappers.cargo.get(player).credits);
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
 
+                int referenceWavelength = 589;//"yellow doublet" sodium D line
                 LaserComponent laser = new LaserComponent(520, 250, 30, 1);
                 vehicle.tools.put(VehicleComponent.Tool.laser.ordinal(), laser);
             }

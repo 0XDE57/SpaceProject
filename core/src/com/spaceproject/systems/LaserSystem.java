@@ -79,12 +79,14 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
         Body body = Mappers.physics.get(entity).body;
         incidentRay.set(MyMath.vector(body.getAngle(), laser.maxDist).add(body.getPosition()));
         if (debug.discoLaser) {
+            int referenceWavelength = 589;//"yellow doublet" sodium D line
             float wavelength = MathUtils.random(380, 780);
             laser.wavelength = wavelength;
             laser.frequency = (float) Physics.wavelengthToFrequency(wavelength);
             int[] rgb = Physics.wavelengthToRGB(wavelength, 1);
             laser.color.set(rgb[0] / 255f, rgb[1] / 255f, rgb[2] / 255f, 1);
         }
+
         reflect(entity, laser, body.getPosition(), incidentRay, laser.color.cpy(), laser.maxDist, maxReflections, deltaTime);
     }
 
@@ -116,13 +118,21 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
                 if (asteroid != null) {
                     if (asteroid.composition == ItemComponent.Resource.GLASS && asteroid.refractiveIndex != 0) {
                         glass = true;
-                        //float mediumIndexOfRefraction =  getIndexOfRefraction(laser.wavelength);
-                        float waveLengthInN1 = laser.wavelength / refractiveIndexVacuum;
+                        //float waveLengthInN1 = laser.wavelength / refractiveIndexVacuum;
                         refract(refract, incidentVector.nor(), rayNormal.nor(), refractiveIndexVacuum, asteroid.refractiveIndex);
                         if (refract.len2() > 0) {
                             shape.setColor(color.r, color.g, color.b, asteroid.color.a);
-                            //todo: raycast refraction
-                            shape.rectLine(b, MyMath.vector(refract.angleRad(), remainingDistance).add(b), 0.1f);
+                            Vector2 refractedEndPoint = MyMath.vector(refract.angleRad(), remainingDistance).add(b);
+                            GameScreen.box2dWorld.rayCast((fixture, point, normal, fraction) -> {
+                                callbackCount++;
+                                //ignore sensors and other fixtures than the one we already hit
+                                if (fixture.isSensor() || fixture != rayFixture) return -1;
+                                refractedEndPoint.set(point);
+                                return fraction;
+                            }, refractedEndPoint, b);
+                            rayCount++;
+                            shape.rectLine(b, refractedEndPoint, 0.1f);
+                            //todo: continue to cast internal reflections
                         }
                     } else {
                         if (debug.reflectAsteroidColor) {
@@ -136,6 +146,9 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
                     if (glass) {
                         damage *= 0.01f;
                     }
+                    //tractor beam test
+                    //rayFixture.getBody().applyForce();
+
                     Box2DContactListener.damage(getEngine(), hitEntity, entity, damage, b, rayFixture.getBody());
                 }
                 if (Mappers.damage.get(hitEntity) != null) {
