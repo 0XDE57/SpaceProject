@@ -419,6 +419,7 @@ public class Box2DContactListener implements ContactListener {
     }
 
     public static HealthComponent damage(Engine engine, Entity entity, Entity source, float damage, Vector2 location, Body damagedBody) {
+        if (damage <= 0) return null;
         HealthComponent health = Mappers.health.get(entity);
         if (health == null) return null;
         if (health.health <= 0) {
