@@ -5,6 +5,7 @@ public class DebugConfig extends Config {
     public boolean spawnAsteroid;
     public boolean spawnCluster;
     public boolean spawnRegularBodies;
+    public boolean spawnPenrose;
     public boolean glassOnly;
     public boolean drawDebugUI;
     public boolean drawFPS;
@@ -25,12 +26,15 @@ public class DebugConfig extends Config {
     public boolean invincible;
     public boolean reflectAsteroidColor;
     public boolean discoLaser;
+    public boolean tractorBeam;//pull
+    public boolean tractorBeamPush;
 
     @Override
     public void loadDefault() {
         spawnAsteroid = false;
         spawnCluster = false;
         spawnRegularBodies = false;
+        spawnPenrose = false;
         glassOnly = false;
         drawDebugUI = true;
         drawFPS = true;
@@ -51,6 +55,8 @@ public class DebugConfig extends Config {
         infiniteFire = false;
         reflectAsteroidColor = false;
         discoLaser = false;
+        tractorBeam = false;
+        tractorBeamPush = false;
     }
     
 }

@@ -1,6 +1,7 @@
 package com.spaceproject.generation;
 
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.ConvexHull;
@@ -98,10 +99,11 @@ public class EntityBuilder {
                 shipEntity.add(chargeCannon);
                 break;
             case 2:
-                LaserComponent laser = new LaserComponent(480, 250, 30, 1);
+                LaserComponent laser = new LaserComponent(520, 250, 30, 1);
                 shipEntity.add(laser);
                 break;
         }
+        vehicle.tools.put(VehicleComponent.Tool.laser.ordinal(), new LaserComponent(520, 250, 30, 1));
 
         //hyper drive
         HyperDriveComponent hyperDrive = new HyperDriveComponent();
@@ -156,7 +158,7 @@ public class EntityBuilder {
 
         shipEntity.add(new SoundComponent());
 
-        //engine particle effect
+        //engine particle effect. todo: kill off cluster, stuff multieffects in particle component with multi source
         Entity mainEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineMain, new Vector2(0, height + 0.2f), 0);
         Entity leftEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineLeft, new Vector2(width/2 - 0.2f, 0), -90);
         Entity rightEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineRight, new Vector2(-(width/2 - 0.2f), 0), 90);
@@ -529,22 +531,62 @@ public class EntityBuilder {
         return entity;
     }
 
+    enum PolygonClass {
+        irregular,
+        triangle, rectangle, pentagon, hexagon, heptagon,
+        rhombusGold,
+        penRhombusThin, penRhombusThicc
+    }
+
     public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float size) {
         int maxPoints = 7;//Box2D poly vert limit is 8: Assertion `3 <= count && count <= 8' failed.
         FloatArray points = new FloatArray();
+        PolygonClass poly = PolygonClass.irregular;
 
-        if (SpaceProject.configManager.getConfig(DebugConfig.class).spawnRegularBodies) {
-            //source: ShapeRenderer.circle();
-            int segments = MathUtils.random(3, maxPoints);
-            float angle = 2 * MathUtils.PI / segments;
-            float cos = MathUtils.cos(angle);
-            float sin = MathUtils.sin(angle);
-            float cx = size, cy = 0;
-            for (int i = 0; i < segments; i++) {
-                points.add(x + cx, y + cy);
-                float temp = cx;
-                cx = cos * cx - sin * cy;
-                cy = sin * temp + cos * cy;
+        DebugConfig debugConfig = SpaceProject.configManager.getConfig(DebugConfig.class);
+        if (debugConfig.spawnRegularBodies) {
+            if (debugConfig.spawnPenrose) {
+                //penrose! rhombic prototiles
+                //5: pentagram, 3: triangle
+                //phi ø = π/5 = Tau/10 = 36 deg = 0.62 rad
+                // The golden rhombus is distinguished from the two rhombi of the Penrose tiling,
+                // which are both related in other ways to the golden ratio but have different shapes than the golden rhombus.
+                //gold: 60 < 60  > 60
+                //thin: 36 < 144 > 36  || ø < 4ø > ø
+                //thic: 72 < 108 > 72  || 2ø < 3ø > 2ø
+                poly = MathUtils.randomBoolean() ? PolygonClass.penRhombusThin : PolygonClass.penRhombusThicc;
+                int gold = 60;
+                int thin = 36;
+                int thicc = 72;
+                float rhombicAngle = poly == PolygonClass.penRhombusThicc ? thicc : thin;
+                //rhombicAngle = gold; // ratio of 1: phi
+                points.add(0, 0);
+                points.add(size, 0);
+                Vector2 vector = MyMath.vector(rhombicAngle * MathUtils.degRad, size);
+                points.add(vector.x, vector.y);
+                vector.add(size,0);
+                points.add(vector.x, vector.y);
+            } else {
+                int segments = MathUtils.random(3, maxPoints);
+                //source: ShapeRenderer.circle();
+                float angle = 2 * MathUtils.PI / segments;
+                float cos = MathUtils.cos(angle);
+                float sin = MathUtils.sin(angle);
+                float cx = size, cy = 0;
+                for (int i = 0; i < segments; i++) {
+                    points.add(x + cx, y + cy);
+                    float temp = cx;
+                    cx = cos * cx - sin * cy;
+                    cy = sin * temp + cos * cy;
+                }
+                switch (points.size/2) {
+                    case 3: poly = PolygonClass.triangle; break;
+                    case 4: poly = PolygonClass.rectangle; break;
+                    case 5: poly = PolygonClass.pentagon; break;
+                    case 6: poly = PolygonClass.hexagon; break;
+                    case 7: poly = PolygonClass.heptagon; break;
+                }
+                Gdx.app.debug("",seed + " : " + segments + " " + poly.name());
             }
         } else {
             float tolerance = 3f;
@@ -555,8 +597,7 @@ public class EntityBuilder {
                     pX = MathUtils.random(size);
                     pY = MathUtils.random(size);
                 } while (isValidPoint(points, pX, pY, tolerance));
-                points.add(pX);
-                points.add(pY);
+                points.add(pX, pY);
             }
         }
         
@@ -572,13 +613,13 @@ public class EntityBuilder {
             hull[index + 1] -= center.y;
         }
 
-        //todo: scale to desired size because current method is not great
+        //todo: scale irregular bodies to desired size because current method is doesnt match
         //GeometryUtils.ensureCCW(hull);
         //Polygon polygon = new Polygon(hull);
         //float area = Math.abs(GeometryUtils.polygonArea(polygon.getVertices(), 0, polygon.getVertices().length));
 
         ItemComponent.Resource resource = ItemComponent.Resource.random();
-        if (SpaceProject.configManager.getConfig(DebugConfig.class).glassOnly) {
+        if (debugConfig.glassOnly) {
             resource = ItemComponent.Resource.GLASS;
         }
         return createAsteroid(seed, x, y, velX, velY, MathUtils.random(MathUtils.PI2), hull, resource, false);
