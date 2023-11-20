@@ -28,7 +28,7 @@ public class LaserComponent implements Component {
 
    public Color color;
 
-   public float wavelength;
+   public float wavelength; //in nanometers
 
    public float frequency;
 

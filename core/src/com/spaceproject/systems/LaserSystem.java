@@ -21,7 +21,7 @@ import com.spaceproject.math.Physics;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
-public class LaserSystem extends IteratingSystem implements RayCastCallback, Disposable {
+public class LaserSystem extends IteratingSystem implements Disposable {
 
     final float refractiveIndexVacuum = 1; //vacuum = 1, water = 1.33, glass = 1.52, diamond = 2.4
     final int maxReflections = 10;
@@ -32,7 +32,6 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
     final Vector2 refract = new Vector2();
     Fixture rayFixture = null;
     final ShapeRenderer shape;
-    boolean hit = false;
 
     int rayCount;
     int callbackCount;
@@ -88,104 +87,109 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
         castLaser(entity, laser, body.getPosition(), incidentRay, laser.color.cpy(), laser.maxDist, maxReflections, deltaTime);
     }
 
-    private boolean castLaser(Entity entity, LaserComponent laser, Vector2 p1, Vector2 p2, Color color, float length, int reflections, float deltaTime) {
-        if (reflections <= 0) return false;
-        if (incidentVector.set(p2).sub(p1).len2() < 0.1f) return false;
+    private void castLaser(Entity entity, LaserComponent laser, Vector2 p1, Vector2 p2, Color color, float length, int reflections, float deltaTime) {
+        if (reflections <= 0) return;
+        if (incidentVector.set(p2).sub(p1).len2() < 0.1f) return;
 
-        hit = false;
         rayPoint.set(p2);
         rayFixture = null;
-        GameScreen.box2dWorld.rayCast(this, p1, p2);
+        GameScreen.box2dWorld.rayCast((fixture, point, normal, fraction) -> {
+            callbackCount++;
+            if (fixture.isSensor()) return -1; //ignore sensor fixtures
+            rayPoint.set(point);
+            rayNormal.set(normal);
+            rayFixture = fixture;
+            return fraction;
+        }, p1, p2);
         rayCount++;
-        p2.set(rayPoint);
-        Color endColor = Color.CLEAR.cpy().lerp(color, MathUtils.random()*0.25f);
 
+        p2.set(rayPoint);
         incidentVector.set(p2).sub(p1);
         float distanceToHit = incidentVector.len();
         float range = distanceToHit / length;
         float remainingDistance = length - distanceToHit;
+
+        Color endColor = Color.CLEAR.cpy().lerp(color, MathUtils.random()*0.25f);
         Color ratio = color.cpy().lerp(endColor, range - MathUtils.random()*0.15f);
         shape.rectLine(p1.x, p1.y, p2.x, p2.y, 0.2f, color, ratio);
 
-        if (hit) {
-            Object userData = rayFixture.getBody().getUserData();
-            if (userData != null) {
-                Entity hitEntity = (Entity) userData;
-                boolean isGlass = false;
-                AsteroidComponent asteroid = Mappers.asteroid.get(hitEntity);
-                if (asteroid != null) {
-                    if (asteroid.composition == ItemComponent.Resource.GLASS && asteroid.refractiveIndex != 0) {
-                        isGlass = true;
-                        //float waveLengthInN1 = laser.wavelength / refractiveIndexVacuum;
-                        refract(refract, incidentVector.nor(), rayNormal.nor(), refractiveIndexVacuum, asteroid.refractiveIndex);
-                        if (refract.len2() > 0) {
-                            if (drawNormal) {
-                                shape.setColor(Color.CYAN);
-                                shape.rectLine(p2, MyMath.vector((float) (rayNormal.angleRad()-Math.PI), 10).add(p2), 0.2f);
-                            }
+        if (rayFixture == null) return;
+        //we hit something!
+        float damage = laser.damage * (1 - range) * deltaTime;
 
-                            Vector2 refractedEndPoint = MyMath.vector(refract.angleRad(), remainingDistance).add(p2);
-                            Vector2 innerNormal = new Vector2();
-                            GameScreen.box2dWorld.rayCast((fixture, point, normal, fraction) -> {
-                                callbackCount++;
-                                //ignore sensors and other fixtures than the one we already hit
-                                if (fixture.isSensor() || fixture != rayFixture) return -1;
-                                refractedEndPoint.set(point);
-                                innerNormal.set(normal);
-                                return fraction;
-                            }, refractedEndPoint, p2);
-                            rayCount++;
-                            shape.setColor(color.r, color.g, color.b, asteroid.color.a);
-                            shape.rectLine(p2, refractedEndPoint, 0.1f);
-                            //todo: continue to cast internal reflections
-                            //calculate reflection: reflectedVector = incidentVector - 2 * (incidentVector dot normal) * normal
-                            //Vector2 internalReflection = new Vector2(refractedEndPoint).sub(innerNormal.scl(2 * refractedEndPoint.dot(innerNormal))).setLength(remainingDistance).add(refractedEndPoint);
-                            //shape.rectLine(refractedEndPoint,internalReflection, 0.2f);
+        //if fixture hit is a glassteroid, calculate refraction
+        boolean isGlass = false;
+        Object userData = rayFixture.getBody().getUserData();
+        if (userData != null) {
+            Entity hitEntity = (Entity) userData;
+            AsteroidComponent asteroid = Mappers.asteroid.get(hitEntity);
+            if (asteroid != null) {
+                if (asteroid.composition == ItemComponent.Resource.GLASS) {
+                    isGlass = true;
+                    //float waveLengthInN1 = laser.wavelength / refractiveIndexVacuum;
+                    refract(refract, incidentVector.nor(), rayNormal.nor(), refractiveIndexVacuum, asteroid.refractiveIndex);
+                    if (refract.len2() > 0) {
+                        if (drawNormal) {
+                            shape.setColor(Color.CYAN);
+                            shape.rectLine(p2, MyMath.vector((float) (rayNormal.angleRad()-Math.PI), 10).add(p2), 0.2f);
                         }
-                    } else {
-                        if (debug.reflectAsteroidColor) {
-                            color.set(asteroid.color.cpy());
-                        }
-                    }
-                }
-                if (entity != hitEntity) {
-                    //do laser damage!
-                    float damage = laser.damage * (1 - range) * deltaTime;
-                    if (isGlass) {
-                        damage *= 0.01f;
-                    }
 
-                    //tractor beam! tractor beam! tractor beam!
-                    float magnitude = 50000f * deltaTime;
-                    if (debug.tractorBeam) {
-                        //tractor beam (pull towards ray)!
-                        rayFixture.getBody().applyForce(MyMath.vector(incidentVector.angleRad() - MathUtils.PI, magnitude), p2, true);
-                        damage = 0;
+                        Vector2 refractedEndPoint = MyMath.vector(refract.angleRad(), remainingDistance).add(p2);
+                        Vector2 innerNormal = new Vector2();
+                        GameScreen.box2dWorld.rayCast((fixture, point, normal, fraction) -> {
+                            callbackCount++;
+                            //ignore sensors and other fixtures than the one we already hit
+                            if (fixture.isSensor() || fixture != rayFixture) return -1;
+                            refractedEndPoint.set(point);
+                            innerNormal.set(normal);
+                            return fraction;
+                        }, refractedEndPoint, p2);
+                        rayCount++;
+                        shape.setColor(color.r, color.g, color.b, asteroid.color.a);
+                        shape.rectLine(p2, refractedEndPoint, 0.1f);
+                        //todo: continue to cast internal reflections
+                        //calculate reflection: reflectedVector = incidentVector - 2 * (incidentVector dot normal) * normal
+                        //Vector2 internalReflection = new Vector2(refractedEndPoint).sub(innerNormal.scl(2 * refractedEndPoint.dot(innerNormal))).setLength(remainingDistance).add(refractedEndPoint);
+                        //shape.rectLine(refractedEndPoint,internalReflection, 0.2f);
                     }
-                    if (debug.tractorBeamPush) {
-                        //tractor beam (push from ray)!
-                        rayFixture.getBody().applyForce(MyMath.vector(incidentVector.angleRad(), magnitude), p2, true);
-                        damage = 0;
+                } else {
+                    if (debug.reflectAsteroidColor) {
+                        color.set(asteroid.color.cpy());
                     }
-
-                    Box2DContactListener.damage(getEngine(), hitEntity, entity, damage, p2, rayFixture.getBody());
-                }
-                if (Mappers.damage.get(hitEntity) != null) {
-                    hitEntity.add(new RemoveComponent());
                 }
             }
 
-            if (drawNormal) {
-                //draw normal
-                shape.setColor(Color.SKY);
-                shape.rectLine(p2, MyMath.vector(rayNormal.angleRad(), 10).add(p2), 0.2f);
-            }
+            if (entity != hitEntity) {
+                //do laser damage!
+                if (isGlass) {
+                    damage *= 0.01f;
+                }
 
-            //calculate reflection: reflectedVector = incidentVector - 2 * (incidentVector dot normal) * normal
-            Vector2 reflectedVector = new Vector2(incidentVector).sub(rayNormal.scl(2 * incidentVector.dot(rayNormal))).setLength(remainingDistance).add(p2);
-            return castLaser(entity, laser, p2, reflectedVector, color, remainingDistance, --reflections, deltaTime);
+                //tractor beam! tractor beam! tractor beam!
+                float magnitude = 50000f * deltaTime;
+                if (debug.tractorBeam) { //tractor beam (pull towards ray)!
+                    rayFixture.getBody().applyForce(MyMath.vector(incidentVector.angleRad() - MathUtils.PI, magnitude), p2, true);
+                    damage = 0;
+                }
+                if (debug.tractorBeamPush) { //tractor beam (push from ray)!
+                    rayFixture.getBody().applyForce(MyMath.vector(incidentVector.angleRad(), magnitude), p2, true);
+                    damage = 0;
+                }
+
+                Box2DContactListener.damage(getEngine(), hitEntity, entity, damage, p2, rayFixture.getBody());
+            }
+            if (Mappers.damage.get(hitEntity) != null) {
+                hitEntity.add(new RemoveComponent()); //destroy bullets
+            }
         }
-        return false;
+        if (drawNormal) {
+            shape.setColor(Color.SKY);
+            shape.rectLine(p2, MyMath.vector(rayNormal.angleRad(), 10).add(p2), 0.2f);
+        }
+
+        //calculate reflection: reflectedVector = incidentVector - 2 * (incidentVector dot normal) * normal
+        Vector2 reflectedVector = incidentVector.cpy().sub(rayNormal.scl(2 * incidentVector.dot(rayNormal))).setLength(remainingDistance).add(p2);
+        castLaser(entity, laser, p2, reflectedVector, color, remainingDistance, --reflections, deltaTime);
     }
 
     /** Calculate angle of refraction using Snell's Law
@@ -266,17 +270,6 @@ public class LaserSystem extends IteratingSystem implements RayCastCallback, Dis
         return (float) (1 +
                         5792105E-8f / ( 238.0185f - Math.pow(wavelength * 1E6f, -2)) +
                         167917E-8f / ( 57.362f - Math.pow(wavelength * 1E6f, -2)));
-    }
-
-    @Override
-    public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
-        callbackCount++;
-        if (fixture.isSensor()) return -1;
-        rayPoint.set(point);
-        rayNormal.set(normal);
-        rayFixture = fixture;
-        hit = true;
-        return fraction;
     }
 
     @Override
