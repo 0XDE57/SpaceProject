@@ -108,7 +108,7 @@ public class ResourceDisposer {
         info.append("\n     [Total]:    ").append(totalTotal);
         //not disposed so maybe doesn't belong but maybe useful
         info.append("\n     [Sound]:    ").append(soundKilled);
-        info.append("\n     [Other]:    ").append(additionalRemove);//?
+        info.append("\n     [AddRemove]:    ").append(additionalRemove);//?
         return info.toString();
     }
     
