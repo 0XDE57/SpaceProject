@@ -143,6 +143,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     
     float accumulator;//todo move to sound component?
     public long shipEngineAmbient(SoundComponent sound, boolean active, float velocity, float angleDelta, float deltaTime) {
+        active = false;//kill
         if (active) {
             if (sound.soundID == -1) {
                 sound.soundID = shipEngineAmbientLoop.loop();
@@ -153,22 +154,17 @@ public class SoundSystem extends EntitySystem implements Disposable {
             }
             //todo sound id of 0 seems to not play?
             //if (sound.soundID == 0) { Gdx.app.error(getClass().getSimpleName(), sound.soundID + ""); }
-            
-            //pitch
+
+            //pitch / pan / volume
             float relVel = velocity / Box2DPhysicsSystem.getVelocityLimit();
             float pitch = MathUtils.map(0f, 1f, 0.5f, 2.0f, relVel);
-            shipEngineAmbientLoop.setPitch(sound.soundID, pitch);
-            shipEngineAmbientLoop.setPitch(sound.soundID1, pitch * (1.5f));
-            //volume
             accumulator += 30.0f * relVel * deltaTime;
             float oscillator = (float) Math.abs(Math.sin(accumulator*3));
-            //shipEngineAmbientLoop.setVolume(sound.soundID, oscillator);
-            //shipEngineAmbientLoop.setVolume(sound.soundID1, masterVolume);
-            //DebugSystem.addDebugText(angleDelta + "", 500 ,550);
+            shipEngineAmbientLoop.setPitch(sound.soundID, pitch);
+            shipEngineAmbientLoop.setPitch(sound.soundID1, pitch * (1.5f));
             shipEngineAmbientLoop.setPan(sound.soundID1, (float) Math.sin(accumulator), oscillator * engineVolume * 0.45f);
             shipEngineAmbientLoop.setPan(sound.soundID, 0, oscillator * engineVolume);
         } else {
-            //if (true) return 0;
             if (sound.soundID != -1) {
                 shipEngineAmbientLoop.setLooping(sound.soundID, false);
                 shipEngineAmbientLoop.setLooping(sound.soundID1, false);
