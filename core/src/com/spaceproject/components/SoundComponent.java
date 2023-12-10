@@ -1,12 +1,12 @@
 package com.spaceproject.components;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.gdx.utils.ObjectMap;
+import de.pottgames.tuningfork.BufferedSoundSource;
 
 public class SoundComponent implements Component {
-    
-    public long soundID = -1; //init to no sound
-    public long soundID1 = -1; //init to no sound
-    
-    public boolean active;
-    
+
+    //active, looping sources
+    public ObjectMap<String, BufferedSoundSource> sources = new ObjectMap<>();
+
 }

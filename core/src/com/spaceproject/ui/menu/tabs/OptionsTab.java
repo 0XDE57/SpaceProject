@@ -5,15 +5,15 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.kotcrab.vis.ui.widget.Separator;
-import com.kotcrab.vis.ui.widget.VisCheckBox;
-import com.kotcrab.vis.ui.widget.VisTable;
+import com.kotcrab.vis.ui.widget.*;
 import com.kotcrab.vis.ui.widget.tabbedpane.Tab;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.KeyConfig;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.systems.HUDSystem;
+import com.spaceproject.systems.SoundSystem;
 
 //Controller tab?
 public class OptionsTab extends Tab {
@@ -48,6 +48,18 @@ public class OptionsTab extends Tab {
             }
         });
 
+        final VisLabel volumeText = new VisLabel("volume: 1");
+        final VisSlider volumeSlider = new VisSlider(0, 1, 0.1f, false);
+        volumeSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                float volume = 1 - volumeSlider.getValue();
+                GameScreen.getEngine().getSystem(SoundSystem.class).setVolume(volume);
+                volumeText.setText("volume: " + MyMath.round(volume,1));
+            }
+        });
+
+
         final VisCheckBox toggleDamageNumbers = new VisCheckBox("show damage numbers (experimental)", HUDSystem.showDamageNumbers);
         toggleDamageNumbers.addListener(new ChangeListener() {
             @Override
@@ -58,7 +70,11 @@ public class OptionsTab extends Tab {
 
         content.add(toggleFullscreen).left().row();
         content.add(toggleVsync).left().row();
-        getContentTable().add(new Separator()).fillX().row();
+        int pad = 10;
+        getContentTable().add(new Separator()).fillX().padTop(pad).padBottom(pad).row();
+        content.add(volumeText).left().row();
+        content.add(volumeSlider).fillX().row();
+        getContentTable().add(new Separator()).fillX().padTop(pad).padBottom(pad).row();
         content.add(toggleDamageNumbers).left().row();
         content.pack();
     }

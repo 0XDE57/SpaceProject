@@ -6,10 +6,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.spaceproject.components.ControlFocusComponent;
-import com.spaceproject.components.HyperDriveComponent;
-import com.spaceproject.components.PhysicsComponent;
-import com.spaceproject.components.ShieldComponent;
+import com.spaceproject.components.*;
 import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.utility.Mappers;
 
@@ -33,7 +30,8 @@ public class ShieldSystem extends IteratingSystem {
             shield.state = ShieldComponent.State.off;
             shield.activate = false;
         }
-        SoundSystem sound = getEngine().getSystem(SoundSystem.class);
+        SoundSystem soundSys = getEngine().getSystem(SoundSystem.class);
+        SoundComponent sound = Mappers.sound.get(entity);
         ControlFocusComponent controlFocus = Mappers.controlFocus.get(entity);
 
         updateCooldown(shield, deltaTime);
@@ -46,7 +44,7 @@ public class ShieldSystem extends IteratingSystem {
     
                 //stop loop if entity is controlled player
                 if (controlFocus != null) {
-                    sound.shieldAmbient(false);
+                    soundSys.shieldAmbient(sound, false);
                 }
                 break;
             case on:
@@ -56,15 +54,7 @@ public class ShieldSystem extends IteratingSystem {
     
                 //start loop if entity is controlled player
                 if (controlFocus != null) {
-                    //todo: store soundID, but where? ship has multiple sound sources
-                    // - engines (multiple engines)
-                    // - shield
-                    // - projectile fire
-                    // the SoundID component currently stores only one...
-                    long id = sound.shieldAmbient(true);
-                    //shield.soundID == ID?
-                    // - or -
-                    //Mappers.sound.get(entity).soundID?
+                    soundSys.shieldAmbient(sound, true);
                 }
                 break;
             case charge:
@@ -84,7 +74,7 @@ public class ShieldSystem extends IteratingSystem {
     
                     //if entity is controlled player
                     if (controlFocus != null) {
-                        sound.shieldOn();
+                        soundSys.shieldOn();
                     }
                 }
                 break;

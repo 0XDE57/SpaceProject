@@ -53,10 +53,8 @@ public class ResourceDisposer {
     
         SoundComponent sound = Mappers.sound.get(entity);
         if (sound != null) {
-            if (sound.active) {
-                soundKilled++;
-            }
-            SoundSystem.stopSound(sound);
+            int stopped = SoundSystem.stopSound(sound);
+            soundKilled += stopped;
         }
 
         //if entity was charging a projectile, make sure the projectile entity is also removed
