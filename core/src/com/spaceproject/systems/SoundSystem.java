@@ -57,7 +57,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         audio = Audio.init(config);
 
         assetManager = new AssetManager();
-        assetManager.setLogger(new Logger("AssetManager", Logger.DEBUG));
+        assetManager.setLogger(new Logger("AssetManager", Logger.ERROR));
         assetManager.setLoader(SoundBuffer.class, new SoundBufferLoader(new InternalFileHandleResolver()));
 
         assetManager.load(f3File, SoundBuffer.class);
