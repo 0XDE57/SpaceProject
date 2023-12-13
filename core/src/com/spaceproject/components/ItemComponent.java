@@ -99,8 +99,10 @@ public class ItemComponent implements Component {
             throw new IllegalArgumentException("No enum constant with id " + id);
         }
 
+        final static Resource[] VALUES = Resource.values();
+        
         public static Resource random() {
-            return Resource.values()[MathUtils.random(Resource.values().length - 1)];
+            return VALUES[MathUtils.random(VALUES.length - 1)];
         }
 
     }

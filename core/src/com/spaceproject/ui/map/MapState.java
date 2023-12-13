@@ -5,9 +5,9 @@ public enum MapState {
     mini,
     full;
     
-    private static MapState[] vals = values();
+    private static final MapState[] VALUES = values();
     
     public MapState next() {
-        return vals[(this.ordinal() + 1) % vals.length];
+        return VALUES[(this.ordinal() + 1) % VALUES.length];
     }
 }

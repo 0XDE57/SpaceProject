@@ -39,16 +39,24 @@ public class TitleScreen extends MyScreenAdapter {
 
     private TitleAnimation foregroundAnimation, backgroundAnimation;
     private ForegroundAnimation previousAnim;
+
     enum ForegroundAnimation {
         tree, delaunay, orbit, crossNoise, nbody;/*, asteroid*/;
+
+        static ForegroundAnimation[] VALUES = ForegroundAnimation.values();
         
         public static ForegroundAnimation random() {
-            return ForegroundAnimation.values()[MathUtils.random(ForegroundAnimation.values().length - 1)];
+            return VALUES[MathUtils.random(VALUES.length - 1)];
         }
         
-        public static ForegroundAnimation next(ForegroundAnimation e) {
-            int index = (e.ordinal() + 1) % ForegroundAnimation.values().length;
-            return ForegroundAnimation.values()[index];
+        public ForegroundAnimation next() {
+            int index = (this.ordinal() + 1) % VALUES.length;
+            return VALUES[index];
+        }
+
+        public ForegroundAnimation previous() {
+            int index = (this.ordinal() + VALUES.length - 1) % VALUES.length;
+            return VALUES[index];
         }
     }
     
@@ -189,7 +197,7 @@ public class TitleScreen extends MyScreenAdapter {
         
         //ensure new anim on refresh
         if (previousAnim != null && anim == previousAnim) {
-            anim = ForegroundAnimation.next(anim);
+            anim = anim.next();
         }
     
         //cleanup previous

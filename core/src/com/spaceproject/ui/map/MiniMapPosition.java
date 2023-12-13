@@ -7,9 +7,9 @@ public enum MiniMapPosition {
     bottomLeft;
     //custom;
     
-    private static MiniMapPosition[] vals = values();
+    private static final MiniMapPosition[] VALUES = values();
     
     public MiniMapPosition next() {
-        return vals[(this.ordinal() + 1) % vals.length];
+        return VALUES[(this.ordinal() + 1) % VALUES.length];
     }
 }
