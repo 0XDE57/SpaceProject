@@ -27,6 +27,7 @@ Welcome to A Space Project. A project involving space...
 * Developer Tools (in progress)
 * Cross-Platform Desktop
   * Linux, Windows, OSX
+  * Official Steam Deck support!
 * Feature Creep and Unrealistic Scope!
    * Multiplayer is out of current scope :(
 
