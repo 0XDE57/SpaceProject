@@ -66,6 +66,9 @@ wiki: https://github.com/0XDE57/SpaceProject/wiki
 
 project: https://github.com/users/0XDE57/projects/1
 
+devlog: https://forum.level1techs.com/t/devember-2022-a-space-project-open-source-space-game
+
+Special thanks to Level1Techs for hosting Devember 2022 and providing: 5900x + x570 mobo + 32GB RAM!
 
 ## License
 Apache 2.0: see [LICENSE.md](/LICENSE.md)
