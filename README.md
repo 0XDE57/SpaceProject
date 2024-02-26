@@ -3,7 +3,7 @@ Welcome to A Space Project. A project involving space...
 > Get a realistic sense of the cosmic scale; there's literally dozens of planets and traveling between them could take up to entire minutes! Enjoy Galactic Space Exploration in a sate-of-the-art, hyper-realistic physics simulation of the entire universe!
 
 ![screenshot](/Capture.PNG?raw=true)
-
+![screenshot](/asteroid_shatter.gif?raw=true)
 ***Game is in pre-alpha prototype phase. More of a sandbox than a game, there is not much content yet***
 
 ## Features
@@ -27,6 +27,7 @@ Welcome to A Space Project. A project involving space...
 * Developer Tools (in progress)
 * Cross-Platform Desktop
   * Linux, Windows, OSX
+  * Official Steam Deck support!
 * Feature Creep and Unrealistic Scope!
    * Multiplayer is out of current scope :(
 
@@ -65,6 +66,9 @@ wiki: https://github.com/0XDE57/SpaceProject/wiki
 
 project: https://github.com/users/0XDE57/projects/1
 
+devlog: https://forum.level1techs.com/t/devember-2022-a-space-project-open-source-space-game
+
+Special thanks to Level1Techs for hosting Devember 2022 and providing: 5900x + x570 mobo + 32GB RAM!
 
 ## License
 Apache 2.0: see [LICENSE.md](/LICENSE.md)
