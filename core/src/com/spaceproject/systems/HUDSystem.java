@@ -102,7 +102,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private GameMenu gameMenu;
     private Actor stationMenu;
     private SimpleTimer interactTimer;
-    
+
     //rendering
     private final OrthographicCamera cam;
     private final Matrix4 projectionMatrix;
@@ -246,12 +246,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         
         shape.begin(ShapeType.Filled);
-    
+
+        CameraSystem camSys = getEngine().getSystem(CameraSystem.class);
+        drawZoomLevelIndicator(camSys);
+
         Entity player = null;
         if (players.size() > 0) {
             player = players.first();
         }
-        drawPlayerStatus(player);
+        drawPlayerStatus(player, camSys);
         
         if (drawEdgeMap) {
             drawEdgeMap();
@@ -314,6 +317,37 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
         batch.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
+    }
+
+    private void drawZoomLevelIndicator(CameraSystem camSys) {
+        if (MathUtils.isEqual(cam.zoom, CameraSystem.getZoomForLevel(camSys.getZoomLevel()), 0.1f)
+                && camSys.zoomChangeTimer.canDoEvent()) return;
+
+        int width = uiCFG.playerHPBarWidth * 2;
+        int x = Gdx.graphics.getWidth() / 2 - width / 2;
+        int y = Gdx.graphics.getHeight() - 30;
+        int thickness = 2;
+
+        shape.setColor(uiCFG.entityHPbarBackground);
+        shape.rectLine(x, y, x + width, y, thickness); //base line
+
+        //levels
+        int sliderHeight = 30;
+        float maxZoom = CameraSystem.getZoomForLevel(camSys.getMaxZoomLevel());
+        for (byte l = 0; l <= camSys.getMaxZoomLevel(); l++) {
+            float r = CameraSystem.getZoomForLevel(l) / maxZoom;
+            shape.rect(x + (r * width), y - (sliderHeight * 0.5f), thickness, sliderHeight);
+        }
+
+        //target
+        shape.setColor(Color.WHITE);
+        float rr = CameraSystem.getZoomForLevel(camSys.getZoomLevel()) / maxZoom;
+        shape.rect(x + (rr * width), y - (sliderHeight * 0.5f), thickness, sliderHeight);
+
+        //current
+        shape.setColor(uiCFG.uiBaseColor);
+        float ratio = cam.zoom / maxZoom;
+        shape.rect(x + (ratio * width), y - (sliderHeight * 0.5f), thickness, sliderHeight);
     }
 
     private void drawMessageBacking(Entity player) {
@@ -497,7 +531,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         subFont.draw(batch, layout, centerX, messageHeight);
     }
     
-    private void drawPlayerStatus(Entity entity) {
+    private void drawPlayerStatus(Entity entity, CameraSystem cam) {
         if (entity == null) return;
         
         int barWidth = uiCFG.playerHPBarWidth;
@@ -511,7 +545,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         drawHyperDriveBar(entity, barX, hyperBarY, barWidth, barHeight);
 
         if (!GameScreen.isPaused()) {
-            CameraSystem cam = getEngine().getSystem(CameraSystem.class);
             if (cam.getZoomLevel() == cam.getMaxZoomLevel()) return;
 
             if (GameScreen.isHyper()) return;

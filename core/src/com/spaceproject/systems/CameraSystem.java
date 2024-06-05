@@ -23,6 +23,7 @@ import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.utility.Mappers;
+import com.spaceproject.utility.SimpleTimer;
 
 public class CameraSystem extends IteratingSystem {
     
@@ -53,11 +54,14 @@ public class CameraSystem extends IteratingSystem {
         free, lerpTarget, lockTarget, combat
     }
 
+    public SimpleTimer zoomChangeTimer;
+
     final DebugConfig debugCFG = SpaceProject.configManager.getConfig(DebugConfig.class);
 
     public CameraSystem() {
         super(Family.all(CameraFocusComponent.class, TransformComponent.class).get());
         cam = MyScreenAdapter.cam;
+        zoomChangeTimer = new SimpleTimer(3000);
     }
     
     @Override
@@ -274,7 +278,8 @@ public class CameraSystem extends IteratingSystem {
 
     public void setZoomTarget(byte level) {
         zoomLevel = level;
-        zoomTarget = getZoomForLevel(level);
+        zoomTarget = getZoomForLevel(zoomLevel);
+        zoomChangeTimer.reset();
     }
 
     public float setZoomToDefault(Entity entity) {
@@ -290,14 +295,14 @@ public class CameraSystem extends IteratingSystem {
     public void zoomIn() {
         if (GameScreen.isPaused()) return;
         if (zoomLevel <= 0) return;
-        zoomTarget = getZoomForLevel(--zoomLevel);
+        setZoomTarget(--zoomLevel);
         //Gdx.app.debug(this.getClass().getSimpleName(), "zoomIn: " + zoomTarget + " : " + zoomLevel);
     }
     
     public void zoomOut() {
         if (GameScreen.isPaused()) return;
         if (zoomLevel >= maxZoomLevel) return;
-        zoomTarget = getZoomForLevel(++zoomLevel);
+        setZoomTarget(++zoomLevel);
         //Gdx.app.debug(this.getClass().getSimpleName(), "zoomOut: " + zoomTarget + " : " + zoomLevel);
     }
     

@@ -3,7 +3,9 @@ package com.spaceproject.config;
 import com.badlogic.gdx.graphics.Color;
 
 public class UIConfig extends Config {
-    
+
+    public Color uiBaseColor;
+
     public int playerHPBarY;
     public int playerHPBarWidth;
     public int playerHPBarHeight;
@@ -27,6 +29,8 @@ public class UIConfig extends Config {
     
     @Override
     public void loadDefault() {
+        uiBaseColor = new Color(0.1f, 0.63f, 0.88f, 1f);
+
         playerHPBarY = 55;
         playerHPBarWidth = 300;
         playerHPBarHeight = 20;
