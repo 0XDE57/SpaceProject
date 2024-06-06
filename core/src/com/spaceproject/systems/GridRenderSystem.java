@@ -104,7 +104,8 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         //render
         shape.setProjectionMatrix(cam.combined);
         shape.begin(ShapeRenderer.ShapeType.Filled);
-        drawGrid(GameScreen.isHyper() ? Color.WHITE : gridColor, gridColorB, calculateGridDensity(gridWidth), 2f, 5);
+        drawGrid(GameScreen.isHyper() ? Color.WHITE : gridColor, calculateGridDensity(gridWidth), 2f);
+        //drawGrid(GameScreen.isHyper() ? Color.WHITE : gridColor, gridColorB, calculateGridDensity(gridWidth), 2f, 5);
         shape.end();
 
         shape.begin(ShapeRenderer.ShapeType.Line);
@@ -141,7 +142,35 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
-    private void drawGrid(Color colorA, Color colorB, int gridSize, float width, int emphasisDivisor) {
+    private void drawGrid(Color color, int gridSize, float width) {
+        shape.setColor(color);
+        //unproject to get edges of viewport
+        topLeft.set(0, 0, 0);
+        topLeft = viewport.unproject(topLeft);
+        bottomRight.set(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0);
+        bottomRight = viewport.unproject(bottomRight);
+        //draw vertical along X axis
+        float thickness = (1/SpaceProject.configManager.getConfig(EngineConfig.class).renderScale) * cam.zoom * width;
+        int i = 0;
+        int referenceX = (int) (topLeft.x/gridSize);
+        int alignedX = referenceX * gridSize;
+        for (int x = alignedX; x < bottomRight.x; x += gridSize) {
+            float aX = alignedX + (i * gridSize);
+            i++;
+            shape.rectLine(aX, topLeft.y, aX, bottomRight.y, thickness);
+        }
+        //draw horizontal along Y axis
+        int j = 0;
+        int referenceY = (int) (bottomRight.y / gridSize);
+        int alignedY = referenceY * gridSize;
+        for (int y = alignedY; y < topLeft.y; y += gridSize) {
+            float aY = alignedY + (j * gridSize);
+            j++;
+            shape.rectLine(topLeft.x, aY, bottomRight.x, aY, thickness);
+        }
+    }
+
+    private void drawGridMultiColor(Color colorA, Color colorB, int gridSize, float width, int emphasisDivisor) {
         //unproject to get edges of viewport
         topLeft.set(0, 0, 0);
         topLeft = viewport.unproject(topLeft);
