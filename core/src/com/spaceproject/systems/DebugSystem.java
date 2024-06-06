@@ -150,8 +150,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
             
             if (debugCFG.drawMousePos)
                 drawMouseLine();
-
-            drawCompass();
+            
             drawDebugVectors();
         }
         shape.end();
@@ -420,13 +419,6 @@ public class DebugSystem extends IteratingSystem implements Disposable {
             }
             
         }
-    }
-
-    Vector2 compassTemp = new Vector2();
-    private void drawCompass() {
-        //////////////////////////////////compassTemp.set()
-        Vector2 v = MyMath.vector(0, 10);
-        shape.line(0, 0, v.x, v.y);
     }
 
     //region external debug util
