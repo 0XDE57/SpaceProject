@@ -10,10 +10,11 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.UIUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.kotcrab.vis.ui.widget.VisWindow;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.IndependentTimer;
 
 /**
@@ -24,7 +25,7 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
 
     private static final float INITIAL_DIRECTION_EMPH_FACTOR = 3.1f;
     private final Vector2 controllerTempCoords = new Vector2();
-    private Array<Actor> focusableActors = new Array<>();
+    private final Array<Actor> focusableActors = new Array<>();
     private boolean isPressed;
     private boolean focusOnTouchdown = true;
     private boolean sendMouseOverEvents = true;
@@ -78,6 +79,8 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
      * @param escapeActor the actor that should receive a touch event when escape key is pressed
      */
     public void setEscapeActor(Actor escapeActor) {
+        //String old = this.escapeActor == null ? "" : " old escape: " + ((TextButton) this.escapeActor).getText().toString();
+        //Gdx.app.error(getClass().getSimpleName(), "escape set gained: " + ((TextButton) escapeActor).getText().toString() + " old: " + old);
         this.escapeActor = escapeActor;
     }
 
@@ -275,6 +278,16 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
                 if (escapeActor != null) {
                     handled = triggerActionOnActor(true, escapeActor);
                     isPressed = handled;
+                } else {
+                    //close window
+                    if (!GameScreen.isPaused()) {
+                        //not paused == window is space station store menu
+                        Actor p = getRoot().getChildren().first();
+                        if (p instanceof VisWindow) {
+                            ((VisWindow) p).fadeOut();
+                            handled = true;
+                        }
+                    }
                 }
                 break;
         }

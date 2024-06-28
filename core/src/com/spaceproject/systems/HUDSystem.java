@@ -25,6 +25,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.*;
+import com.kotcrab.vis.ui.widget.VisWindow;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
 import com.spaceproject.config.KeyConfig;
@@ -33,6 +34,7 @@ import com.spaceproject.generation.FontLoader;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
+import com.spaceproject.ui.ControllerMenuStage;
 import com.spaceproject.ui.map.MapState;
 import com.spaceproject.ui.map.MiniMap;
 import com.spaceproject.ui.menu.GameMenu;
@@ -100,7 +102,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     
     private GameMenu gameMenu;
-    private Actor stationMenu;
+    private VisWindow stationMenu;
     private SimpleTimer interactTimer;
 
     //rendering
@@ -268,7 +270,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
         if (messageState != SpecialState.docked) {
             if (stationMenu != null) {
-                stationMenu.remove();
+                stationMenu.fadeOut();
                 stationMenu = null;
             }
         }
@@ -355,7 +357,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         int messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3)) - offset;
         float height =  40 + offset;
         shape.rect(0, messageHeight, Gdx.graphics.getWidth(), height, Color.CLEAR, Color.CLEAR, Color.DARK_GRAY, Color.DARK_GRAY);
-        Color color = messageState == SpecialState.destroyed ? Color.RED : new Color(0.1f, 0.63f, 0.88f, 1f);
+        Color color = messageState == SpecialState.destroyed ? Color.RED : uiCFG.uiBaseColor;
         shape.setColor(color);
         shape.rectLine(0, messageHeight + height, Gdx.graphics.getWidth(), messageHeight + height, 3);
         if (messageState == SpecialState.destroyed) {
@@ -387,14 +389,19 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                         shape.setColor(Color.WHITE);
                         shape.rectLine(halfWidth - (halfWidth * ratio), timerHeight, halfWidth + (ratio * halfWidth), timerHeight, 2);
                         if (interactTimer.tryEvent()) {
-                            stationMenu = SpaceStationMenu.SpaceStationMenu(GameScreen.getStage(), player, getEngine());
-                            //todo: move camera over
+                            ControllerMenuStage controllerMenuStage = GameScreen.getStage();
+                            stationMenu = (VisWindow) SpaceStationMenu.SpaceStationMenu(controllerMenuStage, player, getEngine());
                         }
                     }
                 } else {
                     interactTimer.reset();
                 }
             }
+        }
+
+        if (stationMenu != null && stationMenu.getParent() == null) {
+            //System.out.println(stationMenu.isVisible() + ", " + stationMenu.getParent());
+            stationMenu = null;
         }
     }
 
