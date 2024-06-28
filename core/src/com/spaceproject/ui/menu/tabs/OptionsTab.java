@@ -2,6 +2,7 @@ package com.spaceproject.ui.menu.tabs;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -50,12 +51,13 @@ public class OptionsTab extends Tab {
 
         final VisLabel volumeText = new VisLabel("volume: 1");
         final VisSlider volumeSlider = new VisSlider(0, 1, 0.1f, false);
+        volumeSlider.setValue(volumeSlider.getMaxValue());
         volumeSlider.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                float volume = 1 - volumeSlider.getValue();
+                float volume = volumeSlider.getValue();
                 GameScreen.getEngine().getSystem(SoundSystem.class).setVolume(volume);
-                volumeText.setText("volume: " + MyMath.round(volume,1));
+                volumeText.setText("volume: " + (MathUtils.isEqual(volume, 0) ? "OFF" : MyMath.round(volume,1)));
             }
         });
 
@@ -71,10 +73,10 @@ public class OptionsTab extends Tab {
         content.add(toggleFullscreen).left().row();
         content.add(toggleVsync).left().row();
         int pad = 10;
-        getContentTable().add(new Separator()).fillX().padTop(pad).padBottom(pad).row();
-        content.add(volumeText).left().row();
-        content.add(volumeSlider).fillX().row();
-        getContentTable().add(new Separator()).fillX().padTop(pad).padBottom(pad).row();
+        //getContentTable().add(new Separator()).fillX().padTop(pad).padBottom(pad).row();
+        content.add(volumeText).padTop(6).row();
+        content.add(volumeSlider).fillX().padBottom(6).row();
+        //getContentTable().add(new Separator()).fillX().padTop(pad).padBottom(pad).row();
         content.add(toggleDamageNumbers).left().row();
         content.pack();
     }
