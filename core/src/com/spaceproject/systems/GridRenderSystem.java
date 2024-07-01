@@ -43,8 +43,8 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     public boolean drawTest = false;
     
     //rendering
-    private final ShapeRenderer shape;
-    private final Matrix4 projectionMatrix;
+    private final ShapeRenderer shape = new ShapeRenderer();
+    private final Matrix4 projectionMatrix = new Matrix4();
     private final Vector3 origin = new Vector3();
     private final Vector3 camWorldPos = new Vector3();
     private final Vector3 mouseProj = new Vector3();
@@ -64,14 +64,10 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     private Entity camMarker, mouseMarker;
     private float animate = 0;
     
-    private SpriteBatch batch;
+    private SpriteBatch batch = new SpriteBatch();
     private BitmapFont subFont;
     
     public GridRenderSystem() {
-        shape = new ShapeRenderer();
-        batch = new SpriteBatch();
-        projectionMatrix = new Matrix4();
-    
         FreeTypeFontGenerator.FreeTypeFontParameter parameter2 = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter2.size = 10;
         parameter2.borderColor = Color.BLACK;
