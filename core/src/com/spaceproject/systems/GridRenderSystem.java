@@ -82,7 +82,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     @Override
     public void addedToEngine(Engine engine) {
         orbitEntities = engine.getEntitiesFor(Family.all(OrbitComponent.class).get());
-        players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
+        players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).exclude(DockedComponent.class).get());
     }
     
     @Override
