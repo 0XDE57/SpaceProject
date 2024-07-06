@@ -106,13 +106,7 @@ public class DebugTab extends HotKeyTab {
                 debugCFG.spawnPenrose = toggleRhombus.isChecked();
             }
         });
-        final VisCheckBox toggleCameraLerp = new VisCheckBox("lerp camera", debugCFG.spawnAsteroid);
-        toggleCameraLerp.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                debugCFG.lerpCam = toggleCameraLerp.isChecked();
-            }
-        });
+
 
         final VisCheckBox toggleComponentList = new VisCheckBox("show components (heavy)", debugCFG.drawComponentList);
         toggleComponentList.addListener(new ChangeListener() {
@@ -238,7 +232,6 @@ public class DebugTab extends HotKeyTab {
         getContentTable().add(toggleRegBodies).left();
         getContentTable().add(toggleRhombus).left().row();
         //getContentTable().add(background) solid color? grid color? also locked parralax test?
-        getContentTable().add(toggleCameraLerp).left().row();
         getContentTable().add(new Separator()).fillX();
         getContentTable().add(new Separator()).fillX();
         getContentTable().add(new Separator()).fillX();

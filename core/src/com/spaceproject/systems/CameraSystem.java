@@ -38,6 +38,7 @@ public class CameraSystem extends IteratingSystem {
     private final float maxZoom = 100000;
     private final byte vehicleDefault = 3;
 
+    private boolean lerpCam = false;
     private final float smoothFollowSpeed = 10f;
     private float maxOffsetFromTarget = 5f;
     private final Vector2 offsetFromTarget = new Vector2();
@@ -56,8 +57,6 @@ public class CameraSystem extends IteratingSystem {
 
     public SimpleTimer zoomChangeTimer;
 
-    final DebugConfig debugCFG = SpaceProject.configManager.getConfig(DebugConfig.class);
-
     public CameraSystem() {
         super(Family.all(CameraFocusComponent.class, TransformComponent.class).get());
         cam = MyScreenAdapter.cam;
@@ -75,7 +74,7 @@ public class CameraSystem extends IteratingSystem {
         Vector2 pos = Mappers.transform.get(entity).pos;
         //Vector2 vel = pos.cpy().add(Mappers.physics.get(entity).body.getLinearVelocity().cpy().scl(0.02f));
 
-        if (debugCFG.lerpCam) {
+        if (lerpCam) {
             mode = Mode.lerpTarget;
         } else {
             mode = Mode.lockTarget;
@@ -202,6 +201,14 @@ public class CameraSystem extends IteratingSystem {
         }
     */
     
+    }
+
+    public boolean isLerp() {
+        return lerpCam;
+    }
+
+    public void setLerp(boolean lerp) {
+        lerpCam = lerp;
     }
     
     private void focusCombatCamera(Vector2 playerPosition, float delta) {

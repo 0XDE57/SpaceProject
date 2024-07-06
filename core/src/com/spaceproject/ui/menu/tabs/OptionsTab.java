@@ -13,6 +13,7 @@ import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.KeyConfig;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
+import com.spaceproject.systems.CameraSystem;
 import com.spaceproject.systems.HUDSystem;
 import com.spaceproject.systems.SoundSystem;
 
@@ -70,6 +71,15 @@ public class OptionsTab extends Tab {
             }
         });
 
+        final VisCheckBox toggleCameraLerp = new VisCheckBox("lerp camera", GameScreen.getEngine().getSystem(CameraSystem.class).isLerp());
+        toggleCameraLerp.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                GameScreen.getEngine().getSystem(CameraSystem.class).setLerp(toggleCameraLerp.isChecked());
+                //debugCFG.lerpCam = toggleCameraLerp.isChecked();
+            }
+        });
+
         content.add(toggleFullscreen).left().row();
         content.add(toggleVsync).left().row();
         int pad = 10;
@@ -78,6 +88,7 @@ public class OptionsTab extends Tab {
         content.add(volumeSlider).fillX().padBottom(6).row();
         //getContentTable().add(new Separator()).fillX().padTop(pad).padBottom(pad).row();
         content.add(toggleDamageNumbers).left().row();
+        content.add(toggleCameraLerp).left().row();
         content.pack();
     }
 

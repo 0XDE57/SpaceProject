@@ -21,7 +21,6 @@ public class DebugConfig extends Config {
     public boolean drawContacts;
     public boolean drawOrbitPath;
     public boolean drawMousePos;
-    public boolean lerpCam;
     public boolean infiniteFire;
     public boolean invincible;
     public boolean reflectAsteroidColor;
@@ -50,7 +49,6 @@ public class DebugConfig extends Config {
         drawContacts = true;
         drawOrbitPath = false;
         drawMousePos = false;
-        lerpCam = false;
         invincible = false;
         infiniteFire = false;
         reflectAsteroidColor = false;
