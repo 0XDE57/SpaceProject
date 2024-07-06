@@ -50,7 +50,7 @@ public class OptionsTab extends Tab {
             }
         });
 
-        final VisLabel volumeText = new VisLabel("volume: 1");
+        final VisLabel volumeText = new VisLabel("volume: 100");
         final VisSlider volumeSlider = new VisSlider(0, 1, 0.1f, false);
         volumeSlider.setValue(volumeSlider.getMaxValue());
         volumeSlider.addListener(new ChangeListener() {
@@ -58,7 +58,7 @@ public class OptionsTab extends Tab {
             public void changed(ChangeEvent event, Actor actor) {
                 float volume = volumeSlider.getValue();
                 GameScreen.getEngine().getSystem(SoundSystem.class).setVolume(volume);
-                volumeText.setText("volume: " + (MathUtils.isEqual(volume, 0) ? "OFF" : MyMath.round(volume,1)));
+                volumeText.setText("volume: " + (MathUtils.isEqual(volume, 0) ? "OFF" : (int)(MyMath.round(volume,1)*100)));
             }
         });
 
@@ -80,12 +80,13 @@ public class OptionsTab extends Tab {
             }
         });
 
+
+        content.add(volumeText).padTop(6).row();
+        content.add(volumeSlider).fillX().padBottom(6).row();
         content.add(toggleFullscreen).left().row();
         content.add(toggleVsync).left().row();
         int pad = 10;
         //getContentTable().add(new Separator()).fillX().padTop(pad).padBottom(pad).row();
-        content.add(volumeText).padTop(6).row();
-        content.add(volumeSlider).fillX().padBottom(6).row();
         //getContentTable().add(new Separator()).fillX().padTop(pad).padBottom(pad).row();
         content.add(toggleDamageNumbers).left().row();
         content.add(toggleCameraLerp).left().row();
