@@ -34,15 +34,8 @@ public class SpaceStationSystem extends IteratingSystem {
     
     @Override
     public void update(float deltaTime) {
-        //enable transparency
-        Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
         shape.setProjectionMatrix(GameScreen.cam.combined);
-
         super.update(deltaTime);
-
-        Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
     @Override
