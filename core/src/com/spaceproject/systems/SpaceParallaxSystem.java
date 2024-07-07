@@ -23,10 +23,10 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     private final ArrayList<SpaceBackgroundTile> tiles = new ArrayList<>();
     
     // multiplier for parallax position of tile
-    private static float dustTileDepth = 0.01f;
-    private static float star1TileDepth = 0.02f;
-    private static float star2TileDepth = 0.018f;
-    private static float star3TileDepth = 0.2f;
+    private static final float dustTileDepth = 0.01f;
+    private static final float star1TileDepth = 0.02f;
+    private static final float star2TileDepth = 0.018f;
+    private static final float star3TileDepth = 0.2f;
     
     // center tile to check for tile change
     private Vector2 dustCenterTile;
@@ -70,12 +70,11 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         spriteBatch.setProjectionMatrix(projectionMatrix);
         spriteBatch.begin();
-        drawParallaxTiles();
+        drawParallaxTiles(cam);
         spriteBatch.end();
     }
     
-    private void drawParallaxTiles() {
-        CameraSystem camSystem = getEngine().getSystem(CameraSystem.class);
+    private void drawParallaxTiles(CameraSystem camSystem) {
         float centerScreenX = Gdx.graphics.getWidth() * 0.5f;
         float centerScreenY = Gdx.graphics.getHeight() * 0.5f;
         for (SpaceBackgroundTile tile : tiles) {
@@ -84,17 +83,28 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
             float drawY = ((-GameScreen.cam.position.y * tile.depth) + tile.y - centerTile) + centerScreenY;
             float width = tile.tex.getWidth();
             float height = tile.tex.getHeight();
-            //draw texture
-            if (MathUtils.isEqual(tile.depth, star3TileDepth)) {
-                float fade = 1 - (GameScreen.cam.zoom / CameraSystem.getZoomForLevel((byte) 10));
-                spriteBatch.setColor(1, 1, 1, fade);
-            } else if (MathUtils.isEqual(tile.depth, star2TileDepth) || MathUtils.isEqual(tile.depth, star1TileDepth)) {
-                float fade = 1 - (GameScreen.cam.zoom / CameraSystem.getZoomForLevel(camSystem.getMaxZoomLevel()));
-                spriteBatch.setColor(1, 1, 1, fade);
-            } else {
-                spriteBatch.setColor(1, 1, 1, 1);
+            switch (tile.layerID) {
+                case -1:
+                    spriteBatch.setColor(1, 1, 1, 0.825f);
+                    break;
+                case 0:
+                    spriteBatch.setColor(1, 1, 1, 0.95f);
+                    break;
+                case 1:
+                    float fade1 = 1 - (GameScreen.cam.zoom / CameraSystem.getZoomForLevel(camSystem.getMaxZoomLevel()));
+                    spriteBatch.setColor(1, 1, 1, fade1);
+                    break;
+                case 2:
+                    float fade2 = 1 - (GameScreen.cam.zoom / CameraSystem.getZoomForLevel(camSystem.getMaxZoomLevel()));
+                    spriteBatch.setColor(1, 1, 1, fade2);
+                    break;
+                case 3:
+                    float fade3 = 1 - (GameScreen.cam.zoom / CameraSystem.getZoomForLevel((byte) 10));
+                    spriteBatch.setColor(1, 1, 1, fade3);
+                    break;
+                default:
+                    spriteBatch.setColor(1, 1, 1, 1);
             }
-
             spriteBatch.draw(tile.tex, drawX, drawY,
                     0, 0,
                     width, height,
@@ -109,11 +119,11 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
         surroundX = (Gdx.graphics.getWidth() / tileSize) + 1;
         surroundY = (Gdx.graphics.getHeight() / tileSize) + 1;
         boolean resize = (prevX != surroundX || prevY != surroundY);
-        dustCenterTile = updateLayer(resize, dustCenterTile, dustTileDepth, SpaceBackgroundTile.TileType.Dust);
-        star0CenterTile = updateLayer(resize, star0CenterTile, 0, SpaceBackgroundTile.TileType.Stars);
-        star1CenterTile = updateLayer(resize, star1CenterTile, star1TileDepth, SpaceBackgroundTile.TileType.Stars);
-        star2CenterTile = updateLayer(resize, star2CenterTile, star2TileDepth, SpaceBackgroundTile.TileType.Stars);
-        star3CenterTile = updateLayer(resize, star3CenterTile, star3TileDepth, SpaceBackgroundTile.TileType.Stars);
+        dustCenterTile  = updateLayer(resize, dustCenterTile, -1, dustTileDepth, SpaceBackgroundTile.TileType.Dust);
+        star0CenterTile = updateLayer(resize, star0CenterTile, 0, 0, SpaceBackgroundTile.TileType.Stars);
+        star1CenterTile = updateLayer(resize, star1CenterTile, 1, star1TileDepth, SpaceBackgroundTile.TileType.Stars);
+        star2CenterTile = updateLayer(resize, star2CenterTile, 2, star2TileDepth, SpaceBackgroundTile.TileType.Stars);
+        star3CenterTile = updateLayer(resize, star3CenterTile, 3, star3TileDepth, SpaceBackgroundTile.TileType.Stars);
     }
     
     /**
@@ -126,23 +136,23 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
      * @param type     of tile
      * @return position of current tile
      */
-    private Vector2 updateLayer(boolean resize, Vector2 lastTile, float depth, SpaceBackgroundTile.TileType type) {
+    private Vector2 updateLayer(boolean resize, Vector2 lastTile, int layerID, float depth, SpaceBackgroundTile.TileType type) {
         //calculate tile camera is within
         Vector2 currentTile = getTilePos(GameScreen.cam.position.x, GameScreen.cam.position.y, depth);
 
         //load initial tiles
         if (lastTile == null) {
             lastTile = new Vector2(currentTile);
-            loadTiles(currentTile, depth, type);
+            loadTiles(currentTile, layerID, depth, type);
         }
         
         //check if moved tile
         if (currentTile.x != lastTile.x || currentTile.y != lastTile.y || resize) {
             // unload old tiles
-            unloadTiles(currentTile, depth);
+            unloadTiles(currentTile, layerID);
             
             // load new tiles
-            loadTiles(currentTile, depth, type);
+            loadTiles(currentTile, layerID, depth, type);
         }
         
         return currentTile;
@@ -184,14 +194,14 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
      * @param depth
      * @param type
      */
-    private void loadTiles(Vector2 centerTile, float depth, TileType type) {
+    private void loadTiles(Vector2 centerTile, int layerID, float depth, TileType type) {
         for (int tX = (int) centerTile.x - surroundX; tX <= centerTile.x + surroundX; tX++) {
             for (int tY = (int) centerTile.y - surroundY; tY <= centerTile.y + surroundY; tY++) {
                 // check if tile already exists
                 boolean isTileLoaded = false;
                 for (int index = 0; index < tiles.size(); ++index) {
                     SpaceBackgroundTile t = tiles.get(index);
-                    if (t.tileX == tX && t.tileY == tY && t.depth == depth && t.type == type) {
+                    if (t.tileX == tX && t.tileY == tY && t.layerID == layerID && t.type == type) {
                         isTileLoaded = true;
                         break;
                     }
@@ -201,22 +211,19 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
                 if (!isTileLoaded) {
                     //Gdx.app.debug(this.getClass().getSimpleName(), "Load " + type + " tile: [" + depth + "]: " + tX + ", " + tY
                     //    + " surround: " + surroundX + ", " + surroundY);
-                    tiles.add(new SpaceBackgroundTile(tX, tY, depth, tileSize, type));
+                    tiles.add(new SpaceBackgroundTile(tX, tY, layerID, depth, tileSize, type));
                 }
             }
         }
     }
     
     /**
-     * Remove any tiles not surrounding centerTile of same depth.
-     *
-     * @param centerTile
-     * @param depth
+     * Remove any tiles not surrounding centerTile of same layerID.
      */
-    private void unloadTiles(Vector2 centerTile, float depth) {
+    private void unloadTiles(Vector2 centerTile, int layerID) {
         for (int index = 0; index < tiles.size(); ++index) {
             SpaceBackgroundTile tile = tiles.get(index);
-            if (tile.depth == depth && !tileIsNear(centerTile, tile)) {
+            if (tile.layerID == layerID && !tileIsNear(centerTile, tile)) {
                 //Gdx.app.debug(this.getClass().getSimpleName(), "Unload " + tile.type + " tile: [" + depth + "]: " + tile.tileX + ", " + tile.tileY);
                 
                 // dispose the texture so it doesn't eat up memory

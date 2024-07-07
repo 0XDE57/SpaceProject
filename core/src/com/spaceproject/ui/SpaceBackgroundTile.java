@@ -12,6 +12,7 @@ public class SpaceBackgroundTile {
     public final float y;
     public final int tileX;
     public final int tileY;
+    public final int layerID;
     public final float depth;
     public final int size;
     public final Texture tex;
@@ -23,10 +24,11 @@ public class SpaceBackgroundTile {
         Stars, Dust
     }
     
-    public SpaceBackgroundTile(int tileX, int tileY, float renderDepth, int tileSize, TileType type) {
+    public SpaceBackgroundTile(int tileX, int tileY, int layerID, float renderDepth, int tileSize, TileType type) {
         this.tileX = tileX;
         this.tileY = tileY;
         this.type = type;
+        this.layerID = layerID;
         depth = renderDepth;
         
         //generate texture
