@@ -42,7 +42,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     
     public SpaceParallaxSystem() {
         spriteBatch = new SpriteBatch();
-        
+
         spaceShader = new ShaderProgram(Gdx.files.internal("shaders/spaceParallax.vert"), Gdx.files.internal("shaders/spaceParallax.frag"));
         if (spaceShader.isCompiled()) {
             spriteBatch.setShader(spaceShader);
@@ -75,6 +75,7 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     }
     
     private void drawParallaxTiles() {
+        CameraSystem camSystem = getEngine().getSystem(CameraSystem.class);
         float centerScreenX = Gdx.graphics.getWidth() * 0.5f;
         float centerScreenY = Gdx.graphics.getHeight() * 0.5f;
         for (SpaceBackgroundTile tile : tiles) {
@@ -84,6 +85,16 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
             float width = tile.tex.getWidth();
             float height = tile.tex.getHeight();
             //draw texture
+            if (MathUtils.isEqual(tile.depth, star3TileDepth)) {
+                float fade = 1 - (GameScreen.cam.zoom / CameraSystem.getZoomForLevel((byte) 10));
+                spriteBatch.setColor(1, 1, 1, fade);
+            } else if (MathUtils.isEqual(tile.depth, star2TileDepth) || MathUtils.isEqual(tile.depth, star1TileDepth)) {
+                float fade = 1 - (GameScreen.cam.zoom / CameraSystem.getZoomForLevel(camSystem.getMaxZoomLevel()));
+                spriteBatch.setColor(1, 1, 1, fade);
+            } else {
+                spriteBatch.setColor(1, 1, 1, 1);
+            }
+
             spriteBatch.draw(tile.tex, drawX, drawY,
                     0, 0,
                     width, height,
