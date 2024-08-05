@@ -20,7 +20,8 @@ import com.spaceproject.utility.SimpleTimer;
 public class ControllerInputSystem extends EntitySystem implements ControllerListener {
     
     private boolean debugInput = false;
-    
+
+    private boolean vibrate = true;
     private float leftStickHorAxis;
     private float leftStickVertAxis;
     private float rightStickHorAxis;
@@ -368,6 +369,8 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     }
     
     public void vibrate(int durationMS, float strength) {
+        if (!vibrate) return;
+
         Controller controller = Controllers.getCurrent();
         if (controller == null || !controller.canVibrate()) {
             return;
@@ -375,4 +378,9 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         //strength range: 0.0 - 1.0
         controller.startVibration(durationMS, strength);
     }
+
+    public void setVibrateEnable(boolean checked) {
+        vibrate = checked;
+    }
+
 }

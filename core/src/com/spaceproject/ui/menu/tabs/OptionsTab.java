@@ -14,6 +14,7 @@ import com.spaceproject.config.KeyConfig;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.systems.CameraSystem;
+import com.spaceproject.systems.ControllerInputSystem;
 import com.spaceproject.systems.HUDSystem;
 import com.spaceproject.systems.SoundSystem;
 
@@ -80,6 +81,14 @@ public class OptionsTab extends Tab {
             }
         });
 
+        final VisCheckBox toggleControllerVibrate = new VisCheckBox("controller vibrate", true);
+        toggleControllerVibrate.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                GameScreen.getEngine().getSystem(ControllerInputSystem.class).setVibrateEnable(toggleControllerVibrate.isChecked());
+            }
+        });
+
 
         content.add(volumeText).padTop(6).row();
         content.add(volumeSlider).fillX().padBottom(6).row();
@@ -90,6 +99,7 @@ public class OptionsTab extends Tab {
         //getContentTable().add(new Separator()).fillX().padTop(pad).padBottom(pad).row();
         content.add(toggleDamageNumbers).left().row();
         content.add(toggleCameraLerp).left().row();
+        content.add(toggleControllerVibrate).left().row();
         content.pack();
     }
 

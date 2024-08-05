@@ -410,7 +410,7 @@ public class Box2DContactListener implements ContactListener {
         //damaged entity was controlled by player, vibrate on impact
         if (Mappers.controlFocus.get(entity) != null) {
             //warning: system coupling
-            engine.getSystem(ControllerInputSystem.class).vibrate(100, 1f);
+            engine.getSystem(ControllerInputSystem.class).vibrate(150, 1f);
             engine.getSystem(CameraSystem.class).impact(entity);
             sound.hullImpactHeavy(1);
         }
