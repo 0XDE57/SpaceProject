@@ -352,6 +352,12 @@ public class Box2DContactListener implements ContactListener {
     }
     
     private void vehicleImpact(Entity entity, Entity otherBody, Contact contact, float impulse, Body body) {
+        DamageComponent damageComponent = Mappers.damage.get(otherBody);
+        if (damageComponent != null && damageComponent.source == entity) {
+            //Gdx.app.debug(getClass().getSimpleName(), "ignore damage to self");
+            return;
+        }
+
         //calc damage relative to how hard impact impulse was
         float relativeDamage = (impulse * vehicleDamageMultiplier);
         
