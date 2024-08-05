@@ -24,7 +24,7 @@ import java.util.ArrayList;
 
 public class AsteroidBeltSystem extends EntitySystem {
 
-    class AsteroidRemovedQueue {
+    static class AsteroidRemovedQueue {
         public final AsteroidComponent asteroidComponent;
         public final Vector2 position;
         public final Vector2 velocity;
@@ -70,7 +70,7 @@ public class AsteroidBeltSystem extends EntitySystem {
         updateBeltOrbit();
 
         //spawn child asteroids or resource drops when asteroids destroyed
-        processAstroidDestructionQueue();
+        processAsteroidDestructionQueue();
     
         //debug spawn asteroid at mouse position
         if (GameScreen.isDebugMode && Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
@@ -164,7 +164,7 @@ public class AsteroidBeltSystem extends EntitySystem {
         spawnQ.add(new AsteroidRemovedQueue(asteroid, pos, vel, angle, angularVel));
     }
 
-    private void processAstroidDestructionQueue() {
+    private void processAsteroidDestructionQueue() {
         for (AsteroidRemovedQueue asteroid : spawnQ) {
             asteroidDestroyed(asteroid.asteroidComponent, asteroid.position, asteroid.velocity, asteroid.angle, asteroid.angularVelocity);
         }
