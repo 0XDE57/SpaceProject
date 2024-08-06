@@ -15,6 +15,7 @@ import de.pottgames.tuningfork.logger.GdxLogger;
 
 public class SoundSystem extends EntitySystem implements Disposable {
 
+    boolean log = false;
     AssetManager assetManager;
 
     Audio audio;
@@ -53,7 +54,11 @@ public class SoundSystem extends EntitySystem implements Disposable {
     @Override
     public void addedToEngine(Engine engine) {
         final AudioConfig config = new AudioConfig();
-        config.setLogger(new GdxLogger());
+        if (log) {
+            config.setLogger(new GdxLogger());
+        } else {
+            config.setLogger(null);
+        }
         audio = Audio.init(config);
 
         assetManager = new AssetManager();
@@ -98,6 +103,10 @@ public class SoundSystem extends EntitySystem implements Disposable {
 
     public void setVolume(float value) {
         audio.setMasterVolume(value);
+    }
+
+    public float getVolume() {
+        return audio.getMasterVolume();
     }
 
     public void pauseAll() {
