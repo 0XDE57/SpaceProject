@@ -352,6 +352,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape.rect(x + (ratio * width), y - (sliderHeight * 0.5f), thickness, sliderHeight);
     }
 
+    boolean interactHold;
     private void drawMessageBacking(Entity player) {
         int offset = 50;
         int messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3)) - offset;
@@ -392,9 +393,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                             ControllerMenuStage controllerMenuStage = GameScreen.getStage();
                             stationMenu = (VisWindow) SpaceStationMenu.SpaceStationMenu(controllerMenuStage, player, getEngine());
                         }
+                    } else {
+                        if (!interactHold) {
+                            stationMenu.remove();
+                        }
                     }
+                    interactHold = true;
                 } else {
                     interactTimer.reset();
+                    interactHold = false;
                 }
             }
         }
