@@ -473,6 +473,7 @@ public class Box2DContactListener implements ContactListener {
                 respawn.reason = "hold [" + input.toUpperCase() + "] to activate shield";
             }
             respawnEntity.add(respawn);
+            respawnEntity.add(Mappers.trail.get(entity));
             respawnEntity.add(new RingEffectComponent());//todo: replace with explode particle effect
             engine.addEntity(respawnEntity);
             Gdx.app.debug(Box2DContactListener.class.getSimpleName(), "create respawn(" + respawn.reason + ") marker: " + DebugUtil.objString(respawnEntity) + " for " + DebugUtil.objString(entity));
