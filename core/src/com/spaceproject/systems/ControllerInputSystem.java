@@ -240,7 +240,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         }
 
         if (GameScreen.isPaused()) return false;
-        if (players.size() == 0)  return false;
+        if (players.size() == 0) return false;
         
         //update axis
         if (axisCode == controller.getMapping().axisLeftX) {
@@ -278,6 +278,12 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             if (laser != null) {
                 laser.state = LaserComponent.State.on;
             }
+
+            TractorBeamComponent tractorBeam = Mappers.tractor.get(player);
+            if (tractorBeam != null) {
+                tractorBeam.state = TractorBeamComponent.State.push;//todo: ability to switch between push and pull (double tap?)
+            }
+
             desktopInput.setFocusToController();
         } else {
             //todo: bug, stick drift and minor inputs seem to be interfering with mouse input
@@ -287,6 +293,11 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                 LaserComponent laser = Mappers.laser.get(player);
                 if (laser != null) {
                     laser.state = LaserComponent.State.off;
+                }
+
+                TractorBeamComponent tractorBeam = Mappers.tractor.get(player);
+                if (tractorBeam != null) {
+                    tractorBeam.state = TractorBeamComponent.State.off;
                 }
             }
         }
@@ -355,17 +366,17 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
                 + "] index:" + controller.getPlayerIndex()
                 + " power:" + controller.getPowerLevel()
                 + " vibrate:" + canVibrate;
-        Gdx.app.log(this.getClass().getSimpleName(), info);
+        Gdx.app.log(getClass().getSimpleName(), info);
     }
     
     private void logInput(Controller controller, int buttonCode, boolean buttonDown) {
         String info = controller.getName() + ": ["+ buttonCode + "] " + buttonDown;
-        Gdx.app.debug(this.getClass().getSimpleName(), info);
+        Gdx.app.debug(getClass().getSimpleName(), info);
     }
     
     private void logAxis(Controller controller, int axisCode, float value) {
         String info = controller.getName() + ": ["+ axisCode + "] " + value;
-        Gdx.app.debug(this.getClass().getSimpleName(), info);
+        Gdx.app.debug(getClass().getSimpleName(), info);
     }
     
     public void vibrate(int durationMS, float strength) {

@@ -16,15 +16,12 @@ import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
 import com.spaceproject.config.EntityConfig;
 import com.spaceproject.generation.BodyBuilder;
-import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
-
-import java.util.HashMap;
 
 
 public class ShipControlSystem extends IteratingSystem {
@@ -119,7 +116,7 @@ public class ShipControlSystem extends IteratingSystem {
         }
         
         if (control.swapWeapon) {
-            swapWeapon(entity);
+            cycleTool(entity);
         }
         
         //transition or take off from planet
@@ -153,7 +150,7 @@ public class ShipControlSystem extends IteratingSystem {
         control.changeVehicle = false;
         
         Entity characterEntity = Mappers.vehicle.get(vehicleEntity).driver;
-        Gdx.app.log(this.getClass().getSimpleName(), DebugUtil.objString(characterEntity)
+        Gdx.app.log(getClass().getSimpleName(), DebugUtil.objString(characterEntity)
                 + " exiting vehicle " + DebugUtil.objString(vehicleEntity));
         
         // re-create box2D body and set position near vehicle
@@ -216,40 +213,36 @@ public class ShipControlSystem extends IteratingSystem {
         }
     }
     
-    private void swapWeapon(Entity player) {
+    private void cycleTool(Entity player) {
         VehicleComponent vehicle = Mappers.vehicle.get(player);
-        if (vehicle == null) return;
-        
-        if (vehicle.weaponSwapTimer == null) {
-            vehicle.weaponSwapTimer = new SimpleTimer(500);
-        }
-        
-        if (!vehicle.weaponSwapTimer.tryEvent()) return;
+        if (vehicle == null || vehicle.tools.isEmpty()) return;
 
-        switch (vehicle.currentTool) {
-            case cannon: {
-                if (!vehicle.tools.containsKey(VehicleComponent.Tool.laser.ordinal())) break;
-                //remove cannon component from entity and place in cargo
-                vehicle.tools.put(VehicleComponent.Tool.cannon.ordinal(), player.remove(CannonComponent.class));
-                //pull laser from cargo and apply to entity
-                LaserComponent laser = (LaserComponent) vehicle.tools.get(VehicleComponent.Tool.laser.ordinal());
-                player.add(laser);
-                vehicle.currentTool = VehicleComponent.Tool.laser;
-                Gdx.app.log(getClass().getSimpleName(), "equipped:" + vehicle.currentTool);
-                break;
-            }
-            case laser: {
-                if (!vehicle.tools.containsKey(VehicleComponent.Tool.cannon.ordinal())) break;
-                //remove cannon component from entity and place in cargo
-                vehicle.tools.put(VehicleComponent.Tool.laser.ordinal(), player.remove(LaserComponent.class));
-                //pull laser from cargo and apply to entity
-                CannonComponent cannon = (CannonComponent) vehicle.tools.get(VehicleComponent.Tool.cannon.ordinal());
-                player.add(cannon);
-                vehicle.currentTool = VehicleComponent.Tool.cannon;
-                Gdx.app.log(getClass().getSimpleName(), "equipped: " + vehicle.currentTool);
-                break;
-            }
+        if (vehicle.toolSwapTimer == null) {
+            vehicle.toolSwapTimer = new SimpleTimer(300);
         }
+        if (!vehicle.toolSwapTimer.tryEvent()) return;
+
+        VehicleComponent.Tool nextTool = vehicle.currentTool;
+        do {
+            nextTool = nextTool.next();
+            //Gdx.app.log(getClass().getSimpleName(), "searching for:" + nextTool);
+        } while (!vehicle.tools.containsKey(nextTool.ordinal()));
+
+        //unload current tool
+        Component removedTool = null;
+        switch (vehicle.currentTool) {
+            case cannon: removedTool = player.remove(CannonComponent.class); break;
+            case laser: removedTool = player.remove(LaserComponent.class); break;
+            case tractor: removedTool = player.remove(TractorBeamComponent.class); break;
+        }
+        //store unloaded tool in inventory
+        vehicle.tools.put(vehicle.currentTool.ordinal(), removedTool);
+
+        //load new tool from inventory
+        Component newTool = vehicle.tools.remove(nextTool.ordinal());
+        player.add(newTool);
+        vehicle.currentTool = nextTool;
+        Gdx.app.log(getClass().getSimpleName(), "equipped:" + vehicle.currentTool);
     }
     
     //region transition
@@ -262,28 +255,26 @@ public class ShipControlSystem extends IteratingSystem {
         screenTrans.timer = new SimpleTimer(entityCFG.shrinkGrowAnimTime, true);
         screenTrans.animInterpolation = Interpolation.pow2;
         entity.add(screenTrans);
-        
-        Gdx.app.log(this.getClass().getSimpleName(), "takeOffPlanet: " + DebugUtil.objString(entity));
+        Gdx.app.log(getClass().getSimpleName(), "takeOffPlanet: " + DebugUtil.objString(entity));
     }
     
     private void beginLandOnPlanet(Entity entity, Entity planet) {
         if (Mappers.screenTrans.get(entity) != null) {
-            Gdx.app.error(this.getClass().getSimpleName(), "transition already in progress, aborting.");
+            Gdx.app.error(getClass().getSimpleName(), "transition already in progress, aborting.");
             return;
         }
         if (planet == null) {
-            Gdx.app.error(this.getClass().getSimpleName(), "can not land on null planet.");
+            Gdx.app.error(getClass().getSimpleName(), "can not land on null planet.");
             return;
         }
-        
+
         ScreenTransitionComponent screenTrans = new ScreenTransitionComponent();
         screenTrans.landStage = ScreenTransitionComponent.LandAnimStage.shrink;//begin animation
         screenTrans.planet = planet;
         screenTrans.timer = new SimpleTimer(entityCFG.shrinkGrowAnimTime, true);
         screenTrans.animInterpolation = Interpolation.sineIn;
         entity.add(screenTrans);
-        
-        Gdx.app.log(this.getClass().getSimpleName(), "beginLandOnPlanet: " + DebugUtil.objString(entity));
+        Gdx.app.log(getClass().getSimpleName(), "beginLandOnPlanet: " + DebugUtil.objString(entity));
     }
     
     private Entity getPlanetNearPosition(Vector2 pos) {
@@ -294,7 +285,6 @@ public class ShipControlSystem extends IteratingSystem {
                 return planet;
             }
         }
-        
         return null;
     }
     //endregion

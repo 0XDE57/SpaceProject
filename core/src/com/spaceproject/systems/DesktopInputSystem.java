@@ -249,6 +249,11 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             if (laser != null) {
                 laser.state = LaserComponent.State.on;
             }
+
+            TractorBeamComponent tractorBeam = Mappers.tractor.get(player);
+            if (tractorBeam != null) {
+                tractorBeam.state = TractorBeamComponent.State.push; //todo: ability to switch between push and pull (double tap?)
+            }
             return true;
         }
         
@@ -267,12 +272,18 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         if (players.size() == 0) return false;
 
         if (button == Input.Buttons.LEFT) {
-            ControllableComponent control = Mappers.controllable.get(players.first());
+            Entity player = players.first();
+            ControllableComponent control = Mappers.controllable.get(player);
             control.attack = false;
 
-            LaserComponent laser = Mappers.laser.get(players.first());
+            LaserComponent laser = Mappers.laser.get(player);
             if (laser != null) {
                 laser.state = LaserComponent.State.off;
+            }
+
+            TractorBeamComponent tractorBeam = Mappers.tractor.get(player);
+            if (tractorBeam != null) {
+                tractorBeam.state = TractorBeamComponent.State.off;
             }
             return true;
         }

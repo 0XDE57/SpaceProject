@@ -67,7 +67,7 @@ public class SystemsConfig extends Config {
         // - parallax grid render -> "under-hud" / frame of reference / debug tool
         // - sprite 2D renderer -> render regular textures no shader
         // - sprite 2D shader renderer -> render textures with shader applied
-        // - spline render -> render movement paths, mostly for debug and frame of reference
+        // - trail render -> render movement paths, mostly for debug and frame of reference - todo: trail should render on top of planets but below other sprites, if trail is changed to spritebatch it could use z-order ?
         // - asteroid renderer -> custom shaperenderer to draw filled polygons
         // - sprite 3D renderer -> render 3d meshes with no shader
         // - todo: sprite 3D shader renderer -> render 3d meshes with shader applied
@@ -91,9 +91,10 @@ public class SystemsConfig extends Config {
         systems.add(new SysCFG(Sprite2DShaderRenderSystem.class, 121, false, true, true, true, true));
         systems.add(new SysCFG(AsteroidRenderSystem.class, 122, false, true, false, true, true));
         systems.add(new SysCFG(LaserSystem.class, 123, true, true, true, true, true));
-        systems.add(new SysCFG(ProjectileHitRenderSystem.class, 124, false, true, true, true, true));
-        systems.add(new SysCFG(Sprite3DRenderSystem.class, 125, false, true, true, true, true));
-        systems.add(new SysCFG(ShieldRenderSystem.class, 126, false, true, true, true, true));
+        systems.add(new SysCFG(TractorBeamSystem.class, 124, true, true, true, true, true));
+        systems.add(new SysCFG(ProjectileHitRenderSystem.class, 125, false, true, true, true, true));
+        systems.add(new SysCFG(Sprite3DRenderSystem.class, 126, false, true, true, true, true));
+        systems.add(new SysCFG(ShieldRenderSystem.class, 127, false, true, true, true, true));
         systems.add(new SysCFG(ParticleSystem.class, 130, true, true, true, true, true));
         systems.add(new SysCFG(HUDSystem.class, 200, false, true, true, true, true));
         systems.add(new SysCFG(ScreenTransitionSystem.class, 300, true, true, true, true, true));
