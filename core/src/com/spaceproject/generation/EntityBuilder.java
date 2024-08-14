@@ -105,12 +105,11 @@ public class EntityBuilder {
                 shipEntity.add(laser);
                 break;
         }
-        vehicle.tools.put(VehicleComponent.Tool.laser.ordinal(), new LaserComponent(520, 250, 30, 1));
+        //vehicle.tools.put(VehicleComponent.Tool.laser.ordinal(), new LaserComponent(520, 250, 30, 1));
         TractorBeamComponent tractorBeam = new TractorBeamComponent();
         tractorBeam.maxDist = 150;
         tractorBeam.magnitude = 70000;
-        //shipEntity.add(tractorBeam);
-        vehicle.tools.put(VehicleComponent.Tool.tractor.ordinal(), tractorBeam);
+        //vehicle.tools.put(VehicleComponent.Tool.tractor.ordinal(), tractorBeam);
 
         //hyper drive
         HyperDriveComponent hyperDrive = new HyperDriveComponent();

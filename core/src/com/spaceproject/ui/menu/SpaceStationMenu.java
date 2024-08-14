@@ -31,6 +31,8 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 
 public class SpaceStationMenu {
 
+    //todo: move item cost into own actor to fix alignment issues
+    //todo: gray out upgrades that are already obtained
     public static Actor SpaceStationMenu(ControllerMenuStage stage, Entity player, Engine engine) {
         //enable color markup
         VisUI.getSkin().get("default-font", BitmapFont.class).getData().markupEnabled = true;
@@ -47,12 +49,15 @@ public class SpaceStationMenu {
         String shieldUpgrade = "Active Shield".toUpperCase();
         String hyperdriveUpgrade = "Hyper-Drive".toUpperCase();
         String laserUpgrade = "Laser".toUpperCase();
+        String tractorUpgrade = "Tractor Beam".toUpperCase();
         String hyperdriveDescription = "[" + colorItem + "]" + hyperdriveUpgrade + "[]\nenable deep-space exploration.\n\nHold [" + colorControl + "][" + hyperControl + "][] to activate.";
         String shieldDescription = "[" + colorItem + "]" + shieldUpgrade + "[]\nprotect your ship from damage.\n\nHold [" + colorControl + "][" + shieldControl + "][] to activate.";
         String laserDescription = "[" + colorItem + "]" + laserUpgrade + "[]\nprecision tool.\n\nHold [" + colorControl + "][" + laserControl + "][] to activate.";
-        int costHyper = 999999;
-        int costShield = 10000;
-        int costLaser = 10000;
+        String tractorBeamDescription = "[" + colorItem + "]" + tractorUpgrade + "[]\npush or pull objects.\n\nHold [" + colorControl + "][" + laserControl + "][] to activate.";
+        int costHyper = 50000;
+        int costShield = 5000;
+        int costLaser = 20000;
+        int costTractorBeam = 10000;
         int costHP = 10000;
         int costThrust = 1000;
         int costDMG = 1000;
@@ -178,6 +183,41 @@ public class SpaceStationMenu {
             }
         });
 
+        TextButton buttonTractorBeam = new TextButton("[" + colorItem + "]" + tractorUpgrade + "  [" + colorCredits + "] " + costTractorBeam, VisUI.getSkin());
+        buttonTractorBeam.getLabel().setAlignment(Align.left);
+        buttonTractorBeam.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (Mappers.tractor.get(player) != null) return;
+                if (vehicle.tools.containsKey(VehicleComponent.Tool.tractor.ordinal())) return;
+
+                CargoComponent cargo = Mappers.cargo.get(player);
+                if (cargo.credits < costTractorBeam) {
+                    //error soundfx if not enough moneys
+                    Gdx.app.debug(getClass().getSimpleName(), "insufficient credits for " + tractorUpgrade);
+                    creditsValue.addAction(sequence(color(Color.RED),color(Color.WHITE, 0.5f)));
+                    return;
+                }
+                //purchase
+                cargo.credits -= costTractorBeam;
+                creditsValue.setText(Mappers.cargo.get(player).credits);
+                creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
+
+                //add upgrade to tools inventory
+                TractorBeamComponent tractorBeam = new TractorBeamComponent();
+                tractorBeam.maxDist = 150;
+                tractorBeam.magnitude = 70000;
+                vehicle.tools.put(VehicleComponent.Tool.tractor.ordinal(), tractorBeam);
+            }
+        });
+        buttonTractorBeam.addListener(new FocusListener() {
+            @Override
+            public boolean handle(Event event) {
+                text.setText(tractorBeamDescription);
+                return super.handle(event);
+            }
+        });
+
         int hp = 100;
         TextButton buttonAddHealth = new TextButton("Increase [" + colorItem + "]Health [" + colorCredits + "]" + costHP, VisUI.getSkin());
         buttonAddHealth.getLabel().setAlignment(Align.left);
@@ -291,6 +331,7 @@ public class SpaceStationMenu {
         Table buttonTable = new VisTable();
         buttonTable.add(buttonShield).fillX().row();
         buttonTable.add(buttonLaser).fillX().row();
+        buttonTable.add(buttonTractorBeam).fillX().row();
         buttonTable.add(buttonHyperDrive).fillX().row();
         buttonTable.add(buttonAddHealth).fillX().row();
         buttonTable.add(buttonAddThrust).fillX().row();
