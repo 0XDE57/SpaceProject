@@ -56,20 +56,6 @@ public class DebugTab extends HotKeyTab {
                 debugCFG.reflectAsteroidColor = toggleReflect.isChecked();
             }
         });
-        final VisCheckBox toggleTractorBeam = new VisCheckBox("tractor beam! (pull)", debugCFG.tractorBeam);
-        toggleTractorBeam.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                debugCFG.tractorBeam = toggleTractorBeam.isChecked();
-            }
-        });
-        final VisCheckBox toggleTractorPull = new VisCheckBox("tractor beam! (push)", debugCFG.tractorBeamPush);
-        toggleTractorPull.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                debugCFG.tractorBeamPush = toggleTractorPull.isChecked();
-            }
-        });
 
         final VisCheckBox toggleAsteroidSpawn = new VisCheckBox("spawn asteroid on [right-click]", debugCFG.spawnAsteroid);
         toggleAsteroidSpawn.addListener(new ChangeListener() {
@@ -224,8 +210,6 @@ public class DebugTab extends HotKeyTab {
         getContentTable().add(toggleInfiniteFire).left().row();
         getContentTable().add(toggleDisco).left();
         getContentTable().add(toggleReflect).left().row();
-        getContentTable().add(toggleTractorBeam).left();
-        getContentTable().add(toggleTractorPull).left().row();
         getContentTable().add(toggleAsteroidSpawn).left();
         getContentTable().add(toggleAsteroidCluster).left();
         getContentTable().add(toggleGlassOnly).left().row();

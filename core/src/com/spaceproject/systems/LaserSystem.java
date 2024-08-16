@@ -164,18 +164,6 @@ public class LaserSystem extends IteratingSystem implements Disposable {
                 if (isGlass) {
                     damage *= 0.01f;
                 }
-
-                //tractor beam! tractor beam! tractor beam!
-                float magnitude = 50000f * deltaTime;
-                if (debug.tractorBeam) { //tractor beam (pull towards ray)!
-                    rayFixture.getBody().applyForce(MyMath.vector(incidentVector.angleRad() - MathUtils.PI, magnitude), p2, true);
-                    damage = 0;
-                }
-                if (debug.tractorBeamPush) { //tractor beam (push from ray)!
-                    rayFixture.getBody().applyForce(MyMath.vector(incidentVector.angleRad(), magnitude), p2, true);
-                    damage = 0;
-                }
-
                 Box2DContactListener.damage(getEngine(), hitEntity, entity, damage, p2, rayFixture.getBody());
             }
             if (Mappers.damage.get(hitEntity) != null) {
