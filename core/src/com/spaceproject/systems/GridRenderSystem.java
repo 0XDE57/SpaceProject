@@ -291,7 +291,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
             Vector2 vel = MyMath.vector(body.getLinearVelocity().angleRad(), 500000).cpy();
             shape.rectLine(pos.x, pos.y, vel.x, vel.y, width, compassHighlight, compassHighlight);
             vel.set(MyMath.vector(body.getLinearVelocity().angleRad(), 50)).add(pos.x, pos.y);
-            //draw arrow
+
             compassHighlight.a = 1;
             shape.setColor(compassHighlight);
             HealthComponent health = Mappers.health.get(entity);
@@ -299,12 +299,32 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
             if (health != null && (GameScreen.getGameTimeCurrent() - health.lastHitTime < hurtTime)) {
                 shape.setColor(Color.RED.cpy());
             }
+
+            //draw arrow
             int arrowSize = 10;
             Vector2 arrowLeft  = MyMath.vector(body.getLinearVelocity().angleRad() + 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
             shape.rectLine(vel, arrowLeft, 1);
             Vector2 arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
             shape.rectLine(vel, arrowRight, 1);
+            //more speed!
+            if (body.getLinearVelocity().len() >= Box2DPhysicsSystem.getVelocityLimit() * 0.5f) {
+                vel.set(MyMath.vector(body.getLinearVelocity().angleRad(), 60)).add(pos.x, pos.y);
+                arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
+                shape.rectLine(vel, arrowLeft, 1);
+                arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
+                shape.rectLine(vel, arrowRight, 1);
+            }
+            //max velocity!!!
+            if (MathUtils.isEqual(body.getLinearVelocity().len(), Box2DPhysicsSystem.getVelocityLimit(), 0.5f)) {
+                vel.set(MyMath.vector(body.getLinearVelocity().angleRad(), 70)).add(pos.x, pos.y);
+                arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
+                shape.rectLine(vel, arrowLeft, 1);
+                arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
+                shape.rectLine(vel, arrowRight, 1);
+            }
         }
+
+        //draw force applied from engines?
     }
     
     private GlyphLayout layout = new GlyphLayout();
