@@ -306,9 +306,17 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
             shape.rectLine(vel, arrowLeft, 1);
             Vector2 arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
             shape.rectLine(vel, arrowRight, 1);
-            //more speed!
-            if (body.getLinearVelocity().len() >= Box2DPhysicsSystem.getVelocityLimit() * 0.5f) {
+            //more!
+            if (body.getLinearVelocity().len() >= Box2DPhysicsSystem.getVelocityLimit() * 0.33f) {
                 vel.set(MyMath.vector(body.getLinearVelocity().angleRad(), 60)).add(pos.x, pos.y);
+                arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
+                shape.rectLine(vel, arrowLeft, 1);
+                arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
+                shape.rectLine(vel, arrowRight, 1);
+            }
+            //moar!!
+            if (body.getLinearVelocity().len() >= Box2DPhysicsSystem.getVelocityLimit() * 0.66f) {
+                vel.set(MyMath.vector(body.getLinearVelocity().angleRad(), 70)).add(pos.x, pos.y);
                 arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
                 shape.rectLine(vel, arrowLeft, 1);
                 arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
@@ -316,7 +324,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
             }
             //max velocity!!!
             if (MathUtils.isEqual(body.getLinearVelocity().len(), Box2DPhysicsSystem.getVelocityLimit(), 0.5f)) {
-                vel.set(MyMath.vector(body.getLinearVelocity().angleRad(), 70)).add(pos.x, pos.y);
+                vel.set(MyMath.vector(body.getLinearVelocity().angleRad(), 80)).add(pos.x, pos.y);
                 arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
                 shape.rectLine(vel, arrowLeft, 1);
                 arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
