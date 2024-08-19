@@ -103,7 +103,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     private GameMenu gameMenu;
     private VisWindow stationMenu;
-    private SimpleTimer interactTimer;
 
     //rendering
     private final OrthographicCamera cam;
@@ -195,8 +194,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 return super.scrolled(event, x, y, amountX, amountY);
             }
         });
-
-        interactTimer = new SimpleTimer(250);
     }
     
     @Override
@@ -385,22 +382,16 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             if (player != null) {
                 ControllableComponent control = Mappers.controllable.get(player);
                 if (control.interact) {
-                    if (stationMenu == null) {
-                        float ratio = interactTimer.ratio();
-                        shape.setColor(Color.WHITE);
-                        shape.rectLine(halfWidth - (halfWidth * ratio), timerHeight, halfWidth + (ratio * halfWidth), timerHeight, 2);
-                        if (interactTimer.tryEvent()) {
+                    if (!interactHold) {
+                        if (stationMenu == null) {
                             ControllerMenuStage controllerMenuStage = GameScreen.getStage();
                             stationMenu = (VisWindow) SpaceStationMenu.SpaceStationMenu(controllerMenuStage, player, getEngine());
-                        }
-                    } else {
-                        if (!interactHold) {
+                        } else {
                             stationMenu.remove();
                         }
                     }
                     interactHold = true;
                 } else {
-                    interactTimer.reset();
                     interactHold = false;
                 }
             }
@@ -460,7 +451,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 continue;
             }
             
-            Vector3 pos = cam.project(new Vector3(Mappers.transform.get(entity).pos.cpy(), 0));//new -> cache
+            Vector3 pos = cam.project(new Vector3(Mappers.transform.get(entity).pos.cpy(), 0));//todo: new & cpy() -> cache
             
             //background
             shape.setColor(uiCFG.entityHPbarBackground);
@@ -780,7 +771,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             inventoryFont.setColor(Color.WHITE);
             String key = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).switchWeapon);
             String input = getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? " [D-Pad Right] " : " [" + key + "] ";
-            layout.setText(inventoryFont, vehicleComponent.currentTool + input, Color.WHITE, 0, Align.right, false);
+            String toolText = vehicleComponent.currentTool.toString();
+            if (vehicleComponent.currentTool == VehicleComponent.Tool.tractor) {
+                toolText += ":" + Mappers.tractor.get(entity).mode.toString();
+            }
+            layout.setText(inventoryFont, toolText + input, Color.WHITE, 0, Align.right, false);
             inventoryFont.draw(batch, layout, barX, healthBarY - barHeight + layout.height - 3);
         }
     }
