@@ -35,9 +35,11 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     private final long doubleTapTime = 300;
     private final SimpleTimer doubleTapLeft = new SimpleTimer(doubleTapTime);
     private final SimpleTimer doubleTapRight = new SimpleTimer(doubleTapTime);
+    private final SimpleTimer doubleTapLeftTrigger = new SimpleTimer(200);
     private int tapCounterLeft = 0;
     private int tapCounterRight = 0;
-    
+    private int tapCounterLeftTrigger = 0;
+
     private ImmutableArray<Entity> players;
     
     @Override
@@ -232,7 +234,8 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
     public boolean buttonUp(Controller controller, int buttonCode) {
         return playerControls(controller, buttonCode, false);
     }
-    
+
+    boolean r2Hold = false;
     @Override
     public boolean axisMoved(Controller controller, int axisCode, float value) {
         if (debugInput) {
@@ -267,6 +270,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         ControllableComponent control = Mappers.controllable.get(player);
         DesktopInputSystem desktopInput = getEngine().getSystem(DesktopInputSystem.class);
         if (r2 > triggerDeadZone) {
+            desktopInput.setFocusToController();
             control.attack = true;
             
             CannonComponent cannon = Mappers.cannon.get(player);
@@ -281,13 +285,32 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
 
             TractorBeamComponent tractorBeam = Mappers.tractor.get(player);
             if (tractorBeam != null) {
-                tractorBeam.state = TractorBeamComponent.State.push;//todo: ability to switch between push and pull (double tap?)
+                if (!r2Hold) {
+                    r2Hold = true;
+                    //check double tap
+                    tapCounterLeftTrigger++;
+                    if (tapCounterLeftTrigger == 1) {
+                        //single tap
+                        doubleTapLeftTrigger.reset();
+                        tractorBeam.state = tractorBeam.mode;
+                    } else {
+                        //double tap
+                        tapCounterLeftTrigger = 0;
+                        //toggle between push and pull
+                        tractorBeam.state = tractorBeam.mode == TractorBeamComponent.State.push ? TractorBeamComponent.State.pull : TractorBeamComponent.State.push;
+                    }
+                    tractorBeam.mode = tractorBeam.state; //always update state
+                }
             }
-
-            desktopInput.setFocusToController();
+            //timeout
+            if (doubleTapLeftTrigger.canDoEvent()) {
+                tapCounterLeftTrigger = 0;
+            }
         } else {
             //todo: bug, stick drift and minor inputs seem to be interfering with mouse input
             if (desktopInput.getControllerHasFocus()) {
+                r2Hold = false;
+
                 control.attack = false;
 
                 LaserComponent laser = Mappers.laser.get(player);

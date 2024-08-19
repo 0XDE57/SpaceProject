@@ -29,9 +29,11 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
     private final long doubleTapTime = 300;
     private final SimpleTimer doubleTapLeft = new SimpleTimer(doubleTapTime);
     private final SimpleTimer doubleTapRight = new SimpleTimer(doubleTapTime);
+    private final SimpleTimer doubleTapLeftTrigger = new SimpleTimer(200);
     private int tapCounterLeft = 0;
     private int tapCounterRight = 0;
-    
+    private int tapCounterLeftTrigger = 0;
+
     @Override
     public void addedToEngine(Engine engine) {
         players = engine.getEntitiesFor(Family.all(ControlFocusComponent.class, ControllableComponent.class).get());
@@ -250,10 +252,29 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
                 laser.state = LaserComponent.State.on;
             }
 
+
             TractorBeamComponent tractorBeam = Mappers.tractor.get(player);
             if (tractorBeam != null) {
-                tractorBeam.state = TractorBeamComponent.State.push; //todo: ability to switch between push and pull (double tap?)
+                //check double tap
+                tapCounterLeftTrigger++;
+                if (tapCounterLeftTrigger == 1) {
+                    //single tap
+                    doubleTapLeftTrigger.reset();
+                    tractorBeam.state = tractorBeam.mode;
+                } else {
+                    //double tap
+                    tapCounterLeftTrigger = 0;
+                    //doubleTapLeftTrigger.reset();
+                    //toggle between push and pull
+                    tractorBeam.state = tractorBeam.mode == TractorBeamComponent.State.push ? TractorBeamComponent.State.pull : TractorBeamComponent.State.push;
+                }
+                tractorBeam.mode = tractorBeam.state; //always update state
             }
+            //timeout
+            if (doubleTapLeftTrigger.canDoEvent()) {
+                tapCounterLeftTrigger = 0;
+            }
+
             return true;
         }
         
@@ -285,6 +306,12 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             if (tractorBeam != null) {
                 tractorBeam.state = TractorBeamComponent.State.off;
             }
+
+            //timeout
+            if (doubleTapLeftTrigger.canDoEvent()) {
+                tapCounterLeftTrigger = 0;
+            }
+
             return true;
         }
         return false;
