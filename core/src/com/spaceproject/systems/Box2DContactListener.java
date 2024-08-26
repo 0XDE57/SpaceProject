@@ -106,7 +106,7 @@ public class Box2DContactListener implements ContactListener {
             //Gdx.app.debug(getClass().getSimpleName(), "ignore damage to self");
             return; //ignore self-inflicted damage
         }
-     
+
         AIComponent ai = Mappers.AI.get(attackedEntity);
         if (ai != null) {
             //focus camera on target
@@ -434,6 +434,18 @@ public class Box2DContactListener implements ContactListener {
             }
             return null;
         }
+
+        /////////////////////////////////////////////////////////
+        //goal: reward player for accuracy -> hits on reduce heat
+        //cannon upgrades?: level 1,2,3 eg: level 3 adds cooldown reduction on hit? could be a upgrade?
+        if (Mappers.asteroid.get(entity) != null) {
+            CannonComponent cannon = Mappers.cannon.get(source);
+            if (cannon != null) {
+                cannon.heat -= 0.05f;
+                if (cannon.heat < 0) cannon.heat = 0;
+            }
+        }///////////////////////////////////////////////////////
+        //todo: if source is player = hit marker?
 
         health.lastHitTime = GameScreen.getGameTimeCurrent();
         health.lastHitSource = source;
