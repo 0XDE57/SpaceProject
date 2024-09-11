@@ -54,16 +54,16 @@ public class SpaceStationSystem extends IteratingSystem {
 
         //update docked ships
         if (spaceStation.dockPortA != null) {
-            updateShipInDock(entity, spaceStation, stationPhysics, spaceStation.dockPortA, BodyBuilder.DOCK_A_ID);
+            updateShipInDock(entity, spaceStation, stationPhysics, spaceStation.dockPortA, BodyBuilder.DOCK_A_ID, deltaTime);
         }
         if (spaceStation.dockPortB != null) {
-            updateShipInDock(entity, spaceStation, stationPhysics, spaceStation.dockPortB, BodyBuilder.DOCK_B_ID);
+            updateShipInDock(entity, spaceStation, stationPhysics, spaceStation.dockPortB, BodyBuilder.DOCK_B_ID, deltaTime);
         }
         if (spaceStation.dockPortC != null) {
-            updateShipInDock(entity, spaceStation, stationPhysics, spaceStation.dockPortC, BodyBuilder.DOCK_C_ID);
+            updateShipInDock(entity, spaceStation, stationPhysics, spaceStation.dockPortC, BodyBuilder.DOCK_C_ID, deltaTime);
         }
         if (spaceStation.dockPortD != null) {
-            updateShipInDock(entity, spaceStation, stationPhysics, spaceStation.dockPortD, BodyBuilder.DOCK_D_ID);
+            updateShipInDock(entity, spaceStation, stationPhysics, spaceStation.dockPortD, BodyBuilder.DOCK_D_ID, deltaTime);
         }
 
         //draw docking pad
@@ -95,7 +95,7 @@ public class SpaceStationSystem extends IteratingSystem {
         shape.end();
     }
 
-    private void updateShipInDock(Entity stationEntity, SpaceStationComponent spaceStation, PhysicsComponent stationPhysics, Entity dockedShip, int dockId) {
+    private void updateShipInDock(Entity stationEntity, SpaceStationComponent spaceStation, PhysicsComponent stationPhysics, Entity dockedShip, int dockId, float deltaTime) {
         PhysicsComponent shipPhysics = Mappers.physics.get(dockedShip);
         if (shipPhysics.body == null) return;
         Transform transform = stationPhysics.body.getTransform();
@@ -111,12 +111,8 @@ public class SpaceStationSystem extends IteratingSystem {
                 shipPhysics.body.setTransform(tempVec, shipPhysics.body.getAngle());
                 shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
 
-                CargoComponent cargo = Mappers.cargo.get(dockedShip);
-                if (cargo.inventory.size() == 0) {
-                    heal(cargo, Mappers.health.get(dockedShip));
-                } else {
-                    sellCargo(cargo, shipPhysics.body.getPosition());
-                }
+                heal(Mappers.health.get(dockedShip), deltaTime);
+                sellCargo(Mappers.cargo.get(dockedShip), shipPhysics.body.getPosition());
             }
         }
 
@@ -232,26 +228,17 @@ public class SpaceStationSystem extends IteratingSystem {
         }
     }
 
-    private void heal(CargoComponent cargo, HealthComponent health) {
-        if (cargo == null || health == null) return;
+    private void heal(HealthComponent health, float deltaTime) {
+        if (health == null) return;
         if (health.maxHealth == health.health) return;
-        if (cargo.credits <= 0) return;
 
-        if (GameScreen.getGameTimeCurrent() - cargo.lastCollectTime < inventorySellTimer) return;
-
-        float healthMissing = health.maxHealth - health.health;
-        float healedUnits = healthMissing;
-        int creditCost = (int) (healthMissing * healthCostPerUnit);
-        if (creditCost > cargo.credits) {
-            creditCost = cargo.credits;
-            healedUnits = cargo.credits / healthCostPerUnit;
-        }
-        health.health += healedUnits;
+        float healRate = 30;
+        health.health += healRate * deltaTime;
+        /* todo: add repair sound to signal to player that ship is fully repaired
+        if (health.maxHealth == health.health) {
+            getEngine().getSystem(SoundSystem.class).heal();
+        }*/
         health.health = Math.min(health.health, health.maxHealth);
-        cargo.credits -= creditCost;
-        //getEngine().getSystem(HUDSystem.class).subCredits(creditCost);
-        //getEngine().getSystem(SoundSystem.class).heal();
-        Gdx.app.debug(getClass().getSimpleName(), "-" + creditCost + "c for repairs: +" + (int)healedUnits + "hp restored");
     }
 
 }
