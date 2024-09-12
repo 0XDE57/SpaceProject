@@ -464,7 +464,7 @@ public class Box2DContactListener implements ContactListener {
     
     private static void destroy(Engine engine, Entity entity, Entity source, Body damagedBody) {
         //create respawn entity for player
-        if (Mappers.controllable.get(entity) != null) {
+        if (Mappers.controlFocus.get(entity) != null) {
             Entity respawnEntity = new Entity();
             TransformComponent transform = new TransformComponent();
             transform.pos.set(Mappers.transform.get(entity).pos);
@@ -485,7 +485,10 @@ public class Box2DContactListener implements ContactListener {
                 respawn.reason = "hold [" + input.toUpperCase() + "] to activate shield";
             }
             respawnEntity.add(respawn);
-            respawnEntity.add(Mappers.trail.get(entity));
+            TrailComponent trailComponent = Mappers.trail.get(entity);
+            if (trailComponent != null) {
+                respawnEntity.add(trailComponent);
+            }
             respawnEntity.add(new RingEffectComponent());//todo: replace with explode particle effect
             engine.addEntity(respawnEntity);
             Gdx.app.debug(Box2DContactListener.class.getSimpleName(), "create respawn(" + respawn.reason + ") marker: " + DebugUtil.objString(respawnEntity) + " for " + DebugUtil.objString(entity));
