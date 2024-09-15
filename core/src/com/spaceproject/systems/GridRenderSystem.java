@@ -13,11 +13,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
@@ -57,6 +53,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     private final Color gridColorB = new Color(.51f, .5f, .5f, 0.3f);
     private final Color ringColor = Color.PURPLE.cpy();
     private final Color lineColor = Color.GREEN.cpy();
+    private final Color highlight = Color.WHITE.cpy();
     
     private final Color compassColor = Color.WHITE.cpy();
     private ImmutableArray<Entity> players;
@@ -213,28 +210,41 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     private void drawOrbitPath() {
         float alpha = MathUtils.clamp((cam.zoom / 150 / 2), 0, 1);
         if (MathUtils.isEqual(alpha, 0)) return;
-        
+
         ringColor.a = alpha;
         lineColor.a = alpha;
-        
+        highlight.a = alpha;
+
+        Body body = null;
+        if (players.size() > 0) {
+            body = Mappers.physics.get(players.first()).body;
+        }
+
         for (Entity entity : orbitEntities) {
             OrbitComponent orbit = Mappers.orbit.get(entity);
             TransformComponent entityPos = Mappers.transform.get(entity);
-            
-            if (orbit.parent != null) {
-                TransformComponent parentPos = Mappers.transform.get(orbit.parent);
-                shape.setColor(ringColor);
-                shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
-                shape.setColor(lineColor);
-                shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
-            }
-            
             TextureComponent tex = Mappers.texture.get(entity);
+
+            boolean intersects = false;
+
             if (tex != null) {
                 float radius = tex.texture.getWidth() * 0.5f * tex.scale;
+                if (body != null && orbit.parent != null) {
+                    Vector2 facing = MyMath.vector(body.getAngle(), 500000).add(body.getPosition());
+                    intersects = Intersector.intersectSegmentCircle(body.getPosition(), facing, entityPos.pos, radius * radius);
+                }
+                shape.setColor(intersects ? highlight : lineColor);
                 shape.circle(entityPos.pos.x, entityPos.pos.y, radius);
             }
-    
+
+            if (orbit.parent != null) {
+                TransformComponent parentPos = Mappers.transform.get(orbit.parent);
+                shape.setColor(intersects ? highlight : ringColor);
+                shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
+                shape.setColor(intersects ? highlight : lineColor);
+                shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
+            }
+
             AsteroidBeltComponent stellarDisk = Mappers.asteroidBelt.get(entity);
             if (stellarDisk != null) {
                 Vector2 pos = Mappers.transform.get(entity).pos;
@@ -288,7 +298,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         
         //draw velocity vector
         if (body.getLinearVelocity().len() >= 0.1f) {
-            Vector2 vel = MyMath.vector(body.getLinearVelocity().angleRad(), 500000).cpy();
+            Vector2 vel = MyMath.vector(body.getLinearVelocity().angleRad(), 500000);
             shape.rectLine(pos.x, pos.y, vel.x, vel.y, width, compassHighlight, compassHighlight);
             vel.set(MyMath.vector(body.getLinearVelocity().angleRad(), 50)).add(pos.x, pos.y);
 
