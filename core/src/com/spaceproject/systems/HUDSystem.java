@@ -21,7 +21,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.*;
@@ -96,7 +95,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             this.color = color;
         }
     }
-    private List<CreditsMarker> markers;
+    private final List<CreditsMarker> markers;
 
     private final UIConfig uiCFG = SpaceProject.configManager.getConfig(UIConfig.class);
     private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
@@ -303,6 +302,25 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                         drawHint("press [" + input + "] to take off");
                     }
                 }
+            }
+        }
+
+        Entity focused = getEngine().getSystem(GridRenderSystem.class).closest;
+        if (focused != null) {
+            PlanetComponent planet = Mappers.planet.get(focused);
+            if (planet != null) {
+                TransformComponent transform = Mappers.transform.get(focused);
+                tempProj.set(transform.pos.x, transform.pos.y, 0);
+                Vector3 screenPos = MyScreenAdapter.cam.project(tempProj);
+                float offset = layout.height * 1.5f;
+                float alpha = MathUtils.clamp((cam.zoom / 150 / 2), 0, 1);
+                inventoryFont.setColor(1, 1, 1, alpha);
+                layout.setText(inventoryFont, "<planet name>");
+                inventoryFont.draw(batch, layout, screenPos.x - layout.width*0.5f, screenPos.y + offset);
+                layout.setText(inventoryFont, "atmosphere: <unknown>");
+                inventoryFont.draw(batch, layout, screenPos.x - layout.width*0.5f, screenPos.y);
+                layout.setText(inventoryFont, "size: " + planet.mapSize);
+                inventoryFont.draw(batch, layout, screenPos.x - layout.width*0.5f, screenPos.y - offset);//replace with mass?
             }
         }
 

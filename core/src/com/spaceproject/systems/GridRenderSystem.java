@@ -62,7 +62,9 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     private ImmutableArray<Entity> stations;
     private Entity camMarker, mouseMarker;
     private float animate = 0;
-    
+
+    Entity closest;
+
     private SpriteBatch batch = new SpriteBatch();
     private BitmapFont subFont;
     
@@ -127,13 +129,11 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
 
         shape.end();
 
-        shape.begin(ShapeRenderer.ShapeType.Filled);
-
-        shape.end();
-        
-        //batch.begin();
-        //drawHint("an object in motion, remains in motion");
-        //batch.end();
+        /*
+        batch.begin();
+        drawHint("an object in motion, remains in motion");
+        batch.end();
+        */
     
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
@@ -209,7 +209,8 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         }
         return width;
     }
-    
+
+    float accumulator = 0;
     private void drawOrbitPath() {
         float alpha = MathUtils.clamp((cam.zoom / 150 / 2), 0, 1);
         if (MathUtils.isEqual(alpha, 0)) return;
@@ -223,6 +224,8 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
             body = Mappers.physics.get(players.first()).body;
         }
 
+        closest = null;
+        float distClosest = Float.MAX_VALUE;
         for (Entity entity : orbitEntities) {
             OrbitComponent orbit = Mappers.orbit.get(entity);
             TransformComponent transform = Mappers.transform.get(entity);
@@ -231,9 +234,17 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
             boolean intersects = false;
             if (tex != null) {
                 float radius = tex.texture.getWidth() * 0.5f * tex.scale;
-                if (body != null && orbit.parent != null) {
+                if (body != null && orbit.parent != null && !body.getLinearVelocity().isZero()) {
                     Vector2 facing = MyMath.vector(body.getAngle(), 500000).add(body.getPosition());
+                    //Vector2 facing = MyMath.vector(body.getLinearVelocity().angleRad(), 500000).add(body.getPosition());
                     intersects = Intersector.intersectSegmentCircle(body.getPosition(), facing, transform.pos, radius * radius);
+                    if (intersects) {
+                        float dist2 = body.getPosition().dst2(transform.pos);
+                        if (dist2 < distClosest) {
+                            distClosest = dist2;
+                            closest = entity;
+                        }
+                    }
                 }
                 shape.setColor(intersects ? highlight : lineColor);
                 shape.circle(transform.pos.x, transform.pos.y, radius);
@@ -263,6 +274,17 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
             stationColor.a = alpha;
             shape.setColor(stationColor);
             shape.circle(parentTransform.pos.x, parentTransform.pos.y, dist);
+        }
+
+        if (closest != null) {
+            Vector2 pos = Mappers.transform.get(closest).pos;
+            TextureComponent tex = Mappers.texture.get(closest);
+            float radius = tex.texture.getWidth() * 0.5f * tex.scale;
+            accumulator += 3 * Gdx.graphics.getDeltaTime();
+            lineColor.a = (float) Math.abs(Math.sin(accumulator));
+            shape.setColor(lineColor);
+            float width = radius * 2;
+            shape.rect(pos.x - width * 0.5f, pos.y - width * 0.5f, width, width);
         }
     }
     
@@ -306,8 +328,8 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         compassHighlight.a = alpha;
         
         //draw velocity vector
-        if (body.getLinearVelocity().len() >= 0.1f) {
-            Vector2 vel = MyMath.vector(body.getLinearVelocity().angleRad(), 500000);
+        if (!body.getLinearVelocity().isZero()) {
+            Vector2 vel = MyMath.vector(body.getLinearVelocity().angleRad(), 500000).cpy();
             shape.rectLine(pos.x, pos.y, vel.x, vel.y, width, compassHighlight, compassHighlight);
             vel.set(MyMath.vector(body.getLinearVelocity().angleRad(), 50)).add(pos.x, pos.y);
 
