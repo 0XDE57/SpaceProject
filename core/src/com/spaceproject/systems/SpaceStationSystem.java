@@ -93,6 +93,32 @@ public class SpaceStationSystem extends IteratingSystem {
             shape.circle(tempVec.x, tempVec.y, dock.getRadius());
         }
         shape.end();
+
+        shape.begin(ShapeRenderer.ShapeType.Line);
+        for (Fixture fixture : stationPhysics.body.getFixtureList()) {
+            if (fixture.getUserData() == null) continue;
+
+            shape.setColor(Color.WHITE);
+            int dockID = (int) fixture.getUserData();
+            if (spaceStation.dockPortA != null && dockID == BodyBuilder.DOCK_A_ID) {
+                shape.setColor(Color.GREEN);
+            }
+            if (spaceStation.dockPortB != null && dockID == BodyBuilder.DOCK_B_ID) {
+                shape.setColor(Color.GREEN);
+            }
+            if (spaceStation.dockPortC != null && dockID == BodyBuilder.DOCK_C_ID) {
+                shape.setColor(Color.GREEN);
+            }
+            if (spaceStation.dockPortD != null && dockID == BodyBuilder.DOCK_D_ID) {
+                shape.setColor(Color.GREEN);
+            }
+
+            CircleShape dock = (CircleShape) fixture.getShape();
+            tempVec.set(dock.getPosition());
+            transform.mul(tempVec);
+            shape.circle(tempVec.x, tempVec.y, dock.getRadius());
+        }
+        shape.end();
     }
 
     private void updateShipInDock(Entity stationEntity, SpaceStationComponent spaceStation, PhysicsComponent stationPhysics, Entity dockedShip, int dockId, float deltaTime) {
