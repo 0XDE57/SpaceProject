@@ -42,6 +42,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     final float[] engineColor;
     final float[] engineColorBoost;
     final float[] engineColorHyper;
+    final float[] engineColorDamage;
     
     float particleScale = 0.02f;
     
@@ -58,7 +59,8 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
         engineColor = new float[]{ 1, 0.34901962f, 0.047058824f };
         engineColorBoost = new float[]{ 0.047058824f, 0.34901962f, 1 };
         engineColorHyper = new float[]{ 1, 0.047058824f, 0.34901962f };
-        
+        engineColorDamage = new float[]{ 1, 0.047058824f, 0.047058824f };
+
         //projectile charge
         chargeEffect = new ParticleEffect();
         chargeEffect.load(Gdx.files.internal("particles/absorb2.particle"), Gdx.files.internal("particles/"));
@@ -200,6 +202,9 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
                         tint.setColors(engineColorBoost);
                     } else {
                         tint.setColors(engineColor);
+                    }
+                    if (GameScreen.getGameTimeCurrent() - Mappers.health.get(entity).lastHitTime <1000) {
+                        tint.setColors(engineColorDamage);
                     }
                 }
             }
