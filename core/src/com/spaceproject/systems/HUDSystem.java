@@ -577,7 +577,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         drawPlayerShield(entity, barX, healthBarY, barWidth, barHeight);
         drawPlayerAmmoBar(entity, barX, ammoBarY, barWidth, barHeight);
     }
-    
+
+    float damageAnim = 0;
     private void drawPlayerHealth(Entity entity, float x, float y, float width, float height) {
         HealthComponent health = Mappers.health.get(entity);
         if (health == null) return;
@@ -586,19 +587,25 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape.rect(x, y, width, height);
     
         float ratioHP = health.health / health.maxHealth;
-        shape.setColor(1 - ratioHP, ratioHP, 0, uiCFG.entityHPbarOpacity);
-        //if (ratioHP < 1/4) {
-        // fade red border in and out anim
-        //  shape.setColor(sin(accumulator), 0, 0, 1);
-        // }
-        if (GameScreen.getGameTimeCurrent() - health.lastHitTime < 1000) {
-            shape.setColor(1, 0, 0, 1);
-
+        boolean warning = ratioHP < 0.25f;
+        boolean hit = GameScreen.getGameTimeCurrent() - health.lastHitTime < 1000;
+        if (hit || warning) {
+            if (warning) {
+                damageAnim += 10 * Gdx.graphics.getDeltaTime();
+                float alpha = (float) Math.abs(Math.sin(damageAnim));
+                shape.setColor(1, 0, 0, alpha);
+            } else {
+                shape.setColor(1, 0, 0, 1);
+            }
+            //border
             int thickness = 2;
             shape.rectLine(x, y+height, x+width, y+height, thickness);//top
             shape.rectLine(x, y, x+width, y,thickness);//bottom
             shape.rectLine(x, y+height, x, y, thickness);//left
             shape.rectLine(x+width, y+height, x+width, y, thickness);//right
+        }
+        if (!hit) {
+            shape.setColor(1 - ratioHP, ratioHP, 0, uiCFG.entityHPbarOpacity);
         }
 
         shape.rect(x, y, width * ratioHP, height);
