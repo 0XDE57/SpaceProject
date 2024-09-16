@@ -52,12 +52,14 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     private final Color gridColor = Color.BLACK.cpy();
     private final Color gridColorB = new Color(.51f, .5f, .5f, 0.3f);
     private final Color ringColor = Color.PURPLE.cpy();
-    private final Color lineColor = Color.GREEN.cpy();
+    private final Color lineColor = new Color(0.15f, 0.5f, 0.9f, 0.9f);;
     private final Color highlight = Color.WHITE.cpy();
+    private final Color stationColor = Color.GREEN.cpy();
     
     private final Color compassColor = Color.WHITE.cpy();
     private ImmutableArray<Entity> players;
     private ImmutableArray<Entity> orbitEntities;
+    private ImmutableArray<Entity> stations;
     private Entity camMarker, mouseMarker;
     private float animate = 0;
     
@@ -76,6 +78,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     public void addedToEngine(Engine engine) {
         orbitEntities = engine.getEntitiesFor(Family.all(OrbitComponent.class).get());
         players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).exclude(DockedComponent.class).get());
+        stations = engine.getEntitiesFor(Family.all(SpaceStationComponent.class, TransformComponent.class).get());
     }
     
     @Override
@@ -222,19 +225,18 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
 
         for (Entity entity : orbitEntities) {
             OrbitComponent orbit = Mappers.orbit.get(entity);
-            TransformComponent entityPos = Mappers.transform.get(entity);
+            TransformComponent transform = Mappers.transform.get(entity);
             TextureComponent tex = Mappers.texture.get(entity);
 
             boolean intersects = false;
-
             if (tex != null) {
                 float radius = tex.texture.getWidth() * 0.5f * tex.scale;
                 if (body != null && orbit.parent != null) {
                     Vector2 facing = MyMath.vector(body.getAngle(), 500000).add(body.getPosition());
-                    intersects = Intersector.intersectSegmentCircle(body.getPosition(), facing, entityPos.pos, radius * radius);
+                    intersects = Intersector.intersectSegmentCircle(body.getPosition(), facing, transform.pos, radius * radius);
                 }
                 shape.setColor(intersects ? highlight : lineColor);
-                shape.circle(entityPos.pos.x, entityPos.pos.y, radius);
+                shape.circle(transform.pos.x, transform.pos.y, radius);
             }
 
             if (orbit.parent != null) {
@@ -242,18 +244,25 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
                 shape.setColor(intersects ? highlight : ringColor);
                 shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
                 shape.setColor(intersects ? highlight : lineColor);
-                shape.line(parentPos.pos.x, parentPos.pos.y, entityPos.pos.x, entityPos.pos.y);
+                shape.line(parentPos.pos.x, parentPos.pos.y, transform.pos.x, transform.pos.y);
             }
 
             AsteroidBeltComponent stellarDisk = Mappers.asteroidBelt.get(entity);
             if (stellarDisk != null) {
                 Vector2 pos = Mappers.transform.get(entity).pos;
-                shape.setColor(lineColor);
-                shape.circle(pos.x, pos.y, stellarDisk.radius);
-                shape.setColor(ringColor);
+                shape.setColor(gridColorB);
                 shape.circle(pos.x, pos.y, stellarDisk.radius - (stellarDisk.bandWidth / 2));
                 shape.circle(pos.x, pos.y, stellarDisk.radius + (stellarDisk.bandWidth / 2));
             }
+        }
+
+        for (Entity entity : stations) {
+            TransformComponent transform = Mappers.transform.get(entity);
+            TransformComponent parentTransform = Mappers.transform.get(Mappers.spaceStation.get(entity).parentOrbitBody);
+            float dist = transform.pos.dst(parentTransform.pos);
+            stationColor.a = alpha;
+            shape.setColor(stationColor);
+            shape.circle(parentTransform.pos.x, parentTransform.pos.y, dist);
         }
     }
     
