@@ -1,15 +1,19 @@
 package com.spaceproject.systems;
 
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Transform;
@@ -24,16 +28,32 @@ public class SpaceStationSystem extends IteratingSystem {
 
     private final ShapeRenderer shape;
     private final Vector2 tempVec = new Vector2();
-    private final float healthCostPerUnit = 15.0f; //how many credits per unit of health
     private final long inventorySellTimer = 400;
+    private float animate = 0;
+
+    private ImmutableArray<Entity> players;
+    Body body = null;
 
     public SpaceStationSystem() {
         super(Family.all(SpaceStationComponent.class, TransformComponent.class).get());
         shape = new ShapeRenderer();
     }
-    
+
+
+    @Override
+    public void addedToEngine(Engine engine) {
+        players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).exclude(DockedComponent.class).get());
+        super.addedToEngine(engine);
+    }
+
     @Override
     public void update(float deltaTime) {
+        if (players != null && players.size() > 0) {
+            body = Mappers.physics.get(players.first()).body;
+        } else {
+            body = null;
+        }
+        animate += 5 * deltaTime;
         shape.setProjectionMatrix(GameScreen.cam.combined);
         super.update(deltaTime);
     }
@@ -116,6 +136,17 @@ public class SpaceStationSystem extends IteratingSystem {
             CircleShape dock = (CircleShape) fixture.getShape();
             tempVec.set(dock.getPosition());
             transform.mul(tempVec);
+
+            //highlight landing pad when player velocity vector intersect with dock
+            if (body != null && !body.getLinearVelocity().isZero()) {
+                Vector2 facing = MyMath.vector(body.getLinearVelocity().angleRad(), 500000).add(body.getPosition());
+                boolean intersects = Intersector.intersectSegmentCircle(body.getPosition(), facing, tempVec, dock.getRadius() * dock.getRadius());
+                if (intersects) {
+                    float g = (float) Math.abs(Math.sin(animate));
+                    shape.setColor(0, g, 0, 1);
+                }
+            }
+
             shape.circle(tempVec.x, tempVec.y, dock.getRadius());
         }
         shape.end();
