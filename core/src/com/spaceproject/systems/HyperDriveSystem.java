@@ -35,11 +35,6 @@ public class HyperDriveSystem extends IteratingSystem {
                 // override box2d physics with our velocity
                 TransformComponent transform = Mappers.transform.get(entity);
                 transform.pos.add(hyperDrive.velocity.cpy().scl(deltaTime));
-    
-                // turn off
-                if (hyperDrive.activate && hyperDrive.graceTimer.tryEvent()) {
-                    disengageHyperDrive(entity, hyperDrive);
-                }
                 break;
             case charging:
                 //cancel charge
