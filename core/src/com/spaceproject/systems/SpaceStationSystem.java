@@ -191,6 +191,12 @@ public class SpaceStationSystem extends IteratingSystem {
         if (shield != null && shield.state == ShieldComponent.State.on) {
             return; //ignore shielded entities
         }
+        HyperDriveComponent hyperdrive = Mappers.hyper.get(vehicleEntity);
+        if (hyperdrive != null && hyperdrive.state == HyperDriveComponent.State.charging) {
+            //cancel charge
+            hyperdrive.chargeTimer.reset();
+            hyperdrive.state = HyperDriveComponent.State.off;
+        }
 
         SpaceStationComponent station = Mappers.spaceStation.get(stationEntity);
         String dockedPort = "";
