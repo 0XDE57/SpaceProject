@@ -74,6 +74,7 @@ public class SpaceStationMenu {
 
         TextButton buttonHyperDrive = new TextButton("[" + colorItem + "]" + hyperdriveUpgrade + "   [" + colorCredits + "]" + costHyper, VisUI.getSkin());
         buttonHyperDrive.getLabel().setAlignment(Align.left);
+        buttonHyperDrive.setDisabled(Mappers.hyper.get(player) != null);
         buttonHyperDrive.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -99,6 +100,7 @@ public class SpaceStationMenu {
                 hyperDrive.graceTimer = new SimpleTimer(1000);
                 player.add(hyperDrive);
                 //getEngine().getSystem(SpaceStationSystem.class).purchase(player,HyperDrive.class);
+                buttonHyperDrive.setDisabled(true);
             }
         });
         buttonHyperDrive.addListener(new FocusListener() {
@@ -111,6 +113,7 @@ public class SpaceStationMenu {
 
         TextButton buttonShield = new TextButton("[" + colorItem + "]" + shieldUpgrade + "  [" + colorCredits + "]" + costShield, VisUI.getSkin());
         buttonShield.getLabel().setAlignment(Align.left);
+        buttonShield.setDisabled(Mappers.shield.get(player) != null);
         VehicleComponent vehicle = Mappers.vehicle.get(player);
         buttonShield.addListener(new ChangeListener() {
             @Override
@@ -140,6 +143,8 @@ public class SpaceStationMenu {
                 shield.heatResistance = 0f;
                 shield.cooldownRate = 0.1f;
                 player.add(shield);
+
+                buttonShield.setDisabled(true);
             }
         });
         buttonShield.addListener(new FocusListener() {
@@ -152,6 +157,7 @@ public class SpaceStationMenu {
 
         TextButton buttonLaser = new TextButton("[" + colorItem + "]" + laserUpgrade + "  [" + colorCredits + "]               " + costLaser, VisUI.getSkin());
         buttonLaser.getLabel().setAlignment(Align.left);
+        buttonLaser.setDisabled(Mappers.laser.get(player) != null || vehicle.tools.containsKey(VehicleComponent.Tool.laser.ordinal()));
         buttonLaser.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -173,6 +179,8 @@ public class SpaceStationMenu {
                 int referenceWavelength = 589;//"yellow doublet" sodium D line
                 LaserComponent laser = new LaserComponent(520, 250, 30, 1);
                 vehicle.tools.put(VehicleComponent.Tool.laser.ordinal(), laser);
+
+                buttonLaser.setDisabled(true);
             }
         });
         buttonLaser.addListener(new FocusListener() {
@@ -185,6 +193,7 @@ public class SpaceStationMenu {
 
         TextButton buttonTractorBeam = new TextButton("[" + colorItem + "]" + tractorUpgrade + "  [" + colorCredits + "] " + costTractorBeam, VisUI.getSkin());
         buttonTractorBeam.getLabel().setAlignment(Align.left);
+        buttonTractorBeam.setDisabled(Mappers.tractor.get(player) != null || vehicle.tools.containsKey(VehicleComponent.Tool.tractor.ordinal()));
         buttonTractorBeam.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -208,6 +217,8 @@ public class SpaceStationMenu {
                 tractorBeam.maxDist = 150;
                 tractorBeam.magnitude = 70000;
                 vehicle.tools.put(VehicleComponent.Tool.tractor.ordinal(), tractorBeam);
+
+                buttonTractorBeam.setDisabled(true);
             }
         });
         buttonTractorBeam.addListener(new FocusListener() {
