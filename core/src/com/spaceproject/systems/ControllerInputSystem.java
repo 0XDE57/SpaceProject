@@ -124,6 +124,11 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             
             if (control.boost) {
                 control.movementMultiplier = 1;
+
+                HyperDriveComponent hyper = Mappers.hyper.get(player);
+                if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
+                    HyperDriveSystem.disengageHyperDrive(player, hyper);
+                }
             }
             
             DashComponent dash = Mappers.dash.get(player);
@@ -184,7 +189,12 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             if (doubleTapRight.canDoEvent()) {
                 tapCounterRight = 0;
             }
-            
+            if (buttonDown) {
+                HyperDriveComponent hyper = Mappers.hyper.get(player);
+                if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
+                    HyperDriveSystem.disengageHyperDrive(player, hyper);
+                }
+            }
             return true;
         }
         
@@ -211,7 +221,12 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
             if (doubleTapLeft.canDoEvent()) {
                 tapCounterLeft = 0;
             }
-            
+            if (buttonDown) {
+                HyperDriveComponent hyper = Mappers.hyper.get(player);
+                if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
+                    HyperDriveSystem.disengageHyperDrive(player, hyper);
+                }
+            }
             return true;
         }
         

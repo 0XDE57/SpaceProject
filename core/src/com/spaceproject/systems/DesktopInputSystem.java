@@ -76,6 +76,13 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         control.movementMultiplier = 1; // set multiplier to full power because a key switch is on or off
         if (keycode == keyCFG.forward) {
             control.moveForward = keyDown;
+            if (keyDown) {
+                //cancel hyperdrive if active
+                HyperDriveComponent hyper = Mappers.hyper.get(player);
+                if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
+                    HyperDriveSystem.disengageHyperDrive(player, hyper);
+                }
+            }
             return true;
         }
 
@@ -99,6 +106,14 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             //timeout
             if (doubleTapRight.canDoEvent()) {
                 tapCounterRight = 0;
+            }
+
+            if (keyDown) {
+                //cancel hyperdrive if active
+                HyperDriveComponent hyper = Mappers.hyper.get(player);
+                if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
+                    HyperDriveSystem.disengageHyperDrive(player, hyper);
+                }
             }
             return true;
         }
@@ -124,13 +139,19 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             if (doubleTapLeft.canDoEvent()) {
                 tapCounterLeft = 0;
             }
+            if (keyDown) {
+                //cancel hyperdrive if active
+                HyperDriveComponent hyper = Mappers.hyper.get(player);
+                if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
+                    HyperDriveSystem.disengageHyperDrive(player, hyper);
+                }
+            }
             return true;
         }
 
         if (keycode == keyCFG.back) {
             control.moveBack = keyDown;
-            
-            if (control.moveBack) {
+            if (keyDown) {
                 //cancel hyperdrive if active
                 HyperDriveComponent hyper = Mappers.hyper.get(player);
                 if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
@@ -142,6 +163,13 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
 
         if (keycode == keyCFG.boost) {
             control.boost = keyDown;
+            if (keyDown) {
+                //cancel hyperdrive if active
+                HyperDriveComponent hyper = Mappers.hyper.get(player);
+                if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
+                    HyperDriveSystem.disengageHyperDrive(player, hyper);
+                }
+            }
             return true;
         }
 
