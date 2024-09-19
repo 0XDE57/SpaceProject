@@ -72,8 +72,9 @@ public class SpaceStationMenu {
         creditsTable.add(creditsText);
         creditsTable.add(creditsValue);
 
-        TextButton buttonHyperDrive = new TextButton("[" + colorItem + "]" + hyperdriveUpgrade + "   [" + colorCredits + "]" + costHyper, VisUI.getSkin());
+        TextButton buttonHyperDrive = new TextButton("[" + colorItem + "]" + hyperdriveUpgrade, VisUI.getSkin());
         buttonHyperDrive.getLabel().setAlignment(Align.left);
+        buttonHyperDrive.add(new Label("[" + colorCredits + "]" + costHyper, VisUI.getSkin()));
         buttonHyperDrive.setDisabled(Mappers.hyper.get(player) != null);
         buttonHyperDrive.addListener(new ChangeListener() {
             @Override
@@ -111,8 +112,9 @@ public class SpaceStationMenu {
             }
         });
 
-        TextButton buttonShield = new TextButton("[" + colorItem + "]" + shieldUpgrade + "  [" + colorCredits + "]" + costShield, VisUI.getSkin());
+        TextButton buttonShield = new TextButton("[" + colorItem + "]" + shieldUpgrade, VisUI.getSkin());
         buttonShield.getLabel().setAlignment(Align.left);
+        buttonShield.add(new Label("[" + colorCredits + "]" + costShield, VisUI.getSkin()));
         buttonShield.setDisabled(Mappers.shield.get(player) != null);
         VehicleComponent vehicle = Mappers.vehicle.get(player);
         buttonShield.addListener(new ChangeListener() {
@@ -155,8 +157,9 @@ public class SpaceStationMenu {
             }
         });
 
-        TextButton buttonLaser = new TextButton("[" + colorItem + "]" + laserUpgrade + "  [" + colorCredits + "]               " + costLaser, VisUI.getSkin());
+        TextButton buttonLaser = new TextButton("[" + colorItem + "]" + laserUpgrade, VisUI.getSkin());
         buttonLaser.getLabel().setAlignment(Align.left);
+        buttonLaser.add(new Label("[" + colorCredits + "]" + costLaser, VisUI.getSkin()));
         buttonLaser.setDisabled(Mappers.laser.get(player) != null || vehicle.tools.containsKey(VehicleComponent.Tool.laser.ordinal()));
         buttonLaser.addListener(new ChangeListener() {
             @Override
@@ -191,8 +194,9 @@ public class SpaceStationMenu {
             }
         });
 
-        TextButton buttonTractorBeam = new TextButton("[" + colorItem + "]" + tractorUpgrade + "  [" + colorCredits + "] " + costTractorBeam, VisUI.getSkin());
+        TextButton buttonTractorBeam = new TextButton("[" + colorItem + "]" + tractorUpgrade, VisUI.getSkin());
         buttonTractorBeam.getLabel().setAlignment(Align.left);
+        buttonTractorBeam.add(new Label("[" + colorCredits + "]" + costTractorBeam, VisUI.getSkin()));
         buttonTractorBeam.setDisabled(Mappers.tractor.get(player) != null || vehicle.tools.containsKey(VehicleComponent.Tool.tractor.ordinal()));
         buttonTractorBeam.addListener(new ChangeListener() {
             @Override
@@ -230,8 +234,9 @@ public class SpaceStationMenu {
         });
 
         int hp = 100;
-        TextButton buttonAddHealth = new TextButton("Increase [" + colorItem + "]Health [" + colorCredits + "]" + costHP, VisUI.getSkin());
+        TextButton buttonAddHealth = new TextButton("Increase [" + colorItem + "]Health", VisUI.getSkin());
         buttonAddHealth.getLabel().setAlignment(Align.left);
+        buttonAddHealth.add(new Label("[" + colorCredits + "]" + costHP, VisUI.getSkin()));
         buttonAddHealth.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -258,8 +263,9 @@ public class SpaceStationMenu {
             }
         });
 
-        TextButton buttonAddThrust = new TextButton("Increase [" + colorItem + "]Thrust  [" + colorCredits + "]" + costThrust, VisUI.getSkin());
+        TextButton buttonAddThrust = new TextButton("Increase [" + colorItem + "]Thrust", VisUI.getSkin());
         buttonAddThrust.getLabel().setAlignment(Align.left);
+        buttonAddThrust.add(new Label("[" + colorCredits + "]" + costThrust, VisUI.getSkin()));
         int thrust = 200;
         buttonAddThrust.addListener(new ChangeListener() {
             @Override
@@ -287,8 +293,9 @@ public class SpaceStationMenu {
             }
         });
 
-        TextButton buttonLaserPower = new TextButton("Increase [" + colorItem + "]LASER DMG[" + colorCredits + "]" + costDMG, VisUI.getSkin());
+        TextButton buttonLaserPower = new TextButton("Increase [" + colorItem + "]LASER DMG  ", VisUI.getSkin());
         buttonLaserPower.getLabel().setAlignment(Align.left);
+        buttonLaserPower.add(new Label("[" + colorCredits + "]" + costDMG, VisUI.getSkin()));
         int damage = 200;
         buttonLaserPower.addListener(new ChangeListener() {
             @Override
