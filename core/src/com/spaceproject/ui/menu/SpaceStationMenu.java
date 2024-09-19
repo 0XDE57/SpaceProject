@@ -157,6 +157,7 @@ public class SpaceStationMenu {
             }
         });
 
+        TextButton buttonLaserPower = new TextButton("Increase [" + colorItem + "]LASER DMG  ", VisUI.getSkin());
         TextButton buttonLaser = new TextButton("[" + colorItem + "]" + laserUpgrade, VisUI.getSkin());
         buttonLaser.getLabel().setAlignment(Align.left);
         buttonLaser.add(new Label("[" + colorCredits + "]" + costLaser, VisUI.getSkin()));
@@ -184,6 +185,7 @@ public class SpaceStationMenu {
                 vehicle.tools.put(VehicleComponent.Tool.laser.ordinal(), laser);
 
                 buttonLaser.setDisabled(true);
+                buttonLaserPower.setDisabled(false);
             }
         });
         buttonLaser.addListener(new FocusListener() {
@@ -293,9 +295,10 @@ public class SpaceStationMenu {
             }
         });
 
-        TextButton buttonLaserPower = new TextButton("Increase [" + colorItem + "]LASER DMG  ", VisUI.getSkin());
+
         buttonLaserPower.getLabel().setAlignment(Align.left);
         buttonLaserPower.add(new Label("[" + colorCredits + "]" + costDMG, VisUI.getSkin()));
+        buttonLaserPower.setDisabled(Mappers.laser.get(player) == null && !vehicle.tools.containsKey(VehicleComponent.Tool.laser.ordinal()));
         int damage = 200;
         buttonLaserPower.addListener(new ChangeListener() {
             @Override
@@ -308,7 +311,12 @@ public class SpaceStationMenu {
                     return;
                 }
                 LaserComponent laserComponent = Mappers.laser.get(player);
-                if (laserComponent == null) return;
+                if (laserComponent == null) {
+                    laserComponent = (LaserComponent) vehicle.tools.get(VehicleComponent.Tool.laser.ordinal());
+                    if (laserComponent == null) {
+                        return;
+                    }
+                }
                 //purchase
                 cargo.credits -= costDMG;
                 creditsValue.setText(Mappers.cargo.get(player).credits);
@@ -321,6 +329,9 @@ public class SpaceStationMenu {
             @Override
             public boolean handle(Event event) {
                 LaserComponent laserComponent = Mappers.laser.get(player);
+                if (laserComponent == null) {
+                    laserComponent = (LaserComponent) vehicle.tools.get(VehicleComponent.Tool.laser.ordinal());
+                }
                 text.setText("Increase [" + colorItem + "]DMG[]\nby [" + colorCredits + "]"
                         + damage +"[]\nCurrent: "+ (laserComponent == null ? 0 : laserComponent.damage));
                 return super.handle(event);
