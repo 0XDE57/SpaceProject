@@ -54,13 +54,13 @@ public class SpaceStationMenu {
         String shieldDescription = "[" + colorItem + "]" + shieldUpgrade + "[]\nprotect your ship from damage.\n\nHold [" + colorControl + "][" + shieldControl + "][] to activate.";
         String laserDescription = "[" + colorItem + "]" + laserUpgrade + "[]\nprecision tool.\n\nHold [" + colorControl + "][" + laserControl + "][] to activate.";
         String tractorBeamDescription = "[" + colorItem + "]" + tractorUpgrade + "[]\npush or pull objects.\n\nHold [" + colorControl + "][" + laserControl + "][] to activate.\nDouble Tap to toggle between PUSH & PULL";
-        int costHyper = 50000;
-        int costShield = 5000;
-        int costLaser = 20000;
+        int costHyper = 100000;
+        int costShield = 25000;
+        int costLaser = 25000;
         int costTractorBeam = 10000;
-        int costHP = 10000;
-        int costThrust = 1000;
-        int costDMG = 1000;
+        int costHP = 40000;
+        int costThrust = 30000;
+        int costDMG = 20000;
 
         ScrollableTextArea text = new ScrollableTextArea("");
         text.removeListener(text.getDefaultInputListener());
