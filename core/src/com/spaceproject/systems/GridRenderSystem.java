@@ -51,7 +51,6 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     private Vector3 bottomRight = new Vector3();
     private final Color gridColor = Color.BLACK.cpy();
     private final Color gridColorB = new Color(.51f, .5f, .5f, 0.3f);
-    private final Color ringColor = Color.PURPLE.cpy();
     private final Color lineColor = new Color(0.15f, 0.5f, 0.9f, 0.9f);;
     private final Color highlight = Color.WHITE.cpy();
     private final Color stationColor = Color.GREEN.cpy();
@@ -215,7 +214,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         float alpha = MathUtils.clamp((cam.zoom / 150 / 2), 0, 1);
         if (MathUtils.isEqual(alpha, 0)) return;
 
-        ringColor.a = alpha;
+        //ringColor.a = alpha;
         lineColor.a = alpha;
         highlight.a = alpha;
 
@@ -252,9 +251,8 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
 
             if (orbit.parent != null) {
                 TransformComponent parentPos = Mappers.transform.get(orbit.parent);
-                shape.setColor(intersects ? highlight : ringColor);
-                shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
                 shape.setColor(intersects ? highlight : lineColor);
+                shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
                 shape.line(parentPos.pos.x, parentPos.pos.y, transform.pos.x, transform.pos.y);
             }
 
