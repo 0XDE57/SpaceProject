@@ -62,7 +62,8 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     private Entity camMarker, mouseMarker;
     private float animate = 0;
 
-    Entity closest;
+    Entity closestFacing;
+    Entity closestVelocity;
 
     private SpriteBatch batch = new SpriteBatch();
     private BitmapFont subFont;
@@ -223,35 +224,46 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
             body = Mappers.physics.get(players.first()).body;
         }
 
-        closest = null;
-        float distClosest = Float.MAX_VALUE;
+        closestFacing = null;
+        closestVelocity = null;
+        float distClosestFacing = Float.MAX_VALUE;
+        float distClosestVelocity = Float.MAX_VALUE;
         for (Entity entity : orbitEntities) {
             OrbitComponent orbit = Mappers.orbit.get(entity);
             TransformComponent transform = Mappers.transform.get(entity);
             TextureComponent tex = Mappers.texture.get(entity);
 
-            boolean intersects = false;
+            boolean intersectsFacing = false;
+            boolean intersectsVelocity = false;
             if (tex != null) {
                 float radius = tex.texture.getWidth() * 0.5f * tex.scale;
                 if (body != null && orbit.parent != null && !body.getLinearVelocity().isZero()) {
                     Vector2 facing = MyMath.vector(body.getAngle(), 500000).add(body.getPosition());
-                    //Vector2 facing = MyMath.vector(body.getLinearVelocity().angleRad(), 500000).add(body.getPosition());
-                    intersects = Intersector.intersectSegmentCircle(body.getPosition(), facing, transform.pos, radius * radius);
-                    if (intersects) {
+                    intersectsFacing = Intersector.intersectSegmentCircle(body.getPosition(), facing, transform.pos, radius * radius);
+                    if (intersectsFacing) {
                         float dist2 = body.getPosition().dst2(transform.pos);
-                        if (dist2 < distClosest) {
-                            distClosest = dist2;
-                            closest = entity;
+                        if (dist2 < distClosestFacing) {
+                            distClosestFacing = dist2;
+                            closestFacing = entity;
+                        }
+                    }
+                    Vector2 velocity = MyMath.vector(body.getLinearVelocity().angleRad(), 500000).add(body.getPosition());
+                    intersectsVelocity = Intersector.intersectSegmentCircle(body.getPosition(),velocity, transform.pos, radius * radius);
+                    if (intersectsVelocity) {
+                        float dist2 = body.getPosition().dst2(transform.pos);
+                        if (dist2 < distClosestVelocity) {
+                            distClosestVelocity = dist2;
+                            closestVelocity = entity;
                         }
                     }
                 }
-                shape.setColor(intersects ? highlight : lineColor);
+                shape.setColor(intersectsFacing ? highlight : lineColor);
                 shape.circle(transform.pos.x, transform.pos.y, radius);
             }
 
             if (orbit.parent != null) {
                 TransformComponent parentPos = Mappers.transform.get(orbit.parent);
-                shape.setColor(intersects ? highlight : lineColor);
+                shape.setColor(intersectsFacing ? highlight : lineColor);
                 shape.circle(parentPos.pos.x, parentPos.pos.y, orbit.radialDistance);
                 shape.line(parentPos.pos.x, parentPos.pos.y, transform.pos.x, transform.pos.y);
             }
@@ -274,11 +286,20 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
             shape.circle(parentTransform.pos.x, parentTransform.pos.y, dist);
         }
 
-        if (closest != null) {
-            Vector2 pos = Mappers.transform.get(closest).pos;
-            TextureComponent tex = Mappers.texture.get(closest);
+        accumulator += 3 * Gdx.graphics.getDeltaTime();
+        if (closestFacing != null) {
+            Vector2 pos = Mappers.transform.get(closestFacing).pos;
+            TextureComponent tex = Mappers.texture.get(closestFacing);
             float radius = tex.texture.getWidth() * 0.5f * tex.scale;
-            accumulator += 3 * Gdx.graphics.getDeltaTime();
+            lineColor.a = (float) Math.abs(Math.sin(accumulator));
+            shape.setColor(lineColor);
+            float width = radius * 2;
+            shape.rect(pos.x - width * 0.5f, pos.y - width * 0.5f, width, width);
+        }
+        if (closestVelocity != null) {
+            Vector2 pos = Mappers.transform.get(closestVelocity).pos;
+            TextureComponent tex = Mappers.texture.get(closestVelocity);
+            float radius = tex.texture.getWidth() * 0.5f * tex.scale;
             lineColor.a = (float) Math.abs(Math.sin(accumulator));
             shape.setColor(lineColor);
             float width = radius * 2;

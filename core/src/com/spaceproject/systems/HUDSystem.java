@@ -305,7 +305,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             }
         }
 
-        Entity focused = getEngine().getSystem(GridRenderSystem.class).closest;
+        Entity focused = getEngine().getSystem(GridRenderSystem.class).closestFacing;
         if (focused != null) {
             PlanetComponent planet = Mappers.planet.get(focused);
             if (planet != null) {
