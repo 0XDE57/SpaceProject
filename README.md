@@ -7,18 +7,17 @@ Welcome to A Space Project. A project involving space...
 ***Game is in pre-alpha prototype phase. More of a sandbox than a game, there is not much content yet***
 
 ## Features
-* Fly around the starsystem in a spaceship
-* Faster Than Light Travel! (yeah it's real, cuz like quantum anti-dark matter n' stuff yo)
+* Fly around the star system in a spaceship
 * Discover a plethora of astronomical bodies including:
     * Unary star systems, Binary star systems, Trinary star systems, and even ~~Quadri... quatro? quadrino-ary?~~
     * lonely rogue planets who lost their sun :(
     * Destructible asteroids using cutting edge - ***t r i ▲ n g l e s*** -
-* Fight against other ship (disabled for now)
+* Mine asteroids for resources. Upgrade ship.
+* Faster Than Light Travel! (yeah it's real, cuz like quantum anti-dark matter n' stuff yo)
+* ~~Fight against other ship~~ (disabled for now)
   * combat broken placeholder AI while I figure out the rest of the engine.
-* Land on and explore planets (in theory, probably out of scope):
-   * The planets are flat (ha, take that Round Earthers!)
-      * Actually the planets are ***donuts*** (ha, take that Flat Earthers!)
-* Controller Support (works in game but not menus)
+* Land on and explore finite (toroidally wrapped) planets (in theory, probably out of scope).
+* Controller Support (works in game but not all menus)
    * hot plugging!
 * Sound?
   * there is no sound in the vacuum of space silly
@@ -44,7 +43,7 @@ Welcome to A Space Project. A project involving space...
 | Defense: Dodge (Barrel Roll)   | Double Tap A/D | Double Tap R1/L1  |
 | Interact                       | E             | D-Pad Down         |
 | Cycle Equiped Tool             | Q             | D-Pad Right        |
-| Toggle HyperDrive              | Hold 1        | Hold B             |
+| Engage HyperDrive              | Hold 1        | Hold B             |
 | Enter/Exit vehicle             | G             | Y                  |
 | Zoom                           | Scroll Wheel  | Right JoyStick     |
 | Reset Zoom                     | Middle-Click  | Click in Right stick |
@@ -66,9 +65,6 @@ wiki: https://github.com/0XDE57/SpaceProject/wiki
 
 project: https://github.com/users/0XDE57/projects/1
 
-devlog: https://forum.level1techs.com/t/devember-2022-a-space-project-open-source-space-game
-
-Special thanks to Level1Techs for hosting Devember 2022 and providing: 5900x + x570 mobo + 32GB RAM!
 
 ## License
 Apache 2.0: see [LICENSE.md](/LICENSE.md)
