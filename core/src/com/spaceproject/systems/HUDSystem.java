@@ -324,6 +324,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             }
         }
 
+        if (focusedDist > 0) {
+            inventoryFont.setColor(1, 1, 1, 1);
+            layout.setText(inventoryFont, " " + (int)focusedDist );
+            inventoryFont.draw(batch, layout, focusedPos.x, focusedPos.y+1);
+        }
+
         //drawHint("stars are hot");
         //drawHint("an object in motion remains in motion");
         float warningDist = 200000;
@@ -891,11 +897,18 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
      * TODO: load star mapState markers based on point list instead of star entity for stars that aren't loaded yet
      * TODO: move these values into MapComponent or a config file
      */
+    Vector3 topLeft = new Vector3();
+    Vector3 bottomRight = new Vector3();
+    Vector3 screenPos = new Vector3();
+    Vector2 focusedPos = new Vector2();
+    float focusedDist;
     private void drawEdgeMap() {
+        Entity closestApproaching = getEngine().getSystem(GridRenderSystem.class).closestVelocity;
+
         float markerSmall = 3.5f; //min marker size
         float markerLarge = 8; //max marker size
         float distSmall = 600; //distance when marker is small
-        float distLarge = 150; //distance when marker is large
+        float distLarge = 200; //distance when marker is large
         
         int padding = (int) (markerLarge + 4); //how close to draw from edge of screen (in pixels)
         int width = Gdx.graphics.getWidth();
@@ -916,16 +929,17 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             shape.line(padding, padding, width - padding, padding);//bottom
             shape.line(padding, height - padding, width - padding, height - padding);//top
         }
-    
-        Vector3 topLeft = cam.unproject(new Vector3(0, 0, 0));
-        Vector3 bottomRight = cam.unproject(new Vector3(width, height, 0));
-        Vector3 screenPos = new Vector3();
+        focusedDist = -1;
+        topLeft.set(0, 0, 0);
+        topLeft = cam.unproject(topLeft);
+        bottomRight.set(width, height, 0);
+        bottomRight = cam.unproject(bottomRight);
         for (Entity mapable : mapableEntities) {
             MapComponent map = Mappers.map.get(mapable);
-            Vector2 pos = Mappers.transform.get(mapable).pos.cpy();
+            Vector2 pos = Mappers.transform.get(mapable).pos;
             screenPos.set(pos, 0);
             
-            if (screenPos.dst(MyScreenAdapter.cam.position) > map.distance) {
+            if (screenPos.dst2(MyScreenAdapter.cam.position) > map.distance * map.distance) {
                 continue;
             }
             
@@ -968,10 +982,14 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             //set co'ords relative to center screen
             markerX += centerX;
             markerY += centerY;
-            
+
             //calculate size of marker based on distance
+            float dist = pos.dst(cam.position.x, cam.position.y);
+            if (closestApproaching != null && closestApproaching.equals(mapable)) {
+                focusedDist = dist;
+                focusedPos.set(markerX, markerY);
+            }
             TextureComponent tex = Mappers.texture.get(mapable);
-            float dist = MyMath.distance(pos.x, pos.y, cam.position.x, cam.position.y);
             if (tex != null) {
                 dist -= Math.max(tex.texture.getWidth(), tex.texture.getHeight()) / 2.0f * tex.scale;
             }
