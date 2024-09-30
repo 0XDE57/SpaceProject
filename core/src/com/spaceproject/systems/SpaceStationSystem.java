@@ -95,16 +95,16 @@ public class SpaceStationSystem extends IteratingSystem {
             shape.setColor(Color.BLACK);
             int dockID = (int) fixture.getUserData();
             if (spaceStation.dockPortA != null && dockID == BodyBuilder.DOCK_A_ID) {
-                shape.setColor(Color.WHITE);
+                shape.setColor(Color.GRAY);
             }
             if (spaceStation.dockPortB != null && dockID == BodyBuilder.DOCK_B_ID) {
-                shape.setColor(Color.WHITE);
+                shape.setColor(Color.GRAY);
             }
             if (spaceStation.dockPortC != null && dockID == BodyBuilder.DOCK_C_ID) {
-                shape.setColor(Color.WHITE);
+                shape.setColor(Color.GRAY);
             }
             if (spaceStation.dockPortD != null && dockID == BodyBuilder.DOCK_D_ID) {
-                shape.setColor(Color.WHITE);
+                shape.setColor(Color.GRAY);
             }
 
             CircleShape dock = (CircleShape) fixture.getShape();
