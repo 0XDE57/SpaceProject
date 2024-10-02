@@ -50,20 +50,24 @@ public class Box2DContactListener implements ContactListener {
     
     private void onCollision(Contact contact, Entity a, Entity b) {
         //check damage collision
-        HealthComponent healthA = Mappers.health.get(a);
-        if (healthA != null) {
-            DamageComponent damageB = Mappers.damage.get(b);
-            if (damageB != null) {
-                handleDamage(contact, b, a, damageB, healthA, contact.getFixtureA().getBody());
-                return;
+        if (!contact.getFixtureA().isSensor()) {
+            HealthComponent healthA = Mappers.health.get(a);
+            if (healthA != null) {
+                DamageComponent damageB = Mappers.damage.get(b);
+                if (damageB != null) {
+                    handleDamage(contact, b, a, damageB, healthA, contact.getFixtureA().getBody());
+                    return;
+                }
             }
         }
-        HealthComponent healthB = Mappers.health.get(b);
-        if (healthB != null) {
-            DamageComponent damageA = Mappers.damage.get(a);
-            if (damageA != null) {
-                handleDamage(contact, a, b, damageA, healthB, contact.getFixtureB().getBody());
-                return;
+        if (!contact.getFixtureB().isSensor()) {
+            HealthComponent healthB = Mappers.health.get(b);
+            if (healthB != null) {
+                DamageComponent damageA = Mappers.damage.get(a);
+                if (damageA != null) {
+                    handleDamage(contact, a, b, damageA, healthB, contact.getFixtureB().getBody());
+                    return;
+                }
             }
         }
         //check item collision
@@ -223,11 +227,11 @@ public class Box2DContactListener implements ContactListener {
             //active heat damage
             StarComponent starA = Mappers.star.get(entityA);
             if (starA != null) {
-                doActiveHeatDamage(contact, contact.getFixtureB(), entityA, entityB, timeStep);
+                doActiveHeatDamage(contact.getFixtureB(), entityA, entityB, timeStep);
             }
             StarComponent starB = Mappers.star.get(entityB);
             if (starB != null) {
-                doActiveHeatDamage(contact, contact.getFixtureA(), entityB, entityA, timeStep);
+                doActiveHeatDamage(contact.getFixtureA(), entityB, entityA, timeStep);
             }
             //active item movement
             ItemComponent itemDropA = Mappers.item.get(entityA);
@@ -241,7 +245,7 @@ public class Box2DContactListener implements ContactListener {
         }
     }
     
-    private void doActiveHeatDamage(Contact contact, Fixture burningFixture, Entity starEntity, Entity burningEntity, float timeStep) {
+    private void doActiveHeatDamage(Fixture burningFixture, Entity starEntity, Entity burningEntity, float timeStep) {
         if (burningFixture.isSensor()) {
             //check if item
             if (Mappers.item.get(burningEntity) != null) {
@@ -441,6 +445,7 @@ public class Box2DContactListener implements ContactListener {
         if (Mappers.asteroid.get(entity) != null) {
             CannonComponent cannon = Mappers.cannon.get(source);
             if (cannon != null) {
+                //cannon level / upgrade?
                 cannon.heat -= 0.05f;
                 if (cannon.heat < 0) cannon.heat = 0;
             }
