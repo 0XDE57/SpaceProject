@@ -253,7 +253,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         //todo, allow multiple disks at different radius: make sure layer is distinct (not overlap planet orbits)
         AsteroidBeltComponent circumstellarDisc = new AsteroidBeltComponent();
         circumstellarDisc.radius = 1500;
-        circumstellarDisc.bandWidth = 220; //how wide of band centered on radius, concentrated at radius
+        circumstellarDisc.bandWidth = 220; //how wide of band centered on radius, todo: concentrate larger bodies at radius, getting smaller outward
         circumstellarDisc.maxSpawn = 180; //todo: calculate density: ratio of asteroids to space in disk
         circumstellarDisc.velocity = 20;
         circumstellarDisc.clockwise = isRotateClockwise;
@@ -290,7 +290,8 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
             if (hasMoon) {
                 float moonDist = planet.getComponent(TextureComponent.class).texture.getWidth() * planet.getComponent(TextureComponent.class).scale * 2;
                 moonDist *= 0.7f;
-                distance += moonDist;
+                planet.getComponent(OrbitComponent.class).radialDistance += moonDist; //push further out
+                distance += moonDist * 2;
                 Entity moon = EntityBuilder.createMoon(MyMath.getSeed(x, y + distance), planet, moonDist, isRotateClockwise);
                 entities.add(moon);
                 
@@ -308,7 +309,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
             
             entities.add(planet);
         }
-        
+        //circumstellarDisc.radius = distance + 1500;
         Gdx.app.log(getClass().getSimpleName(), "Planetary System: [" + seed + "](" + x + ", " + y + ") Bodies: " + (numPlanets));
         
         return entities;
