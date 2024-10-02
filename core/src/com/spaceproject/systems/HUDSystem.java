@@ -110,12 +110,19 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private final SpriteBatch batch;
     private final BitmapFont font, subFont, inventoryFont;
     private final GlyphLayout layout;
-    private static final Vector3 tempProj = new Vector3();
+    private final Vector3 tempProj = new Vector3();
+    private final Color cacheColor = new Color();
 
     //entity storage
     private ImmutableArray<Entity> mapableEntities;
     private ImmutableArray<Entity> players;
     private ImmutableArray<Entity> killableEntities;
+
+    private final Vector3 topLeft = new Vector3();
+    private final Vector3 bottomRight = new Vector3();
+    private final Vector3 screenPos = new Vector3();
+    private final Vector2 focusedPos = new Vector2();
+    private float focusedDist;
     
     private MiniMap miniMap;
     
@@ -126,7 +133,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         off, docked, landing, launching, destroyed;
     }
 
-    float anim = 0;
+    float statusAnim = 0;
+    float damageAnim = 0;
     
     public HUDSystem() {
         cam = MyScreenAdapter.cam;
@@ -213,7 +221,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         checkInput();
     
         if (drawHud) {
-            anim += 4f * deltaTime;
+            statusAnim += 4f * deltaTime;
             drawHUD(deltaTime);
         
             if (miniMap.getState() != MapState.off) {
@@ -474,17 +482,18 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             if (!uiCFG.renderFullHealth && health.health == health.maxHealth) {
                 continue;
             }
-            
-            Vector3 pos = cam.project(new Vector3(Mappers.transform.get(entity).pos.cpy(), 0));//todo: new & cpy() -> cache
+
+            tempProj.set(Mappers.transform.get(entity).pos, 0);
+            cam.project(tempProj);
             
             //background
             shape.setColor(uiCFG.entityHPbarBackground);
-            shape.rect(pos.x - barLength * 0.5f, pos.y + yOffset, barLength, barWidth);
+            shape.rect(tempProj.x - barLength * 0.5f, tempProj.y + yOffset, barLength, barWidth);
             
             //health
             float ratio = health.health / health.maxHealth;
             shape.setColor(1 - ratio, ratio, 0, uiCFG.entityHPbarOpacity); //creates color between red and green
-            shape.rect(pos.x - barLength * 0.5f, pos.y + yOffset, barLength * ratio, barWidth);
+            shape.rect(tempProj.x - barLength * 0.5f, tempProj.y + yOffset, barLength * ratio, barWidth);
         }
     }
     
@@ -509,9 +518,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 messageState = SpecialState.docked;
             }
         }
-        
-        float ratio = 1 + (float) Math.sin(anim);
-        Color c = Color.GOLD.cpy().lerp(Color.CYAN, ratio);
+
         switch (messageState) {
             case docked:
                 String key = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).interact);
@@ -535,27 +542,33 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 break;
             case destroyed:
                 layout.setText(font, "[ DESTROYED ]");
-                c = Color.BLACK.cpy().lerp(Color.RED, ratio);
                 break;
             case off:
                 return;
         }
-        font.setColor(c);
+
+        float ratio = 1 + (float) Math.sin(statusAnim);
+        if (messageState == SpecialState.destroyed) {
+            cacheColor.set(0, 0, 0, 1).lerp(Color.RED, ratio);
+        } else {
+            cacheColor.set(Color.GOLD.r, Color.GOLD.g, Color.GOLD.b, Color.GOLD.a).lerp(Color.CYAN, ratio);
+        }
+        font.setColor(cacheColor);
         
         float centerX = (Gdx.graphics.getWidth() - layout.width) * 0.5f;
-        int messageHeight = (int) (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3) + layout.height);
+        float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3f) + layout.height);
         font.draw(batch, layout, centerX, messageHeight);
     }
 
-    private Color hintColor = new Color();
+
     private void drawHint(String text) {
-        float ratio = 1 + (float) Math.sin(anim*0.1);
-        hintColor.set(0, 1, 0, 1).lerp(Color.PURPLE, ratio);
-        subFont.setColor(hintColor);
+        float ratio = 1 + (float) Math.sin(statusAnim * 0.1f);
+        cacheColor.set(0, 1, 0, 1).lerp(Color.PURPLE, ratio);
+        subFont.setColor(cacheColor);
         layout.setText(subFont, text);
         
         float centerX = (Gdx.graphics.getWidth() - layout.width) * 0.5f;
-        int messageHeight = (int) (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3) + layout.height);
+        float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3f) + layout.height);
         messageHeight -= layout.height * 2;
         subFont.draw(batch, layout, centerX, messageHeight);
     }
@@ -584,7 +597,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         drawPlayerAmmoBar(entity, barX, ammoBarY, barWidth, barHeight);
     }
 
-    float damageAnim = 0;
+
     private void drawPlayerHealth(Entity entity, float x, float y, float width, float height) {
         HealthComponent health = Mappers.health.get(entity);
         if (health == null) return;
@@ -749,10 +762,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         int barX = Gdx.graphics.getWidth() / 2 - barWidth / 2;
         HyperDriveComponent hyper = Mappers.hyper.get(entity);
         if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
-            Color c = Color.GOLD.cpy().lerp(Color.CYAN, 1 + (float) Math.sin(anim));
-            layout.setText(inventoryFont, "[ HYPER-DRIVE ]", c, 0, Align.center, false);
+            //statusColor.set(Color.GOLD.toIntBits());//toIntBits() stores in ABGR, while set() expects RGBA
+            cacheColor.set(Color.GOLD.r, Color.GOLD.g, Color.GOLD.b, Color.GOLD.a).lerp(Color.CYAN, 1 + (float) Math.sin(statusAnim));
+            layout.setText(inventoryFont, "[ HYPER-DRIVE ]", cacheColor, 0, Align.center, false);
             inventoryFont.draw(batch, layout, barX + layout.width - 37, healthBarY + barHeight + layout.height -1);
-            //draw hyper drive key
             return;
         }
         CameraSystem camSystem = getEngine().getSystem(CameraSystem.class);
@@ -817,7 +830,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (cargo == null) return;
 
         long colorTime = 6000;
-        long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;//todo: per resource...
+        long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;
         float ratio = (float) timeSinceCollect / (float) colorTime;
         if (GameScreen.isPaused() || messageState == SpecialState.docked) {
             ratio = 0f;
@@ -845,11 +858,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             float y = text.pos.y;
             if (text.project) {
                 tempProj.set(text.pos.x, text.pos.y, 0);
-                Vector3 screenPos = MyScreenAdapter.cam.project(tempProj);
-                x = screenPos.x;
-                y = screenPos.y;
+                MyScreenAdapter.cam.project(tempProj);
+                x = tempProj.x;
+                y = tempProj.y;
             }
-            inventoryFont.setColor(Color.RED.cpy().lerp(Color.CLEAR, (float) (GameScreen.getGameTimeCurrent() - text.timestamp) / damageTime));
+            cacheColor.set(1, 0, 0, 1).lerp(Color.CLEAR, (float) (GameScreen.getGameTimeCurrent() - text.timestamp) / damageTime);
+            inventoryFont.setColor(cacheColor);
             inventoryFont.draw(batch, "" + (int)text.damage, x, y);
         }
 
@@ -897,11 +911,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
      * TODO: load star mapState markers based on point list instead of star entity for stars that aren't loaded yet
      * TODO: move these values into MapComponent or a config file
      */
-    Vector3 topLeft = new Vector3();
-    Vector3 bottomRight = new Vector3();
-    Vector3 screenPos = new Vector3();
-    Vector2 focusedPos = new Vector2();
-    float focusedDist;
     private void drawEdgeMap() {
         Entity closestApproaching = getEngine().getSystem(GridRenderSystem.class).closestVelocity;
 
@@ -920,20 +929,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         
         //todo: add navigation point for current direction facing
         //todo: add navigation point for current velocity vector
-        boolean drawBorder = true;
-        if (drawBorder) {
-            //todo: look broken dont see border
-            shape.setColor(Color.RED);
-            shape.line(padding, padding, padding, height - padding);//left
-            shape.line(width - padding, padding, width - padding, height - padding);//right
-            shape.line(padding, padding, width - padding, padding);//bottom
-            shape.line(padding, height - padding, width - padding, height - padding);//top
-        }
         focusedDist = -1;
         topLeft.set(0, 0, 0);
-        topLeft = cam.unproject(topLeft);
+        cam.unproject(topLeft);
         bottomRight.set(width, height, 0);
-        bottomRight = cam.unproject(bottomRight);
+        cam.unproject(bottomRight);
         for (Entity mapable : mapableEntities) {
             MapComponent map = Mappers.map.get(mapable);
             Vector2 pos = Mappers.transform.get(mapable).pos;
@@ -991,7 +991,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             }
             TextureComponent tex = Mappers.texture.get(mapable);
             if (tex != null) {
-                dist -= Math.max(tex.texture.getWidth(), tex.texture.getHeight()) / 2.0f * tex.scale;
+                dist -= Math.max(tex.texture.getWidth(), tex.texture.getHeight()) * 0.5f * tex.scale;
             }
             float distClamp = MathUtils.clamp((dist-distLarge)/(distSmall-distLarge), 0, 1);
             float sizeInterp = Interpolation.pow3In.apply(1-distClamp);
