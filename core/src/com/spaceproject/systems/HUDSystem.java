@@ -551,7 +551,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (messageState == SpecialState.destroyed) {
             cacheColor.set(0, 0, 0, 1).lerp(Color.RED, ratio);
         } else {
-            cacheColor.set(Color.GOLD.r, Color.GOLD.g, Color.GOLD.b, Color.GOLD.a).lerp(Color.CYAN, ratio);
+            cacheColor.set(Color.GOLD).lerp(Color.CYAN, ratio);
         }
         font.setColor(cacheColor);
         
@@ -619,7 +619,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             //border
             int thickness = 2;
             shape.rectLine(x, y+height, x+width, y+height, thickness);//top
-            shape.rectLine(x, y, x+width, y,thickness);//bottom
+            shape.rectLine(x, y, x+width, y, thickness);//bottom
             shape.rectLine(x, y+height, x, y, thickness);//left
             shape.rectLine(x+width, y+height, x+width, y, thickness);//right
         }
@@ -762,8 +762,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         int barX = Gdx.graphics.getWidth() / 2 - barWidth / 2;
         HyperDriveComponent hyper = Mappers.hyper.get(entity);
         if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
-            //statusColor.set(Color.GOLD.toIntBits());//toIntBits() stores in ABGR, while set() expects RGBA
-            cacheColor.set(Color.GOLD.r, Color.GOLD.g, Color.GOLD.b, Color.GOLD.a).lerp(Color.CYAN, 1 + (float) Math.sin(statusAnim));
+            cacheColor.set(Color.GOLD).lerp(Color.CYAN, 1 + (float) Math.sin(statusAnim));
             layout.setText(inventoryFont, "[ HYPER-DRIVE ]", cacheColor, 0, Align.center, false);
             inventoryFont.draw(batch, layout, barX + layout.width - 37, healthBarY + barHeight + layout.height -1);
             return;
