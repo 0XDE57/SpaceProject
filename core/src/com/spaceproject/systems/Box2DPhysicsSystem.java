@@ -77,11 +77,13 @@ public class Box2DPhysicsSystem extends EntitySystem {
             transform.angle = physics.body.getAngle() * MathUtils.radiansToDegrees * alpha + old.angle * (1.0f - alpha);
         }*/
     }
-    
+
+    /** Box2D uses MKS (meters, kilograms, and seconds) units and radians for angles
+     *  movement limit = 2 * units per step
+     *  eg step of 60: 60 * 2 = 120,  max velocity = 120
+     * @return maximum velocity
+     */
     public static int getVelocityLimit() {
-        //Box2D uses MKS (meters, kilograms, and seconds) units and radians for angles
-        //movement limit = 2 * units per step
-        //eg step of 60: 60 * 2 = 120,  max velocity = 120
         return 2 * engineCFG.physicsStepPerFrame;
     }
     
