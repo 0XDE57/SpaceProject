@@ -33,7 +33,8 @@ public class ReflectionNode extends UpdateNode {
     }
     
     private void init() {
-        for (Field f : getValue().getClass().getFields()) {
+        for (Field f : getValue().getClass().getDeclaredFields()) {
+            f.setAccessible(true);
             add(new FieldNode(new Label("init", VisUI.getSkin(), skinSmallFont, Color.WHITE), getValue(), f));
         }
     }

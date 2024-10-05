@@ -40,16 +40,14 @@ import static com.spaceproject.generation.FontLoader.skinSmallFont;
  *      view Entities
  *      view Components in Entities
  *      view Fields in Components via reflection
-
+ *
  *      todo: view by component, eg:
  *          AIComponent
  *              Entity A
  *              Entity B
  *              Entity C
  *
- *     todo: allow view private fields
  *     todo: allow edit values
- *
  */
 public class ECSExplorerWindow extends VisWindow implements EntityListener {
     
@@ -68,22 +66,19 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
     private final int keyDown = Input.Keys.DOWN;
     private final int keyLeft = Input.Keys.LEFT;
     private final int keyRight = Input.Keys.RIGHT;
-    
-    
+
     public ECSExplorerWindow(Engine engine) {
         super("ECS Explorer");
         
         this.engine = engine;
         refreshTimer = new SimpleTimer(refreshRate, true);
-        
-        
+
         setResizable(true);
         setMovable(true);
         setSize(400, Gdx.graphics.getHeight() - 20);
         setPosition(10, 10);
         addCloseButton();
-        
-        
+
         systemNodes = new MyNode(new Label("Systems", VisUI.getSkin(), skinSmallFont, Color.WHITE));
         entityNodes = new MyNode(new Label("Entities", VisUI.getSkin(), skinSmallFont, Color.WHITE));
         tree = new Tree(VisUI.getSkin());
@@ -105,8 +100,7 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
         options.add(showHistoryCheck);
         contents.add(options);
         contents.row();
-        
-        
+
         final ScrollPane scrollPane = new ScrollPane(tree);
         scrollPane.setScrollbarsVisible(true);//why no scroll bar show?
         //scrollPane.setFadeScrollBars(true);
@@ -115,7 +109,6 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
         //scrollPane.scrol
         contents.add(scrollPane).expand().fill();
         add(contents).expand().fill();
-        
     }
     
     public void update() {
@@ -190,6 +183,7 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
     private void show() {
         show(GameScreen.getStage());
     }
+
     private void show(Stage stage) {
         stage.addActor(this);
         fadeIn();
