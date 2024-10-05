@@ -66,7 +66,7 @@ public class SpaceStationSystem extends IteratingSystem {
         if (spaceStation.parentOrbitBody != null) {
             TransformComponent parentTransform = Mappers.transform.get(spaceStation.parentOrbitBody);
             //set velocity perpendicular to parent body, (simplified 2-body model)
-            float angle = MyMath.angleTo(parentTransform.pos, stationPhysics.body.getPosition());
+            float angle = MyMath.angleTo(stationPhysics.body.getPosition(), parentTransform.pos);
             stationPhysics.body.setLinearVelocity(MyMath.vector(angle + (spaceStation.velocity > 0 ? -MathUtils.HALF_PI : MathUtils.HALF_PI), spaceStation.velocity));
             Vector2 pos = stationPhysics.body.getPosition();
             stationPhysics.body.setTransform(pos.x, pos.y, angle);

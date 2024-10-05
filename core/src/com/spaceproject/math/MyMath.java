@@ -52,17 +52,13 @@ public abstract class MyMath {
     public static float distance(float x1, float y1, float x2, float y2) {
         return (float) Math.hypot(x2 - x1, y2 - y1);
     }
-    
-    public static float angleTo(float x1, float y1, float x2, float y2) {
-        return (float) -(Math.atan2(x2 - x1, y2 - y1)) - 1.57f;
-    }
    
     public static float angleTo(Vector2 a, Vector2 b) {
         return angleTo(a.x, a.y, b.x, b.y);
     }
     
-    public static float angle2(float x1, float y1, float x2, float y2) {
-        return (float) Math.atan2(x2 - x1, y2 - y1);
+    public static float angleTo(float x1, float y1, float x2, float y2) {
+        return (float) Math.atan2(y2 - y1, x2 - x1);
     }
     
     public static float getAngularImpulse(Body body, float targetAngle, float delta) {

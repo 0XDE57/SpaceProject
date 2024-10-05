@@ -80,7 +80,7 @@ public class AsteroidAnim extends TitleAnimation {
         Vector2 centerScreen = new Vector2(Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
         Vector2 mousePos = new Vector2(Gdx.input.getX(),Gdx.graphics.getHeight()-Gdx.input.getY());
         
-        float mouseAngle = MyMath.angleTo(mousePos.x, mousePos.y, centerScreen.x, centerScreen.y);
+        float mouseAngle = MyMath.angleTo(centerScreen.x, centerScreen.y, mousePos.x, mousePos.y);
     
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             bullet.setTransform(centerScreen, mouseAngle);

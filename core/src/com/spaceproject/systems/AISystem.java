@@ -226,7 +226,7 @@ public class AISystem extends IteratingSystem {
     }
     
     private void dumbSeek(ControllableComponent control, Vector2 aiPos, Vector2 targetPos, float multiplier) {
-        control.angleTargetFace = MyMath.angleTo(targetPos, aiPos);
+        control.angleTargetFace = MyMath.angleTo(aiPos,targetPos);
         control.moveForward = true;
         control.movementMultiplier = multiplier;
     }

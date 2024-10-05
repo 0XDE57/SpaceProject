@@ -353,7 +353,7 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         float dist = Math.abs(MyMath.distance(0, 0, leftStickHorAxis, leftStickVertAxis));
         if (dist >= stickDeadzone) {
             //face stick direction
-            control.angleTargetFace = MyMath.angle2(0, 0, -leftStickVertAxis, leftStickHorAxis);
+            control.angleTargetFace = MyMath.angleTo(0, 0, leftStickHorAxis, -leftStickVertAxis);
             control.movementMultiplier = MathUtils.clamp(dist, 0, 1);
             //control.moveForward = control.movementMultiplier > engageThreshold;
             

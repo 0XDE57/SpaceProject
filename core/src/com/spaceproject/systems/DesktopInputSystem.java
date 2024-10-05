@@ -222,7 +222,7 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         ControllableComponent control = Mappers.controllable.get(players.first());
         
         Vector3 playerPos = GameScreen.cam.project(tempVec.set(transform.pos, 0));
-        float angle = MyMath.angleTo(x, Gdx.graphics.getHeight() - y, playerPos.x, playerPos.y);
+        float angle = MyMath.angleTo(playerPos.x, playerPos.y, x, Gdx.graphics.getHeight() - y);
         control.angleTargetFace = angle;
         
         return true;

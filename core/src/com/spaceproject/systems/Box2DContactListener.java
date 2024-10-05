@@ -289,7 +289,7 @@ public class Box2DContactListener implements ContactListener {
 
         Vector2 collectorPos = collectorBody.getPosition();//do same here with other body
         Vector2 itemPos = body.getPosition();
-        float angleRad = MyMath.angleTo(collectorPos, itemPos);
+        float angleRad = MyMath.angleTo(itemPos, collectorPos);
         float distance = collectorPos.dst2(itemPos);
         float magnitude = distance * distance * timeStep;
         body.applyForceToCenter(MyMath.vector(angleRad, magnitude), true);

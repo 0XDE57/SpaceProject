@@ -93,7 +93,7 @@ public class OrbitAnim extends TitleAnimation {
         //interaction: clicking aligns angle
         if (Gdx.input.isTouched()) {
             centerScreen.set(Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
-            float angleToTouch = MyMath.angleTo(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY(), centerScreen.x, centerScreen.y);
+            float angleToTouch = MyMath.angleTo(centerScreen.x, centerScreen.y, Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
             for (Body orbit : bodies) {
                 //orbit.angleRadians = angleToTouch;
                 orbit.angleRadians += 2 * delta;

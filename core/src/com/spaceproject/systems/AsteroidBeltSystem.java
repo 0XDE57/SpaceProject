@@ -53,6 +53,7 @@ public class AsteroidBeltSystem extends EntitySystem {
     private final Vector2 center = new Vector2();
 
     private float minArea = Float.MAX_VALUE, maxArea = Float.MIN_VALUE;
+    private float totalArea = 0;
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -95,9 +96,14 @@ public class AsteroidBeltSystem extends EntitySystem {
                 TransformComponent parentTransform = Mappers.transform.get(asteroid.parentOrbitBody);
                 AsteroidBeltComponent asteroidBelt = Mappers.asteroidBelt.get(asteroid.parentOrbitBody);
                 //set velocity perpendicular to parent body, (simplified 2-body model)
-                float angle = MyMath.angleTo(parentTransform.pos, physics.body.getPosition()) + (asteroidBelt.clockwise ? -MathUtils.HALF_PI : MathUtils.HALF_PI);
-                physics.body.setLinearVelocity(MyMath.vector(angle, asteroidBelt.velocity));
-            } else {
+                float angle = MyMath.angleTo(physics.body.getPosition(), parentTransform.pos) + (asteroidBelt.clockwise ? -MathUtils.HALF_PI : MathUtils.HALF_PI);
+                Vector2 targetVelocity = MyMath.vector(angle, asteroidBelt.velocity);
+
+                physics.body.setLinearVelocity(targetVelocity);
+                //todo: set should be avoided.
+                //  instead we should add the desired velocity. or rather the difference between the current velocity and the desired velocity. a steering behavior?
+            }
+            /*else {
                 //todo: gravity pull into belt if close enough: re-entry?
                 for (Entity parentEntity : spawnBelt) {
                     AsteroidBeltComponent asteroidBelt = Mappers.asteroidBelt.get(parentEntity);
@@ -114,14 +120,14 @@ public class AsteroidBeltSystem extends EntitySystem {
                         boolean meetsVelThreshold = Math.abs(physics.body.getLinearVelocity().len() - asteroidBelt.velocity) < velDeltaThreshold;
 
                         //todo: if should merge, begin merge
-                        if (meetsAngleThreshold /*&& meetsVelThreshold*/) {
+                        if (meetsAngleThreshold /*&& meetsVelThreshold*) {
                             //asteroid.parentOrbitBody = parentEntity;
                             //Gdx.app.debug(this.getClass().getSimpleName(), "ASTEROID re-entry into orbit");
                             break; // no point looking at other disks once met
                         }
                     }
                 }
-            }
+            }*/
         }
     }
 
@@ -141,6 +147,7 @@ public class AsteroidBeltSystem extends EntitySystem {
                 ast.parentOrbitBody = parentEntity;
 
                 disk.spawned++;
+                totalArea += ast.area;
             }
         }
     }
@@ -161,7 +168,7 @@ public class AsteroidBeltSystem extends EntitySystem {
         //just like we cannot destroy a body during a physics step (hence removing entities at end of frame)
 
         //so we instead add to a spawn queue to be processed next system tick
-        spawnQ.add(new AsteroidRemovedQueue(asteroid, pos, vel, angle, angularVel));
+        spawnQ.add(new AsteroidRemovedQueue(asteroid, pos, vel, angle, angularVel));//todo: new -> pool
     }
 
     private void processAsteroidDestructionQueue() {
@@ -175,6 +182,7 @@ public class AsteroidBeltSystem extends EntitySystem {
         if (asteroid.area >= minAsteroidSize) {
             shatterAsteroid(parentPos, parentVel, parentAngle, parentAngularVel, asteroid);
         } else {
+            //todo: pool drops
             Entity drop = EntityBuilder.dropResource(parentPos, parentVel, asteroid.composition, asteroid.color);
             getEngine().addEntity(drop);
         }
@@ -183,6 +191,7 @@ public class AsteroidBeltSystem extends EntitySystem {
     private Entity spawnAsteroid(float x, float y, float velX, float velY) {
         int size = MathUtils.random(14, 120);//NOTE: does not guarantee final area
         long seed = MyMath.getSeed(x, y);
+        //todo: pool asteroids. note box2d body is already pooled internally, but we can pool the entity itself to eliminate new
         Entity asteroid = EntityBuilder.createAsteroid(seed, x, y, velX, velY, size);
         Polygon polygon = asteroid.getComponent(AsteroidComponent.class).polygon;
         float area = Math.abs(GeometryUtils.polygonArea(polygon.getVertices(), 0, polygon.getVertices().length));
@@ -214,7 +223,7 @@ public class AsteroidBeltSystem extends EntitySystem {
     }
 
     private void spawnChildAsteroid(Vector2 parentPos, Vector2 parentVel, float parentAngle, float parentAngularVel, AsteroidComponent asteroidComponent, float[] vertices) {
-        /* todo: re shatter issues; if we turn on b2d debug we can see the velocity is not the origin of child shards
+        /* todo: re shatter issues; if we turn on b2d debug we can see the velocity is not the origin of child bodies
         NOTE: Box2D expects Polygons vertices are stored with a counter clockwise winding (CCW).
         We must be careful because the notion of CCW is with respect to a right-handed
         coordinate system with the z-axis pointing out of the plane.
