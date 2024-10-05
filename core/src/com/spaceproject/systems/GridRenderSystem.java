@@ -312,29 +312,33 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         //set alpha
         float min = 0.05f;
         float maxZoom = CameraSystem.getZoomForLevel(getEngine().getSystem(CameraSystem.class).getMaxZoomLevel());
-        float alpha = MathUtils.map(1, maxZoom,min, 1, Math.max(Math.min(GameScreen.cam.zoom*10, maxZoom), 1));
+        float alpha = MathUtils.map(1, maxZoom, min, 1, Math.max(Math.min(GameScreen.cam.zoom * 10, maxZoom), 1));
         if (MathUtils.isEqual(alpha, 0)) return;
-        
+
         HyperDriveComponent hyper = Mappers.hyper.get(entity);
         if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
             return;
         }
-        
+
         //draw movement direction for navigation assistance, line up vector with target destination
         Body body = Mappers.physics.get(entity).body;
         Vector2 facing = MyMath.vector(body.getAngle(), 500000);
         Vector2 originalPosition = Mappers.transform.get(entity).pos;
         playerPos.set(originalPosition, 0);
         Vector3 pos = cam.project(playerPos);
-        
+
         float width = 0.5f;
         compassColor.a = alpha;
         shape.rectLine(pos.x, pos.y, facing.x, facing.y, width, compassColor, compassColor);
-        Vector2 lead = MyMath.vector(body.getAngle(), 70).add(pos.x, pos.y);
+        Vector2 lead = MyMath.vector(body.getAngle(), 80).add(pos.x, pos.y);
         compassColor.a = 1;
         shape.setColor(compassColor);
         shape.circle(lead.x, lead.y, 2);
-    
+
+        if (body.getLinearVelocity().isZero()) {
+            return;
+        }
+
         //draw movement direction for navigation assistance, line up vector with target destination
         cacheColor.set(compassColor);
         ControllableComponent control = Mappers.controllable.get(entity);
@@ -346,54 +350,61 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
             cacheColor.set(0, 1, 1, 1);
         }
         cacheColor.a = alpha;
-        
+
         //draw velocity vector
-        if (!body.getLinearVelocity().isZero()) {
-            cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 500000));
-            shape.rectLine(pos.x, pos.y, cacheVec.x, cacheVec.y, width, cacheColor, cacheColor);
-            cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 50)).add(pos.x, pos.y);
+        cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 500000));
+        shape.rectLine(pos.x, pos.y, cacheVec.x, cacheVec.y, width, cacheColor, cacheColor);
+        
+        float velocity = body.getLinearVelocity().len();
+        boolean isMaxVelocity = MathUtils.isEqual(velocity, Box2DPhysicsSystem.getVelocityLimit(), 0.5f);
 
-            boolean isMaxVelocity = MathUtils.isEqual(body.getLinearVelocity().len(), Box2DPhysicsSystem.getVelocityLimit(), 0.5f);
+        cacheColor.a = 1;
+        shape.setColor(cacheColor);
+        HealthComponent health = Mappers.health.get(entity);
+        long hurtTime = 1000;
+        if (health != null && (GameScreen.getGameTimeCurrent() - health.lastHitTime < hurtTime)) {
+            shape.setColor(Color.RED);
+        }
 
-            cacheColor.a = 1;
-            shape.setColor(cacheColor);
-            HealthComponent health = Mappers.health.get(entity);
-            long hurtTime = 1000;
-            if (health != null && (GameScreen.getGameTimeCurrent() - health.lastHitTime < hurtTime)) {
-                shape.setColor(Color.RED);
-            }
-
-            //draw arrow
-            int arrowSize = 10;
-            float angle = 135 * MathUtils.degreesToRadians;
-            Vector2 arrowLeft  = MyMath.vector(body.getLinearVelocity().angleRad() + angle, arrowSize).add(cacheVec);
+        //draw arrows
+        int arrowSize = 10;
+        float angle = 135 * MathUtils.degreesToRadians;
+        cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 80)).add(pos.x, pos.y);
+        Vector2 arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + angle, arrowSize).add(cacheVec);
+        shape.rectLine(cacheVec, arrowLeft, 1);
+        Vector2 arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
+        shape.rectLine(cacheVec, arrowRight, 1);
+        //more!
+        if (velocity >= Box2DPhysicsSystem.getVelocityLimit() * 0.25f) {
+            cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 90)).add(pos.x, pos.y);
+            arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + angle, arrowSize).add(cacheVec);
             shape.rectLine(cacheVec, arrowLeft, 1);
-            Vector2 arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
+            arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
             shape.rectLine(cacheVec, arrowRight, 1);
-            //more!
-            if (body.getLinearVelocity().len() >= Box2DPhysicsSystem.getVelocityLimit() * 0.33f) {
-                cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 60)).add(pos.x, pos.y);
-                arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + angle, arrowSize).add(cacheVec);
-                shape.rectLine(cacheVec, arrowLeft, 1);
-                arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
-                shape.rectLine(cacheVec, arrowRight, 1);
-            }
-            //moar!!
-            if (body.getLinearVelocity().len() >= Box2DPhysicsSystem.getVelocityLimit() * 0.66f) {
-                cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 70)).add(pos.x, pos.y);
-                arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + angle, arrowSize).add(cacheVec);
-                shape.rectLine(cacheVec, arrowLeft, 1);
-                arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
-                shape.rectLine(cacheVec, arrowRight, 1);
-            }
-            //max velocity!!!
-            if (isMaxVelocity) {
-                cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 80)).add(pos.x, pos.y);
-                arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + angle, arrowSize).add(cacheVec);
-                shape.rectLine(cacheVec, arrowLeft, 1);
-                arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
-                shape.rectLine(cacheVec, arrowRight, 1);
-            }
+        }
+        //more++
+        if (velocity >= Box2DPhysicsSystem.getVelocityLimit() * 0.5f) {
+            cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 100)).add(pos.x, pos.y);
+            arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + angle, arrowSize).add(cacheVec);
+            shape.rectLine(cacheVec, arrowLeft, 1);
+            arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
+            shape.rectLine(cacheVec, arrowRight, 1);
+        }
+        //moar+++
+        if (velocity >= Box2DPhysicsSystem.getVelocityLimit() * 0.75f) {
+            cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 110)).add(pos.x, pos.y);
+            arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + angle, arrowSize).add(cacheVec);
+            shape.rectLine(cacheVec, arrowLeft, 1);
+            arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
+            shape.rectLine(cacheVec, arrowRight, 1);
+        }
+        //max velocity!!!
+        if (isMaxVelocity) {
+            cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 120)).add(pos.x, pos.y);
+            arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + angle, arrowSize).add(cacheVec);
+            shape.rectLine(cacheVec, arrowLeft, 1);
+            arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
+            shape.rectLine(cacheVec, arrowRight, 1);
         }
         //draw force applied from engines?
     }
