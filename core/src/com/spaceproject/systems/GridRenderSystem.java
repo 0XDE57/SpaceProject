@@ -36,7 +36,6 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     public boolean drawCameraPath = false;
     public boolean drawMousePath = false;
     public boolean drawThirdsGrid = false;
-    public boolean drawTest = false;
     
     //rendering
     private final ShapeRenderer shape = new ShapeRenderer();
@@ -54,19 +53,25 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     private final Color lineColor = new Color(0.15f, 0.5f, 0.9f, 0.9f);;
     private final Color highlight = Color.WHITE.cpy();
     private final Color stationColor = Color.GREEN.cpy();
-    
     private final Color compassColor = Color.WHITE.cpy();
+    private final Color hintColorB = Color.PURPLE.cpy();
+    private final Color hintColorA = Color.GREEN.cpy();
+
+    private final Color cacheColor = new Color();
+    private final Vector2 cacheVec = new Vector2();
+
     private ImmutableArray<Entity> players;
     private ImmutableArray<Entity> orbitEntities;
     private ImmutableArray<Entity> stations;
     private Entity camMarker, mouseMarker;
-    private float animate = 0;
+    private float accumulator = 0;
 
     Entity closestFacing;
     Entity closestVelocity;
 
-    private SpriteBatch batch = new SpriteBatch();
-    private BitmapFont subFont;
+    private final SpriteBatch batch = new SpriteBatch();
+    private final BitmapFont subFont;
+    private final GlyphLayout layout = new GlyphLayout();
     
     public GridRenderSystem() {
         FreeTypeFontGenerator.FreeTypeFontParameter parameter2 = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -119,8 +124,6 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         if (drawCameraPath) debugDrawCameraPath(Color.YELLOW);
         if (drawMousePath) debugDrawMousePath();
         if (drawThirdsGrid) drawThirdsGrid(Color.PINK);
-        // debug test rendering
-        if (drawTest) debugRenderTest(deltaTime);
         
         //draw helpful navigation information
         if (players.size() > 0) {
@@ -210,12 +213,10 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         return width;
     }
 
-    float accumulator = 0;
     private void drawOrbitPath() {
         float alpha = MathUtils.clamp((cam.zoom / 150 / 2), 0, 1);
         if (MathUtils.isEqual(alpha, 0)) return;
 
-        //ringColor.a = alpha;
         lineColor.a = alpha;
         highlight.a = alpha;
 
@@ -306,7 +307,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
             shape.rect(pos.x - width * 0.5f, pos.y - width * 0.5f, width, width);
         }
     }
-    
+
     private void drawCompass(Entity entity) {
         //set alpha
         float min = 0.05f;
@@ -335,71 +336,72 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         shape.circle(lead.x, lead.y, 2);
     
         //draw movement direction for navigation assistance, line up vector with target destination
-        Color compassHighlight = compassColor;
+        cacheColor.set(compassColor);
         ControllableComponent control = Mappers.controllable.get(entity);
         if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight) {
             width *= 2;
-            compassHighlight = Color.GOLD.cpy();
+            cacheColor.set(0xffd700ff);
         }
         if (control.boost) {
-            compassHighlight = Color.CYAN.cpy();
+            cacheColor.set(0, 1, 1, 1);
         }
-        compassHighlight.a = alpha;
+        cacheColor.a = alpha;
         
         //draw velocity vector
         if (!body.getLinearVelocity().isZero()) {
-            Vector2 vel = MyMath.vector(body.getLinearVelocity().angleRad(), 500000).cpy();
-            shape.rectLine(pos.x, pos.y, vel.x, vel.y, width, compassHighlight, compassHighlight);
-            vel.set(MyMath.vector(body.getLinearVelocity().angleRad(), 50)).add(pos.x, pos.y);
+            cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 500000));
+            shape.rectLine(pos.x, pos.y, cacheVec.x, cacheVec.y, width, cacheColor, cacheColor);
+            cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 50)).add(pos.x, pos.y);
 
-            compassHighlight.a = 1;
-            shape.setColor(compassHighlight);
+            boolean isMaxVelocity = MathUtils.isEqual(body.getLinearVelocity().len(), Box2DPhysicsSystem.getVelocityLimit(), 0.5f);
+
+            cacheColor.a = 1;
+            shape.setColor(cacheColor);
             HealthComponent health = Mappers.health.get(entity);
             long hurtTime = 1000;
             if (health != null && (GameScreen.getGameTimeCurrent() - health.lastHitTime < hurtTime)) {
-                shape.setColor(Color.RED.cpy());
+                shape.setColor(Color.RED);
             }
 
             //draw arrow
             int arrowSize = 10;
-            Vector2 arrowLeft  = MyMath.vector(body.getLinearVelocity().angleRad() + 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
-            shape.rectLine(vel, arrowLeft, 1);
-            Vector2 arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
-            shape.rectLine(vel, arrowRight, 1);
+            float angle = 135 * MathUtils.degreesToRadians;
+            Vector2 arrowLeft  = MyMath.vector(body.getLinearVelocity().angleRad() + angle, arrowSize).add(cacheVec);
+            shape.rectLine(cacheVec, arrowLeft, 1);
+            Vector2 arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
+            shape.rectLine(cacheVec, arrowRight, 1);
             //more!
             if (body.getLinearVelocity().len() >= Box2DPhysicsSystem.getVelocityLimit() * 0.33f) {
-                vel.set(MyMath.vector(body.getLinearVelocity().angleRad(), 60)).add(pos.x, pos.y);
-                arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
-                shape.rectLine(vel, arrowLeft, 1);
-                arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
-                shape.rectLine(vel, arrowRight, 1);
+                cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 60)).add(pos.x, pos.y);
+                arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + angle, arrowSize).add(cacheVec);
+                shape.rectLine(cacheVec, arrowLeft, 1);
+                arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
+                shape.rectLine(cacheVec, arrowRight, 1);
             }
             //moar!!
             if (body.getLinearVelocity().len() >= Box2DPhysicsSystem.getVelocityLimit() * 0.66f) {
-                vel.set(MyMath.vector(body.getLinearVelocity().angleRad(), 70)).add(pos.x, pos.y);
-                arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
-                shape.rectLine(vel, arrowLeft, 1);
-                arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
-                shape.rectLine(vel, arrowRight, 1);
+                cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 70)).add(pos.x, pos.y);
+                arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + angle, arrowSize).add(cacheVec);
+                shape.rectLine(cacheVec, arrowLeft, 1);
+                arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
+                shape.rectLine(cacheVec, arrowRight, 1);
             }
             //max velocity!!!
-            if (MathUtils.isEqual(body.getLinearVelocity().len(), Box2DPhysicsSystem.getVelocityLimit(), 0.5f)) {
-                vel.set(MyMath.vector(body.getLinearVelocity().angleRad(), 80)).add(pos.x, pos.y);
-                arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
-                shape.rectLine(vel, arrowLeft, 1);
-                arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - 135 * MathUtils.degreesToRadians, arrowSize).add(vel);
-                shape.rectLine(vel, arrowRight, 1);
+            if (isMaxVelocity) {
+                cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 80)).add(pos.x, pos.y);
+                arrowLeft = MyMath.vector(body.getLinearVelocity().angleRad() + angle, arrowSize).add(cacheVec);
+                shape.rectLine(cacheVec, arrowLeft, 1);
+                arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
+                shape.rectLine(cacheVec, arrowRight, 1);
             }
         }
-
         //draw force applied from engines?
     }
-    
-    private GlyphLayout layout = new GlyphLayout();
+
     private void drawHint(String text) {
-        float ratio = 1 + (float) Math.sin(animate*0.1);
-        Color c = Color.GREEN.cpy().lerp(Color.PURPLE, ratio);
-        subFont.setColor(c);
+        float ratio = 1 + (float) Math.sin(accumulator*0.1);
+        hintColorA.set(Color.GREEN).lerp(hintColorB, ratio);
+        subFont.setColor(hintColorA);
         layout.setText(subFont, text);
         
         float centerX = (Gdx.graphics.getWidth() - layout.width) * 0.5f;
@@ -468,54 +470,13 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         shape.line(0, heightThirds, Gdx.graphics.getWidth(), heightThirds);
         shape.line(0, heightThirds*2, Gdx.graphics.getWidth(), heightThirds*2);
     }
-    
-    private void drawEye(float segments, Rectangle rectangle) {
-        
-        if (segments > 0) {
-            shape.setColor(Color.RED);
-            float height = rectangle.getHeight() / segments;
-            float width = rectangle.getWidth() / segments;
-            for (int i = 0; i * height <= rectangle.getHeight(); i++) {
-                //bottom right
-                shape.line(rectangle.x + i * width,  rectangle.y, rectangle.x + rectangle.getWidth(), rectangle.y + i * height);
-                
-                //top left
-                shape.line(rectangle.x,  rectangle.y + i * height,  rectangle.x + i * width, rectangle.y + rectangle.getHeight());
-                
-                //bottom left
-                //shape.line(rectangle.x, rectangle.y + i * height, rectangle.x + i * width, rectangle.y);
-                
-                //diagonal
-                //shape.line(rectangle.x, rectangle.y  + i * height, rectangle.x + i * width, rectangle.y);
-            }
-        }
-        
-        shape.setColor(Color.GREEN);
-        shape.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.getHeight());
-    }
-
-    private void debugRenderTest(float deltaTime) {
-        //drawGrid(Color.WHITE, boundingBox, 50, 3);
-        //Color red = Color.RED.cpy();
-        //red.a = 0.5f;
-        //drawGrid(red, boundingBox, 50, 1);
-        Rectangle gridBounds = new Rectangle(1, 1, Gdx.graphics.getWidth()-2, Gdx.graphics.getHeight()-2);
-        animate += deltaTime;
-        int edgePad = 200;
-        Rectangle rectangle = new Rectangle(edgePad, edgePad,
-                Gdx.graphics.getWidth() - edgePad * 2,
-                Gdx.graphics.getHeight() - edgePad * 2);
-        //drawEye((float) (10.0f * Math.sin(animate)), rectangle);
-        drawEye((float) (10.0f + (Math.sin(animate) * 5.0f)), gridBounds);
-        //((float) (10.0f + (Math.sin(animate) * 10.0f)), new Rectangle(100F, 200F, 100F, (float) (100 + (Math.sin(animate) * 100.0f))));
-        //drawEye((float) (10.0f + ((Math.sin(animate * 10.0f) + MathUtils.PI) * 10.0f)), new Rectangle(100F, 100F, (float) (100 + (Math.sin(animate) * 100.0f)), 100));
-    }
     //endregion
     
     @Override
     public void dispose() {
         shape.dispose();
         batch.dispose();
+        subFont.dispose();
     }
     
 }
