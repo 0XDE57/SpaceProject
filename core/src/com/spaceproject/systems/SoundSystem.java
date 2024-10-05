@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.spaceproject.components.ItemComponent;
 import com.spaceproject.components.SoundComponent;
+import com.spaceproject.utility.SimpleTimer;
 import de.pottgames.tuningfork.*;
 import de.pottgames.tuningfork.logger.GdxLogger;
 
@@ -26,6 +27,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
             shipEngineAmbientFile = "sound/55hz.wav",
             hullImpactFile = "sound/hullImpactLight.mp3",
             hullImpactHeavyFile = "sound/hullImpactHeavy.mp3",
+            healthAlarmFile = "sound/lowHealthAlarm.ogg",
             shieldOnFile = "sound/shieldOn.mp3",
             shieldOffFile = "sound/shieldOff.mp3",
             shieldAmbientFile = "sound/shieldAmbient.wav",
@@ -42,14 +44,17 @@ public class SoundSystem extends EntitySystem implements Disposable {
     //Sound bounce0, bounce1, bounce2;
     SoundBuffer laserShoot, laserShootCharge;
     SoundBuffer hullImpact, hullImpactHeavy;
+    SoundBuffer healthAlarm;
     SoundBuffer shieldImpact, shieldOn, shieldOff, shieldAmbientLoop;
     SoundBuffer hyperdriveEngage;
     SoundBuffer pickup, credits;
     SoundBuffer heal;
     SoundBuffer dockStation, undockStation;
 
-    SoundEffect reverb;
-    SoundEffect echo;
+    Reverb reverbData;
+    RingModulator ringModData;
+    SoundEffect reverbEffect;
+    SoundEffect ringModEffect;
 
     @Override
     public void addedToEngine(Engine engine) {
@@ -71,6 +76,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         assetManager.load(shipEngineAmbientFile, SoundBuffer.class);
         assetManager.load(hullImpactFile, SoundBuffer.class);
         assetManager.load(hullImpactHeavyFile, SoundBuffer.class);
+        assetManager.load(healthAlarmFile, SoundBuffer.class);
         assetManager.load(shieldOnFile, SoundBuffer.class);
         assetManager.load(shieldOffFile, SoundBuffer.class);
         assetManager.load(shieldAmbientFile, SoundBuffer.class);
@@ -87,6 +93,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         shipEngineAmbientLoop = assetManager.get(shipEngineAmbientFile);
         hullImpact = assetManager.get(hullImpactFile);
         hullImpactHeavy = assetManager.get(hullImpactHeavyFile);
+        healthAlarm = assetManager.get(healthAlarmFile);
         shieldOn = assetManager.get(shieldOnFile);
         shieldOff = assetManager.get(shieldOffFile);
         shieldAmbientLoop = assetManager.get(shieldAmbientFile);
@@ -97,8 +104,11 @@ public class SoundSystem extends EntitySystem implements Disposable {
         undockStation = assetManager.get(undockStationFile);
 
         //test effects
-        reverb = new SoundEffect(new Reverb());
-        echo = new SoundEffect(new RingModulator());
+        reverbData = new Reverb();
+        reverbEffect = new SoundEffect(reverbData);
+        ringModData = new RingModulator();
+        ringModData.waveform = 1;
+        ringModEffect = new SoundEffect(ringModData);
     }
 
     public void setVolume(float value) {
@@ -134,15 +144,17 @@ public class SoundSystem extends EntitySystem implements Disposable {
         if (active) {
             if (currentSource == null) {
                 currentSource = audio.obtainSource(shipEngineAmbientLoop);
-                currentSource.attachEffect(reverb);
+                currentSource.attachEffect(reverbEffect);
                 currentSource.play();
                 currentSource.setLooping(true);
                 sound.sources.put(key, currentSource);
             }
-
             float relVel = velocity / Box2DPhysicsSystem.getVelocityLimit();
-            float pitch = MathUtils.map(0f, 1f, 0.5f, 2.0f, relVel);
+            float pitch = MathUtils.map(0f,  1f, 0.5f, 2.0f, relVel);
             currentSource.setPitch(pitch);
+            currentSource.setFilter(1f, 0);
+            //reverbData.density = 1-relVel;
+            //reverbEffect.updateEffect(reverbData);
         } else {
             if (currentSource != null) {
                 currentSource.free();
@@ -157,7 +169,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         if (active) {
             if (currentSource == null) {
                 currentSource = audio.obtainSource(shieldAmbientLoop);
-                currentSource.attachEffect(reverb);
+                currentSource.attachEffect(reverbEffect);
                 currentSource.setLooping(true);
                 currentSource.play();
                 sound.sources.put(key, currentSource);
@@ -170,7 +182,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         }
     }
     
-    public long asteroidShatter(ItemComponent.Resource resource) {
+    public void asteroidShatter(ItemComponent.Resource resource) {
         float pitch = MathUtils.random(0.5f, 2.0f);
         //pitch based on asteroid size?
         //pitch = MathUtils.map(minAsteroidSize, maxArea, 2f, 0.5f, asteroid.area);
@@ -182,7 +194,6 @@ public class SoundSystem extends EntitySystem implements Disposable {
             //case GOLD: return break4.play(1, pitch, 0);
             default: f3.play(1.25f, pitch, 0);
         }
-        return -1;
     }
     
     public void laserShoot(float pitch) {
@@ -194,8 +205,8 @@ public class SoundSystem extends EntitySystem implements Disposable {
         laserShoot.play(volume, pitch, 0);
     }
     
-    public long laserCharge(float volume, float pitch) {
-        return -1;//return laserShootCharge.play(volume, pitch, 0);
+    public void laserCharge(float volume, float pitch) {
+        //laserShootCharge.play(volume, pitch, 0);
     }
     
     public void hullImpactLight(float volume) {
@@ -204,6 +215,26 @@ public class SoundSystem extends EntitySystem implements Disposable {
     
     public void hullImpactHeavy(float pitch) {
         hullImpactHeavy.play(1, pitch, 0);
+    }
+
+    //int maxduration = 2;
+    //SimpleTimer timer = new SimpleTimer(-1);
+    public void healthAlarm(SoundComponent sound) {
+        healthAlarm.play();
+        /* todo: loop warning only 2 or 3 times.
+        String key = healthAlarmFile;
+        BufferedSoundSource currentSource = sound.sources.get(key);
+        if (currentSource == null) {
+            currentSource = audio.obtainSource(healthAlarm);
+            currentSource.setLooping(true);
+            currentSource.play();
+            sound.sources.put(key, currentSource);
+            //timer.setInterval(healthAlarm.getDuration(), true);
+
+        } else {
+            float time = healthAlarm.getDuration() * maxduration;
+            //if ()
+        }*/
     }
     
     public void shieldImpact(float volume) {
@@ -218,9 +249,8 @@ public class SoundSystem extends EntitySystem implements Disposable {
         shieldOff.play();
     }
     
-    public long hyperdriveEngage() {
-        return 0;//disable for now
-        //return hyperdriveEngageID = hyperdriveEngage.play();
+    public void hyperdriveEngage() {
+        //hyperdriveEngage.play();//disable for now
     }
     
     public void pickup() {
@@ -229,9 +259,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
     }
     
     public void shipExplode() {
-        BufferedSoundSource source = audio.obtainSource(shipExplode);
-        //source.attachEffect(reverb);
-        source.play();
+        shipExplode.play();
     }
 
     public void dockStation() {
@@ -253,6 +281,30 @@ public class SoundSystem extends EntitySystem implements Disposable {
     @Override
     public void dispose() {
         assetManager.dispose();
+
+        //cleanup sounds
+        shipEngineAmbientLoop.dispose();
+        shipExplode.dispose();
+        f3.dispose();
+        laserShoot.dispose();
+        laserShootCharge.dispose();
+        hullImpact.dispose();
+        hullImpactHeavy.dispose();
+        healthAlarm.dispose();
+        shieldImpact.dispose();
+        shieldOn.dispose();
+        shieldOff.dispose();
+        shieldAmbientLoop.dispose();
+        hyperdriveEngage.dispose();
+        pickup.dispose();
+        credits.dispose();
+        heal.dispose();
+        dockStation.dispose();
+        undockStation.dispose();
+        //cleanup effects
+        reverbEffect.dispose();
+        ringModEffect.dispose();
+
         audio.dispose();
     }
 

@@ -462,6 +462,10 @@ public class Box2DContactListener implements ContactListener {
             } else {
                 destroy(engine, entity, source, damagedBody);
             }
+        } else {
+            if (health.health / health.maxHealth < 0.25f && Mappers.controlFocus.get(entity) != null) {
+                engine.getSystem(SoundSystem.class).healthAlarm(Mappers.sound.get(entity));
+            }
         }
         HUDSystem.damageMarker(location, damage, health.lastHitTime);
         return health;
