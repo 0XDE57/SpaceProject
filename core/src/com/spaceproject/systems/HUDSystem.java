@@ -390,9 +390,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         Color color = messageState == SpecialState.destroyed ? Color.RED : uiCFG.uiBaseColor;
         shape.setColor(color);
         shape.rectLine(0, messageHeight + height, Gdx.graphics.getWidth(), messageHeight + height, 3);
-        if (messageState == SpecialState.destroyed) {
-            shape.rectLine(0, messageHeight, Gdx.graphics.getWidth(), messageHeight, 1);
-        }
+        shape.rectLine(0, messageHeight, Gdx.graphics.getWidth(), messageHeight, 1);
 
         int timerHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3) - 6);
         float halfWidth = Gdx.graphics.getWidth()*0.5f;
@@ -1023,7 +1021,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     public void resize(int width, int height) {
         gameMenu.resetPosition();
         if (stationMenu != null) {
-            stationMenu.setPosition(Gdx.graphics.getWidth() / 3f, Gdx.graphics.getHeight() / 2f, Align.center);
+            stationMenu.setPosition(Gdx.graphics.getWidth() / 3f, SpaceStationMenu.getHeight(stationMenu), Align.right);
         }
         miniMap.updateMapPosition();
     }
