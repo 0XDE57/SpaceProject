@@ -1,10 +1,9 @@
 package com.spaceproject.ui.debug.nodes;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.badlogic.gdx.utils.Array;
-import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.widget.VisLabel;
 import com.spaceproject.ui.debug.ECSExplorerWindow;
 import com.spaceproject.utility.SimpleTimer;
 
@@ -18,7 +17,7 @@ public class GhostNode extends UpdateNode {
     private SimpleTimer removeTimer;
     
     public GhostNode(UpdateNode nodeRemoved, boolean includeChildren) {
-        super(new Label(nodeRemoved.getActor().getName(), VisUI.getSkin(), skinSmallFont, Color.RED), null);
+        super(new VisLabel(nodeRemoved.getActor().getName(), skinSmallFont, Color.RED), null);
         
         Tree.Node parent = nodeRemoved.getParent();
         final Array<Tree.Node> parentsSiblings;
@@ -44,7 +43,7 @@ public class GhostNode extends UpdateNode {
         for (Tree.Node child : children) {
             addChildren(child.getChildren(), root);
             
-            add(new MyNode(new Label(child.getActor().getName(), VisUI.getSkin(), skinSmallFont, Color.RED)));
+            add(new VisTreeNode(new VisLabel(child.getActor().getName(), skinSmallFont, Color.RED)));
         }
     }
     

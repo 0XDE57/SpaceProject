@@ -281,11 +281,13 @@ public class ControllerMenuStage extends Stage implements ControllerListener {
                 } else {
                     //close window
                     if (!GameScreen.isPaused()) {
-                        //not paused == window is space station store menu
                         Actor p = getRoot().getChildren().first();
                         if (p instanceof VisWindow) {
-                            ((VisWindow) p).fadeOut();
-                            handled = true;
+                            //not paused + window is present = a window is open. ignore debug tool
+                            if (!((VisWindow) p).getTitleLabel().getText().contains("ECS Explorer")) {
+                                ((VisWindow) p).fadeOut();
+                                handled = true;
+                            }
                         }
                     }
                 }

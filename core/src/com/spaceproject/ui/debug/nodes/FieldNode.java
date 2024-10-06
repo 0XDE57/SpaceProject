@@ -1,13 +1,11 @@
 package com.spaceproject.ui.debug.nodes;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.kotcrab.vis.ui.widget.VisLabel;
 
 import java.lang.reflect.Field;
 
-/**
- * Created by Whilow Schock on 25/09/2019.
- */
+
 public class FieldNode extends UpdateNode {
     
     private Object owner;
@@ -25,7 +23,7 @@ public class FieldNode extends UpdateNode {
     
     @Override
     public void update() {
-        ((Label) getActor()).setText(toString());
+        ((VisLabel) getActor()).setText(toString());
     }
     
     @Override
@@ -43,4 +41,5 @@ public class FieldNode extends UpdateNode {
             return e.getMessage();
         }
     }
+
 }

@@ -10,24 +10,17 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.Tree;
-import com.badlogic.gdx.scenes.scene2d.ui.Tree.Node;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Selection;
 import com.badlogic.gdx.utils.Array;
-import com.kotcrab.vis.ui.VisUI;
-import com.kotcrab.vis.ui.widget.VisWindow;
+import com.kotcrab.vis.ui.widget.*;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.ui.debug.nodes.EntityNode;
 import com.spaceproject.ui.debug.nodes.GhostNode;
-import com.spaceproject.ui.debug.nodes.MyNode;
+import com.spaceproject.ui.debug.nodes.VisTreeNode;
 import com.spaceproject.ui.debug.nodes.ReflectionNode;
 import com.spaceproject.ui.debug.nodes.UpdateNode;
-import com.spaceproject.utility.SimpleTimer;
+import com.spaceproject.utility.IndependentTimer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,28 +32,36 @@ import static com.spaceproject.generation.FontLoader.skinSmallFont;
  *      view Systems in the Engine, and their Priorities
  *      view Entities
  *      view Components in Entities
- *      view Fields in Components via reflection
- *
+ *      view Fields and their values in Components via reflection
+ *      enable and disable systems processing
+ *      remove entities (soft: add @RemoveComponent() and cleaned up by @RemovalSystem) (hard: directly remove(), no auto-dispose)
+ *      remove components from entities
+ *      todo: allow expanding non basic types
+ *      todo: allow edit values
+ *          int float string -> text
+ *          bool -> checkbox
+ *          color -> color picker
  *      todo: view by component, eg:
  *          AIComponent
  *              Entity A
  *              Entity B
  *              Entity C
- *
- *     todo: allow edit values
+ *      todo: search bar.
+ *          - search entities or components by hashcode
+ *          - search by component class (filter)
  */
 public class ECSExplorerWindow extends VisWindow implements EntityListener {
     
     private Engine engine;
-    private Tree tree;
-    private Node systemNodes, entityNodes;
-    
+    private VisTree tree;
+    private VisTree.Node systemNodes, entityNodes;
+
     private static int refreshRate = 1000;
-    public static int newTime = 1000;
-    public static int removeTime = 1000;
+    public static int newTime = 2000;
+    public static int removeTime = 2000;
     public static boolean showHistory = true;
     public static boolean includeChildren = false;
-    private SimpleTimer refreshTimer;
+    private IndependentTimer refreshTimer;
     
     private final int keyUP = Input.Keys.UP;
     private final int keyDown = Input.Keys.DOWN;
@@ -68,28 +69,25 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
     private final int keyRight = Input.Keys.RIGHT;
 
     public ECSExplorerWindow(Engine engine) {
-        super("ECS Explorer");
+        super("ECS Explorer [F9]");
         
         this.engine = engine;
-        refreshTimer = new SimpleTimer(refreshRate, true);
+        refreshTimer = new IndependentTimer(refreshRate, true);
 
         setResizable(true);
         setMovable(true);
-        setSize(400, Gdx.graphics.getHeight() - 20);
+        setSize(500, Gdx.graphics.getHeight() - 20);
         setPosition(10, 10);
         addCloseButton();
-
-        systemNodes = new MyNode(new Label("Systems", VisUI.getSkin(), skinSmallFont, Color.WHITE));
-        entityNodes = new MyNode(new Label("Entities", VisUI.getSkin(), skinSmallFont, Color.WHITE));
-        tree = new Tree(VisUI.getSkin());
+        systemNodes = new VisTreeNode(new VisLabel("Systems", skinSmallFont, Color.WHITE));
+        entityNodes = new VisTreeNode(new VisLabel("Entities", skinSmallFont, Color.WHITE));
+        tree = new VisTree();
         tree.add(systemNodes);
         tree.add(entityNodes);
-        refreshNodes();
         
-        final Table contents = new Table();
-        
-        final Table options = new Table();
-        final CheckBox showHistoryCheck = new CheckBox("show history", VisUI.getSkin());
+        final VisTable contents = new VisTable();
+        final VisTable options = new VisTable();
+        final VisCheckBox showHistoryCheck = new VisCheckBox("show history");
         showHistoryCheck.setChecked(showHistory);
         showHistoryCheck.addListener(new ChangeListener() {
             @Override
@@ -101,12 +99,9 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
         contents.add(options);
         contents.row();
 
-        final ScrollPane scrollPane = new ScrollPane(tree);
-        scrollPane.setScrollbarsVisible(true);//why no scroll bar show?
-        //scrollPane.setFadeScrollBars(true);
-        //scrollPane.setScrollbarsOnTop(true);
-        //scrollPane.setForceScroll(false, true);
-        //scrollPane.scrol
+        final VisScrollPane scrollPane = new VisScrollPane(tree);
+        scrollPane.setScrollbarsVisible(true);
+        scrollPane.setFadeScrollBars(false);//always show scrollbar
         contents.add(scrollPane).expand().fill();
         add(contents).expand().fill();
     }
@@ -115,27 +110,29 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
         if (!isVisible()) {
             return;
         }
-        
         if (refreshTimer.tryEvent()) {
             refreshNodes();
         }
     }
     
     private void refreshNodes() {
+        updateSystems();
+        if (GameScreen.isPaused())
+            return;
+
         if (showHistory) {
             clearGhosts(entityNodes.getChildren());
         }
-        updateSystems();
         updateEntities();
     }
     
     private void updateEntities() {
         //update entities
-        ((Label)entityNodes.getActor()).setText("Entities [" + engine.getEntities().size() + "]");
+        ((VisLabel)entityNodes.getActor()).setText("Entities (" + engine.getEntities().size() + ")");
         for (Entity entity : engine.getEntities()) {
-            Node entNode = entityNodes.findNode(entity);
+            VisTree.Node entNode = entityNodes.findNode(entity);
             if (entNode == null) {
-                entityNodes.add(new EntityNode(entity, VisUI.getSkin()));
+                entityNodes.add(new EntityNode(entity));
             } else {
                 ((UpdateNode) entNode).update();
             }
@@ -144,9 +141,9 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
     
     private void updateSystems() {
         //add nodes
-        ((Label)systemNodes.getActor()).setText("Systems [" + engine.getSystems().size() + "]");
+        ((VisLabel)systemNodes.getActor()).setText("Systems (" + engine.getSystems().size() + ")");
         for (EntitySystem system : engine.getSystems()) {
-            Node sysNode = systemNodes.findNode(system);
+            VisTree.Node sysNode = systemNodes.findNode(system);
             if (sysNode == null) {
                 systemNodes.add(new ReflectionNode(system));
             }
@@ -163,8 +160,8 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
         }
     }
     
-    private void clearGhosts(Array<Node> nodes) {
-        for (Node child : nodes) {
+    private void clearGhosts(Array<VisTree.Node> nodes) {
+        for (VisTree.Node child : nodes) {
             if (child.getChildren().size > 0) {
                 clearGhosts(child.getChildren());
             }
@@ -209,26 +206,26 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
     }
     
     public void keyDown(InputEvent event, int keycode) {
-        Selection<Node> nodeSelection = tree.getSelection();
-        Node selectedNode = nodeSelection.first();
+        Selection<VisTree.Node> nodeSelection = tree.getSelection();
+        VisTree.Node selectedNode = nodeSelection.first();
         if (selectedNode == null) {
             List<Integer> keys = Arrays.asList(keyUP, keyDown, keyLeft, keyRight);
             if (keys.contains(keycode)) {
-                nodeSelection.choose((Node) tree.getRootNodes().first());
+                nodeSelection.choose((VisTree.Node) tree.getRootNodes().first());
             }
             return;
         }
         
-        final Array<Node> siblingNodes;
-        Node parentNode = selectedNode.getParent();
+        final Array<VisTree.Node> siblingNodes;
+        VisTree.Node parentNode = selectedNode.getParent();
         if (parentNode == null) {
             siblingNodes = tree.getRootNodes();
         } else {
             siblingNodes = parentNode.getChildren();
         }
         int index = siblingNodes.indexOf(selectedNode, false);
-        
-        Node chosen = null;
+
+        VisTree.Node chosen = null;
         switch (keycode) {
             case keyUP:
                 if (index > 0) {
@@ -241,7 +238,7 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
                 break;
             case keyDown:
                 if (selectedNode.isExpanded() && (selectedNode.getChildren().size > 0)) {
-                    chosen = (Node) selectedNode.getChildren().first();
+                    chosen = (VisTree.Node) selectedNode.getChildren().first();
                 } else {
                     chosen = getNextNodeBelow(siblingNodes, parentNode, index);
                 }
@@ -267,10 +264,10 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
         }
     }
     
-    private Node getNextNodeAbove(Node current) {
+    private VisTree.Node getNextNodeAbove(VisTree.Node current) {
         if (current.isExpanded()) {
             if (current.getChildren().size > 0) {
-                Node nextNode = (Node) current.getChildren().get(current.getChildren().size - 1);
+                VisTree.Node nextNode = (VisTree.Node) current.getChildren().get(current.getChildren().size - 1);
                 return getNextNodeAbove(nextNode);
             }
         }
@@ -278,13 +275,13 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
         return current;
     }
     
-    private Node getNextNodeBelow(Array<Node> siblingNodes, Node parentNode, int index) {
+    private VisTree.Node getNextNodeBelow(Array<VisTree.Node> siblingNodes, VisTree.Node parentNode, int index) {
         if (index < siblingNodes.size - 1) {
             return siblingNodes.get(index + 1);
         } else if (index == siblingNodes.size - 1) {
             if (parentNode != null) {
-                Node parentsParent = parentNode.getParent(); //(grandparents?)
-                final Array<Node> parentsSiblings; //(aunts/uncles?)
+                VisTree.Node parentsParent = parentNode.getParent(); //(grandparents?)
+                final Array<VisTree.Node> parentsSiblings; //(aunts/uncles?)
                 if (parentsParent == null) {
                     parentsSiblings = tree.getRootNodes();
                 } else {
@@ -300,12 +297,12 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
     
     @Override
     public void entityAdded(Entity entity) {
-        entityNodes.add(new EntityNode(entity, VisUI.getSkin(), showHistory));
+        entityNodes.add(new EntityNode(entity, showHistory));
     }
     
     @Override
     public void entityRemoved(Entity entity) {
-        Node node = entityNodes.findNode(entity);
+        VisTree.Node node = entityNodes.findNode(entity);
         if (node == null) {
             Gdx.app.error(this.getClass().getSimpleName(), "node for entity null!");
             return;

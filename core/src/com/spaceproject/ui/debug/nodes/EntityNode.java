@@ -3,34 +3,57 @@ package com.spaceproject.ui.debug.nodes;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisTable;
+import com.kotcrab.vis.ui.widget.VisTextButton;
+import com.spaceproject.components.RemoveComponent;
 import com.spaceproject.ui.debug.ECSExplorerWindow;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.SimpleTimer;
 
 import static com.spaceproject.generation.FontLoader.skinSmallFont;
 
-/**
- * Created by Whilow Schock on 25/09/2019.
- */
+
 public class EntityNode extends UpdateNode {
     
     boolean isNew = false;
     private SimpleTimer newTimer;
     
-    public EntityNode(Entity entity, Skin skin) {
-        super(new Label(DebugUtil.objString(entity), skin, skinSmallFont, Color.WHITE), entity);
+    public EntityNode(Entity entity) {
+        super(createActor(entity), entity);
     }
-    
-    public EntityNode(Entity entity, Skin skin, boolean markNew) {
-        this(entity, skin);
+
+    private static Actor createActor(Entity entity) {
+        VisTable table = new VisTable();
+        table.add(new VisLabel(DebugUtil.objString(entity),  skinSmallFont, Color.WHITE)).width(400);
+
+        //VisTextButton addButton = new VisTextButton("[+] add");
+        //table.add(addButton);
+
+        VisTextButton deleteButton = new VisTextButton("delete");
+        deleteButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                entity.add(new RemoveComponent());
+                Gdx.app.debug(getClass().getSimpleName(), "marked entity for death: " + DebugUtil.objString(entity));
+            }
+        });
+        table.add(deleteButton);
+        return table;
+    }
+
+    public EntityNode(Entity entity, boolean markNew) {
+        this(entity);
         
         isNew = markNew;
         if (isNew) {
             newTimer = new SimpleTimer(ECSExplorerWindow.newTime, true);
-            getActor().setColor(Color.GREEN);
+            VisLabel label = (VisLabel) ((VisTable)getActor()).getChildren().first();
+            label.setColor(Color.GREEN);
         }
     }
     
@@ -43,14 +66,15 @@ public class EntityNode extends UpdateNode {
         if (getValue() == null) {
             return;
         }
-        
+
+        VisLabel label = (VisLabel) ((VisTable)getActor()).getChildren().first();
         if (isNew && newTimer.tryEvent()) {
             isNew = false;
             newTimer = null;
-            getActor().setColor(Color.WHITE);
+            label.setColor(Color.WHITE);
         }
-        
-        ((Label) getActor()).setText(toString());
+
+        label.setText(toString());
         
         if (!isExpanded())
             return;
@@ -87,6 +111,7 @@ public class EntityNode extends UpdateNode {
         if (getValue() == null)
             return super.toString();
         
-        return DebugUtil.objString(getEntity()) + " [" + getEntity().getComponents().size() + "]";
+        return DebugUtil.objString(getEntity()) + " (" + getEntity().getComponents().size() + ")";
     }
+
 }

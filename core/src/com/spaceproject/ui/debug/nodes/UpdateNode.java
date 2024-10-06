@@ -4,11 +4,11 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.spaceproject.utility.DebugUtil;
 
 
-public abstract class UpdateNode extends MyNode {
+public abstract class UpdateNode extends VisTreeNode {
     
     UpdateNode(Actor actor, Object obj) {
         super(actor);
-        this.setValue(obj);
+        setValue(obj);
         if (obj != null) {
             getActor().setName(DebugUtil.objString(obj));
         }
@@ -23,14 +23,13 @@ public abstract class UpdateNode extends MyNode {
         update();
     }
     
-    
     public abstract void update();
-    
-    
+
     public void removeAndCreateGhost(boolean includeChildren) {
         new GhostNode(this, includeChildren);
         
         remove();
     }
+
 }
 
