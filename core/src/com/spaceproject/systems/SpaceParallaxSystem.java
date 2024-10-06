@@ -43,10 +43,12 @@ public class SpaceParallaxSystem extends EntitySystem implements Disposable {
     public SpaceParallaxSystem() {
         spriteBatch = new SpriteBatch();
 
-        spaceShader = new ShaderProgram(Gdx.files.internal("shaders/spaceParallax.vert"), Gdx.files.internal("shaders/spaceParallax.frag"));
+        String vertex = "shaders/spaceParallax.vert";
+        String fragment = "shaders/spaceParallax.frag";
+        spaceShader = new ShaderProgram(Gdx.files.internal(vertex), Gdx.files.internal(fragment));
         if (spaceShader.isCompiled()) {
             spriteBatch.setShader(spaceShader);
-            Gdx.app.log(getClass().getSimpleName(), "shader compiled successfully!");
+            Gdx.app.log(getClass().getSimpleName(), "shader compiled successfully! [" + vertex + ", " + fragment + "]");
         } else {
             Gdx.app.error(getClass().getSimpleName(), "shader failed to compile:\n" + spaceShader.getLog());
         }

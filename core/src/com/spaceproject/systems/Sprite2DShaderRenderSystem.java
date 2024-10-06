@@ -50,21 +50,25 @@ public class Sprite2DShaderRenderSystem extends IteratingSystem implements Dispo
     
         //load shaders
         ShaderProgram.pedantic = false;
-        starShader = new ShaderProgram(Gdx.files.internal("shaders/starAnimate.vert"), Gdx.files.internal("shaders/starAnimate.frag"));
+        String starVert = "shaders/starAnimate.vert";
+        String starFrag = "shaders/starAnimate.frag";
+        starShader = new ShaderProgram(Gdx.files.internal(starVert), Gdx.files.internal(starFrag));
         if (starShader.isCompiled()) {
             //load by default for now
             spriteBatch.setShader(starShader);
-            Gdx.app.log(this.getClass().getSimpleName(), "shader compiled successfully!");
+            Gdx.app.log(getClass().getSimpleName(), "shader compiled successfully! [" + starVert + ", " + starFrag + "]");
         } else {
-            Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + starShader.getLog());
+            Gdx.app.error(getClass().getSimpleName(), "shader failed to compile:\n" + starShader.getLog());
         }
-        
-        grayscaleShader = new ShaderProgram(Gdx.files.internal("shaders/grayscale.vert"), Gdx.files.internal("shaders/grayscale.frag"));
+
+        String grayVert = "shaders/grayscale.vert";
+        String grayFrag = "shaders/grayscale.frag";
+        grayscaleShader = new ShaderProgram(Gdx.files.internal(grayVert), Gdx.files.internal(grayFrag));
         if (starShader.isCompiled()) {
             //spriteBatch.setShader(starShader);
-            Gdx.app.log(this.getClass().getSimpleName(), "shader compiled successfully!");
+            Gdx.app.log(getClass().getSimpleName(), "shader compiled successfully! [" + grayVert + ", " + grayFrag + "]");
         } else {
-            Gdx.app.error(this.getClass().getSimpleName(), "shader failed to compile:\n" + starShader.getLog());
+            Gdx.app.error(getClass().getSimpleName(), "shader failed to compile:\n" + starShader.getLog());
         }
     }
 
