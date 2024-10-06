@@ -41,6 +41,7 @@ import static com.spaceproject.generation.FontLoader.skinSmallFont;
  *          int float string -> text
  *          bool -> checkbox
  *          color -> color picker
+ *          texture -> render?
  *      todo: view by component, eg:
  *          AIComponent
  *              Entity A
@@ -49,6 +50,8 @@ import static com.spaceproject.generation.FontLoader.skinSmallFont;
  *      todo: search bar.
  *          - search entities or components by hashcode
  *          - search by component class (filter)
+ *      todo: add Entity button -> open new entity designer window, create empty entity. add Components
+ *      todo: add Component button -> add Component to entity
  */
 public class ECSExplorerWindow extends VisWindow implements EntityListener {
     
