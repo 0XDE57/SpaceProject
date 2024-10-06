@@ -330,6 +330,19 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 layout.setText(inventoryFont, "size: " + planet.mapSize);
                 inventoryFont.draw(batch, layout, screenPos.x - layout.width*0.5f, screenPos.y - offset);//replace with mass?
             }
+            StarComponent star = Mappers.star.get(focused);
+            if (star != null) {
+                TransformComponent transform = Mappers.transform.get(focused);
+                tempProj.set(transform.pos.x, transform.pos.y, 0);
+                Vector3 screenPos = MyScreenAdapter.cam.project(tempProj);
+                float offset = layout.height * 1.5f;
+                float alpha = MathUtils.clamp((cam.zoom / 150 / 2), 0, 1);
+                inventoryFont.setColor(1, 1, 1, alpha);
+                layout.setText(inventoryFont, "<star type>" /*+ star.StellarClass*/);
+                inventoryFont.draw(batch, layout, screenPos.x - layout.width*0.5f, screenPos.y + offset);
+                layout.setText(inventoryFont, "temperature: " + (int)star.temperature + "k");
+                inventoryFont.draw(batch, layout, screenPos.x - layout.width*0.5f, screenPos.y);
+            }
         }
 
         if (focusedDist > 0) {

@@ -238,7 +238,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
             boolean intersectsVelocity = false;
             if (tex != null) {
                 float radius = tex.texture.getWidth() * 0.5f * tex.scale;
-                if (body != null && orbit.parent != null && !body.getLinearVelocity().isZero()) {
+                if (body != null && !body.getLinearVelocity().isZero()) {
                     Vector2 facing = MyMath.vector(body.getAngle(), 500000).add(body.getPosition());
                     intersectsFacing = Intersector.intersectSegmentCircle(body.getPosition(), facing, transform.pos, radius * radius);
                     if (intersectsFacing) {
@@ -288,7 +288,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         }
 
         accumulator += 3 * Gdx.graphics.getDeltaTime();
-        if (closestFacing != null) {
+        if (closestFacing != null && Mappers.star.get(closestFacing) == null) {
             Vector2 pos = Mappers.transform.get(closestFacing).pos;
             TextureComponent tex = Mappers.texture.get(closestFacing);
             float radius = tex.texture.getWidth() * 0.5f * tex.scale;
@@ -297,7 +297,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
             float width = radius * 2;
             shape.rect(pos.x - width * 0.5f, pos.y - width * 0.5f, width, width);
         }
-        if (closestVelocity != null) {
+        if (closestVelocity != null && Mappers.star.get(closestVelocity) == null) {
             Vector2 pos = Mappers.transform.get(closestVelocity).pos;
             TextureComponent tex = Mappers.texture.get(closestVelocity);
             float radius = tex.texture.getWidth() * 0.5f * tex.scale;
