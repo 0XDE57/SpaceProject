@@ -41,10 +41,12 @@ public class ProjectileHitRenderSystem extends EntitySystem implements Disposabl
     }
 
     private static final Pool<Ring> ringPool = Pools.get(Ring.class, 200);
-    private static final Array<Ring> activeRings = new Array<>();
+    private static final Array<Ring> activeRings = new Array<>(false, 200);
 
     private final ShapeRenderer shape;
+    private int numVert, peakVert;
     private final float growthRate = 2.0f;
+    private final StringBuilder infoString = new StringBuilder();
 
     public ProjectileHitRenderSystem() {
         shape = new ShapeRenderer();
@@ -61,7 +63,6 @@ public class ProjectileHitRenderSystem extends EntitySystem implements Disposabl
         hit(x, y, 0, 0, color);
     }
 
-    int numVert;
     @Override
     public void update(float delta) {
         shape.setProjectionMatrix(GameScreen.cam.combined);
@@ -79,13 +80,13 @@ public class ProjectileHitRenderSystem extends EntitySystem implements Disposabl
             ring.radius += growthRate * delta;
             shape.setColor(ring.color.r, ring.color.g, ring.color.b, 1-ring.radius);
             shape.circle(ring.x, ring.y, ring.radius);
-
             if (1 - ring.radius <= 0) {
                 iterator.remove();
                 ringPool.free(ring);
             }
         }
         numVert = shape.getRenderer().getNumVertices(); //must be checked before end() called
+        peakVert = Math.max(peakVert, numVert);
         shape.end();
         
         //disable transparency
@@ -99,12 +100,11 @@ public class ProjectileHitRenderSystem extends EntitySystem implements Disposabl
         shape.dispose();
     }
 
-    StringBuilder infoString = new StringBuilder();
     @Override
     public String toString() {
         infoString.setLength(0);
-        infoString.append("vertices: ").append(numVert)
-                .append(", [Ring Pool] active: ").append(activeRings.size)
+        infoString.append("vertices: ").append(numVert).append(" (").append(peakVert)
+                .append("), [Ring Pool] active: ").append(activeRings.size)
                 .append(", free: ").append(ringPool.getFree())
                 .append(", peak: ").append(ringPool.peak)
                 .append(", max: ").append(ringPool.max);

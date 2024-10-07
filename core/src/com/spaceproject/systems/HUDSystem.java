@@ -70,8 +70,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
     }
 
-    private static final Array<DamageText> activeNumbers = new Array<>();
-    private static final Pool<DamageText> numbersPool = Pools.get(DamageText.class, 400);
+    private static final int poolSize = 400;
+    private static final Array<DamageText> activeNumbers = new Array<>(false, poolSize); //don't care about order so we can avoid a System.arraycopy()
+    private static final Pool<DamageText> numbersPool = Pools.get(DamageText.class, poolSize);
     public static boolean showDamageNumbers = false;
     public static int damageTime = 750;
     public static int activePeak;
@@ -90,7 +91,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             this.color = color;
         }
     }
-    private final List<CreditsMarker> markers;
+    private final Array<CreditsMarker> markers;
 
     private final UIConfig uiCFG = SpaceProject.configManager.getConfig(UIConfig.class);
     private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
@@ -139,7 +140,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         layout = new GlyphLayout();
 
         miniMap = new MiniMap();
-        markers = new ArrayList<>();
+        markers = new Array<>(false, 16);
 
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 26;
