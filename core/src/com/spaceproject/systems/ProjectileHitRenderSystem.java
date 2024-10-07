@@ -91,7 +91,7 @@ public class ProjectileHitRenderSystem extends EntitySystem implements Disposabl
         //disable transparency
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
-        DebugSystem.addDebugText(toString(), 100, 100);
+        //DebugSystem.addDebugText(toString(), 100, 100);
     }
     
     @Override
