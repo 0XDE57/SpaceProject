@@ -141,60 +141,25 @@ public class Box2DContactListener implements ContactListener {
         //do damage
         damage(engine, attackedEntity, damageComponent.source, damageComponent.damage, contact, damagedBody);
         
-        //add projectile ghost (fx)
-        boolean showGhostTrail = (healthComponent.health <= 0);
-        explodeProjectile(contact, damageEntity, attackedEntity, showGhostTrail);
+        //fx
+        explodeProjectile(contact, attackedEntity);
         
         //remove projectile
         damageEntity.add(new RemoveComponent());
     }
 
     Color cacheColor = new Color();
-    private void explodeProjectile(Contact contact, Entity entityHit, Entity attackedEntity, boolean showGhost) {
-        WorldManifold manifold = contact.getWorldManifold();
-        //we only need the first point in this case
-        Vector2 p = manifold.getPoints()[0];
-        
-        Entity contactPoint = new Entity();
-        
-        //create entity at point of contact
-        TransformComponent transform = new TransformComponent();
-        transform.pos.set(p);
-        contactPoint.add(transform);
-
-        ExpireComponent expire = new ExpireComponent();
-        expire.timer = new SimpleTimer(1000, true);
-        contactPoint.add(expire);
-        
-        //todo: better particle this one is ugly
-        //ParticleComponent particle = new ParticleComponent();
-        //particle.type = ParticleComponent.EffectType.bulletExplode;
-        //contactP.add(particle);
-
+    private void explodeProjectile(Contact contact, Entity attackedEntity) {
         cacheColor.set(Color.WHITE);
         AsteroidComponent asteroid = Mappers.asteroid.get(attackedEntity);
         if (asteroid != null) {
             cacheColor.set(asteroid.color);
         }
-        if (showGhost) {
-            TrailComponent trailComponent = (TrailComponent) ECSUtil.transferComponent(entityHit, contactPoint, TrailComponent.class);
-            if (trailComponent != null) {
-                trailComponent.time = GameScreen.getGameTimeCurrent();
-                trailComponent.color = new Color(0, 0, 0, 0.15f);
-                if (asteroid != null) {
-                    trailComponent.color.set(asteroid.color);
-
-                }
-                trailComponent.style = TrailComponent.Style.solid;
-            }
-        }
-
-        //todo: transfer velocity from object hit
+        //we only need the first point in this case
+        Vector2 pos = contact.getWorldManifold().getPoints()[0];
+        //transfer velocity from object hit
         Vector2 vel = Mappers.physics.get(attackedEntity).body.getLinearVelocity();
-        //ProjectileHitRenderSystem.hit(p.x, p.y, Color.WHITE);
-        ProjectileHitRenderSystem.hit(p.x, p.y, vel.x, vel.y, cacheColor);
-        
-        engine.addEntity(contactPoint);
+        ProjectileHitRenderSystem.hit(pos.x, pos.y, vel.x, vel.y, cacheColor);
     }
     
     private void collectItemDrop(Fixture collectorFixture, CargoComponent cargo, Entity item) {
