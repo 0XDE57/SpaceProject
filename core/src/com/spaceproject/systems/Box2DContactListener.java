@@ -118,17 +118,16 @@ public class Box2DContactListener implements ContactListener {
             //focus ai on player
             ai.attackTarget = damageComponent.source;
             ai.state = AIComponent.State.attack;
-        } else if (Mappers.controlFocus.get(damageEntity) != null) {
+        } /*else if (Mappers.controlFocus.get(damageEntity) != null) {
             //someone attacked player, focus on enemy
             damageEntity.add(new CamTargetComponent());
-        }
+        }*/
         
         //check for shield
         ShieldComponent shieldComp = Mappers.shield.get(attackedEntity);
         if ((shieldComp != null) && (shieldComp.state == ShieldComponent.State.on)) {
             //todo: "break effect", sound effect, particle effect
             //shieldComp.state == ShieldComponent.State.break;??
-            //damageEntity.add(new RemoveComponent());
             return;
         }
         
@@ -149,7 +148,8 @@ public class Box2DContactListener implements ContactListener {
         //remove projectile
         damageEntity.add(new RemoveComponent());
     }
-    
+
+    Color cacheColor = new Color();
     private void explodeProjectile(Contact contact, Entity entityHit, Entity attackedEntity, boolean showGhost) {
         WorldManifold manifold = contact.getWorldManifold();
         //we only need the first point in this case
@@ -161,10 +161,7 @@ public class Box2DContactListener implements ContactListener {
         TransformComponent transform = new TransformComponent();
         transform.pos.set(p);
         contactPoint.add(transform);
-        //todo: transfer velocity from object hit
-        
-        contactPoint.add(new RingEffectComponent());
-        
+
         ExpireComponent expire = new ExpireComponent();
         expire.timer = new SimpleTimer(1000, true);
         contactPoint.add(expire);
@@ -173,19 +170,29 @@ public class Box2DContactListener implements ContactListener {
         //ParticleComponent particle = new ParticleComponent();
         //particle.type = ParticleComponent.EffectType.bulletExplode;
         //contactP.add(particle);
-        
+
+        cacheColor.set(Color.WHITE);
+        AsteroidComponent asteroid = Mappers.asteroid.get(attackedEntity);
+        if (asteroid != null) {
+            cacheColor.set(asteroid.color);
+        }
         if (showGhost) {
             TrailComponent trailComponent = (TrailComponent) ECSUtil.transferComponent(entityHit, contactPoint, TrailComponent.class);
             if (trailComponent != null) {
                 trailComponent.time = GameScreen.getGameTimeCurrent();
                 trailComponent.color = new Color(0, 0, 0, 0.15f);
-                AsteroidComponent asteroid = Mappers.asteroid.get(attackedEntity);
                 if (asteroid != null) {
                     trailComponent.color.set(asteroid.color);
+
                 }
                 trailComponent.style = TrailComponent.Style.solid;
             }
         }
+
+        //todo: transfer velocity from object hit
+        Vector2 vel = Mappers.physics.get(attackedEntity).body.getLinearVelocity();
+        //ProjectileHitRenderSystem.hit(p.x, p.y, Color.WHITE);
+        ProjectileHitRenderSystem.hit(p.x, p.y, vel.x, vel.y, cacheColor);
         
         engine.addEntity(contactPoint);
     }
@@ -498,7 +505,8 @@ public class Box2DContactListener implements ContactListener {
             if (trailComponent != null) {
                 respawnEntity.add(trailComponent);
             }
-            respawnEntity.add(new RingEffectComponent());//todo: replace with explode particle effect
+            ProjectileHitRenderSystem.hit(transform.pos.x, transform.pos.y, Color.RED);//todo: replace with explode particle effect
+
             engine.addEntity(respawnEntity);
             Gdx.app.debug(Box2DContactListener.class.getSimpleName(), "create respawn(" + respawn.reason + ") marker: " + DebugUtil.objString(respawnEntity) + " for " + DebugUtil.objString(entity));
         }
