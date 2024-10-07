@@ -314,29 +314,29 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             if (planet != null) {
                 TransformComponent transform = Mappers.transform.get(focused);
                 tempProj.set(transform.pos.x, transform.pos.y, 0);
-                Vector3 screenPos = MyScreenAdapter.cam.project(tempProj);
-                float offset = layout.height * 1.5f;
+                MyScreenAdapter.cam.project(tempProj);
                 float alpha = MathUtils.clamp((cam.zoom / 150 / 2), 0, 1);
                 inventoryFont.setColor(1, 1, 1, alpha);
                 layout.setText(inventoryFont, "<planet name>");
-                inventoryFont.draw(batch, layout, screenPos.x - layout.width*0.5f, screenPos.y + offset);
+                float offset = layout.height * 1.5f;
+                inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y + offset);
                 layout.setText(inventoryFont, "atmosphere: <unknown>");
-                inventoryFont.draw(batch, layout, screenPos.x - layout.width*0.5f, screenPos.y);
+                inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y);
                 layout.setText(inventoryFont, "size: " + planet.mapSize);
-                inventoryFont.draw(batch, layout, screenPos.x - layout.width*0.5f, screenPos.y - offset);//replace with mass?
+                inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y - offset);//replace with mass?
             }
             StarComponent star = Mappers.star.get(focused);
             if (star != null) {
                 TransformComponent transform = Mappers.transform.get(focused);
                 tempProj.set(transform.pos.x, transform.pos.y, 0);
-                Vector3 screenPos = MyScreenAdapter.cam.project(tempProj);
-                float offset = layout.height * 1.5f;
+                MyScreenAdapter.cam.project(tempProj);
                 float alpha = MathUtils.clamp((cam.zoom / 150 / 2), 0, 1);
                 inventoryFont.setColor(1, 1, 1, alpha);
                 layout.setText(inventoryFont, "<star type>" /*+ star.StellarClass*/);
-                inventoryFont.draw(batch, layout, screenPos.x - layout.width*0.5f, screenPos.y + offset);
+                float offset = layout.height * 1.5f;
+                inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y + offset);
                 layout.setText(inventoryFont, "temperature: " + (int)star.temperature + "k");
-                inventoryFont.draw(batch, layout, screenPos.x - layout.width*0.5f, screenPos.y);
+                inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y);
             }
         }
 
@@ -852,6 +852,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             }
         }
     }
+    //endregion
 
     private void drawDamageText() {
         for (Iterator<DamageText> iterator = activeNumbers.iterator(); iterator.hasNext();) {
@@ -899,7 +900,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     public void addCredits(int totalCredits, Vector2 pos, Color color) {
         markers.add(new CreditsMarker(totalCredits, pos, color));//todo: replace with pool
     }
-    //endregion
     
     /**
      * Mark off-screen objects on edge of screen for navigation.
