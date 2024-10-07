@@ -8,8 +8,10 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.StringBuilder;
 import com.spaceproject.components.AIComponent;
 import com.spaceproject.components.AttachedToComponent;
 import com.spaceproject.components.CameraFocusComponent;
@@ -20,7 +22,10 @@ import com.spaceproject.components.ControllableComponent;
 import java.lang.reflect.Field;
 
 public class ECSUtil {
-    
+
+    static String className = ECSUtil.class.getSimpleName();
+    static StringBuilder infoString = new StringBuilder();
+
     public static Component transferComponent(Entity fromEntity, Entity toEntity, Class<? extends Component> componentClass) {
         Component transferredComponent = fromEntity.remove(componentClass);
         if (transferredComponent == null) {
@@ -69,11 +74,10 @@ public class ECSUtil {
         
         return targetEntity;
     }
-    
+
+    static int ohNo = 0;
     public static Array<Entity> getAttachedEntities(Engine engine, Entity parentEntity) {
         Array<Entity> cluster = new Array<>();
-        cluster.add(parentEntity);
-        
         ImmutableArray<Entity> attachedEntities = engine.getEntitiesFor(Family.all(AttachedToComponent.class).get());
         for (Entity attachedEntity : attachedEntities) {
             AttachedToComponent attachedTo = Mappers.attachedTo.get(attachedEntity);
@@ -81,7 +85,7 @@ public class ECSUtil {
                 cluster.add(attachedEntity);
             }
         }
-        
+        //Gdx.app.debug(className, "oh no - new array: " + ohNo++);
         return cluster;
     }
     
@@ -97,20 +101,34 @@ public class ECSUtil {
             //return getAttachedEntities(engine, attached.parentEntity);?
         }
     }*/
-    
-    public static String getECSString(Engine engine) {
+
+    static int peakE, peakC, peakS;
+    public static String getECSString(Engine engine, boolean includePeak) {
         int entities = engine.getEntities().size();
         int components = 0;
         for (Entity ent : engine.getEntities()) {
             components += ent.getComponents().size();
         }
         int systems = engine.getSystems().size();
-        return "E: " + entities + " C: " + components + " S: " + systems;
+        peakE = Math.max(peakE, entities);
+        peakC = Math.max(peakC, components);
+        peakS = Math.max(peakS, systems);
+        infoString.setLength(0);
+        infoString.append("E: ").append(entities)
+                .append(" C: ").append(components)
+                .append(" S: ").append(systems);
+        if (includePeak) {
+            infoString.append(" - peak[").append(peakE)
+                    .append("/").append(peakC)
+                    .append("/").append(peakS)
+                    .append("]");
+        }
+        return infoString.toString();
     }
     
     public static void printSystems(Engine eng) {
         for (EntitySystem sys : eng.getSystems()) {
-            Gdx.app.debug("DebugUtil", sys + " (" + sys.priority + ")");
+            Gdx.app.debug(className, sys + " (" + sys.priority + ")");
         }
     }
     
@@ -119,21 +137,25 @@ public class ECSUtil {
             printEntity(entity);
         }
     }
-    
+
     public static void printEntity(Entity entity) {
-        Gdx.app.debug("DebugUtil", entity.toString());
+        infoString.setLength(0);
+        infoString.append(entity.toString());
         for (Component c : entity.getComponents()) {
-            Gdx.app.debug("DebugUtil", "\t" + c.toString());
+            infoString.append("\n\t").append(c.toString());
             for (Field f : c.getClass().getFields()) {
                 try {
-                    Gdx.app.debug("DebugUtil", String.format("\t\t%-14s %s", f.getName(), f.get(c)));
+                    infoString.append(String.format("\n\t\t%-14s %s", f.getName(), f.get(c)));
                 } catch (IllegalArgumentException e) {
-                    Gdx.app.error("DebugUtil", "failed to read fields", e);
+                    Gdx.app.error(className, "failed to read fields", e);
+                    //infoString.append("failed to read fields").append(e);
                 } catch (IllegalAccessException e) {
-                    Gdx.app.error("DebugUtil", "fail to read fields", e);
+                    infoString.append("failed to read fields").append(e);
+                    //Gdx.app.error(className, "fail to read fields", e);
                 }
             }
         }
+        Gdx.app.error(className, infoString.toString());
     }
     
 }

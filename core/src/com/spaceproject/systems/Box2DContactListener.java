@@ -416,6 +416,7 @@ public class Box2DContactListener implements ContactListener {
         //cannon upgrades?: level 1,2,3 eg: level 3 adds cooldown reduction on hit? could be a upgrade?
         if (Mappers.asteroid.get(entity) != null) {
             CannonComponent cannon = Mappers.cannon.get(source);
+
             if (cannon != null) {
                 //cannon level / upgrade?
                 cannon.heat -= 0.05f;
@@ -444,6 +445,16 @@ public class Box2DContactListener implements ContactListener {
     }
     
     private static void destroy(Engine engine, Entity entity, Entity source, Body damagedBody) {
+        entity.add(new RemoveComponent());
+
+        AsteroidComponent asteroid = Mappers.asteroid.get(entity);
+        if (asteroid != null) {
+            //NOTE: cannot CreateBody() during physics step
+            engine.getSystem(AsteroidBeltSystem.class).destroyAsteroid(asteroid, damagedBody.getPosition().cpy(), damagedBody.getLinearVelocity().cpy(), damagedBody.getAngle(), damagedBody.getAngularVelocity());
+            engine.getSystem(SoundSystem.class).asteroidShatter(asteroid.composition);
+            return;
+        }
+
         //create respawn entity for player
         if (Mappers.controlFocus.get(entity) != null) {
             Entity respawnEntity = new Entity();
@@ -475,36 +486,29 @@ public class Box2DContactListener implements ContactListener {
             engine.addEntity(respawnEntity);
             Gdx.app.debug(Box2DContactListener.class.getSimpleName(), "create respawn(" + respawn.reason + ") marker: " + DebugUtil.objString(respawnEntity) + " for " + DebugUtil.objString(entity));
         }
-    
-        /*
-        //drop inventory
-        CargoComponent cargoComponent = Mappers.cargo.get(entity);
-        if (cargoComponent != null) {
-            int items = cargoComponent.count;
-            for (int i = 0; i <= items; i++) {
-                Color color = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
-                EntityBuilder.dropResource(damagedBody.getPosition(), damagedBody.getLinearVelocity(), color);
-            }
-        }*/
-        
-        //if entity was part of a cluster, remove all entities attached to cluster
-        Array<Entity> cluster = ECSUtil.getAttachedEntities(engine, entity);
-        for (Entity e : cluster) {
-            e.add(new RemoveComponent());
-        }
-        
-        AsteroidComponent asteroid = Mappers.asteroid.get(entity);
-        if (asteroid != null) {
-            //NOTE: cannot CreateBody() during physics step
-            engine.getSystem(AsteroidBeltSystem.class).destroyAsteroid(asteroid, damagedBody.getPosition().cpy(), damagedBody.getLinearVelocity().cpy(), damagedBody.getAngle(), damagedBody.getAngularVelocity());
-            engine.getSystem(SoundSystem.class).asteroidShatter(asteroid.composition);
-        }
-        
+
         VehicleComponent vehicle = Mappers.vehicle.get(entity);
         if (vehicle != null) {
+            //if entity was part of a cluster, remove all entities attached to cluster
+            Array<Entity> cluster = ECSUtil.getAttachedEntities(engine, entity);
+            for (Entity e : cluster) {
+                e.add(new RemoveComponent());
+            }
+
+            /*
+            //drop inventory
+            CargoComponent cargoComponent = Mappers.cargo.get(entity);
+            if (cargoComponent != null) {
+                int items = cargoComponent.count;
+                for (int i = 0; i <= items; i++) {
+                    Color color = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
+                    EntityBuilder.dropResource(damagedBody.getPosition(), damagedBody.getLinearVelocity(), color);
+                }
+            }*/
             Gdx.app.log(Box2DContactListener.class.getSimpleName(), "[" + DebugUtil.objString(entity) + "] destroyed by: [" + DebugUtil.objString(source) + "]");
             engine.getSystem(SoundSystem.class).shipExplode();
         }
+
     }
     
 }

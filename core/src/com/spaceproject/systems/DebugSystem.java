@@ -206,7 +206,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         fontLarge.setColor(Color.WHITE);
         
         //entity/component count
-        String count = ECSUtil.getECSString(getEngine());
+        String count = ECSUtil.getECSString(getEngine(), true);
         fontLarge.draw(batch, count, x, y - (lineHeight * linePos++));
         
         //memory
