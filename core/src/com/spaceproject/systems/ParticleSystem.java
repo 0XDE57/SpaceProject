@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AttachedToComponent;
 import com.spaceproject.components.BarrelRollComponent;
 import com.spaceproject.components.ChargeCannonComponent;
@@ -22,6 +23,7 @@ import com.spaceproject.components.HyperDriveComponent;
 import com.spaceproject.components.ParticleComponent;
 import com.spaceproject.components.ShieldComponent;
 import com.spaceproject.components.TransformComponent;
+import com.spaceproject.config.EngineConfig;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 
@@ -45,6 +47,8 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     final float[] engineColorDamage;
     
     float particleScale = 0.02f;
+
+    EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     
     public ParticleSystem() {
         super(Family.all(ParticleComponent.class).get());
@@ -250,7 +254,7 @@ public class ParticleSystem extends IteratingSystem implements EntityListener, D
     private void updateTailParticle(Entity entity, ParticleComponent particle) {
         TransformComponent transform = Mappers.transform.get(entity);
         float rot = particle.angle + (transform.rotation * MathUtils.radDeg + 180);
-        float thicc = Mappers.texture.get(entity).scale * 2f;
+        float thicc = engineCFG.bodyScale * 2f;
         
         Array<ParticleEmitter> emitters = particle.pooledEffect.getEmitters();
         for (int i = 0; i < emitters.size; i++) {

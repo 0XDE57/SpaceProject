@@ -97,25 +97,19 @@ public class CannonSystem extends IteratingSystem {
         float offset = (float) Math.sin(cannon.heat) * cannon.heatInaccuracy;
         cannon.aimOffset = MathUtils.random(offset, -offset);
     }
-    
+
+    static EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
     public static Entity createMissile(CannonComponent cannon, Entity parentEntity) {
         Entity entity = new Entity();
-        
-        //create texture
-        EngineConfig engineCFG = SpaceProject.configManager.getConfig(EngineConfig.class);
-        TextureComponent texture = new TextureComponent();
-        texture.texture = TextureGenerator.generateProjectile();
-        texture.scale = engineCFG.bodyScale;
-        
+
         //physics
         TransformComponent parentTransform = Mappers.transform.get(parentEntity);
         Vector2 spawnPos = cannon.anchorVec.cpy().rotateRad(parentTransform.rotation).add(parentTransform.pos);
         float rot = parentTransform.rotation + cannon.aimAngle + cannon.aimOffset;
         Vector2 sourceVel = Mappers.physics.get(parentEntity).body.getLinearVelocity();
         Vector2 projectileVel = MyMath.vector(rot, cannon.velocity).add(sourceVel);
-        float bodyWidth = texture.texture.getWidth() * texture.scale;
-        float bodyHeight = texture.texture.getHeight() * texture.scale;
-        
+        float bodyWidth = 3 * engineCFG.bodyScale;
+        float bodyHeight = 2 * engineCFG.bodyScale;
         PhysicsComponent physics = new PhysicsComponent();
         physics.body = BodyBuilder.createRect(spawnPos.x, spawnPos.y, bodyWidth, bodyHeight, BodyDef.BodyType.DynamicBody, entity);
         physics.body.setTransform(spawnPos, rot);
@@ -147,7 +141,6 @@ public class CannonSystem extends IteratingSystem {
         
         entity.add(missile);
         entity.add(expire);
-        entity.add(texture);
         entity.add(physics);
         entity.add(transform);
         
