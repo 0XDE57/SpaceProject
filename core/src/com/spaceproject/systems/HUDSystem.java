@@ -45,6 +45,7 @@ import com.spaceproject.utility.SimpleTimer;
 
 import java.lang.StringBuilder;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -52,29 +53,23 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
     public static class DamageText implements Pool.Poolable {
         public float damage;
-        public Vector2 pos;
+        public float x, y;
         public long timestamp;
         public boolean project;
 
-        public DamageText() {
-            pos = new Vector2();
-        }
-
-        public void init(Vector2 pos, float damage, long lastHitTime, boolean project) {
-            this.pos.set(pos);
+        public void init(float x, float y, float damage, long lastHitTime, boolean project) {
+            this.x = x;
+            this.y = y;
             this.damage = damage;
             this.timestamp = lastHitTime;
             this.project = project;
         }
 
         @Override
-        public void reset() {
-            pos.set(0,0);
-            damage = 0;
-            timestamp = 0;
-            project = false;
-        }
+        public void reset() {}
+
     }
+
     private static final Array<DamageText> activeNumbers = new Array<>();
     private static final Pool<DamageText> numbersPool = Pools.get(DamageText.class);
     public static boolean showDamageNumbers = false;
@@ -82,16 +77,16 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     public static int activePeak;
     StringBuilder infoString = new StringBuilder();
 
-    class CreditsMarker {//can this fit into the same damage pool?
+    class CreditsMarker {//can this fit into the same damage pool? it really doesn't need to...
         final int value;
         Vector2 location;
         SimpleTimer animTimer;
         final Color color;
         CreditsMarker(int value, Vector2 pos, Color color) {
             this.value = value;
-            Vector3 screenPos = cam.project(new Vector3(pos.cpy(), 0));
-            location = new Vector2(screenPos.x, screenPos.y);
-            animTimer = new SimpleTimer(1000, true);
+            Vector3 screenPos = cam.project(new Vector3(pos.cpy(), 0));//copy
+            location = new Vector2(screenPos.x, screenPos.y);//new
+            animTimer = new SimpleTimer(1000, true);//new -> float timestamp
             this.color = color;
         }
     }
@@ -287,7 +282,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         drawInventory(player, 20, 30);
 
         drawCreditMarkers(deltaTime);
-        drawDamageText(deltaTime);
+        drawDamageText();
 
         //draw special state: hyper or landing / launching
         drawSpecialStateMessage(player);
@@ -571,7 +566,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         font.draw(batch, layout, centerX, messageHeight);
     }
 
-
     private void drawHint(String text) {
         float ratio = 1 + (float) Math.sin(statusAnim * 0.1f);
         cacheColor.set(0, 1, 0, 1).lerp(Color.PURPLE, ratio);
@@ -607,7 +601,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         drawPlayerShield(entity, barX, healthBarY, barWidth, barHeight);
         drawPlayerAmmoBar(entity, barX, ammoBarY, barWidth, barHeight);
     }
-
 
     private void drawPlayerHealth(Entity entity, float x, float y, float width, float height) {
         HealthComponent health = Mappers.health.get(entity);
@@ -860,14 +853,13 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
     }
 
-    private void drawDamageText(float deltaTime) {
-        //float up = 5;
-        for (DamageText text : activeNumbers) {
-            //text.pos.y += up * deltaTime;
-            float x = text.pos.x;
-            float y = text.pos.y;
+    private void drawDamageText() {
+        for (Iterator<DamageText> iterator = activeNumbers.iterator(); iterator.hasNext();) {
+            DamageText text = iterator.next();
+            float x = text.x;
+            float y = text.y;
             if (text.project) {
-                tempProj.set(text.pos.x, text.pos.y, 0);
+                tempProj.set(x, y, 0);
                 MyScreenAdapter.cam.project(tempProj);
                 x = tempProj.x;
                 y = tempProj.y;
@@ -875,15 +867,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             cacheColor.set(1, 0, 0, 1).lerp(Color.CLEAR, (float) (GameScreen.getGameTimeCurrent() - text.timestamp) / damageTime);
             inventoryFont.setColor(cacheColor);
             inventoryFont.draw(batch, "" + (int)text.damage, x, y);
-        }
 
-        //free up expired items back into pool
-        DamageText item;
-        for (int i = activeNumbers.size; --i >= 0;) {
-            item = activeNumbers.get(i);
-            if (item.timestamp < GameScreen.getGameTimeCurrent() - damageTime) {
-                activeNumbers.removeIndex(i);
-                numbersPool.free(item);
+            if (text.timestamp < GameScreen.getGameTimeCurrent() - damageTime) {
+                iterator.remove();
+                numbersPool.free(text);
             }
         }
     }
@@ -892,21 +879,19 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (!showDamageNumbers || !drawHud) return;
         //https://libgdx.com/wiki/articles/memory-management#object-pooling
         DamageText test = numbersPool.obtain();
-        test.init(pos, damage, lastHitTime, true);
+        test.init(pos.x, pos.y, damage, lastHitTime, true);
         activeNumbers.add(test);
         activePeak = Math.max(activePeak, activeNumbers.size);
     }
 
     private void drawCreditMarkers(float deltaTime) {
         float velocityY = 35f;
-        for (CreditsMarker marker : markers) {
+        for (Iterator<CreditsMarker> iterator = markers.iterator(); iterator.hasNext();) {
+            CreditsMarker marker = iterator.next();
             inventoryFont.setColor(marker.color.r, marker.color.g, marker.color.b, 1-marker.animTimer.ratio());
             inventoryFont.draw(batch, "+" + marker.value, marker.location.x, marker.location.y += velocityY * deltaTime);
-        }
-        for (CreditsMarker marker : markers) {
             if (marker.animTimer.tryEvent()) {
-                markers.remove(marker);
-                return;
+                iterator.remove();
             }
         }
     }
