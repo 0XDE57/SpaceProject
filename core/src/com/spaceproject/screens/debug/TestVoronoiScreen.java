@@ -6,18 +6,15 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.ConvexHull;
-import com.badlogic.gdx.math.DelaunayTriangulator;
-import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Polygon;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.generation.FontLoader;
 import com.spaceproject.math.DelaunayCell;
+import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 
@@ -33,14 +30,15 @@ import java.util.ArrayList;
 
 public class TestVoronoiScreen extends MyScreenAdapter {
     BitmapFont text = FontLoader.createFont(FontLoader.fontBitstreamVMBold, 20);
-    
+    BitmapFont dataFont = FontLoader.createFont(FontLoader.fontBitstreamVM, 12);
+    GlyphLayout layout = new GlyphLayout();
     //all points that define a polygon and any point inside the polygon
     FloatArray points;
     
     //triangulation
     DelaunayTriangulator delaunay = new DelaunayTriangulator();
     ShortArray triangles = new ShortArray();
-    ArrayList<DelaunayCell> dCells = new ArrayList<DelaunayCell>();
+    ArrayList<DelaunayCell> dCells = new ArrayList<>();
     
     //convex hull
     float[] hull;
@@ -49,18 +47,23 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     
     //toggles
     boolean drawCircumcircle = false,
-            drawCircumcenter = true,
+            drawCircumcenter = false,
             drawPoints = true,
             drawDelaunay = true,
-            drawVoronoi = true,
+            drawVoronoi = false,
             drawMidpoints = false,
             drawHull = true,
-            drawCentroid = false;
+            drawCentroid = false,
+            drawTriangleQuality = false,
+            drawTriangleInfo = false;
     
     int pSize = 6;
     float dragRadius = 20;
     int focusedPoint = -1;//no index
-    
+
+    boolean isDrag = false;
+    Vector2 dragStart = new Vector2();
+
     //todo: [x] fix grabbing points, focus point, don't lose it
     //todo: [x] highlight focused point
     //todo: [ ] highlight when near grab-able point
@@ -135,10 +138,24 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             int p1 = triangles.get(i) * 2;
             int p2 = triangles.get(i + 1) * 2;
             int p3 = triangles.get(i + 2) * 2;
+
+            float[] hull = new float[] {
+                    points.get(p1), points.get(p1 + 1), // xy: 0, 1
+                    points.get(p2), points.get(p2 + 1), // xy: 2, 3
+                    points.get(p3), points.get(p3 + 1)  // xy: 4, 5
+            };
+
+            //discard duplicate points
+            if ((hull[0] == hull[2] && hull[1] == hull[3]) || // p1 == p2 or
+                    (hull[0] == hull[4] && hull[1] == hull[5]) || // p1 == p3 or
+                    (hull[2] == hull[4] && hull[3] == hull[5])) { // p2 == p3
+                Gdx.app.error(getClass().getSimpleName(), "Duplicate point!");
+                continue;
+            }
+
             Vector2 a = new Vector2(points.get(p1), points.get(p1 + 1));
             Vector2 b = new Vector2(points.get(p2), points.get(p2 + 1));
             Vector2 c = new Vector2(points.get(p3), points.get(p3 + 1));
-            
             DelaunayCell d = new DelaunayCell(a, b, c);
             dCells.add(d);
         }
@@ -157,7 +174,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     }
     
     /**
-     * Check if a line from a to b intersects with the convext hull.
+     * Check if a line from a to b intersects with the convex hull.
      * If so, the point of intersection is stored in the intersect vector.
      *
      * @param a         point one
@@ -195,7 +212,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     //if both circumcenters are within the convex hull, draw from circumcenter to circumcenter
                     shape.line(cellA.circumcenter, cellB.circumcenter);
                 } else {
-                    //if circumcenter is outside of convex hull, draw from circumcenter to intersection
+                    //if circumcenter is outside convex hull, draw from circumcenter to intersection
                     Vector2 intersect = new Vector2();
                     if (collideWithHull(cellA.circumcenter, cellB.circumcenter, intersect)) {
                         shape.line(cellA.circumcenter, intersect);
@@ -206,7 +223,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             } else {
                 //if no neighbor, draw from midpoint to circumcenter
                 //TODO: don't connect to mid points if already connected to voronoi point
-                shape.setColor(Color.CYAN);
+                shape.setColor(Color.PINK);
                 shape.line(cellA.circumcenter, cellA.midAB);
                 shape.line(cellA.circumcenter, cellA.midBC);
                 shape.line(cellA.circumcenter, cellA.midCA);
@@ -248,9 +265,19 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     }
     
     private void drawStuff() {
-        
+        if (drawTriangleQuality) {
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+            shape.begin(ShapeType.Filled);
+            for (DelaunayCell cell : dCells) {
+                shape.setColor(0.3f, 0.3f, 0.3f, 1 - cell.quality);
+                shape.triangle(cell.a.x, cell.a.y, cell.b.x, cell.b.y, cell.c.x, cell.c.y);
+            }
+            shape.end();
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+        }
+
         shape.begin(ShapeType.Line);
-        
         shape.setColor(Color.BLACK);
         if (points.size <= 4) {
             for (int i = 0; i < points.size; i += 2) {
@@ -261,71 +288,71 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         
         if (drawCentroid) {
-            shape.setColor(Color.CYAN);
+            shape.setColor(Color.RED);
             shape.circle(centroid.x, centroid.y, pSize);
         }
         
-        for (DelaunayCell d : dCells) {
+        for (DelaunayCell cell : dCells) {
             //draw points
             if (drawPoints) {
                 shape.setColor(Color.BLACK);
-                shape.circle(d.a.x, d.a.y, pSize);
-                shape.circle(d.b.x, d.b.y, pSize);
-                shape.circle(d.c.x, d.c.y, pSize);
+                shape.circle(cell.a.x, cell.a.y, pSize);
+                shape.circle(cell.b.x, cell.b.y, pSize);
+                shape.circle(cell.c.x, cell.c.y, pSize);
             }
     
             if (drawCentroid) {
                 shape.setColor(Color.CYAN);
-                shape.circle(d.centroid.x, d.centroid.y, pSize);
+                shape.circle(cell.centroid.x, cell.centroid.y, pSize);
             }
             
             //draw delaunay triangles
             if (drawDelaunay) {
                 shape.setColor(Color.BLACK);
-                shape.triangle(d.a.x, d.a.y, // A
-                        d.b.x, d.b.y, // B
-                        d.c.x, d.c.y);// C
+                shape.triangle(cell.a.x, cell.a.y, // A
+                        cell.b.x, cell.b.y, // B
+                        cell.c.x, cell.c.y);// C
             }
             
             //draw midpoints
             if (drawMidpoints) {
                 shape.setColor(Color.BLUE);
-                shape.circle(d.midAB.x, d.midAB.y, 1);//Different radius to help determine edge
-                shape.circle(d.midCA.x, d.midCA.y, 2);
-                shape.circle(d.midBC.x, d.midBC.y, 3);
+                shape.circle(cell.midAB.x, cell.midAB.y, 1);//Different radius to help determine edge
+                shape.circle(cell.midCA.x, cell.midCA.y, 2);
+                shape.circle(cell.midBC.x, cell.midBC.y, 3);
             }
             
             //draw voronoi cells
             if (drawVoronoi) {
 				/*
 				shape.setColor(Color.ORANGE);		
-				shape.line(d.circumcenter, d.midAB);
-				shape.line(d.circumcenter, d.midBC);
-				shape.line(d.circumcenter, d.midCA);
+				shape.line(cell.circumcenter, cell.midAB);
+				shape.line(cell.circumcenter, cell.midBC);
+				shape.line(cell.circumcenter, cell.midCA);
 				*/
 				/*
 				shape.setColor(Color.ORANGE);
-				if (d.nAB != null) shape.line(d.circumcenter, d.nAB.circumcenter);
-				if (d.nBC != null) shape.line(d.circumcenter, d.nBC.circumcenter);
-				if (d.nCA != null) shape.line(d.circumcenter, d.nCA.circumcenter);
+				if (cell.nAB != null) shape.line(cell.circumcenter, cell.nAB.circumcenter);
+				if (cell.nBC != null) shape.line(cell.circumcenter, cell.nBC.circumcenter);
+				if (cell.nCA != null) shape.line(cell.circumcenter, cell.nCA.circumcenter);
 				*/
                 
-                drawCellEdge(d, d.nAB);
-                drawCellEdge(d, d.nBC);
-                drawCellEdge(d, d.nBC);
+                drawCellEdge(cell, cell.nAB);
+                drawCellEdge(cell, cell.nBC);
+                drawCellEdge(cell, cell.nBC);
                 
 				/*
-				if (hullPoly.contains(d.circumcenter)) {
+				if (hullPoly.contains(cell.circumcenter)) {
 					/*
 					shape.setColor(Color.ORANGE);
-					if (d.nAB != null) shape.line(d.circumcenter, d.nAB.circumcenter);
-					if (d.nBC != null) shape.line(d.circumcenter, d.nBC.circumcenter);
-					if (d.nCA != null) shape.line(d.circumcenter, d.nCA.circumcenter);
+					if (cell.nAB != null) shape.line(cell.circumcenter, cell.nAB.circumcenter);
+					if (cell.nBC != null) shape.line(cell.circumcenter, cell.nBC.circumcenter);
+					if (cell.nCA != null) shape.line(cell.circumcenter, cell.nCA.circumcenter);
 					*
 					/*
-					drawCellEdge(d, d.nAB);
-					drawCellEdge(d, d.nBC);
-					drawCellEdge(d, d.nBC);*
+					drawCellEdge(cell, cell.nAB);
+					drawCellEdge(cell, cell.nBC);
+					drawCellEdge(cell, cell.nBC);*
 
 				} else {
 					//check collision with convex hull, only draw within hull
@@ -339,22 +366,22 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 						Vector2 edgeA = new Vector2(x1, y1);
 						Vector2 edgeB = new Vector2(x2, y2);
 
-						drawIntersectingLines(d, d.midAB, edgeA, edgeB);
-						drawIntersectingLines(d, d.midBC, edgeA, edgeB);
-						drawIntersectingLines(d, d.midCA, edgeA, edgeB);
+						drawIntersectingLines(cell, cell.midAB, edgeA, edgeB);
+						drawIntersectingLines(cell, cell.midBC, edgeA, edgeB);
+						drawIntersectingLines(cell, cell.midCA, edgeA, edgeB);
 
 					}
 				}*/
             }
             
             //draw circumcircle
-            if (!hullPoly.contains(d.circumcenter)) {
+            if (!hullPoly.contains(cell.circumcenter)) {
                 shape.setColor(Color.MAGENTA);
             } else {
                 shape.setColor(Color.GREEN);
             }
-            if (drawCircumcircle) shape.circle(d.circumcenter.x, d.circumcenter.y, d.circumradius);
-            if (drawCircumcenter) shape.circle(d.circumcenter.x, d.circumcenter.y, pSize);
+            if (drawCircumcircle) shape.circle(cell.circumcenter.x, cell.circumcenter.y, cell.circumradius);
+            if (drawCircumcenter) shape.circle(cell.circumcenter.x, cell.circumcenter.y, pSize);
         }
         
         if (focusedPoint >= 0) {
@@ -370,8 +397,25 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         
         shape.end();
+
+        if (drawTriangleInfo) {
+            batch.begin();
+            dataFont.setColor(Color.BLACK);
+            for (DelaunayCell cell : dCells) {
+                //draw area
+                //draw quality
+                //cell.area;
+                //cell.quality;
+                //setText (BitmapFont font, CharSequence str, Color color, float targetWidth, int halign, boolean wrap)
+                layout.setText(dataFont, MyMath.round(cell.area, 2) + "", dataFont.getColor(), 0, Align.center, false);
+                dataFont.draw(batch, layout, cell.centroid.x, cell.centroid.y);
+                layout.setText(dataFont, cell.quality + "", dataFont.getColor(), 0, Align.center, false);
+                dataFont.draw(batch, layout, cell.centroid.x, cell.centroid.y - layout.height * 1.3f);
+            }
+            batch.end();
+        }
     }
-    
+
     @Override
     public void render(float delta) {
         //clear screen
@@ -414,6 +458,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         
         text.setColor(drawCentroid ? Color.GREEN : Color.BLACK);
         text.draw(batch, "8: Delaunay Centroid", 10, y - h * 7);
+
+        text.setColor(drawTriangleQuality ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "9: Triangle Quality", 10, y - h * 8);
+
+        text.setColor(drawTriangleInfo ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "0: Triangle Info", 10, y - h * 9);
         batch.end();
     }
     
@@ -438,27 +488,47 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
             int x = Gdx.input.getX();
             int y = Gdx.graphics.getHeight() - Gdx.input.getY();
-            
-            if (focusedPoint >= 0) {
-                points.set(focusedPoint, x);
-                points.set(focusedPoint + 1, y);
-            }
-            
-            boolean mod = false;
-            for (int i = 0; i < points.size && !mod; i += 2) {
-                float px = points.get(i);
-                float py = points.get(i + 1);
-                if (Vector2.dst(x, y, px, py) < dragRadius) {
-                    focusedPoint = i;
-                    mod = true;
+
+            if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
+                if (!isDrag) {
+                    isDrag = true;
+                    dragStart.set(x, y);
                 }
-            }
-            
-            if (mod) {
+                float offsetX = dragStart.x - x;
+                float offsetY = dragStart.y - y;
+
+                for (int i = 0; i < points.size; i += 2) {
+                    float px = points.get(i);
+                    float py = points.get(i + 1);
+                    points.set(i, px - offsetX);
+                    points.set(i + 1, py - offsetY);
+                }
                 calculateDelaunay();
+                dragStart.set(x, y);
+
+            } else {
+                if (focusedPoint >= 0) {
+                    points.set(focusedPoint, x);
+                    points.set(focusedPoint + 1, y);
+                }
+
+                boolean mod = false;
+                for (int i = 0; i < points.size && !mod; i += 2) {
+                    float px = points.get(i);
+                    float py = points.get(i + 1);
+                    if (Vector2.dst(x, y, px, py) < dragRadius) {
+                        focusedPoint = i;
+                        mod = true;
+                    }
+                }
+
+                if (mod) {
+                    calculateDelaunay();
+                }
             }
         } else {
             focusedPoint = -1;
+            isDrag = false;
         }
         
         //toggle drawings
@@ -485,6 +555,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         if (Gdx.input.isKeyJustPressed(Keys.NUM_8)) {
             drawCentroid = !drawCentroid;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.NUM_9)) {
+            drawTriangleQuality = !drawTriangleQuality;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.NUM_0)) {
+            drawTriangleInfo = !drawTriangleInfo;
         }
     }
     

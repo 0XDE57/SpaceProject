@@ -15,6 +15,8 @@ public class DelaunayCell {
     public Vector2 circumcenter;//center of circle that intersects each vertex a,b,c
     public float circumradius;//radius of circle that intersects each vertex a,b,c
     public Vector2 centroid = new Vector2();
+    public float area;
+    public float quality;
     
     public DelaunayCell(Vector2 a, Vector2 b, Vector2 c) {
         //set triangle points
@@ -31,15 +33,33 @@ public class DelaunayCell {
         Vector3 circle = PolygonUtil.circumcircle(a, b, c);
         circumcenter = new Vector2(circle.x, circle.y);
         circumradius = circle.z;
-        
+
         //calculate centroid
+        /*
         float[] poly = new float[]{
                 a.x, a.y,
                 b.x, b.y,
                 c.x, c.y
         };
-        //GeometryUtils.ensureCCW(poly);
         GeometryUtils.polygonCentroid(poly, 0 , poly.length, centroid);
+        */
+        GeometryUtils.triangleCentroid(a.x, a.y, b.x, b.y, c.x, c.y, centroid);
+        quality = triangleQuality(
+                centroid.x - a.x, centroid.y - a.y,
+                centroid.x - b.x, centroid.y - b.y,
+                centroid.x - c.x, centroid.y - c.y);
+        area = GeometryUtils.triangleArea(a.x, a.y, b.x, b.y, c.x, c.y);
+    }
+
+    /** Ratio of circumradius to shortest edge as a measure of triangle quality.
+     * copy of GeometryUtils.triangleQuality() modified to use provided circumradius instead of recalculating.
+     * NOTE: this function expects triangle cords to be relative to the centroid origin (0, 0)!
+     */
+    public float triangleQuality (float x1, float y1, float x2, float y2, float x3, float y3) {
+        float sqLength1 = x1 * x1 + y1 * y1;
+        float sqLength2 = x2 * x2 + y2 * y2;
+        float sqLength3 = x3 * x3 + y3 * y3;
+        return (float)Math.sqrt(Math.min(sqLength1, Math.min(sqLength2, sqLength3))) / circumradius;
     }
     
     /**

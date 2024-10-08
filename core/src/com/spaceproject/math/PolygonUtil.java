@@ -1,12 +1,7 @@
 package com.spaceproject.math;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.Polygon;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
@@ -109,13 +104,20 @@ public class PolygonUtil {
                     return true;
             }
         }
+
         return polygon.contains(circle.x, circle.y);
     }
-    
+
+    public final static Vector3 cacheVector = new Vector3();
     /**
      * Calculate smallest possible circle that intersects
      * each vertex of a triangle defined by vertex a,b,c.
      * https://gist.github.com/mutoo/5617691
+     *
+     * effectively merges position and radius properties into a single call:
+     * GeometryUtils.triangleCircumcenter();
+     * GeometryUtils.triangleCircumradius();
+     * without having to calculate (recalculate) both properties separately.
      *
      * @param a
      * @param b
@@ -160,7 +162,7 @@ public class PolygonUtil {
         dx = b.x - xc;
         dy = b.y - yc;
         float radius = (float) Math.sqrt(dx * dx + dy * dy);
-        return new Vector3(xc, yc, radius);
+        return cacheVector.set(xc, yc, radius);
     }
     
 }
