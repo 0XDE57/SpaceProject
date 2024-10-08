@@ -36,7 +36,7 @@ public class ProjectileHitRenderSystem extends EntitySystem implements Disposabl
             //color = null;
             //recommends null but what about simply resting values?
             //color.set(1, 1, 1, 1);
-            //or even ignore since it will be set on init?
+            //or even ignore since it will be set on init()?
         }
     }
 
@@ -50,17 +50,6 @@ public class ProjectileHitRenderSystem extends EntitySystem implements Disposabl
 
     public ProjectileHitRenderSystem() {
         shape = new ShapeRenderer();
-    }
-
-    public static void hit(float x, float y, float velX, float velY, Color color) {
-        //https://libgdx.com/wiki/articles/memory-management#object-pooling
-        Ring ring = ringPool.obtain();
-        ring.init(x,y, velX, velY, color);
-        activeRings.add(ring);
-    }
-
-    public static void hit(float x, float y, Color color) {
-        hit(x, y, 0, 0, color);
     }
 
     @Override
@@ -93,6 +82,16 @@ public class ProjectileHitRenderSystem extends EntitySystem implements Disposabl
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
         //DebugSystem.addDebugText(toString(), 100, 100);
+    }
+
+    public static void hit(float x, float y, float velX, float velY, Color color) {
+        Ring ring = ringPool.obtain();
+        ring.init(x,y, velX, velY, color);
+        activeRings.add(ring);
+    }
+
+    public static void hit(float x, float y, Color color) {
+        hit(x, y, 0, 0, color);
     }
     
     @Override

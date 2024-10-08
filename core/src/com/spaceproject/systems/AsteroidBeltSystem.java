@@ -6,6 +6,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AsteroidBeltComponent;
@@ -20,23 +22,33 @@ import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
-import java.util.ArrayList;
 
 public class AsteroidBeltSystem extends EntitySystem {
 
-    static class AsteroidRemovedQueue {
-        public final AsteroidComponent asteroidComponent;
-        public final Vector2 position;
-        public final Vector2 velocity;
-        public final float angle;
-        public final float angularVelocity;
+    static class AsteroidRemovedQueue implements Pool.Poolable {
+        public AsteroidComponent asteroidComponent;
+        public Vector2 position;
+        public Vector2 velocity;
+        public float angle;
+        public float angularVelocity;
 
-        AsteroidRemovedQueue(AsteroidComponent asteroidComponent, Vector2 position, Vector2 velocity, float angle, float angularVelocity) {
+        public void init(AsteroidComponent asteroidComponent, Vector2 position, Vector2 velocity, float angle, float angularVelocity) {
             this.asteroidComponent = asteroidComponent;
             this.position = position;
             this.velocity = velocity;
             this.angle = angle;
             this.angularVelocity = angularVelocity;
+        }
+
+        @Override
+        public void reset() {
+            // https://libgdx.com/wiki/articles/memory-management#object-pooling
+            // Beware of leaking references to Pooled objects. Just because you invoke “free” on the Pool does not invalidate any outstanding references.
+            // This can lead to subtle bugs if you’re not careful.
+            // You can also create subtle bugs if the state of your objects is not fully reset when the object is put in the pool.
+            asteroidComponent = null;
+            position = null;
+            velocity = null;
         }
     }
 
@@ -44,7 +56,8 @@ public class AsteroidBeltSystem extends EntitySystem {
     private ImmutableArray<Entity> spawnBelt;
     
     private final SimpleTimer lastSpawnedTimer = new SimpleTimer(1000);
-    private final ArrayList<AsteroidRemovedQueue> spawnQ = new ArrayList<>();
+    private final Pool<AsteroidRemovedQueue> removePool = Pools.get(AsteroidRemovedQueue.class, 100);
+    private final Array<AsteroidRemovedQueue> spawnQ = new Array<>(false, 100);
 
     private final DelaunayTriangulator delaunay = new DelaunayTriangulator();
     private final float minAsteroidSize = 100; //anything smaller than this will not create more
@@ -54,6 +67,9 @@ public class AsteroidBeltSystem extends EntitySystem {
 
     private float minArea = Float.MAX_VALUE, maxArea = Float.MIN_VALUE;
     private float totalArea = 0;
+
+    private final StringBuilder infoString = new StringBuilder();
+    private int activePeak = 0;
     
     @Override
     public void addedToEngine(Engine engine) {
@@ -166,15 +182,18 @@ public class AsteroidBeltSystem extends EntitySystem {
         //NOTE: cannot CreateBody() during physics step
         //  jni/Box2D/Dynamics/b2World.cpp:109: b2Body* b2World::CreateBody(const b2BodyDef*): Assertion `IsLocked() == false' failed.
         //just like we cannot destroy a body during a physics step (hence removing entities at end of frame)
-
-        //so we instead add to a spawn queue to be processed next system tick
-        spawnQ.add(new AsteroidRemovedQueue(asteroid, pos, vel, angle, angularVel));//todo: new -> pool
+        //so instead we add to a spawn queue to be processed next system tick
+        AsteroidRemovedQueue remove = removePool.obtain();
+        remove.init(asteroid, pos, vel, angle, angularVel);
+        spawnQ.add(remove);
     }
 
     private void processAsteroidDestructionQueue() {
         for (AsteroidRemovedQueue asteroid : spawnQ) {
             asteroidDestroyed(asteroid.asteroidComponent, asteroid.position, asteroid.velocity, asteroid.angle, asteroid.angularVelocity);
         }
+        //DebugSystem.addDebugText(toString(), 200, 200);
+        removePool.freeAll(spawnQ);
         spawnQ.clear();
     }
 
@@ -214,7 +233,6 @@ public class AsteroidBeltSystem extends EntitySystem {
         System.arraycopy(vertices, 0, newPoly, 0, length);
 
         //center new point
-        Vector2 center = new Vector2();
         GeometryUtils.polygonCentroid(vertices, 0, length, center);
         newPoly[length] = center.x;
         newPoly[length + 1] = center.y;
@@ -259,16 +277,17 @@ public class AsteroidBeltSystem extends EntitySystem {
               the returned indices are for the input array, and count*2 additional working memory is needed.
             - Returns: triples of indices into the points that describe the triangles in clockwise order.
         */
+        int child = 0;
+        float childArea = 0;
 
         ShortArray triangleIndices = delaunay.computeTriangles(vertices, false);
-        //Gdx.app.debug(getClass().getSimpleName(), "shatter into " + triangleIndices.size / 3);
 
         //create cells for each triangle
         for (int index = 0; index < triangleIndices.size; index += 3) {
             int p1 = triangleIndices.get(index) * 2;
             int p2 = triangleIndices.get(index + 1) * 2;
             int p3 = triangleIndices.get(index + 2) * 2;
-            float[] hull = new float[] {
+            float[] hull = new float[]{
                     vertices[p1], vertices[p1 + 1], // xy: 0, 1
                     vertices[p2], vertices[p2 + 1], // xy: 2, 3
                     vertices[p3], vertices[p3 + 1]  // xy: 4, 5
@@ -283,32 +302,64 @@ public class AsteroidBeltSystem extends EntitySystem {
                 //../b2PolygonShape.cpp:158: void b2PolygonShape::Set(const b2Vec2*, int32): Assertion `false' failed.
                 continue;
             }
+            child++;
 
-            GeometryUtils.ensureCCW(hull);
+            /*
+            //discard shards / slivers?
+            float threshold = 1f;
+            if (GeometryUtils.triangleQuality(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5]) < threshold) {
+                continue; //discard
+            }*/
 
-            //shift vertices to be centered
-            GeometryUtils.triangleCentroid(
-                    hull[0], hull[1],
-                    hull[2], hull[3],
-                    hull[4], hull[5],
-                    center);
-            for (int j = 0; j < hull.length; j += 2) {
-                //todo: this is a fix for #30, but causes #2 to get worse
-                //hull[j] -= center.x;
-                //hull[j + 1] -= center.y;
+            //GeometryUtils.ensureCCW(hull); // appears to have no effect...
+            /*
+            float area = GeometryUtils.triangleArea(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5]);
+            childArea += area;
+            float quality = GeometryUtils.triangleQuality(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5]);
+            Gdx.app.log(getClass().getSimpleName(), child + " - a: " + area + ", q:" + quality);
+            */
+
+            boolean reCenter = false;
+            if (reCenter) {
+                //shift vertices to be centered
+                GeometryUtils.triangleCentroid(
+                        hull[0], hull[1],
+                        hull[2], hull[3],
+                        hull[4], hull[5],
+                        center);
+                for (int j = 0; j < hull.length; j += 2) {
+                    //todo: this is a fix for #30...
+                    // but causes #2 to get worse and places bodies incorrect relative to parent
+                    hull[j] -= center.x;
+                    hull[j + 1] -= center.y;
+                }
             }
 
-            long seed = (long) (Math.random() * Long.MAX_VALUE);
+
             float angularDrift = Math.max(MathUtils.random(-maxDriftAngle, maxDriftAngle), minDriftAngle);
             //todo: rotate center relative to parent by angle?
             //Vector2 pos = parentBody.getPosition().cpy();//.mulAdd(center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle()), 0.1f);
             //center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle());
             //Vector2 pos = parentBody.getPosition().cpy().add(center);
             //Vector2 vel = parentBody.getLinearVelocity().cpy();
-            Entity childAsteroid = EntityBuilder.createAsteroid(seed, parentPos.x, parentPos.y, parentVel.x, parentVel.y, parentAngle, hull, asteroidComponent.composition, true);
+            Entity childAsteroid = EntityBuilder.createAsteroid(parentPos.x, parentPos.y, parentVel.x, parentVel.y, parentAngle, hull, asteroidComponent.composition, true);
             childAsteroid.getComponent(PhysicsComponent.class).body.setAngularVelocity(parentAngularVel + angularDrift);
             getEngine().addEntity(childAsteroid);
         }
+
+        /*
+        int expected = triangleIndices.size / 3;
+        if (child < expected) {
+            Gdx.app.error(getClass().getSimpleName(), "less children than expected?!");
+        }
+        if (child > expected) {
+            Gdx.app.error(getClass().getSimpleName(), "more children than expected?!");
+        }
+        if (!MathUtils.isEqual(asteroidComponent.area, childArea)) {
+            Gdx.app.error(getClass().getSimpleName(), "area mismatch");
+        }
+        Gdx.app.log(getClass().getSimpleName(), "shatter into: " + child + " expected: " + expected + " parent area: " + asteroidComponent.area + " child area:" + childArea);
+         */
     }
 
     public Array<Polygon> breakPoly(Polygon p){
@@ -332,6 +383,17 @@ public class AsteroidBeltSystem extends EntitySystem {
             asteroids.add(p1);
         }
         return asteroids;
+    }
+
+    @Override
+    public String toString() {
+        infoString.setLength(0);
+        infoString.append("[AsteroidRemovePool] active: ").append(spawnQ.size)
+                .append(", active peak: ").append(activePeak = Math.max(activePeak, spawnQ.size))
+                .append(", free: ").append(removePool.getFree())
+                .append(", peak: ").append(removePool.peak)
+                .append(", max: ").append(removePool.max);
+        return infoString.toString();
     }
 
 }

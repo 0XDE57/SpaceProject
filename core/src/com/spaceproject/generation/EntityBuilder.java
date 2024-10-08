@@ -1,7 +1,6 @@
 package com.spaceproject.generation;
 
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.ConvexHull;
@@ -484,13 +483,8 @@ public class EntityBuilder {
         return entity;
     }
 
-    public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float angle, float[] vertices, ItemComponent.Resource resource, boolean revealed) {
-        MathUtils.random.setSeed(seed);
+    public static Entity createAsteroid(float x, float y, float velX, float velY, float angle, float[] vertices, ItemComponent.Resource resource, boolean revealed) {
         Entity entity = new Entity();
-
-        SeedComponent seedComp = new SeedComponent();
-        seedComp.seed = seed;
-        entity.add(seedComp);
 
         TransformComponent transform = new TransformComponent();
         transform.pos.set(x, y);
@@ -502,10 +496,10 @@ public class EntityBuilder {
         We must be careful because the notion of CCW is with respect to a right-handed coordinate
         system with the z-axis pointing out of the plane.
         */
-        AsteroidComponent asteroid = new AsteroidComponent();
-        GeometryUtils.ensureCCW(vertices);
+        //GeometryUtils.ensureCCW(vertices); //appears to do nothing...
         Polygon polygon = new Polygon(vertices);
         float area = Math.abs(GeometryUtils.polygonArea(polygon.getVertices(), 0, polygon.getVertices().length));
+        AsteroidComponent asteroid = new AsteroidComponent();
         asteroid.polygon = polygon;
         asteroid.area = area;
         asteroid.composition = resource;
@@ -528,12 +522,6 @@ public class EntityBuilder {
         health.health = health.maxHealth;
         entity.add(health);
 
-        boolean crazyLaserTest = false;
-        if (crazyLaserTest) {
-            LaserComponent laser = new LaserComponent(650, 2000, 1, 1);
-            entity.add(laser);
-        }
-
         return entity;
     }
 
@@ -550,6 +538,8 @@ public class EntityBuilder {
         PolygonClass poly = PolygonClass.irregular;
 
         DebugConfig debugConfig = SpaceProject.configManager.getConfig(DebugConfig.class);
+        //debugConfig.spawnRegularBodies = true;
+        //debugConfig.spawnPenrose = true;
         if (debugConfig.spawnRegularBodies) {
             if (debugConfig.spawnPenrose) {
                 //penrose! rhombic prototiles
@@ -591,8 +581,10 @@ public class EntityBuilder {
                     case 5: poly = PolygonClass.pentagon; break;
                     case 6: poly = PolygonClass.hexagon; break;
                     case 7: poly = PolygonClass.heptagon; break;
+                    //todo: octagons should be supported yet still fails with:
+                    // case 8: poly = PolygonClass.octogon; break;
                 }
-                Gdx.app.debug("",seed + " : " + segments + " " + poly.name());
+                //Gdx.app.debug("",seed + " : " + segments + " " + poly.name());
             }
         } else {
             float tolerance = 3f;
@@ -624,11 +616,8 @@ public class EntityBuilder {
         //Polygon polygon = new Polygon(hull);
         //float area = Math.abs(GeometryUtils.polygonArea(polygon.getVertices(), 0, polygon.getVertices().length));
 
-        ItemComponent.Resource resource = ItemComponent.Resource.random();
-        if (debugConfig.glassOnly) {
-            resource = ItemComponent.Resource.GLASS;
-        }
-        return createAsteroid(seed, x, y, velX, velY, MathUtils.random(MathUtils.PI2), hull, resource, false);
+        ItemComponent.Resource resource = debugConfig.glassOnly ? ItemComponent.Resource.GLASS : ItemComponent.Resource.random();
+        return createAsteroid(x, y, velX, velY, MathUtils.random(MathUtils.PI2), hull, resource, false);
     }
     
     private static boolean isValidPoint(FloatArray points, float pX, float pY, float tolerance) {
