@@ -265,6 +265,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     }
     
     private void drawStuff() {
+        if (focusedPoint >= 0) {
+            shape.begin(ShapeType.Filled);
+            float focusX = points.get(focusedPoint);
+            float focusY = points.get(focusedPoint + 1);
+            shape.setColor(Color.GREEN);
+            shape.circle(focusX, focusY, dragRadius);
+            shape.end();
+        }
+
         if (drawTriangleQuality) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -383,20 +392,14 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             if (drawCircumcircle) shape.circle(cell.circumcenter.x, cell.circumcenter.y, cell.circumradius);
             if (drawCircumcenter) shape.circle(cell.circumcenter.x, cell.circumcenter.y, pSize);
         }
-        
-        if (focusedPoint >= 0) {
-            float focusX = points.get(focusedPoint);
-            float focusY = points.get(focusedPoint + 1);
-            shape.setColor(Color.GREEN);
-            shape.circle(focusX, focusY, dragRadius);
-        }
-        
+
         if (drawHull && hullPoly != null) {
             shape.setColor(Color.RED);
             shape.polyline(hullPoly.getVertices());
         }
-        
         shape.end();
+
+
 
         if (drawTriangleInfo) {
             batch.begin();
