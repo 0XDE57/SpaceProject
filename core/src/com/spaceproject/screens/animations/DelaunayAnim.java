@@ -26,20 +26,16 @@ public class DelaunayAnim extends TitleAnimation {
         velocity = 10;
         numPoints = 20;
         pad = 10;
-        
         points = new FloatArray();
         dirs = new FloatArray();
         for (int i = 0; i < numPoints * 2; i += 2) {
             float x = MathUtils.random(pad, Gdx.graphics.getWidth() - pad);
             float y = MathUtils.random(pad, Gdx.graphics.getHeight() - pad);
-            
+            points.add(x);
+            points.add(y);
             float dir = MathUtils.random(0, MathUtils.PI2);
             float dx = (float) (Math.cos(dir) * velocity);
             float dy = (float) (Math.sin(dir) * velocity);
-            
-            points.add(x);
-            points.add(y);
-            
             dirs.add(dx);
             dirs.add(dy);
         }
@@ -48,13 +44,23 @@ public class DelaunayAnim extends TitleAnimation {
     @Override
     public void render(float delta, ShapeRenderer shape) {
         if (Gdx.input.justTouched()) {
-            points.add(Gdx.input.getX());
-            points.add(Gdx.graphics.getHeight() - Gdx.input.getY());
-            float dir = MathUtils.random(0, MathUtils.PI2);
-            float dx = (float) (Math.cos(dir) * velocity);
-            float dy = (float) (Math.sin(dir) * velocity);
-            dirs.add(dx);
-            dirs.add(dy);
+            int x = Gdx.input.getX();
+            int y = Gdx.graphics.getHeight() - Gdx.input.getY();
+            boolean duplicate = false;
+            for (int i = 0; i < points.size && !duplicate; i += 2) {
+                if (MathUtils.isEqual(x, points.get(i), 0.1f) && MathUtils.isEqual(y, points.get(i+1), 0.1f)) {
+                    duplicate = true;
+                }
+            }
+            if (!duplicate) {
+                points.add(x);
+                points.add(y);
+                float dir = MathUtils.random(0, MathUtils.PI2);
+                float dx = (float) (Math.cos(dir) * velocity);
+                float dy = (float) (Math.sin(dir) * velocity);
+                dirs.add(dx);
+                dirs.add(dy);
+            }
         }
         
         for (int i = 0; i < points.size; i += 2) {
@@ -72,7 +78,6 @@ public class DelaunayAnim extends TitleAnimation {
         shape.begin(ShapeRenderer.ShapeType.Line);
         shape.setColor(Color.BLACK);
         //todo: remove duplicate points. spam creating points on a single point will cause crash.
-        // repro: points get stuck in corners. spam in corner
         // Duplicate points will result in undefined behavior.
         triangles = delaunay.computeTriangles(points, false);
         for (int i = 0; i < triangles.size; i += 3) {
