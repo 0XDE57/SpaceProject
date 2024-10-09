@@ -45,7 +45,7 @@ public class ProjectileHitRenderSystem extends EntitySystem implements Disposabl
 
     private final ShapeRenderer shape;
     private int numVert, peakVert;
-    private final float growthRate = 2.0f;
+    private final float growthRate = 1.1f;
     private final StringBuilder infoString = new StringBuilder();
 
     public ProjectileHitRenderSystem() {
@@ -61,15 +61,17 @@ public class ProjectileHitRenderSystem extends EntitySystem implements Disposabl
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         
         //render
+        float maxRadius = 1.1f;
         shape.begin(ShapeRenderer.ShapeType.Filled);
         for (Iterator<Ring> iterator = activeRings.iterator(); iterator.hasNext();) {
             Ring ring = iterator.next();
             ring.x += ring.velX * delta;
             ring.y += ring.velY * delta;
             ring.radius += growthRate * delta;
-            shape.setColor(ring.color.r, ring.color.g, ring.color.b, 1-ring.radius);
+            float ratio = ring.radius / maxRadius;
+            shape.setColor(ring.color.r, ring.color.g, ring.color.b, 1 - ratio);
             shape.circle(ring.x, ring.y, ring.radius);
-            if (1 - ring.radius <= 0) {
+            if (ring.radius > maxRadius) {
                 iterator.remove();
                 ringPool.free(ring);
             }
