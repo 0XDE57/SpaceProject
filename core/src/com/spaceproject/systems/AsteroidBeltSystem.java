@@ -202,7 +202,9 @@ public class AsteroidBeltSystem extends EntitySystem {
             shatterAsteroid(parentPos, parentVel, parentAngle, parentAngularVel, asteroid);
         } else {
             //todo: pool drops
-            Entity drop = EntityBuilder.dropResource(parentPos, parentVel, asteroid.composition, asteroid.color);
+            GeometryUtils.polygonCentroid(asteroid.polygon.getVertices(), 0, asteroid.polygon.getVertices().length, center);
+            center.rotateRad(parentAngle);
+            Entity drop = EntityBuilder.dropResource(parentPos.add(center), parentVel, asteroid.composition, asteroid.color);
             getEngine().addEntity(drop);
         }
     }
@@ -333,15 +335,16 @@ public class AsteroidBeltSystem extends EntitySystem {
                     hull[j] -= center.x;
                     hull[j + 1] -= center.y;
                 }
+                //center.rotateRad(parentAngle);
+                //parentPos.rotateAroundRad(center, parentAngle);
+                //todo: rotate center relative to parent by angle?
+                //Vector2 pos = parentBody.getPosition().cpy();//.mulAdd(center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle()), 0.1f);
+                //center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle());
+                //Vector2 pos = parentBody.getPosition().cpy().add(center);
+                //Vector2 vel = parentBody.getLinearVelocity().cpy();
             }
 
-
             float angularDrift = Math.max(MathUtils.random(-maxDriftAngle, maxDriftAngle), minDriftAngle);
-            //todo: rotate center relative to parent by angle?
-            //Vector2 pos = parentBody.getPosition().cpy();//.mulAdd(center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle()), 0.1f);
-            //center.rotateAroundRad(parentBody.getPosition(), parentBody.getAngle());
-            //Vector2 pos = parentBody.getPosition().cpy().add(center);
-            //Vector2 vel = parentBody.getLinearVelocity().cpy();
             Entity childAsteroid = EntityBuilder.createAsteroid(parentPos.x, parentPos.y, parentVel.x, parentVel.y, parentAngle, hull, asteroidComponent.composition, true);
             childAsteroid.getComponent(PhysicsComponent.class).body.setAngularVelocity(parentAngularVel + angularDrift);
             getEngine().addEntity(childAsteroid);
