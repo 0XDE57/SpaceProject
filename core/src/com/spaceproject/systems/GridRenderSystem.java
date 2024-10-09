@@ -359,6 +359,11 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
                 cacheColor.set(Color.BLUE);
             }
         }
+        HealthComponent health = Mappers.health.get(entity);
+        long hurtTime = 1000;
+        if (health != null && (GameScreen.getGameTimeCurrent() - health.lastHitTime < hurtTime)) {
+            cacheColor.set(Color.RED);
+        }
         cacheColor.a = alpha;
 
         //draw velocity vector
@@ -367,14 +372,8 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         
         float velocity = body.getLinearVelocity().len();
         boolean isMaxVelocity = MathUtils.isEqual(velocity, Box2DPhysicsSystem.getVelocityLimit(), 0.5f);
-
         cacheColor.a = 1;
         shape.setColor(cacheColor);
-        HealthComponent health = Mappers.health.get(entity);
-        long hurtTime = 1000;
-        if (health != null && (GameScreen.getGameTimeCurrent() - health.lastHitTime < hurtTime)) {
-            shape.setColor(Color.RED);
-        }
 
         //draw arrows
         int arrowSize = 10;
