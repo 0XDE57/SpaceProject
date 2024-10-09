@@ -667,8 +667,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape.rect(x, y, width * ratioShield, height);
 
         if (shield.state == ShieldComponent.State.on) {
-            drawPlayerHealth(entity, x, y + halfHeight * 0.5f, width, halfHeight);
-            shape.setColor(Color.BLUE);
+            shape.setColor(Color.WHITE);
             if (shield.heat >= 0.95f) {
                 shape.setColor(1, 0, 0, 1);
             }
@@ -815,7 +814,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
 
         VehicleComponent vehicleComponent = Mappers.vehicle.get(entity);
-        if (vehicleComponent != null && vehicleComponent.tools.size() > 0) {
+        if (vehicleComponent != null && !vehicleComponent.tools.isEmpty()) {
             inventoryFont.setColor(Color.WHITE);
             String key = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).switchWeapon);
             String input = getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? " [D-Pad Right] " : " [" + key + "] ";
