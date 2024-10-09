@@ -349,6 +349,10 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         if (control.boost) {
             cacheColor.set(0, 1, 1, 1);
         }
+        ShieldComponent shield = Mappers.shield.get(entity);
+        if (shield != null && shield.state == ShieldComponent.State.on) {
+            cacheColor.set(Color.BLUE);
+        }
         cacheColor.a = alpha;
 
         //draw velocity vector
