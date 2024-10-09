@@ -53,7 +53,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     private final Color lineColor = new Color(0.15f, 0.5f, 0.9f, 0.9f);;
     private final Color highlight = Color.WHITE.cpy();
     private final Color stationColor = Color.GREEN.cpy();
-    private final Color compassColor = Color.WHITE.cpy();
+    //private final Color compassColor = Color.WHITE.cpy();
     private final Color hintColorB = Color.PURPLE.cpy();
     private final Color hintColorA = Color.GREEN.cpy();
 
@@ -328,11 +328,19 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         Vector3 pos = cam.project(playerPos);
 
         float width = 0.5f;
-        compassColor.a = alpha;
-        shape.rectLine(pos.x, pos.y, facing.x, facing.y, width, compassColor, compassColor);
+        cacheColor.set(Color.WHITE);
+        cacheColor.a = alpha;
+        shape.rectLine(pos.x, pos.y, facing.x, facing.y, width, cacheColor, cacheColor);
+        CannonComponent cannon = Mappers.cannon.get(entity);
+        if (cannon != null) {
+            int hitTime = 200;
+            long timeSinceHit = GameScreen.getGameTimeCurrent() - cannon.lastHitTime;
+            if (timeSinceHit < hitTime) {
+                cacheColor.set(Color.WHITE.cpy()).lerp(Color.MAGENTA, 1 - ((float) timeSinceHit / hitTime));
+            }
+        }
+        shape.setColor(cacheColor);
         Vector2 lead = MyMath.vector(body.getAngle(), 80).add(pos.x, pos.y);
-        compassColor.a = 1;
-        shape.setColor(compassColor);
         shape.circle(lead.x, lead.y, 2);
 
         if (body.getLinearVelocity().isZero()) {
@@ -340,7 +348,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         }
 
         //draw movement direction for navigation assistance, line up vector with target destination
-        cacheColor.set(compassColor);
+        cacheColor.set(Color.WHITE);
         ControllableComponent control = Mappers.controllable.get(entity);
         if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight) {
             width *= 2;
@@ -351,7 +359,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         }
         ShieldComponent shield = Mappers.shield.get(entity);
         if (shield != null && shield.state == ShieldComponent.State.on) {
-            long hitTime = 500;
+            int hitTime = 500;
             long timeSinceHit = GameScreen.getGameTimeCurrent() - shield.lastHit;
             if (timeSinceHit < hitTime) {
                 cacheColor.set(Color.GREEN);
