@@ -145,9 +145,9 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         shape.setColor(color);
         //unproject to get edges of viewport
         topLeft.set(0, 0, 0);
-        topLeft = viewport.unproject(topLeft);
+        viewport.unproject(topLeft);
         bottomRight.set(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0);
-        bottomRight = viewport.unproject(bottomRight);
+        viewport.unproject(bottomRight);
         //draw vertical along X axis
         float thickness = (1/SpaceProject.configManager.getConfig(EngineConfig.class).renderScale) * cam.zoom * width;
         int i = 0;
@@ -172,9 +172,9 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
     private void drawGridMultiColor(Color colorA, Color colorB, int gridSize, float width, int emphasisDivisor) {
         //unproject to get edges of viewport
         topLeft.set(0, 0, 0);
-        topLeft = viewport.unproject(topLeft);
+        viewport.unproject(topLeft);
         bottomRight.set(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0);
-        bottomRight = viewport.unproject(bottomRight);
+        viewport.unproject(bottomRight);
         //draw vertical along X axis
         float thickness = (1/SpaceProject.configManager.getConfig(EngineConfig.class).renderScale) * cam.zoom * width;
         int i = 0;
