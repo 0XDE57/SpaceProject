@@ -36,6 +36,7 @@ public class TitleScreen extends MyScreenAdapter {
     private Label titleLabel;
     private int edgePad;
     private Matrix4 projectionMatrix = new Matrix4();
+    private boolean debugMenuEnabled = false;
 
     private TitleAnimation foregroundAnimation, backgroundAnimation;
     private ForegroundAnimation previousAnim;
@@ -136,9 +137,10 @@ public class TitleScreen extends MyScreenAdapter {
             initForegroundAnim();
         }
         
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
+        if (!debugMenuEnabled && Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
             menu.addDebugItems(game);
             menu.table.pack();
+            debugMenuEnabled = true;
         }
         /*
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
