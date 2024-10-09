@@ -193,6 +193,7 @@ public class GameScreen extends MyScreenAdapter {
     
     public void switchScreen(Entity transEntity, Entity planet) {
         Array<Entity> transEntityCluster = ECSUtil.getAttachedEntities(engine, transEntity);
+        transEntityCluster.insert(0, transEntity);
         
         //if AI, remove it. todo: should happen in screen transition system. AI shouldn't make it to here
         if (Mappers.AI.get(transEntity) != null) {
