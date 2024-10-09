@@ -351,7 +351,13 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         }
         ShieldComponent shield = Mappers.shield.get(entity);
         if (shield != null && shield.state == ShieldComponent.State.on) {
-            cacheColor.set(Color.BLUE);
+            long hitTime = 500;
+            long timeSinceHit = GameScreen.getGameTimeCurrent() - shield.lastHit;
+            if (timeSinceHit < hitTime) {
+                cacheColor.set(Color.GREEN);
+            } else {
+                cacheColor.set(Color.BLUE);
+            }
         }
         cacheColor.a = alpha;
 
