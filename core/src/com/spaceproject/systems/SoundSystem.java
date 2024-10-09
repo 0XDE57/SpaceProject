@@ -42,13 +42,13 @@ public class SoundSystem extends EntitySystem implements Disposable {
     SoundBuffer f3;
     SoundBuffer break0, break1, break2, break3, break4;
     //Sound bounce0, bounce1, bounce2;
-    SoundBuffer laserShoot, laserShootCharge;
+    SoundBuffer laserShoot;//, laserShootCharge;
     SoundBuffer hullImpact, hullImpactHeavy;
     SoundBuffer healthAlarm;
     SoundBuffer shieldImpact, shieldOn, shieldOff, shieldAmbientLoop;
-    SoundBuffer hyperdriveEngage;
+    //SoundBuffer hyperdriveEngage;
     SoundBuffer pickup, credits;
-    SoundBuffer heal;
+    //SoundBuffer heal;
     SoundBuffer dockStation, undockStation;
 
     Reverb reverbData;
@@ -287,7 +287,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         shipExplode.dispose();
         f3.dispose();
         laserShoot.dispose();
-        laserShootCharge.dispose();
+        //laserShootCharge.dispose();
         hullImpact.dispose();
         hullImpactHeavy.dispose();
         healthAlarm.dispose();
@@ -295,10 +295,10 @@ public class SoundSystem extends EntitySystem implements Disposable {
         shieldOn.dispose();
         shieldOff.dispose();
         shieldAmbientLoop.dispose();
-        hyperdriveEngage.dispose();
+        //hyperdriveEngage.dispose();
         pickup.dispose();
         credits.dispose();
-        heal.dispose();
+        //heal.dispose();
         dockStation.dispose();
         undockStation.dispose();
         //cleanup effects
