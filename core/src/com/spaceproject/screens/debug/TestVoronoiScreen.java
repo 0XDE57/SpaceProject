@@ -29,9 +29,13 @@ import java.util.ArrayList;
 //https://github.com/mjholtzem/Unity-2D-Destruction
 
 public class TestVoronoiScreen extends MyScreenAdapter {
+
+    //rendering
+    final Matrix4 projectionMatrix = new Matrix4();
     BitmapFont text = FontLoader.createFont(FontLoader.fontBitstreamVMBold, 20);
     BitmapFont dataFont = FontLoader.createFont(FontLoader.fontBitstreamVM, 12);
     GlyphLayout layout = new GlyphLayout();
+
     //all points that define a polygon and any point inside the polygon
     FloatArray points;
     
@@ -44,6 +48,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     float[] hull;
     Polygon hullPoly;
     Vector2 centroid = new Vector2();
+    final ConvexHull convex = new ConvexHull();
     
     //toggles
     boolean drawCircumcircle = false,
@@ -67,10 +72,10 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     //todo: [x] fix grabbing points, focus point, don't lose it
     //todo: [x] highlight focused point
     //todo: [ ] highlight when near grab-able point
-    //todo: [ ] center points
+    //todo: [x] center points
     //todo: [ ] draw grid
-    //todo: [ ] discard points if too close? epsilon check remove duplicate points
-    //todo: [ ] fix scaling for window resize
+    //todo: [x] discard points if too close? epsilon check remove duplicate points
+    //todo: [x] fix scaling for window resize
     //todo: [ ] fix voronoi cells for edge cases
     //todo: [ ] extract voronoi cells
     //todo: [ ] display points as array both input and output
@@ -80,14 +85,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     //todo: [x] display centroid for sub voronoi
     
     public TestVoronoiScreen() {
-        //center cam
-        cam.position.x = Gdx.graphics.getWidth() / 2;
-        cam.position.y = Gdx.graphics.getHeight() / 2;
-        
         generateNewPoints(10);
     }
-    
-    
+
     private void generateNewPoints(int numPoints) {
         //reset / clear previous
         dCells.clear();
@@ -102,16 +102,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             points.add(x);
             points.add(y);
         }
-    
-    
-        float p = 100;
-        Rectangle rectangle = new Rectangle( p, p, Gdx.graphics.getWidth()-p*2, Gdx.graphics.getHeight()-p*2);
-        //bottom left
-        //points.add(rectangle.x);
-        //points.add(rectangle.y);
-        //top right
-        //points.add(rectangle.x + rectangle.getWidth());
-        //points.add(rectangle.y + rectangle.getHeight());
+
+        //calculate the convex hull of all the points
+        //center around centroid in middle of screen
+        hull = convex.computePolygon(points, false).toArray();//<--system.arraycopy()
+        GeometryUtils.polygonCentroid(hull, 0, hull.length, centroid);
+        for (int i = 0; i < points.size; i+= 2) {
+            points.set(i, centroid.x - points.get(i) + Gdx.graphics.getWidth()*0.5f);
+            points.set(i + 1, centroid.y - points.get(i + 1) + Gdx.graphics.getHeight()*0.5f);
+        }
         
         //create cells out of points
         calculateDelaunay();
@@ -129,27 +128,26 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         
         //apply delaunay triangulation to points
         triangles = delaunay.computeTriangles(points, false);
-        //triangles = new EarClippingTriangulator().computeTriangles(points);
         
         //create cells for each triangle
         dCells.clear();
+        int discard = 1;
         for (int i = 0; i < triangles.size; i += 3) {
             //get points
             int p1 = triangles.get(i) * 2;
             int p2 = triangles.get(i + 1) * 2;
             int p3 = triangles.get(i + 2) * 2;
-
             float[] hull = new float[] {
                     points.get(p1), points.get(p1 + 1), // xy: 0, 1
                     points.get(p2), points.get(p2 + 1), // xy: 2, 3
                     points.get(p3), points.get(p3 + 1)  // xy: 4, 5
             };
 
-            //discard duplicate points
+            //discard duplicate points (todo: should do this check before new float above, also use equals... exit early)
             if ((hull[0] == hull[2] && hull[1] == hull[3]) || // p1 == p2 or
                     (hull[0] == hull[4] && hull[1] == hull[5]) || // p1 == p3 or
                     (hull[2] == hull[4] && hull[3] == hull[5])) { // p2 == p3
-                Gdx.app.error(getClass().getSimpleName(), "Duplicate point!");
+                Gdx.app.error(getClass().getSimpleName(), "Duplicate point!: " + discard++);
                 continue;
             }
 
@@ -164,8 +162,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         DelaunayCell.findNeighbors(dCells);
         
         //calculate the convex hull of all the points
-        ConvexHull convex = new ConvexHull();
-        hull = convex.computePolygon(points, false).toArray();
+        //ConvexHull convex = new ConvexHull();
+        hull = convex.computePolygon(points, false).toArray();//<system.arraycopy()
         //computePolygon -> Returns convex hull in counter-clockwise order. Note: the last point in the returned list is the same as the first one.
         //Gdx.app.log(getClass().getSimpleName(), "isCCW?" + GeometryUtils.isCCW(hull, 0, hull.length));
         //todo: explore isCCW, start
@@ -399,17 +397,10 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         shape.end();
 
-
-
         if (drawTriangleInfo) {
             batch.begin();
             dataFont.setColor(Color.BLACK);
             for (DelaunayCell cell : dCells) {
-                //draw area
-                //draw quality
-                //cell.area;
-                //cell.quality;
-                //setText (BitmapFont font, CharSequence str, Color color, float targetWidth, int halign, boolean wrap)
                 layout.setText(dataFont, MyMath.round(cell.area, 2) + "", dataFont.getColor(), 0, Align.center, false);
                 dataFont.draw(batch, layout, cell.centroid.x, cell.centroid.y);
                 layout.setText(dataFont, cell.quality + "", dataFont.getColor(), 0, Align.center, false);
@@ -424,7 +415,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         //clear screen
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        
+
         //render voronoi stuff
         drawStuff();
         
@@ -433,11 +424,36 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         
         drawMenu();
     }
-    
+
+    @Override
+    public void resize(int width, int height) {
+        super.resize(width, height);
+        projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        shape.setProjectionMatrix(projectionMatrix);
+        batch.setProjectionMatrix(projectionMatrix);
+        //todo: recentering may also flip the entire polygon? interesting bug...
+        boolean recenter = true;
+        if (recenter) {
+            //calculate the convex hull of all the points
+            //center around centroid in middle of screen
+            hull = convex.computePolygon(points, true).toArray(); //sorted seems to have no impact on
+            GeometryUtils.polygonCentroid(hull, 0, hull.length, centroid);
+            for (int i = 0; i < points.size; i+= 2) {
+                points.set(i, centroid.x - points.get(i) + width*0.5f);
+                points.set(i + 1, centroid.y - points.get(i + 1) + height*0.5f);
+            }
+            calculateDelaunay();
+        }
+    }
+
     private void drawMenu() {
         batch.begin();
         int y = Gdx.graphics.getHeight() - 10;
         float h = text.getLineHeight();
+
+        layout.setText(text, "Points: " + (int) (points.size * 0.5f) + ", D-Cells:" + dCells.size() + ", V-Cells: ?", Color.WHITE, 0, Align.center, false);
+        text.draw(batch, layout, Gdx.graphics.getWidth() * 0.5f, y);
+
         text.setColor(drawCircumcenter ? Color.GREEN : Color.BLACK);
         text.draw(batch, "1: Circumcenter", 10, y);
         
@@ -479,20 +495,28 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         if (Gdx.input.isKeyJustPressed(Keys.SPACE)) {
             generateNewPoints(3);
         }
-        
+
+        int x = Gdx.input.getX();
+        int y = Gdx.graphics.getHeight() - Gdx.input.getY();
+
         //create new point
         if (Gdx.input.justTouched() && Gdx.input.isButtonPressed(Buttons.RIGHT)) {
-            points.add(Gdx.input.getX());
-            points.add(Gdx.graphics.getHeight() - Gdx.input.getY());
-            calculateDelaunay();
+            boolean duplicate = false;
+            for (int i = 0; i < points.size && !duplicate; i += 2) {
+                if (MathUtils.isEqual(x, points.get(i), 0.1f) && MathUtils.isEqual(y, points.get(i+1), 0.1f)) {
+                    duplicate = true;
+                }
+            }
+            if (!duplicate) {
+                points.add(x);
+                points.add(y);
+                calculateDelaunay();
+            }
         }
-        
-        //drag points around
-        if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
-            int x = Gdx.input.getX();
-            int y = Gdx.graphics.getHeight() - Gdx.input.getY();
 
+        if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
             if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
+                //drag all points around
                 if (!isDrag) {
                     isDrag = true;
                     dragStart.set(x, y);
@@ -508,13 +532,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 }
                 calculateDelaunay();
                 dragStart.set(x, y);
-
             } else {
+                //drag selected point around
                 if (focusedPoint >= 0) {
                     points.set(focusedPoint, x);
                     points.set(focusedPoint + 1, y);
                 }
-
                 boolean mod = false;
                 for (int i = 0; i < points.size && !mod; i += 2) {
                     float px = points.get(i);
@@ -524,7 +547,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                         mod = true;
                     }
                 }
-
                 if (mod) {
                     calculateDelaunay();
                 }
