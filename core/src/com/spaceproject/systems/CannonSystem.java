@@ -126,7 +126,7 @@ public class CannonSystem extends IteratingSystem {
         //particle fx -> trailing effect
         ParticleComponent newParticle = new ParticleComponent();
         newParticle.type = ParticleComponent.EffectType.projectileTrail;
-        newParticle.offset = new Vector2();
+        newParticle.offset = new Vector2(0, bodyWidth);
         entity.add(newParticle);
         
         //entity.add(new TrailComponent());
