@@ -594,9 +594,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private void drawStats(StatsComponent stats) {
         float centerX = 20;
         int offset = 50;
-        float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3)) - offset;
+        float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3f)) - offset;
         layout.setText(subFont,  String.format("%-10s %s", stats.kills, "kills"), Color.RED, 0, Align.left, false);
-        float height = layout.height * 1.4f;
+        float height = layout.height * 1.6f;
         subFont.draw(batch, layout, centerX, messageHeight - height);
 
         layout.setText(subFont, String.format("%-10s %s", stats.deaths, "deaths"), Color.RED, 0, Align.left, false);
