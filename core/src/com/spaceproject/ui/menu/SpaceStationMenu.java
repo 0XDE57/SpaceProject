@@ -53,11 +53,17 @@ public class SpaceStationMenu {
         String tractorBeamDescription = "[" + colorItem + "]" + tractorUpgrade + "[]\npush or pull objects.\n\nHold [" + colorControl + "][" + laserControl + "][] to activate.\nDouble Tap to toggle between PUSH & PULL";
         int costHyper = 100000;
         int costShield = 25000;
-        int costLaser = 25000;
+        int costLaser = 30000;
         int costTractorBeam = 10000;
         int costHP = 40000;
-        int costThrust = 30000;
-        int costDMG = 20000;
+        int costThrust = 20000;
+        int costCannonDMG = 10000;
+        int costCannonVelocity = 20000;//todo
+        int costCannonCooldown = 20000;//todo
+        int costLaserDMG = 20000;
+        int costLaserRange = 20000;//todo
+        int costTractorRange = 10000;//todo
+        int costTractorForce = 10000;//todo
 
         ScrollableTextArea text = new ScrollableTextArea("");
         text.removeListener(text.getDefaultInputListener());
@@ -256,7 +262,7 @@ public class SpaceStationMenu {
         buttonAddHealth.addListener(new FocusListener() {
             @Override
             public boolean handle(Event event) {
-                text.setText("Increase [" + colorItem + "]HP[]\nby [" + colorCredits + "]" + hp +"[]\nCurrent: "+ Mappers.health.get(player).maxHealth);
+                text.setText("Increase [" + colorItem + "]HP[]\nby: [" + colorCredits + "]" + hp +"\nCurrent:  [" + colorCredits + "]"+ Mappers.health.get(player).maxHealth);
                 return super.handle(event);
             }
         });
@@ -286,21 +292,51 @@ public class SpaceStationMenu {
         buttonAddThrust.addListener(new FocusListener() {
             @Override
             public boolean handle(Event event) {
-                text.setText("Increase [" + colorItem + "]THRUST[]\nby [" + colorCredits + "]" + thrust +"[]\nCurrent: "+ Mappers.vehicle.get(player).thrust);
+                text.setText("Increase [" + colorItem + "]THRUST\nby: [" + colorCredits + "]" + thrust +"[]\nCurrent: [" + colorCredits + "]"+ Mappers.vehicle.get(player).thrust);
                 return super.handle(event);
             }
         });
 
+        //costCannonDMG
+        VisTextButton buttonAddCannonDMG = new VisTextButton("Increase [" + colorItem + "]Cannon DMG ");
+        buttonAddCannonDMG.getLabel().setAlignment(Align.left);
+        buttonAddCannonDMG.add(new VisLabel("[" + colorCredits + "]" + costCannonDMG));
+        int damageCannon = 5;
+        buttonAddCannonDMG.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                CargoComponent cargo = Mappers.cargo.get(player);
+                if (cargo.credits < costCannonDMG) {
+                    //error soundfx if not enough moneys
+                    Gdx.app.debug(getClass().getSimpleName(), "insufficient credits for cannon damage");
+                    creditsValue.addAction(sequence(color(Color.RED),color(Color.WHITE, 0.5f)));
+                    return;
+                }
+                //purchase
+                cargo.credits -= costCannonDMG;
+                creditsValue.setText(Mappers.cargo.get(player).credits);
+                creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
+
+                Mappers.cannon.get(player).damage += damageCannon;
+            }
+        });
+        buttonAddCannonDMG.addListener(new FocusListener() {
+            @Override
+            public boolean handle(Event event) {
+                text.setText("Increase [" + colorItem + "]Cannon Damage\nby: [" + colorCredits + "]" + damageCannon +"\nCurrent: [" + colorCredits + "]" + Mappers.cannon.get(player).damage);
+                return super.handle(event);
+            }
+        });
 
         buttonLaserPower.getLabel().setAlignment(Align.left);
-        buttonLaserPower.add(new VisLabel("[" + colorCredits + "]" + costDMG));
+        buttonLaserPower.add(new VisLabel("[" + colorCredits + "]" + costLaserDMG));
         buttonLaserPower.setDisabled(Mappers.laser.get(player) == null && !vehicle.tools.containsKey(VehicleComponent.Tool.laser.ordinal()));
         int damage = 200;
         buttonLaserPower.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 CargoComponent cargo = Mappers.cargo.get(player);
-                if (cargo.credits < costDMG) {
+                if (cargo.credits < costLaserDMG) {
                     //error soundfx if not enough moneys
                     Gdx.app.debug(getClass().getSimpleName(), "insufficient credits for  laser");
                     creditsValue.addAction(sequence(color(Color.RED),color(Color.WHITE, 0.5f)));
@@ -314,7 +350,7 @@ public class SpaceStationMenu {
                     }
                 }
                 //purchase
-                cargo.credits -= costDMG;
+                cargo.credits -= costLaserDMG;
                 creditsValue.setText(Mappers.cargo.get(player).credits);
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
 
@@ -328,13 +364,12 @@ public class SpaceStationMenu {
                 if (laserComponent == null) {
                     laserComponent = (LaserComponent) vehicle.tools.get(VehicleComponent.Tool.laser.ordinal());
                 }
-                text.setText("Increase [" + colorItem + "]DMG[]\nby [" + colorCredits + "]"
-                        + damage +"[]\nCurrent: "+ (laserComponent == null ? 0 : laserComponent.damage));
+                text.setText("Increase [" + colorItem + "]DMG\nby: [" + colorCredits + "]" + damage +"\nCurrent:  [" + colorCredits + "]"+ (laserComponent == null ? 0 : laserComponent.damage));
                 return super.handle(event);
             }
         });
 
-        VisTextButton buttonDebugGiveMoney = new VisTextButton("[" + colorItem + "]DEBUG: []ADD CREDITS");
+        VisTextButton buttonDebugGiveMoney = new VisTextButton("[#ff0000]DEBUG: []ADD CREDITS");
         buttonDebugGiveMoney.getLabel().setAlignment(Align.left);
         buttonDebugGiveMoney.addListener(new ChangeListener() {
             @Override
@@ -360,6 +395,7 @@ public class SpaceStationMenu {
         buttonTable.add(buttonHyperDrive).fillX().row();
         buttonTable.add(buttonAddHealth).fillX().row();
         buttonTable.add(buttonAddThrust).fillX().row();
+        buttonTable.add(buttonAddCannonDMG).fillX().row();
         buttonTable.add(buttonLaserPower).fillX().row();
         buttonTable.add(buttonDebugGiveMoney).fillX().row();
 

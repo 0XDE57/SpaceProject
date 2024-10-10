@@ -48,7 +48,7 @@ public class EntityConfig extends Config {
         dodgeForce = 8f;
         cannonSize = 1;
         cannonAmmo = 5;
-        cannonDamage = 15;
+        cannonDamage = 5;
         cannonFireRate = 200;
         cannonRechargeRate = 1000;
         cannonVelocity = 80;
