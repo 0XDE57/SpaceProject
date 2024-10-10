@@ -21,7 +21,9 @@ import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
-//NOTE: while this not a system itself, its behavior is directly linked to the @Box2DPhysicsSystem
+/**
+ * NOTE: while this not a system itself, its behavior is directly linked to the {@link Box2DPhysicsSystem}
+ */
 public class Box2DContactListener implements ContactListener {
     
     private final Engine engine;
