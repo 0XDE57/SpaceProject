@@ -109,6 +109,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
     //entity storage
     private ImmutableArray<Entity> mapableEntities;
+    private ImmutableArray<Entity> bodies;
     private ImmutableArray<Entity> players;
     private ImmutableArray<Entity> killableEntities;
 
@@ -208,6 +209,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
         killableEntities = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class)
                 .exclude(ControlFocusComponent.class, AsteroidComponent.class).get());
+        bodies = engine.getEntitiesFor(Family.one(PlanetComponent.class, StatsComponent.class).get());
     }
     
     @Override
@@ -308,41 +310,18 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             }
         }
 
-        Entity focused = getEngine().getSystem(GridRenderSystem.class).closestFacing;
-        if (focused != null) {
-            PlanetComponent planet = Mappers.planet.get(focused);
-            if (planet != null) {
-                TransformComponent transform = Mappers.transform.get(focused);
-                tempProj.set(transform.pos.x, transform.pos.y, 0);
-                MyScreenAdapter.cam.project(tempProj);
-                float alpha = MathUtils.clamp((cam.zoom / 150 / 2), 0, 1);
-                inventoryFont.setColor(1, 1, 1, alpha);
-                layout.setText(inventoryFont, "<planet name>");
-                float offset = layout.height * 1.5f;
-                inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y + offset);
-                layout.setText(inventoryFont, "atmosphere: <unknown>");
-                inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y);
-                layout.setText(inventoryFont, "size: " + planet.mapSize);
-                inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y - offset);//replace with mass?
+        if (camSys.isMaxZoomLevel()) {
+            for (Entity body : bodies) {
+                drawBodyInfoOnFocus(body);
             }
-            StarComponent star = Mappers.star.get(focused);
-            if (star != null) {
-                TransformComponent transform = Mappers.transform.get(focused);
-                tempProj.set(transform.pos.x, transform.pos.y, 0);
-                MyScreenAdapter.cam.project(tempProj);
-                float alpha = MathUtils.clamp((cam.zoom / 150 / 2), 0, 1);
-                inventoryFont.setColor(1, 1, 1, alpha);
-                layout.setText(inventoryFont, "<star type>" /*+ star.StellarClass*/);
-                float offset = layout.height * 1.5f;
-                inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y + offset);
-                layout.setText(inventoryFont, "temperature: " + (int)star.temperature + "k");
-                inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y);
-            }
+        } else {
+            Entity focused = getEngine().getSystem(GridRenderSystem.class).closestFacing;
+            drawBodyInfoOnFocus(focused);
         }
 
         if (focusedDist > 0) {
             inventoryFont.setColor(1, 1, 1, 1);
-            layout.setText(inventoryFont, " " + (int)focusedDist );
+            layout.setText(inventoryFont, " " + (int)focusedDist);
             inventoryFont.draw(batch, layout, focusedPos.x, focusedPos.y+1);
         }
 
@@ -356,6 +335,40 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
         batch.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
+    }
+
+    private void drawBodyInfoOnFocus(Entity entity) {
+        if (entity == null) return;
+
+        PlanetComponent planet = Mappers.planet.get(entity);
+        if (planet != null) {
+            TransformComponent transform = Mappers.transform.get(entity);
+            tempProj.set(transform.pos.x, transform.pos.y, 0);
+            MyScreenAdapter.cam.project(tempProj);
+            float alpha = MathUtils.clamp((cam.zoom / 150 / 2), 0, 1);
+            inventoryFont.setColor(1, 1, 1, alpha);
+            layout.setText(inventoryFont, "<planet name>");
+            float offset = layout.height * 1.5f;
+            inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y + offset);
+            layout.setText(inventoryFont, "atmosphere: <unknown>");
+            inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y);
+            layout.setText(inventoryFont, "size: " + planet.mapSize);
+            inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y - offset);//replace with mass?
+            return;
+        }
+        StarComponent star = Mappers.star.get(entity);
+        if (star != null) {
+            TransformComponent transform = Mappers.transform.get(entity);
+            tempProj.set(transform.pos.x, transform.pos.y, 0);
+            MyScreenAdapter.cam.project(tempProj);
+            float alpha = MathUtils.clamp((cam.zoom / 150 / 2), 0, 1);
+            inventoryFont.setColor(1, 1, 1, alpha);
+            layout.setText(inventoryFont, "<star type>" /*+ star.StellarClass*/);
+            float offset = layout.height * 1.5f;
+            inventoryFont.draw(batch, layout, tempProj.x - layout.width * 0.5f, tempProj.y + offset);
+            layout.setText(inventoryFont, "temperature: " + (int) star.temperature + "k");
+            inventoryFont.draw(batch, layout, tempProj.x - layout.width * 0.5f, tempProj.y);
+        }
     }
 
     private void drawZoomLevelIndicator(CameraSystem camSys) {
@@ -626,7 +639,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         drawHyperDriveBar(entity, barX, hyperBarY, barWidth, barHeight);
 
         if (!GameScreen.isPaused()) {
-            if (cam.getZoomLevel() == cam.getMaxZoomLevel()) return;
+            if (cam.isMaxZoomLevel()) return;
 
             if (GameScreen.isHyper()) return;
         }
@@ -805,7 +818,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             return;
         }
         CameraSystem camSystem = getEngine().getSystem(CameraSystem.class);
-        if (camSystem.getZoomLevel() == camSystem.getMaxZoomLevel()) {
+        if (camSystem.isMaxZoomLevel()) {
             return;
         }
 

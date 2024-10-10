@@ -13,12 +13,9 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Queue;
-import com.spaceproject.SpaceProject;
 import com.spaceproject.components.CamTargetComponent;
 import com.spaceproject.components.CameraFocusComponent;
 import com.spaceproject.components.TransformComponent;
-import com.spaceproject.config.ConfigManager;
-import com.spaceproject.config.DebugConfig;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
@@ -43,7 +40,7 @@ public class CameraSystem extends IteratingSystem {
     private float maxOffsetFromTarget = 5f;
     private final Vector2 offsetFromTarget = new Vector2();
     
-    private final int frames = 10; //how many frames to average lerp over
+    private final int frames = 20; //how many frames to average lerp over
     private final Queue<Vector2> averageTarget = new Queue<>();
     private final Vector3 average = new Vector3();
     
@@ -56,6 +53,8 @@ public class CameraSystem extends IteratingSystem {
     }
 
     public SimpleTimer zoomChangeTimer;
+
+    final Vector2 cacheVec = new Vector2();
 
     public CameraSystem() {
         super(Family.all(CameraFocusComponent.class, TransformComponent.class).get());
@@ -71,8 +70,12 @@ public class CameraSystem extends IteratingSystem {
     
     @Override
     public void processEntity(Entity entity, float delta) {
-        Vector2 pos = Mappers.transform.get(entity).pos;
-        //Vector2 vel = pos.cpy().add(Mappers.physics.get(entity).body.getLinearVelocity().cpy().scl(0.02f));
+        cacheVec.set(Mappers.transform.get(entity).pos);
+        /*
+        PhysicsComponent physics = Mappers.physics.get(entity);
+        if (physics != null && !physics.body.getLinearVelocity().isZero()) {
+            cacheVec.add(physics.body.getLinearVelocity().cpy().scl(0.1f));
+        }*/
 
         if (lerpCam) {
             mode = Mode.lerpTarget;
@@ -81,8 +84,8 @@ public class CameraSystem extends IteratingSystem {
         }
         
         switch (mode) {
-            case lockTarget: lockToTarget(pos); break;
-            case lerpTarget: lerpToTarget(pos, delta); break;
+            case lockTarget: lockToTarget(cacheVec); break;
+            case lerpTarget: lerpToTarget(cacheVec, delta); break;
             case combat: {
                 //midpoint between mouse and player to pull you away
                 Vector3 targetPos = GameScreen.cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
@@ -98,8 +101,9 @@ public class CameraSystem extends IteratingSystem {
         }
         
         //clamp lerp offset so character remains on screen
-        clampOffset(pos, maxOffsetFromTarget);
-        
+        clampOffset(cacheVec, maxOffsetFromTarget);
+        //if (entity near edge of screen, clamp(). or zoom out) { }
+
         animateZoom(delta);
         
         debugCameraControls(delta);
@@ -111,7 +115,7 @@ public class CameraSystem extends IteratingSystem {
         cam.position.x = pos.x;
         cam.position.y = pos.y;
     }
-    
+
     private void lerpToTarget(Vector2 pos, float delta) {
         //we want to lerp the camera for some smoothed following
         //but if we lerp directly using built in camera.position.lerp()
@@ -123,7 +127,8 @@ public class CameraSystem extends IteratingSystem {
         //leading to an ugly back and forth jitter making cam / sprites render unstable/jumpy
         
         //so we calculate the rolling average of the lerped value over a few frames to smooth out jitter
-        averageTarget.addLast(new Vector2(cam.position.x + (pos.x - cam.position.x) * smoothFollowSpeed * delta,
+        averageTarget.addLast(
+                new Vector2(cam.position.x + (pos.x - cam.position.x) * smoothFollowSpeed * delta,
                 cam.position.y + (pos.y - cam.position.y) * smoothFollowSpeed * delta));
         if (averageTarget.size > frames) {
             averageTarget.removeFirst();
@@ -135,16 +140,16 @@ public class CameraSystem extends IteratingSystem {
         average.scl(1.0f / averageTarget.size);
         cam.position.set(average);
 
+        //cacheVector.set(pos.x, pos.y, 0);
+        //cam.position.lerp(cacheVector, 0.9f);
     }
     
     private void clampOffset(Vector2 pos, float maxOffset) {
         //radial clamp
         offsetFromTarget.set(pos.x - cam.position.x, pos.y - cam.position.y);
-        if (offsetFromTarget.len() > maxOffset) {
-            Vector2 clamped = offsetFromTarget.clamp(0, maxOffset);
-            cam.position.x = pos.x - clamped.x;
-            cam.position.y = pos.y - clamped.y;
-        }
+        offsetFromTarget.clamp(0, maxOffset);
+        cam.position.x = pos.x - offsetFromTarget.x;
+        cam.position.y = pos.y - offsetFromTarget.y;
     }
     
     private void clampViewport() {
@@ -200,7 +205,6 @@ public class CameraSystem extends IteratingSystem {
             //cameraFocus.zoomTarget += 2f * delta;
         }
     */
-    
     }
 
     public boolean isLerp() {
@@ -320,6 +324,10 @@ public class CameraSystem extends IteratingSystem {
     
     public byte getMaxZoomLevel() {
         return maxZoomLevel;
+    }
+
+    public boolean isMaxZoomLevel() {
+        return getZoomLevel() == getMaxZoomLevel();
     }
     
     /** iter: -1,    0,   1, 2, 3, 4, 5, 6,  7, 8...
