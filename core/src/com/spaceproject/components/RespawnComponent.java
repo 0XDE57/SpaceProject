@@ -19,4 +19,6 @@ public class RespawnComponent implements Component {
 
     public SimpleTimer timeout;
 
+    public int saveCredits;//todo: revisit save?
+
 }

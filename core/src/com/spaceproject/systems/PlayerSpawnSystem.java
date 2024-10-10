@@ -94,14 +94,16 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
                     respawn.spawn = RespawnComponent.AnimState.end;
                     respawnEntity.add(new RemoveComponent());
                     //todo: but not just nearest. last station docked at. space station is check point
-                    spawnPlayer();
+                    Entity player = spawnPlayer();
+                    ECSUtil.transferComponent(respawnEntity, player, StatsComponent.class);
+                    player.getComponent(CargoComponent.class).credits = respawn.saveCredits;//hack!
                     break;
                 //default: Gdx.app.debug(getClass().getSimpleName(), respawn.spawn.name());
             }
         }
     }
 
-    public void spawnPlayer() {
+    public Entity spawnPlayer() {
         //if no space station found: force spawn 0, 0
         Vector2 spawnPosition = new Vector2(0, 0);
 
@@ -140,6 +142,7 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
 
         Gdx.app.log(getClass().getSimpleName(), "player [" + DebugUtil.objString(player) + "] spawned: " + MyMath.formatVector2(spawnPosition, 1) +
                 (spaceStation == null ? " NO STATION FOUND!!!" : " at station: [" + DebugUtil.objString(spaceStation) + "]"));
+        return player;
     }
 
     public boolean pan(Entity entity) {

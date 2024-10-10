@@ -29,7 +29,7 @@ public class Box2DContactListener implements ContactListener {
     private final int asteroidDamageThreshold = 15000; //impulse threshold to apply damage caused by impact
     private final float asteroidBreakOrbitThreshold = 250;
     private final float vehicleDamageThreshold = 15; //impulse threshold to apply damage to vehicles
-    private float vehicleDamageMultiplier = 1f;
+    private final float vehicleDamageMultiplier = 1f;
     private final float impactMultiplier = 0.1f; //how much damage relative to impulse
     private final float heatDamageRate = 400f;// how quickly stars to damage to health
     private float peakImpulse = 0; //highest recorded impact, stat just to gauge
@@ -75,7 +75,7 @@ public class Box2DContactListener implements ContactListener {
         if (itemDropA != null) {
             CargoComponent cargoB = Mappers.cargo.get(b);
             if (cargoB != null) {
-                collectItemDrop(contact.getFixtureB(), cargoB, a);
+                collectItemDrop(contact.getFixtureB(), cargoB, a, b);
                 return;
             }
         }
@@ -83,7 +83,7 @@ public class Box2DContactListener implements ContactListener {
         if (itemDropB != null) {
             CargoComponent cargoA = Mappers.cargo.get(a);
             if (cargoA != null) {
-                collectItemDrop(contact.getFixtureA(), cargoA, b);
+                collectItemDrop(contact.getFixtureA(), cargoA, b, a);
                 return;
             }
         }
@@ -162,7 +162,7 @@ public class Box2DContactListener implements ContactListener {
         ProjectileHitRenderSystem.hit(pos.x, pos.y, vel.x, vel.y, cacheColor);
     }
     
-    private void collectItemDrop(Fixture collectorFixture, CargoComponent cargo, Entity item) {
+    private void collectItemDrop(Fixture collectorFixture, CargoComponent cargo, Entity item, Entity collector) {
         if (collectorFixture.getUserData() != null && (int)collectorFixture.getUserData() != BodyBuilder.SHIP_INNER_SENSOR_ID)
             return;
         
@@ -176,6 +176,11 @@ public class Box2DContactListener implements ContactListener {
         cargo.inventory.put(itemId, quantity);
         cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
         item.add(new RemoveComponent());
+
+        StatsComponent stats = Mappers.stat.get(collector);
+        if (stats != null) {
+            stats.resourcesCollected++;
+        }
         
         engine.getSystem(SoundSystem.class).pickup();
     }
@@ -411,20 +416,14 @@ public class Box2DContactListener implements ContactListener {
             return null;
         }
 
-        if (Mappers.asteroid.get(entity) != null) {
-            CannonComponent cannon = Mappers.cannon.get(source);
-            if (cannon != null) {
-                cannon.hits++;
-                cannon.lastHitTime = GameScreen.getGameTimeCurrent();//hit marker!
-                cannon.damageDealt += (long) damage;
-                //goal: reward player for accuracy -> hits on reduce heat
-                //cannon upgrades?: level 1,2,3 eg:
-                // level 1 is basic starter cannon
-                // level 2 increases damage and firerate
-                // level 3 adds cooldown reduction on hit?
-                cannon.heat -= 0.05f;
-                if (cannon.heat < 0) cannon.heat = 0;
-            }
+        StatsComponent stats = Mappers.stat.get(entity);
+        if (stats != null) {
+            stats.damageTaken += (long) damage;
+        }
+        StatsComponent sourceStats = Mappers.stat.get(source);
+        if (sourceStats != null) {
+            sourceStats.shotsHit++;
+            sourceStats.damageDealt += (long) damage;
         }
 
         health.lastHitTime = GameScreen.getGameTimeCurrent();
@@ -442,7 +441,20 @@ public class Box2DContactListener implements ContactListener {
                 engine.getSystem(SoundSystem.class).healthAlarm(Mappers.sound.get(entity));
             }
         }
-        HUDSystem.damageMarker(location, damage, health.lastHitTime);
+
+        CannonComponent cannon = Mappers.cannon.get(source);
+        if (cannon != null) {
+            cannon.lastHitTime = GameScreen.getGameTimeCurrent();//hit marker!
+            //goal: reward player for accuracy -> hits on reduce heat
+            //cannon upgrades?: level 1,2,3 eg:
+            // level 1 is basic starter cannon
+            // level 2 increases damage and firerate
+            // level 3 adds cooldown reduction on hit?
+            cannon.heat -= 0.05f;
+            if (cannon.heat < 0) cannon.heat = 0;
+        }
+
+        HUDSystem.damageMarker(location, damage);
         return health;
     }
     
@@ -457,36 +469,9 @@ public class Box2DContactListener implements ContactListener {
             return;
         }
 
-        //create respawn entity for player
         if (Mappers.controlFocus.get(entity) != null) {
-            Entity respawnEntity = new Entity();
-            TransformComponent transform = new TransformComponent();
-            transform.pos.set(Mappers.transform.get(entity).pos);
-            respawnEntity.add(transform);
-            //set camera focus to temporary respawn object
-            respawnEntity.add(new CameraFocusComponent());
-            RespawnComponent respawn = new RespawnComponent();
-            respawn.spawn = RespawnComponent.AnimState.pause;
-            respawn.timeout = new SimpleTimer(3000, true);
-            respawn.reason = "reason goes here";
-            if (Mappers.star.get(source) != null) {
-                respawn.reason = "stars are hot";
-            } else if (Mappers.asteroid.get(source) != null) {
-                String input = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).activateShield);
-                if (engine.getSystem(DesktopInputSystem.class).getControllerHasFocus()) {
-                    input = "l-trigger";
-                }
-                respawn.reason = "hold [" + input.toUpperCase() + "] to activate shield";
-            }
-            respawnEntity.add(respawn);
-            TrailComponent trailComponent = Mappers.trail.get(entity);
-            if (trailComponent != null) {
-                respawnEntity.add(trailComponent);
-            }
-            ProjectileHitRenderSystem.hit(transform.pos.x, transform.pos.y, Color.RED);//todo: replace with explode particle effect
-
-            engine.addEntity(respawnEntity);
-            Gdx.app.debug(Box2DContactListener.class.getSimpleName(), "create respawn(" + respawn.reason + ") marker: " + DebugUtil.objString(respawnEntity) + " for " + DebugUtil.objString(entity));
+            //create respawn entity for player
+            respawnPlayer(engine, entity, source);
         }
 
         VehicleComponent vehicle = Mappers.vehicle.get(entity);
@@ -496,7 +481,6 @@ public class Box2DContactListener implements ContactListener {
             for (Entity e : cluster) {
                 e.add(new RemoveComponent());
             }
-
             /*
             //drop inventory
             CargoComponent cargoComponent = Mappers.cargo.get(entity);
@@ -510,7 +494,55 @@ public class Box2DContactListener implements ContactListener {
             Gdx.app.log(Box2DContactListener.class.getSimpleName(), "[" + DebugUtil.objString(entity) + "] destroyed by: [" + DebugUtil.objString(source) + "]");
             engine.getSystem(SoundSystem.class).shipExplode();
         }
-
     }
-    
+
+    /** creates a temporary death marker entity to mark the position of death.
+     *  sets animation timer
+     *  handles some special cases are transferring trail to continue rendering once player entity is removed from engine.
+     *  respawn handled by {@link PlayerSpawnSystem}
+     */
+    private static void respawnPlayer(Engine engine, Entity entity, Entity source) {
+        Entity respawnEntity = new Entity();
+
+        ECSUtil.transferComponent(entity, respawnEntity, TrailComponent.class);
+
+        StatsComponent stats = (StatsComponent) ECSUtil.transferComponent(entity, respawnEntity, StatsComponent.class);
+        stats.deaths++;
+        CargoComponent cargo = Mappers.cargo.get(entity);
+        if (cargo != null) {
+            int totalLost = 0;
+            for (int i : cargo.inventory.values()) {
+                totalLost += i;
+            }
+            stats.resourcesLost += totalLost;
+        }
+
+        //set to position of player death
+        TransformComponent transform = new TransformComponent();
+        transform.pos.set(Mappers.transform.get(entity).pos);
+        respawnEntity.add(transform);
+        //set camera focus to temporary respawn object
+        respawnEntity.add(new CameraFocusComponent());
+
+        RespawnComponent respawn = new RespawnComponent();
+        respawn.saveCredits = Mappers.cargo.get(entity).credits;//hack!
+        respawn.spawn = RespawnComponent.AnimState.pause;
+        respawn.timeout = new SimpleTimer(3000, true);
+        respawn.reason = "reason goes here";
+        if (Mappers.star.get(source) != null) {
+            respawn.reason = "stars are hot";
+        } else if (Mappers.asteroid.get(source) != null) {
+            String input = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).activateShield);
+            if (engine.getSystem(DesktopInputSystem.class).getControllerHasFocus()) {
+                input = "l-trigger";
+            }
+            respawn.reason = "hold [" + input.toUpperCase() + "] to activate shield";
+        }
+        respawnEntity.add(respawn);
+
+        engine.addEntity(respawnEntity);
+        ProjectileHitRenderSystem.hit(transform.pos.x, transform.pos.y, Color.RED);//todo: replace with explode particle effect
+        Gdx.app.debug(Box2DContactListener.class.getSimpleName(), "create respawn(" + respawn.reason + ") marker: " + DebugUtil.objString(respawnEntity) + " for " + DebugUtil.objString(entity));
+    }
+
 }

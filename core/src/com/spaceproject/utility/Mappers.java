@@ -41,6 +41,7 @@ public class Mappers {
     public static final ComponentMapper<SpaceStationComponent> spaceStation = ComponentMapper.getFor(SpaceStationComponent.class);
     public static final ComponentMapper<Sprite3DComponent> sprite3D = ComponentMapper.getFor(Sprite3DComponent.class);
     public static final ComponentMapper<StarComponent> star = ComponentMapper.getFor(StarComponent.class);
+    public static final ComponentMapper<StatsComponent> stat = ComponentMapper.getFor(StatsComponent.class);
     public static final ComponentMapper<TextureComponent> texture = ComponentMapper.getFor(TextureComponent.class);
     public static final ComponentMapper<TractorBeamComponent> tractor = ComponentMapper.getFor(TractorBeamComponent.class);
     public static final ComponentMapper<TrailComponent> trail = ComponentMapper.getFor(TrailComponent.class);

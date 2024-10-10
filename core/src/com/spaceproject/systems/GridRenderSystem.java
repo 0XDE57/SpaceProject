@@ -339,6 +339,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
                 cacheColor.set(Color.WHITE.cpy()).lerp(Color.MAGENTA, 1 - ((float) timeSinceHit / hitTime));
             }
         }
+        cacheColor.a = 1;
         shape.setColor(cacheColor);
         Vector2 lead = MyMath.vector(body.getAngle(), 80).add(pos.x, pos.y);
         shape.circle(lead.x, lead.y, 2);

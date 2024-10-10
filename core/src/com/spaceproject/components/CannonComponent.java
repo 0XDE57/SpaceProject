@@ -38,14 +38,6 @@ public class CannonComponent implements Component {
 
     public float heatInaccuracy;
 
-    //stats
-    //todo: move to StatComponent? kills, deaths, accuracy, shotsFired, resourcesCollected, creditsEarned, creditsSpent, etc...
-    public long shotsFired;
-
-    public long hits;
-
-    public long damageDealt;
-
     public long lastHitTime;
 
 }

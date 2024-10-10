@@ -44,9 +44,7 @@ import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
 import java.lang.StringBuilder;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 
 public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener, Disposable {
@@ -293,6 +291,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             if (respawnEntities.size() > 0) {
                 RespawnComponent respawn = Mappers.respawn.get(respawnEntities.first());
                 drawHint(respawn.reason);
+                drawStats(Mappers.stat.get(respawnEntities.first()));
             }
         } else {
             ControllableComponent control = Mappers.controllable.get(player);
@@ -577,6 +576,40 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3f) + layout.height);
         messageHeight -= layout.height * 2;
         subFont.draw(batch, layout, centerX, messageHeight);
+    }
+
+    private void drawStats(StatsComponent stats) {
+        float centerX = 20;
+        int offset = 50;
+        float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3)) - offset;
+        layout.setText(subFont,  String.format("%-10s %s", stats.kills, "kills"), Color.RED, 0, Align.left, false);
+        float height = layout.height * 1.4f;
+        subFont.draw(batch, layout, centerX, messageHeight - height);
+
+        layout.setText(subFont, String.format("%-10s %s", stats.deaths, "deaths"), Color.RED, 0, Align.left, false);
+        subFont.draw(batch, layout, centerX, messageHeight - height * 2);
+
+        layout.setText(subFont, String.format("%-10s %s",stats.shotsFired, "shots fired"), Color.RED, 0, Align.left, false);
+        subFont.draw(batch, layout, centerX, messageHeight - height * 3);
+
+        layout.setText(subFont, String.format("%-10s %s", stats.shotsHit, "shots hit") + " - " + MyMath.round((double) stats.shotsHit / stats.shotsFired * 100, 2) + "%", Color.RED, 0, Align.left, false);
+        subFont.draw(batch, layout, centerX, messageHeight - height * 4);
+
+        layout.setText(subFont, String.format("%-10s %s", stats.damageDealt, "damage dealt"), Color.RED, 0, Align.left, false);
+        subFont.draw(batch, layout, centerX, messageHeight - height * 5);
+
+        layout.setText(subFont, String.format("%-10s %s", stats.damageTaken, "damage taken"), Color.RED, 0, Align.left, false);
+        subFont.draw(batch, layout, centerX, messageHeight - height * 6);
+
+        layout.setText(subFont, String.format("%-10s %s", stats.resourcesCollected, "resources collected"), Color.RED, 0, Align.left, false);
+        subFont.draw(batch, layout, centerX, messageHeight - height * 7);
+
+        layout.setText(subFont, String.format("%-10s %s", stats.resourcesLost, "resources lost"), Color.RED, 0, Align.left, false);
+        subFont.draw(batch, layout, centerX, messageHeight - height * 8);
+
+        layout.setText(subFont, String.format("%-10s %s", stats.profit, "profit"), Color.RED, 0, Align.left, false);
+        subFont.draw(batch, layout, centerX, messageHeight - height * 9);
+
     }
     
     private void drawPlayerStatus(Entity entity, CameraSystem cam) {
@@ -876,11 +909,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
     }
 
-    public static void damageMarker(Vector2 pos, float damage, long lastHitTime) {
+    public static void damageMarker(Vector2 pos, float damage) {
         if (!showDamageNumbers || !drawHud) return;
         //https://libgdx.com/wiki/articles/memory-management#object-pooling
         DamageText test = numbersPool.obtain();
-        test.init(pos.x, pos.y, damage, lastHitTime, true);
+        test.init(pos.x, pos.y, damage, GameScreen.getGameTimeCurrent(), true);
         activeNumbers.add(test);
         activePeak = Math.max(activePeak, activeNumbers.size);
     }

@@ -169,7 +169,7 @@ public class SpaceStationSystem extends IteratingSystem {
                 shipPhysics.body.setLinearVelocity(stationPhysics.body.getLinearVelocity());
 
                 heal(Mappers.health.get(dockedShip), deltaTime);
-                sellCargo(Mappers.cargo.get(dockedShip), shipPhysics.body.getPosition());
+                sellCargo(dockedShip, shipPhysics.body.getPosition());
             }
         }
 
@@ -264,13 +264,15 @@ public class SpaceStationSystem extends IteratingSystem {
         Gdx.app.debug(getClass().getSimpleName(), "undock [" + DebugUtil.objString(dockedShip) + "] from station: [" + DebugUtil.objString(stationEntity) + "] port: " + port);
     }
 
-    private void sellCargo(CargoComponent cargo, Vector2 pos) {
+    private void sellCargo(Entity collector, Vector2 pos) {
+        CargoComponent cargo = Mappers.cargo.get(collector);
         if (cargo == null) return;
 
+        StatsComponent stats = Mappers.stat.get(collector);
         for (ItemComponent.Resource resource : ItemComponent.Resource.values()) {
             int id = resource.getId();
             if (cargo.inventory.containsKey(id)) {
-                if (GameScreen.getGameTimeCurrent() - cargo.lastCollectTime < inventorySellTimer) return;
+                if (GameScreen.getGameTimeCurrent() - cargo.lastCollectTime < inventorySellTimer) return; //animation
                 /*todo: base local value on rarity of resource in that local system.
                    eg: a system red is common so value local value will be less,
                    or a system where gold is more rare than usual  so value will be more
@@ -285,6 +287,9 @@ public class SpaceStationSystem extends IteratingSystem {
                 cargo.credits += credits;
                 cargo.inventory.remove(id);
                 cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
+                if (stats != null) {
+                    stats.profit += credits;
+                }
                 getEngine().getSystem(HUDSystem.class).addCredits(credits, pos, resource.getColor());
                 Gdx.app.debug(getClass().getSimpleName(), "+" + credits + "c. sold " + quantity + " " + resource.name() + " @"+ resource.getValue() + "c");
             }

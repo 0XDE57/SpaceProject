@@ -12,12 +12,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.StringBuilder;
-import com.spaceproject.components.AIComponent;
-import com.spaceproject.components.AttachedToComponent;
-import com.spaceproject.components.CameraFocusComponent;
-import com.spaceproject.components.CamTargetComponent;
-import com.spaceproject.components.ControlFocusComponent;
-import com.spaceproject.components.ControllableComponent;
+import com.spaceproject.components.*;
 
 import java.lang.reflect.Field;
 
@@ -48,6 +43,7 @@ public class ECSUtil {
         transferComponent(fromEntity, toEntity, AIComponent.class);
         transferComponent(fromEntity, toEntity, ControllableComponent.class);
         transferComponent(fromEntity, toEntity, CamTargetComponent.class);
+        transferComponent(fromEntity, toEntity, StatsComponent.class);
     }
     
     public static Entity copyEntity(Entity entity) {
@@ -75,7 +71,10 @@ public class ECSUtil {
         return targetEntity;
     }
 
-    static int ohNo = 0;
+
+    /** avoid this mess
+     * todo: fix engine particle effect to not require multiple entities with AttachedToComponent */
+    @Deprecated
     public static Array<Entity> getAttachedEntities(Engine engine, Entity parentEntity) {
         Array<Entity> cluster = new Array<>();
         ImmutableArray<Entity> attachedEntities = engine.getEntitiesFor(Family.all(AttachedToComponent.class).get());
@@ -85,7 +84,6 @@ public class ECSUtil {
                 cluster.add(attachedEntity);
             }
         }
-        //Gdx.app.debug(className, "oh no - new array: " + ohNo++);
         return cluster;
     }
     

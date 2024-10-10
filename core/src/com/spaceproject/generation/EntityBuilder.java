@@ -161,7 +161,11 @@ public class EntityBuilder {
         CargoComponent cargo = new CargoComponent();
         shipEntity.add(cargo);
 
+        //sound
         shipEntity.add(new SoundComponent());
+
+        //stats
+        shipEntity.add(new StatsComponent());//should this be part of control focus? this may have to transfer() when exiting vehicles to get in another
 
         //engine particle effect. todo: kill off cluster, stuff multieffects in particle component with multi source
         Entity mainEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineMain, new Vector2(0, height + 0.2f), 0);
@@ -532,6 +536,8 @@ public class EntityBuilder {
         penRhombusThin, penRhombusThicc
     }
 
+    static final ConvexHull convex = new ConvexHull();
+    static final Vector2 center = new Vector2();
     public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float size) {
         int maxPoints = 7;//Box2D poly vert limit is 8: Assertion `3 <= count && count <= 8' failed.
         FloatArray points = new FloatArray();
@@ -600,11 +606,9 @@ public class EntityBuilder {
         }
         
         //generate hull poly from random points
-        ConvexHull convex = new ConvexHull();
         float[] hull = convex.computePolygon(points, false).toArray();
         
         //shift vertices to be centered around 0,0 relatively
-        Vector2 center = new Vector2();
         GeometryUtils.polygonCentroid(hull, 0, hull.length, center);
         for (int index = 0; index < hull.length; index += 2) {
             hull[index] -= center.x;
@@ -619,6 +623,33 @@ public class EntityBuilder {
         ItemComponent.Resource resource = debugConfig.glassOnly ? ItemComponent.Resource.GLASS : ItemComponent.Resource.random();
         return createAsteroid(x, y, velX, velY, MathUtils.random(MathUtils.PI2), hull, resource, false);
     }
+
+    /*todo: should we make custom poly to avoid toArray() causing a system System.arraycopy()
+    static public Vector2 polygonCentroid (FloatArray polygon, int offset, int count, Vector2 centroid) {
+        if (count < 6) throw new IllegalArgumentException("A polygon must have 3 or more coordinate pairs.");
+
+        float area = 0, x = 0, y = 0;
+        int last = offset + count - 2;
+        float x1 = polygon[last], y1 = polygon[last + 1];
+        for (int i = offset; i <= last; i += 2) {
+            float x2 = polygon[i], y2 = polygon[i + 1];
+            float a = x1 * y2 - x2 * y1;
+            area += a;
+            x += (x1 + x2) * a;
+            y += (y1 + y2) * a;
+            x1 = x2;
+            y1 = y2;
+        }
+        if (area == 0) {
+            centroid.x = 0;
+            centroid.y = 0;
+        } else {
+            area *= 0.5f;
+            centroid.x = x / (6 * area);
+            centroid.y = y / (6 * area);
+        }
+        return centroid;
+    }*/
     
     private static boolean isValidPoint(FloatArray points, float pX, float pY, float tolerance) {
         for (int i = 0; i < points.size; i += 2) {
@@ -718,9 +749,9 @@ public class EntityBuilder {
         
         PhysicsComponent physics = new PhysicsComponent();
         physics.body = BodyBuilder.createDrop(pos.x, pos.y, 2, drop);
-        float spin = -0.2f;
-        physics.body.applyAngularImpulse(MathUtils.random(-spin, spin), true);
         physics.body.setLinearVelocity(velocity);
+        float angularVelocity = MathUtils.random(1f, 5f);
+        physics.body.applyAngularImpulse(MathUtils.randomBoolean() ? angularVelocity : -angularVelocity, true);
 
         ItemComponent item = new ItemComponent();
         //todo: come up with some sort of composition and chance to drop eg: ruby 0.5%, emerald 0.5%, sapphire 0.5%. diamond 0.1%

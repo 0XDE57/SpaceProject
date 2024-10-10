@@ -7,24 +7,13 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.BarrelRollComponent;
-import com.spaceproject.components.CannonComponent;
-import com.spaceproject.components.ControllableComponent;
-import com.spaceproject.components.DamageComponent;
-import com.spaceproject.components.ExpireComponent;
-import com.spaceproject.components.HyperDriveComponent;
-import com.spaceproject.components.ParticleComponent;
-import com.spaceproject.components.PhysicsComponent;
-import com.spaceproject.components.ShieldComponent;
-import com.spaceproject.components.TrailComponent;
-import com.spaceproject.components.TextureComponent;
-import com.spaceproject.components.TransformComponent;
+import com.spaceproject.components.*;
 import com.spaceproject.config.DebugConfig;
 import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.RenderOrder;
 import com.spaceproject.generation.BodyBuilder;
-import com.spaceproject.generation.TextureGenerator;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
@@ -75,10 +64,13 @@ public class CannonSystem extends IteratingSystem {
             }
         }
         cannon.timerFireRate.reset();
-        cannon.shotsFired++;
         cannon.heat += cannon.heatRate;
         if (cannon.heat >= 1f) {
             cannon.heat = 1;
+        }
+        StatsComponent stats = Mappers.stat.get(parentEntity);
+        if (stats != null) {
+            stats.shotsFired++;
         }
 
         //create missile
