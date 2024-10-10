@@ -88,7 +88,7 @@ public class GameScreen extends MyScreenAdapter {
         //init scene2d/VisUI
         if (VisUI.isLoaded())
             VisUI.dispose(true);
-        VisUI.load(SpaceProject.isMobile() ? VisUI.SkinScale.X2 : VisUI.SkinScale.X1);
+        VisUI.load(VisUI.SkinScale.X1);
         VisUI.setDefaultTitleAlign(Align.center);
         BitmapFont font = FontLoader.createFont(FontLoader.fontBitstreamVM, 12);
         VisUI.getSkin().add(FontLoader.skinSmallFont, font);

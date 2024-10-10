@@ -10,22 +10,18 @@ public class SysCFG {
     private boolean haltOnGamePause;
     private boolean loadInSpace;
     private boolean loadInWorld;
-    private boolean loadOnDesktop;
-    private boolean loadOnMobile;
     
     
-    SysCFG(Class<? extends EntitySystem> systemClass, int priority, boolean haltOnGamePause, boolean loadInSpace, boolean loadInWorld, boolean loadOnDesktop, boolean loadOnMobile) {
-        this(systemClass.getName(), priority, haltOnGamePause, loadInSpace, loadInWorld, loadOnDesktop, loadOnMobile);
+    SysCFG(Class<? extends EntitySystem> systemClass, int priority, boolean haltOnGamePause, boolean loadInSpace, boolean loadInWorld) {
+        this(systemClass.getName(), priority, haltOnGamePause, loadInSpace, loadInWorld);
     }
     
-    SysCFG(String className, int priority, boolean haltOnGamePause, boolean loadInSpace, boolean loadInWorld, boolean loadOnDesktop, boolean loadOnMobile) {
+    SysCFG(String className, int priority, boolean haltOnGamePause, boolean loadInSpace, boolean loadInWorld) {
         this.className = className;
         this.priority = priority;
         this.haltOnGamePause = haltOnGamePause;
         this.loadInSpace = loadInSpace;
         this.loadInWorld = loadInWorld;
-        this.loadOnDesktop = loadOnDesktop;
-        this.loadOnMobile = loadOnMobile;
     }
     
     public String getClassName() {
@@ -47,12 +43,5 @@ public class SysCFG {
     public boolean isLoadInWorld() {
         return loadInWorld;
     }
-    
-    public boolean isLoadOnDesktop() {
-        return loadOnDesktop;
-    }
-    
-    public boolean isLoadOnMobile() {
-        return loadOnMobile;
-    }
+
 }

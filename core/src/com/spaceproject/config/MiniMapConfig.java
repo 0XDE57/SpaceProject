@@ -41,9 +41,7 @@ public class MiniMapConfig extends Config {
     
     public void loadDefault() {
         miniMapPosition = MiniMapPosition.topRight;
-        if (SpaceProject.isMobile()) {
-            miniMapPosition = MiniMapPosition.topLeft;
-        }
+
         defaultMapScale = 200;
         gridSize = (int) Math.pow(2, 17 - 1);
         borderWidth = 1;

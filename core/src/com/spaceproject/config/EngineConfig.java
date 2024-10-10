@@ -41,19 +41,12 @@ public class EngineConfig extends Config {
         physicsVelocityIterations = 6;
         physicsPositionIterations = 2;
         physicsStepPerFrame = 120;
-        
+
+
+        // dynamically choose number of available cores
+        // but leave some threads for other applications (don't be greedy)
+        // assume desktop can use at least 4 threads
         int availableCPU = Runtime.getRuntime().availableProcessors();
-        if (SpaceProject.isMobile()) {
-            // default 2 threads on mobile as phones have limited resources
-            maxNoiseGenThreads = 2;
-            if (availableCPU >= 8) {
-                maxNoiseGenThreads = 4;
-            }
-        } else {
-            // assume desktop can use at least 4 threads
-            // dynamically choose number of available cores
-            // but leave some threads for other applications (don't be greedy)
-            maxNoiseGenThreads = MathUtils.clamp(availableCPU - 2, 4, 10);
-        }
+        maxNoiseGenThreads = MathUtils.clamp(availableCPU - 2, 4, 10);
     }
 }

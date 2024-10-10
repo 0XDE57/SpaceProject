@@ -13,8 +13,6 @@ public class SpaceProject extends Game {
     public static final String TITLE = "a space project";
     public static final String VERSION = "pre-alpha";//<α
     
-    private static boolean isMobile;
-    
     public static ConfigManager configManager;
 
     boolean skipTitle = false;
@@ -28,8 +26,6 @@ public class SpaceProject extends Game {
     @Override
     public void create() {
         MyScreenAdapter.game = this;
-        
-        isMobile = Gdx.app.getType() != Application.ApplicationType.Desktop;
     
         Gdx.graphics.setTitle(TITLE + "  (" + VERSION + ")");
         
@@ -45,10 +41,6 @@ public class SpaceProject extends Game {
     private static void loadConfigs() {
         configManager = new ConfigManager();
         configManager.init();
-    }
-    
-    public static boolean isMobile() {
-        return isMobile;
     }
     
 }

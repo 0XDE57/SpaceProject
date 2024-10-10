@@ -90,7 +90,7 @@ public class TitleScreen extends MyScreenAdapter {
         menu = new TitleScreenMenu(stage, game, false);
         stage.addActor(menu.table);
         menu.table.pack();
-        edgePad = SpaceProject.isMobile() ? 20 : 10;
+        edgePad = 10;
         menu.table.setPosition(edgePad, edgePad);
         menu.table.validate();
         //must set one focused actor first, otherwise controller stage won't focus

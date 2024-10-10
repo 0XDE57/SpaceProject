@@ -33,15 +33,6 @@ public class TitleScreenMenu {
         for (Actor button : table.getChildren()) {
             stage.addFocusableActor(button);
         }
-
-        //set bigger labels on mobile
-        if (SpaceProject.isMobile()) {
-            for (Actor button : table.getChildren()) {
-                if (button instanceof TextButton) {
-                    ((TextButton) button).getLabel().setFontScale(2f);
-                }
-            }
-        }
     }
 
     private void addMenuItems(final SpaceProject game) {
