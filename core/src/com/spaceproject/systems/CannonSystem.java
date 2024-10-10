@@ -59,6 +59,7 @@ public class CannonSystem extends IteratingSystem {
         if (!cannon.timerFireRate.canDoEvent() || (cannon.heat > overheatThreshold)) {
             if (SpaceProject.configManager.getConfig(DebugConfig.class).infiniteFire) {
                 cannon.velocity = 999999;
+                cannon.damage = 999999;
             } else {
                 return;
             }
