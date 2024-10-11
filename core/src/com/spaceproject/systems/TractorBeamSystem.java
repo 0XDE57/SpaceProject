@@ -120,7 +120,10 @@ public class TractorBeamSystem extends IteratingSystem implements Disposable {
                     rayFixture.getBody().applyForce(MyMath.vector(incidentVector.angleRad(), magnitude), p2, true);
                     break;
                 case pull:
-                    rayFixture.getBody().applyForce(MyMath.vector(incidentVector.angleRad() - MathUtils.PI, magnitude), p2, true);
+                    Vector2 force = MyMath.vector(incidentVector.angleRad() - MathUtils.PI, magnitude);
+                    rayFixture.getBody().applyForce(force, p2, true);
+                    //apply same force to player?
+                    Mappers.physics.get(entity).body.applyForceToCenter(force.rotateDeg(180).scl(0.2f), true);
                     break;
             }
         }
