@@ -59,7 +59,7 @@ public class SpaceStationMenu {
         int costHP = 40000;
         int costThrust = 20000;
         int costCannonDMG = 10000;
-        int costCannonVelocity = 20000;
+        int costCannonVelocity = 10000;
         int costCannonCooldown = 20000;//todo
         int costLaserDMG = 20000;
         int costLaserRange = 20000;//todo
@@ -71,7 +71,8 @@ public class SpaceStationMenu {
         VisTable creditsTable = new VisTable();
         VisLabel creditsText = new VisLabel("CREDITS: ");
         creditsTable.add(creditsText);
-        VisLabel creditsValue = new VisLabel("[" + colorCredits + "]" + Mappers.cargo.get(player).credits);
+        CargoComponent cargo = Mappers.cargo.get(player);
+        VisLabel creditsValue = new VisLabel("[" + colorCredits + "]" + cargo.credits);
         //creditsValue.addAction(forever(sequence(color(Color.RED,0.2f), color(Color.BLUE, 0.2f), delay(0.5f))));
         creditsTable.add(creditsValue);
 
@@ -85,7 +86,6 @@ public class SpaceStationMenu {
             public void changed(ChangeEvent event, Actor actor) {
                 if (Mappers.hyper.get(player) != null) return;
 
-                CargoComponent cargo = Mappers.cargo.get(player);
                 if (cargo.credits < costHyper) {
                     //error soundfx if not enough moneys
                     Gdx.app.debug(getClass().getSimpleName(), "insufficient credits for " + hyperdriveUpgrade);
@@ -94,7 +94,7 @@ public class SpaceStationMenu {
                 }
                 //purchase
                 cargo.credits -= costHyper;
-                creditsValue.setText(Mappers.cargo.get(player).credits);
+                creditsValue.setText(cargo.credits);
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
 
                 //add new hyperdrive
@@ -127,7 +127,6 @@ public class SpaceStationMenu {
             public void changed(ChangeEvent event, Actor actor) {
                 if (Mappers.shield.get(player) != null) return;
 
-                CargoComponent cargo = Mappers.cargo.get(player);
                 if (cargo.credits < costShield) {
                     //error soundfx if not enough moneys
                     Gdx.app.debug(getClass().getSimpleName(), "insufficient credits for " + shieldUpgrade);
@@ -136,7 +135,7 @@ public class SpaceStationMenu {
                 }
                 //purchase
                 cargo.credits -= costShield;
-                creditsValue.setText(Mappers.cargo.get(player).credits);
+                creditsValue.setText(cargo.credits);
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
 
                 //add new shield
@@ -167,14 +166,12 @@ public class SpaceStationMenu {
         VisTextButton buttonLaser = new VisTextButton("[" + colorItem + "]" + laserUpgrade);
         buttonLaser.getLabel().setAlignment(Align.left);
         buttonLaser.add(new VisLabel("[" + colorCredits + "]" + costLaser));
-        buttonLaser.setDisabled(Mappers.laser.get(player) != null || vehicle.tools.containsKey(VehicleComponent.Tool.laser.ordinal()));
+        buttonLaser.setDisabled(getLaserComponent(player, vehicle) != null);
         buttonLaser.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                if (Mappers.laser.get(player) != null) return;
-                if (vehicle.tools.containsKey(VehicleComponent.Tool.laser.ordinal())) return;
+                if (getLaserComponent(player, vehicle) != null) return;
 
-                CargoComponent cargo = Mappers.cargo.get(player);
                 if (cargo.credits < costLaser) {
                     //error soundfx if not enough moneys
                     Gdx.app.debug(getClass().getSimpleName(), "insufficient credits for " + laserUpgrade);
@@ -183,7 +180,7 @@ public class SpaceStationMenu {
                 }
                 //purchase
                 cargo.credits -= costLaser;
-                creditsValue.setText(Mappers.cargo.get(player).credits);
+                creditsValue.setText(cargo.credits);
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
 
                 int referenceWavelength = 589;//"yellow doublet" sodium D line
@@ -206,14 +203,12 @@ public class SpaceStationMenu {
         VisTextButton buttonTractorBeam = new VisTextButton("[" + colorItem + "]" + tractorUpgrade);
         buttonTractorBeam.getLabel().setAlignment(Align.left);
         buttonTractorBeam.add(new VisLabel("[" + colorCredits + "]" + costTractorBeam));
-        buttonTractorBeam.setDisabled(Mappers.tractor.get(player) != null || vehicle.tools.containsKey(VehicleComponent.Tool.tractor.ordinal()));
+        buttonTractorBeam.setDisabled(getTractorComponent(player, vehicle) != null);
         buttonTractorBeam.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                if (Mappers.tractor.get(player) != null) return;
-                if (vehicle.tools.containsKey(VehicleComponent.Tool.tractor.ordinal())) return;
+                if (getTractorComponent(player, vehicle) != null) return;
 
-                CargoComponent cargo = Mappers.cargo.get(player);
                 if (cargo.credits < costTractorBeam) {
                     //error soundfx if not enough moneys
                     Gdx.app.debug(getClass().getSimpleName(), "insufficient credits for " + tractorUpgrade);
@@ -222,12 +217,12 @@ public class SpaceStationMenu {
                 }
                 //purchase
                 cargo.credits -= costTractorBeam;
-                creditsValue.setText(Mappers.cargo.get(player).credits);
+                creditsValue.setText(cargo.credits);
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
 
                 //add upgrade to tools inventory
                 TractorBeamComponent tractorBeam = new TractorBeamComponent();
-                tractorBeam.maxDist = 150;
+                tractorBeam.maxDist = 200;
                 tractorBeam.magnitude = 70000;
                 vehicle.tools.put(VehicleComponent.Tool.tractor.ordinal(), tractorBeam);
 
@@ -250,7 +245,6 @@ public class SpaceStationMenu {
         buttonAddHealth.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                CargoComponent cargo = Mappers.cargo.get(player);
                 if (cargo.credits < costHP) {
                     //error soundfx if not enough moneys
                     Gdx.app.debug(getClass().getSimpleName(), "insufficient credits for  hp");
@@ -259,7 +253,7 @@ public class SpaceStationMenu {
                 }
                 //purchase
                 cargo.credits -= costHP;
-                creditsValue.setText(Mappers.cargo.get(player).credits);
+                creditsValue.setText(cargo.credits);
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
 
                 Mappers.health.get(player).maxHealth += hp;
@@ -281,7 +275,6 @@ public class SpaceStationMenu {
         buttonAddThrust.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                CargoComponent cargo = Mappers.cargo.get(player);
                 if (cargo.credits < costThrust) {
                     //error soundfx if not enough moneys
                     Gdx.app.debug(getClass().getSimpleName(), "insufficient credits for  thrust");
@@ -290,7 +283,7 @@ public class SpaceStationMenu {
                 }
                 //purchase
                 cargo.credits -= costThrust;
-                creditsValue.setText(Mappers.cargo.get(player).credits);
+                creditsValue.setText(cargo.credits);
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
 
                 Mappers.vehicle.get(player).thrust += thrust;
@@ -312,7 +305,6 @@ public class SpaceStationMenu {
         buttonAddCannonDamage.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                CargoComponent cargo = Mappers.cargo.get(player);
                 if (cargo.credits < costCannonDMG) {
                     //error soundfx if not enough moneys
                     Gdx.app.debug(getClass().getSimpleName(), "insufficient credits for cannon damage");
@@ -321,37 +313,39 @@ public class SpaceStationMenu {
                 }
                 //purchase
                 cargo.credits -= costCannonDMG;
-                creditsValue.setText(Mappers.cargo.get(player).credits);
+                creditsValue.setText(cargo.credits);
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
 
-                Mappers.cannon.get(player).damage += damageCannon;
+                CannonComponent cannon = getCannonComponent(player, vehicle);
+                cannon.damage += damageCannon;
             }
         });
         buttonAddCannonDamage.addListener(new FocusListener() {
             @Override
             public boolean handle(Event event) {
-                text.setText("Increase [" + colorItem + "]Cannon Damage\nby: [" + colorCredits + "]" + damageCannon +"\nCurrent: [" + colorCredits + "]" + Mappers.cannon.get(player).damage);
+                CannonComponent cannon = getCannonComponent(player, vehicle);
+                text.setText("Increase [" + colorItem + "]Cannon Damage\nby: [" + colorCredits + "]" + damageCannon +"\nCurrent: [" + colorCredits + "]" + cannon.damage);
                 return super.handle(event);
             }
         });
 
         // Cannon Velocity
         VisTextButton buttonAddCannonVelocity = new VisTextButton("Increase [" + colorItem + "]Cannon Velocity ");
-        buttonAddCannonVelocity.setDisabled(Mappers.cannon.get(player).velocity >= Box2DPhysicsSystem.getVelocityLimit());
+        CannonComponent cannon = getCannonComponent(player, vehicle);
+        buttonAddCannonVelocity.setDisabled(cannon != null && cannon.velocity >= Box2DPhysicsSystem.getVelocityLimit());
         buttonAddCannonVelocity.getLabel().setAlignment(Align.left);
         buttonAddCannonVelocity.add(new VisLabel("[" + colorCredits + "]" + costCannonVelocity));
         float velocity = 20;
         buttonAddCannonVelocity.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                CargoComponent cargo = Mappers.cargo.get(player);
                 if (cargo.credits < costCannonVelocity) {
                     //error soundfx if not enough moneys
                     Gdx.app.debug(getClass().getSimpleName(), "insufficient credits for cannon velocity");
                     creditsValue.addAction(sequence(color(Color.RED),color(Color.WHITE, 0.5f)));
                     return;
                 }
-                CannonComponent cannon = Mappers.cannon.get(player);
+                CannonComponent cannon = getCannonComponent(player, vehicle);
                 if (cannon.velocity >= Box2DPhysicsSystem.getVelocityLimit()) {
                     Gdx.app.debug(getClass().getSimpleName(), "max velocity!");
                     buttonAddCannonVelocity.setDisabled(true);
@@ -361,14 +355,15 @@ public class SpaceStationMenu {
                 cargo.credits -= costCannonVelocity;
                 cannon.velocity += velocity;
                 cannon.velocity = Math.min(cannon.velocity, Box2DPhysicsSystem.getVelocityLimit());
-                creditsValue.setText(Mappers.cargo.get(player).credits);
+                creditsValue.setText(cargo.credits);
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
             }
         });
         buttonAddCannonVelocity.addListener(new FocusListener() {
             @Override
             public boolean handle(Event event) {
-                text.setText("Increase [" + colorItem + "]Cannon Velocity\nby: [" + colorCredits + "]" + velocity +"\nCurrent: [" + colorCredits + "]" + Mappers.cannon.get(player).velocity);
+                CannonComponent cannon = getCannonComponent(player, vehicle);
+                text.setText("Increase [" + colorItem + "]Cannon Velocity\nby: [" + colorCredits + "]" + velocity +"\nCurrent: [" + colorCredits + "]" + cannon.velocity);
                 return super.handle(event);
             }
         });
@@ -376,41 +371,34 @@ public class SpaceStationMenu {
         // laser damage
         buttonLaserPower.getLabel().setAlignment(Align.left);
         buttonLaserPower.add(new VisLabel("[" + colorCredits + "]" + costLaserDMG));
-        buttonLaserPower.setDisabled(Mappers.laser.get(player) == null && !vehicle.tools.containsKey(VehicleComponent.Tool.laser.ordinal()));
-        int damage = 200;
+        buttonLaserPower.setDisabled(getLaserComponent(player, vehicle) == null);
+        int damage = 30;
         buttonLaserPower.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                CargoComponent cargo = Mappers.cargo.get(player);
                 if (cargo.credits < costLaserDMG) {
                     //error soundfx if not enough moneys
                     Gdx.app.debug(getClass().getSimpleName(), "insufficient credits for  laser");
                     creditsValue.addAction(sequence(color(Color.RED),color(Color.WHITE, 0.5f)));
                     return;
                 }
-                LaserComponent laserComponent = Mappers.laser.get(player);
-                if (laserComponent == null) {
-                    laserComponent = (LaserComponent) vehicle.tools.get(VehicleComponent.Tool.laser.ordinal());
-                    if (laserComponent == null) {
-                        return;
-                    }
-                }
+
+                LaserComponent laser = getLaserComponent(player, vehicle);
+                if (laser == null) return;
+
                 //purchase
                 cargo.credits -= costLaserDMG;
-                creditsValue.setText(Mappers.cargo.get(player).credits);
+                creditsValue.setText(cargo.credits);
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
 
-                laserComponent.damage += damage;
+                laser.damage += damage;
             }
         });
         buttonLaserPower.addListener(new FocusListener() {
             @Override
             public boolean handle(Event event) {
-                LaserComponent laserComponent = Mappers.laser.get(player);
-                if (laserComponent == null) {
-                    laserComponent = (LaserComponent) vehicle.tools.get(VehicleComponent.Tool.laser.ordinal());
-                }
-                text.setText("Increase [" + colorItem + "]DMG\nby: [" + colorCredits + "]" + damage +"\nCurrent:  [" + colorCredits + "]"+ (laserComponent == null ? 0 : laserComponent.damage));
+                LaserComponent laser = getLaserComponent(player, vehicle);
+                text.setText("Increase [" + colorItem + "]DMG\nby: [" + colorCredits + "]" + damage +"\nCurrent:  [" + colorCredits + "]"+ (laser == null ? "N/A" : laser.damage));
                 return super.handle(event);
             }
         });
@@ -421,9 +409,8 @@ public class SpaceStationMenu {
         buttonDebugGiveMoney.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                CargoComponent cargo = Mappers.cargo.get(player);
                 cargo.credits += 999999;
-                creditsValue.setText(Mappers.cargo.get(player).credits);
+                creditsValue.setText(cargo.credits);
                 creditsValue.addAction(sequence(color(Color.valueOf(colorItem)),color(Color.valueOf(colorCredits), 1f)));
 
             }
@@ -470,6 +457,30 @@ public class SpaceStationMenu {
         stage.setFocusedActor(buttonTable.getChildren().first());
 
         return window;
+    }
+
+    private static CannonComponent getCannonComponent(Entity player, VehicleComponent vehicle) {
+        CannonComponent cannon = Mappers.cannon.get(player);
+        if (cannon == null && vehicle.tools.containsKey(VehicleComponent.Tool.cannon.ordinal())) {
+            return (CannonComponent) vehicle.tools.get(VehicleComponent.Tool.cannon.ordinal());
+        }
+        return cannon;
+    }
+
+    private static LaserComponent getLaserComponent(Entity player, VehicleComponent vehicle) {
+        LaserComponent laser = Mappers.laser.get(player);
+        if (laser == null && vehicle.tools.containsKey(VehicleComponent.Tool.laser.ordinal())) {
+            return (LaserComponent) vehicle.tools.get(VehicleComponent.Tool.laser.ordinal());
+        }
+        return laser;
+    }
+
+    private static TractorBeamComponent getTractorComponent(Entity player, VehicleComponent vehicle) {
+        TractorBeamComponent tractor = Mappers.tractor.get(player);
+        if (tractor == null && vehicle.tools.containsKey(VehicleComponent.Tool.tractor.ordinal())) {
+            return (TractorBeamComponent) vehicle.tools.get(VehicleComponent.Tool.tractor.ordinal());
+        }
+        return tractor;
     }
 
     public static float getHeight(VisWindow window) {
