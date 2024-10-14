@@ -3,8 +3,6 @@ package com.spaceproject.components;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Rectangle;
-import com.spaceproject.screens.TitleScreen;
-import com.spaceproject.ui.map.MiniMapPosition;
 import com.spaceproject.utility.SimpleTimer;
 
 import java.util.HashMap;
@@ -26,18 +24,18 @@ public class VehicleComponent implements Component {
         private static final Tool[] VALUES = values();
 
         public Tool next() {
-            int index = (this.ordinal() + 1) % VALUES.length;
+            int index = (ordinal() + 1) % VALUES.length;
             return VALUES[index];
         }
 
         public Tool previous() {
-            int index = (this.ordinal() + VALUES.length - 1) % VALUES.length;
+            int index = (ordinal() + VALUES.length - 1) % VALUES.length;
             return VALUES[index];
         }
     }
 
     public Tool currentTool;
 
-    public HashMap<Integer, Component> tools = new HashMap();
+    public HashMap<Integer, Component> tools = new HashMap<>();
     
 }
