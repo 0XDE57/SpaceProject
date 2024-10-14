@@ -530,7 +530,7 @@ public class Box2DContactListener implements ContactListener {
         respawn.saveCredits = Mappers.cargo.get(entity).credits;//hack!
         respawn.spawn = RespawnComponent.AnimState.pause;
         respawn.timeout = new SimpleTimer(3000, true);
-        respawn.reason = "reason goes here";
+        respawn.reason = "any key to respawn";
         if (Mappers.star.get(source) != null) {
             respawn.reason = "stars are hot";
         } else if (Mappers.asteroid.get(source) != null) {
@@ -538,7 +538,9 @@ public class Box2DContactListener implements ContactListener {
             if (engine.getSystem(DesktopInputSystem.class).getControllerHasFocus()) {
                 input = "l-trigger";
             }
-            respawn.reason = "hold [" + input.toUpperCase() + "] to activate shield";
+            if (Mappers.shield.get(entity) != null) {
+                respawn.reason = "hold [" + input.toUpperCase() + "] to activate shield";
+            }
         }
         respawnEntity.add(respawn);
 
