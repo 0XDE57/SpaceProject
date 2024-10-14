@@ -57,14 +57,19 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
         setFocusToDesktop();
         if (keycode == Input.Keys.ESCAPE) {
             GameMenu menu = getEngine().getSystem(HUDSystem.class).getGameMenu();
-            if (!menu.isVisible()) menu.show();
+            if (!menu.isVisible()) {
+                menu.show();
+                return true;
+            }
         }
-
 
         if (players.size() == 0) {
             ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
             if (respawnEntities.size() != 0) {
-                return getEngine().getSystem(PlayerSpawnSystem.class).pan(respawnEntities.first());
+                PlayerSpawnSystem spawnSystem = getEngine().getSystem(PlayerSpawnSystem.class);
+                if (spawnSystem != null) {
+                    return spawnSystem.pan(respawnEntities.first());
+                }
             }
             return false;
         }
@@ -107,7 +112,6 @@ public class DesktopInputSystem extends EntitySystem implements InputProcessor {
             if (doubleTapRight.canDoEvent()) {
                 tapCounterRight = 0;
             }
-
             if (keyDown) {
                 //cancel hyperdrive if active
                 HyperDriveComponent hyper = Mappers.hyper.get(player);

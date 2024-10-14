@@ -19,7 +19,7 @@ import com.spaceproject.utility.SimpleTimer;
 
 public class ControllerInputSystem extends EntitySystem implements ControllerListener {
     
-    private boolean debugInput = false;
+    private final boolean debugInput = false;
 
     private boolean vibrate = true;
     private float leftStickHorAxis;
@@ -110,11 +110,13 @@ public class ControllerInputSystem extends EntitySystem implements ControllerLis
         if (players.size() == 0) {
             ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
             if (respawnEntities.size() != 0) {
-                return getEngine().getSystem(PlayerSpawnSystem.class).pan(respawnEntities.first());
+                PlayerSpawnSystem spawnSystem = getEngine().getSystem(PlayerSpawnSystem.class);
+                if (spawnSystem != null) {
+                    spawnSystem.pan(respawnEntities.first());
+                }
             }
             return false;
         }
-
         
         Entity player = players.first();
         ControllableComponent control = Mappers.controllable.get(player);

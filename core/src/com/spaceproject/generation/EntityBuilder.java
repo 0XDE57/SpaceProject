@@ -164,10 +164,7 @@ public class EntityBuilder {
         //sound
         shipEntity.add(new SoundComponent());
 
-        //stats
-        shipEntity.add(new StatsComponent());//should this be part of control focus? this may have to transfer() when exiting vehicles to get in another
-
-        //engine particle effect. todo: kill off cluster, stuff multieffects in particle component with multi source
+        //engine particle effect. todo: kill off cluster, stuff multiple sources in particle component
         Entity mainEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineMain, new Vector2(0, height + 0.2f), 0);
         Entity leftEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineLeft, new Vector2(width/2 - 0.2f, 0), -90);
         Entity rightEngine = createEngine(shipEntity, ParticleComponent.EffectType.shipEngineRight, new Vector2(-(width/2 - 0.2f), 0), 90);
@@ -290,6 +287,7 @@ public class EntityBuilder {
         Entity character = createCharacter(x, y);
         character.add(new CameraFocusComponent());
         character.add(new ControlFocusComponent());
+        character.add(new StatsComponent());
         return character;
     }
 

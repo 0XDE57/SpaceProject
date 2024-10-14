@@ -5,14 +5,17 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
+import com.spaceproject.config.WorldConfig;
 import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.ECSUtil;
 import com.spaceproject.utility.Mappers;
 
-public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
+public class PlayerSpawnSystem extends EntitySystem {
     
     //  new game:
     //  > start at space station
@@ -72,38 +75,52 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
 
         if (!initialSpawn) {
             initialSpawn = true;
-            spawnPlayer();
+            spawnPlayerSpaceStation();
         }
 
         if (respawn.size() > 0) {
             Entity respawnEntity = respawn.first();
             RespawnComponent respawn = Mappers.respawn.get(respawnEntity);
-            switch(respawn.spawn) {
-                case pan:
-                    Entity closestSpaceStation = ECSUtil.closestEntity(Mappers.transform.get(respawnEntity).pos, spaceStations);
-                    Vector2 target = Mappers.transform.get(closestSpaceStation).pos;
-                    Vector2 cam = Mappers.transform.get(respawnEntity).pos.cpy().lerp(target, respawn.timeout.ratio());
-                    Mappers.transform.get(respawnEntity).pos.set(cam);
-                    //todo: lerp to spawn location
-                    if (respawn.timeout.tryEvent()) {
-                        respawn.spawn = RespawnComponent.AnimState.spawn;
-                        getEngine().getSystem(CameraSystem.class).setZoomTarget((byte) 3);
-                    }
-                    break;
-                case spawn:
-                    respawn.spawn = RespawnComponent.AnimState.end;
-                    respawnEntity.add(new RemoveComponent());
-                    //todo: but not just nearest. last station docked at. space station is check point
-                    Entity player = spawnPlayer();
-                    ECSUtil.transferComponent(respawnEntity, player, StatsComponent.class);
-                    player.getComponent(CargoComponent.class).credits = respawn.saveCredits;//hack!
-                    break;
-                //default: Gdx.app.debug(getClass().getSimpleName(), respawn.spawn.name());
+
+            if (GameScreen.inSpace()) {
+                switch (respawn.spawn) {
+                    case pan:
+                        Entity closestSpaceStation = ECSUtil.closestEntity(Mappers.transform.get(respawnEntity).pos, spaceStations);
+                        Vector2 target = Mappers.transform.get(closestSpaceStation).pos;
+                        Vector2 cam = Mappers.transform.get(respawnEntity).pos.cpy().lerp(target, respawn.timeout.ratio());
+                        Mappers.transform.get(respawnEntity).pos.set(cam);
+                        //todo: lerp to spawn location
+                        if (respawn.timeout.tryEvent()) {
+                            respawn.spawn = RespawnComponent.AnimState.spawn;
+                            getEngine().getSystem(CameraSystem.class).setZoomTarget((byte) 3);
+                        }
+                        break;
+                    case spawn:
+                        respawn.spawn = RespawnComponent.AnimState.end;
+                        respawnEntity.add(new RemoveComponent());
+                        //todo: but not just nearest. last station docked at. space station is check point
+                        Entity player = spawnPlayerSpaceStation();
+                        ECSUtil.transferComponent(respawnEntity, player, StatsComponent.class);
+                        player.getComponent(CargoComponent.class).credits = respawn.saveCredits;//hack!
+                        break;
+                    //default: Gdx.app.debug(getClass().getSimpleName(), respawn.spawn.name());
+                }
+            } else {
+                spawnPlayerWorld();
             }
         }
     }
 
-    public Entity spawnPlayer() {
+    private Entity spawnPlayerWorld() {
+        WorldConfig worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
+        int mapSize = GameScreen.getCurrentPlanet().getComponent(PlanetComponent.class).mapSize;
+        int position = mapSize * worldCFG.tileSize / 2;//set  position to middle of planet
+        Entity newPlayer = EntityBuilder.createPlayer(position, position);
+        getEngine().addEntity(newPlayer);
+        return newPlayer;
+    }
+
+    public Entity spawnPlayerSpaceStation() {
         //if no space station found: force spawn 0, 0
         Vector2 spawnPosition = new Vector2(0, 0);
 
@@ -117,7 +134,7 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
         if (spaceStation != null) {
             spawnPosition.set(Mappers.physics.get(spaceStation).body.getPosition());
         } else {
-            // else no station found, force spawn one at nearest body?
+            // no station found. ideally, this should never happen...
             Gdx.app.error(getClass().getSimpleName(), "no space station found to respawn!!!");
         }
 
@@ -154,37 +171,6 @@ public class PlayerSpawnSystem extends EntitySystem implements EntityListener {
             return true;
         }
         return false;
-    }
-    
-    @Override
-    public void entityAdded(Entity entity) {
-        //could simply hook here? any time a player is added...
-        //no because spawn location needs to be correct at time of spawn
-    }
-    
-    @Override
-    public void entityRemoved(Entity entity) {
-        //if (Mappers.controllable.get(entity) == null) {
-        //    return;
-        //}
-        
-        /*
-        Gdx.app.log(getClass().getSimpleName(), "Controlled entity assumed to be player; respawning...");
-        
-        if (GameScreen.inSpace()) {
-            //get last space station
-            
-            Array<Entity> newPlayer = EntityBuilder.createPlayerShip(0, 0, true);
-            for (Entity e : newPlayer) {
-                getEngine().addEntity(e);
-            }
-        } else {
-            WorldConfig worldCFG = SpaceProject.configManager.getConfig(WorldConfig.class);
-            int mapSize = GameScreen.getCurrentPlanet().getComponent(PlanetComponent.class).mapSize;
-            int position = mapSize * worldCFG.tileSize / 2;//set  position to middle of planet
-            Entity newPlayer = EntityBuilder.createPlayer(position, position);
-            getEngine().addEntity(newPlayer);
-        }*/
     }
 
 }

@@ -509,14 +509,18 @@ public class Box2DContactListener implements ContactListener {
         ECSUtil.transferComponent(entity, respawnEntity, TrailComponent.class);
 
         StatsComponent stats = (StatsComponent) ECSUtil.transferComponent(entity, respawnEntity, StatsComponent.class);
-        stats.deaths++;
-        CargoComponent cargo = Mappers.cargo.get(entity);
-        if (cargo != null) {
-            int totalLost = 0;
-            for (int i : cargo.inventory.values()) {
-                totalLost += i;
+        if (stats != null) {
+            stats.deaths++;
+            CargoComponent cargo = Mappers.cargo.get(entity);
+            if (cargo != null) {
+                int totalLost = 0;
+                for (int i : cargo.inventory.values()) {
+                    totalLost += i;
+                }
+                stats.resourcesLost += totalLost;
             }
-            stats.resourcesLost += totalLost;
+        } else{
+            Gdx.app.debug(Box2DContactListener.class.getSimpleName(), "warning! no stats on player?");
         }
 
         //set to position of player death

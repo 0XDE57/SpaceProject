@@ -592,6 +592,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
 
     private void drawStats(StatsComponent stats) {
+        if (stats == null) return;
+
         float centerX = 20;
         int offset = 50;
         float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3f)) - offset;
