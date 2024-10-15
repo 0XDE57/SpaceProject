@@ -379,6 +379,14 @@ public class GameScreen extends MyScreenAdapter {
                 system.setProcessing(!isPaused);
                 Gdx.app.log(getClass().getSimpleName(), "processing " + (isPaused ? "disabled" : "enabled") + " for " + system.getClass().getSimpleName());
             }
+            //todo: change to interface? IPauseListener { pause(), resume() }
+            if (system instanceof SoundSystem) {
+                if (isPaused) {
+                    ((SoundSystem) system).pauseAll();
+                } else {
+                    ((SoundSystem) system).resumeAll();
+                }
+            }
         }
     }
     //endregion
