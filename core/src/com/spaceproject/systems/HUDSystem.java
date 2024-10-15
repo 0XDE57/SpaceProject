@@ -74,7 +74,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     public static boolean showDamageNumbers = false;
     public static int damageTime = 750;
     public static int activePeak;
-    StringBuilder infoString = new StringBuilder();
+    private final StringBuilder infoString = new StringBuilder();
 
     class CreditsMarker {//can this fit into the same damage pool? it really doesn't need to...
         final int value;
@@ -96,6 +96,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     
     private GameMenu gameMenu;
     private VisWindow stationMenu;
+    private boolean interactHold;
 
     //rendering
     private final OrthographicCamera cam;
@@ -127,9 +128,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     enum SpecialState {
         off, docked, landing, launching, destroyed;
     }
+    private SpecialState messageState = SpecialState.off;
 
-    float statusAnim = 0;
-    float damageAnim = 0;
+    private float statusAnim = 0;
+    private float damageAnim = 0;
     
     public HUDSystem() {
         cam = MyScreenAdapter.cam;
@@ -242,97 +244,82 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         shape.setProjectionMatrix(projectionMatrix);
         batch.setProjectionMatrix(projectionMatrix);
-        
+
         //enable transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        
+
         shape.begin(ShapeType.Filled);
-
-        CameraSystem camSys = getEngine().getSystem(CameraSystem.class);
-        drawZoomLevelIndicator(camSys);
-
         Entity player = null;
         if (players.size() > 0) {
             player = players.first();
         }
-        drawPlayerStatus(player, camSys);
-        
-        if (drawEdgeMap) {
-            drawEdgeMap();
-        }
-        
-        drawHealthBars();
 
         //draw background for state message
         if (messageState != SpecialState.off) {
             drawMessageBacking(player);
         }
         if (messageState != SpecialState.docked) {
+            //auto close shop menu
             if (stationMenu != null) {
                 stationMenu.fadeOut();
                 stationMenu = null;
             }
         }
+        //skip drawing some UI elements during land and take off
+        CameraSystem camSys = getEngine().getSystem(CameraSystem.class);
+        if (messageState != SpecialState.launching && messageState != SpecialState.landing) {
+            drawZoomLevelIndicator(camSys);
+            drawPlayerStatus(player, camSys);
 
+            if (drawEdgeMap) {
+                drawEdgeMap();
+            }
+
+            drawHealthBars();
+        }
         shape.end();
 
 
         batch.begin();
-        drawStatusInfo(player, uiCFG.playerHPBarWidth, uiCFG.playerHPBarHeight, uiCFG.playerHPBarY + 5);
-        drawInventory(player, 20, 30);
+        //skip drawing some UI elements during land and take off
+        if (messageState != SpecialState.launching && messageState != SpecialState.landing) {
+            if (camSys.isMaxZoomLevel()) {
+                for (Entity body : bodies) {
+                    drawBodyInfoOnFocus(body);
+                }
+            } else {
+                Entity focused = getEngine().getSystem(GridRenderSystem.class).closestFacing;
+                drawBodyInfoOnFocus(focused);
+            }
 
-        drawCreditMarkers(deltaTime);
+            if (focusedDist > 0) {
+                inventoryFont.setColor(1, 1, 1, 1);
+                layout.setText(inventoryFont, " " + (int) focusedDist);
+                inventoryFont.draw(batch, layout, focusedPos.x, focusedPos.y + 1);
+            }
+
+            drawStatusInfo(player, uiCFG.playerHPBarWidth, uiCFG.playerHPBarHeight, uiCFG.playerHPBarY + 5);
+            drawInventory(player, 20, 30);
+
+            drawCreditMarkers(deltaTime);
+        }
+
         drawDamageText();
 
         //draw special state: hyper or landing / launching
         drawSpecialStateMessage(player);
 
-        if (player == null) {
-            ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
-            if (respawnEntities.size() > 0) {
-                RespawnComponent respawn = Mappers.respawn.get(respawnEntities.first());
-                drawHint(respawn.reason);
-                drawStats(Mappers.stat.get(respawnEntities.first()));
-            }
-        } else {
-            ControllableComponent control = Mappers.controllable.get(player);
-            if (control != null && control.canTransition && (Mappers.screenTrans.get(player) == null)) {
-                String key = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).interact);
-                String input = (getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad Down" : key).toUpperCase();
-                if (GameScreen.inSpace()) {
-                    drawHint("press [" + input + "] to land");
-                } else {
-                    if (Mappers.vehicle.get(player) != null) {
-                        drawHint("press [" + input + "] to take off");
-                    }
-                }
-            }
-        }
-
-        if (camSys.isMaxZoomLevel()) {
-            for (Entity body : bodies) {
-                drawBodyInfoOnFocus(body);
-            }
-        } else {
-            Entity focused = getEngine().getSystem(GridRenderSystem.class).closestFacing;
-            drawBodyInfoOnFocus(focused);
-        }
-
-        if (focusedDist > 0) {
-            inventoryFont.setColor(1, 1, 1, 1);
-            layout.setText(inventoryFont, " " + (int)focusedDist);
-            inventoryFont.draw(batch, layout, focusedPos.x, focusedPos.y+1);
-        }
 
         //drawHint("stars are hot");
         //drawHint("an object in motion remains in motion");
+        //todo: #5
         float warningDist = 200000;
         warningDist = warningDist * warningDist;
-        if (cam.position.dst2(0,0,0) > warningDist) {
+        if (cam.position.dst2(0, 0, 0) > warningDist) {
             drawHint("warning: broken physics ahead " + MyMath.formatVector3as2(cam.position, 1));
         }
-    
+
         batch.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
@@ -377,7 +364,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
         int width = uiCFG.playerHPBarWidth * 2;
         int x = Gdx.graphics.getWidth() / 2 - width / 2;
-        int y = Gdx.graphics.getHeight() - 30;
+        int y = Gdx.graphics.getHeight() - 40;
         int thickness = 2;
 
         shape.setColor(uiCFG.entityHPbarBackground);
@@ -402,7 +389,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape.rect(x + (ratio * width), y - (sliderHeight * 0.5f), thickness, sliderHeight);
     }
 
-    boolean interactHold;
     private void drawMessageBacking(Entity player) {
         int offset = 50;
         int messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3)) - offset;
@@ -517,7 +503,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
     
     //region player status
-    SpecialState messageState = SpecialState.off;
     private void drawSpecialStateMessage(Entity player) {
         messageState = SpecialState.off;
         if (player == null) {
@@ -577,6 +562,28 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         float centerX = (Gdx.graphics.getWidth() - layout.width) * 0.5f;
         float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3f) + layout.height);
         font.draw(batch, layout, centerX, messageHeight);
+
+        if (player == null) {
+            ImmutableArray<Entity> respawnEntities = getEngine().getEntitiesFor(Family.all(RespawnComponent.class).get());
+            if (respawnEntities.size() > 0) {
+                RespawnComponent respawn = Mappers.respawn.get(respawnEntities.first());
+                drawHint(respawn.reason);
+                drawStats(Mappers.stat.get(respawnEntities.first()));
+            }
+        } else {
+            ControllableComponent control = Mappers.controllable.get(player);
+            if (control != null && control.canTransition && (Mappers.screenTrans.get(player) == null)) {
+                String key = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).interact);
+                String input = (getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "D-Pad Down" : key).toUpperCase();
+                if (GameScreen.inSpace()) {
+                    drawHint("press [" + input + "] to land");
+                } else {
+                    if (Mappers.vehicle.get(player) != null) {
+                        drawHint("press [" + input + "] to take off");
+                    }
+                }
+            }
+        }
     }
 
     private void drawHint(String text) {
