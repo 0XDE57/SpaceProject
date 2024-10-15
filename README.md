@@ -21,7 +21,7 @@ Welcome to A Space Project. A project involving space...
    * hot plugging!
 * Sound?
   * there is no sound in the vacuum of space silly
-* Unit Tests?
+* ~~Unit Tests~~
    * pfft... my code is perfect. the first time. every time.
 * Developer Tools (in progress)
 * Cross-Platform Desktop
