@@ -50,6 +50,11 @@ public class SpaceStationMenu {
         String shieldDescription = "[" + colorItem + "]" + shieldUpgrade + "[]\nprotect your ship from damage.\n\nHold [" + colorControl + "][" + shieldControl + "][] to activate.";
         String laserDescription = "[" + colorItem + "]" + laserUpgrade + "[]\nprecision tool.\n\nHold [" + colorControl + "][" + laserControl + "][] to activate.";
         String tractorBeamDescription = "[" + colorItem + "]" + tractorUpgrade + "[]\npush or pull objects.\n\nHold [" + colorControl + "][" + laserControl + "][] to activate.\nDouble Tap to toggle between PUSH & PULL";
+        //todo: component levels may be better than per attribute?
+        // examples: 3 or 5 levels?
+        // - Laser [1,2,3]
+        // - Cannon [1,2,3,4,5]
+        // - Health [1,2,3]
         int costHyper = 100000;
         int costShield = 25000;
         int costLaser = 30000;
