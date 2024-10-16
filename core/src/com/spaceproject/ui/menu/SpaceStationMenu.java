@@ -56,7 +56,7 @@ public class SpaceStationMenu {
         int costTractorBeam = 10000;
         int costHP = 40000;
         int costThrust = 20000;
-        int costCannonDMG = 10000;
+        int costCannonDMG = 20000;
         int costCannonVelocity = 10000;
         //int costCannonCooldown = 20000;//todo
         int costLaserDMG = 20000;
