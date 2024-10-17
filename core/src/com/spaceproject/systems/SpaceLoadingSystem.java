@@ -23,6 +23,7 @@ import com.spaceproject.components.SeedComponent;
 import com.spaceproject.components.TextureComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.CelestialConfig;
+import com.spaceproject.config.RenderOrder;
 import com.spaceproject.generation.AstroBody;
 import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.generation.TextureGenerator;
@@ -259,7 +260,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         circumstellarDisc.clockwise = isRotateClockwise;
         star.add(circumstellarDisc);
         entities.add(star);
-    
+
         Entity spaceStation;
         //if (numPlanets == 0) {
         spaceStation = EntityBuilder.createSpaceStation(star, Mappers.star.get(star).radius * 4 + 200, false);
@@ -309,7 +310,22 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
             
             entities.add(planet);
         }
-        //circumstellarDisc.radius = distance + 1500;
+
+        //hack in outer belt
+        Entity secondBelt = new Entity();
+        TransformComponent transform = new TransformComponent();
+        transform.pos.set(x, y);
+        transform.zOrder = RenderOrder.ASTRO.getHierarchy();
+        secondBelt.add(transform);
+        AsteroidBeltComponent outerBelt = new AsteroidBeltComponent();
+        outerBelt.radius = distance + 1500;
+        outerBelt.bandWidth = 300;
+        outerBelt.maxSpawn = 400;
+        outerBelt.velocity = 20;
+        outerBelt.clockwise = isRotateClockwise;
+        secondBelt.add(outerBelt);
+        entities.add(secondBelt);
+
         Gdx.app.log(getClass().getSimpleName(), "Planetary System: [" + seed + "](" + x + ", " + y + ") Bodies: " + (numPlanets));
         
         return entities;
@@ -417,19 +433,20 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         hasInit = true;
         
         //a placeholder to add dummy objects for now
-        for (Entity e : EntityBuilder.createBasicShip(-20, 40, GameScreen.inSpace())) {
+        for (Entity e : EntityBuilder.createBasicShip(1300, 1600, GameScreen.inSpace())) {
             engine.addEntity(e);
         }
-        for (Entity e : EntityBuilder.createBasicShip(-30, 40, GameScreen.inSpace())) {
+        for (Entity e : EntityBuilder.createBasicShip(1330, 1600, GameScreen.inSpace())) {
             engine.addEntity(e);
         }
-        for (Entity e : EntityBuilder.createBasicShip(-40, 40, GameScreen.inSpace())) {
+        for (Entity e : EntityBuilder.createBasicShip(1340, 1600, GameScreen.inSpace())) {
             engine.addEntity(e);
         }
-        for (Entity e : EntityBuilder.createBasicShip(-60, 40, GameScreen.inSpace())) {
+        for (Entity e : EntityBuilder.createBasicShip(1360, 1600, GameScreen.inSpace())) {
             engine.addEntity(e);
         }
-        
+
+        /*
         Entity aiTest = EntityBuilder.createCharacterAI(0, 40);
         Mappers.AI.get(aiTest).state = AIComponent.State.wander;
         //aiTest.add(new CameraFocusComponent());//test cam focus on AI
@@ -442,7 +459,7 @@ public class SpaceLoadingSystem extends EntitySystem implements EntityListener {
         Entity aiTest3 = EntityBuilder.createCharacterAI(0, 80);
         Mappers.AI.get(aiTest3).state = AIComponent.State.landOnPlanet;
         //aiTest3.add(new CameraFocusComponent());
-        engine.addEntity(aiTest3);
+        engine.addEntity(aiTest3);*/
     }
     
 }
