@@ -211,7 +211,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         players = engine.getEntitiesFor(Family.all(CameraFocusComponent.class, ControllableComponent.class).get());
         killableEntities = engine.getEntitiesFor(Family.all(HealthComponent.class, TransformComponent.class)
                 .exclude(ControlFocusComponent.class, AsteroidComponent.class).get());
-        bodies = engine.getEntitiesFor(Family.one(PlanetComponent.class, StatsComponent.class).get());
+        bodies = engine.getEntitiesFor(Family.one(PlanetComponent.class, StarComponent.class).get());
     }
     
     @Override
