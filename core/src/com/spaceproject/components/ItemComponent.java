@@ -11,10 +11,12 @@ public class ItemComponent implements Component {
         GREEN(2, Color.GREEN, 60, 0.2f, 3f, 0.5f,1.7f, "break1.wav"),
         BLUE(3, new Color(0.1f, 0.3f, 1f, 1), 50, 0.2f, 1f, 0.4f, 1.3f, "break2.wav"),
         SILVER(4, new Color(0.97f, 0.97f, 1, 1), 100, 0.2f, 0.3f, 0.3f,1f, "break3.wav"),
-        GOLD(5, Color.GOLD, 200, 0.2f, 8f, 0.8f, 3, "break4.wav"),
+        GOLD(5, Color.GOLD, 400, 0.2f, 8f, 0.8f, 3, "break4.wav"),
         GLASS(6, new Color(0.5f, 0.5f, 0.5f, 0.5f), 10, 0, 0.1f, 0.05f, 1.5f, "glass.wav");
 
         /*
+        ROCK()
+
         NICKEL(0.1f, new Color(192f/255f, 192f/255f, 192f/255f, 1)),
         IRON(0.2f, new Color(128f/255f, 128f/255f, 128f/255f, 1)),
         GOLD(0.15f, new Color(1f, 128f/255f, 128f/255f, 1)),
