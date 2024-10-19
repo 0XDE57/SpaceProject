@@ -89,8 +89,17 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     //          triangle, rectangle, at least to octagon (or higher since this isn't limited by box2d currently) 12 or allow user to input num sides
     //todo [ ] ability to delete point. maybe [SHIFT + R-Click]
     //todo: [ ] editable points list in VisUI textbox
-    //todo: [ ] shatter button: place new point at each midpoint
-    
+    //todo: [...] shatter button
+    //          [x] place new point at each circumcenter
+    //          [ ]  shatter at Voronoi Center
+    //          [ ] shatter at Midpoints
+    //          [ ] if we think of any more...
+    //          [x] limit duplicates...
+    // [ ] render to file:
+    //    [ ] PNG
+    //    [ ] create animation (https://github.com/tommyettinger/anim8-gdx): base shape, shatter iteration 1-10 (or stop when duplicate points = too small to shatter further)
+    // [ ] background color options
+
     public TestVoronoiScreen() {
         generateNewPoints(10);
     }
@@ -100,7 +109,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         dCells.clear();
         triangles.clear();
         hullPoly = null;
-        
+
         int pad = 200;//distance away from edge of screen
         points = new FloatArray();
         for (int i = 0; i < numPoints * 2; i += 2) {
@@ -487,38 +496,44 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         layout.setText(text, "Points: " + (int) (points.size * 0.5f) + ", D-Cells:" + dCells.size() + ", V-Cells: ?", Color.WHITE, 0, Align.center, false);
         text.draw(batch, layout, Gdx.graphics.getWidth() * 0.5f, y);
 
+        text.setColor(Color.BLACK);
+        text.draw(batch, "[L-Click] Drag point", 10, y - h * 1);
+        text.draw(batch, "[R-Click] Create new point", 10, y- h  * 2);
+        text.draw(batch, "[SHIFT + L-Click] Drag points", 10, y - h * 3);
+        text.draw(batch, "[S] Shatter: Circumcenter", 10, y - h * 4);
+
         text.setColor(drawCircumcenter ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[1] Circumcenter", 10, y);
+        text.draw(batch, "[1] Circumcenter", 10, y - h  * 5);
         
         text.setColor(drawCircumcircle ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[2] Circumcircle", 10, y - h * 1);
+        text.draw(batch, "[2] Circumcircle", 10, y - h * 6);
         
         text.setColor(drawPoints ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[3] Points", 10, y - h * 2);
+        text.draw(batch, "[3] Points", 10, y - h * 7);
         
         text.setColor(drawMidpoints ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[4] Mid points", 10, y - h * 3);
+        text.draw(batch, "[4] Mid points", 10, y - h * 8);
         
         text.setColor(drawVoronoi ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[5] Voronoi", 10, y - h * 4);
+        text.draw(batch, "[5] Voronoi", 10, y - h * 9);
         
         text.setColor(drawDelaunay ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[6] Delaunay", 10, y - h * 5);
+        text.draw(batch, "[6] Delaunay", 10, y - h * 10);
         
         text.setColor(drawHull ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[7] Hull", 10, y - h * 6);
+        text.draw(batch, "[7] Hull", 10, y - h * 11);
         
         text.setColor(drawCentroid ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[8] Delaunay Centroid", 10, y - h * 7);
+        text.draw(batch, "[8] Delaunay Centroid", 10, y - h * 12);
 
         text.setColor(drawTriangleQuality ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[9] Triangle Quality", 10, y - h * 8);
+        text.draw(batch, "[9] Triangle Quality", 10, y - h * 13);
 
         text.setColor(drawTriangleInfo ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[0] Triangle Info", 10, y - h * 9);
+        text.draw(batch, "[0] Triangle Info", 10, y - h * 14);
 
         text.setColor(drawMidGraph ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[-] Midpoint-Centroid", 10, y - h * 10);
+        text.draw(batch, "[-] Midpoint-Centroid", 10, y - h * 15);
         batch.end();
     }
     
@@ -590,6 +605,25 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         } else {
             focusedPoint = -1;
             isDrag = false;
+        }
+
+        //sub-shatter!
+        if (Gdx.input.isKeyJustPressed(Keys.S)) {
+            for (DelaunayCell cell : dCells) {
+                boolean duplicate = false;
+                float x1 = cell.centroid.x;
+                float y1 = cell.centroid.y;
+                for (int i = 0; i < points.size && !duplicate; i += 2) {
+                    if (MathUtils.isEqual(x1, points.get(i), 0.1f) && MathUtils.isEqual(y1, points.get(i+1), 0.1f)) {
+                        duplicate = true;
+                    }
+                }
+                if (!duplicate) {
+                    points.add(x1);
+                    points.add(y1);
+                }
+            }
+            calculateDelaunay();
         }
         
         //toggle drawings
