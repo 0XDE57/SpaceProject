@@ -57,6 +57,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawDelaunay = true,
             drawVoronoi = false,
             drawMidpoints = false,
+            drawMidGraph = false,
             drawHull = true,
             drawCentroid = false,
             drawTriangleQuality = false,
@@ -71,7 +72,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
     //todo: [x] fix grabbing points, focus point, don't lose it
     //todo: [x] highlight focused point
-    //todo: [ ] highlight when near grab-able point
+    //todo: [ ] highlight when near grab-able point, or highlighatble info
     //todo: [x] center points
     //todo: [ ] draw grid
     //todo: [x] discard points if too close? epsilon check remove duplicate points
@@ -83,6 +84,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     //todo: [x] display centroid for sub delaunay
     //todo: [x] display centroid voronoi
     //todo: [x] display centroid for sub voronoi
+    //todo: [ ] basic shape loader, centered with reasonable scale
+    //todo: [ ] ability to scale shape, maybe [ALT + L-Click]
+    //          triangle, rectangle, at least to octagon (or higher since this isn't limited by box2d currently) 12 or allow user to input num sides
+    //todo [ ] ability to delete point. maybe [SHIFT + R-Click]
+    //todo: [ ] editable points list in VisUI textbox
+    //todo: [ ] shatter button: place new point at each midpoint
     
     public TestVoronoiScreen() {
         generateNewPoints(10);
@@ -328,7 +335,19 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.circle(cell.midCA.x, cell.midCA.y, 2);
                 shape.circle(cell.midBC.x, cell.midBC.y, 3);
             }
-            
+
+            //a second dual-graph? (third-graph?)
+            //connect midcenters to delauney centroid
+            if (drawMidGraph) {
+                shape.setColor(Color.BLUE);
+                for (DelaunayCell dCell : dCells) {
+                    shape.line(dCell.centroid, dCell.midAB);
+                    shape.line(dCell.centroid, dCell.midBC);
+                    shape.line(dCell.centroid, dCell.midCA);
+                }
+            }
+            //are the other dual graphs? I think im beginning to see some shapes and patterns...
+
             //draw voronoi cells
             if (drawVoronoi) {
 				/*
@@ -397,8 +416,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         shape.end();
 
+        batch.begin();
         if (drawTriangleInfo) {
-            batch.begin();
             dataFont.setColor(Color.BLACK);
             for (DelaunayCell cell : dCells) {
                 layout.setText(dataFont, MyMath.round(cell.area, 2) + "", dataFont.getColor(), 0, Align.center, false);
@@ -406,8 +425,22 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 layout.setText(dataFont, cell.quality + "", dataFont.getColor(), 0, Align.center, false);
                 dataFont.draw(batch, layout, cell.centroid.x, cell.centroid.y - layout.height * 1.3f);
             }
-            batch.end();
         }
+        /*//rendering on screen
+        boolean drawCoords = true;
+        if (drawCoords) {
+            dataFont.setColor(Color.BLACK);
+            if (points.size <= 4) {
+                for (int i = 0; i < points.size; i += 2) {
+                    float x = points.get(i);
+                    float y = points.get(i + 1);
+                    layout.setText(dataFont, MyMath.formatPos(x, y, 1), dataFont.getColor(), 0, Align.center, false);
+                    dataFont.draw(batch, layout, x, y);
+                }
+            }
+        }*/
+
+        batch.end();
     }
 
     @Override
@@ -455,34 +488,37 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, layout, Gdx.graphics.getWidth() * 0.5f, y);
 
         text.setColor(drawCircumcenter ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "1: Circumcenter", 10, y);
+        text.draw(batch, "[1] Circumcenter", 10, y);
         
         text.setColor(drawCircumcircle ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "2: Circumcircle", 10, y - h * 1);
+        text.draw(batch, "[2] Circumcircle", 10, y - h * 1);
         
         text.setColor(drawPoints ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "3: Points", 10, y - h * 2);
+        text.draw(batch, "[3] Points", 10, y - h * 2);
         
         text.setColor(drawMidpoints ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "4: Mid points", 10, y - h * 3);
+        text.draw(batch, "[4] Mid points", 10, y - h * 3);
         
         text.setColor(drawVoronoi ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "5: Voronoi", 10, y - h * 4);
+        text.draw(batch, "[5] Voronoi", 10, y - h * 4);
         
         text.setColor(drawDelaunay ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "6: Delaunay", 10, y - h * 5);
+        text.draw(batch, "[6] Delaunay", 10, y - h * 5);
         
         text.setColor(drawHull ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "7: Hull", 10, y - h * 6);
+        text.draw(batch, "[7] Hull", 10, y - h * 6);
         
         text.setColor(drawCentroid ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "8: Delaunay Centroid", 10, y - h * 7);
+        text.draw(batch, "[8] Delaunay Centroid", 10, y - h * 7);
 
         text.setColor(drawTriangleQuality ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "9: Triangle Quality", 10, y - h * 8);
+        text.draw(batch, "[9] Triangle Quality", 10, y - h * 8);
 
         text.setColor(drawTriangleInfo ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "0: Triangle Info", 10, y - h * 9);
+        text.draw(batch, "[0] Triangle Info", 10, y - h * 9);
+
+        text.setColor(drawMidGraph ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[-] Midpoint-Centroid", 10, y - h * 10);
         batch.end();
     }
     
@@ -586,6 +622,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         if (Gdx.input.isKeyJustPressed(Keys.NUM_0)) {
             drawTriangleInfo = !drawTriangleInfo;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.MINUS)) {
+            drawMidGraph = !drawMidGraph;
         }
     }
     
