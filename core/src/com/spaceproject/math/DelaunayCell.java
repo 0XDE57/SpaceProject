@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class DelaunayCell {
     
     public Vector2 a, b, c;//vertex that define triangle
-    public Vector2 midAB, midBC, midCA;//midpoints between vertex
+    public Vector2 midAB, midBC, midCA;//semiperimeter: midpoints between vertex
     public DelaunayCell nAB, nBC, nCA;//neighbors (TODO: reference for now, index later)
     public Vector2 circumCenter;//center of circle that intersects each vertex a,b,c
     public float circumRadius;//radius of circle that intersects each vertex a,b,c
@@ -24,7 +24,7 @@ public class DelaunayCell {
         this.b = b;
         this.c = c;
         
-        //calculate midpoints
+        //calculate semiperimeter / midpoints
         midAB = a.cpy().add(b).scl(0.5f);
         midBC = b.cpy().add(c).scl(0.5f);
         midCA = c.cpy().add(a).scl(0.5f);

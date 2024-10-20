@@ -99,6 +99,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     //      [x] place new point at each circumcenter
     //      [ ] shatter at Voronoi Center
     //      [ ] shatter at Midpoints
+    //      [ ] add points at excircle or escribed circle: https://en.wikipedia.org/wiki/Incircle_and_excircles#Excircles_and_excenters
     //      [ ] if we think of any more...
     //      [x] limit duplicates...
     // [x] render to file: Pixmap -> PNG. how to render shaperenderer to file?
@@ -108,8 +109,14 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     // [ ] background color options
     // [ ] pool cells
     // [ ] render triangle by area relative to total hull area
+    // [ ] investigate: sometimes triangulation returns artifacts
+    //      seems to be more pronounced with equilaterals or concyclic (or cocyclic)
+    //      or when points line up perfectly on y axis?
+    // [ ] draw Incircle
+    // [ ] draw Excircle
+    // [ ] draw Gergonne triangle: contact triangle or intouch triangle of △ A B C
     // [ ]
-    // [ ] investigate: ometimes traiangulation returns artifacts when points line up perfectly on y axis?
+    // [ ] ensure all types can be rendered https://en.wikipedia.org/wiki/Triangle_center
 
     public TestVoronoiScreen() {
         generateNewPoints(MathUtils.random(3, 16), false, false);
@@ -151,7 +158,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         //center around centroid in middle of screen
         hull = convex.computePolygon(points, false).toArray();//<--system.arraycopy()
         GeometryUtils.polygonCentroid(hull, 0, hull.length, centroid);
-        Gdx.app.log(getClass().getSimpleName(), "isCCW?" + GeometryUtils.isCCW(hull, 0, hull.length));
+        //Gdx.app.log(getClass().getSimpleName(), "isCCW?" + GeometryUtils.isCCW(hull, 0, hull.length));
         if (addCentroid) {
             points.add(centroid.x, centroid.y);
         }
@@ -395,6 +402,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             //NOTE: Delaunay and Voronoi are Convex polygons only.
             //a second dual-graph? (tri-graph?)
             //connect midpoints to delaunay centroid
+            //midpoint also known as: semiperimeter: https://en.wikipedia.org/wiki/Semiperimeter
             if (drawMidGraph) {
                 shape.setColor(Color.BLUE);
                 shape.line(cell.centroid, cell.midAB);
@@ -584,7 +592,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, "[L-Click] Drag point", 10, y - h * line++);
         text.draw(batch, "[R-Click] Create new point", 10, y- h  * line++);
         text.draw(batch, "[SHIFT + L-Click] Drag points", 10, y - h * line++);
-        text.draw(batch, "[S] Shatter: Circumcenter", 10, y - h * line++);
+        text.draw(batch, "[S] Shatter @ Delaunay Centroid", 10, y - h * line++);
         text.draw(batch, "[CTRL + D] Save PNG", 10, y - h * line++);
 
         //toggles
@@ -613,7 +621,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, "[8] Delaunay Centroid", 10, y - h * line++);
 
         text.setColor(drawTriangleQuality ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[9] Triangle Quality", 10, y - h * line++);
+        text.draw(batch, "[9] Triangle Quality Graph", 10, y - h * line++);
 
         text.setColor(drawTriangleInfo ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[0] Triangle Info", 10, y - h * line++);
@@ -622,7 +630,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, "[-] Centroid-Vertex Graph", 10, y - h * line++);
 
         text.setColor(drawMidGraph ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[=] Centroid-Midpoint Graph", 10, y - h * line++);
+        text.draw(batch, "[=] Centroid-Semiperimeter Graph", 10, y - h * line++);
         batch.end();
     }
     
@@ -738,10 +746,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         //Control + S -> Save to file
         if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Keys.D)) {
-            Pixmap image = Pixmap.createFromFrameBuffer(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-            FileHandle handle = Gdx.files.local("capture_" + Gdx.graphics.getFrameId() + ".PNG");
-            Gdx.app.log(getClass().getSimpleName(), "writing to: " + handle.path());
-            PixmapIO.writePNG(handle, image, -1, true);
+           renderToFile();
         }
         
         //toggle drawings
@@ -781,6 +786,23 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         if (Gdx.input.isKeyJustPressed(Keys.EQUALS)) {
             drawMidGraph = !drawMidGraph;
         }
+    }
+
+    private void renderToFile() {
+        if (points.size < 6) return;
+        //manually clear with clear color for transparent background
+        Gdx.gl.glClearColor(0, 0, 0, 0);
+        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        //and force re-render
+        drawStuff();
+        //save framebuffer to file
+        Rectangle bounds = hullPoly.getBoundingRectangle();
+        int padding = 10;
+        Pixmap image = Pixmap.createFromFrameBuffer((int) bounds.x - padding, (int) bounds.y - padding, (int) bounds.getWidth() + padding * 2, (int) bounds.getHeight() + padding * 2);
+        //Pixmap.createFromFrameBuffer(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); //fullscreen capture
+        FileHandle handle = Gdx.files.local("capture_" + Gdx.graphics.getFrameId() + ".PNG");
+        Gdx.app.log(getClass().getSimpleName(), "writing to: " + handle.path());
+        PixmapIO.writePNG(handle, image, -1, true);
     }
 
     private void clear() {
