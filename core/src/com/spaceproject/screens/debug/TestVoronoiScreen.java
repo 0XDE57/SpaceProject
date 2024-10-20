@@ -364,26 +364,21 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             //connect midpoints to delaunay centroid
             if (drawMidGraph) {
                 shape.setColor(Color.BLUE);
-                for (DelaunayCell dCell : dCells) {
-                    shape.line(dCell.centroid, dCell.midAB);
-                    shape.line(dCell.centroid, dCell.midBC);
-                    shape.line(dCell.centroid, dCell.midCA);
-                }
+                shape.line(cell.centroid, cell.midAB);
+                shape.line(cell.centroid, cell.midBC);
+                shape.line(cell.centroid, cell.midCA);
                 //todo: OBSERVATIONS of MidPointToCentroid Dual Graph
                 // cells may be concave and convex!
             }
             //another dual-graph?
             if (drawCenteroidPointGraph) {
                 shape.setColor(Color.PURPLE);
-                for (DelaunayCell dCell : dCells) {
-                    shape.line(dCell.centroid, dCell.a);
-                    shape.line(dCell.centroid, dCell.b);
-                    shape.line(dCell.centroid, dCell.c);
-                }
+                shape.line(cell.centroid, cell.a);
+                shape.line(cell.centroid, cell.b);
+                shape.line(cell.centroid, cell.c);
                 //todo: OBSERVATIONS of VertexToCentroid Dual Graph
                 // all internal cells are 4 vertex (quadrilateral) and convex!
                 // all external cells are 3 vertex (triangle)
-
             }
             //are the other dual graphs? I think im beginning to see some shapes and patterns...
 
@@ -651,6 +646,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         //sub-shatter!
         if (Gdx.input.isKeyJustPressed(Keys.S)) {
+            if (points.size >= 32767) {
+                return;
+            }
             for (DelaunayCell cell : dCells) {
                 boolean duplicate = false;
                 float x1 = cell.centroid.x;
