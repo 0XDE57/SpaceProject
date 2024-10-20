@@ -103,10 +103,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     //      [ ] if we think of any more...
     //      [x] limit duplicates...
     // [x] render to file: Pixmap -> PNG. how to render shaperenderer to file?
-    //      [ ] transparency
-    //      [ ] shape only crop? currently is full screen capture.
+    //      [x transparency
+    //      [x] shape only crop? currently is full screen capture.
     // [ ] render to file: create animation (https://github.com/tommyettinger/anim8-gdx): base shape, shatter iteration 1-10 (or stop when duplicate points = too small to shatter further)
-    // [ ] background color options
     // [ ] pool cells
     // [ ] render triangle by area relative to total hull area
     // [ ] investigate: sometimes triangulation returns artifacts
@@ -115,7 +114,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     // [ ] draw Incircle
     // [ ] draw Excircle
     // [ ] draw Gergonne triangle: contact triangle or intouch triangle of △ A B C
-    // [ ]
+    // [ ] color palate: render
+    // [ ] color pallet: VisUIcolor picker dialog select render colors
+    // [ ] color:pallet: background color options or checkered tile?
+    // [ ] render grid lines
+    // [ ] render grid axis X,Y
+    // [ ] draw triangle weight graph: area/totalArea
     // [ ] ensure all types can be rendered https://en.wikipedia.org/wiki/Triangle_center
 
     public TestVoronoiScreen() {
