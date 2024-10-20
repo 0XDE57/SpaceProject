@@ -44,6 +44,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     
     //triangulation
     DelaunayTriangulator delaunay = new DelaunayTriangulator();
+    final int maxVerticies = 32767;//todo: this is odd number why? there will always be even number of points.
     ShortArray triangles = new ShortArray();
     ArrayList<DelaunayCell> dCells = new ArrayList<>();
     
@@ -142,7 +143,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         //create cells out of points
         calculateDelaunay();
     }
-    
+
     /**
      * Calculate triangulation on points.
      * Then create cells out of each triangle.
@@ -153,9 +154,20 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         //polygons must contain at least 3 points.
         if (points.size < 6) return;
 
+        //todo: ArrayIndexOutOfBoundsException: Index -32768 out of bounds for length 32766
+        // how did index become negative when we do not allow less than 6? see line above
+        //
+        // Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: Index -32768 out of bounds for length 32766
+        // at com.badlogic.gdx.math.DelaunayTriangulator.computeTriangles(DelaunayTriangulator.java:140) -> i = p2 - end;
+        // at com.badlogic.gdx.math.DelaunayTriangulator.computeTriangles(DelaunayTriangulator.java:43)
+        // at com.spaceproject.screens.debug.TestVoronoiScreen.calculateDelaunay(TestVoronoiScreen.java:163)
+
         //computeTriangles() supports only up to 32767 IllegalArgumentException: count must be <= 32767
-        if (points.size > 32767) return;
-        
+        if (points.size > maxVerticies-1) {
+            Gdx.app.error(getClass().getSimpleName(), points.size + " too big. calculation ignored!");
+            return;
+        }
+
         //apply delaunay triangulation to points
         triangles = delaunay.computeTriangles(points, false);
         
@@ -302,6 +314,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             shape.end();
         }
 
+        /*
         if (drawTriangleQuality) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -312,7 +325,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             }
             shape.end();
             Gdx.gl.glDisable(GL20.GL_BLEND);
-        }
+        }*/
 
         shape.begin(ShapeType.Line);
         shape.setColor(Color.BLACK);
@@ -482,6 +495,18 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             }
         }*/
         batch.end();
+
+        if (drawTriangleQuality) {
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+            shape.begin(ShapeType.Filled);
+            for (DelaunayCell cell : dCells) {
+                shape.setColor(0.3f, 0.3f, 0.3f, 1 - cell.quality);
+                shape.triangle(cell.a.x, cell.a.y, cell.b.x, cell.b.y, cell.c.x, cell.c.y);
+            }
+            shape.end();
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+        }
     }
 
     @Override
@@ -525,7 +550,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         int y = Gdx.graphics.getHeight() - 10;
         float h = text.getLineHeight();
         int line = 1;
-        int maxPoints = 32767 / 2;
+        int maxPoints = maxVerticies / 2;
         layout.setText(text, "Points: " + (int) (points.size * 0.5f) + "/" + maxPoints + ", D-Cells:" + dCells.size() + ", V-Cells: ?", Color.WHITE, 0, Align.center, false);
         text.draw(batch, layout, Gdx.graphics.getWidth() * 0.5f, y);
 
@@ -589,6 +614,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         //create new point
         if (Gdx.input.justTouched() && Gdx.input.isButtonPressed(Buttons.RIGHT)) {
+            //computeTriangles() supports only up to 32767 IllegalArgumentException: count must be <= 32767
+            if (points.size > maxVerticies) {
+                Gdx.app.error(getClass().getSimpleName(), points.size + " > 32767. ignored!");
+                return;
+            }
+
             boolean duplicate = false;
             for (int i = 0; i < points.size && !duplicate; i += 2) {
                 if (MathUtils.isEqual(x, points.get(i), 0.1f) && MathUtils.isEqual(y, points.get(i+1), 0.1f)) {
@@ -646,10 +677,14 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         //sub-shatter!
         if (Gdx.input.isKeyJustPressed(Keys.S)) {
-            if (points.size >= 32767) {
-                return;
-            }
+            boolean added = false;
             for (DelaunayCell cell : dCells) {
+                //computeTriangles() supports only up to 32767 IllegalArgumentException: count must be <= 32767
+                if (points.size > maxVerticies-2) {
+                    Gdx.app.error(getClass().getSimpleName(), points.size + " > 32767. ignored!");
+                    return;
+                }
+
                 boolean duplicate = false;
                 float x1 = cell.centroid.x;
                 float y1 = cell.centroid.y;
@@ -661,9 +696,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 if (!duplicate) {
                     points.add(x1);
                     points.add(y1);
+                    added = true;
                 }
             }
-            calculateDelaunay();
+            if (added) {
+                calculateDelaunay();
+            }
         }
 
         //Control + S -> Save to file
