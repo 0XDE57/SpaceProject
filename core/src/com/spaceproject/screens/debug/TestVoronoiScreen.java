@@ -3,8 +3,11 @@ package com.spaceproject.screens.debug;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -58,6 +61,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawVoronoi = false,
             drawMidpoints = false,
             drawMidGraph = false,
+            drawCenteroidPointGraph = false,
             drawHull = true,
             drawCentroid = false,
             drawTriangleQuality = false,
@@ -70,35 +74,40 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     boolean isDrag = false;
     Vector2 dragStart = new Vector2();
 
-    //todo: [x] fix grabbing points, focus point, don't lose it
-    //todo: [x] highlight focused point
-    //todo: [ ] highlight when near grab-able point, or highlighatble info
-    //todo: [x] center points
-    //todo: [ ] draw grid
-    //todo: [x] discard points if too close? epsilon check remove duplicate points
-    //todo: [x] fix scaling for window resize
-    //todo: [ ] fix voronoi cells for edge cases
-    //todo: [ ] extract voronoi cells
-    //todo: [ ] display points as array both input and output
-    //todo: [x] display centroid delaunay
-    //todo: [x] display centroid for sub delaunay
-    //todo: [x] display centroid voronoi
-    //todo: [x] display centroid for sub voronoi
-    //todo: [ ] basic shape loader, centered with reasonable scale
-    //todo: [ ] ability to scale shape, maybe [ALT + L-Click]
+    //todo:
+    // [x] fix grabbing points, focus point, don't lose it
+    // [x] highlight focused point
+    // [ ] highlight when near grab-able point, or highlighatble info
+    // [x] center points
+    // [ ] draw grid
+    // [x] discard points if too close? epsilon check remove duplicate points
+    // [x] fix scaling for window resize
+    // [ ] fix voronoi cells for edge cases
+    // [ ] extract voronoi cells
+    // [ ] display points as array both input and output
+    // [x] display centroid delaunay
+    // [x] display centroid for sub delaunay
+    // [x] display centroid voronoi
+    // [x] display centroid for sub voronoi
+    // [ ] basic shape loader, centered with reasonable scale
+    // [ ] ability to scale shape, maybe [ALT + L-Click]
     //          triangle, rectangle, at least to octagon (or higher since this isn't limited by box2d currently) 12 or allow user to input num sides
-    //todo [ ] ability to delete point. maybe [SHIFT + R-Click]
-    //todo: [ ] editable points list in VisUI textbox
-    //todo: [...] shatter button
-    //          [x] place new point at each circumcenter
-    //          [ ]  shatter at Voronoi Center
-    //          [ ] shatter at Midpoints
-    //          [ ] if we think of any more...
-    //          [x] limit duplicates...
-    // [ ] render to file:
-    //    [ ] PNG
-    //    [ ] create animation (https://github.com/tommyettinger/anim8-gdx): base shape, shatter iteration 1-10 (or stop when duplicate points = too small to shatter further)
+    // [ ] ability to delete point. maybe [SHIFT + R-Click]
+    // [ ] editable points list in VisUI textbox
+    // [...] shatter button
+    //      [x] place new point at each circumcenter
+    //      [ ] shatter at Voronoi Center
+    //      [ ] shatter at Midpoints
+    //      [ ] if we think of any more...
+    //      [x] limit duplicates...
+    // [x] render to file: Pixmap -> PNG. how to render shaperenderer to file?
+    //      [ ] transparency
+    //      [ ] shape only crop? currently is full screen capture.
+    // [ ] render to file: create animation (https://github.com/tommyettinger/anim8-gdx): base shape, shatter iteration 1-10 (or stop when duplicate points = too small to shatter further)
     // [ ] background color options
+    // [ ] pool cells
+    // [ ] render triangle by area relative to total hull area
+    // [ ]
 
     public TestVoronoiScreen() {
         generateNewPoints(10);
@@ -110,11 +119,13 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         triangles.clear();
         hullPoly = null;
 
+        //todo: shapes!
         int pad = 200;//distance away from edge of screen
         points = new FloatArray();
         for (int i = 0; i < numPoints * 2; i += 2) {
             float x = MathUtils.random(pad, Gdx.graphics.getWidth() - pad);
             float y = MathUtils.random(pad, Gdx.graphics.getHeight() - pad);
+            //todo: reject duplicate points
             points.add(x);
             points.add(y);
         }
@@ -141,6 +152,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     private void calculateDelaunay() {
         //polygons must contain at least 3 points.
         if (points.size < 6) return;
+
+        //computeTriangles() supports only up to 32767 IllegalArgumentException: count must be <= 32767
+        if (points.size > 32767) return;
         
         //apply delaunay triangulation to points
         triangles = delaunay.computeTriangles(points, false);
@@ -183,7 +197,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         //computePolygon -> Returns convex hull in counter-clockwise order. Note: the last point in the returned list is the same as the first one.
         //Gdx.app.log(getClass().getSimpleName(), "isCCW?" + GeometryUtils.isCCW(hull, 0, hull.length));
         //todo: explore isCCW, start
-        hullPoly = new Polygon(hull);
+        hullPoly = new Polygon(hull); //todo: new -> pool
         hullPoly.getCentroid(centroid); //-> GeometryUtils.polygonCentroid(hull, 0, hull.length, centroid);
     }
     
@@ -219,17 +233,17 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     
     private void drawCellEdge(DelaunayCell cellA, DelaunayCell cellB) {
         //check circle is within hull
-        if (hullPoly.contains(cellA.circumcenter)) {
+        if (hullPoly.contains(cellA.circumCenter)) {
             if (cellB != null) {
                 shape.setColor(Color.ORANGE);
-                if (hullPoly.contains(cellB.circumcenter)) {
+                if (hullPoly.contains(cellB.circumCenter)) {
                     //if both circumcenters are within the convex hull, draw from circumcenter to circumcenter
-                    shape.line(cellA.circumcenter, cellB.circumcenter);
+                    shape.line(cellA.circumCenter, cellB.circumCenter);
                 } else {
                     //if circumcenter is outside convex hull, draw from circumcenter to intersection
                     Vector2 intersect = new Vector2();
-                    if (collideWithHull(cellA.circumcenter, cellB.circumcenter, intersect)) {
-                        shape.line(cellA.circumcenter, intersect);
+                    if (collideWithHull(cellA.circumCenter, cellB.circumCenter, intersect)) {
+                        shape.line(cellA.circumCenter, intersect);
                         shape.circle(intersect.x, intersect.y, 8);//show point of intersection
                     }
                 }
@@ -238,9 +252,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 //if no neighbor, draw from midpoint to circumcenter
                 //TODO: don't connect to mid points if already connected to voronoi point
                 shape.setColor(Color.PINK);
-                shape.line(cellA.circumcenter, cellA.midAB);
-                shape.line(cellA.circumcenter, cellA.midBC);
-                shape.line(cellA.circumcenter, cellA.midCA);
+                shape.line(cellA.circumCenter, cellA.midAB);
+                shape.line(cellA.circumCenter, cellA.midBC);
+                shape.line(cellA.circumCenter, cellA.midCA);
                 shape.circle(cellA.midAB.x, cellA.midAB.y, 8);
                 shape.circle(cellA.midBC.x, cellA.midBC.y, 8);
                 shape.circle(cellA.midCA.x, cellA.midCA.y, 8);
@@ -271,7 +285,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     
     private void drawIntersectingLines(DelaunayCell cell, Vector2 mid, Vector2 edgeA, Vector2 edgeB) {
         Vector2 intersect = new Vector2();
-        if (Intersector.intersectSegments(edgeA, edgeB, cell.circumcenter, mid, intersect)) {
+        if (Intersector.intersectSegments(edgeA, edgeB, cell.circumCenter, mid, intersect)) {
             shape.setColor(Color.GREEN);
             shape.line(mid, intersect);
             shape.circle(intersect.x, intersect.y, 3);
@@ -345,8 +359,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.circle(cell.midBC.x, cell.midBC.y, 3);
             }
 
+            //NOTE: Delaunay and Voronoi are Convex polygons only.
             //a second dual-graph? (third-graph?)
-            //connect midcenters to delauney centroid
+            //connect midpoints to delaunay centroid
             if (drawMidGraph) {
                 shape.setColor(Color.BLUE);
                 for (DelaunayCell dCell : dCells) {
@@ -354,6 +369,21 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     shape.line(dCell.centroid, dCell.midBC);
                     shape.line(dCell.centroid, dCell.midCA);
                 }
+                //todo: OBSERVATIONS of MidPointToCentroid Dual Graph
+                // cells may be concave and convex!
+            }
+            //another dual-graph?
+            if (drawCenteroidPointGraph) {
+                shape.setColor(Color.PURPLE);
+                for (DelaunayCell dCell : dCells) {
+                    shape.line(dCell.centroid, dCell.a);
+                    shape.line(dCell.centroid, dCell.b);
+                    shape.line(dCell.centroid, dCell.c);
+                }
+                //todo: OBSERVATIONS of VertexToCentroid Dual Graph
+                // all internal cells are 4 vertex (quadrilateral) and convex!
+                // all external cells are 3 vertex (triangle)
+
             }
             //are the other dual graphs? I think im beginning to see some shapes and patterns...
 
@@ -410,13 +440,21 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             }
             
             //draw circumcircle
-            if (!hullPoly.contains(cell.circumcenter)) {
+            if (!hullPoly.contains(cell.circumCenter)) {
                 shape.setColor(Color.MAGENTA);
             } else {
                 shape.setColor(Color.GREEN);
             }
-            if (drawCircumcircle) shape.circle(cell.circumcenter.x, cell.circumcenter.y, cell.circumradius);
-            if (drawCircumcenter) shape.circle(cell.circumcenter.x, cell.circumcenter.y, pSize);
+            if (drawCircumcircle) {
+                //todo: failed: ArrayIndexOutOfBoundsException: Index 20003 out of bounds for length 20000
+                //      Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: Index 20003 out of bounds for length 20000
+                //      at com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20.color(ImmediateModeRenderer20.java:121)
+                //      at com.badlogic.gdx.graphics.glutils.ShapeRenderer.circle(ShapeRenderer.java:906)
+                //      at com.badlogic.gdx.graphics.glutils.ShapeRenderer.circle(ShapeRenderer.java:892)
+                //      at com.spaceproject.screens.debug.TestVoronoiScreen.drawStuff(TestVoronoiScreen.java:438)
+                shape.circle(cell.circumCenter.x, cell.circumCenter.y, cell.circumRadius);
+            }
+            if (drawCircumcenter) shape.circle(cell.circumCenter.x, cell.circumCenter.y, pSize);
         }
 
         if (drawHull && hullPoly != null) {
@@ -448,7 +486,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 }
             }
         }*/
-
         batch.end();
     }
 
@@ -492,48 +529,53 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         batch.begin();
         int y = Gdx.graphics.getHeight() - 10;
         float h = text.getLineHeight();
-
-        layout.setText(text, "Points: " + (int) (points.size * 0.5f) + ", D-Cells:" + dCells.size() + ", V-Cells: ?", Color.WHITE, 0, Align.center, false);
+        int line = 1;
+        int maxPoints = 32767 / 2;
+        layout.setText(text, "Points: " + (int) (points.size * 0.5f) + "/" + maxPoints + ", D-Cells:" + dCells.size() + ", V-Cells: ?", Color.WHITE, 0, Align.center, false);
         text.draw(batch, layout, Gdx.graphics.getWidth() * 0.5f, y);
 
         text.setColor(Color.BLACK);
-        text.draw(batch, "[L-Click] Drag point", 10, y - h * 1);
-        text.draw(batch, "[R-Click] Create new point", 10, y- h  * 2);
-        text.draw(batch, "[SHIFT + L-Click] Drag points", 10, y - h * 3);
-        text.draw(batch, "[S] Shatter: Circumcenter", 10, y - h * 4);
+        text.draw(batch, "[L-Click] Drag point", 10, y - h * line++);
+        text.draw(batch, "[R-Click] Create new point", 10, y- h  * line++);
+        text.draw(batch, "[SHIFT + L-Click] Drag points", 10, y - h * line++);
+        text.draw(batch, "[S] Shatter: Circumcenter", 10, y - h * line++);
+        text.draw(batch, "[CTRL + D] Save PNG", 10, y - h * line++);
 
         text.setColor(drawCircumcenter ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[1] Circumcenter", 10, y - h  * 5);
+        text.draw(batch, "[1] CircumCenter", 10, y - h  * line++);
         
         text.setColor(drawCircumcircle ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[2] Circumcircle", 10, y - h * 6);
+        text.draw(batch, "[2] CircumCircle", 10, y - h * line++);
         
         text.setColor(drawPoints ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[3] Points", 10, y - h * 7);
+        text.draw(batch, "[3] Points", 10, y - h * line++);
         
         text.setColor(drawMidpoints ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[4] Mid points", 10, y - h * 8);
+        text.draw(batch, "[4] Mid points", 10, y - h * line++);
         
         text.setColor(drawVoronoi ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[5] Voronoi", 10, y - h * 9);
+        text.draw(batch, "[5] Voronoi Graph", 10, y - h * line++);
         
         text.setColor(drawDelaunay ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[6] Delaunay", 10, y - h * 10);
+        text.draw(batch, "[6] Delaunay Graph", 10, y - h * line++);
         
         text.setColor(drawHull ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[7] Hull", 10, y - h * 11);
+        text.draw(batch, "[7] Hull", 10, y - h * line++);
         
         text.setColor(drawCentroid ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[8] Delaunay Centroid", 10, y - h * 12);
+        text.draw(batch, "[8] Delaunay Centroid", 10, y - h * line++);
 
         text.setColor(drawTriangleQuality ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[9] Triangle Quality", 10, y - h * 13);
+        text.draw(batch, "[9] Triangle Quality", 10, y - h * line++);
 
         text.setColor(drawTriangleInfo ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[0] Triangle Info", 10, y - h * 14);
+        text.draw(batch, "[0] Triangle Info", 10, y - h * line++);
+
+        text.setColor(drawCenteroidPointGraph ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[-] Centroid-Vertex Graph", 10, y - h * line++);
 
         text.setColor(drawMidGraph ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[-] Midpoint-Centroid", 10, y - h * 15);
+        text.draw(batch, "[=] Centroid-Midpoint Graph", 10, y - h * line++);
         batch.end();
     }
     
@@ -625,6 +667,14 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             }
             calculateDelaunay();
         }
+
+        //Control + S -> Save to file
+        if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Keys.D)) {
+            Pixmap image = Pixmap.createFromFrameBuffer(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            FileHandle handle = Gdx.files.local("capture_" + Gdx.graphics.getFrameId() + ".PNG");
+            Gdx.app.log(getClass().getSimpleName(), "writing to: " + handle.path());
+            PixmapIO.writePNG(handle, image, -1, true);
+        }
         
         //toggle drawings
         if (Gdx.input.isKeyJustPressed(Keys.NUM_1)) {
@@ -658,6 +708,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawTriangleInfo = !drawTriangleInfo;
         }
         if (Gdx.input.isKeyJustPressed(Keys.MINUS)) {
+            drawCenteroidPointGraph = !drawCenteroidPointGraph;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.EQUALS)) {
             drawMidGraph = !drawMidGraph;
         }
     }

@@ -12,8 +12,8 @@ public class DelaunayCell {
     public Vector2 a, b, c;//vertex that define triangle
     public Vector2 midAB, midBC, midCA;//midpoints between vertex
     public DelaunayCell nAB, nBC, nCA;//neighbors (TODO: reference for now, index later)
-    public Vector2 circumcenter;//center of circle that intersects each vertex a,b,c
-    public float circumradius;//radius of circle that intersects each vertex a,b,c
+    public Vector2 circumCenter;//center of circle that intersects each vertex a,b,c
+    public float circumRadius;//radius of circle that intersects each vertex a,b,c
     public Vector2 centroid = new Vector2();
     public float area;
     public float quality;
@@ -31,8 +31,8 @@ public class DelaunayCell {
         
         //calculate circumscribed circle
         Vector3 circle = PolygonUtil.circumcircle(a, b, c);
-        circumcenter = new Vector2(circle.x, circle.y);
-        circumradius = circle.z;
+        circumCenter = new Vector2(circle.x, circle.y);
+        circumRadius = circle.z;
 
         //calculate centroid
         /*
@@ -59,7 +59,7 @@ public class DelaunayCell {
         float sqLength1 = x1 * x1 + y1 * y1;
         float sqLength2 = x2 * x2 + y2 * y2;
         float sqLength3 = x3 * x3 + y3 * y3;
-        return (float)Math.sqrt(Math.min(sqLength1, Math.min(sqLength2, sqLength3))) / circumradius;
+        return (float)Math.sqrt(Math.min(sqLength1, Math.min(sqLength2, sqLength3))) / circumRadius;
     }
     
     /**
@@ -112,7 +112,7 @@ public class DelaunayCell {
         for (DelaunayCell cellA : dCells) {
             for (DelaunayCell cellB : dCells) {
                 //skip check on self
-                if (cellA.circumcenter.epsilonEquals(cellB.circumcenter, 0.01f)) {
+                if (cellA.circumCenter.epsilonEquals(cellB.circumCenter, 0.01f)) {
                     continue;
                 }
                 //check and set neighbors

@@ -115,6 +115,10 @@ public abstract class MyMath {
         builder.append(seconds == 0 ? "00" : seconds < 10 ? "0" + seconds : seconds);
         return builder.toString();
     }
+
+    public static String formatPos(float x, float y, int decimal) {
+        return round(x, decimal) + ", " + round(y, decimal);
+    }
     
     public static String formatVector2(Vector2 vec, int decimal) {
         return round(vec.x, decimal) + ", " + round(vec.y, decimal);
