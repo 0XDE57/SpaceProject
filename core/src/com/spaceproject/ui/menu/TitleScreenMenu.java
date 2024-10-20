@@ -3,13 +3,12 @@ package com.spaceproject.ui.menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.*;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
-import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
 import com.kotcrab.vis.ui.widget.VisDialog;
+import com.kotcrab.vis.ui.widget.VisTable;
+import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.screens.debug.BlocksTestScreen;
 import com.spaceproject.screens.GameScreen;
@@ -19,24 +18,22 @@ import com.spaceproject.ui.ControllerMenuStage;
 public class TitleScreenMenu {
 
     private final ControllerMenuStage stage;
-    public Table table;
+    public VisTable table;
 
     public TitleScreenMenu(final ControllerMenuStage stage, final SpaceProject game, boolean showDebugScreens) {
         this.stage = stage;
-        table = new Table();
+        table = new VisTable();
 
         if (showDebugScreens) {
             addDebugItems(game);
         }
     
         addMenuItems(game);
-        for (Actor button : table.getChildren()) {
-            stage.addFocusableActor(button);
-        }
+        resetFocusableActors();
     }
 
     private void addMenuItems(final SpaceProject game) {
-        TextButton btnPlay = new TextButton("play", VisUI.getSkin());
+        VisTextButton btnPlay = new VisTextButton("play");
         btnPlay.getLabel().setAlignment(Align.left);
         btnPlay.addListener(new ChangeListener() {
             @Override
@@ -45,7 +42,7 @@ public class TitleScreenMenu {
             }
         });
 
-        TextButton btnLoad = new TextButton("load", VisUI.getSkin());
+        VisTextButton btnLoad = new VisTextButton("load");
         btnLoad.getLabel().setAlignment(Align.left);
         btnLoad.addListener(new ChangeListener() {
             @Override
@@ -60,7 +57,7 @@ public class TitleScreenMenu {
             }
         });
 
-        TextButton btnOption = new TextButton("options", VisUI.getSkin());
+        VisTextButton btnOption = new VisTextButton("options");
         btnOption.getLabel().setAlignment(Align.left);
         btnOption.addListener(new ChangeListener() {
             @Override
@@ -69,7 +66,7 @@ public class TitleScreenMenu {
             }
         });
 
-        TextButton btnAbout = new TextButton("about", VisUI.getSkin());
+        VisTextButton btnAbout = new VisTextButton("about");
         btnAbout.getLabel().setAlignment(Align.left);
         btnAbout.addListener(new ChangeListener() {
             @Override
@@ -78,7 +75,7 @@ public class TitleScreenMenu {
             }
         });
 
-        TextButton btnExit = new TextButton("exit", VisUI.getSkin());
+        VisTextButton btnExit = new VisTextButton("exit");
         btnExit.getLabel().setAlignment(Align.left);
 
         btnExit.addListener(new ChangeListener() {
@@ -122,11 +119,10 @@ public class TitleScreenMenu {
                                 case something: Dialogs.showOKDialog(stage, "result", "pressed: something"); break;
                             }
                         });
-
                 }
         });*/
 
-        btnLoad.setDisabled(true);
+        //btnLoad.setDisabled(true);
         //btnOption.setDisabled(true);
         table.add(btnPlay).fillX().row();
         //table.add(btnLoad).fillX().row();
@@ -136,7 +132,7 @@ public class TitleScreenMenu {
     }
 
     public void addDebugItems(final SpaceProject game) {
-        TextButton btnVoronoi = new TextButton("[DEBUG] voronoi", VisUI.getSkin());
+        VisTextButton btnVoronoi = new VisTextButton("[DEBUG] voronoi");
         btnVoronoi.getLabel().setAlignment(Align.left);
         btnVoronoi.addListener(new ChangeListener() {
             @Override
@@ -145,7 +141,7 @@ public class TitleScreenMenu {
             }
         });
 
-        TextButton btnNoise = new TextButton("[DEBUG] noise", VisUI.getSkin());
+        VisTextButton btnNoise = new VisTextButton("[DEBUG] noise");
         btnNoise.getLabel().setAlignment(Align.left);
         btnNoise.addListener(new ChangeListener() {
             @Override
@@ -154,7 +150,7 @@ public class TitleScreenMenu {
             }
         });
 
-        TextButton btnShip = new TextButton("[DEBUG] ship gen", VisUI.getSkin());
+        VisTextButton btnShip = new VisTextButton("[DEBUG] ship gen");
         btnShip.getLabel().setAlignment(Align.left);
         btnShip.addListener(new ChangeListener() {
             @Override
@@ -163,7 +159,7 @@ public class TitleScreenMenu {
             }
         });
 
-        TextButton btn3D = new TextButton("[DEBUG] 3D rotate", VisUI.getSkin());
+        VisTextButton btn3D = new VisTextButton("[DEBUG] 3D rotate");
         btn3D.getLabel().setAlignment(Align.left);
         btn3D.addListener(new ChangeListener() {
             @Override
@@ -171,8 +167,8 @@ public class TitleScreenMenu {
                 game.setScreen(new Test3DScreen());
             }
         });
-        
-        TextButton btnSpiral = new TextButton("[DEBUG] Spiral Gen", VisUI.getSkin());
+
+        VisTextButton btnSpiral = new VisTextButton("[DEBUG] Spiral Gen");
         btnSpiral.getLabel().setAlignment(Align.left);
         btnSpiral.addListener(new ChangeListener() {
             @Override
@@ -180,8 +176,8 @@ public class TitleScreenMenu {
                 game.setScreen(new TestSpiralGalaxy());
             }
         });
-    
-        TextButton btnBlock = new TextButton("[DEBUG] Block Engine Test", VisUI.getSkin());
+
+        VisTextButton btnBlock = new VisTextButton("[DEBUG] Block Engine Test");
         btnBlock.getLabel().setAlignment(Align.left);
         btnBlock.addListener(new ChangeListener() {
             @Override
@@ -196,6 +192,16 @@ public class TitleScreenMenu {
         table.add(btnNoise).fillX().row();
         table.add(btn3D).fillX().row();
         table.add(btnShip).fillX().row();
+
+        resetFocusableActors();
+    }
+
+    private void resetFocusableActors() {
+        //stage.setFocusedActor(null); clear focused?
+        stage.clearFocusableActors();
+        for (Actor button : table.getChildren()) {
+            stage.addFocusableActor(button);
+        }
     }
 
 }

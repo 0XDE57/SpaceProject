@@ -9,13 +9,13 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisTable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.generation.FontLoader;
 import com.spaceproject.screens.animations.DelaunayAnim;
@@ -32,8 +32,8 @@ public class TitleScreen extends MyScreenAdapter {
     private SpaceProject game;
     private ControllerMenuStage stage;
     private TitleScreenMenu menu;
-    private Table versionTable;
-    private Label titleLabel;
+    private VisTable versionTable;
+    private VisLabel titleLabel;
     private int edgePad;
     private Matrix4 projectionMatrix = new Matrix4();
     private boolean debugMenuEnabled = false;
@@ -82,7 +82,7 @@ public class TitleScreen extends MyScreenAdapter {
         String menuFont = "menuFont";
         initMenuFont(menuFont);
         
-        titleLabel = new Label(SpaceProject.TITLE, VisUI.getSkin(), titleFont, Color.WHITE);
+        titleLabel = new VisLabel(SpaceProject.TITLE, titleFont, Color.WHITE);
         titleLabel.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight(), Align.top);
         stage.addActor(titleLabel);
         
@@ -97,8 +97,8 @@ public class TitleScreen extends MyScreenAdapter {
         //stage.setFocusedActor(menu.table.getChildren().first());
 
         //version note
-        versionTable = new Table();
-        versionTable.add(new Label(SpaceProject.VERSION, VisUI.getSkin(), menuFont, Color.WHITE));
+        versionTable = new VisTable();
+        versionTable.add(new VisLabel(SpaceProject.VERSION, menuFont, Color.WHITE));
         stage.addActor(versionTable);
         versionTable.pack();
 
