@@ -40,18 +40,18 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     GlyphLayout layout = new GlyphLayout();
 
     //all points that define a polygon and any point inside the polygon
-    FloatArray points;
+    final FloatArray points = new FloatArray(true, 500/*maxVerticies*/);
     
     //triangulation
-    DelaunayTriangulator delaunay = new DelaunayTriangulator();
+    final DelaunayTriangulator delaunay = new DelaunayTriangulator();
     final int maxVerticies = 32767;//todo: this is odd number why? there will always be even number of points.
-    ShortArray triangles = new ShortArray();
-    ArrayList<DelaunayCell> dCells = new ArrayList<>();
+    ShortArray triangles;
+    final ArrayList<DelaunayCell> dCells = new ArrayList<>();
     
     //convex hull
     float[] hull;
     Polygon hullPoly;
-    Vector2 centroid = new Vector2();
+    final Vector2 centroid = new Vector2();
     final ConvexHull convex = new ConvexHull();
     
     //toggles
@@ -109,35 +109,55 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     // [ ] pool cells
     // [ ] render triangle by area relative to total hull area
     // [ ]
+    // [ ] investigate: ometimes traiangulation returns artifacts when points line up perfectly on y axis?
 
     public TestVoronoiScreen() {
-        generateNewPoints(10);
+        generateNewPoints(MathUtils.random(3, 16), false, false);
     }
 
-    private void generateNewPoints(int numPoints) {
-        //reset / clear previous
-        dCells.clear();
-        triangles.clear();
-        hullPoly = null;
+    private void generateNewPoints(int numPoints, boolean regular, boolean addCentroid) {
+        clear();
+        float centerScreenX = Gdx.graphics.getWidth() * 0.5f;
+        float centerScreenY = Gdx.graphics.getHeight() * 0.5f;
 
-        //todo: shapes!
-        int pad = 200;//distance away from edge of screen
-        points = new FloatArray();
-        for (int i = 0; i < numPoints * 2; i += 2) {
-            float x = MathUtils.random(pad, Gdx.graphics.getWidth() - pad);
-            float y = MathUtils.random(pad, Gdx.graphics.getHeight() - pad);
-            //todo: reject duplicate points
-            points.add(x);
-            points.add(y);
+        if (regular) {
+            //shapes!
+            //source: ShapeRenderer.circle();
+            float x = centerScreenX;
+            float y = centerScreenY;
+            float size = Math.min(x, y);
+            float angle = 2 * MathUtils.PI / numPoints;
+            float cos = MathUtils.cos(angle);
+            float sin = MathUtils.sin(angle);
+            float cx = size, cy = 0;
+            for (int i = 0; i < numPoints; i++) {
+                points.add(x + cx, y + cy);
+                float temp = cx;
+                cx = cos * cx - sin * cy;
+                cy = sin * temp + cos * cy;
+            }
+        } else {
+            int pad = 200;//distance away from edge of screen
+            for (int i = 0; i < numPoints * 2; i += 2) {
+                float x = MathUtils.random(pad, Gdx.graphics.getWidth() - pad);
+                float y = MathUtils.random(pad, Gdx.graphics.getHeight() - pad);
+                //todo: reject duplicate points
+                points.add(x);
+                points.add(y);
+            }
         }
 
         //calculate the convex hull of all the points
         //center around centroid in middle of screen
         hull = convex.computePolygon(points, false).toArray();//<--system.arraycopy()
         GeometryUtils.polygonCentroid(hull, 0, hull.length, centroid);
+        Gdx.app.log(getClass().getSimpleName(), "isCCW?" + GeometryUtils.isCCW(hull, 0, hull.length));
+        if (addCentroid) {
+            points.add(centroid.x, centroid.y);
+        }
         for (int i = 0; i < points.size; i+= 2) {
-            points.set(i, centroid.x - points.get(i) + Gdx.graphics.getWidth()*0.5f);
-            points.set(i + 1, centroid.y - points.get(i + 1) + Gdx.graphics.getHeight()*0.5f);
+            points.set(i, centroid.x - points.get(i) + centerScreenX);
+            points.set(i + 1, centroid.y - points.get(i + 1) + centerScreenY);
         }
         
         //create cells out of points
@@ -163,7 +183,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         // at com.spaceproject.screens.debug.TestVoronoiScreen.calculateDelaunay(TestVoronoiScreen.java:163)
 
         //computeTriangles() supports only up to 32767 IllegalArgumentException: count must be <= 32767
-        if (points.size > maxVerticies-1) {
+        if (points.size > maxVerticies-2) {
             Gdx.app.error(getClass().getSimpleName(), points.size + " too big. calculation ignored!");
             return;
         }
@@ -373,7 +393,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             }
 
             //NOTE: Delaunay and Voronoi are Convex polygons only.
-            //a second dual-graph? (third-graph?)
+            //a second dual-graph? (tri-graph?)
             //connect midpoints to delaunay centroid
             if (drawMidGraph) {
                 shape.setColor(Color.BLUE);
@@ -383,7 +403,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 //todo: OBSERVATIONS of MidPointToCentroid Dual Graph
                 // cells may be concave and convex!
             }
-            //another dual-graph?
+            //connect centroids: another dual-graph?
             if (drawCenteroidPointGraph) {
                 shape.setColor(Color.PURPLE);
                 shape.line(cell.centroid, cell.a);
@@ -464,11 +484,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             }
             if (drawCircumcenter) shape.circle(cell.circumCenter.x, cell.circumCenter.y, pSize);
         }
-
-        if (drawHull && hullPoly != null) {
-            shape.setColor(Color.RED);
-            shape.polyline(hullPoly.getVertices());
-        }
         shape.end();
 
         batch.begin();
@@ -507,6 +522,13 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             shape.end();
             Gdx.gl.glDisable(GL20.GL_BLEND);
         }
+
+        shape.begin(ShapeType.Line);
+        if (drawHull && hullPoly != null) {
+            shape.setColor(Color.RED);
+            shape.polyline(hullPoly.getVertices());
+        }
+        shape.end();
     }
 
     @Override
@@ -555,12 +577,17 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, layout, Gdx.graphics.getWidth() * 0.5f, y);
 
         text.setColor(Color.BLACK);
+        //controls
+        text.draw(batch, "[C] Clear", 10, y - h * line++);
+        text.draw(batch, "[Spacebar] Generate Random + [ALT] add centroid", 10, y - h * line++);
+        text.draw(batch, "[SHIFT + Spacebar] Generate Regular + [ALT] add centroid", 10, y - h * line++);
         text.draw(batch, "[L-Click] Drag point", 10, y - h * line++);
         text.draw(batch, "[R-Click] Create new point", 10, y- h  * line++);
         text.draw(batch, "[SHIFT + L-Click] Drag points", 10, y - h * line++);
         text.draw(batch, "[S] Shatter: Circumcenter", 10, y - h * line++);
         text.draw(batch, "[CTRL + D] Save PNG", 10, y - h * line++);
 
+        //toggles
         text.setColor(drawCircumcenter ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[1] CircumCenter", 10, y - h  * line++);
         
@@ -603,10 +630,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
             MyScreenAdapter.game.setScreen(new TitleScreen(MyScreenAdapter.game));
         }
-        
-        //reset. new test points
+
+        // clear: full reset
+        if (Gdx.input.isKeyJustPressed(Keys.C)) {
+            clear();
+        }
+
+        //reset. random test points
         if (Gdx.input.isKeyJustPressed(Keys.SPACE)) {
-            generateNewPoints(3);
+            generateNewPoints(MathUtils.random(3, 16), Gdx.input.isKeyPressed(Keys.SHIFT_LEFT), Gdx.input.isKeyPressed(Keys.CONTROL_LEFT));
         }
 
         int x = Gdx.input.getX();
@@ -680,8 +712,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             boolean added = false;
             for (DelaunayCell cell : dCells) {
                 //computeTriangles() supports only up to 32767 IllegalArgumentException: count must be <= 32767
-                if (points.size > maxVerticies-2) {
-                    Gdx.app.error(getClass().getSimpleName(), points.size + " > 32767. ignored!");
+                if (points.size > maxVerticies-3) {
+                    Gdx.app.error(getClass().getSimpleName(), points.size + " too many points. shatter aborted!");
                     return;
                 }
 
@@ -750,5 +782,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawMidGraph = !drawMidGraph;
         }
     }
-    
+
+    private void clear() {
+        points.clear();
+        dCells.clear();
+        hull = null;
+        hullPoly = null;
+    }
+
 }
