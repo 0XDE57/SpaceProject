@@ -659,14 +659,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 Gdx.app.error(getClass().getSimpleName(), points.size + " > 32767. ignored!");
                 return;
             }
-
-            boolean duplicate = false;
-            for (int i = 0; i < points.size && !duplicate; i += 2) {
-                if (MathUtils.isEqual(x, points.get(i), 0.1f) && MathUtils.isEqual(y, points.get(i+1), 0.1f)) {
-                    duplicate = true;
-                }
-            }
-            if (!duplicate) {
+            if (!isDuplicate(x, y)) {
                 points.add(x);
                 points.add(y);
                 calculateDelaunay();
@@ -724,16 +717,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     Gdx.app.error(getClass().getSimpleName(), points.size + " too many points. shatter aborted!");
                     return;
                 }
-
-                boolean duplicate = false;
                 float x1 = cell.centroid.x;
                 float y1 = cell.centroid.y;
-                for (int i = 0; i < points.size && !duplicate; i += 2) {
-                    if (MathUtils.isEqual(x1, points.get(i), 0.1f) && MathUtils.isEqual(y1, points.get(i+1), 0.1f)) {
-                        duplicate = true;
-                    }
-                }
-                if (!duplicate) {
+                if (!isDuplicate(x1, y1)) {
                     points.add(x1);
                     points.add(y1);
                     added = true;
@@ -786,6 +772,16 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         if (Gdx.input.isKeyJustPressed(Keys.EQUALS)) {
             drawMidGraph = !drawMidGraph;
         }
+    }
+
+    private boolean isDuplicate(float x1, float y1) {
+        boolean duplicate = false;
+        for (int i = 0; i < points.size && !duplicate; i += 2) {
+            if (MathUtils.isEqual(x1, points.get(i), 0.1f) && MathUtils.isEqual(y1, points.get(i+1), 0.1f)) {
+                duplicate = true;
+            }
+        }
+        return duplicate;
     }
 
     private void renderToFile() {
