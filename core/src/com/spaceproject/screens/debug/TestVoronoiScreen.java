@@ -675,7 +675,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 }
                 float offsetX = dragStart.x - x;
                 float offsetY = dragStart.y - y;
-
                 for (int i = 0; i < points.size; i += 2) {
                     float px = points.get(i);
                     float py = points.get(i + 1);
@@ -796,7 +795,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         int padding = 10;
         Pixmap image = Pixmap.createFromFrameBuffer((int) bounds.x - padding, (int) bounds.y - padding, (int) bounds.getWidth() + padding * 2, (int) bounds.getHeight() + padding * 2);
         //Pixmap.createFromFrameBuffer(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); //fullscreen capture
-        FileHandle handle = Gdx.files.local("assets/captured/capture_" + Gdx.graphics.getFrameId() + ".PNG");
+        FileHandle handle = Gdx.files.local("assets/capture/capture_" + Gdx.graphics.getFrameId() + ".PNG");
         Gdx.app.log(getClass().getSimpleName(), "writing to: " + handle.path());
         PixmapIO.writePNG(handle, image, -1, true);
     }
