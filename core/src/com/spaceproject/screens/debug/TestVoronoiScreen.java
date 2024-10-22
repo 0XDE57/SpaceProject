@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.generation.FontLoader;
@@ -23,13 +24,63 @@ import com.spaceproject.screens.TitleScreen;
 
 import java.util.ArrayList;
 
-//voronoi/polygon stuff
+//voronoi/polygon research:
 //END GOAL: https://www.youtube.com/watch?v=pe4_Dimk7v0
 //https://github.com/libgdx/libgdx/wiki/Circles%2C-planes%2C-rays%2C-etc.
 //https://en.wikipedia.org/wiki/Circumscribed_circle
 //http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect/565282#565282
 //http://stackoverflow.com/questions/31021968/correct-use-of-polygon-triangulators-in-libgdx
 //https://github.com/mjholtzem/Unity-2D-Destruction
+//todo:
+// [x] fix grabbing points, focus point, don't lose it
+// [x] highlight focused point
+// [ ] highlight when near grab-able point, or highlighatble info
+// [x] center points
+// [x] discard points if too close? epsilon check remove duplicate points
+// [x] fix scaling for window resize
+// [ ] fix voronoi cells for edge cases
+// [ ] extract voronoi cells
+// [ ] display points as array both input and output
+// [x] display centroid delaunay
+// [x] display centroid for sub delaunay
+// [x] display centroid voronoi
+// [x] display centroid for sub voronoi
+// [ ] basic shape loader, centered with reasonable scale
+// [ ] ability to scale shape, maybe [ALT + L-Click]
+//          triangle, rectangle, at least to octagon (or higher since this isn't limited by box2d currently) 12 or allow user to input num sides
+// [ ] ability to delete point. maybe [SHIFT + R-Click]
+// [ ] editable points list in VisUI textbox
+// [...] shatter button
+//      [x] place new point at each circumcenter
+//      [ ] shatter at Voronoi Center
+//      [ ] shatter at Midpoints
+//      [ ] add points at excircle or escribed circle: https://en.wikipedia.org/wiki/Incircle_and_excircles#Excircles_and_excenters
+//      [ ] if we think of any more...
+//      [x] limit duplicates...
+// [x] render to file: Pixmap -> PNG. how to render shaperenderer to file?
+//      [x transparency
+//      [x] shape only crop? currently is full screen capture.
+// [ ] render to file: create animation (https://github.com/tommyettinger/anim8-gdx): base shape, shatter iteration 1-10 (or stop when duplicate points = too small to shatter further)
+// [ ] pool cells
+// [ ] render triangle by area relative to total hull area
+// [ ] investigate: sometimes triangulation returns artifacts
+//      seems to be more pronounced with equilaterals or concyclic (or cocyclic)
+//      or when points line up perfectly on y axis?
+// [ ] draw Incircle
+// [ ] draw Excircle
+// [ ] draw Gergonne triangle: contact triangle or intouch triangle of △ A B C
+// [ ] color palate: render
+// [ ] color pallet: VisUIcolor picker dialog select render colors
+// [ ] color:pallet: background color options or checkered tile?
+// [ ] render grid lines
+// [ ] render grid axis X,Y
+// [ ] draw triangle weight graph: area/totalArea
+// [ ] ensure all types can be rendered https://en.wikipedia.org/wiki/Triangle_center
+// [ ] project 3D cube to 2D?
+// [ ] grid generation!
+// [ ] scale
+//      rotate 90, 45, user defined?
+// [ ] rotate //modififer key + click should scale + rotate when a hull point selected?
 
 public class TestVoronoiScreen extends MyScreenAdapter {
 
@@ -41,7 +92,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
     //all points that define a polygon and any point inside the polygon
     final FloatArray points = new FloatArray(true, 500/*maxVerticies*/);
-    
+    final Array<Color> colorTest = new Array<>();
+
     //triangulation
     final DelaunayTriangulator delaunay = new DelaunayTriangulator();
     final int maxVerticies = 32767;//todo: this is odd number why? there will always be even number of points.
@@ -53,6 +105,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     Polygon hullPoly;
     final Vector2 centroid = new Vector2();
     final ConvexHull convex = new ConvexHull();
+
+    final Vector2 cacheVec = new Vector2();
+    final Color cacheColor = new Color();
     
     //toggles
     boolean drawCircumcircle = false,
@@ -66,61 +121,27 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawHull = true,
             drawCentroid = false,
             drawTriangleQuality = false,
-            drawTriangleInfo = false;
+            drawTriangleInfo = false,
+            voronoiRender = false;
     
-    int pSize = 6;
+    int pSize = 5;
     float dragRadius = 20;
     int focusedPoint = -1;//no index
 
     boolean isDrag = false;
     Vector2 dragStart = new Vector2();
 
-    //todo:
-    // [x] fix grabbing points, focus point, don't lose it
-    // [x] highlight focused point
-    // [ ] highlight when near grab-able point, or highlighatble info
-    // [x] center points
-    // [ ] draw grid
-    // [x] discard points if too close? epsilon check remove duplicate points
-    // [x] fix scaling for window resize
-    // [ ] fix voronoi cells for edge cases
-    // [ ] extract voronoi cells
-    // [ ] display points as array both input and output
-    // [x] display centroid delaunay
-    // [x] display centroid for sub delaunay
-    // [x] display centroid voronoi
-    // [x] display centroid for sub voronoi
-    // [ ] basic shape loader, centered with reasonable scale
-    // [ ] ability to scale shape, maybe [ALT + L-Click]
-    //          triangle, rectangle, at least to octagon (or higher since this isn't limited by box2d currently) 12 or allow user to input num sides
-    // [ ] ability to delete point. maybe [SHIFT + R-Click]
-    // [ ] editable points list in VisUI textbox
-    // [...] shatter button
-    //      [x] place new point at each circumcenter
-    //      [ ] shatter at Voronoi Center
-    //      [ ] shatter at Midpoints
-    //      [ ] add points at excircle or escribed circle: https://en.wikipedia.org/wiki/Incircle_and_excircles#Excircles_and_excenters
-    //      [ ] if we think of any more...
-    //      [x] limit duplicates...
-    // [x] render to file: Pixmap -> PNG. how to render shaperenderer to file?
-    //      [x transparency
-    //      [x] shape only crop? currently is full screen capture.
-    // [ ] render to file: create animation (https://github.com/tommyettinger/anim8-gdx): base shape, shatter iteration 1-10 (or stop when duplicate points = too small to shatter further)
-    // [ ] pool cells
-    // [ ] render triangle by area relative to total hull area
-    // [ ] investigate: sometimes triangulation returns artifacts
-    //      seems to be more pronounced with equilaterals or concyclic (or cocyclic)
-    //      or when points line up perfectly on y axis?
-    // [ ] draw Incircle
-    // [ ] draw Excircle
-    // [ ] draw Gergonne triangle: contact triangle or intouch triangle of △ A B C
-    // [ ] color palate: render
-    // [ ] color pallet: VisUIcolor picker dialog select render colors
-    // [ ] color:pallet: background color options or checkered tile?
-    // [ ] render grid lines
-    // [ ] render grid axis X,Y
-    // [ ] draw triangle weight graph: area/totalArea
-    // [ ] ensure all types can be rendered https://en.wikipedia.org/wiki/Triangle_center
+    //distance based voronoi render style
+    enum DistanceCheck {
+        euclidean, manhattan, chess, antiChess;
+
+        private static final DistanceCheck[] VALUES = values();
+
+        public DistanceCheck next() {
+            return VALUES[(ordinal() + 1) % VALUES.length];
+        }
+    }
+    private DistanceCheck renderStyle = DistanceCheck.euclidean;
 
     public TestVoronoiScreen() {
         generateNewPoints(MathUtils.random(3, 16), false, false);
@@ -169,6 +190,10 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         for (int i = 0; i < points.size; i+= 2) {
             points.set(i, centroid.x - points.get(i) + centerScreenX);
             points.set(i + 1, centroid.y - points.get(i + 1) + centerScreenY);
+
+            //init color test
+            //todo: pool
+            colorTest.add(new Color((float)Math.random()*0.5f, (float)Math.random()*0.5f, (float)Math.random()*0.5f, 1));
         }
         
         //create cells out of points
@@ -336,6 +361,21 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     }
     
     private void drawStuff() {
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        if (voronoiRender && points.notEmpty()) {
+            shape.begin(ShapeType.Line);
+            //todo: this could be rendered to a texture, distance does not need to be calculated every frame.
+            //  only needs to update when points are modified (add/remove/drag)
+            for (int y = 0; y < Gdx.graphics.getHeight(); y++) {
+                for (int x = 0; x < Gdx.graphics.getWidth(); x++) {
+                    shape.setColor(closestPointColor(x, y));
+                    shape.point(x, y, 0);
+                }
+            }
+            shape.end();
+        }
+
         if (focusedPoint >= 0) {
             shape.begin(ShapeType.Filled);
             float focusX = points.get(focusedPoint);
@@ -498,6 +538,22 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         shape.end();
 
+        if (drawTriangleQuality) {
+            shape.begin(ShapeType.Filled);
+            for (DelaunayCell cell : dCells) {
+                shape.setColor(0.3f, 0.3f, 0.3f, 1 - cell.quality);
+                shape.triangle(cell.a.x, cell.a.y, cell.b.x, cell.b.y, cell.c.x, cell.c.y);
+            }
+            shape.end();
+        }
+
+        shape.begin(ShapeType.Line);
+        if (drawHull && hullPoly != null) {
+            shape.setColor(Color.RED);
+            shape.polyline(hullPoly.getVertices());
+        }
+        shape.end();
+
         batch.begin();
         if (drawTriangleInfo) {
             dataFont.setColor(Color.BLACK);
@@ -523,35 +579,58 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }*/
         batch.end();
 
-        if (drawTriangleQuality) {
-            Gdx.gl.glEnable(GL20.GL_BLEND);
-            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-            shape.begin(ShapeType.Filled);
-            for (DelaunayCell cell : dCells) {
-                shape.setColor(0.3f, 0.3f, 0.3f, 1 - cell.quality);
-                shape.triangle(cell.a.x, cell.a.y, cell.b.x, cell.b.y, cell.c.x, cell.c.y);
-            }
-            shape.end();
-            Gdx.gl.glDisable(GL20.GL_BLEND);
-        }
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+    }
 
-        shape.begin(ShapeType.Line);
-        if (drawHull && hullPoly != null) {
-            shape.setColor(Color.RED);
-            shape.polyline(hullPoly.getVertices());
+    public Color closestPointColor(float x, float y) {
+        cacheVec.set(x, y);
+        int closest = -1;//index?
+        float closeDist = Float.MAX_VALUE;
+        for (int i = 0; i < points.size; i += 2) {
+            float xx = points.get(i);
+            float yy = points.get(i + 1);
+            float dist = 0;
+            switch (renderStyle) {
+                case euclidean:
+                    dist = cacheVec.dst2(xx, yy);
+                    break;
+                case manhattan:
+                    dist = Math.abs(x - xx) + Math.abs(y - yy);
+                    break;
+                case chess: //Chebyshev (max)
+                    dist = MyMath.chessDistance(x, y, xx, yy);
+                    break;
+                case antiChess: //anti-Chebyshev (min)
+                    dist = MyMath.antiChessDistance(x, y, xx, yy);
+                    break;
+            }
+            if (dist < closeDist) {
+                closeDist = dist;
+                closest = i;
+            }
         }
-        shape.end();
+        //i 0 -> 0
+        //i 2 -> 1
+        //i 4 -> 2
+        //i 6 -> 3
+        //i 8 -> 4
+        if (closest != 0) {
+            closest /= 2;
+        }
+        return colorTest.get(closest);
     }
 
     @Override
     public void render(float delta) {
         //clear screen
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
-        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
 
         //render voronoi stuff
         drawStuff();
-        
+
+
         //toggles, add/move points, reset
         updateControls();
         
@@ -597,7 +676,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, "[R-Click] Create new point", 10, y- h  * line++);
         text.draw(batch, "[SHIFT + L-Click] Drag points", 10, y - h * line++);
         text.draw(batch, "[S] Shatter @ Delaunay Centroid", 10, y - h * line++);
-        text.draw(batch, "[CTRL + D] Save PNG", 10, y - h * line++);
+        text.draw(batch, "[CTRL + D] Save Cropped PNG", 10, y - h * line++);//todo: add full screen variant
 
         //toggles
         text.setColor(drawCircumcenter ? Color.GREEN : Color.BLACK);
@@ -635,6 +714,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         text.setColor(drawMidGraph ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[=] Centroid-Semiperimeter Graph", 10, y - h * line++);
+
+        text.setColor(voronoiRender ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[Q] Voronoi Render [" + renderStyle.name().toUpperCase() + "]", 10, y - h * line++);
+        text.draw(batch, "[W] Cycle Render Style", 10, y - h * line++);
+        text.draw(batch, "[E] Voronoi Render (Regenerate Colors)", 10, y - h * line++);
+
         batch.end();
     }
     
@@ -666,6 +751,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             if (!isDuplicate(x, y)) {
                 points.add(x);
                 points.add(y);
+                colorTest.add(new Color((float)Math.random(), (float)Math.random(), (float)Math.random(), 1));
                 calculateDelaunay();
             }
         }
@@ -725,6 +811,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 if (!isDuplicate(x1, y1)) {
                     points.add(x1);
                     points.add(y1);
+                    colorTest.add(new Color((float)Math.random() * 0.5f, (float)Math.random() * 0.5f, (float)Math.random() * 0.5f, 0.5f));
                     added = true;
                 }
             }
@@ -775,6 +862,23 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         if (Gdx.input.isKeyJustPressed(Keys.EQUALS)) {
             drawMidGraph = !drawMidGraph;
         }
+        //running out of numbers. need better controls
+        if (Gdx.input.isKeyJustPressed(Keys.Q)) {
+            voronoiRender = !voronoiRender;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.W)) {
+            renderStyle = renderStyle.next();
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.E)) {
+            regenColor();
+        }
+    }
+
+    private void regenColor() {
+        colorTest.clear();
+        for (int i = 0; i < points.size; i+= 2) {
+            colorTest.add(new Color((float)Math.random() * 0.5f, (float)Math.random() * 0.5f, (float)Math.random() * 0.5f, 1));
+        }
     }
 
     private boolean isDuplicate(float x1, float y1) {
@@ -809,6 +913,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         dCells.clear();
         hull = null;
         hullPoly = null;
+        colorTest.clear();
     }
 
 }
