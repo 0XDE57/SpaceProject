@@ -133,7 +133,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
     //distance based voronoi render style
     enum DistanceCheck {
-        euclidean, manhattan, chess, antiChess;
+        euclidean, manhattan, chess, antiChess, multiplied, divided, experimentA, experimentB;
 
         private static final DistanceCheck[] VALUES = values();
 
@@ -462,8 +462,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.line(cell.centroid, cell.b);
                 shape.line(cell.centroid, cell.c);
                 //todo: OBSERVATIONS of VertexToCentroid Dual Graph
-                // all internal cells are 4 vertex (quadrilateral) and convex!
-                // all external cells are 3 vertex (triangle)
+                // all internal cells are only 4 vertex (quadrilateral) and convex!
             }
             //are the other dual graphs? I think im beginning to see some shapes and patterns...
 
@@ -590,6 +589,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             float xx = points.get(i);
             float yy = points.get(i + 1);
             float dist = 0;
+            float dX = Math.abs(x - xx);
+            float dY = Math.abs(y - yy);
             switch (renderStyle) {
                 case euclidean:
                     dist = cacheVec.dst2(xx, yy);
@@ -602,6 +603,22 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     break;
                 case antiChess: //anti-Chebyshev (min)
                     dist = MyMath.antiChessDistance(x, y, xx, yy);
+                    break;
+                case multiplied:
+                    dist = Math.abs(x - xx) * Math.abs(y - yy);
+                    break;
+                case divided:
+                    dist = Math.abs(x - xx) / Math.abs(y - yy);
+                    break;
+                case experimentA:
+                    //float dX = Math.abs(x - xx);
+                    //float dY = Math.abs(y - yy);
+                    dist = Math.min(dX, dY) / Math.max(dX, dY);
+                    break;
+                case experimentB:
+                    //float dX = Math.abs(x - xx);
+                    //float dY = Math.abs(y - yy);
+                    dist = Math.min(dX, dY) * Math.max(dX, dY);
                     break;
             }
             if (dist < closeDist) {
@@ -648,6 +665,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         if (recenter) {
             //calculate the convex hull of all the points
             //center around centroid in middle of screen
+            if (points.size < 3) {
+                //if n = two, center is difference between the points
+                //centroid = (p1 - p2) / 2
+                //if n = 1, just center the single point...
+                return;
+            }
             hull = convex.computePolygon(points, true).toArray(); //sorted seems to have no impact on
             GeometryUtils.polygonCentroid(hull, 0, hull.length, centroid);
             for (int i = 0; i < points.size; i+= 2) {
