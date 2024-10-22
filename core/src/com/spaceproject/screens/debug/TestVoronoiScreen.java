@@ -400,7 +400,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         shape.begin(ShapeType.Line);
         shape.setColor(Color.BLACK);
-        if (points.size <= 4) {
+        if (drawPoints) {
+        //if (points.size <= 4) {
             for (int i = 0; i < points.size; i += 2) {
                 float x = points.get(i);
                 float y = points.get(i + 1);
@@ -414,13 +415,14 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         
         for (DelaunayCell cell : dCells) {
-            //draw points
+            /*
+            //differentiate points A, B, C
             if (drawPoints) {
                 shape.setColor(Color.BLACK);
-                shape.circle(cell.a.x, cell.a.y, pSize);
-                shape.circle(cell.b.x, cell.b.y, pSize);
-                shape.circle(cell.c.x, cell.c.y, pSize);
-            }
+                shape.circle(cell.a.x, cell.a.y, 1);
+                shape.circle(cell.b.x, cell.b.y, 2);
+                shape.circle(cell.c.x, cell.c.y, 3);
+            }*/
     
             if (drawCentroid) {
                 shape.setColor(Color.CYAN);
