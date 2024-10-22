@@ -81,6 +81,7 @@ import java.util.ArrayList;
 // [ ] scale
 //      rotate 90, 45, user defined?
 // [ ] rotate //modififer key + click should scale + rotate when a hull point selected?
+// [ ] snap modifier
 
 public class TestVoronoiScreen extends MyScreenAdapter {
 
@@ -133,7 +134,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
     //distance based voronoi render style
     enum DistanceCheck {
-        euclidean, manhattan, chess, antiChess, multiplied, divided, experimentA, experimentB;
+        euclidean, manhattan, chess, antiChess, multiply, divXY, divYX,
+        divMinMax, divMaxMin, minMin, minMax, subXY, subYX;
 
         private static final DistanceCheck[] VALUES = values();
 
@@ -145,12 +147,24 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
     public TestVoronoiScreen() {
         generateNewPoints(MathUtils.random(3, 16), false, false);
+
     }
 
     private void generateNewPoints(int numPoints, boolean regular, boolean addCentroid) {
         clear();
         float centerScreenX = Gdx.graphics.getWidth() * 0.5f;
         float centerScreenY = Gdx.graphics.getHeight() * 0.5f;
+
+        /*
+        //CO-LINEAR POINTS!!!
+        //todo: warning! co-linear points will break centering and triangulation. but makes pretty patterns in the voronoi render layer
+        for (int i = 0; i < numPoints * 2; i += 2) {
+            float dist = (float) Gdx.graphics.getWidth() / numPoints;
+            float x = i * 0.5f * dist;
+            float y = centerScreenY;
+            points.add(x);
+            points.add(y);
+        }*/
 
         if (regular) {
             //shapes!
@@ -387,34 +401,53 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         /*
         if (drawTriangleQuality) {
-            Gdx.gl.glEnable(GL20.GL_BLEND);
-            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
             shape.begin(ShapeType.Filled);
             for (DelaunayCell cell : dCells) {
                 shape.setColor(0.3f, 0.3f, 0.3f, 1 - cell.quality);
                 shape.triangle(cell.a.x, cell.a.y, cell.b.x, cell.b.y, cell.c.x, cell.c.y);
             }
             shape.end();
-            Gdx.gl.glDisable(GL20.GL_BLEND);
         }*/
 
         shape.begin(ShapeType.Line);
-        shape.setColor(Color.BLACK);
+
+        //all points
         if (drawPoints) {
-        //if (points.size <= 4) {
+            shape.setColor(Color.BLACK);
             for (int i = 0; i < points.size; i += 2) {
                 float x = points.get(i);
                 float y = points.get(i + 1);
                 shape.circle(x, y, pSize);
             }
         }
-        
+
+        //main centroid for whole poly
         if (drawCentroid) {
             shape.setColor(Color.RED);
             shape.circle(centroid.x, centroid.y, pSize);
         }
         
         for (DelaunayCell cell : dCells) {
+
+            //draw circumcircle
+            if (!hullPoly.contains(cell.circumCenter)) {
+                shape.setColor(Color.MAGENTA);
+            } else {
+                shape.setColor(Color.GREEN);
+            }
+            if (drawCircumcircle) {
+                //todo: failed: ArrayIndexOutOfBoundsException: Index 20003 out of bounds for length 20000
+                //      Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: Index 20003 out of bounds for length 20000
+                //      at com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20.color(ImmediateModeRenderer20.java:121)
+                //      at com.badlogic.gdx.graphics.glutils.ShapeRenderer.circle(ShapeRenderer.java:906)
+                //      at com.badlogic.gdx.graphics.glutils.ShapeRenderer.circle(ShapeRenderer.java:892)
+                //      at com.spaceproject.screens.debug.TestVoronoiScreen.drawStuff(TestVoronoiScreen.java:438)
+                shape.circle(cell.circumCenter.x, cell.circumCenter.y, cell.circumRadius);
+            }
+            if (drawCircumcenter) {
+                shape.circle(cell.circumCenter.x, cell.circumCenter.y, pSize);
+            }
+
             /*
             //differentiate points A, B, C
             if (drawPoints) {
@@ -423,7 +456,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.circle(cell.b.x, cell.b.y, 2);
                 shape.circle(cell.c.x, cell.c.y, 3);
             }*/
-    
+
+            //per delaunay cell centroid
             if (drawCentroid) {
                 shape.setColor(Color.CYAN);
                 shape.circle(cell.centroid.x, cell.centroid.y, pSize);
@@ -445,6 +479,16 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.circle(cell.midBC.x, cell.midBC.y, 3);
             }
 
+
+            //connect centroids: another dual-graph?
+            if (drawCenteroidPointGraph) {
+                shape.setColor(Color.PURPLE);
+                shape.line(cell.centroid, cell.a);
+                shape.line(cell.centroid, cell.b);
+                shape.line(cell.centroid, cell.c);
+                //todo: OBSERVATIONS of VertexToCentroid Dual Graph
+                // all internal cells are only ever 4 vertex (quadrilateral) and always convex!
+            }
             //NOTE: Delaunay and Voronoi are Convex polygons only.
             //a second dual-graph? (tri-graph?)
             //connect midpoints to delaunay centroid
@@ -456,15 +500,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.line(cell.centroid, cell.midCA);
                 //todo: OBSERVATIONS of MidPointToCentroid Dual Graph
                 // cells may be concave and convex!
-            }
-            //connect centroids: another dual-graph?
-            if (drawCenteroidPointGraph) {
-                shape.setColor(Color.PURPLE);
-                shape.line(cell.centroid, cell.a);
-                shape.line(cell.centroid, cell.b);
-                shape.line(cell.centroid, cell.c);
-                //todo: OBSERVATIONS of VertexToCentroid Dual Graph
-                // all internal cells are only 4 vertex (quadrilateral) and convex!
             }
             //are the other dual graphs? I think im beginning to see some shapes and patterns...
 
@@ -519,27 +554,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 					}
 				}*/
             }
-            
-            //draw circumcircle
-            if (!hullPoly.contains(cell.circumCenter)) {
-                shape.setColor(Color.MAGENTA);
-            } else {
-                shape.setColor(Color.GREEN);
-            }
-            if (drawCircumcircle) {
-                //todo: failed: ArrayIndexOutOfBoundsException: Index 20003 out of bounds for length 20000
-                //      Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: Index 20003 out of bounds for length 20000
-                //      at com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20.color(ImmediateModeRenderer20.java:121)
-                //      at com.badlogic.gdx.graphics.glutils.ShapeRenderer.circle(ShapeRenderer.java:906)
-                //      at com.badlogic.gdx.graphics.glutils.ShapeRenderer.circle(ShapeRenderer.java:892)
-                //      at com.spaceproject.screens.debug.TestVoronoiScreen.drawStuff(TestVoronoiScreen.java:438)
-                shape.circle(cell.circumCenter.x, cell.circumCenter.y, cell.circumRadius);
-            }
-            if (drawCircumcenter) shape.circle(cell.circumCenter.x, cell.circumCenter.y, pSize);
         }
         shape.end();
 
+
         if (drawTriangleQuality) {
+            //moveable layer? this could by under or over...
             shape.begin(ShapeType.Filled);
             for (DelaunayCell cell : dCells) {
                 shape.setColor(0.3f, 0.3f, 0.3f, 1 - cell.quality);
@@ -548,6 +568,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             shape.end();
         }
 
+        //always at end to be on top
         shape.begin(ShapeType.Line);
         if (drawHull && hullPoly != null) {
             shape.setColor(Color.RED);
@@ -590,37 +611,61 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         for (int i = 0; i < points.size; i += 2) {
             float xx = points.get(i);
             float yy = points.get(i + 1);
-            float dist = 0;
             float dX = Math.abs(x - xx);
             float dY = Math.abs(y - yy);
+            float min = Math.min(dX, dY);
+            float max = Math.max(dX, dY);
+            float dist = 0;
             switch (renderStyle) {
                 case euclidean:
                     dist = cacheVec.dst2(xx, yy);
                     break;
-                case manhattan:
-                    dist = Math.abs(x - xx) + Math.abs(y - yy);
+                case manhattan: //add
+                    //dist = Math.abs(x - xx) + Math.abs(y - yy);
+                    dist = dX + dY;
                     break;
                 case chess: //Chebyshev (max)
-                    dist = MyMath.chessDistance(x, y, xx, yy);
+                    dist = max;
+                    //dist =  MyMath.chessDistance(x, y, xx, yy);
                     break;
                 case antiChess: //anti-Chebyshev (min)
-                    dist = MyMath.antiChessDistance(x, y, xx, yy);
+                    //dist = MyMath.antiChessDistance(x, y, xx, yy);
+                    dist = min;
                     break;
-                case multiplied:
-                    dist = Math.abs(x - xx) * Math.abs(y - yy);
+                case multiply:
+                    //dist = Math.abs(x - xx) * Math.abs(y - yy);
+                    dist = dX * dY;
                     break;
-                case divided:
-                    dist = Math.abs(x - xx) / Math.abs(y - yy);
+                case minMin:
+                    dist = min * min;
                     break;
-                case experimentA:
+                case minMax:
+                    dist = min * max;
+                    break;
+                case divXY:
+                    //dist = Math.abs(x - xx) * Math.abs(y - yy);
+                    dist = dX / dY;
+                    break;
+                case divYX:
+                    //dist = Math.abs(x - xx) * Math.abs(y - yy);
+                    dist = dY / dX;
+                    break;
+                case divMinMax:
                     //float dX = Math.abs(x - xx);
                     //float dY = Math.abs(y - yy);
-                    dist = Math.min(dX, dY) / Math.max(dX, dY);
+                    dist = min / max;
                     break;
-                case experimentB:
-                    //float dX = Math.abs(x - xx);
-                    //float dY = Math.abs(y - yy);
-                    dist = Math.min(dX, dY) * Math.max(dX, dY);
+                case divMaxMin:
+                    dist = max / min;
+                    break;
+                /*case maxMax:
+                    dist = max * max;//exact same as chess!
+                    break;*/
+                case subXY:
+                    dist = dX - dY;//inverse? of manhattan, doesnt seem to be very interesting.
+                    break;
+                case subYX:
+                    dist = dY - dX;
                     break;
             }
             if (dist < closeDist) {
@@ -645,10 +690,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-
         //render voronoi stuff
         drawStuff();
-
 
         //toggles, add/move points, reset
         updateControls();
@@ -701,7 +744,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, "[R-Click] Create new point", 10, y- h  * line++);
         text.draw(batch, "[SHIFT + L-Click] Drag points", 10, y - h * line++);
         text.draw(batch, "[S] Shatter @ Delaunay Centroid", 10, y - h * line++);
-        text.draw(batch, "[CTRL + D] Save Cropped PNG", 10, y - h * line++);//todo: add full screen variant
+        text.draw(batch, "[CTRL + D] Save PNG", 10, y - h * line++);
 
         //toggles
         text.setColor(drawCircumcenter ? Color.GREEN : Color.BLACK);
@@ -847,7 +890,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         //Control + S -> Save to file
         if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Keys.D)) {
-           renderToFile();
+            //just make all variants for now
+            renderToFile(true, ImageBackground.transparent);
+            renderToFile(false, ImageBackground.transparent);
+            renderToFile(true, ImageBackground.gray);
+            renderToFile(false, ImageBackground.gray);
         }
         
         //toggle drawings
@@ -916,20 +963,41 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         return duplicate;
     }
 
-    private void renderToFile() {
+    enum ImageBackground {
+        transparent, gray//, userDefined
+    }
+
+    private void renderToFile(boolean crop, ImageBackground background) {
         if (points.size < 6) return;
         //manually clear with clear color for transparent background
-        Gdx.gl.glClearColor(0, 0, 0, 0);
-        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        switch (background) {
+            case transparent:
+                Gdx.gl.glClearColor(0, 0, 0, 0);
+                break;
+            case gray:
+                Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
+                break;
+            //todo: default: userDefinedColor?
+        }
+        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         //and force re-render
         drawStuff();
-        //save framebuffer to file
-        Rectangle bounds = hullPoly.getBoundingRectangle();
-        int padding = 10;
-        Pixmap image = Pixmap.createFromFrameBuffer((int) bounds.x - padding, (int) bounds.y - padding, (int) bounds.getWidth() + padding * 2, (int) bounds.getHeight() + padding * 2);
-        //Pixmap.createFromFrameBuffer(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); //fullscreen capture
-        FileHandle handle = Gdx.files.local("assets/capture/capture_" + Gdx.graphics.getFrameId() + ".PNG");
+        Pixmap image;
+        if (crop) {
+            //crop to hull bounds
+            Rectangle bounds = hullPoly.getBoundingRectangle();
+            int padding = 10;
+            image = Pixmap.createFromFrameBuffer((int) bounds.x - padding, (int) bounds.y - padding, (int) bounds.getWidth() + padding * 2, (int) bounds.getHeight() + padding * 2);
+        } else {
+            //fullscreen capture
+            image = Pixmap.createFromFrameBuffer(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        }
+        String mode = "_" + (voronoiRender ? renderStyle.toString().toLowerCase() : "") +  "_" +  background.toString().toLowerCase();
+        String frame = crop ? "_crop" : "";
+        String resolution = "_" + image.getWidth() + "x" + image.getHeight();
+        FileHandle handle = Gdx.files.local("assets/capture/" + Gdx.graphics.getFrameId() + mode + frame + resolution + ".png");
         Gdx.app.log(getClass().getSimpleName(), "writing to: " + handle.path());
+        //save framebuffer to file
         PixmapIO.writePNG(handle, image, -1, true);
     }
 
