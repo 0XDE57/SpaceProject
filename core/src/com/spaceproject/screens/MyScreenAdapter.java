@@ -133,13 +133,13 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
     private void toggleVsync() {
         engineCFG.vsync = !engineCFG.vsync;
         Gdx.graphics.setVSync(engineCFG.vsync);
-        Gdx.app.log(getClass().getSimpleName(), "toggle vsync = " + engineCFG.vsync);
+        Gdx.app.log(getClass().getSimpleName(), "vsync: " + engineCFG.vsync);
     }
 
     public void setVsync(boolean enable) {
         engineCFG.vsync = enable;
         Gdx.graphics.setVSync(engineCFG.vsync);
-        Gdx.app.log(getClass().getSimpleName(), "set vsync = " + engineCFG.vsync);
+        Gdx.app.log(getClass().getSimpleName(), "vsync: " + engineCFG.vsync);
     }
 
     public boolean getVsync() {
