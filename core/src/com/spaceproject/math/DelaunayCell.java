@@ -15,6 +15,8 @@ public class DelaunayCell {
     public Vector2 circumCenter;//center of circle that intersects each vertex a,b,c
     public float circumRadius;//radius of circle that intersects each vertex a,b,c
     public Vector2 centroid = new Vector2();
+    public Vector2 incircle = new Vector2();
+    public float inRadius;
     public float area;
     public float quality;
     
@@ -49,6 +51,9 @@ public class DelaunayCell {
                 centroid.x - b.x, centroid.y - b.y,
                 centroid.x - c.x, centroid.y - c.y);
         area = GeometryUtils.triangleArea(a.x, a.y, b.x, b.y, c.x, c.y);
+
+        //calculate incircle and radius
+        inCircle();
     }
 
     /** Ratio of circumradius to shortest edge as a measure of triangle quality.
@@ -60,6 +65,24 @@ public class DelaunayCell {
         float sqLength2 = x2 * x2 + y2 * y2;
         float sqLength3 = x3 * x3 + y3 * y3;
         return (float)Math.sqrt(Math.min(sqLength1, Math.min(sqLength2, sqLength3))) / circumRadius;
+    }
+
+    /** Incircle: compute "inner circle" of a triangle. incenter and inradius
+     */
+    private void inCircle() {
+        //da, db and dc are the side lengths OPPOSITE vertex A, B and C
+        float da = b.dst(c);
+        float db = c.dst(a);
+        float dc = a.dst(b);
+        float dt = da + db + dc; //total
+        float x = (da * a.x + db * b.x + dc * c.x) / dt;
+        float y = (da * a.y + db * b.y + dc * c.y) / dt;
+        incircle.set(x, y);
+
+        //calculate inRadius
+        float p = dt / 2;// p = semi-perimeter of the circle
+        float r = area / p;
+        inRadius = r;
     }
     
     /**

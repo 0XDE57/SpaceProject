@@ -22,6 +22,7 @@ import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 //voronoi/polygon research:
@@ -45,7 +46,7 @@ import java.util.ArrayList;
 // [x] display centroid for sub delaunay
 // [x] display centroid voronoi
 // [x] display centroid for sub voronoi
-// [ ] basic shape loader, centered with reasonable scale
+// [x] basic shape loader, centered with reasonable scale
 // [ ] ability to scale shape, maybe [ALT + L-Click]
 //          triangle, rectangle, at least to octagon (or higher since this isn't limited by box2d currently) 12 or allow user to input num sides
 // [ ] ability to delete point. maybe [SHIFT + R-Click]
@@ -54,6 +55,7 @@ import java.util.ArrayList;
 //      [x] place new point at each circumcenter
 //      [ ] shatter at Voronoi Center
 //      [ ] shatter at Midpoints
+//      [ ]
 //      [ ] add points at excircle or escribed circle: https://en.wikipedia.org/wiki/Incircle_and_excircles#Excircles_and_excenters
 //      [ ] if we think of any more...
 //      [x] limit duplicates...
@@ -62,11 +64,10 @@ import java.util.ArrayList;
 //      [x] shape only crop? currently is full screen capture.
 // [ ] render to file: create animation (https://github.com/tommyettinger/anim8-gdx): base shape, shatter iteration 1-10 (or stop when duplicate points = too small to shatter further)
 // [ ] pool cells
-// [ ] render triangle by area relative to total hull area
 // [ ] investigate: sometimes triangulation returns artifacts
 //      seems to be more pronounced with equilaterals or concyclic (or cocyclic)
 //      or when points line up perfectly on y axis?
-// [ ] draw Incircle
+// [x] draw Incircle
 // [ ] draw Excircle
 // [ ] draw Gergonne triangle: contact triangle or intouch triangle of △ A B C
 // [ ] color palate: render
@@ -75,6 +76,7 @@ import java.util.ArrayList;
 // [ ] render grid lines
 // [ ] render grid axis X,Y
 // [ ] draw triangle weight graph: area/totalArea
+// [ ] render triangle by area relative to total hull area
 // [ ] ensure all types can be rendered https://en.wikipedia.org/wiki/Triangle_center
 // [ ] project 3D cube to 2D?
 // [ ] grid generation!
@@ -123,7 +125,10 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawCentroid = false,
             drawTriangleQuality = false,
             drawTriangleInfo = false,
-            voronoiRender = false;
+            voronoiRender = false,
+            drawInTriangle = false,
+            drawInRadius = false,
+            drawInCenter = false;
     
     int pSize = 5;
     float dragRadius = 20;
@@ -448,6 +453,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.circle(cell.circumCenter.x, cell.circumCenter.y, pSize);
             }
 
+            if (drawInRadius) {
+                shape.setColor(Color.CORAL);
+                shape.circle(cell.incircle.x, cell.incircle.y, cell.inRadius);
+            }
+            if (drawInCenter) {
+                shape.setColor(Color.CORAL);
+                shape.circle(cell.incircle.x, cell.incircle.y, 3);
+            }
+
             /*
             //differentiate points A, B, C
             if (drawPoints) {
@@ -500,6 +514,14 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.line(cell.centroid, cell.midCA);
                 //todo: OBSERVATIONS of MidPointToCentroid Dual Graph
                 // cells may be concave and convex!
+            }
+
+            if (drawInTriangle) {
+                shape.setColor(Color.ROYAL);
+                shape.triangle(cell.midAB.x, cell.midAB.y,
+                        cell.midBC.x, cell.midBC.y,
+                        cell.midCA.x, cell.midCA.y);
+
             }
             //are the other dual graphs? I think im beginning to see some shapes and patterns...
 
@@ -788,6 +810,14 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, "[W] Cycle Render Style", 10, y - h * line++);
         text.draw(batch, "[E] Voronoi Render (Regenerate Colors)", 10, y - h * line++);
 
+        text.setColor(drawInTriangle ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[T] InTriangle", 10, y - h * line++);
+
+        text.setColor(drawInCenter ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[Y] InCircle: InCenter", 10, y - h * line++);
+        text.setColor(drawInRadius ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[U] InCircle: InRadius", 10, y - h * line++);
+
         batch.end();
     }
     
@@ -934,7 +964,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         if (Gdx.input.isKeyJustPressed(Keys.EQUALS)) {
             drawMidGraph = !drawMidGraph;
         }
-        //running out of numbers. need better controls
+        //todo: running out of numbers. need better controls
         if (Gdx.input.isKeyJustPressed(Keys.Q)) {
             voronoiRender = !voronoiRender;
         }
@@ -943,6 +973,16 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         if (Gdx.input.isKeyJustPressed(Keys.E)) {
             regenColor();
+        }
+        //todo: I am really just making things up now and need a new solution soon beyond simply qwertyuiop'ing my way down the keyboards...
+        if (Gdx.input.isKeyJustPressed(Keys.T)) {
+            drawInTriangle = !drawInTriangle;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.Y)) {
+            drawInCenter = !drawInCenter;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.U)) {
+            drawInRadius = !drawInRadius;
         }
     }
 
@@ -999,6 +1039,16 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         Gdx.app.log(getClass().getSimpleName(), "writing to: " + handle.path());
         //save framebuffer to file
         PixmapIO.writePNG(handle, image, -1, true);
+    }
+
+    public static Pixmap createFromFrameBuffer (int x, int y, int w, int h) {
+        Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
+
+        final Pixmap pixmap = new Pixmap(w, h, Pixmap.Format.RGBA4444);
+        ByteBuffer pixels = pixmap.getPixels();
+        Gdx.gl.glReadPixels(x, y, w, h, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, pixels);
+
+        return pixmap;
     }
 
     private void clear() {
