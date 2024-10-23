@@ -3,10 +3,9 @@ package com.spaceproject.ui.menu.tabs;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.util.dialog.OptionDialogAdapter;
+import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.tabbedpane.Tab;
 import com.kotcrab.vis.ui.widget.tabbedpane.TabbedPane;
 import com.spaceproject.screens.GameScreen;
@@ -23,7 +22,7 @@ public class MainMenuTab extends HotKeyTab {
     public MainMenuTab(final GameMenu gameMenu) {
         super("menu", Input.Keys.ESCAPE);
 
-        TextButton btnGotoMain = new TextButton("main menu", VisUI.getSkin());
+        VisTextButton btnGotoMain = new VisTextButton("main menu");
         btnGotoMain.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -36,7 +35,7 @@ public class MainMenuTab extends HotKeyTab {
             }
         });
 
-        TextButton btnLoad = new TextButton("load", VisUI.getSkin());
+        VisTextButton btnLoad = new VisTextButton("load");
         btnLoad.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -44,7 +43,7 @@ public class MainMenuTab extends HotKeyTab {
             }
         });
 
-        TextButton btnSave = new TextButton("save", VisUI.getSkin());
+        VisTextButton btnSave = new VisTextButton("save");
         btnSave.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -52,7 +51,7 @@ public class MainMenuTab extends HotKeyTab {
             }
         });
 
-        TextButton btnOptions = new TextButton("keybinds", VisUI.getSkin());
+        VisTextButton btnOptions = new VisTextButton("keybinds");
         btnOptions.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -65,7 +64,7 @@ public class MainMenuTab extends HotKeyTab {
             }
         });
     
-        TextButton btnExit = new TextButton("exit", VisUI.getSkin());
+        VisTextButton btnExit = new VisTextButton("exit");
         btnExit.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
