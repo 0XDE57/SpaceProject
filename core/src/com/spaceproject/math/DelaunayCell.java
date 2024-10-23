@@ -12,7 +12,7 @@ public class DelaunayCell {
     public Vector2 a, b, c;//vertex that define triangle
     public Vector2 midAB, midBC, midCA;//semiperimeter: midpoints between vertex
     public DelaunayCell nAB, nBC, nCA;//neighbors (TODO: reference for now, index later)
-    public Vector2 circumCenter;//center of circle that intersects each vertex a,b,c
+    public Vector2 circumCenter = new Vector2();//center of circle that intersects each vertex a,b,c
     public float circumRadius;//radius of circle that intersects each vertex a,b,c
     public Vector2 centroid = new Vector2();
     public Vector2 incircle = new Vector2();
@@ -33,18 +33,10 @@ public class DelaunayCell {
         
         //calculate circumscribed circle
         Vector3 circle = PolygonUtil.circumcircle(a, b, c);
-        circumCenter = new Vector2(circle.x, circle.y);
+        circumCenter.set(circle.x, circle.y);
         circumRadius = circle.z;
 
         //calculate centroid
-        /*
-        float[] poly = new float[]{
-                a.x, a.y,
-                b.x, b.y,
-                c.x, c.y
-        };
-        GeometryUtils.polygonCentroid(poly, 0 , poly.length, centroid);
-        */
         GeometryUtils.triangleCentroid(a.x, a.y, b.x, b.y, c.x, c.y, centroid);
         quality = PolygonUtil.triangleQuality(
                 centroid.x - a.x, centroid.y - a.y,
@@ -53,28 +45,10 @@ public class DelaunayCell {
                 circumRadius);
         area = GeometryUtils.triangleArea(a.x, a.y, b.x, b.y, c.x, c.y);
 
-        //calculate incircle and radius
-        inCircle();
-    }
-
-    /** Incircle: compute "inner circle" of a triangle. incenter and inradius
-     * NOTE: expects area to be calculated before calling
-     * todo: make static polygonutil version
-     */
-    private void inCircle() {
-        //delta a, b and c are the side lengths OPPOSITE vertex A, B and C
-        float da = b.dst(c);
-        float db = c.dst(a);
-        float dc = a.dst(b);
-        float dt = da + db + dc; //delta total
-        float x = (da * a.x + db * b.x + dc * c.x) / dt;
-        float y = (da * a.y + db * b.y + dc * c.y) / dt;
-        incircle.set(x, y);
-
-        //calculate inRadius
-        float p = dt / 2;// p = semi-perimeter of the circle
-        float r = area / p;
-        inRadius = r;
+        //calculate inscribed circle
+        Vector3 inscribedCircle = PolygonUtil.inCircle(a, b, c, area);
+        incircle.set(inscribedCircle.x, inscribedCircle.y);
+        inRadius = inscribedCircle.z;
     }
     
     /**

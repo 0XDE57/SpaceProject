@@ -165,6 +165,25 @@ public class PolygonUtil {
         return cacheVector.set(xc, yc, radius);
     }
 
+    /** Incircle: compute inscribed circle of a triangle.
+     * NOTE: expects area to be calculated before calling
+     * @return incircle of triangle in a Vector3 with incenter in x,y and inradius in z.
+     */
+    public static Vector3 inCircle(Vector2 a, Vector2 b, Vector2 c, float area) {
+        //delta a, b and c are the side lengths OPPOSITE vertex A, B and C
+        float da = b.dst(c);
+        float db = c.dst(a);
+        float dc = a.dst(b);
+        float dt = da + db + dc; //delta total
+        float x = (da * a.x + db * b.x + dc * c.x) / dt;
+        float y = (da * a.y + db * b.y + dc * c.y) / dt;
+
+        //calculate inRadius
+        float p = dt / 2;// p = semi-perimeter of the circle
+        float r = area / p;
+        return cacheVector.set(x, y, r);
+    }
+
     /** Ratio of circumradius to shortest edge as a measure of triangle quality.
      * copy of GeometryUtils.triangleQuality() modified to use provided circumradius instead of recalculating.
      * NOTE: this function expects triangle cords to be relative to the centroid origin (0, 0)!
