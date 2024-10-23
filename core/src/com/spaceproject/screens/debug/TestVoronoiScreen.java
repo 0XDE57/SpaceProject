@@ -84,6 +84,7 @@ import java.util.ArrayList;
 //      rotate 90, 45, user defined?
 // [ ] rotate //modififer key + click should scale + rotate when a hull point selected?
 // [ ] snap modifier
+// [ ] tileable voronoi! 2D voronoi wrapped on a 4D torus
 
 public class TestVoronoiScreen extends MyScreenAdapter {
 
@@ -926,39 +927,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             renderToFile(true, ImageBackground.gray);
             renderToFile(false, ImageBackground.gray);
 
-            //format tests
-            /*
-            //RGBA4444
-            // todo: crash A
-            // # Problematic frame:
-            // # C  [libc.so.6+0x16c7c0]
-            // Fatal glibc error: malloc.c:2599 (sysmalloc): assertion failed: (old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)
-            //renderToFile(true, ImageBackground.transparent, Pixmap.Format.RGBA4444);
-
-            //renderToFile(false, ImageBackground.transparent, Pixmap.Format.RGBA4444);
-
-            //todo: crash B
-            //Problematic frame:
-            //# C  [libc.so.6+0x16c837]
-            //malloc(): corrupted top size
-            renderToFile(true, ImageBackground.gray, Pixmap.Format.RGBA4444);
-
-            //renderToFile(false, ImageBackground.gray, Pixmap.Format.RGBA4444);
-
-            /*
-            //RGB888;
-            renderToFile(true, ImageBackground.transparent, Pixmap.Format.RGB888);
-            renderToFile(false, ImageBackground.transparent, Pixmap.Format.RGB888);
-            renderToFile(true, ImageBackground.gray, Pixmap.Format.RGB888);
-            renderToFile(false, ImageBackground.gray, Pixmap.Format.RGB888);
-
-            //RGB565;
-            renderToFile(true, ImageBackground.transparent, Pixmap.Format.RGB565);
-            renderToFile(false, ImageBackground.transparent, Pixmap.Format.RGB565);
-            renderToFile(true, ImageBackground.gray, Pixmap.Format.RGB565);
-            renderToFile(false, ImageBackground.gray, Pixmap.Format.RGB565);
-
-             */
+            //formatTests();
         }
         
         //toggle drawings
@@ -1018,6 +987,40 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         if (Gdx.input.isKeyJustPressed(Keys.U)) {
             drawInRadius = !drawInRadius;
         }
+    }
+
+    private void formatTests() {
+        //RGBA4444
+        // todo: crash A
+        // # Problematic frame:
+        // # C  [libc.so.6+0x16c7c0]
+        // Fatal glibc error: malloc.c:2599 (sysmalloc): assertion failed: (old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)
+        renderToFile(true, ImageBackground.transparent, Pixmap.Format.RGBA4444);
+
+        //renderToFile(false, ImageBackground.transparent, Pixmap.Format.RGBA4444);
+
+        //todo: crash B
+        //Problematic frame:
+        //# C  [libc.so.6+0x16c837]
+        //malloc(): corrupted top size
+        renderToFile(true, ImageBackground.gray, Pixmap.Format.RGBA4444);
+
+        //renderToFile(false, ImageBackground.gray, Pixmap.Format.RGBA4444);
+
+/*
+        //RGB888;
+        renderToFile(true, ImageBackground.transparent, Pixmap.Format.RGB888);
+        renderToFile(false, ImageBackground.transparent, Pixmap.Format.RGB888);
+        renderToFile(true, ImageBackground.gray, Pixmap.Format.RGB888);
+        renderToFile(false, ImageBackground.gray, Pixmap.Format.RGB888);
+
+        //RGB565;
+        renderToFile(true, ImageBackground.transparent, Pixmap.Format.RGB565);
+        renderToFile(false, ImageBackground.transparent, Pixmap.Format.RGB565);
+        renderToFile(true, ImageBackground.gray, Pixmap.Format.RGB565);
+        renderToFile(false, ImageBackground.gray, Pixmap.Format.RGB565);
+
+ */
     }
 
     private void regenColor() {
