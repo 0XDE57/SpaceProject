@@ -131,7 +131,29 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
         Gdx.graphics.setVSync(engineCFG.vsync);
         Gdx.app.log(getClass().getSimpleName(), "set vsync = " + engineCFG.vsync);
     }
-    
+
+    final int GL_MULTISAMPLE = 0x809D;
+    /**
+     * Must first enable in config:
+     * config.setBackBufferConfig(8, 8, 8, 8, 16, 0, 8)
+     */
+    public void enableMSAA() {
+        Gdx.gl20.glEnable(GL_MULTISAMPLE);
+    }
+
+    public void disableMSAA() {
+        Gdx.gl20.glDisable(GL_MULTISAMPLE);
+    }
+
+    /** NOTE! If application was not initially launched with MSAA enabled on startup config,
+     * this will return true even if MSAA is not actually on!
+     * Must first enable in config:
+     * config.setBackBufferConfig(8, 8, 8, 8, 16, 0, 8)
+     */
+    public boolean isMSAAEnabled() {
+        return Gdx.gl.glIsEnabled(GL_MULTISAMPLE);
+    }
+
     public static void resetCamera() {
         cam.zoom = 1;
         resetRotation();

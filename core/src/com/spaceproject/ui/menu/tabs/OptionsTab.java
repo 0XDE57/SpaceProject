@@ -51,6 +51,19 @@ public class OptionsTab extends Tab {
             }
         });
 
+        final VisCheckBox toggleMSAA = new VisCheckBox("MSAA", game.isMSAAEnabled());
+        toggleMSAA.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (toggleMSAA.isChecked()) {
+                    game.enableMSAA();
+                } else {
+                    game.disableMSAA();
+                }
+                Gdx.app.log(getClass().getSimpleName(), "MSAA: " + game.isMSAAEnabled());
+            }
+        });
+
         final VisLabel volumeText = new VisLabel("volume: 100");
         final VisSlider volumeSlider = new VisSlider(0, 1, 0.1f, false);
         volumeSlider.setValue(volumeSlider.getMaxValue());
@@ -94,6 +107,7 @@ public class OptionsTab extends Tab {
         content.add(volumeSlider).fillX().padBottom(6).row();
         content.add(toggleFullscreen).left().row();
         content.add(toggleVsync).left().row();
+        content.add(toggleMSAA).left().row();
         int pad = 10;
         //getContentTable().add(new Separator()).fillX().padTop(pad).padBottom(pad).row();
         //getContentTable().add(new Separator()).fillX().padTop(pad).padBottom(pad).row();

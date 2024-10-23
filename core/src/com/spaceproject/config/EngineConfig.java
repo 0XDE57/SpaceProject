@@ -6,6 +6,7 @@ import com.spaceproject.SpaceProject;
 public class EngineConfig extends Config {
     
     public boolean vsync;
+    public boolean msaa;
     
     public float renderScale;
     public float viewportWidth;
@@ -27,6 +28,7 @@ public class EngineConfig extends Config {
     @Override
     public void loadDefault() {
         vsync = true;
+        msaa = true;
         
         renderScale = 30f;
         viewportWidth = 1280;
