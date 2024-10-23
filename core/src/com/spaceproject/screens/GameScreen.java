@@ -88,12 +88,14 @@ public class GameScreen extends MyScreenAdapter {
         //init scene2d/VisUI
         if (VisUI.isLoaded())
             VisUI.dispose(true);
-        VisUI.load(VisUI.SkinScale.X1);
+        VisUI.load();
         VisUI.setDefaultTitleAlign(Align.center);
         BitmapFont font = FontLoader.createFont(FontLoader.fontBitstreamVM, 12);
         VisUI.getSkin().add(FontLoader.skinSmallFont, font);
-        TextButton.TextButtonStyle textButtonStyle = VisUI.getSkin().get(TextButton.TextButtonStyle.class);
-        textButtonStyle.focused = textButtonStyle.over; //set focused style to over for keyboard navigation because VisUI default focused style is null!
+
+        //i think this is not true... lets disable it for now then kill it later
+        //TextButton.TextButtonStyle textButtonStyle = VisUI.getSkin().get(TextButton.TextButtonStyle.class);
+        //textButtonStyle.focused = textButtonStyle.over; //set focused style to over for keyboard navigation because VisUI default focused style is null!
 
         stage = new ControllerMenuStage(new ScreenViewport());
         getInputMultiplexer().addProcessor(0, stage);
