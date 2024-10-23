@@ -26,6 +26,7 @@ public class KeyConfig extends Config {
     //---screen controls---
     public int fullscreen;
     public int vsync;
+    public int msaa;
     public int zoomOut;
     public int zoomIn;
     public int resetZoom;
@@ -67,6 +68,7 @@ public class KeyConfig extends Config {
         //screen
         fullscreen = Keys.F11;
         vsync = Keys.F8;
+        msaa = Keys.F7;
         zoomOut = Keys.MINUS;
         zoomIn = Keys.EQUALS;
         resetZoom = Keys.PERIOD;

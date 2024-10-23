@@ -74,6 +74,16 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
         if (Gdx.input.isKeyJustPressed(keyCFG.vsync)) {
             toggleVsync();
         }
+
+        //vsync toggle
+        if (Gdx.input.isKeyJustPressed(keyCFG.msaa)) {
+            if (isMSAAEnabled()) {
+                disableMSAA();
+            } else {
+                enableMSAA();
+            }
+            Gdx.app.log(getClass().getSimpleName(), "MSAA: " + isMSAAEnabled());
+        }
     }
     
     public static InputMultiplexer getInputMultiplexer() {
@@ -132,6 +142,11 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
         Gdx.app.log(getClass().getSimpleName(), "set vsync = " + engineCFG.vsync);
     }
 
+    public boolean getVsync() {
+        return false;//Gdx.gl.glIsEnabled(GL_VSYNC);
+    }
+
+    final int GL_MAXSAMPLE = 0x809D;
     final int GL_MULTISAMPLE = 0x809D;
     /**
      * Must first enable in config:
@@ -151,6 +166,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
      * config.setBackBufferConfig(8, 8, 8, 8, 16, 0, 8)
      */
     public boolean isMSAAEnabled() {
+        //Gdx.gl.glGetIntegerv(Gdx.gl32.);
         return Gdx.gl.glIsEnabled(GL_MULTISAMPLE);
     }
 
@@ -169,5 +185,5 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
         shape.dispose();
         batch.dispose();
     }
-    
+
 }

@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.kotcrab.vis.ui.widget.*;
@@ -23,15 +25,21 @@ public class OptionsTab extends Tab {
     private String title;
     private Table content;
 
+    final VisCheckBox toggleFullscreen;
+    final VisCheckBox toggleVsync;
+    final VisCheckBox toggleMSAA;
+    GameScreen game;
+
     public OptionsTab(String title, GameScreen game) {
         super(false, false);
+        this.game = game;
         this.title = title;
         content = new VisTable();
         content.setFillParent(true);
         EngineConfig engineConfig = SpaceProject.configManager.getConfig(EngineConfig.class);
         KeyConfig keyConfig = SpaceProject.configManager.getConfig(KeyConfig.class);
 
-        final VisCheckBox toggleFullscreen = new VisCheckBox("fullscreen [" + Input.Keys.toString(keyConfig.fullscreen) + "]", Gdx.graphics.isFullscreen());
+        toggleFullscreen = new VisCheckBox("fullscreen [" + Input.Keys.toString(keyConfig.fullscreen) + "]", Gdx.graphics.isFullscreen());
         toggleFullscreen.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -43,7 +51,7 @@ public class OptionsTab extends Tab {
             }
         });
 
-        final VisCheckBox toggleVsync = new VisCheckBox("vsync ["+ Input.Keys.toString(keyConfig.vsync) + "]", engineConfig.vsync);
+        toggleVsync = new VisCheckBox("vsync ["+ Input.Keys.toString(keyConfig.vsync) + "]", engineConfig.vsync);
         toggleVsync.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -51,7 +59,7 @@ public class OptionsTab extends Tab {
             }
         });
 
-        final VisCheckBox toggleMSAA = new VisCheckBox("MSAA", game.isMSAAEnabled());
+        toggleMSAA = new VisCheckBox("MSAA ["+ Input.Keys.toString(keyConfig.msaa) + "]", game.isMSAAEnabled());
         toggleMSAA.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -115,8 +123,29 @@ public class OptionsTab extends Tab {
         content.add(toggleCameraLerp).left().row();
         content.add(toggleControllerVibrate).left().row();
         content.pack();
+
+        /*
+        getContentTable().addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                updateSettings();
+                return super.touchDown(event, x, y, pointer, button);
+            }
+        });*/
     }
 
+    public void updateSettings() {
+        toggleFullscreen.setChecked(Gdx.graphics.isFullscreen());
+        toggleMSAA.setChecked(game.isMSAAEnabled());
+        //toggleVsync.setChecked(game.getVsync());
+        toggleVsync.setChecked(SpaceProject.configManager.getConfig(EngineConfig.class).vsync);
+    }
+
+    @Override
+    public void onShow() {
+        super.onShow();
+        updateSettings();
+    }
 
     @Override
     public String getTabTitle() {
