@@ -46,35 +46,27 @@ public class DelaunayCell {
         GeometryUtils.polygonCentroid(poly, 0 , poly.length, centroid);
         */
         GeometryUtils.triangleCentroid(a.x, a.y, b.x, b.y, c.x, c.y, centroid);
-        quality = triangleQuality(
+        quality = PolygonUtil.triangleQuality(
                 centroid.x - a.x, centroid.y - a.y,
                 centroid.x - b.x, centroid.y - b.y,
-                centroid.x - c.x, centroid.y - c.y);
+                centroid.x - c.x, centroid.y - c.y,
+                circumRadius);
         area = GeometryUtils.triangleArea(a.x, a.y, b.x, b.y, c.x, c.y);
 
         //calculate incircle and radius
         inCircle();
     }
 
-    /** Ratio of circumradius to shortest edge as a measure of triangle quality.
-     * copy of GeometryUtils.triangleQuality() modified to use provided circumradius instead of recalculating.
-     * NOTE: this function expects triangle cords to be relative to the centroid origin (0, 0)!
-     */
-    public float triangleQuality (float x1, float y1, float x2, float y2, float x3, float y3) {
-        float sqLength1 = x1 * x1 + y1 * y1;
-        float sqLength2 = x2 * x2 + y2 * y2;
-        float sqLength3 = x3 * x3 + y3 * y3;
-        return (float)Math.sqrt(Math.min(sqLength1, Math.min(sqLength2, sqLength3))) / circumRadius;
-    }
-
     /** Incircle: compute "inner circle" of a triangle. incenter and inradius
+     * NOTE: expects area to be calculated before calling
+     * todo: make static polygonutil version
      */
     private void inCircle() {
-        //da, db and dc are the side lengths OPPOSITE vertex A, B and C
+        //delta a, b and c are the side lengths OPPOSITE vertex A, B and C
         float da = b.dst(c);
         float db = c.dst(a);
         float dc = a.dst(b);
-        float dt = da + db + dc; //total
+        float dt = da + db + dc; //delta total
         float x = (da * a.x + db * b.x + dc * c.x) / dt;
         float y = (da * a.y + db * b.y + dc * c.y) / dt;
         incircle.set(x, y);

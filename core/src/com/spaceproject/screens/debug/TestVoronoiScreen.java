@@ -920,11 +920,45 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         //Control + D -> Save to file
         if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Keys.D)) {
-            //just make all variants for now
+            //RGBA8888 (default)
             renderToFile(true, ImageBackground.transparent);
             renderToFile(false, ImageBackground.transparent);
             renderToFile(true, ImageBackground.gray);
             renderToFile(false, ImageBackground.gray);
+
+            //format tests
+            /*
+            //RGBA4444
+            // todo: crash A
+            // # Problematic frame:
+            // # C  [libc.so.6+0x16c7c0]
+            // Fatal glibc error: malloc.c:2599 (sysmalloc): assertion failed: (old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)
+            //renderToFile(true, ImageBackground.transparent, Pixmap.Format.RGBA4444);
+
+            //renderToFile(false, ImageBackground.transparent, Pixmap.Format.RGBA4444);
+
+            //todo: crash B
+            //Problematic frame:
+            //# C  [libc.so.6+0x16c837]
+            //malloc(): corrupted top size
+            renderToFile(true, ImageBackground.gray, Pixmap.Format.RGBA4444);
+
+            //renderToFile(false, ImageBackground.gray, Pixmap.Format.RGBA4444);
+
+            /*
+            //RGB888;
+            renderToFile(true, ImageBackground.transparent, Pixmap.Format.RGB888);
+            renderToFile(false, ImageBackground.transparent, Pixmap.Format.RGB888);
+            renderToFile(true, ImageBackground.gray, Pixmap.Format.RGB888);
+            renderToFile(false, ImageBackground.gray, Pixmap.Format.RGB888);
+
+            //RGB565;
+            renderToFile(true, ImageBackground.transparent, Pixmap.Format.RGB565);
+            renderToFile(false, ImageBackground.transparent, Pixmap.Format.RGB565);
+            renderToFile(true, ImageBackground.gray, Pixmap.Format.RGB565);
+            renderToFile(false, ImageBackground.gray, Pixmap.Format.RGB565);
+
+             */
         }
         
         //toggle drawings
@@ -1008,6 +1042,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     }
 
     private void renderToFile(boolean crop, ImageBackground background) {
+        renderToFile(crop, background, Pixmap.Format.RGBA8888);//default
+    }
+    private void renderToFile(boolean crop, ImageBackground background, Pixmap.Format format) {
         if (points.size < 6) return;
         //manually clear with clear color for transparent background
         switch (background) {
@@ -1027,27 +1064,31 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             //crop to hull bounds
             Rectangle bounds = hullPoly.getBoundingRectangle();
             int padding = 10;
-            image = Pixmap.createFromFrameBuffer((int) bounds.x - padding, (int) bounds.y - padding, (int) bounds.getWidth() + padding * 2, (int) bounds.getHeight() + padding * 2);
+            //image = Pixmap.createFromFrameBuffer((int) bounds.x - padding, (int) bounds.y - padding, (int) bounds.getWidth() + padding * 2, (int) bounds.getHeight() + padding * 2);
+
+            image = createFromFrameBuffer((int) bounds.x - padding, (int) bounds.y - padding, (int) bounds.getWidth() + padding * 2, (int) bounds.getHeight() + padding * 2, format);
         } else {
             //fullscreen capture
-            image = Pixmap.createFromFrameBuffer(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            //image = Pixmap.createFromFrameBuffer(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+            //test formats
+            image = createFromFrameBuffer(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), format);
         }
         String mode = "_" + (voronoiRender ? renderStyle.toString().toLowerCase() : "") +  "_" +  background.toString().toLowerCase();
         String frame = crop ? "_crop" : "";
         String resolution = "_" + image.getWidth() + "x" + image.getHeight();
-        FileHandle handle = Gdx.files.local("assets/capture/" + Gdx.graphics.getFrameId() + mode + frame + resolution + ".png");
+        String formats = "_" + format.toString().toLowerCase();
+        FileHandle handle = Gdx.files.local("assets/capture/" + Gdx.graphics.getFrameId() + mode + frame + resolution + formats + ".png");
         Gdx.app.log(getClass().getSimpleName(), "writing to: " + handle.path());
         //save framebuffer to file
         PixmapIO.writePNG(handle, image, -1, true);
     }
 
-    public static Pixmap createFromFrameBuffer (int x, int y, int w, int h) {
+    public static Pixmap createFromFrameBuffer(int x, int y, int w, int h, Pixmap.Format format) {
         Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
-
-        final Pixmap pixmap = new Pixmap(w, h, Pixmap.Format.RGBA4444);
+        final Pixmap pixmap = new Pixmap(w, h, format);
         ByteBuffer pixels = pixmap.getPixels();
         Gdx.gl.glReadPixels(x, y, w, h, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, pixels);
-
         return pixmap;
     }
 

@@ -164,5 +164,16 @@ public class PolygonUtil {
         float radius = (float) Math.sqrt(dx * dx + dy * dy);
         return cacheVector.set(xc, yc, radius);
     }
+
+    /** Ratio of circumradius to shortest edge as a measure of triangle quality.
+     * copy of GeometryUtils.triangleQuality() modified to use provided circumradius instead of recalculating.
+     * NOTE: this function expects triangle cords to be relative to the centroid origin (0, 0)!
+     */
+    public static float triangleQuality(float x1, float y1, float x2, float y2, float x3, float y3, float circumRadius) {
+        float sqLength1 = x1 * x1 + y1 * y1;
+        float sqLength2 = x2 * x2 + y2 * y2;
+        float sqLength3 = x3 * x3 + y3 * y3;
+        return (float)Math.sqrt(Math.min(sqLength1, Math.min(sqLength2, sqLength3))) / circumRadius;
+    }
     
 }
