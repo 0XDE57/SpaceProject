@@ -70,9 +70,11 @@ import java.util.ArrayList;
 // [x] draw Incircle
 // [ ] draw Excircle
 // [ ] draw Gergonne triangle: contact triangle or intouch triangle of △ A B C
+// [ ] draw tangent circles: https://en.wikipedia.org/wiki/Nine-point_circle
+// [ ] draw anticomplementary triangle: https://mathworld.wolfram.com/AnticomplementaryTriangle.html
 // [ ] color palate: render
-// [ ] color pallet: VisUIcolor picker dialog select render colors
-// [ ] color:pallet: background color options or checkered tile?
+// [ ] color pallet: VisUI color picker dialog select render colors
+// [ ] color pallet: background color options or checkered tile?
 // [ ] render grid lines
 // [ ] render grid axis X,Y
 // [ ] draw triangle weight graph: area/totalArea
@@ -82,9 +84,21 @@ import java.util.ArrayList;
 // [ ] grid generation!
 // [ ] scale
 //      rotate 90, 45, user defined?
-// [ ] rotate //modififer key + click should scale + rotate when a hull point selected?
+// [ ] rotate //modifier key + click should scale + rotate when a hull point selected?
+// [ ] flip X,Y
 // [ ] snap modifier
 // [ ] tileable voronoi! 2D voronoi wrapped on a 4D torus
+
+// centers: (in the case of an equilateral, these 4 centers are the same point!)
+// [x] incenter -> inscribed
+// [x] cicumcenter
+// [x] centroid
+// [ ] orthocenter
+// [ ]
+// and their respective graphs connecting centers
+
+// Pythagorean triples; A right triangle where the sides are in the ratio of integers
+//  eg: 3:4:5 , 6:8:10 , 5:12:13 , 9:12:15 , 8:15:17
 
 public class TestVoronoiScreen extends MyScreenAdapter {
 
@@ -114,7 +128,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     final Color cacheColor = new Color();
     
     //toggles
-    boolean drawCircumcircle = false,
+    boolean debugPointOrder = false,
+            drawCircumcircle = false,
             drawCircumcenter = false,
             drawPoints = true,
             drawDelaunay = true,
@@ -381,8 +396,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     }
     
     private void drawStuff() {
+        //enable blending
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        //background distance based voronoi render
         if (voronoiRender && points.notEmpty()) {
             shape.begin(ShapeType.Line);
             //todo: this could be rendered to a texture, distance does not need to be calculated every frame.
@@ -396,6 +414,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             shape.end();
         }
 
+        //mouse grab point
         if (focusedPoint >= 0) {
             shape.begin(ShapeType.Filled);
             float focusX = points.get(focusedPoint);
@@ -416,6 +435,26 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }*/
 
         shape.begin(ShapeType.Line);
+        //todo: debug draw points in order first to last perhaps color coder black to white or red
+        // this is to visualize the actual order of the points in the array
+        if (debugPointOrder) {
+            if (points.size > 2) {
+                Color colorA = Color.RED;
+                Color colorB = Color.BLUE;
+                float pX = points.get(0), pY = points.get(1);
+                for (int i = 0; i < points.size; i += 2) {
+                    float x = points.get(i);
+                    float y = points.get(i + 1);
+                    if (i != 0) { //skip if no previous xy
+                        float ratio = (float) i / points.size;
+                        cacheColor.set(colorA).lerp(colorB, ratio);
+                        shape.line(x, y, pX, pY, cacheColor, cacheColor);
+                        pX = x;
+                        pY = y;
+                    }
+                }
+            }
+        }
 
         //all points
         if (drawPoints) {
@@ -503,6 +542,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.line(cell.centroid, cell.c);
                 //todo: OBSERVATIONS of VertexToCentroid Dual Graph
                 // all internal cells are only ever 4 vertex (quadrilateral) and always convex!
+                // edges connect to nowhere
             }
             //NOTE: Delaunay and Voronoi are Convex polygons only.
             //a second dual-graph? (tri-graph?)
@@ -525,6 +565,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
             }
             //are the other dual graphs? I think im beginning to see some shapes and patterns...
+            //there's graphs everywhere!!!
 
             //draw voronoi cells
             if (drawVoronoi) {
@@ -709,6 +750,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
     @Override
     public void render(float delta) {
+        super.render(delta);
         //clear screen
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
@@ -729,6 +771,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         shape.setProjectionMatrix(projectionMatrix);
         batch.setProjectionMatrix(projectionMatrix);
         //todo: recentering may also flip the entire polygon? interesting bug...
+        //todo: could put a timer to wait a small delay that gets reset on repid resizing so calculating large points is less on high point count
         boolean recenter = true;
         if (recenter) {
             //calculate the convex hull of all the points
@@ -739,7 +782,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 //if n = 1, just center the single point...
                 return;
             }
-            hull = convex.computePolygon(points, true).toArray(); //sorted seems to have no impact on
+            hull = convex.computePolygon(points, false).toArray(); //sorted seems to have no impact on
             GeometryUtils.polygonCentroid(hull, 0, hull.length, centroid);
             for (int i = 0; i < points.size; i+= 2) {
                 points.set(i, centroid.x - points.get(i) + width*0.5f);
@@ -770,6 +813,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, "[CTRL + D] Save PNG", 10, y - h * line++);
 
         //toggles
+        text.setColor(debugPointOrder ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[F2] Debug Point Order", 10, y - h  * line++);
+
         text.setColor(drawCircumcenter ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[1] CircumCenter", 10, y - h  * line++);
         
@@ -879,7 +925,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     points.set(focusedPoint + 1, y);
                 }
                 boolean mod = false;
+                //todo: BUG! sometimes drag will swap points when dragging too close to other points
                 for (int i = 0; i < points.size && !mod; i += 2) {
+                    //if (i == focusedPoint) continue; //skip self
                     float px = points.get(i);
                     float py = points.get(i + 1);
                     if (Vector2.dst(x, y, px, py) < dragRadius) {
@@ -922,15 +970,21 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         //Control + D -> Save to file
         if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Keys.D)) {
             //RGBA8888 (default)
-            renderToFile(true, ImageBackground.transparent);
-            renderToFile(false, ImageBackground.transparent);
-            renderToFile(true, ImageBackground.gray);
-            renderToFile(false, ImageBackground.gray);
+            //NOTE: expensive! each variation causes redraw!
+            //todo: draw once and capture
+
+            //renderBlendToFile();
+
+            renderToFile(ImageBackground.transparent);
+            renderToFile(ImageBackground.gray);
 
             //formatTests();
         }
         
         //toggle drawings
+        if (Gdx.input.isKeyJustPressed(Keys.F2)) {
+            debugPointOrder = !debugPointOrder;
+        }
         if (Gdx.input.isKeyJustPressed(Keys.NUM_1)) {
             drawCircumcenter = !drawCircumcenter;
         }
@@ -995,7 +1049,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         // # Problematic frame:
         // # C  [libc.so.6+0x16c7c0]
         // Fatal glibc error: malloc.c:2599 (sysmalloc): assertion failed: (old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)
-        renderToFile(true, ImageBackground.transparent, Pixmap.Format.RGBA4444);
+        renderToFile(ImageBackground.transparent, Pixmap.Format.RGBA4444);
 
         //renderToFile(false, ImageBackground.transparent, Pixmap.Format.RGBA4444);
 
@@ -1003,7 +1057,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         //Problematic frame:
         //# C  [libc.so.6+0x16c837]
         //malloc(): corrupted top size
-        renderToFile(true, ImageBackground.gray, Pixmap.Format.RGBA4444);
+        renderToFile(ImageBackground.gray, Pixmap.Format.RGBA4444);
 
         //renderToFile(false, ImageBackground.gray, Pixmap.Format.RGBA4444);
 
@@ -1044,11 +1098,13 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         transparent, gray//, userDefined
     }
 
-    private void renderToFile(boolean crop, ImageBackground background) {
-        renderToFile(crop, background, Pixmap.Format.RGBA8888);//default
+    private void renderToFile(ImageBackground background) {
+        renderToFile(background, Pixmap.Format.RGBA8888);//default
     }
-    private void renderToFile(boolean crop, ImageBackground background, Pixmap.Format format) {
+    private void renderToFile(ImageBackground background, Pixmap.Format format) {
         if (points.size < 6) return;
+        long startTime = System.currentTimeMillis();
+
         //manually clear with clear color for transparent background
         switch (background) {
             case transparent:
@@ -1062,29 +1118,83 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         //and force re-render
         drawStuff();
-        Pixmap image;
-        if (crop) {
-            //crop to hull bounds
-            Rectangle bounds = hullPoly.getBoundingRectangle();
-            int padding = 10;
-            //image = Pixmap.createFromFrameBuffer((int) bounds.x - padding, (int) bounds.y - padding, (int) bounds.getWidth() + padding * 2, (int) bounds.getHeight() + padding * 2);
 
-            image = createFromFrameBuffer((int) bounds.x - padding, (int) bounds.y - padding, (int) bounds.getWidth() + padding * 2, (int) bounds.getHeight() + padding * 2, format);
-        } else {
-            //fullscreen capture
-            //image = Pixmap.createFromFrameBuffer(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        //crop to hull bounds
+        Rectangle bounds = hullPoly.getBoundingRectangle();
+        int padding = 10;
+        //image = Pixmap.createFromFrameBuffer((int) bounds.x - padding, (int) bounds.y - padding, (int) bounds.getWidth() + padding * 2, (int) bounds.getHeight() + padding * 2);
+        Pixmap cropImage  = createFromFrameBuffer((int) bounds.x - padding, (int) bounds.y - padding, (int) bounds.getWidth() + padding * 2, (int) bounds.getHeight() + padding * 2, format);
 
-            //test formats
-            image = createFromFrameBuffer(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), format);
-        }
-        String mode = "_" + (voronoiRender ? renderStyle.toString().toLowerCase() : "") +  "_" +  background.toString().toLowerCase();
-        String frame = crop ? "_crop" : "";
-        String resolution = "_" + image.getWidth() + "x" + image.getHeight();
+        //fullscreen capture
+        //image = Pixmap.createFromFrameBuffer(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        Pixmap fullscreenImage = createFromFrameBuffer(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), format);
+
+        String mode = (voronoiRender ? renderStyle.toString().toLowerCase() : "")
+                +  (background == ImageBackground.transparent ? "_" + background.toString().toLowerCase() : "");
         String formats = "_" + format.toString().toLowerCase();
-        FileHandle handle = Gdx.files.local("assets/capture/" + Gdx.graphics.getFrameId() + mode + frame + resolution + formats + ".png");
-        Gdx.app.log(getClass().getSimpleName(), "writing to: " + handle.path());
-        //save framebuffer to file
-        PixmapIO.writePNG(handle, image, -1, true);
+        String msaa = (((MyScreenAdapter)game.getScreen()).isMSAAEnabled() ? "_MSAA_" : "_");
+
+        //save fullscreen framebuffer to file
+        FileHandle fullscreenHandle = Gdx.files.local("assets/capture/" + Gdx.graphics.getFrameId() + mode + formats + msaa + fullscreenImage.getWidth() + "x" + fullscreenImage.getHeight() + ".png");
+        Gdx.app.log(getClass().getSimpleName(), "writing to: " + fullscreenHandle.path());
+        PixmapIO.writePNG(fullscreenHandle, fullscreenImage, -1, true);
+
+        //save cropped frambuffer to file
+        FileHandle cropHandle = Gdx.files.local("assets/capture/" + Gdx.graphics.getFrameId() + mode + "_crop" + formats + msaa + cropImage.getWidth() + "x" + cropImage.getHeight() + ".png");
+        Gdx.app.log(getClass().getSimpleName(), "writing to: " + cropHandle.path());
+        PixmapIO.writePNG(cropHandle, cropImage, -1, true);
+
+        long end = System.currentTimeMillis() - startTime;
+        Gdx.app.log(getClass().getSimpleName(), "finished: " + end);
+    }
+
+
+    private void renderBlendToFile() {
+        if (points.size < 6) return;
+        long startTime = System.currentTimeMillis();
+
+        int padding = 10;
+        Rectangle bounds = hullPoly.getBoundingRectangle(); //crop to hull bounds
+
+        // ----- first pass render no MSAA -----
+        ((MyScreenAdapter)game.getScreen()).disableMSAA();
+        //manually clear with clear color for transparent background
+        Gdx.gl.glClearColor(0, 0, 0, 0);
+        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+        //and force re-render
+        drawStuff();
+        //capture first pass frambuffer to file
+        Pixmap rawRender = Pixmap.createFromFrameBuffer((int) bounds.x - padding, (int) bounds.y - padding, (int) bounds.getWidth() + padding * 2, (int) bounds.getHeight() + padding * 2);
+        FileHandle rawFile = Gdx.files.local("assets/capture/" + Gdx.graphics.getFrameId() + "_RAW_" + rawRender.getWidth() + "x" + rawRender.getHeight() + ".png");
+        Gdx.app.log(getClass().getSimpleName(), "writing to: " + rawFile.path());
+        PixmapIO.writePNG(rawFile, rawRender, -1, true);
+
+        // ----- second pass render with MSAA enabled -----
+        ((MyScreenAdapter)game.getScreen()).enableMSAA();
+        //manually clear with clear color for transparent background
+        Gdx.gl.glClearColor(0, 0, 0, 0);
+        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+        //and force re-render
+        drawStuff();
+        Pixmap msaaRender = Pixmap.createFromFrameBuffer((int) bounds.x - padding, (int) bounds.y - padding, (int) bounds.getWidth() + padding * 2, (int) bounds.getHeight() + padding * 2);
+        //capture msaa render
+        FileHandle msaaFile = Gdx.files.local("assets/capture/" + Gdx.graphics.getFrameId() + "_MSAA_" + msaaRender.getWidth() + "x" + msaaRender.getHeight() + ".png");
+        Gdx.app.log(getClass().getSimpleName(), "writing to: " + msaaFile.path());
+        PixmapIO.writePNG(msaaFile, msaaRender, -1, true);
+
+
+        //blend pixmaps
+        msaaRender.setBlending(Pixmap.Blending.SourceOver);
+        rawRender.setBlending(Pixmap.Blending.SourceOver);
+        rawRender.drawPixmap(msaaRender, rawRender.getWidth(), rawRender.getHeight());
+        //msaaRender.drawPixmap(rawRender, msaaRender.getWidth(), msaaRender.getHeight());
+        //capture blended render
+        FileHandle blendFile = Gdx.files.local("assets/capture/" + Gdx.graphics.getFrameId() + "_BLEND_" + rawRender.getWidth() + "x" + rawRender.getHeight() + ".png");
+        Gdx.app.log(getClass().getSimpleName(), "writing to: " + blendFile.path());
+        PixmapIO.writePNG(blendFile, rawRender, -1, true);
+
+        long end = System.currentTimeMillis() - startTime;
+        Gdx.app.log(getClass().getSimpleName(), "finished: " + end);
     }
 
     public static Pixmap createFromFrameBuffer(int x, int y, int w, int h, Pixmap.Format format) {
