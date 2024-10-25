@@ -88,17 +88,21 @@ import java.util.ArrayList;
 // [ ] flip X,Y
 // [ ] snap modifier
 // [ ] tileable voronoi! 2D voronoi wrapped on a 4D torus
+// [ ] mst!!! krustal?
 
 // centers: (in the case of an equilateral, these 4 centers are the same point!)
 // [x] incenter -> inscribed
 // [x] cicumcenter
 // [x] centroid
-// [ ] orthocenter
-// [ ]
-// and their respective graphs connecting centers
+// [x] orthocenter
+// [ ] are there more centers?
+// [x] and their respective graphs connecting centers
+//      [ ] fix performance, allow select center variant
 
 // Pythagorean triples; A right triangle where the sides are in the ratio of integers
 //  eg: 3:4:5 , 6:8:10 , 5:12:13 , 9:12:15 , 8:15:17
+
+//https://en.wikipedia.org/wiki/Dual_graph
 
 public class TestVoronoiScreen extends MyScreenAdapter {
 
@@ -117,10 +121,14 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     final int maxVertices = 32767;//todo: this is odd number why? there will always be even number of points.
     ShortArray triangles;
     final ArrayList<DelaunayCell> dCells = new ArrayList<>();
-    
+
+    final DelaunayTriangulator dualaunay = new DelaunayTriangulator();// dual delaunay ;)
+    final FloatArray centroidPoints = new FloatArray();
+    ShortArray centroidGraph;
+
     //convex hull
     float[] hull;
-    Polygon hullPoly;
+    final Polygon hullPoly = new Polygon();
     final Vector2 centroid = new Vector2();
     final ConvexHull convex = new ConvexHull();
 
@@ -144,7 +152,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             voronoiRender = false,
             drawInTriangle = false,
             drawInRadius = false,
-            drawInCenter = false;
+            drawInCenter = false,
+            drawOrtho = false,
+            secondaryGraph = false;
     
     int pSize = 5;
     float dragRadius = 20;
@@ -266,28 +276,28 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         dCells.clear();
         int discard = 1;
         for (int i = 0; i < triangles.size; i += 3) {
-            //get points
+            //get point indexes
             int p1 = triangles.get(i) * 2;
             int p2 = triangles.get(i + 1) * 2;
             int p3 = triangles.get(i + 2) * 2;
-            float[] hull = new float[] {
-                    points.get(p1), points.get(p1 + 1), // xy: 0, 1
-                    points.get(p2), points.get(p2 + 1), // xy: 2, 3
-                    points.get(p3), points.get(p3 + 1)  // xy: 4, 5
-            };
 
-            //discard duplicate points (todo: should do this check before new float above, also use equals... exit early)
-            if ((hull[0] == hull[2] && hull[1] == hull[3]) || // p1 == p2 or
-                    (hull[0] == hull[4] && hull[1] == hull[5]) || // p1 == p3 or
-                    (hull[2] == hull[4] && hull[3] == hull[5])) { // p2 == p3
+            float p1x = points.get(p1), p1y = points.get(p1 + 1); // xy: 0, 1
+            float p2x = points.get(p2), p2y = points.get(p2 + 1); // xy: 2, 3
+            float p3x = points.get(p3), p3y = points.get(p3 + 1); // xy: 4, 5
+            //discard duplicate points
+            if     ((MathUtils.isEqual(p1x, p2x) && MathUtils.isEqual(p1y, p2y)) || // p1 == p2 or
+                    (MathUtils.isEqual(p1x, p3x) && MathUtils.isEqual(p1y, p3y)) || // p1 == p3 or
+                    (MathUtils.isEqual(p2x, p3x) && MathUtils.isEqual(p2y, p3y))) { // p2 == p3
                 Gdx.app.error(getClass().getSimpleName(), "Duplicate point!: " + discard++);
                 continue;
             }
 
-            Vector2 a = new Vector2(points.get(p1), points.get(p1 + 1));
-            Vector2 b = new Vector2(points.get(p2), points.get(p2 + 1));
-            Vector2 c = new Vector2(points.get(p3), points.get(p3 + 1));
-            DelaunayCell d = new DelaunayCell(a, b, c);
+            Vector2 a = new Vector2(p1x, p1y);
+            Vector2 b = new Vector2(p2x, p2y);
+            Vector2 c = new Vector2(p3x, p3y);
+            DelaunayCell d = new DelaunayCell(a, b, c);//todo: pool cell
+            //todo: either pool the vecs, or store index of points and retrive from points
+            //DelaunayCell d = new DelaunayCell(points, p1, p2, p3);
             dCells.add(d);
         }
         
@@ -296,12 +306,25 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         
         //calculate the convex hull of all the points
         //ConvexHull convex = new ConvexHull();
-        hull = convex.computePolygon(points, false).toArray();//<system.arraycopy()
+        hull = convex.computePolygon(points, false).toArray();// <- system.arraycopy()
         //computePolygon -> Returns convex hull in counter-clockwise order. Note: the last point in the returned list is the same as the first one.
-        //Gdx.app.log(getClass().getSimpleName(), "isCCW?" + GeometryUtils.isCCW(hull, 0, hull.length));
-        //todo: explore isCCW, start
-        hullPoly = new Polygon(hull); //todo: new -> pool
+        //todo: explore isCCW
+        // Gdx.app.log(getClass().getSimpleName(), "isCCW?" + GeometryUtils.isCCW(hull, 0, hull.length));
+        hullPoly.setVertices(hull);
         hullPoly.getCentroid(centroid); //-> GeometryUtils.polygonCentroid(hull, 0, hull.length, centroid);
+
+
+        if (secondaryGraph) {
+            //holy crap more graphs!!! but getting heavy to compute....
+            centroidPoints.clear();
+            for (DelaunayCell cell : dCells) {
+                //centroidPoints.add(cell.centroid.x, cell.centroid.y);
+                centroidPoints.add(cell.circumCenter.x, cell.circumCenter.y); //anti-voronoi?
+                //centroidPoints.add(cell.incircle.x, cell.incircle.y);
+                //centroidPoints.add(cell.orthocenter.x, cell.orthocenter.y);
+            }
+            centroidGraph = dualaunay.computeTriangles(centroidPoints, false);
+        }
     }
     
     /**
@@ -350,7 +373,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                         shape.circle(intersect.x, intersect.y, 8);//show point of intersection
                     }
                 }
-                
             } else {
                 //if no neighbor, draw from midpoint to circumcenter
                 //TODO: don't connect to mid points if already connected to voronoi point
@@ -424,37 +446,17 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             shape.end();
         }
 
-        /*
         if (drawTriangleQuality) {
+            //moveable layer? this could by under or over...
             shape.begin(ShapeType.Filled);
             for (DelaunayCell cell : dCells) {
                 shape.setColor(0.3f, 0.3f, 0.3f, 1 - cell.quality);
                 shape.triangle(cell.a.x, cell.a.y, cell.b.x, cell.b.y, cell.c.x, cell.c.y);
             }
             shape.end();
-        }*/
+        }
 
         shape.begin(ShapeType.Line);
-        //todo: debug draw points in order first to last perhaps color coder black to white or red
-        // this is to visualize the actual order of the points in the array
-        if (debugPointOrder) {
-            if (points.size > 2) {
-                Color colorA = Color.RED;
-                Color colorB = Color.BLUE;
-                float pX = points.get(0), pY = points.get(1);
-                for (int i = 0; i < points.size; i += 2) {
-                    float x = points.get(i);
-                    float y = points.get(i + 1);
-                    if (i != 0) { //skip if no previous xy
-                        float ratio = (float) i / points.size;
-                        cacheColor.set(colorA).lerp(colorB, ratio);
-                        shape.line(x, y, pX, pY, cacheColor, cacheColor);
-                        pX = x;
-                        pY = y;
-                    }
-                }
-            }
-        }
 
         //all points
         if (drawPoints) {
@@ -473,7 +475,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         
         for (DelaunayCell cell : dCells) {
-
             //draw circumcircle
             if (!hullPoly.contains(cell.circumCenter)) {
                 shape.setColor(Color.MAGENTA);
@@ -533,6 +534,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.circle(cell.midBC.x, cell.midBC.y, 3);
             }
 
+            //draw ortho
+            if (drawOrtho) {
+                shape.setColor(Color.MAGENTA);
+                shape.circle(cell.orthocenter.x, cell.orthocenter.y, 2);
+            }
 
             //connect centroids: another dual-graph?
             if (drawCenteroidPointGraph) {
@@ -619,9 +625,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 				}*/
             }
         }
+
+
         shape.end();
 
-
+/*
         if (drawTriangleQuality) {
             //moveable layer? this could by under or over...
             shape.begin(ShapeType.Filled);
@@ -630,13 +638,57 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.triangle(cell.a.x, cell.a.y, cell.b.x, cell.b.y, cell.c.x, cell.c.y);
             }
             shape.end();
-        }
+        }*/
 
         //always at end to be on top
         shape.begin(ShapeType.Line);
-        if (drawHull && hullPoly != null) {
+        if (secondaryGraph) {
+            int discard = 1;
+            shape.setColor(Color.GREEN);
+            for (int i = 0; i < centroidGraph.size; i += 3) {
+                //get point indexes
+                int p1 = centroidGraph.get(i) * 2;
+                int p2 = centroidGraph.get(i + 1) * 2;
+                int p3 = centroidGraph.get(i + 2) * 2;
+
+                float ax = centroidPoints.get(p1), ay = centroidPoints.get(p1 + 1); // xy: 0, 1
+                float bx = centroidPoints.get(p2), by = centroidPoints.get(p2 + 1); // xy: 2, 3
+                float cx = centroidPoints.get(p3), cy = centroidPoints.get(p3 + 1); // xy: 4, 5
+                //discard duplicate points
+                if ((MathUtils.isEqual(ax, bx) && MathUtils.isEqual(ay, by)) || // p1 == p2 or a b
+                        (MathUtils.isEqual(ax, cx) && MathUtils.isEqual(ay, cy)) || // p1 == p3 or  a c
+                        (MathUtils.isEqual(bx, cx) && MathUtils.isEqual(by, cy))) { // p2 == p3 b c
+                    Gdx.app.error(getClass().getSimpleName(), "Duplicate point!: " + discard++);
+                    continue;
+                }
+                shape.triangle(ax, ay, bx, by, cx, cy);
+            }
+        }
+
+        if (drawHull && hull != null) {
             shape.setColor(Color.RED);
             shape.polyline(hullPoly.getVertices());
+        }
+
+        // debug draw points in order first to last color coded
+        // this is to visualize the actual order of the points in the array
+        if (debugPointOrder) {
+            if (points.size > 2) {
+                Color colorA = Color.RED;
+                Color colorB = Color.BLUE;
+                float pX = points.get(0), pY = points.get(1);
+                for (int i = 0; i < points.size; i += 2) {
+                    float x = points.get(i);
+                    float y = points.get(i + 1);
+                    if (i != 0) { //skip if no previous xy
+                        float ratio = (float) i / points.size;
+                        cacheColor.set(colorA).lerp(colorB, ratio);
+                        shape.line(x, y, pX, pY, cacheColor, cacheColor);
+                        pX = x;
+                        pY = y;
+                    }
+                }
+            }
         }
         shape.end();
 
@@ -865,6 +917,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.setColor(drawInRadius ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[U] InCircle: InRadius", 10, y - h * line++);
 
+        text.setColor(drawOrtho ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[I] OrthoCenter", 10, y - h * line++);
+
         batch.end();
     }
     
@@ -1041,6 +1096,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         if (Gdx.input.isKeyJustPressed(Keys.U)) {
             drawInRadius = !drawInRadius;
         }
+        if (Gdx.input.isKeyJustPressed(Keys.I)) {
+            drawOrtho = !drawOrtho;
+        }
     }
 
     private void formatTests() {
@@ -1209,7 +1267,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         points.clear();
         dCells.clear();
         hull = null;
-        hullPoly = null;
         colorTest.clear();
     }
 

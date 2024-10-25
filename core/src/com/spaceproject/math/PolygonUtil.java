@@ -108,7 +108,9 @@ public class PolygonUtil {
         return polygon.contains(circle.x, circle.y);
     }
 
-    public final static Vector3 cacheVector = new Vector3();
+    public final static Vector3 cacheVector3 = new Vector3();
+    public final static Vector2 cacheVector2 = new Vector2();
+
     /**
      * Calculate smallest possible circle that intersects
      * each vertex of a triangle defined by vertex a,b,c.
@@ -162,14 +164,14 @@ public class PolygonUtil {
         dx = b.x - xc;
         dy = b.y - yc;
         float radius = (float) Math.sqrt(dx * dx + dy * dy);
-        return cacheVector.set(xc, yc, radius);
+        return cacheVector3.set(xc, yc, radius);
     }
 
-    /** Incircle: compute inscribed circle of a triangle.
+    /** Calculate Incircle: compute inscribed circle of a triangle.
      * NOTE: expects area to be calculated before calling
      * @return incircle of triangle in a Vector3 with incenter in x,y and inradius in z.
      */
-    public static Vector3 inCircle(Vector2 a, Vector2 b, Vector2 c, float area) {
+    public static Vector3 incircle(Vector2 a, Vector2 b, Vector2 c, float area) {
         //delta a, b and c are the side lengths OPPOSITE vertex A, B and C
         float da = b.dst(c);
         float db = c.dst(a);
@@ -181,7 +183,33 @@ public class PolygonUtil {
         //calculate inRadius
         float p = dt / 2;// p = semi-perimeter of the circle
         float r = area / p;
-        return cacheVector.set(x, y, r);
+        return cacheVector3.set(x, y, r);
+    }
+
+    /** Caclulate Orthocenter
+     * coincides with the circumcenter, incenter and centroid for an equilateral triangle,
+     * coincides with the right-angled vertex for right triangles,
+     * lies inside the triangle for acute triangles,
+     * lies outside the triangle in obtuse triangles.
+     */
+    public static Vector2 orthocenter(Vector2 a, Vector2 b, Vector2 c) {
+        // slopes
+        float slopeAB = (b.y - a.y) / (b.x - a.x);
+        float slopeBC = (c.y - b.y) / (c.x - b.x);
+
+        // altitudes slopes (negative reciprocals)
+        //we only need 2 altitudes, as the intersection of any two altitudes will also lie on the third
+        float altSlopeC = -1 / slopeAB;
+        float altSlopeA = -1 / slopeBC;
+
+        // altitudes y-intercepts
+        float interceptC = c.y - altSlopeC * c.x;
+        float interceptA = a.y - altSlopeA * a.x;
+
+        // intersection (orthocenter)
+        float orthocenterX = (interceptA - interceptC) / (altSlopeC - altSlopeA);
+        float orthocenterY = altSlopeC * orthocenterX + interceptC;
+        return cacheVector2.set(orthocenterX, orthocenterY);
     }
 
     /** Ratio of circumradius to shortest edge as a measure of triangle quality.

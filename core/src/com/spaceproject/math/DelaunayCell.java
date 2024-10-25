@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 
 public class DelaunayCell {
-    
+
     public Vector2 a, b, c;//vertex that define triangle
     public Vector2 midAB, midBC, midCA;//semiperimeter: midpoints between vertex
     public DelaunayCell nAB, nBC, nCA;//neighbors (TODO: reference for now, index later)
@@ -16,16 +16,50 @@ public class DelaunayCell {
     public float circumRadius;//radius of circle that intersects each vertex a,b,c
     public Vector2 centroid = new Vector2();
     public Vector2 incircle = new Vector2();
+    public Vector2 orthocenter = new Vector2();
     public float inRadius;
     public float area;
     public float quality;
-    
+
+    /*
+    private static final Vector2 cacheVec = new Vector2();
+    public Vector2 getA(FloatArray points) {
+        return cacheVec.set(points.get(p1), points.get(p1 + 1));
+    }
+    public Vector2 getB(FloatArray points) {
+        return cacheVec.set(points.get(p2), points.get(p2 + 1));
+    }
+    public Vector2 getC(FloatArray points) {
+        return cacheVec.set(points.get(p3), points.get(p3 + 1));
+    }
+    public int p1, p2, p3;
+    public DelaunayCell(FloatArray points, int p1, int p2, int p3) {
+        this.p1 = p1;
+        this.p2 = p2;
+        this.p3 = p3;
+
+        float ax = points.get(p1), ay = points.get(p1 + 1); // xy: 0, 1
+        float bx = points.get(p2), by = points.get(p2 + 1); // xy: 2, 3
+        float cx = points.get(p3), cy = points.get(p3 + 1); // xy: 4, 5
+        //or
+        /*
+        float ax = points.get(p1), ay = points.get(p1 + 1), // xy: 0, 1
+            bx = points.get(p1 + 2), by = points.get(p1 + 3), // xy: 2, 3
+            cx = points.get(p1 + 4), cy = points.get(p1 + 5); // xy: 4, 5
+*
+        Vector2 a = getA(points);
+        Vector2 b = getB(points);
+        Vector2 c = getC(points);
+    }
+    */
+
+
     public DelaunayCell(Vector2 a, Vector2 b, Vector2 c) {
         //set triangle points
         this.a = a;
         this.b = b;
         this.c = c;
-        
+
         //calculate semiperimeter / midpoints
         midAB = a.cpy().add(b).scl(0.5f);
         midBC = b.cpy().add(c).scl(0.5f);
@@ -46,11 +80,15 @@ public class DelaunayCell {
         area = GeometryUtils.triangleArea(a.x, a.y, b.x, b.y, c.x, c.y);
 
         //calculate inscribed circle
-        Vector3 inscribedCircle = PolygonUtil.inCircle(a, b, c, area);
+        Vector3 inscribedCircle = PolygonUtil.incircle(a, b, c, area);
         incircle.set(inscribedCircle.x, inscribedCircle.y);
         inRadius = inscribedCircle.z;
+
+        //calculate orthocenter
+        Vector2 ortho = PolygonUtil.orthocenter(a, b, c);
+        orthocenter.set(ortho);
     }
-    
+
     /**
      * Check if points are close enough together.
      *
