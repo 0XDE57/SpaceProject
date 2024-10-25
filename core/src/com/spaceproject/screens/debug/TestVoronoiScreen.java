@@ -86,7 +86,8 @@ import java.util.ArrayList;
 //      rotate 90, 45, user defined?
 // [ ] rotate //modifier key + click should scale + rotate when a hull point selected?
 // [ ] flip X,Y
-// [ ] snap modifier
+// [ ] snap modifier: snap to grid
+// [ ] snap modifier: snap to neares center (any of the centers: highlight)
 // [ ] tileable voronoi! 2D voronoi wrapped on a 4D torus
 // [ ] mst!!! krustal?
 
@@ -176,9 +177,21 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     }
     private DistanceCheck renderStyle = DistanceCheck.euclidean;
 
+    //where to add points
+    enum TriangleCenter {
+        centroid, circumcircle, incenter, orthocenter;
+        //todo: gergonne, nagel, ninepoint, excenter, symmedian;
+
+        private static final TriangleCenter[] VALUES = values();
+
+        public TriangleCenter next() {
+            return VALUES[(ordinal() + 1) % VALUES.length];
+        }
+    }
+    private TriangleCenter shatterStyle = TriangleCenter.centroid;
+
     public TestVoronoiScreen() {
         generateNewPoints(MathUtils.random(3, 16), false, false);
-
     }
 
     private void generateNewPoints(int numPoints, boolean regular, boolean addCentroid) {
@@ -655,9 +668,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 float bx = centroidPoints.get(p2), by = centroidPoints.get(p2 + 1); // xy: 2, 3
                 float cx = centroidPoints.get(p3), cy = centroidPoints.get(p3 + 1); // xy: 4, 5
                 //discard duplicate points
-                if ((MathUtils.isEqual(ax, bx) && MathUtils.isEqual(ay, by)) || // p1 == p2 or a b
-                        (MathUtils.isEqual(ax, cx) && MathUtils.isEqual(ay, cy)) || // p1 == p3 or  a c
-                        (MathUtils.isEqual(bx, cx) && MathUtils.isEqual(by, cy))) { // p2 == p3 b c
+                if     ((MathUtils.isEqual(ax, bx) && MathUtils.isEqual(ay, by)) ||
+                        (MathUtils.isEqual(ax, cx) && MathUtils.isEqual(ay, cy)) ||
+                        (MathUtils.isEqual(bx, cx) && MathUtils.isEqual(by, cy))) {
                     Gdx.app.error(getClass().getSimpleName(), "Duplicate point!: " + discard++);
                     continue;
                 }
@@ -861,7 +874,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, "[L-Click] Drag point", 10, y - h * line++);
         text.draw(batch, "[R-Click] Create new point", 10, y- h  * line++);
         text.draw(batch, "[SHIFT + L-Click] Drag points", 10, y - h * line++);
-        text.draw(batch, "[S] Shatter @ Delaunay Centroid", 10, y - h * line++);
+        text.draw(batch, "[S] Shatter @ " + shatterStyle.toString().toUpperCase(), 10, y - h * line++);
+        text.draw(batch, "[A] Cycle Shatter Center" , 10, y - h * line++);
         text.draw(batch, "[CTRL + D] Save PNG", 10, y - h * line++);
 
         //toggles
@@ -999,6 +1013,10 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             isDrag = false;
         }
 
+        if (Gdx.input.isKeyJustPressed(Keys.A)) {
+            shatterStyle = shatterStyle.next();
+        }
+
         //sub-shatter!
         if (Gdx.input.isKeyJustPressed(Keys.S)) {
             boolean added = false;
@@ -1008,11 +1026,29 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     Gdx.app.error(getClass().getSimpleName(), points.size + " too many points. shatter aborted!");
                     return;
                 }
-                float x1 = cell.centroid.x;
-                float y1 = cell.centroid.y;
-                if (!isDuplicate(x1, y1)) {
-                    points.add(x1);
-                    points.add(y1);
+                float px = 0, py = 0;
+                switch (shatterStyle) {
+                    case centroid:
+                        px = cell.centroid.x;
+                        py = cell.centroid.y;
+                        break;
+                    case circumcircle:
+                        px = cell.circumCenter.x;
+                        py = cell.circumCenter.y;
+                        break;
+                    case incenter:
+                        px = cell.incircle.x;
+                        py = cell.incircle.y;
+                        break;
+                    case orthocenter:
+                        px = cell.orthocenter.x;
+                        py = cell.orthocenter.y;
+                        break;
+                }
+                //float
+                if (!isDuplicate(px, py)) {
+                    points.add(px);
+                    points.add(py);
                     colorTest.add(new Color((float)Math.random() * 0.5f, (float)Math.random() * 0.5f, (float)Math.random() * 0.5f, 0.5f));
                     added = true;
                 }
@@ -1267,6 +1303,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         dCells.clear();
         hull = null;
         colorTest.clear();
+
+        centroidPoints.clear();
     }
 
 }
