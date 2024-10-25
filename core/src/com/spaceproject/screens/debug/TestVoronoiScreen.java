@@ -1029,9 +1029,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             //todo: draw once and capture
 
             //renderBlendToFile();
-
-            renderToFile(ImageBackground.transparent);
-            renderToFile(ImageBackground.gray);
+            renderToFile(drawVoronoi ? ImageBackground.gray : ImageBackground.transparent);
+            //renderToFile(ImageBackground.gray);
 
             //formatTests();
         }
