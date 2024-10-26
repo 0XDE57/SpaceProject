@@ -20,7 +20,6 @@ import com.badlogic.gdx.utils.StringBuilder;
 import com.spaceproject.generation.FontLoader;
 import com.spaceproject.math.DelaunayCell;
 import com.spaceproject.math.MyMath;
-import com.spaceproject.math.PolygonUtil;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 
@@ -164,7 +163,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawInRadius = false,
             drawInCenter = false,
             drawOrtho = false,
-            secondaryGraph = false;
+            drawCentroidDelaunay = false;
     
     int pSize = 5;
     float dragRadius = 20;
@@ -336,39 +335,40 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         hullPoly.setVertices(hull);
         hullPoly.getCentroid(centroid); //-> GeometryUtils.polygonCentroid(hull, 0, hull.length, centroid);
 
-        if (secondaryGraph) {
-            //holy crap more graphs!!! but getting heavy to compute....
-            centroidPoints.clear();
-            for (DelaunayCell cell : dCells) {
-                float px = 0, py = 0;
-                switch (shatterStyle) {
-                    case centroid:
-                        px = cell.centroid.x;
-                        py = cell.centroid.y;
-                        break;
-                    case circumcircle:
-                        px = cell.circumCenter.x;
-                        py = cell.circumCenter.y;
-                        break;
-                    case incenter:
-                        px = cell.incircle.x;
-                        py = cell.incircle.y;
-                        break;
-                    case orthocenter:
-                        px = cell.orthocenter.x;
-                        py = cell.orthocenter.y;
-                        break;
-                }
-                centroidPoints.add(px, py);
-                //centroidPoints.add(cell.centroid.x, cell.centroid.y);
-                //centroidPoints.add(cell.circumCenter.x, cell.circumCenter.y); //anti-voronoi?
-                //centroidPoints.add(cell.incircle.x, cell.incircle.y);
-                //centroidPoints.add(cell.orthocenter.x, cell.orthocenter.y);
-            }
-            centroidGraph = dualaunay.computeTriangles(centroidPoints, false);
+        if (drawCentroidDelaunay) {
+            calculateCentroidDelaunay();
         }
     }
-    
+
+    private void calculateCentroidDelaunay() {
+        if (dCells.isEmpty()) return;
+        //holy crap more graphs!!! but getting heavy to compute....
+        centroidPoints.clear();
+        for (DelaunayCell cell : dCells) {
+            float px = 0, py = 0;
+            switch (shatterStyle) {
+                case centroid:
+                    px = cell.centroid.x;
+                    py = cell.centroid.y;
+                    break;
+                case circumcircle:
+                    px = cell.circumCenter.x;
+                    py = cell.circumCenter.y;
+                    break;
+                case incenter:
+                    px = cell.incircle.x;
+                    py = cell.incircle.y;
+                    break;
+                case orthocenter:
+                    px = cell.orthocenter.x;
+                    py = cell.orthocenter.y;
+                    break;
+            }
+            centroidPoints.add(px, py);
+        }
+        centroidGraph = dualaunay.computeTriangles(centroidPoints, false);
+    }
+
     /**
      * Check if a line from a to b intersects with the convex hull.
      * If so, the point of intersection is stored in the intersect vector.
@@ -687,7 +687,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         //always at end to be on top
         shape.begin(ShapeType.Line);
-        if (secondaryGraph) {
+        if (drawCentroidDelaunay && centroidPoints.notEmpty()) {
             int discard = 1;
             shape.setColor(Color.GREEN);
             for (int i = 0; i < centroidGraph.size; i += 3) {
@@ -774,6 +774,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     }
                 }
             }
+        }
+
+        if (snap != null) {
+            shape.setColor(Color.GREEN);
+            shape.circle(snap.x, snap.y, 3);
         }
         shape.end();
 
@@ -1078,9 +1083,14 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.setColor(drawOrtho ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[I] OrthoCenter", 10, y - h * line++);
 
+        text.setColor(drawCentroidDelaunay ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[O] Centroid Delaunay Graph", 10, y - h * line++);
+
         batch.end();
     }
-    
+
+    Vector2 snap = null;
+
     private void updateControls() {
         if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
             MyScreenAdapter.game.setScreen(new TitleScreen(MyScreenAdapter.game));
@@ -1098,6 +1108,17 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         int x = Gdx.input.getX();
         int y = Gdx.graphics.getHeight() - Gdx.input.getY();
+
+        if (Gdx.input.isKeyJustPressed(Keys.SHIFT_LEFT)) {
+            float snapRadius = 20;
+            for (DelaunayCell cell : dCells) {
+                if (Vector2.dst(x, y, cell.centroid.x, cell.centroid.y) < snapRadius) {
+                    //highlight cell, set x,y marker
+                    snap = new Vector2(cell.centroid);
+                }
+            }
+            //snap should highlight snap location on press, add on release
+        }
 
         //create new point
         if (Gdx.input.justTouched() && Gdx.input.isButtonPressed(Buttons.RIGHT)) {
@@ -1133,12 +1154,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 dragStart.set(x, y);
             } else {
                 //drag selected point around
+                boolean mod = false;
                 if (focusedPoint >= 0) {
                     points.set(focusedPoint, x);
                     points.set(focusedPoint + 1, y);
+                    mod = true;
                 }
-                boolean mod = false;
-                //todo: BUG! sometimes drag will swap points when dragging too close to other points
                 for (int i = 0; i < points.size && !mod; i += 2) {
                     //if (i == focusedPoint) continue; //skip self
                     float px = points.get(i);
@@ -1159,6 +1180,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         if (Gdx.input.isKeyJustPressed(Keys.A)) {
             shatterStyle = shatterStyle.next();
+            if (drawCentroidDelaunay) {
+                calculateCentroidDelaunay();
+            }
         }
 
         //sub-shatter!
@@ -1249,6 +1273,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             }
             clear();
             points.addAll(newPoints);
+            Gdx.app.log(getClass().getSimpleName(), "pasted vertices from clipboard: " + points.size);
             calculateDelaunay();
         }
 
@@ -1314,6 +1339,13 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         if (Gdx.input.isKeyJustPressed(Keys.I)) {
             drawOrtho = !drawOrtho;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.O)) {
+            drawCentroidDelaunay = !drawCentroidDelaunay;
+            //may have to call recalculate here:
+            if (drawCentroidDelaunay) {
+                calculateDelaunay();
+            }
         }
     }
 
