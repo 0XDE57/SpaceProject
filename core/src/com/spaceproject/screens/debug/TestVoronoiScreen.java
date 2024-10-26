@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.ShortArray;
 import com.spaceproject.generation.FontLoader;
 import com.spaceproject.math.DelaunayCell;
 import com.spaceproject.math.MyMath;
+import com.spaceproject.math.PolygonUtil;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 
@@ -90,13 +91,18 @@ import java.util.ArrayList;
 // [ ] snap modifier: snap to neares center (any of the centers: highlight)
 // [ ] tileable voronoi! 2D voronoi wrapped on a 4D torus
 // [ ] mst!!! krustal?
-
+// [ ] complete graph: a simple undirected graph in which every pair of distinct vertices is connected by a unique edge.
+//      A complete digraph is a directed graph in which every pair of distinct vertices is connected by a pair of unique edges (one in each direction)
+//      https://en.wikipedia.org/wiki/Complete_graph
+// [ ] Utility graph: ?
+//     https://en.wikipedia.org/wiki/Three_utilities_problem
+//      see also: https://en.wikipedia.org/wiki/Toroidal_graph
 // centers: (in the case of an equilateral, these 4 centers are the same point!)
 // [x] incenter -> inscribed
 // [x] cicumcenter
 // [x] centroid
 // [x] orthocenter
-// [ ] are there more centers?
+// [ ] are there more centers? yes...
 // [x] and their respective graphs connecting centers
 //      [ ] fix performance, allow select center variant
 
@@ -104,6 +110,9 @@ import java.util.ArrayList;
 //  eg: 3:4:5 , 6:8:10 , 5:12:13 , 9:12:15 , 8:15:17
 
 //https://en.wikipedia.org/wiki/Dual_graph
+
+//hmm, what are "forbiggen"?
+// https://en.wikipedia.org/wiki/Forbidden_graph_characterization
 
 public class TestVoronoiScreen extends MyScreenAdapter {
 
@@ -326,7 +335,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         hullPoly.setVertices(hull);
         hullPoly.getCentroid(centroid); //-> GeometryUtils.polygonCentroid(hull, 0, hull.length, centroid);
 
-
         if (secondaryGraph) {
             //holy crap more graphs!!! but getting heavy to compute....
             centroidPoints.clear();
@@ -431,6 +439,10 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     }
     
     private void drawStuff() {
+        int mouseX = Gdx.input.getX();
+        int mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
+        cacheVec.set(mouseX, mouseY);
+
         //enable blending
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -683,6 +695,41 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             shape.polyline(hullPoly.getVertices());
         }
 
+        if (drawTriangleInfo) {
+            shape.setColor(Color.WHITE);
+            for (DelaunayCell cell : dCells) {
+                //only render mouse over triangle
+                if (!Intersector.isPointInTriangle(cacheVec, cell.a, cell.b, cell.c)) {
+                    continue;
+                }
+                shape.triangle(cell.a.x, cell.a.y, // A
+                        cell.b.x, cell.b.y, // B
+                        cell.c.x, cell.c.y);// C
+
+                //could display each centroid type?
+                float px = 0, py = 0;
+                switch (shatterStyle) {
+                    case centroid:
+                        px = cell.centroid.x;
+                        py = cell.centroid.y;
+                        break;
+                    case circumcircle:
+                        px = cell.circumCenter.x;
+                        py = cell.circumCenter.y;
+                        break;
+                    case incenter:
+                        px = cell.incircle.x;
+                        py = cell.incircle.y;
+                        break;
+                    case orthocenter:
+                        px = cell.orthocenter.x;
+                        py = cell.orthocenter.y;
+                        break;
+                }
+                shape.circle(px, py, 2);
+            }
+        }
+
         // debug draw points in order first to last color coded
         // this is to visualize the actual order of the points in the array
         if (debugPointOrder) {
@@ -705,19 +752,79 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         shape.end();
 
+
         batch.begin();
+        boolean debugLocation = false;
+        boolean debugCentroid = true;
+        boolean debugQA = false; //qa = quality area
         if (drawTriangleInfo) {
             dataFont.setColor(Color.BLACK);
             for (DelaunayCell cell : dCells) {
-                layout.setText(dataFont, MyMath.round(cell.area, 2) + "", dataFont.getColor(), 0, Align.center, false);
-                dataFont.draw(batch, layout, cell.centroid.x, cell.centroid.y);
-                layout.setText(dataFont, cell.quality + "", dataFont.getColor(), 0, Align.center, false);
-                dataFont.draw(batch, layout, cell.centroid.x, cell.centroid.y - layout.height * 1.3f);
+                //only render mouse over triangle
+                if (!Intersector.isPointInTriangle(cacheVec, cell.a, cell.b, cell.c)) {
+                    continue;
+                }
+                //could display each centroid type?
+                float px = 0, py = 0;
+                switch (shatterStyle) {
+                    case centroid:
+                        px = cell.centroid.x;
+                        py = cell.centroid.y;
+                        break;
+                    case circumcircle:
+                        px = cell.circumCenter.x;
+                        py = cell.circumCenter.y;
+                        break;
+                    case incenter:
+                        px = cell.incircle.x;
+                        py = cell.incircle.y;
+                        break;
+                    case orthocenter:
+                        px = cell.orthocenter.x;
+                        py = cell.orthocenter.y;
+                        break;
+                }
+                //draw cendroid!
+                layout.setText(dataFont, MyMath.round(px, 2) + "," + MyMath.round(py, 2), dataFont.getColor(), 0, Align.center, false);
+                dataFont.draw(batch, layout, px, py);
+                //a, b, c
+                layout.setText(dataFont, MyMath.round(cell.a.x, 2) + "," + MyMath.round(cell.a.y, 2), dataFont.getColor(), 0, Align.center, false);
+                dataFont.draw(batch, layout, cell.a.x, cell.a.y);
+                layout.setText(dataFont, MyMath.round(cell.b.x, 2) + "," + MyMath.round(cell.b.y, 2), dataFont.getColor(), 0, Align.center, false);
+                dataFont.draw(batch, layout, cell.b.x, cell.b.y);
+                layout.setText(dataFont, MyMath.round(cell.c.x, 2) + "," + MyMath.round(cell.c.y, 2), dataFont.getColor(), 0, Align.center, false);
+                dataFont.draw(batch, layout, cell.c.x, cell.c.y);
+
+                if (debugQA) {
+                    //area
+                    layout.setText(dataFont, MyMath.round(cell.area, 2) + "", dataFont.getColor(), 0, Align.center, false);
+                    dataFont.draw(batch, layout, cell.centroid.x, cell.centroid.y);
+                    //quality
+                    layout.setText(dataFont, cell.quality + "", dataFont.getColor(), 0, Align.center, false);
+                    dataFont.draw(batch, layout, cell.centroid.x, cell.centroid.y - layout.height * 1.3f);
+                }
+                //show points [0,0,0,0,0,0,0,0,0,0] ...
+                //show hull [0,0,0,0,0,0]
+                //show triangles [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]
+
+                //or highlight?
+                // show all points but highlight hull points [0,[#FF0000]0,0,0,0,0,0,0,0,0]
+                // (may be faster to render once normally then just render hull on top? how to align characters tho...monospace?
+            }
+
+            //render location
+            if (debugLocation) {
+                for (int i = 0; i < points.size; i += 2) {
+                    float x = points.get(i);
+                    float y = points.get(i + 1);
+                    layout.setText(dataFont, MyMath.round(x, 2) + ", " + MyMath.round(y, 2), dataFont.getColor(), 0, Align.center, false);
+                    dataFont.draw(batch, layout, x, y);
+                }
             }
         }
-        /*//rendering on screen
-        boolean drawCoords = true;
-        if (drawCoords) {
+
+        //raw points
+        if (debugCentroid) {
             dataFont.setColor(Color.BLACK);
             if (points.size <= 4) {
                 for (int i = 0; i < points.size; i += 2) {
@@ -727,7 +834,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     dataFont.draw(batch, layout, x, y);
                 }
             }
-        }*/
+        }
         batch.end();
 
         Gdx.gl.glDisable(GL20.GL_BLEND);
@@ -861,13 +968,14 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         batch.begin();
         int y = Gdx.graphics.getHeight() - 10;
         float h = text.getLineHeight();
-        int line = 1;
+        int line = 0;
         int maxPoints = maxVertices / 2;
         layout.setText(text, "Points: " + (int) (points.size * 0.5f) + "/" + maxPoints + ", D-Cells:" + dCells.size() + ", V-Cells: ?", Color.WHITE, 0, Align.center, false);
         text.draw(batch, layout, Gdx.graphics.getWidth() * 0.5f, y);
 
         text.setColor(Color.BLACK);
         //controls
+        text.draw(batch, "[ESC] Return to menu", 10, y - h * line++);
         text.draw(batch, "[C] Clear", 10, y - h * line++);
         text.draw(batch, "[Spacebar] Generate Random + [ALT] add centroid", 10, y - h * line++);
         text.draw(batch, "[SHIFT + Spacebar] Generate Regular + [ALT] add centroid", 10, y - h * line++);
