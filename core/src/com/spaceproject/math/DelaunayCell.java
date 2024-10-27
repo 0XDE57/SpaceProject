@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class DelaunayCell {
 
-    public Vector2 a, b, c;//vertex that define triangle
+    public Vector2 a, b, c;//vertex that define triangle todo: make this an index, don't create 3 new vectors for each triangle, that's silly!
     public Vector2 midAB, midBC, midCA;//semiperimeter: midpoints between vertex
     public DelaunayCell nAB, nBC, nCA;//neighbors (TODO: reference for now, index later)
     public Vector2 circumCenter = new Vector2();//center of circle that intersects each vertex a,b,c

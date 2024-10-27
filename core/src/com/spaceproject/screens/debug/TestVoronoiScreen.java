@@ -23,7 +23,6 @@ import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 //voronoi/polygon research:
@@ -127,8 +126,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
     //triangulation
     final DelaunayTriangulator delaunay = new DelaunayTriangulator();
-    final int maxVertices = 32767;//todo: this is odd number why? there will always be even number of points.
+    final int maxVertices = 32767;//todo: this is odd number why? there will always be even number of points as xy pairs.
     ShortArray triangles;
+
     final ArrayList<DelaunayCell> dCells = new ArrayList<>();
 
     final DelaunayTriangulator dualaunay = new DelaunayTriangulator();// dual delaunay ;)
@@ -166,7 +166,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawCentroidDelaunay = false;
     
     int pSize = 5;
-    float dragRadius = 20;
+    float dragRadius = 10;
     int focusedPoint = -1;//no index
 
     boolean isDrag = false;
@@ -176,7 +176,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
     //distance based voronoi render style
     enum DistanceCheck {
-        euclidean, manhattan, chess, antiChess, multiply, divXY, divYX,
+        euclidean, manhattan, //todo: minkowski,
+        chess, antiChess, multiplyXY, divXY, divYX,
         divMinMax, divMaxMin, minMin, minMax, subXY, subYX;
 
         private static final DistanceCheck[] VALUES = values();
@@ -208,6 +209,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         clear();
         float centerScreenX = Gdx.graphics.getWidth() * 0.5f;
         float centerScreenY = Gdx.graphics.getHeight() * 0.5f;
+        boolean recenter = false;
 
         /*
         //CO-LINEAR POINTS!!!
@@ -255,15 +257,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         if (addCentroid) {
             points.add(centroid.x, centroid.y);
         }
-        for (int i = 0; i < points.size; i+= 2) {
-            points.set(i, centroid.x - points.get(i) + centerScreenX);
-            points.set(i + 1, centroid.y - points.get(i + 1) + centerScreenY);
-
-            //init color test
-            //todo: pool
-            colorTest.add(new Color((float)Math.random()*0.5f, (float)Math.random()*0.5f, (float)Math.random()*0.5f, 1));
+        if (recenter) {
+            for (int i = 0; i < points.size; i += 2) {
+                points.set(i, centroid.x - points.get(i) + centerScreenX);
+                points.set(i + 1, centroid.y - points.get(i + 1) + centerScreenY);
+            }
         }
-        
+
+        regenColor();
+
         //create cells out of points
         calculateDelaunay();
     }
@@ -872,7 +874,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
     public Color closestPointColor(float x, float y) {
         cacheVec.set(x, y);
-        int closest = -1;//index?
+        int closeIndex = -1;//index?
         float closeDist = Float.MAX_VALUE;
         for (int i = 0; i < points.size; i += 2) {
             float xx = points.get(i);
@@ -884,7 +886,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             float dist = 0;
             switch (renderStyle) {
                 case euclidean:
-                    dist = cacheVec.dst2(xx, yy);
+                    dist = cacheVec.dst2(xx, yy); //squared for cpu
                     break;
                 case manhattan: //add
                     //dist = Math.abs(x - xx) + Math.abs(y - yy);
@@ -892,33 +894,28 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     break;
                 case chess: //Chebyshev (max)
                     dist = max;
-                    //dist =  MyMath.chessDistance(x, y, xx, yy);
+                    dist =  MyMath.chessDistance(x, y, xx, yy);
                     break;
                 case antiChess: //anti-Chebyshev (min)
                     //dist = MyMath.antiChessDistance(x, y, xx, yy);
                     dist = min;
                     break;
-                case multiply:
-                    //dist = Math.abs(x - xx) * Math.abs(y - yy);
+                case multiplyXY:
                     dist = dX * dY;
                     break;
-                case minMin:
+                case divXY:
+                    dist = dX / dY;
+                    break;
+                case divYX:
+                    dist = dY / dX;
+                    break;
+                    case minMin:
                     dist = min * min;
                     break;
                 case minMax:
                     dist = min * max;
                     break;
-                case divXY:
-                    //dist = Math.abs(x - xx) * Math.abs(y - yy);
-                    dist = dX / dY;
-                    break;
-                case divYX:
-                    //dist = Math.abs(x - xx) * Math.abs(y - yy);
-                    dist = dY / dX;
-                    break;
                 case divMinMax:
-                    //float dX = Math.abs(x - xx);
-                    //float dY = Math.abs(y - yy);
                     dist = min / max;
                     break;
                 case divMaxMin:
@@ -936,18 +933,13 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             }
             if (dist < closeDist) {
                 closeDist = dist;
-                closest = i;
+                closeIndex = i;
             }
         }
-        //i 0 -> 0
-        //i 2 -> 1
-        //i 4 -> 2
-        //i 6 -> 3
-        //i 8 -> 4
-        if (closest != 0) {
-            closest /= 2;
+        if (closeIndex != 0) {
+            closeIndex /= 2;
         }
-        return colorTest.get(closest);
+        return colorTest.get(closeIndex);
     }
 
     @Override
@@ -996,7 +988,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
     private void drawMenu() {
         batch.begin();
-        int y = Gdx.graphics.getHeight() - 10;
+        int x = 10;
+        int y = Gdx.graphics.getHeight() - x;
         float h = text.getLineHeight();
         int line = 0;
         int maxPoints = maxVertices / 2;
@@ -1005,19 +998,19 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         text.setColor(Color.BLACK);
         //controls
-        text.draw(batch, "[ESC] Return to menu", 10, y - h * line++);
-        text.draw(batch, "[X] Clear", 10, y - h * line++);//B makes no sense but Copy has to be C
-        text.draw(batch, "[Spacebar] Generate Random + [ALT] add centroid", 10, y - h * line++);
-        text.draw(batch, "[SHIFT + Spacebar] Generate Regular + [ALT] add centroid", 10, y - h * line++);
-        text.draw(batch, "[L-Click] Drag point", 10, y - h * line++);
-        text.draw(batch, "[R-Click] Create new point", 10, y- h  * line++);
+        text.draw(batch, "[ESC] Return to menu", x, y - h * line++);
+        text.draw(batch, "[X] Clear", x, y - h * line++);//B makes no sense but Copy has to be C
+        text.draw(batch, "[Spacebar] Generate Random + [ALT] add centroid", x, y - h * line++);
+        text.draw(batch, "[SHIFT + Spacebar] Generate Regular + [ALT] add centroid", x, y - h * line++);
+        text.draw(batch, "[L-Click] Drag point", x, y - h * line++);
+        text.draw(batch, "[R-Click] Create new point", x, y - h  * line++);
         //text.draw(batch, "[Shift + R-Click] Create new point: locked", 10, y- h  * line++);//todo
-        text.draw(batch, "[SHIFT + L-Click] Drag points", 10, y - h * line++);
-        text.draw(batch, "[S] Shatter @ " + shatterStyle.toString().toUpperCase(), 10, y - h * line++);
-        text.draw(batch, "[A] Cycle Shatter Center" , 10, y - h * line++);
-        text.draw(batch, "[CTRL + D] Save PNG", 10, y - h * line++);
-        text.draw(batch, "[CTRL + C] Copy points to clipboard", 10, y - h * line++); //todo
-        text.draw(batch, "[CTRL + V] Load points from clipboard", 10, y - h * line++); //todo
+        text.draw(batch, "[SHIFT + L-Click] Drag points", x, y - h * line++);
+        text.draw(batch, "[S] Shatter -> " + shatterStyle.toString().toUpperCase(), x, y - h * line++);
+        text.draw(batch, "[A] Cycle Shatter Center" , x, y - h * line++);
+        text.draw(batch, "[CTRL + D] Save PNG", x, y - h * line++);
+        text.draw(batch, "[CTRL + C] Copy points to clipboard", x, y - h * line++); //todo
+        text.draw(batch, "[CTRL + V] Load points from clipboard", x, y - h * line++); //todo
 
         //todo: reorder in a more sensible grouping. maybe:
         //  points
@@ -1029,68 +1022,67 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         //toggles
         text.setColor(debugPointOrder ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[F2] Debug Point Order", 10, y - h  * line++);
+        text.draw(batch, "[F2] Debug Point Order", x, y - h  * line++);
 
         text.setColor(drawCircumcenter ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[1] CircumCenter", 10, y - h  * line++);
+        text.draw(batch, "[1] CircumCenter", x, y - h  * line++);
         
         text.setColor(drawCircumcircle ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[2] CircumCircle", 10, y - h * line++);
+        text.draw(batch, "[2] CircumCircle", x, y - h * line++);
         
         text.setColor(drawPoints ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[3] Points", 10, y - h * line++);
+        text.draw(batch, "[3] Points", x, y - h * line++);
         
         text.setColor(drawMidpoints ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[4] Semiperimeter (midpoints)", 10, y - h * line++);
+        text.draw(batch, "[4] Semiperimeter (midpoints)", x, y - h * line++);
         
         text.setColor(drawVoronoi ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[5] Voronoi Graph", 10, y - h * line++);
+        text.draw(batch, "[5] Voronoi Graph", x, y - h * line++);
         
         text.setColor(drawDelaunay ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[6] Delaunay Graph", 10, y - h * line++);
+        text.draw(batch, "[6] Delaunay Graph", x, y - h * line++);
         
         text.setColor(drawHull ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[7] Hull", 10, y - h * line++);
+        text.draw(batch, "[7] Hull", x, y - h * line++);
         
         text.setColor(drawCentroid ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[8] Centroid", 10, y - h * line++);
+        text.draw(batch, "[8] Centroid", x, y - h * line++);
 
         text.setColor(drawTriangleQuality ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[9] Triangle Quality Graph", 10, y - h * line++);
+        text.draw(batch, "[9] Triangle Quality Graph", x, y - h * line++);
 
         text.setColor(drawTriangleInfo ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[0] Triangle Info", 10, y - h * line++);
+        text.draw(batch, "[0] Triangle Info", x, y - h * line++);
 
         text.setColor(drawCenteroidPointGraph ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[-] Centroid-Vertex Graph", 10, y - h * line++);
+        text.draw(batch, "[-] Centroid-Vertex Graph", x, y - h * line++);
 
         text.setColor(drawMidGraph ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[=] Centroid-Semiperimeter Graph", 10, y - h * line++);
+        text.draw(batch, "[=] Centroid-Semiperimeter Graph", x, y - h * line++);
 
         text.setColor(voronoiRender ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[Q] Voronoi Render [" + renderStyle.name().toUpperCase() + "]", 10, y - h * line++);
-        text.draw(batch, "[W] Cycle Render Style", 10, y - h * line++);
-        text.draw(batch, "[E] Voronoi Render (Regenerate Colors)", 10, y - h * line++);
+        text.draw(batch, "[Q] Voronoi Render -> " + renderStyle.name().toUpperCase(), x, y - h * line++);
+        text.draw(batch, "[W] Cycle Render Style", x, y - h * line++);
+        text.draw(batch, "[E] Voronoi Render (Regenerate Colors)", x, y - h * line++);
 
         text.setColor(drawInTriangle ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[T] InTriangle", 10, y - h * line++);
+        text.draw(batch, "[T] InTriangle", x, y - h * line++);
 
         text.setColor(drawInCenter ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[Y] InCircle: InCenter", 10, y - h * line++);
+        text.draw(batch, "[Y] InCircle: InCenter", x, y - h * line++);
         text.setColor(drawInRadius ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[U] InCircle: InRadius", 10, y - h * line++);
+        text.draw(batch, "[U] InCircle: InRadius", x, y - h * line++);
 
         text.setColor(drawOrtho ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[I] OrthoCenter", 10, y - h * line++);
+        text.draw(batch, "[I] OrthoCenter", x, y - h * line++);
 
         text.setColor(drawCentroidDelaunay ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[O] Centroid Delaunay Graph", 10, y - h * line++);
+        text.draw(batch, "[O] Centroid Delaunay Graph -> " +  shatterStyle.name().toUpperCase(), x, y - h * line++);
 
         batch.end();
     }
 
     Vector2 snap = null;
-
     private void updateControls() {
         if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
             MyScreenAdapter.game.setScreen(new TitleScreen(MyScreenAdapter.game));
@@ -1228,15 +1220,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         //Control + D -> Save to file
         if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Keys.D)) {
-            //RGBA8888 (default)
-            //NOTE: expensive! each variation causes redraw!
-            //todo: draw once and capture
-
-            //renderBlendToFile();
-            renderToFile(drawVoronoi ? ImageBackground.gray : ImageBackground.transparent);
-            //renderToFile(ImageBackground.gray);
-
-            //formatTests();
+            renderToFile(!voronoiRender);
         }
 
         //copy paste!
@@ -1268,13 +1252,14 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     newPoints.add(parsed);
                 }
             } catch (NumberFormatException ex) {
-                Gdx.app.error(getClass().getSimpleName(),"Float could not parsed. Clipboard paste aborted.", ex);
+                Gdx.app.error(getClass().getSimpleName(),"Invalid input! Float could not parsed. This expects floats in XY pairs as CSV. Clipboard paste aborted.");
                 return;
             }
             clear();
             points.addAll(newPoints);
             Gdx.app.log(getClass().getSimpleName(), "pasted vertices from clipboard: " + points.size);
             calculateDelaunay();
+            regenColor();
         }
 
         //toggle drawings
@@ -1349,40 +1334,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
     }
 
-    private void formatTests() {
-        //RGBA4444
-        // todo: crash A
-        // # Problematic frame:
-        // # C  [libc.so.6+0x16c7c0]
-        // Fatal glibc error: malloc.c:2599 (sysmalloc): assertion failed: (old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)
-        //renderToFile(ImageBackground.transparent, Pixmap.Format.RGBA4444);
-
-        //renderToFile(false, ImageBackground.transparent, Pixmap.Format.RGBA4444);
-
-        //todo: crash B
-        //Problematic frame:
-        //# C  [libc.so.6+0x16c837]
-        //malloc(): corrupted top size
-        //renderToFile(ImageBackground.gray, Pixmap.Format.RGBA4444);
-
-        //renderToFile(false, ImageBackground.gray, Pixmap.Format.RGBA4444);
-
-/*
-        //RGB888;
-        renderToFile(true, ImageBackground.transparent, Pixmap.Format.RGB888);
-        renderToFile(false, ImageBackground.transparent, Pixmap.Format.RGB888);
-        renderToFile(true, ImageBackground.gray, Pixmap.Format.RGB888);
-        renderToFile(false, ImageBackground.gray, Pixmap.Format.RGB888);
-
-        //RGB565;
-        renderToFile(true, ImageBackground.transparent, Pixmap.Format.RGB565);
-        renderToFile(false, ImageBackground.transparent, Pixmap.Format.RGB565);
-        renderToFile(true, ImageBackground.gray, Pixmap.Format.RGB565);
-        renderToFile(false, ImageBackground.gray, Pixmap.Format.RGB565);
-
- */
-    }
-
     private void regenColor() {
         colorTest.clear();
         for (int i = 0; i < points.size; i+= 2) {
@@ -1416,28 +1367,20 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         return duplicate;
     }
 
-    enum ImageBackground {
-        transparent, gray//, userDefined
-    }
-
-
-    private void renderToFile(ImageBackground background) {
+    /** Save render to PNG.
+     * Note: transparency causes redraw! expensive!
+     */
+    private void renderToFile(boolean transparent) {
         if (points.size < 6) return;
         long startTime = System.currentTimeMillis();
 
-        //manually clear with clear color for transparent background
-        switch (background) {
-            case transparent:
-                Gdx.gl.glClearColor(0, 0, 0, 0);
-                break;
-            case gray:
-                Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
-                break;
-            //todo: default: userDefinedColor?
+        if (transparent) {
+            //manually clear with clear color for transparent background
+            Gdx.gl.glClearColor(0, 0, 0, 0);
+            Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+            //and force re-render
+            drawStuff();
         }
-        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-        //and force re-render
-        drawStuff();
 
         //crop to hull bounds
         Rectangle bounds = hullPoly.getBoundingRectangle();
@@ -1447,8 +1390,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         //fullscreen capture
         Pixmap fullscreenImage = Pixmap.createFromFrameBuffer(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        String mode = (voronoiRender ? renderStyle.toString().toLowerCase() : "")
-                +  (background == ImageBackground.transparent ? "_" + background.toString().toLowerCase() : "");
+        String mode = (voronoiRender ? renderStyle.toString().toLowerCase() : "") + (transparent ? "_transparent" : "");
         String msaa = (((MyScreenAdapter)game.getScreen()).isMSAAEnabled() ? "_MSAA_" : "_");
 
         //save fullscreen framebuffer to file
@@ -1464,7 +1406,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         long end = System.currentTimeMillis() - startTime;
         Gdx.app.log(getClass().getSimpleName(), "finished: " + end);
     }
-
 
     private void renderBlendToFile() {
         if (points.size < 6) return;
@@ -1512,14 +1453,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         long end = System.currentTimeMillis() - startTime;
         Gdx.app.log(getClass().getSimpleName(), "finished: " + end);
-    }
-
-    public static Pixmap createFromFrameBuffer(int x, int y, int w, int h, Pixmap.Format format) {
-        Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
-        final Pixmap pixmap = new Pixmap(w, h, format);
-        ByteBuffer pixels = pixmap.getPixels();
-        Gdx.gl.glReadPixels(x, y, w, h, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, pixels);
-        return pixmap;
     }
 
     private void clear() {

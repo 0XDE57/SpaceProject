@@ -160,21 +160,28 @@ public abstract class MyMath {
         return fibonacci(n - 1) + fibonacci(n - 2);
     }
 
+    /** Taxicab or Manhattan distance is the distance between two points is defined as
+     * the sum of the absolute differences of their respective Cartesian coordinates.
+     * rectilinear distance
+     */
+    public static float manhattanDistance(float x1, float y1, float x2, float y2) {
+        return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+    }
+
     /** Chebyshev "chessboard" distance.
      * The distance between two points is the greatest of their differences along any coordinate dimension.
-     * https://en.wikipedia.org/wiki/Chebyshev_distance
      */
-    public static float chessDistance(float x1, float y1, float x2, float y2){
-        float dX = Math.abs(x1-x2);
-        float dY = Math.abs(y1-y2);
+    public static float chessDistance(float x1, float y1, float x2, float y2) {
+        float dX = Math.abs(x1 - x2);
+        float dY = Math.abs(y1 - y2);
         return Math.max(dX, dY);
     }
 
     /** Modification inspired by above for min distance.
      */
-    public static float antiChessDistance(float x1, float y1, float x2, float y2){
-        float dX = Math.abs(x1-x2);
-        float dY = Math.abs(y1-y2);
+    public static float antiChessDistance(float x1, float y1, float x2, float y2) {
+        float dX = Math.abs(x1 - x2);
+        float dY = Math.abs(y1 - y2);
         return Math.min(dX, dY);
     }
 
