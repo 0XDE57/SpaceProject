@@ -5,10 +5,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
-import com.badlogic.gdx.utils.Pools;
-import com.badlogic.gdx.utils.ShortArray;
+import com.badlogic.gdx.utils.*;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.AsteroidBeltComponent;
 import com.spaceproject.components.AsteroidComponent;
@@ -16,11 +13,14 @@ import com.spaceproject.components.PhysicsComponent;
 import com.spaceproject.components.TransformComponent;
 import com.spaceproject.config.DebugConfig;
 import com.spaceproject.generation.EntityBuilder;
+import com.spaceproject.math.DoubleDelaunayTriangulator;
 import com.spaceproject.math.MyMath;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
+
+import java.lang.StringBuilder;
 
 
 public class AsteroidBeltSystem extends EntitySystem {
@@ -59,7 +59,7 @@ public class AsteroidBeltSystem extends EntitySystem {
     private final Pool<AsteroidRemovedQueue> removePool = Pools.get(AsteroidRemovedQueue.class, 100);
     private final Array<AsteroidRemovedQueue> spawnQ = new Array<>(false, 100);
 
-    private final DelaunayTriangulator delaunay = new DelaunayTriangulator();
+    private final DoubleDelaunayTriangulator delaunay = new DoubleDelaunayTriangulator();
     private final float minAsteroidSize = 100; //anything smaller than this will not create more
     private final float maxDriftAngle = 0.05f; //angular drift when shatter
     private final float minDriftAngle = 0.01f;
@@ -282,7 +282,12 @@ public class AsteroidBeltSystem extends EntitySystem {
         int child = 0;
         float childArea = 0;
 
-        ShortArray triangleIndices = delaunay.computeTriangles(vertices, false);
+        //copy float to double for higher precision triangulation
+        double[] vertsFloat = new double[vertices.length];
+        for (int i = 0; i < vertsFloat.length; i++) {
+            vertsFloat[i] = vertices[i];
+        }
+        IntArray triangleIndices = delaunay.computeTriangles(vertsFloat, false);
 
         //create cells for each triangle
         for (int index = 0; index < triangleIndices.size; index += 3) {
