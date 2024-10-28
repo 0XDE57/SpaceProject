@@ -149,7 +149,11 @@ public abstract class MyMath {
         return (double) Math.round(value * scale) / scale;
     }
     //endregion
-    
+
+    static public boolean isEqualDouble(double a, double b, double tolerance) {
+        return Math.abs(a - b) <= tolerance;
+    }
+
     public static long fibonacci(int n) {
         if (n == 0) {
             return 0;
