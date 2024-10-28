@@ -71,7 +71,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private static final int poolSize = 400;
     private static final Array<DamageText> activeNumbers = new Array<>(false, poolSize); //don't care about order so we can avoid a System.arraycopy()
     private static final Pool<DamageText> numbersPool = Pools.get(DamageText.class, poolSize);
-    public static boolean showDamageNumbers = false;
+    public static boolean showDamageNumbers = true;
     public static int damageTime = 750;
     public static int activePeak;
     private final StringBuilder infoString = new StringBuilder();
@@ -601,9 +601,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private void drawStats(StatsComponent stats) {
         if (stats == null) return;
 
+        //todo: replace with VisUI table for alignment, because string format spacing does not line up properly (glyph spacing?)
+        //todo: add another column for current life vs total
         float centerX = 20;
         int offset = 50;
         float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3f)) - offset;
+        //layout.setText(subFont,  String.format("%-10s %s", stats.timeAlive, "time alive"), Color.RED, 0, Align.left, false);
         layout.setText(subFont,  String.format("%-10s %s", stats.kills, "kills"), Color.RED, 0, Align.left, false);
         float height = layout.height * 1.6f;
         subFont.draw(batch, layout, centerX, messageHeight - height);
