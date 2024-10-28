@@ -50,7 +50,8 @@ Welcome to A Space Project. A project involving space...
 | Toggle Map State               | M             |                      |
 | Toggle HUD                     | H             |                      |
 | Full screen                    | F11           |                      |
-| Menu (Pause)                   | Escape        | Start                | 
+| Menu (Pause)                   | Escape        | Start                |
+| MSAA (Multisample Anti Alias)  | F7            |                      |
 | Vsync                          | F8            |                      |
 | ECS Debug Viewer               | F9            |                      |
 | Misc debug keys | too lazy to document, won't be permanent |
