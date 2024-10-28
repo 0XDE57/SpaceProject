@@ -69,7 +69,8 @@ project: https://github.com/users/0XDE57/projects/1
 ## License
 Apache 2.0: see [LICENSE.md](/LICENSE.md)
 
-Credit appreciated.
+Credit appreciated. Contributions welcome!
+
 
 
 ## Libraries
