@@ -108,6 +108,9 @@ import java.util.ArrayList;
 //hmm, what are "forbidden"?
 // https://en.wikipedia.org/wiki/Forbidden_graph_characterization
 
+
+//
+
 public class TestVoronoiScreen extends MyScreenAdapter {
 
     //rendering
@@ -133,7 +136,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
     //convex hull
     double[] hull; //high precision for calculation
-    float [] floatHull; //low precision for render
+    float[] floatHull; //low precision for render
     final DoublePolygon hullPoly = new DoublePolygon();
     final Vector2 centroid = new Vector2();
     final DoubleConvexHull convex = new DoubleConvexHull();
@@ -495,6 +498,13 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             float focusY = (float) points.get(focusedPoint + 1);
             shape.setColor(Color.GREEN);
             shape.circle(focusX, focusY, dragRadius);
+            shape.end();
+        }
+
+        if (snap != null) {
+            shape.begin(ShapeType.Filled);
+            shape.setColor(Color.SKY);
+            shape.circle(snap.x, snap.y, dragRadius);
             shape.end();
         }
 
@@ -1009,7 +1019,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, "[SHIFT + Spacebar] Generate Regular + [ALT] add centroid", x, y - h * line++);
         text.draw(batch, "[L-Click] Drag point", x, y - h * line++);
         text.draw(batch, "[R-Click] Create new point", x, y - h  * line++);
-        //text.draw(batch, "[Shift + R-Click] Create new point: locked", 10, y- h  * line++);//todo
+        text.draw(batch, "[ALT] Snap to center", 10, y- h  * line++);//todo
         text.draw(batch, "[SHIFT + L-Click] Drag points", x, y - h * line++);
         text.draw(batch, "[S] Shatter -> " + shatterStyle.toString().toUpperCase(), x, y - h * line++);
         text.draw(batch, "[A] Cycle Shatter Center" , x, y - h * line++);
@@ -1103,18 +1113,30 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             generateNewPoints(MathUtils.random(3, 16), Gdx.input.isKeyPressed(Keys.SHIFT_LEFT), Gdx.input.isKeyPressed(Keys.CONTROL_LEFT));
         }
 
-        int x = Gdx.input.getX();
-        int y = Gdx.graphics.getHeight() - Gdx.input.getY();
+        float x = Gdx.input.getX();
+        float y = Gdx.graphics.getHeight() - Gdx.input.getY();
 
-        if (Gdx.input.isKeyJustPressed(Keys.SHIFT_LEFT)) {
-            float snapRadius = 20;
+        if (Gdx.input.isKeyPressed(Keys.ALT_LEFT)) {
+            float snapRadius = 9;
+            Vector2 closestCenter = null;
             for (DelaunayCell cell : dCells) {
                 if (Vector2.dst(x, y, cell.centroid.x, cell.centroid.y) < snapRadius) {
-                    //highlight cell, set x,y marker
-                    snap = new Vector2(cell.centroid);
+                    closestCenter = cell.centroid;
+                }
+                if (Vector2.dst(x, y, cell.circumCenter.x, cell.circumCenter.y) < snapRadius) {
+                    closestCenter = cell.circumCenter;
+                }
+                if (Vector2.dst(x, y, cell.incircle.x, cell.incircle.y) < snapRadius) {
+                    closestCenter = cell.incircle;
+                }
+                if (Vector2.dst(x, y, cell.orthocenter.x, cell.orthocenter.y) < snapRadius) {
+                    closestCenter = cell.orthocenter;
                 }
             }
+            snap = closestCenter;
             //snap should highlight snap location on press, add on release
+        } else {
+            snap = null;
         }
 
         //create new point
@@ -1125,6 +1147,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 Gdx.app.error(getClass().getSimpleName(), points.size + " > 32767. ignored!");
                 return;
             }*/
+            if (snap != null) {
+                x = snap.x;
+                y = snap.y;
+            }
+
             if (!isDuplicate(x, y)) {
                 points.add(x);
                 points.add(y);
@@ -1159,7 +1186,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     mod = true;
                 }
                 for (int i = 0; i < points.size && !mod; i += 2) {
-                    //if (i == focusedPoint) continue; //skip self
                     float px = (float) points.get(i);
                     float py = (float) points.get(i + 1);
                     if (Vector2.dst(x, y, px, py) < dragRadius) {
@@ -1236,8 +1262,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             //comma separated values
             stringBuilder.setLength(0);
             for (int i = 0; i < points.size; i += 2) {
-                float px = (float) points.get(i);
-                float py = (float) points.get(i + 1);
+                double px = points.get(i);
+                double py = points.get(i + 1);
                 stringBuilder.append(px).append(",").append(py);
                 //last point
                 if (i + 2 != points.size) {
@@ -1255,7 +1281,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             DoubleArray newPoints = new DoubleArray();
             try {
                 for (String value : csv) {
-                    float parsed = Float.parseFloat(value);
+                    double parsed = Double.parseDouble(value);
                     newPoints.add(parsed);
                 }
             } catch (NumberFormatException ex) {
@@ -1406,7 +1432,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         Gdx.app.log(getClass().getSimpleName(), "writing to: " + fullscreenHandle.path());
         PixmapIO.writePNG(fullscreenHandle, fullscreenImage, -1, true);
 
-        //save cropped frambuffer to file
+        //save cropped framebuffer to file
         FileHandle cropHandle = Gdx.files.local("assets/capture/" + Gdx.graphics.getFrameId() + mode  + msaa + "_crop_" + cropImage.getWidth() + "x" + cropImage.getHeight() + ".png");
         Gdx.app.log(getClass().getSimpleName(), "writing to: " + cropHandle.path());
         PixmapIO.writePNG(cropHandle, cropImage, -1, true);
@@ -1429,7 +1455,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         //and force re-render
         drawStuff();
-        //capture first pass frambuffer to file
+        //capture first pass framebuffer to file
         Pixmap rawRender = Pixmap.createFromFrameBuffer((int) bounds.x - padding, (int) bounds.y - padding, (int) bounds.getWidth() + padding * 2, (int) bounds.getHeight() + padding * 2);
         FileHandle rawFile = Gdx.files.local("assets/capture/" + Gdx.graphics.getFrameId() + "_RAW_" + rawRender.getWidth() + "x" + rawRender.getHeight() + ".png");
         Gdx.app.log(getClass().getSimpleName(), "writing to: " + rawFile.path());
