@@ -271,28 +271,29 @@ public class SpaceStationSystem extends IteratingSystem {
         StatsComponent stats = Mappers.stat.get(collector);
         for (ItemComponent.Resource resource : ItemComponent.Resource.values()) {
             int id = resource.getId();
-            if (cargo.inventory.containsKey(id)) {
-                if (GameScreen.getGameTimeCurrent() - cargo.lastCollectTime < inventorySellTimer) return; //animation
-                /*todo: base local value on rarity of resource in that local system.
-                   eg: a system red is common so value local value will be less,
-                   or a system where gold is more rare than usual  so value will be more
-                float scarcity = 1.0f;
-                float localValue = scarcity * resource.getValue();
-                int credits = quantity * localValue;
-                */
-                int quantity = cargo.inventory.get(id);
-                int credits = quantity * resource.getValue();
-                float pitch = 0.5f + ((((float) id / cargo.inventory.size()) + 1) * 0.12f);
-                getEngine().getSystem(SoundSystem.class).addCredits(pitch);
-                cargo.credits += credits;
-                cargo.inventory.remove(id);
-                cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
-                if (stats != null) {
-                    stats.profit += credits;
-                }
-                getEngine().getSystem(HUDSystem.class).addCredits(credits, pos, resource.getColor());
-                Gdx.app.debug(getClass().getSimpleName(), "+" + credits + "c. sold " + quantity + " " + resource.name() + " @"+ resource.getValue() + "c");
+            if (!cargo.inventory.containsKey(id)) continue;
+
+            if (GameScreen.getGameTimeCurrent() - cargo.lastCollectTime < inventorySellTimer) return; //animation
+
+            /*todo: base local value on rarity of resource in that local system.
+               eg: a system red is common so value local value will be less,
+               or a system where gold is more rare than usual  so value will be more
+            float scarcity = 1.0f;
+            float localValue = scarcity * resource.getValue();
+            int credits = quantity * localValue;
+            */
+            int quantity = cargo.inventory.get(id);
+            int credits = quantity * resource.getValue();
+            float pitch = 0.5f + ((((float) id / cargo.inventory.size()) + 1) * 0.12f);
+            getEngine().getSystem(SoundSystem.class).addCredits(pitch);
+            cargo.credits += credits;
+            cargo.inventory.remove(id);
+            cargo.lastCollectTime = GameScreen.getGameTimeCurrent();
+            if (stats != null) {
+                stats.profit += credits;
             }
+            getEngine().getSystem(HUDSystem.class).addCredits(credits, pos, resource.getColor());
+            Gdx.app.debug(getClass().getSimpleName(), "+" + credits + "c. sold " + quantity + " " + resource.name() + " @"+ resource.getValue() + "c");
         }
     }
 
