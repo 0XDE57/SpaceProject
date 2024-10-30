@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Component;
 public class StatsComponent implements Component {
 
     //stats
+    //public long timeAlive;
     //todo: kills, deaths, resourcesCollected, creditsEarned, creditsSpent, etc...
     // should it collect per life and total on death?
     public long distanceTraveled;
@@ -17,11 +18,13 @@ public class StatsComponent implements Component {
 
     public long shotsHit;
 
-    public long damageDealt;
+    public float damageDealt;
 
-    public long damageTaken;
+    public float damageTaken;
 
     public long resourcesCollected;
+
+    //public long resourcesSpent;
 
     public long resourcesLost;
 

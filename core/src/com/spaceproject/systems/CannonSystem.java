@@ -13,7 +13,6 @@ import com.spaceproject.config.EngineConfig;
 import com.spaceproject.config.RenderOrder;
 import com.spaceproject.generation.BodyBuilder;
 import com.spaceproject.math.MyMath;
-import com.spaceproject.screens.GameScreen;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
 
@@ -77,7 +76,7 @@ public class CannonSystem extends IteratingSystem {
         //create missile
         Entity missile = createMissile(cannon, parentEntity);
         getEngine().addEntity(missile);
-        getEngine().getSystem(SoundSystem.class).laserShoot(0.4f + (1-cannon.heat * 0.5f));
+        getEngine().getSystem(SoundSystem.class).cannonShoot(0.4f + (1-cannon.heat * 0.5f));
     }
 
     private static void  updateCoolDown(CannonComponent cannon, float deltaTime) {

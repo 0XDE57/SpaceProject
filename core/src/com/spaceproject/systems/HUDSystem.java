@@ -611,34 +611,37 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         float centerX = 20;
         int offset = 50;
         float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3f)) - offset;
-        //layout.setText(subFont,  String.format("%-10s %s", stats.timeAlive, "time alive"), Color.RED, 0, Align.left, false);
+        int h = 1;
+        //layout.setText(subFont,  String.format("%-10s %s", MyMath.formatDuration(stats.timeAlive), "time alive"), Color.RED, 0, Align.left, false);
+        //subFont.draw(batch, layout, centerX, messageHeight - height * h++);
+
         layout.setText(subFont,  String.format("%-10s %s", stats.kills, "kills"), Color.RED, 0, Align.left, false);
         float height = layout.height * 1.6f;
-        subFont.draw(batch, layout, centerX, messageHeight - height);
+        subFont.draw(batch, layout, centerX, messageHeight - height * h++);
 
         layout.setText(subFont, String.format("%-10s %s", stats.deaths, "deaths"), Color.RED, 0, Align.left, false);
-        subFont.draw(batch, layout, centerX, messageHeight - height * 2);
+        subFont.draw(batch, layout, centerX, messageHeight - height * h++);
 
         layout.setText(subFont, String.format("%-10s %s",stats.shotsFired, "shots fired"), Color.RED, 0, Align.left, false);
-        subFont.draw(batch, layout, centerX, messageHeight - height * 3);
+        subFont.draw(batch, layout, centerX, messageHeight - height * h++);
 
         layout.setText(subFont, String.format("%-10s %s", stats.shotsHit, "shots hit") + " - " + MyMath.round((double) stats.shotsHit / stats.shotsFired * 100, 2) + "%", Color.RED, 0, Align.left, false);
-        subFont.draw(batch, layout, centerX, messageHeight - height * 4);
+        subFont.draw(batch, layout, centerX, messageHeight - height * h++);
 
         layout.setText(subFont, String.format("%-10s %s", stats.damageDealt, "damage dealt"), Color.RED, 0, Align.left, false);
-        subFont.draw(batch, layout, centerX, messageHeight - height * 5);
+        subFont.draw(batch, layout, centerX, messageHeight - height * h++);
 
         layout.setText(subFont, String.format("%-10s %s", stats.damageTaken, "damage taken"), Color.RED, 0, Align.left, false);
-        subFont.draw(batch, layout, centerX, messageHeight - height * 6);
+        subFont.draw(batch, layout, centerX, messageHeight - height * h++);
 
         layout.setText(subFont, String.format("%-10s %s", stats.resourcesCollected, "resources collected"), Color.RED, 0, Align.left, false);
-        subFont.draw(batch, layout, centerX, messageHeight - height * 7);
+        subFont.draw(batch, layout, centerX, messageHeight - height * h++);
 
         layout.setText(subFont, String.format("%-10s %s", stats.resourcesLost, "resources lost"), Color.RED, 0, Align.left, false);
-        subFont.draw(batch, layout, centerX, messageHeight - height * 8);
+        subFont.draw(batch, layout, centerX, messageHeight - height * h++);
 
         layout.setText(subFont, String.format("%-10s %s", stats.profit, "profit"), Color.RED, 0, Align.left, false);
-        subFont.draw(batch, layout, centerX, messageHeight - height * 9);
+        subFont.draw(batch, layout, centerX, messageHeight - height * h++);
 
     }
     

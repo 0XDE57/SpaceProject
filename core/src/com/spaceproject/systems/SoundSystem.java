@@ -10,18 +10,17 @@ import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.spaceproject.components.ItemComponent;
 import com.spaceproject.components.SoundComponent;
-import com.spaceproject.utility.SimpleTimer;
 import de.pottgames.tuningfork.*;
 import de.pottgames.tuningfork.logger.GdxLogger;
 
 public class SoundSystem extends EntitySystem implements Disposable {
 
-    boolean log = false;
-    AssetManager assetManager;
+    private boolean log = false;
+    private AssetManager assetManager;
 
-    Audio audio;
+    private Audio audio;
 
-    String f3File = "sound/f3.wav",
+    private String f3File = "sound/f3.wav",
             shootFile = "sound/laserShoot.wav",
             explodeFile = "sound/explode.wav",
             shipEngineAmbientFile = "sound/55hz.wav",
@@ -35,26 +34,28 @@ public class SoundSystem extends EntitySystem implements Disposable {
             pickupFile = "sound/pickup.wav",
             creditsFile = "sound/credits.wav",
             dockStationFile = "sound/dockStation.wav",
-            undockStationFile = "sound/undockStation.wav";
+            undockStationFile = "sound/undockStation.wav",
+            clickFile = "sound/click.wav";
 
-    SoundBuffer shipEngineAmbientLoop;
-    SoundBuffer shipExplode;
-    SoundBuffer f3;
-    SoundBuffer break0, break1, break2, break3, break4;
+    private SoundBuffer shipEngineAmbientLoop;
+    private SoundBuffer shipExplode;
+    private SoundBuffer f3;
+    private SoundBuffer break0, break1, break2, break3, break4;
     //Sound bounce0, bounce1, bounce2;
-    SoundBuffer laserShoot;//, laserShootCharge;
-    SoundBuffer hullImpact, hullImpactHeavy;
-    SoundBuffer healthAlarm;
-    SoundBuffer shieldImpact, shieldOn, shieldOff, shieldAmbientLoop;
+    private SoundBuffer click;
+    private SoundBuffer laserShoot;//, laserShootCharge;
+    private SoundBuffer hullImpact, hullImpactHeavy;
+    private SoundBuffer healthAlarm;
+    private SoundBuffer shieldImpact, shieldOn, shieldOff, shieldAmbientLoop;
     //SoundBuffer hyperdriveEngage;
-    SoundBuffer pickup, credits;
+    private SoundBuffer pickup, credits;
     //SoundBuffer heal;
-    SoundBuffer dockStation, undockStation;
+    private SoundBuffer dockStation, undockStation;
 
-    Reverb reverbData;
-    RingModulator ringModData;
-    SoundEffect reverbEffect;
-    SoundEffect ringModEffect;
+    private Reverb reverbData;
+    private RingModulator ringModData;
+    private SoundEffect reverbEffect;
+    private SoundEffect ringModEffect;
 
     @Override
     public void addedToEngine(Engine engine) {
@@ -85,6 +86,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         assetManager.load(creditsFile, SoundBuffer.class);
         assetManager.load(dockStationFile, SoundBuffer.class);
         assetManager.load(undockStationFile, SoundBuffer.class);
+        assetManager.load(clickFile, SoundBuffer.class);
         assetManager.finishLoading();
 
         f3 = assetManager.get(f3File);
@@ -102,6 +104,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         credits = assetManager.get(creditsFile);
         dockStation = assetManager.get(dockStationFile);
         undockStation = assetManager.get(undockStationFile);
+        click = assetManager.get(clickFile);
 
         //test effects
         reverbData = new Reverb();
@@ -152,7 +155,9 @@ public class SoundSystem extends EntitySystem implements Disposable {
             float relVel = velocity / Box2DPhysicsSystem.getVelocityLimit();
             float pitch = MathUtils.map(0f,  1f, 0.5f, 2.0f, relVel);
             currentSource.setPitch(pitch);
-            currentSource.setFilter(1f, 0);
+            float interp = 1;// Interpolation.exp10In.apply(relVel);
+            //DebugSystem.addDebugText(1-interp+ "", 500, 500);
+            currentSource.setFilter(1-interp, 0);
             //reverbData.density = 1-relVel;
             //reverbEffect.updateEffect(reverbData);
         } else {
@@ -192,16 +197,21 @@ public class SoundSystem extends EntitySystem implements Disposable {
             //case BLUE: return break2.play(1, pitch, 0);
             //case SILVER: return break3.play(1, pitch, 0);
             //case GOLD: return break4.play(1, pitch, 0);
-            default: f3.play(1.25f, pitch, 0);
+            //default: f3.play(1.25f, pitch, 0);
         }
     }
-    
-    public void laserShoot(float pitch) {
-        float offset = 0.02f;
-        laserShoot(0.2f, pitch + MathUtils.random(-offset, offset));
+
+    public void asteroidHit(float ratio) {
+        float pitch = 1 + 1 - ratio;
+        click.play(0.5f, pitch);
     }
     
-    public void laserShoot(float volume, float pitch) {
+    public void cannonShoot(float pitch) {
+        float offset = 0.02f;
+        cannonShoot(0.1f, pitch + MathUtils.random(-offset, offset));
+    }
+    
+    public void cannonShoot(float volume, float pitch) {
         laserShoot.play(volume, pitch, 0);
     }
     
@@ -301,6 +311,7 @@ public class SoundSystem extends EntitySystem implements Disposable {
         //heal.dispose();
         dockStation.dispose();
         undockStation.dispose();
+        click.dispose();
         //cleanup effects
         reverbEffect.dispose();
         ringModEffect.dispose();

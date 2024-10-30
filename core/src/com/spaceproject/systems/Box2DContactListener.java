@@ -257,6 +257,7 @@ public class Box2DContactListener implements ContactListener {
         //destroy other body if has damage payload. eg: projectile
         if (healthComponent == null) {
             if (Mappers.damage.get(burningEntity) != null) {
+                //todo: burn projectile. sizzle / burn sound fx + smoke particle effect
                 burningEntity.add(new RemoveComponent());
             }
         }
@@ -420,12 +421,12 @@ public class Box2DContactListener implements ContactListener {
 
         StatsComponent stats = Mappers.stat.get(entity);
         if (stats != null) {
-            stats.damageTaken += (long) damage;
+            stats.damageTaken += damage;
         }
         StatsComponent sourceStats = Mappers.stat.get(source);
         if (sourceStats != null) {
             sourceStats.shotsHit++;
-            sourceStats.damageDealt += (long) damage;
+            sourceStats.damageDealt += damage;
         }
 
         health.lastHitTime = GameScreen.getGameTimeCurrent();
@@ -442,6 +443,11 @@ public class Box2DContactListener implements ContactListener {
             if (health.health / health.maxHealth < 0.25f && Mappers.controlFocus.get(entity) != null) {
                 engine.getSystem(SoundSystem.class).healthAlarm(Mappers.sound.get(entity));
             }
+
+            AsteroidComponent asteroid = Mappers.asteroid.get(entity);
+            if (asteroid != null) {
+                engine.getSystem(SoundSystem.class).asteroidHit(health.health / health.maxHealth);
+            }
         }
 
         CannonComponent cannon = Mappers.cannon.get(source);
@@ -452,8 +458,8 @@ public class Box2DContactListener implements ContactListener {
             // level 1 is basic starter cannon
             // level 2 increases damage and firerate
             // level 3 adds cooldown reduction on hit?
-            cannon.heat -= 0.05f;
-            if (cannon.heat < 0) cannon.heat = 0;
+            //cannon.heat -= 0.05f;
+            //if (cannon.heat < 0) cannon.heat = 0;
         }
 
         HUDSystem.damageMarker(location, damage);
