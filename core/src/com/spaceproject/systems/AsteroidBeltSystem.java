@@ -311,20 +311,9 @@ public class AsteroidBeltSystem extends EntitySystem {
             }
             child++;
 
-            /*
-            //discard shards / slivers?
-            float threshold = 1f;
-            if (GeometryUtils.triangleQuality(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5]) < threshold) {
-                continue; //discard
-            }*/
 
-            //GeometryUtils.ensureCCW(hull); // appears to have no effect...
-            /*
-            float area = GeometryUtils.triangleArea(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5]);
-            childArea += area;
-            float quality = GeometryUtils.triangleQuality(hull[0], hull[1], hull[2], hull[3], hull[4], hull[5]);
-            Gdx.app.log(getClass().getSimpleName(), child + " - a: " + area + ", q:" + quality);
-            */
+            //todo: discard shards / slivers
+            // if (ratio between length and width > threshold) reject
 
             boolean reCenter = false;
             if (reCenter) {
@@ -354,43 +343,6 @@ public class AsteroidBeltSystem extends EntitySystem {
             childAsteroid.getComponent(PhysicsComponent.class).body.setAngularVelocity(parentAngularVel + angularDrift);
             getEngine().addEntity(childAsteroid);
         }
-
-        /*
-        int expected = triangleIndices.size / 3;
-        if (child < expected) {
-            Gdx.app.error(getClass().getSimpleName(), "less children than expected?!");
-        }
-        if (child > expected) {
-            Gdx.app.error(getClass().getSimpleName(), "more children than expected?!");
-        }
-        if (!MathUtils.isEqual(asteroidComponent.area, childArea)) {
-            Gdx.app.error(getClass().getSimpleName(), "area mismatch");
-        }
-        Gdx.app.log(getClass().getSimpleName(), "shatter into: " + child + " expected: " + expected + " parent area: " + asteroidComponent.area + " child area:" + childArea);
-         */
-    }
-
-    public Array<Polygon> breakPoly(Polygon p){
-        DelaunayTriangulator d = new DelaunayTriangulator();
-        ShortArray s = d.computeTriangles(p.getVertices(),false);
-        Array<Polygon> asteroids = new Array<>();
-        for(int i = 0; i < s.size-2; i+=3){
-            Polygon p1 = new Polygon();
-            Vector2 temp = new Vector2();
-            p1.setVertices(new float[]{
-                    p.getVertex(s.get(i), temp).x, p.getVertex(s.get(i), temp).y,
-                    p.getVertex(s.get(i+1), temp).x, p.getVertex(s.get(i+1), temp).y,
-                    p.getVertex(s.get(i+2), temp).x, p.getVertex(s.get(i+2), temp).y,
-            });
-            Vector2 t1 = p1.getCentroid(new Vector2());
-            Vector2 t2 = p.getCentroid(new Vector2());
-            Vector2 move = new Vector2((float) -Math.sqrt(t1.dst(t2)),0);
-            float r = MathUtils.atan2(t2.y - t1.y, t2.x - t1.x);
-            move.rotateRad(r);
-            p1.setPosition(move.x,move.y);
-            asteroids.add(p1);
-        }
-        return asteroids;
     }
 
     @Override

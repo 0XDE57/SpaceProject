@@ -16,7 +16,7 @@ public class Galaxy {
     
     private static CelestialConfig celestCFG = SpaceProject.configManager.getConfig(CelestialConfig.class);
     public Array<Vector2> points;
-    public Array<AstroBody> objects = new Array<AstroBody>();
+    public Array<AstroBody> objects = new Array<>();
     
     
     public Galaxy() {
@@ -33,11 +33,14 @@ public class Galaxy {
             saveToJson();
         }
     }
-    
-    
+
     private static Array<Vector2> generatePoints(long seed, int numStars, int genRange, float dist) {
+        // Apparently this is called "Blue Noise" or Poisson Disk Sampling.
+        // it suffers an issue where as the graph becomes denser with points, the harder it is to insert a new point
+        // and also has to check more points as n increases
+        //  https://www.youtube.com/watch?v=Ge3aKEmZcqY
         MathUtils.random.setSeed(seed);
-        Array<Vector2> points = new Array<Vector2>();
+        Array<Vector2> points = new Array<>();
         
         dist *= dist;//squared for dst2
         
@@ -76,7 +79,8 @@ public class Galaxy {
         }
         
         if (GameScreen.isDebugMode) {
-            points.add(new Vector2(1337, 420));//TODO: system near origin for debug, don't forget about me
+            //points.clear();
+            //points.add(new Vector2(1337, 420));//TODO: system near origin for debug, don't forget about me
         }
         
         return points;
