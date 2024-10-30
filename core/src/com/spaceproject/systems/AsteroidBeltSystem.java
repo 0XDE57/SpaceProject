@@ -200,13 +200,12 @@ public class AsteroidBeltSystem extends EntitySystem {
     private void asteroidDestroyed(AsteroidComponent asteroid, Vector2 parentPos, Vector2 parentVel, float parentAngle, float parentAngularVel) {
         if (asteroid.area >= minAsteroidSize) {
             shatterAsteroid(parentPos, parentVel, parentAngle, parentAngularVel, asteroid);
-        } else {
-            //todo: pool drops
-            GeometryUtils.polygonCentroid(asteroid.polygon.getVertices(), 0, asteroid.polygon.getVertices().length, center);
-            center.rotateRad(parentAngle);
-            Entity drop = EntityBuilder.dropResource(parentPos.add(center), parentVel, asteroid.composition, asteroid.color);
-            getEngine().addEntity(drop);
         }
+        //todo: pool drops
+        GeometryUtils.polygonCentroid(asteroid.polygon.getVertices(), 0, asteroid.polygon.getVertices().length, center);
+        center.rotateRad(parentAngle);
+        Entity drop = EntityBuilder.dropResource(parentPos.add(center), parentVel, asteroid.composition, asteroid.color);
+        getEngine().addEntity(drop);
     }
 
     private Entity spawnAsteroid(float x, float y, float velX, float velY) {
