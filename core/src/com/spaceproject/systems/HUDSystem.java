@@ -677,23 +677,23 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (total == 0) return;
 
         //todo, just write the total on the cargo? might be nice to see total...
-        long animTime = 1000;
+        long animTime = 500;
         long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;
         float angle = 0;//degrees
+        final float radius = 30;
         for (Map.Entry<Integer, Integer> entry : cargo.inventory.entrySet()) {
             int key = entry.getKey();
             ItemComponent.Resource resource = ItemComponent.Resource.getById(key);
-            float radius = 30;
+            float r = radius;
             if (timeSinceCollect < animTime) {
                 float ra = (float) timeSinceCollect / animTime;
-                radius += 1-(ra * 10);
-                radius = Math.max(radius, 30);
+                r += (1-ra) * 9;
             }
             int count = entry.getValue();
             float ratio = (float) count / total;
             float newAngle = ratio * 360;
             shape.setColor(resource.getColor());
-            shape.arc(barX - radius - 10, healthBarY, radius, angle, newAngle);
+            shape.arc(barX - radius - 10, healthBarY, r, angle, newAngle);
             angle += newAngle;
         }
     }
@@ -938,18 +938,27 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         inventoryFont.setColor(1, 1, 1, 1-ratio);
         inventoryFont.draw(batch, cargo.credits + " credits", inventoryX, inventoryY);
         int offsetY = 1;
+        int total = 0;
         for (ItemComponent.Resource resource : ItemComponent.Resource.values()) {
             int id = resource.getId();
             if (cargo.inventory.containsKey(id)) {
                 int quantity = cargo.inventory.get(id);
+                total += quantity;
                 Color color = resource.getColor();
                 inventoryFont.setColor(color.r, color.g, color.b, 1-ratio);
                 layout.setText(inventoryFont, quantity + " " + resource.name().toLowerCase());
                 inventoryFont.draw(batch, layout, inventoryX, inventoryY + (layout.height * 1.5f * offsetY++));
             }
         }
+        if (total == 0) return;
 
-
+        //draw total
+        int barWidth = uiCFG.playerHPBarWidth;
+        int barX = Gdx.graphics.getWidth() / 2 - barWidth / 2;
+        int healthBarY = uiCFG.playerHPBarY;
+        int radius = 30;
+        layout.setText(inventoryFont, total + "", Color.WHITE, 0, Align.center, false);
+        inventoryFont.draw(batch, layout, barX - radius - 10, healthBarY+3);
     }
     //endregion
 
