@@ -98,6 +98,7 @@ public class DelaunayCell {
      */
     private static boolean sharesMidpoint(Vector2 midpoint, DelaunayCell other) {
         float epsilon = 0.01f;//error margin
+        //todo: return other midpoint, null otherwise
         return midpoint.epsilonEquals(other.midAB, epsilon) ||
                 midpoint.epsilonEquals(other.midBC, epsilon) ||
                 midpoint.epsilonEquals(other.midCA, epsilon);
@@ -111,8 +112,10 @@ public class DelaunayCell {
      * @return true if cells are touching
      */
     public static boolean isNeighbor(DelaunayCell cellA, DelaunayCell cellB) {
+        //todo: set other neighbor, no need to check 2 times from both sides
         if (sharesMidpoint(cellA.midAB, cellB)) {
             cellA.nAB = cellB;
+            //cellB.nXX = cellA; figure out which midpoint is shared on B and set to A
             return true;
         }
         
@@ -139,7 +142,7 @@ public class DelaunayCell {
         for (DelaunayCell cellA : dCells) {
             for (DelaunayCell cellB : dCells) {
                 //skip check on self
-                if (cellA.circumCenter.epsilonEquals(cellB.circumCenter, 0.01f)) {
+                if (cellA.circumCenter.epsilonEquals(cellB.circumCenter)) {
                     continue;
                 }
                 //check and set neighbors

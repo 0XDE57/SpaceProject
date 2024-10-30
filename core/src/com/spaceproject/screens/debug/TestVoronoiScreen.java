@@ -45,16 +45,26 @@ import java.util.ArrayList;
 // [x] basic shape loader, centered with reasonable scale
 // [ ] ability to scale shape, maybe [ALT + L-Click]
 //          triangle, rectangle, at least to octagon (or higher since this isn't limited by box2d currently) 12 or allow user to input num sides
+//      rotate 90, 45, user defined?
+// [ ] rotate //modifier key + click should scale + rotate when a hull point selected?
+// [ ] flip X,Y
 // [ ] ability to delete point. maybe [SHIFT + R-Click]
 // [ ] editable points list in VisUI textbox
-// [...] shatter button
+// [x] shatter button
 //      [x] place new point at each circumcenter
-//      [ ] shatter at Voronoi Center
-//      [ ] shatter at Midpoints
-//      [ ]
-//      [ ] add points at excircle or escribed circle: https://en.wikipedia.org/wiki/Incircle_and_excircles#Excircles_and_excenters
-//      [ ] if we think of any more...
-//      [x] limit duplicates...
+//      [x] shatter at Voronoi Center
+//      [x] shatter at Midpoints
+//      centers: (in the case of an equilateral, these 4 centers are the same point!)
+//      [x] incenter -> inscribed
+//      [x] cicumcenter
+//      [x] centroid
+//      [x] orthocenter
+//      [ ] are there more centers? yes!
+//      [x] and their respective graphs connecting centers
+//           [ ] fix performance
+//           [ ] add points at excircle or escribed circle: https://en.wikipedia.org/wiki/Incircle_and_excircles#Excircles_and_excenters
+//           [ ] if we think of any more...
+//           [x] limit duplicates...
 // [x] render to file: Pixmap -> PNG. how to render shaperenderer to file?
 //      [x transparency
 //      [x] shape only crop? currently is full screen capture.
@@ -73,17 +83,13 @@ import java.util.ArrayList;
 // [ ] color pallet: background color options or checkered tile?
 // [ ] render grid lines
 // [ ] render grid axis X,Y
-// [ ] draw triangle weight graph: area/totalArea
+// [ ] draw relative triangle weight graph: area/totalArea
 // [ ] render triangle by area relative to total hull area
 // [ ] ensure all types can be rendered https://en.wikipedia.org/wiki/Triangle_center
 // [ ] project 3D cube to 2D?
 // [ ] grid generation!
-// [ ] scale
-//      rotate 90, 45, user defined?
-// [ ] rotate //modifier key + click should scale + rotate when a hull point selected?
-// [ ] flip X,Y
 // [ ] snap modifier: snap to grid
-// [ ] snap modifier: snap to neares center (any of the centers: highlight)
+// [x] snap modifier: snap to nears center (any of the centers: highlight)
 // [ ] tileable voronoi! 2D voronoi wrapped on a 4D torus
 // [ ] mst!!! krustal?
 // [ ] complete graph: a simple undirected graph in which every pair of distinct vertices is connected by a unique edge.
@@ -92,14 +98,16 @@ import java.util.ArrayList;
 // [ ] Utility graph: ?
 //     https://en.wikipedia.org/wiki/Three_utilities_problem
 //      see also: https://en.wikipedia.org/wiki/Toroidal_graph
-// centers: (in the case of an equilateral, these 4 centers are the same point!)
-// [x] incenter -> inscribed
-// [x] cicumcenter
-// [x] centroid
-// [x] orthocenter
-// [ ] are there more centers? yes!
-// [x] and their respective graphs connecting centers
-//      [ ] fix performance, allow select center variant
+// [ ] show fps and gl profiler
+// [ ] undo redo [CTRL + Z] [CTRL + Y]
+// [ ] info window
+//      - a,b,c
+//      - mid
+//      - side lengths
+//      - area
+//      - quality
+//      - all centers
+//      - scaled preview with labels
 
 // Pythagorean triples; A right triangle where the sides are in the ratio of integers
 //  eg: 3:4:5 , 6:8:10 , 5:12:13 , 9:12:15 , 8:15:17
@@ -107,8 +115,6 @@ import java.util.ArrayList;
 //https://en.wikipedia.org/wiki/Dual_graph
 //hmm, what are "forbidden"?
 // https://en.wikipedia.org/wiki/Forbidden_graph_characterization
-
-
 //
 
 public class TestVoronoiScreen extends MyScreenAdapter {
@@ -120,12 +126,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     GlyphLayout layout = new GlyphLayout();
 
     //all points that define a polygon and any point inside the polygon
-    final DoubleArray points = new DoubleArray(true, 500/*maxVerticies*/);
+    final DoubleArray points = new DoubleArray(true, 5000);
     final Array<Color> colorTest = new Array<>();
 
     //triangulation
     final DoubleDelaunayTriangulator delaunay = new DoubleDelaunayTriangulator();
-    final int maxVertices = 32767;//todo: this is odd number why? there will always be even number of points as xy pairs.
     IntArray triangles;
 
     final ArrayList<DelaunayCell> dCells = new ArrayList<>();
@@ -280,20 +285,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         //polygons must contain at least 3 points.
         if (points.size < 6) return;
 
-        //todo: ArrayIndexOutOfBoundsException: Index -32768 out of bounds for length 32766
-        // how did index become negative when we do not allow less than 6? see line above
-        //
-        // Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: Index -32768 out of bounds for length 32766
-        // at com.badlogic.gdx.math.DelaunayTriangulator.computeTriangles(DelaunayTriangulator.java:140) -> i = p2 - end;
-        // at com.badlogic.gdx.math.DelaunayTriangulator.computeTriangles(DelaunayTriangulator.java:43)
-        // at com.spaceproject.screens.debug.TestVoronoiScreen.calculateDelaunay(TestVoronoiScreen.java:163)
-
-        //computeTriangles() supports only up to 32767 IllegalArgumentException: count must be <= 32767
-        /*
-        if (points.size > maxVertices - 2) {
-            Gdx.app.error(getClass().getSimpleName(), points.size + " too big. calculation ignored!");
-            return;
-        }*/
+        long start = System.currentTimeMillis();
 
         //apply delaunay triangulation to points
         triangles = delaunay.computeTriangles(points, false);
@@ -347,6 +339,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         if (drawCentroidDelaunay) {
             calculateCentroidDelaunay();
+        }
+        long end = System.currentTimeMillis() - start;
+        if (end > 16) {
+            float ratio = (float)end / (triangles.size / 3f); //might not be best measurement, includes other calculations like hull and secondary graph if enabled...
+            Gdx.app.log("", points.size/2 + " vertices - " + triangles.size / 3f + " triangles in " + end + "ms. ~" + ratio + "ms/tri. FPS:" + Gdx.graphics.getFramesPerSecond());
         }
     }
 
@@ -831,10 +828,10 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                         py = cell.orthocenter.y;
                         break;
                 }
-                //draw cendroid!
+                //draw currently selected center!
                 layout.setText(dataFont, MyMath.round(px, 2) + "," + MyMath.round(py, 2), dataFont.getColor(), 0, Align.center, false);
                 dataFont.draw(batch, layout, px, py);
-                //a, b, c
+                //draw vertices: a, b, c
                 layout.setText(dataFont, MyMath.round(cell.a.x, 2) + "," + MyMath.round(cell.a.y, 2), dataFont.getColor(), 0, Align.center, false);
                 dataFont.draw(batch, layout, cell.a.x, cell.a.y);
                 layout.setText(dataFont, MyMath.round(cell.b.x, 2) + "," + MyMath.round(cell.b.y, 2), dataFont.getColor(), 0, Align.center, false);
@@ -1007,8 +1004,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         int y = Gdx.graphics.getHeight() - x;
         float h = text.getLineHeight();
         int line = 0;
-        int maxPoints = maxVertices / 2;
-        layout.setText(text, "Points: " + (int) (points.size * 0.5f) + "/ " + maxPoints + "?, D-Cells:" + dCells.size() + ", V-Cells: ?", Color.WHITE, 0, Align.center, false);
+        layout.setText(text, "Vertices: " + (int) (points.size * 0.5f)  + ", D-Cells:" + dCells.size() + ", V-Cells: ?", Color.WHITE, 0, Align.center, false);
         text.draw(batch, layout, Gdx.graphics.getWidth() * 0.5f, y);
 
         text.setColor(Color.BLACK);
@@ -1194,6 +1190,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     }
                 }
                 if (mod) {
+                    //todo: for large points sets this becomes slow to move all points then recalculate live.
+                    // debug draw dragstart to help?
+                    // 1. don't update and recalculate
+                    // 2. instead, render hull copy as overlay preview when held down
+                    // move points and recalculate only on release
                     calculateDelaunay();
                 }
             }
