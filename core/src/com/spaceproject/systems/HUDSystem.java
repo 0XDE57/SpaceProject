@@ -271,7 +271,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         CameraSystem camSys = getEngine().getSystem(CameraSystem.class);
         if (messageState != SpecialState.launching && messageState != SpecialState.landing) {
             drawZoomLevelIndicator(camSys);
-            drawPlayerStatus(player, camSys);
+            drawPlayerStatus(player, camSys, deltaTime);
 
             if (drawEdgeMap) {
                 drawEdgeMap();
@@ -645,7 +645,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
     }
     
-    private void drawPlayerStatus(Entity entity, CameraSystem cam) {
+    private void drawPlayerStatus(Entity entity, CameraSystem cam, float deltaTime) {
         if (entity == null) return;
         
         int barWidth = uiCFG.playerHPBarWidth;
@@ -668,10 +668,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         drawPlayerShield(entity, barX, healthBarY, barWidth, barHeight);
         drawPlayerAmmoBar(entity, barX, ammoBarY, barWidth, barHeight);
 
-        drawCargoResources(entity, barX, healthBarY);
+        drawCargoResources(entity, barX, healthBarY, deltaTime);
     }
 
-    private void drawCargoResources(Entity entity, int barX, int healthBarY) {
+    float animAngle = 0;
+    private void drawCargoResources(Entity entity, int barX, int healthBarY, float deltaTime) {
         CargoComponent cargo = Mappers.cargo.get(entity);
         int total = 0;
         for (int value : cargo.inventory.values()) {
@@ -679,10 +680,15 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
         if (total == 0) return;
 
+        float cargoAnimSpeed = 5;
+        animAngle += cargoAnimSpeed * deltaTime;
+        if (animAngle > 360) {
+            animAngle = 0;
+        }
         //todo, just write the total on the cargo? might be nice to see total...
         long animTime = 500;
         long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;
-        float angle = 0;//degrees
+        float angle = animAngle;//degrees
         final float radius = 30;
         for (Map.Entry<Integer, Integer> entry : cargo.inventory.entrySet()) {
             int key = entry.getKey();
