@@ -45,6 +45,7 @@ import com.spaceproject.utility.SimpleTimer;
 
 import java.lang.StringBuilder;
 import java.util.Iterator;
+import java.util.Map;
 
 
 public class HUDSystem extends EntitySystem implements IRequireGameContext, IScreenResizeListener, Disposable {
@@ -280,6 +281,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
         shape.end();
 
+        //shape.begin(ShapeType.Line);
+        //todo: circle for empty cargo inventory?
+        //shape.end();
+
 
         batch.begin();
         //skip drawing some UI elements during land and take off
@@ -455,7 +460,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (Gdx.input.isKeyJustPressed(Input.Keys.K)) { //kill or move to UI option
             miniMap.cycleMiniMapPosition();
         }
-        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.Y)) {//kill our move to debug menu
+        if (Gdx.app.getInput().isKeyJustPressed(Input.Keys.Y)) {//kill or move to debug menu
             if (players.size() > 0) {
                 CargoComponent cargo = Mappers.cargo.get(players.first());
                 if (cargo != null) {
@@ -659,6 +664,38 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         drawPlayerHealth(entity, barX, healthBarY, barWidth, barHeight);
         drawPlayerShield(entity, barX, healthBarY, barWidth, barHeight);
         drawPlayerAmmoBar(entity, barX, ammoBarY, barWidth, barHeight);
+
+        drawCargoResources(entity, barX, healthBarY);
+    }
+
+    private void drawCargoResources(Entity entity, int barX, int healthBarY) {
+        CargoComponent cargo = Mappers.cargo.get(entity);
+        int total = 0;
+        for (int value : cargo.inventory.values()) {
+            total += value;
+        }
+        if (total == 0) return;
+
+        //todo, just write the total on the cargo? might be nice to see total...
+        long animTime = 1000;
+        long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;
+        float angle = 0;//degrees
+        for (Map.Entry<Integer, Integer> entry : cargo.inventory.entrySet()) {
+            int key = entry.getKey();
+            ItemComponent.Resource resource = ItemComponent.Resource.getById(key);
+            float radius = 30;
+            if (timeSinceCollect < animTime) {
+                float ra = (float) timeSinceCollect / animTime;
+                radius += 1-(ra * 10);
+                radius = Math.max(radius, 30);
+            }
+            int count = entry.getValue();
+            float ratio = (float) count / total;
+            float newAngle = ratio * 360;
+            shape.setColor(resource.getColor());
+            shape.arc(barX - radius - 10, healthBarY, radius, angle, newAngle);
+            angle += newAngle;
+        }
     }
 
     private void drawPlayerHealth(Entity entity, float x, float y, float width, float height) {
@@ -821,6 +858,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private void drawStatusInfo(Entity entity, int barWidth, int barHeight, int healthBarY) {
         if (entity == null) return;
 
+        int controlsX = Gdx.graphics.getWidth() - 10;
         int barX = Gdx.graphics.getWidth() / 2 - barWidth / 2;
         HyperDriveComponent hyper = Mappers.hyper.get(entity);
         if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
@@ -861,8 +899,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 if (getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus()) {
                     input = "LT";
                 }
-                layout.setText(inventoryFont, "[" + input + "] ", Color.WHITE, 0, Align.right, false);
-                inventoryFont.draw(batch, layout, barX, healthBarY + layout.height);
+                layout.setText(inventoryFont, "[" + input + "]", Color.WHITE, 0, Align.right, false);
+                inventoryFont.draw(batch, layout, controlsX, healthBarY + layout.height);
                 if (shield.state == ShieldComponent.State.on) {
                     color = Color.BLUE;
                 }
@@ -875,13 +913,14 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (vehicleComponent != null && !vehicleComponent.tools.isEmpty()) {
             inventoryFont.setColor(Color.WHITE);
             String key = Input.Keys.toString(SpaceProject.configManager.getConfig(KeyConfig.class).switchWeapon);
-            String input = getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? " [D-Pad Right] " : " [" + key + "] ";
+            String input = getEngine().getSystem(DesktopInputSystem.class).getControllerHasFocus() ? "[D-Pad Right]" : "[" + key + "]";
             String toolText = vehicleComponent.currentTool.toString();
             if (vehicleComponent.currentTool == VehicleComponent.Tool.tractor) {
                 toolText += ":" + Mappers.tractor.get(entity).mode.toString();
             }
-            layout.setText(inventoryFont, toolText + input, Color.WHITE, 0, Align.right, false);
-            inventoryFont.draw(batch, layout, barX, healthBarY - barHeight + layout.height - 3);
+            toolText += " | " + input + " cycle";
+            layout.setText(inventoryFont, toolText, Color.WHITE, 0, Align.right, false);
+            inventoryFont.draw(batch, layout, controlsX, healthBarY - barHeight + layout.height - 3);
         }
     }
     
@@ -909,6 +948,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 inventoryFont.draw(batch, layout, inventoryX, inventoryY + (layout.height * 1.5f * offsetY++));
             }
         }
+
+
     }
     //endregion
 
