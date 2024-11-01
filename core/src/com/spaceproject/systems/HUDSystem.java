@@ -1144,6 +1144,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     @Override
     public void dispose() {
         font.dispose();
+        //these probably shouldn't be static, that's why we have to clear
+        numbersPool.clear();
+        activeNumbers.clear();
     }
 
     @Override
