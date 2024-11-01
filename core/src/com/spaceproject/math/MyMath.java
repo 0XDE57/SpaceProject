@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.spaceproject.screens.GameScreen;
 
+import java.util.HashMap;
 import java.util.Random;
 
 public abstract class MyMath {
@@ -154,14 +155,16 @@ public abstract class MyMath {
         return Math.abs(a - b) <= tolerance;
     }
 
+    static HashMap<Integer, Long> memo = new HashMap<Integer, Long>() {{
+        put(0, 0L);
+        put(1, 1L);
+    }};
+
     public static long fibonacci(int n) {
-        if (n == 0) {
-            return 0;
+        if (!memo.containsKey(n)) {
+            memo.put(n, fibonacci(n - 1) + fibonacci(n - 2));
         }
-        if (n <= 2) {
-            return 1;
-        }
-        return fibonacci(n - 1) + fibonacci(n - 2);
+        return memo.get(n);
     }
 
     /** Taxicab or Manhattan distance is the distance between two points is defined as
