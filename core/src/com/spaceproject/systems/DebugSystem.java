@@ -53,7 +53,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     private static final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
     
     private ECSExplorerWindow engineView;
-    private InputListener listener;
+    private final InputListener listener;
     
     //rendering
     private static OrthographicCamera cam;
@@ -67,7 +67,7 @@ public class DebugSystem extends IteratingSystem implements Disposable {
     //textures
     private final Texture texCompBack = TextureGenerator.createTile(Color.DARK_GRAY);
     private final Texture texCompSeparator = TextureGenerator.createTile(new Color(0.1f, 0.63f, 0.88f, 1f));
-    GlyphLayout versionLayout;
+    private final GlyphLayout versionLayout;
     
     //entity storage
     private final Array<Entity> objects;
