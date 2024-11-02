@@ -13,7 +13,10 @@ public class ItemComponent implements Component {
         SILVER(4, new Color(0.97f, 0.97f, 1, 1), 100, 0.2f, 0.3f, 0.3f,1f, "break3.wav"),
         GOLD(5, Color.GOLD, 400, 0.2f, 8f, 0.8f, 3, "break4.wav"),
         GLASS(6, new Color(0.5f, 0.5f, 0.5f, 0.5f), 10, 0, 0.1f, 0.05f, 1.5f, "glass.wav");
-
+        //BLACK(7, Color.BLACK, value 9999); // bullets bounce (no damage) and laser absorb (no reflect) but does lots of damage (maybe 1.5x - 2x ?)
+        //glass soft, bullets break easy, but laser refracts and passes through and does no damage
+        //this forces you to get a laser to mine black!
+        //this would allow a multi-material asteroid to have a black outer polygon, and gold inned polygon
         /*
         ROCK()
 

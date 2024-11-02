@@ -117,13 +117,13 @@ public class LaserSystem extends IteratingSystem implements Disposable {
         //we hit something!
         float damage = laser.damage * (1 - range) * deltaTime;
 
-        //if fixture hit is a glassteroid, calculate refraction
         boolean isGlass = false;
         Object userData = rayFixture.getBody().getUserData();
         if (userData != null) {
             Entity hitEntity = (Entity) userData;
             AsteroidComponent asteroid = Mappers.asteroid.get(hitEntity);
             if (asteroid != null) {
+                //if fixture hit is a glassteroid, calculate refraction
                 if (asteroid.composition == ItemComponent.Resource.GLASS) {
                     isGlass = true;
                     //float waveLengthInN1 = laser.wavelength / refractiveIndexVacuum;
@@ -159,15 +159,14 @@ public class LaserSystem extends IteratingSystem implements Disposable {
                 }
             }
 
-            if (entity != hitEntity) {
-                //do laser damage!
-                if (isGlass) {
-                    damage *= 0.01f;
+            //laser doesn't hurt glass!
+            if (!isGlass) {
+                if (entity != hitEntity) {
+                    Box2DContactListener.damage(getEngine(), hitEntity, entity, damage, p2, rayFixture.getBody());
                 }
-                Box2DContactListener.damage(getEngine(), hitEntity, entity, damage, p2, rayFixture.getBody());
-            }
-            if (Mappers.damage.get(hitEntity) != null) {
-                hitEntity.add(new RemoveComponent()); //destroy bullets
+                if (Mappers.damage.get(hitEntity) != null) {
+                    hitEntity.add(new RemoveComponent()); //destroy bullets
+                }
             }
         }
         if (drawNormal) {
