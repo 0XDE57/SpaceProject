@@ -300,14 +300,14 @@ public class ECSExplorerWindow extends VisWindow implements EntityListener {
     
     @Override
     public void entityAdded(Entity entity) {
-        entityNodes.add(new EntityNode(entity, showHistory));
+        entityNodes.add(new EntityNode(entity, showHistory));//todo: pool
     }
     
     @Override
     public void entityRemoved(Entity entity) {
         VisTree.Node node = entityNodes.findNode(entity);
         if (node == null) {
-            Gdx.app.error(this.getClass().getSimpleName(), "node for entity null!");
+            //Gdx.app.error(getClass().getSimpleName(), "node for entity null!");
             return;
         }
         if (showHistory) {
