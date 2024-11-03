@@ -168,7 +168,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawInRadius = false,
             drawInCenter = false,
             drawOrtho = false,
-            drawCentroidDelaunay = false;
+            drawCentroidDelaunay = false,
+            metaball = false;
     
     int pSize = 5;
     float dragRadius = 10;
@@ -176,6 +177,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
     boolean isDrag = false;
     Vector2 dragStart = new Vector2();
+
+    float metaRadius = 30;
 
     final StringBuilder stringBuilder = new StringBuilder();
 
@@ -465,6 +468,21 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             shape.circle(intersect.x, intersect.y, 3);
         }
     }
+
+    /** METABALLS!!!!
+     * https://en.wikipedia.org/wiki/Metaballs
+     */
+    public float metaballSum(float x, float y, float radius) {
+        float sum = 0;
+        for (int i = 0; i < points.size; i += 2) {
+            float px = (float) points.get(i);
+            float py = (float) points.get(i + 1);
+            float dx = Math.abs(x - px);
+            float dy = Math.abs(y - py);
+            sum += (radius * radius) / ((dx * dx) + (dy * dy));
+        }
+        return sum;
+    }
     
     private void drawStuff() {
         //enable blending
@@ -472,8 +490,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
         //background distance based voronoi render
+        shape.begin(ShapeType.Line);
         if (voronoiRender && points.notEmpty()) {
-            shape.begin(ShapeType.Line);
             //todo: this could be rendered to a texture, distance does not need to be calculated every frame.
             //  only needs to update when points are modified (add/remove/drag)
             for (int y = 0; y < Gdx.graphics.getHeight(); y++) {
@@ -482,8 +500,19 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     shape.point(x, y, 0);
                 }
             }
-            shape.end();
         }
+        if (metaball && points.notEmpty()) {
+            shape.setColor(Color.WHITE);
+            for (int y = 0; y < Gdx.graphics.getHeight(); y++) {
+                for (int x = 0; x < Gdx.graphics.getWidth(); x++) {
+                    float sum = metaballSum(x, y, metaRadius);
+                    if (sum > 1) {
+                        shape.point(x, y, 0);
+                    }
+                }
+            }
+        }
+        shape.end();
 
         int mouseX = Gdx.input.getX();
         int mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
@@ -955,8 +984,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     }
 
     @Override
-    public void render(float delta) {
-        super.render(delta);
+    public void render(float deltaTime) {
+        super.render(deltaTime);
         //clear screen
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
@@ -965,7 +994,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         drawStuff();
 
         //toggles, add/move points, reset
-        updateControls();
+        updateControls(deltaTime);
         
         drawMenu();
     }
@@ -1090,11 +1119,14 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.setColor(drawCentroidDelaunay ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[O] Centroid Delaunay Graph -> " +  shatterStyle.name().toUpperCase(), x, y - h * line++);
 
+        text.setColor(metaball ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[M] Metaballs! [<][>] radius: " + MyMath.round(metaRadius, 2), x, y - h * line++);
+
         batch.end();
     }
 
     Vector2 snap = null;
-    private void updateControls() {
+    private void updateControls(float deltaTime) {
         if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
             MyScreenAdapter.game.setScreen(new TitleScreen(MyScreenAdapter.game));
         }
@@ -1116,6 +1148,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             float snapRadius = 9;
             Vector2 closestCenter = null;
             for (DelaunayCell cell : dCells) {
+                //snap to triangle centers
                 if (Vector2.dst(x, y, cell.centroid.x, cell.centroid.y) < snapRadius) {
                     closestCenter = cell.centroid;
                 }
@@ -1128,9 +1161,18 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 if (Vector2.dst(x, y, cell.orthocenter.x, cell.orthocenter.y) < snapRadius) {
                     closestCenter = cell.orthocenter;
                 }
+                //snap to midcenters
+                if (Vector2.dst(x, y, cell.midAB.x, cell.midAB.y) < snapRadius) {
+                    closestCenter = cell.midAB;
+                }
+                if (Vector2.dst(x, y, cell.midBC.x, cell.midBC.y) < snapRadius) {
+                    closestCenter = cell.midBC;
+                }
+                if (Vector2.dst(x, y, cell.midCA.x, cell.midCA.y) < snapRadius) {
+                    closestCenter = cell.midCA;
+                }
             }
             snap = closestCenter;
-            //snap should highlight snap location on press, add on release
         } else {
             snap = null;
         }
@@ -1365,6 +1407,17 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             if (drawCentroidDelaunay) {
                 calculateDelaunay();
             }
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.M)) {
+            metaball = !metaball;
+        }
+        float r = 4;
+        if (Gdx.input.isKeyPressed(Keys.PERIOD)) {
+            metaRadius += r * deltaTime;
+        }
+        if (Gdx.input.isKeyPressed(Keys.COMMA)) {
+            metaRadius -= r * deltaTime;
+            metaRadius = Math.max(metaRadius, 1);
         }
     }
 
