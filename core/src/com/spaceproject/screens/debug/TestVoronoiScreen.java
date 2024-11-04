@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.StringBuilder;
 import com.spaceproject.generation.FontLoader;
 import com.spaceproject.math.*;
+import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 
@@ -253,14 +254,21 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             }
         } else {
             int pad = 200;//distance away from edge of screen
+            int min = Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            if (pad > min) {
+                pad = 0;
+            }
             for (int i = 0; i < numPoints * 2; i += 2) {
-                float x = MathUtils.random(pad, Gdx.graphics.getWidth() - pad);
-                float y = MathUtils.random(pad, Gdx.graphics.getHeight() - pad);
-                //todo: reject duplicate points
-                points.add(x);
-                points.add(y);
+                float x = MathUtils.random(pad, Math.max(Math.abs(Gdx.graphics.getWidth() - pad), pad));
+                float y = MathUtils.random(pad, Math.max(Math.abs(Gdx.graphics.getHeight() - pad), pad));
+                if (!isDuplicate(x, y)) {
+                    points.add(x);
+                    points.add(y);
+                }
             }
         }
+
+        if (points.size < 6) return;
 
         //calculate the convex hull of all the points
         //center around centroid in middle of screen
