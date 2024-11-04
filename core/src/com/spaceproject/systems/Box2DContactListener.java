@@ -107,7 +107,7 @@ public class Box2DContactListener implements ContactListener {
         }
     }
     
-    private void handleDamage(Contact contact, Entity damageEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent healthComponent, Body damagedBody) {
+    private void handleDamage(Contact contact, Entity damageEntity, Entity attackedEntity, DamageComponent damageComponent, HealthComponent health, Body damagedBody) {
         if (damageComponent.source == attackedEntity) {
             //Gdx.app.debug(getClass().getSimpleName(), "ignore damage to self");
             return; //ignore self-inflicted damage
@@ -142,7 +142,13 @@ public class Box2DContactListener implements ContactListener {
         
         //do damage
         damage(engine, attackedEntity, damageComponent.source, damageComponent.damage, contact, damagedBody);
-        
+
+        //this shouldn't be here because activates with star and laser.
+        AsteroidComponent asteroid = Mappers.asteroid.get(attackedEntity);
+        if (asteroid != null) {
+            engine.getSystem(SoundSystem.class).asteroidHit(health.health / health.maxHealth);
+        }
+
         //fx
         explodeProjectile(contact, attackedEntity);
         
@@ -442,11 +448,6 @@ public class Box2DContactListener implements ContactListener {
         } else {
             if (health.health / health.maxHealth < 0.25f && Mappers.controlFocus.get(entity) != null) {
                 engine.getSystem(SoundSystem.class).healthAlarm(Mappers.sound.get(entity));
-            }
-
-            AsteroidComponent asteroid = Mappers.asteroid.get(entity);
-            if (asteroid != null) {
-                engine.getSystem(SoundSystem.class).asteroidHit(health.health / health.maxHealth);
             }
         }
 
