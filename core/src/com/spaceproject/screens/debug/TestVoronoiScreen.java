@@ -62,7 +62,7 @@ import java.util.ArrayList;
 //      [ ] are there more centers? yes!
 //      [x] and their respective graphs connecting centers
 //           [ ] fix performance
-//           [ ] add points at excircle or escribed circle: https://en.wikipedia.org/wiki/Incircle_and_excircles#Excircles_and_excenters
+//           [x] add points at excircle or escribed circle: https://en.wikipedia.org/wiki/Incircle_and_excircles#Excircles_and_excenters
 //           [ ] if we think of any more...
 //           [x] limit duplicates...
 // [x] render to file: Pixmap -> PNG. how to render shaperenderer to file?
@@ -70,11 +70,12 @@ import java.util.ArrayList;
 //      [x] shape only crop? currently is full screen capture.
 // [ ] render to file: create animation (https://github.com/tommyettinger/anim8-gdx): base shape, shatter iteration 1-10 (or stop when duplicate points = too small to shatter further)
 // [ ] pool cells
-// [ ] investigate: sometimes triangulation returns artifacts
+// [x] investigate: sometimes triangulation returns artifacts
 //      seems to be more pronounced with equilaterals or concyclic (or cocyclic)
-//      or when points line up perfectly on y axis?
+//      or when points line up perfectly on y axis? - FIXED: by double math.
 // [x] draw Incircle
-// [ ] draw Excircle
+// [x] draw Excircle
+// [ ] feuerbach's circle - touches all excircles - ninepoint
 // [ ] draw Gergonne triangle: contact triangle or intouch triangle of △ A B C
 // [ ] draw tangent circles: https://en.wikipedia.org/wiki/Nine-point_circle
 // [ ] draw anticomplementary triangle: https://mathworld.wolfram.com/AnticomplementaryTriangle.html
@@ -112,6 +113,8 @@ import java.util.ArrayList;
 // Pythagorean triples; A right triangle where the sides are in the ratio of integers
 //  eg: 3:4:5 , 6:8:10 , 5:12:13 , 9:12:15 , 8:15:17
 // neat: https://www.youtube.com/watch?v=oXcCAAEDte0&t=905s
+//https://www.youtube.com/watch?v=94mV7Fmbx88
+
 //https://en.wikipedia.org/wiki/Dual_graph
 //hmm, what are "forbidden"?
 // https://en.wikipedia.org/wiki/Forbidden_graph_characterization
@@ -167,6 +170,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawInTriangle = false,
             drawInRadius = false,
             drawInCenter = false,
+            drawExRadius = false,
+            drawExCenter = false,
             drawOrtho = false,
             drawCentroidDelaunay = false,
             metaball = false;
@@ -197,17 +202,17 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     private DistanceCheck renderStyle = DistanceCheck.euclidean;
 
     //where to add points
-    enum TriangleCenter {
-        centroid, circumcircle, incenter, orthocenter;
+    enum FocalPoint {
+        centroid, circumcircle, incenter, orthocenter, excenter;
         //todo: gergonne, nagel, ninepoint, excenter, symmedian;
 
-        private static final TriangleCenter[] VALUES = values();
+        private static final FocalPoint[] VALUES = values();
 
-        public TriangleCenter next() {
+        public FocalPoint next() {
             return VALUES[(ordinal() + 1) % VALUES.length];
         }
     }
-    private TriangleCenter shatterStyle = TriangleCenter.centroid;
+    private FocalPoint shatterStyle = FocalPoint.centroid;
 
     public TestVoronoiScreen() {
         generateNewPoints(MathUtils.random(3, 16), false, false);
@@ -372,6 +377,13 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 case orthocenter:
                     px = cell.orthocenter.x;
                     py = cell.orthocenter.y;
+                    break;
+                case excenter:
+                    px = cell.excircleA.x;
+                    py = cell.excircleA.y;
+                    //all A to add below and manually add B and C also
+                    centroidPoints.add(cell.excircleB.x, cell.excircleB.y);
+                    centroidPoints.add(cell.excircleC.x, cell.excircleC.y);
                     break;
             }
             centroidPoints.add(px, py);
@@ -591,6 +603,18 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.circle(cell.incircle.x, cell.incircle.y, 3);
             }
 
+            if (drawExCenter) {
+                shape.setColor(Color.SKY);
+                shape.circle(cell.excircleA.x, cell.excircleA.y, 2);
+                shape.circle(cell.excircleB.x, cell.excircleB.y, 2);
+                shape.circle(cell.excircleC.x, cell.excircleC.y, 2);
+            }
+            if (drawExRadius) {
+                shape.setColor(Color.SKY);
+                shape.circle(cell.excircleA.x, cell.excircleA.y, cell.excircleA.z);
+                shape.circle(cell.excircleB.x, cell.excircleB.y, cell.excircleB.z);
+                shape.circle(cell.excircleC.x, cell.excircleC.y, cell.excircleC.z);
+            }
             /*
             //differentiate points A, B, C
             if (drawPoints) {
@@ -605,6 +629,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.setColor(Color.CYAN);
                 shape.circle(cell.centroid.x, cell.centroid.y, pSize);
             }
+
+
             
             //draw delaunay triangles
             if (drawDelaunay) {
@@ -788,6 +814,13 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                         px = cell.orthocenter.x;
                         py = cell.orthocenter.y;
                         break;
+                    case excenter:
+                        px = cell.excircleA.x;
+                        py = cell.excircleA.y;
+                        //allow A to flow through, but also highlight B and C
+                        shape.circle(cell.excircleB.x, cell.excircleB.y, 2);
+                        shape.circle(cell.excircleC.x, cell.excircleC.y, 2);
+                        break;
                 }
                 shape.circle(px, py, 2);
                 //render all so you can see which triangle they belong too, as it is noisy with many dense points
@@ -795,6 +828,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.circle(cell.circumCenter.x, cell.circumCenter.y, 1);
                 shape.circle(cell.incircle.x, cell.incircle.y, 1);
                 shape.circle(cell.orthocenter.x, cell.orthocenter.y, 1);
+                shape.circle(cell.excircleA.x, cell.excircleA.y, 1);
+                shape.circle(cell.excircleB.x, cell.excircleB.y, 1);
+                shape.circle(cell.excircleC.x, cell.excircleC.y, 1);
             }
         }
 
@@ -855,6 +891,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     case orthocenter:
                         px = cell.orthocenter.x;
                         py = cell.orthocenter.y;
+                        break;
+                    case excenter:
+                        px = cell.excircleA.x;
+                        py = cell.excircleA.y;
+                        //allow A to flow through, but additionally render B and C
+                        layout.setText(dataFont, MyMath.round(cell.excircleB.x, 2) + "," + MyMath.round(cell.excircleB.y, 2), dataFont.getColor(), 0, Align.center, false);
+                        dataFont.draw(batch, layout, cell.excircleB.x, cell.excircleB.y);
+                        layout.setText(dataFont, MyMath.round(cell.excircleC.x, 2) + "," + MyMath.round(cell.excircleC.y, 2), dataFont.getColor(), 0, Align.center, false);
+                        dataFont.draw(batch, layout, cell.excircleC.x, cell.excircleC.y);
                         break;
                 }
                 //draw currently selected center!
@@ -934,8 +979,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     dist = dX + dY;
                     break;
                 case chess: //Chebyshev (max)
+                    // dist =  MyMath.chessDistance(x, y, xx, yy);
                     dist = max;
-                    dist =  MyMath.chessDistance(x, y, xx, yy);
                     break;
                 case antiChess: //anti-Chebyshev (min)
                     //dist = MyMath.antiChessDistance(x, y, xx, yy);
@@ -1114,6 +1159,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.setColor(drawInRadius ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[U] InCircle: InRadius", x, y - h * line++);
 
+        text.setColor(drawExCenter ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[H] ExCircle: ExCenter", x, y - h * line++);
+        text.setColor(drawExRadius ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[J] ExCircle: ExRadius", x, y - h * line++);
+
         text.setColor(drawOrtho ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[I] OrthoCenter", x, y - h * line++);
 
@@ -1173,6 +1223,16 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 if (Vector2.dst(x, y, cell.midCA.x, cell.midCA.y) < snapRadius) {
                     closestCenter = cell.midCA;
                 }
+                //snap to excenters
+                if (Vector2.dst(x, y, cell.excircleA.x, cell.excircleA.y) < snapRadius) {
+                    closestCenter = new Vector2(cell.excircleA.x, cell.excircleA.y);
+                }
+                if (Vector2.dst(x, y, cell.excircleB.x, cell.excircleB.y) < snapRadius) {
+                    closestCenter = new Vector2(cell.excircleB.x, cell.excircleB.y);
+                }
+                if (Vector2.dst(x, y, cell.excircleC.x, cell.excircleC.y) < snapRadius) {
+                    closestCenter = new Vector2(cell.excircleC.x, cell.excircleC.y);
+                }
             }
             snap = closestCenter;
         } else {
@@ -1181,21 +1241,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         //create new point
         if (Gdx.input.justTouched() && Gdx.input.isButtonPressed(Buttons.RIGHT)) {
-            //computeTriangles() supports only up to 32767 IllegalArgumentException: count must be <= 32767
-            /*
-            if (points.size > maxVertices) {
-                Gdx.app.error(getClass().getSimpleName(), points.size + " > 32767. ignored!");
-                return;
-            }*/
             if (snap != null) {
                 x = snap.x;
                 y = snap.y;
             }
-
-            if (!isDuplicate(x, y)) {
-                points.add(x);
-                points.add(y);
-                colorTest.add(new Color((float) Math.random(), (float) Math.random(), (float) Math.random(), 1));
+            if (addNewVertex(x, y)) {
                 calculateDelaunay();
             }
         }
@@ -1282,12 +1332,21 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                         px = cell.orthocenter.x;
                         py = cell.orthocenter.y;
                         break;
+                    case excenter:
+                        //allow A to follow normal logic through
+                        px = cell.excircleA.x;
+                        py = cell.excircleA.y;
+                        //but manually add excircle B and C
+                        if (addNewVertex(cell.excircleB.x, cell.excircleB.y)) {
+                            added = true;
+                        }
+                        if (addNewVertex(cell.excircleC.x, cell.excircleC.y)) {
+                            added = true;
+                        }
+                        break;
                 }
                 //float
-                if (!isDuplicate(px, py)) {
-                    points.add(px);
-                    points.add(py);
-                    colorTest.add(new Color((float) Math.random() * 0.5f, (float) Math.random() * 0.5f, (float) Math.random() * 0.5f, 0.5f));
+                if (addNewVertex(px, py)) {
                     added = true;
                 }
             }
@@ -1400,6 +1459,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         if (Gdx.input.isKeyJustPressed(Keys.U)) {
             drawInRadius = !drawInRadius;
         }
+        if (Gdx.input.isKeyJustPressed(Keys.H)) {
+            drawExCenter = !drawExCenter;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.J)) {
+            drawExRadius = !drawExRadius;
+        }
         if (Gdx.input.isKeyJustPressed(Keys.I)) {
             drawOrtho = !drawOrtho;
         }
@@ -1443,6 +1508,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             newColor.set(v, v, v, 0.5f);
             colorTest.add(newColor);
         }
+    }
+
+    private boolean addNewVertex(float px, float py) {
+        if (isDuplicate(px, py)) return false;
+
+        points.add(px);
+        points.add(py);
+        colorTest.add(new Color((float) Math.random() * 0.5f, (float) Math.random() * 0.5f, (float) Math.random() * 0.5f, 0.5f));
+        return true;
     }
 
     private boolean isDuplicate(float x1, float y1) {

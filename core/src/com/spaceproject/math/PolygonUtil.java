@@ -183,7 +183,7 @@ public class PolygonUtil {
         //calculate inRadius
         float p = dt / 2;// p = semi-perimeter of the circle
         float r = area / p;
-        return cacheVector3.set(x, y, r);
+        return cacheVector3.set(x, y, r);//todo: out parameter instead of cache?
     }
 
     /** Caclulate Orthocenter
@@ -211,6 +211,31 @@ public class PolygonUtil {
         float orthocenterY = altSlopeC * orthocenterX + interceptC;
         return cacheVector2.set(orthocenterX, orthocenterY);
     }
+
+    public static void excircle(Vector2 a, Vector2 b, Vector2 c, float area, Vector3 exCircleA, Vector3 exCircleB, Vector3 exCircleC) {
+        float da = b.dst(c);
+        float db = c.dst(a);
+        float dc = a.dst(b);
+        float s = (da + db + dc) / 2.0f;
+
+        float exRadiusA = area / (s - da);
+        float exRadiusB = area / (s - db);
+        float exRadiusC = area / (s - dc);
+
+        exCircleA.set(
+                (-da * a.x + db * b.x + dc * c.x) / (-da + db + dc),
+                (-da * a.y + db * b.y + dc * c.y) / (-da + db + dc),
+                exRadiusA);
+        exCircleB.set(
+                (da * a.x - db * b.x + dc * c.x) / (da - db + dc),
+                (da * a.y - db * b.y + dc * c.y) / (da - db + dc),
+                exRadiusB);
+        exCircleC.set(
+                (da * a.x + db * b.x - dc * c.x) / (da + db - dc),
+                (da * a.y + db * b.y - dc * c.y) / (da + db - dc),
+                exRadiusC);
+    }
+
 
     /** Ratio of circumradius to shortest edge as a measure of triangle quality.
      * copy of GeometryUtils.triangleQuality() modified to use provided circumradius instead of recalculating.

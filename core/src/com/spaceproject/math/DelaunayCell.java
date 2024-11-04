@@ -17,6 +17,9 @@ public class DelaunayCell {
     public Vector2 centroid = new Vector2();
     public Vector2 incircle = new Vector2();
     public Vector2 orthocenter = new Vector2();
+    public Vector3 excircleA = new Vector3();
+    public Vector3 excircleB = new Vector3();
+    public Vector3 excircleC = new Vector3();
     public float inRadius;
     public float area;
     public float quality;
@@ -32,7 +35,7 @@ public class DelaunayCell {
     public Vector2 getC(FloatArray points) {
         return cacheVec.set(points.get(p3), points.get(p3 + 1));
     }
-    public int p1, p2, p3;
+    public int p1, p2, p3; // <- index of point should name to pIndex
     public DelaunayCell(FloatArray points, int p1, int p2, int p3) {
         this.p1 = p1;
         this.p2 = p2;
@@ -87,6 +90,9 @@ public class DelaunayCell {
         //calculate orthocenter
         Vector2 ortho = PolygonUtil.orthocenter(a, b, c);
         orthocenter.set(ortho);
+
+        //calculate excircles
+        PolygonUtil.excircle(a, b, c, area, excircleA, excircleB, excircleC);
     }
 
     /**
