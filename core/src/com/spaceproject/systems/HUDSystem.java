@@ -696,7 +696,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             float r = radius;
             if (timeSinceCollect < animTime) {
                 float ra = (float) timeSinceCollect / animTime;
-                r += (1-ra) * 9;
+                r += (1-ra) * 7;
             }
             int count = entry.getValue();
             float ratio = (float) count / total;
