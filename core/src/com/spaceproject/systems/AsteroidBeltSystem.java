@@ -7,10 +7,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.*;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.components.AsteroidBeltComponent;
-import com.spaceproject.components.AsteroidComponent;
-import com.spaceproject.components.PhysicsComponent;
-import com.spaceproject.components.TransformComponent;
+import com.spaceproject.components.*;
 import com.spaceproject.config.DebugConfig;
 import com.spaceproject.generation.EntityBuilder;
 import com.spaceproject.math.DoubleDelaunayTriangulator;
@@ -341,6 +338,15 @@ public class AsteroidBeltSystem extends EntitySystem {
             Entity childAsteroid = EntityBuilder.createAsteroid(parentPos.x, parentPos.y, parentVel.x, parentVel.y, parentAngle, hull, asteroidComponent.composition, true);
             childAsteroid.getComponent(PhysicsComponent.class).body.setAngularVelocity(parentAngularVel + angularDrift);
             getEngine().addEntity(childAsteroid);
+
+            //fracture damage model: should extra damage be passed down to children?
+            //eg: parent hp = 100, takes 150 damage = 50 damage
+            // for each child asteroid, apply (remaining damage / number of children)
+            // eg: 50 damage / 3 children = 16.6
+            //float distributedDamage = damage / triangleIndices/3; // * assuming no triangles are discarded!!!
+            //childAsteroid.getComponent(HealthComponent.class).health -= damage;
+            //we could aslo pre sub shatter further depending on how much damage is done? since we already know the what the child
+            //bodies will be under the current simplified delaunay-based shatter.
         }
     }
 
