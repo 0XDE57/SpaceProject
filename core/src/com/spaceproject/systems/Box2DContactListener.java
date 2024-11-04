@@ -478,6 +478,7 @@ public class Box2DContactListener implements ContactListener {
         }
 
         if (Mappers.controlFocus.get(entity) != null) {
+            engine.getSystem(ControllerInputSystem.class).vibrate(150, 1f);
             //create respawn entity for player
             respawnPlayer(engine, entity, source);
         }
