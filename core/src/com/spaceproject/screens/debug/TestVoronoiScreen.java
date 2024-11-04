@@ -1031,7 +1031,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         batch.begin();
         int x = 10;
         int y = Gdx.graphics.getHeight() - x;
-        float h = text.getLineHeight();
+        float h = text.getLineHeight()-1;
         int line = 0;
         layout.setText(text, "Vertices: " + (int) (points.size * 0.5f)  + ", D-Cells:" + dCells.size() + ", V-Cells: ?", Color.WHITE, 0, Align.center, false);
         text.draw(batch, layout, Gdx.graphics.getWidth() * 0.5f, y);
@@ -1042,15 +1042,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, "[X] Clear", x, y - h * line++);//B makes no sense but Copy has to be C
         text.draw(batch, "[Spacebar] Generate Random + [ALT] add centroid", x, y - h * line++);
         text.draw(batch, "[SHIFT + Spacebar] Generate Regular + [ALT] add centroid", x, y - h * line++);
-        text.draw(batch, "[L-Click] Drag point", x, y - h * line++);
-        text.draw(batch, "[R-Click] Create new point", x, y - h  * line++);
+        text.draw(batch, "[L-Click] Drag vertex", x, y - h * line++);
+        text.draw(batch, "[R-Click] Create new vertex", x, y - h  * line++);
         text.draw(batch, "[ALT] Snap to center", 10, y- h  * line++);//todo
-        text.draw(batch, "[SHIFT + L-Click] Drag points", x, y - h * line++);
+        text.draw(batch, "[SHIFT + L-Click] Drag vertices", x, y - h * line++);
         text.draw(batch, "[S] Shatter -> " + shatterStyle.toString().toUpperCase(), x, y - h * line++);
         text.draw(batch, "[A] Cycle Shatter Center" , x, y - h * line++);
         text.draw(batch, "[CTRL + D] Save PNG", x, y - h * line++);
-        text.draw(batch, "[CTRL + C] Copy points to clipboard", x, y - h * line++); //todo
-        text.draw(batch, "[CTRL + V] Load points from clipboard", x, y - h * line++); //todo
+        text.draw(batch, "[CTRL + C] Copy vertices to clipboard", x, y - h * line++); //todo
+        text.draw(batch, "[CTRL + V] Load vertices from clipboard", x, y - h * line++); //todo
 
         //todo: reorder in a more sensible grouping. maybe:
         //  points
@@ -1058,7 +1058,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         // graphs:
         //      - hull
         //      - dalaunay
-        //      -
+        //      - vornoi
+        //      - centers in same order as above points
 
         //toggles
         text.setColor(debugPointOrder ? Color.GREEN : Color.BLACK);
@@ -1119,6 +1120,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.setColor(drawCentroidDelaunay ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[O] Centroid Delaunay Graph -> " +  shatterStyle.name().toUpperCase(), x, y - h * line++);
 
+        //we have officially run out of vertical space at 1280x800... need to rethink UI
         text.setColor(metaball ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[M] Metaballs! [<][>] radius: " + MyMath.round(metaRadius, 2), x, y - h * line++);
 
