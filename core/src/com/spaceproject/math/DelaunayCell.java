@@ -8,19 +8,22 @@ import java.util.ArrayList;
 
 
 public class DelaunayCell {
+    // move to a more data orientated design? kill off all objects and move to primative data types?
 
     public Vector2 a, b, c;//vertex that define triangle todo: make this an index, don't create 3 new vectors for each triangle, that's silly!
     public Vector2 midAB, midBC, midCA;//semiperimeter: midpoints between vertex
     public DelaunayCell nAB, nBC, nCA;//neighbors (TODO: reference for now, index later)
+    public Vector2 centroid = new Vector2();
     public Vector2 circumCenter = new Vector2();//center of circle that intersects each vertex a,b,c
     public float circumRadius;//radius of circle that intersects each vertex a,b,c
-    public Vector2 centroid = new Vector2();
     public Vector2 incircle = new Vector2();
+    public float inRadius;
     public Vector2 orthocenter = new Vector2();
+    public Vector3 ninePointCenter = new Vector3();
     public Vector3 excircleA = new Vector3();
     public Vector3 excircleB = new Vector3();
     public Vector3 excircleC = new Vector3();
-    public float inRadius;
+
     public float area;
     public float quality;
 
@@ -90,6 +93,10 @@ public class DelaunayCell {
         //calculate orthocenter
         Vector2 ortho = PolygonUtil.orthocenter(a, b, c);
         orthocenter.set(ortho);
+
+        //calculate nine-points circle (midpoints between circumcenter and orthocenter)
+        Vector2 midpoint = circumCenter.cpy().add(orthocenter).scl(0.5f);
+        ninePointCenter.set(midpoint, circumRadius*0.5f);
 
         //calculate excircles
         PolygonUtil.excircle(a, b, c, area, excircleA, excircleB, excircleC);

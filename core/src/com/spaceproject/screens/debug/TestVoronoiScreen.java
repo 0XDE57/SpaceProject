@@ -16,7 +16,6 @@ import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.StringBuilder;
 import com.spaceproject.generation.FontLoader;
 import com.spaceproject.math.*;
-import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 
@@ -112,9 +111,15 @@ import java.util.ArrayList;
 //      - scaled preview with labels
 
 // Pythagorean triples; A right triangle where the sides are in the ratio of integers
-//  eg: 3:4:5 , 6:8:10 , 5:12:13 , 9:12:15 , 8:15:17
+//  (3, 4, 5), (5, 12, 13), (7, 24, 25), (8, 15, 17), (9, 40, 41), (11, 60, 61),
+//  (12, 35, 37), (13, 84, 85), (16, 63, 65), (20, 21, 29), (28, 45, 53),
+//  (33, 56, 65), (36, 77, 85), (39, 80, 89), (48, 55, 73), (65, 72, 97)
 // neat: https://www.youtube.com/watch?v=oXcCAAEDte0&t=905s
 //https://www.youtube.com/watch?v=94mV7Fmbx88
+
+// apparently there are thousands (infinite?) triangle centers:
+//https://mathworld.wolfram.com/TriangleCenter.html
+//https://mathworld.wolfram.com/KimberlingCenter.html
 
 //https://en.wikipedia.org/wiki/Dual_graph
 //hmm, what are "forbidden"?
@@ -154,27 +159,30 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     final Color cacheColor = new Color();
     
     //toggles
-    boolean debugPointOrder = false,
+    boolean debugVertexOrder = false,
             drawCircumcircle = false,
-            drawCircumcenter = false,
-            drawPoints = true,
+            drawCircumcenter = false, //O | X3
+            drawVertices = true,
             drawDelaunay = true,
             drawVoronoi = false,
             drawMidpoints = false,
             drawMidGraph = false,
             drawCenteroidPointGraph = false,
             drawHull = true,
-            drawCentroid = false,
+            drawCentroid = false, //G | X2
             drawTriangleQuality = false,
             drawTriangleInfo = false,
             voronoiRender = false,
             drawInTriangle = false,
             drawInRadius = false,
-            drawInCenter = false,
+            drawInCenter = false,//I | X1
             drawExRadius = false,
             drawExCenter = false,
-            drawOrtho = false,
+            drawOrtho = false, //H | X4
+            drawNinePointCenter = false, //F | X5 | Feuerbach point
+            drawNinePointRadius = false,
             drawCentroidDelaunay = false,
+            //drawPythagSquare = true,
             metaball = false;
     
     int pSize = 5;
@@ -204,8 +212,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
     //where to add points
     enum FocalPoint {
-        centroid, circumcircle, incenter, orthocenter, excenter;
-        //todo: gergonne, nagel, ninepoint, excenter, symmedian;
+        centroid, circumcircle, incenter, orthocenter, ninepoint, excenter;
+        //todo: gergonne, nagel, ninepoint, symmedian;
 
         private static final FocalPoint[] VALUES = values();
 
@@ -358,7 +366,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         long end = System.currentTimeMillis() - start;
         if (end > 16) {
-            float ratio = (float)end / (triangles.size / 3f); //might not be best measurement, includes other calculations like hull and secondary graph if enabled...
+            float ratio = (float)end / (triangles.size / 3f); //might not be the best measurement, includes other calculations like hull and secondary graph if enabled...
             Gdx.app.log("", points.size/2 + " vertices - " + triangles.size / 3f + " triangles in " + end + "ms. ~" + ratio + "ms/tri. FPS:" + Gdx.graphics.getFramesPerSecond());
         }
     }
@@ -385,6 +393,10 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 case orthocenter:
                     px = cell.orthocenter.x;
                     py = cell.orthocenter.y;
+                    break;
+                case ninepoint:
+                    px = cell.ninePointCenter.x;
+                    py = cell.ninePointCenter.y;
                     break;
                 case excenter:
                     px = cell.excircleA.x;
@@ -567,7 +579,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         shape.begin(ShapeType.Line);
 
         //all points
-        if (drawPoints) {
+        if (drawVertices) {
             shape.setColor(Color.BLACK);
             for (int i = 0; i < points.size; i += 2) {
                 float x = (float) points.get(i);
@@ -638,7 +650,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.circle(cell.centroid.x, cell.centroid.y, pSize);
             }
 
-
+            //draw ninepoint
+            if (drawNinePointCenter) {
+                shape.setColor(Color.PURPLE);
+                shape.circle(cell.ninePointCenter.x, cell.ninePointCenter.y, 2);
+            }
+            if (drawNinePointRadius) {
+                shape.setColor(Color.PURPLE);
+                shape.circle(cell.ninePointCenter.x, cell.ninePointCenter.y, cell.ninePointCenter.z);
+            }
             
             //draw delaunay triangles
             if (drawDelaunay) {
@@ -748,6 +768,13 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             }
         }
 
+        /*
+        //draw pythagorean square projection
+        if (drawPythagSquare) {
+            shape.setColor(Color.FOREST);
+
+            //shape.rotate();
+        }*/
 
         shape.end();
 
@@ -822,6 +849,10 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                         px = cell.orthocenter.x;
                         py = cell.orthocenter.y;
                         break;
+                    case ninepoint:
+                        px = cell.ninePointCenter.x;
+                        py = cell.ninePointCenter.y;
+                        break;
                     case excenter:
                         px = cell.excircleA.x;
                         py = cell.excircleA.y;
@@ -844,7 +875,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         // debug draw points in order first to last color coded
         // this is to visualize the actual order of the points in the array
-        if (debugPointOrder) {
+        if (debugVertexOrder) {
             if (points.size > 2) {
                 Color colorA = Color.RED;
                 Color colorB = Color.BLUE;
@@ -899,6 +930,10 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     case orthocenter:
                         px = cell.orthocenter.x;
                         py = cell.orthocenter.y;
+                        break;
+                    case ninepoint:
+                        px = cell.ninePointCenter.x;
+                        py = cell.ninePointCenter.y;
                         break;
                     case excenter:
                         px = cell.excircleA.x;
@@ -1115,8 +1150,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         //      - centers in same order as above points
 
         //toggles
-        text.setColor(debugPointOrder ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[F2] Debug Point Order", x, y - h  * line++);
+        text.setColor(debugVertexOrder ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[F2] Debug Vertex Order", x, y - h  * line++);
 
         text.setColor(drawCircumcenter ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[1] CircumCenter", x, y - h  * line++);
@@ -1124,8 +1159,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.setColor(drawCircumcircle ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[2] CircumCircle", x, y - h * line++);
         
-        text.setColor(drawPoints ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[3] Points", x, y - h * line++);
+        text.setColor(drawVertices ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[3] Vertices", x, y - h * line++);
         
         text.setColor(drawMidpoints ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[4] Semiperimeter (midpoints)", x, y - h * line++);
@@ -1172,11 +1207,16 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.setColor(drawExRadius ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[J] ExCircle: ExRadius", x, y - h * line++);
 
+        text.setColor(drawNinePointCenter ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[F] NinePoint: Center", x, y - h * line++);
+        text.setColor(drawNinePointRadius ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[G] NinePoint: Radius", x, y - h * line++);
+
         text.setColor(drawOrtho ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[I] OrthoCenter", x, y - h * line++);
 
         text.setColor(drawCentroidDelaunay ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[O] Centroid Delaunay Graph -> " +  shatterStyle.name().toUpperCase(), x, y - h * line++);
+        text.draw(batch, "[O] (experimental)Centroid Delaunay Graph -> " +  shatterStyle.name().toUpperCase(), x, y - h * line++);//tod: replace with anticomplementary trianlge, then also could add reflection
 
         //we have officially run out of vertical space at 1280x800... need to rethink UI
         text.setColor(metaball ? Color.GREEN : Color.BLACK);
@@ -1409,7 +1449,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         //toggle drawings
         if (Gdx.input.isKeyJustPressed(Keys.F2)) {
-            debugPointOrder = !debugPointOrder;
+            debugVertexOrder = !debugVertexOrder;
         }
         if (Gdx.input.isKeyJustPressed(Keys.NUM_1)) {
             drawCircumcenter = !drawCircumcenter;
@@ -1418,7 +1458,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawCircumcircle = !drawCircumcircle;
         }
         if (Gdx.input.isKeyJustPressed(Keys.NUM_3)) {
-            drawPoints = !drawPoints;
+            drawVertices = !drawVertices;
         }
         if (Gdx.input.isKeyJustPressed(Keys.NUM_4)) {
             drawMidpoints = !drawMidpoints;
@@ -1466,6 +1506,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         if (Gdx.input.isKeyJustPressed(Keys.U)) {
             drawInRadius = !drawInRadius;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.F)) {
+            drawNinePointCenter = !drawNinePointCenter;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.G)) {
+            drawNinePointRadius = !drawNinePointRadius;
         }
         if (Gdx.input.isKeyJustPressed(Keys.H)) {
             drawExCenter = !drawExCenter;
