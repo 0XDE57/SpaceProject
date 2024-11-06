@@ -10,7 +10,6 @@ import com.kotcrab.vis.ui.widget.VisDialog;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.spaceproject.SpaceProject;
-import com.spaceproject.screens.debug.BlocksTestScreen;
 import com.spaceproject.screens.GameScreen;
 import com.spaceproject.screens.debug.*;
 import com.spaceproject.ui.ControllerMenuStage;
@@ -168,26 +167,6 @@ public class TitleScreenMenu {
             }
         });
 
-        VisTextButton btnSpiral = new VisTextButton("[DEBUG] Spiral Gen");
-        btnSpiral.getLabel().setAlignment(Align.left);
-        btnSpiral.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new TestSpiralGalaxy());
-            }
-        });
-
-        VisTextButton btnBlock = new VisTextButton("[DEBUG] Block Engine Test");
-        btnBlock.getLabel().setAlignment(Align.left);
-        btnBlock.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new BlocksTestScreen());
-            }
-        });
-
-        table.add(btnBlock).fillX().row();
-        table.add(btnSpiral).fillX().row();
         table.add(btnVoronoi).fillX().row();
         table.add(btnNoise).fillX().row();
         table.add(btn3D).fillX().row();
