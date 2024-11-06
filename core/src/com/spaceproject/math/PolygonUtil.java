@@ -186,7 +186,7 @@ public class PolygonUtil {
         return cacheVector3.set(x, y, r);//todo: out parameter instead of cache?
     }
 
-    /** Caclulate Orthocenter
+    /** Calculate Orthocenter
      * coincides with the circumcenter, incenter and centroid for an equilateral triangle,
      * coincides with the right-angled vertex for right triangles,
      * lies inside the triangle for acute triangles,
@@ -196,19 +196,35 @@ public class PolygonUtil {
         // slopes
         float slopeAB = (b.y - a.y) / (b.x - a.x);
         float slopeBC = (c.y - b.y) / (c.x - b.x);
+        float slopeCA = (a.y - c.y) / (a.x - c.x);
 
         // altitudes slopes (negative reciprocals)
-        //we only need 2 altitudes, as the intersection of any two altitudes will also lie on the third
         float altSlopeC = -1 / slopeAB;
         float altSlopeA = -1 / slopeBC;
+        float altSlopeB = -1 / slopeCA;
 
         // altitudes y-intercepts
         float interceptC = c.y - altSlopeC * c.x;
         float interceptA = a.y - altSlopeA * a.x;
+        float interceptB = b.y - altSlopeB * b.x;
 
         // intersection (orthocenter)
-        float orthocenterX = (interceptA - interceptC) / (altSlopeC - altSlopeA);
-        float orthocenterY = altSlopeC * orthocenterX + interceptC;
+        // we only need 2 altitudes, as the intersection of any two altitudes will also lie on the third,
+        // but if any vertices are co-linear then slope = 0 giving infinite altitude.
+        // only non-infinite y-intercepts must be used for intersection.
+        float orthocenterX;
+        float orthocenterY;
+        if (Float.isInfinite(altSlopeC)) {
+            orthocenterX = (interceptA - interceptB) / (altSlopeB - altSlopeA);
+            orthocenterY = altSlopeB * orthocenterX + interceptB;
+        } else if (Float.isInfinite(altSlopeA)) {
+            orthocenterX = (interceptC - interceptB) / (altSlopeB - altSlopeC);
+            orthocenterY = altSlopeB * orthocenterX + interceptB;
+        } else {
+            orthocenterX = (interceptA - interceptC) / (altSlopeC - altSlopeA);
+            orthocenterY = altSlopeC * orthocenterX + interceptC;
+        }
+
         return cacheVector2.set(orthocenterX, orthocenterY);
     }
 
