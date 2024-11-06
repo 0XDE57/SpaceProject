@@ -141,12 +141,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     //triangulation
     final DoubleDelaunayTriangulator delaunay = new DoubleDelaunayTriangulator();
     IntArray triangles;
-
     final ArrayList<DelaunayCell> dCells = new ArrayList<>();
-
-    final DelaunayTriangulator dualaunay = new DelaunayTriangulator();// dual delaunay ;)
-    final FloatArray centroidPoints = new FloatArray();
-    ShortArray centroidGraph;
 
     //convex hull
     double[] hull; //high precision for calculation
@@ -154,6 +149,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     final DoublePolygon hullPoly = new DoublePolygon();
     final Vector2 centroid = new Vector2();
     final DoubleConvexHull convex = new DoubleConvexHull();
+    long end = 0;
 
     final Vector2 intersect = new Vector2();
     final Vector2 cacheVec = new Vector2();
@@ -182,7 +178,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawOrtho = false, //H | X4
             drawNinePointCenter = false, //F | X5 | Feuerbach point
             drawNinePointRadius = false,
-            drawCentroidDelaunay = false,
+            drawAnticomplementaryTriangle = false,
             //drawPythagSquare = true,
             metaball = false;
     
@@ -361,55 +357,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         for (int i = 0; i < hullVertices.length; i++) {
             floatHull[i] = (float) hullVertices[i];
         }
-
+/*
         if (drawCentroidDelaunay) {
             calculateCentroidDelaunay();
-        }
-        long end = System.currentTimeMillis() - start;
+        }*/
+        end = System.currentTimeMillis() - start;
         if (end > 16) {
             float ratio = (float)end / (triangles.size / 3f); //might not be the best measurement, includes other calculations like hull and secondary graph if enabled...
             Gdx.app.log("", points.size/2 + " vertices - " + triangles.size / 3f + " triangles in " + end + "ms. ~" + ratio + "ms/tri. FPS:" + Gdx.graphics.getFramesPerSecond());
         }
-    }
-
-    private void calculateCentroidDelaunay() {
-        if (dCells.isEmpty()) return;
-        //holy crap more graphs!!! but getting heavy to compute....
-        centroidPoints.clear();
-        for (DelaunayCell cell : dCells) {
-            float px = 0, py = 0;
-            switch (shatterStyle) {
-                case centroid:
-                    px = cell.centroid.x;
-                    py = cell.centroid.y;
-                    break;
-                case circumcircle:
-                    px = cell.circumCenter.x;
-                    py = cell.circumCenter.y;
-                    break;
-                case incenter:
-                    px = cell.incircle.x;
-                    py = cell.incircle.y;
-                    break;
-                case orthocenter:
-                    px = cell.orthocenter.x;
-                    py = cell.orthocenter.y;
-                    break;
-                case ninepoint:
-                    px = cell.ninePointCenter.x;
-                    py = cell.ninePointCenter.y;
-                    break;
-                case excenter:
-                    px = cell.excircleA.x;
-                    py = cell.excircleA.y;
-                    //all A to add below and manually add B and C also
-                    centroidPoints.add(cell.excircleB.x, cell.excircleB.y);
-                    centroidPoints.add(cell.excircleC.x, cell.excircleC.y);
-                    break;
-            }
-            centroidPoints.add(px, py);
-        }
-        centroidGraph = dualaunay.computeTriangles(centroidPoints, false);
     }
 
     /**
@@ -756,59 +712,32 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 					}
 				}*/
             }
-        }
 
-        /*
-        //draw pythagorean square projection
-        boolean drawPythagSquare = true;
-        if (drawPythagSquare) {
-            shape.setColor(Color.FOREST);
-            //a to b, pivot 90 (tangent) to edge
-            //abSqaureA = pivot on A by length a-b
-            //abSquareB = pivot on B by length a-b
-            //shape.rotate();
-        }*/
-
-        shape.end();
-
-
-
-/*
-        if (drawTriangleQuality) {
-            //moveable layer? this could be under or over...
-            shape.begin(ShapeType.Filled);
-            for (DelaunayCell cell : dCells) {
-                shape.setColor(0.3f, 0.3f, 0.3f, 1 - cell.quality);
-                shape.triangle(cell.a.x, cell.a.y, cell.b.x, cell.b.y, cell.c.x, cell.c.y);
+            //draw anti-complimentary triangle
+            if (drawAnticomplementaryTriangle) {
+                shape.setColor(Color.GREEN);
+                shape.triangle(
+                        cell.excircleA.x, cell.excircleA.y,
+                        cell.excircleB.x, cell.excircleB.y,
+                        cell.excircleC.x, cell.excircleC.y);
             }
-            shape.end();
-        }*/
+
+            /*
+            //draw pythagorean square projection
+            boolean drawPythagSquare = true;
+            if (drawPythagSquare) {
+                shape.setColor(Color.FOREST);
+                //a to b, pivot 90 (tangent) to edge
+                //abSqaureA = pivot on A by length a-b
+                //abSquareB = pivot on B by length a-b
+                //shape.rotate();
+            }*/
+        }
+        //shape.end();
+
 
         //always at end to be on top
-        shape.begin(ShapeType.Line);
-        if (drawCentroidDelaunay && centroidPoints.notEmpty()) {
-            int discard = 1;
-            shape.setColor(Color.GREEN);
-            for (int i = 0; i < centroidGraph.size; i += 3) {
-                //get point indexes
-                int p1 = centroidGraph.get(i) * 2;
-                int p2 = centroidGraph.get(i + 1) * 2;
-                int p3 = centroidGraph.get(i + 2) * 2;
-
-                float ax = centroidPoints.get(p1), ay = centroidPoints.get(p1 + 1); // xy: 0, 1
-                float bx = centroidPoints.get(p2), by = centroidPoints.get(p2 + 1); // xy: 2, 3
-                float cx = centroidPoints.get(p3), cy = centroidPoints.get(p3 + 1); // xy: 4, 5
-                //discard duplicate points
-                if     ((MathUtils.isEqual(ax, bx) && MathUtils.isEqual(ay, by)) ||
-                        (MathUtils.isEqual(ax, cx) && MathUtils.isEqual(ay, cy)) ||
-                        (MathUtils.isEqual(bx, cx) && MathUtils.isEqual(by, cy))) {
-                    Gdx.app.error(getClass().getSimpleName(), "Duplicate point!: " + discard++);
-                    continue;
-                }
-                shape.triangle(ax, ay, bx, by, cx, cy);
-            }
-        }
-
+        //shape.begin(ShapeType.Line);
         if (drawHull && hull != null) {
             shape.setColor(Color.RED);
             shape.polyline(floatHull);
@@ -1116,7 +1045,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         int y = Gdx.graphics.getHeight() - x;
         float h = text.getLineHeight()-1;
         int line = 0;
-        layout.setText(text, "Vertices: " + (int) (points.size * 0.5f)  + ", D-Cells:" + dCells.size() + ", V-Cells: ?", Color.WHITE, 0, Align.center, false);
+        layout.setText(text, "FPS: " + Gdx.graphics.getFramesPerSecond() + " - Vertices: " + (int) (points.size * 0.5f)  + ", D-Cells:" + dCells.size() + ", V-Cells: ? - " +  end + "ms", Color.WHITE, 0, Align.center, false);
         text.draw(batch, layout, Gdx.graphics.getWidth() * 0.5f, y);
 
         text.setColor(Color.BLACK);
@@ -1210,8 +1139,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.setColor(drawOrtho ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[I] OrthoCenter", x, y - h * line++);
 
-        text.setColor(drawCentroidDelaunay ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[O] (experimental)Centroid Delaunay Graph -> " +  shatterStyle.name().toUpperCase(), x, y - h * line++);//tod: replace with anticomplementary trianlge, then also could add reflection
+        text.setColor(drawAnticomplementaryTriangle ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[O] Anticomplementary Triangle", x, y - h * line++);
 
         //we have officially run out of vertical space at 1280x800... need to rethink UI
         text.setColor(metaball ? Color.GREEN : Color.BLACK);
@@ -1342,21 +1271,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         if (Gdx.input.isKeyJustPressed(Keys.A)) {
             shatterStyle = shatterStyle.next();
-            if (drawCentroidDelaunay) {
-                calculateCentroidDelaunay();
-            }
         }
 
         //sub-shatter!
         if (Gdx.input.isKeyJustPressed(Keys.S)) {
             boolean added = false;
             for (DelaunayCell cell : dCells) {
-                //computeTriangles() supports only up to 32767 IllegalArgumentException: count must be <= 32767
-                /*
-                if (points.size > maxVertices - 4) {
-                    Gdx.app.error(getClass().getSimpleName(), points.size + " too many points. shatter aborted!");
-                    return;
-                }*/
                 float px = 0, py = 0;
                 switch (shatterStyle) {
                     case centroid:
@@ -1374,6 +1294,10 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     case orthocenter:
                         px = cell.orthocenter.x;
                         py = cell.orthocenter.y;
+                        break;
+                    case ninepoint:
+                        px = cell.ninePointCenter.x;
+                        py = cell.ninePointCenter.y;
                         break;
                     case excenter:
                         //allow A to follow normal logic through
@@ -1432,7 +1356,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     newPoints.add(parsed);
                 }
             } catch (NumberFormatException ex) {
-                Gdx.app.error(getClass().getSimpleName(),"Invalid input! Float could not parsed. This expects floats in XY pairs as CSV. Clipboard paste aborted.");
+                Gdx.app.error(getClass().getSimpleName(),"Invalid input! Double could not parsed. This expects doubles in XY pairs as CSV. Clipboard paste aborted.");
                 return;
             }
             clear();
@@ -1518,11 +1442,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawOrtho = !drawOrtho;
         }
         if (Gdx.input.isKeyJustPressed(Keys.O)) {
-            drawCentroidDelaunay = !drawCentroidDelaunay;
-            //may have to call recalculate here:
-            if (drawCentroidDelaunay) {
-                calculateDelaunay();
-            }
+            drawAnticomplementaryTriangle = !drawAnticomplementaryTriangle;
         }
         if (Gdx.input.isKeyJustPressed(Keys.M)) {
             metaball = !metaball;
@@ -1569,7 +1489,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     }
 
     private boolean isDuplicate(float x1, float y1) {
-        double tolerance = 0.1f;
+        double tolerance = 1;
         boolean duplicate = false;
         for (int i = 0; i < points.size && !duplicate; i += 2) {
             if (MyMath.isEqualDouble(x1, points.get(i), tolerance) && MyMath.isEqualDouble(y1, points.get(i+1), tolerance)) {
@@ -1673,7 +1593,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         dCells.clear();
         hull = null;
         colorTest.clear();
-        centroidPoints.clear();
     }
 
 }
