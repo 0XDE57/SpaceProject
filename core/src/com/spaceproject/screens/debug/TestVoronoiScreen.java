@@ -155,6 +155,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     final Vector2 centroid = new Vector2();
     final DoubleConvexHull convex = new DoubleConvexHull();
 
+    final Vector2 intersect = new Vector2();
     final Vector2 cacheVec = new Vector2();
     final Color cacheColor = new Color();
     
@@ -428,19 +429,14 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             double yA = vertices[v + 1];
             double xB = vertices[v + 2];
             double yB = vertices[v + 3];
-            // convex hull line between A and B
-            Vector2 edgeA = new Vector2((float) xA, (float) yA); //todo: cache
-            Vector2 edgeB = new Vector2((float) xB, (float) yB); //todo: cache
-            
-            if (Intersector.intersectSegments(edgeA, edgeB, a, b, intersect)) {
+            if (Intersector.intersectSegments((float) xA, (float) yA, (float) xB, (float) yB, a.x, a.y, b.x, b.y, intersect)) {
                 //the two lines intersect. point of intersection is set in variable intersect
                 return true;
             }
-            
         }
         return false;
     }
-    
+
     private void drawCellEdge(DelaunayCell cellA, DelaunayCell cellB) {
         //check circle is within hull
         if (hullPoly.contains(cellA.circumCenter)) {
@@ -451,7 +447,6 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     shape.line(cellA.circumCenter, cellB.circumCenter);
                 } else {
                     //if circumcenter is outside convex hull, draw from circumcenter to intersection
-                    Vector2 intersect = new Vector2();//todo: cache
                     if (collideWithHull(cellA.circumCenter, cellB.circumCenter, intersect)) {
                         shape.line(cellA.circumCenter, intersect);
                         shape.circle(intersect.x, intersect.y, 8);//show point of intersection
@@ -476,25 +471,20 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 double yA = vertices[v + 1];
                 double xB = vertices[v + 2];
                 double yB = vertices[v + 3];
-                // convex hull line
-                Vector2 edgeA = new Vector2((float) xA, (float) yA); //todo: cache
-                Vector2 edgeB = new Vector2((float) xB, (float) yB); //todo: cache
-                
                 //TODO: only draw where voronoi points are not connected and ignore certain midpoints.
                 //ignore where the circumcenter is outside of hull? and some other edge cases...
                 //if (Intersector.isPointInTriangle(cellA.circumcenter, cellA.a, cellA.b, cellA.c)?
                 //if (Intersector.pointLineSide(edgeA, edgeB, cellA.midXX) == 1)?
                 //if circumcenter is same side as midpoint, opposite of obtuse angle, dont draw?
-                drawIntersectingLines(cellA, cellA.midAB, edgeA, edgeB);
-                drawIntersectingLines(cellA, cellA.midBC, edgeA, edgeB);
-                drawIntersectingLines(cellA, cellA.midCA, edgeA, edgeB);
+                drawIntersectingLines(cellA, cellA.midAB, (float) xA, (float) yA, (float) xB, (float) yB);
+                drawIntersectingLines(cellA, cellA.midBC, (float) xA, (float) yA, (float) xB, (float) yB);
+                drawIntersectingLines(cellA, cellA.midCA, (float) xA, (float) yA, (float) xB, (float) yB);
             }
         }
     }
     
-    private void drawIntersectingLines(DelaunayCell cell, Vector2 mid, Vector2 edgeA, Vector2 edgeB) {
-        Vector2 intersect = new Vector2();//todo: cache
-        if (Intersector.intersectSegments(edgeA, edgeB, cell.circumCenter, mid, intersect)) {
+    private void drawIntersectingLines(DelaunayCell cell, Vector2 mid, float xA, float yA, float xB, float yB) {
+        if (Intersector.intersectSegments(xA, yA, xB, yB, cell.circumCenter.x, cell.circumCenter.y, mid.x, mid.y, intersect)) {
             shape.setColor(Color.GREEN);
             shape.line(mid, intersect);
             shape.circle(intersect.x, intersect.y, 3);
@@ -567,7 +557,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
 
         if (drawTriangleQuality) {
-            //moveable layer? this could by under or over...
+            //moveable layer? this could be under or over...
             shape.begin(ShapeType.Filled);
             for (DelaunayCell cell : dCells) {
                 shape.setColor(0.3f, 0.3f, 0.3f, 1 - cell.quality);
@@ -770,17 +760,22 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         /*
         //draw pythagorean square projection
+        boolean drawPythagSquare = true;
         if (drawPythagSquare) {
             shape.setColor(Color.FOREST);
-
+            //a to b, pivot 90 (tangent) to edge
+            //abSqaureA = pivot on A by length a-b
+            //abSquareB = pivot on B by length a-b
             //shape.rotate();
         }*/
 
         shape.end();
 
+
+
 /*
         if (drawTriangleQuality) {
-            //moveable layer? this could by under or over...
+            //moveable layer? this could be under or over...
             shape.begin(ShapeType.Filled);
             for (DelaunayCell cell : dCells) {
                 shape.setColor(0.3f, 0.3f, 0.3f, 1 - cell.quality);
@@ -1132,13 +1127,13 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, "[SHIFT + Spacebar] Generate Regular + [ALT] add centroid", x, y - h * line++);
         text.draw(batch, "[L-Click] Drag vertex", x, y - h * line++);
         text.draw(batch, "[R-Click] Create new vertex", x, y - h  * line++);
-        text.draw(batch, "[ALT] Snap to center", 10, y- h  * line++);//todo
+        text.draw(batch, "[ALT] Snap to center", 10, y - h * line++);
         text.draw(batch, "[SHIFT + L-Click] Drag vertices", x, y - h * line++);
         text.draw(batch, "[S] Shatter -> " + shatterStyle.toString().toUpperCase(), x, y - h * line++);
         text.draw(batch, "[A] Cycle Shatter Center" , x, y - h * line++);
         text.draw(batch, "[CTRL + D] Save PNG", x, y - h * line++);
-        text.draw(batch, "[CTRL + C] Copy vertices to clipboard", x, y - h * line++); //todo
-        text.draw(batch, "[CTRL + V] Load vertices from clipboard", x, y - h * line++); //todo
+        text.draw(batch, "[CTRL + C] Copy vertices to clipboard", x, y - h * line++);
+        text.draw(batch, "[CTRL + V] Load vertices from clipboard", x, y - h * line++);
 
         //todo: reorder in a more sensible grouping. maybe:
         //  points
