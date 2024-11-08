@@ -4,10 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.PixmapIO;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -93,6 +90,7 @@ import java.util.ArrayList;
 // [x] snap modifier: snap to nears center (any of the centers: highlight)
 // [ ] tileable voronoi! 2D voronoi wrapped on a 4D torus
 // [ ] mst!!! krustal?
+// [ ] and why not shortest path?
 // [ ] complete graph: a simple undirected graph in which every pair of distinct vertices is connected by a unique edge.
 //      A complete digraph is a directed graph in which every pair of distinct vertices is connected by a pair of unique edges (one in each direction)
 //      https://en.wikipedia.org/wiki/Complete_graph
@@ -126,6 +124,9 @@ import java.util.ArrayList;
 // https://en.wikipedia.org/wiki/Forbidden_graph_characterization
 //
 
+//option to apply a pass of rupperts algo?
+//https://en.wikipedia.org/wiki/Delaunay_refinement
+
 public class TestVoronoiScreen extends MyScreenAdapter {
 
     //rendering
@@ -137,6 +138,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     //all points that define a polygon and any point inside the polygon
     final DoubleArray points = new DoubleArray(true, 5000);
     final Array<Color> colorTest = new Array<>();
+    final Array<Color> colors = Colors.getColors().values().toArray();
 
     //triangulation
     final DoubleDelaunayTriangulator delaunay = new DoubleDelaunayTriangulator();
@@ -150,6 +152,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     final Vector2 centroid = new Vector2();
     final DoubleConvexHull convex = new DoubleConvexHull();
     long end = 0;
+
+
 
     final Vector2 intersect = new Vector2();
     final Vector2 cacheVec = new Vector2();
@@ -175,6 +179,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             drawInCenter = false,//I | X1
             drawExRadius = false,
             drawExCenter = false,
+            excircleLines = false,
             drawOrtho = false, //H | X4
             drawNinePointCenter = false, //F | X5 | Feuerbach point
             drawNinePointRadius = false,
@@ -192,6 +197,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     float metaRadius = 30;
 
     final StringBuilder stringBuilder = new StringBuilder();
+
+    //mesh quality stats
+    float longestEdge, shortestEdge, averageEdge;
+    float smallestArea,largestArea, averageArea;
+    float largestAngle, smallestAngle;
+    float lowestQuality, highestQuality, averageQuality;
 
     //distance based voronoi render style
     enum DistanceCheck {
@@ -220,6 +231,18 @@ public class TestVoronoiScreen extends MyScreenAdapter {
     }
     private FocalPoint shatterStyle = FocalPoint.centroid;
 
+    //triangle fill render style
+    enum ColorStyle {
+        qualityShade, rgb, rng;
+
+        private static final ColorStyle[] VALUES = values();
+
+        public ColorStyle next() {
+            return VALUES[(ordinal() + 1) % VALUES.length];
+        }
+    }
+    private ColorStyle colorStyle = ColorStyle.qualityShade;
+
     public TestVoronoiScreen() {
         generateNewPoints(MathUtils.random(3, 16), false, false);
     }
@@ -246,7 +269,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             //source: ShapeRenderer.circle();
             float x = centerScreenX;
             float y = centerScreenY;
-            float size = Math.min(x, y);
+            float size = Math.min(x, y) - 40;
             float angle = 2 * MathUtils.PI / numPoints;
             float cos = MathUtils.cos(angle);
             float sin = MathUtils.sin(angle);
@@ -308,12 +331,24 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         long start = System.currentTimeMillis();
 
+        //stats
+        shortestEdge = Float.MAX_VALUE;
+        longestEdge = Float.MIN_VALUE;
+        smallestArea = Float.MAX_VALUE;
+        largestArea = Float.MIN_VALUE;
+        //smallestAngle, largestAngle, average;
+        lowestQuality = Float.MAX_VALUE;
+        highestQuality = Float.MIN_VALUE;
+        //averageQuality = 0;
+
+
         //apply delaunay triangulation to points
         triangles = delaunay.computeTriangles(points, false);
 
         //create cells for each triangle
         dCells.clear();
-        int discard = 1;
+        int discard = 0;
+        int successfulTriangle = 0;
         for (int i = 0; i < triangles.size; i += 3) {
             //get point indexes
             int p1 = triangles.get(i) * 2;
@@ -327,7 +362,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             if     ((MathUtils.isEqual(p1x, p2x) && MathUtils.isEqual(p1y, p2y)) || // p1 == p2 or
                     (MathUtils.isEqual(p1x, p3x) && MathUtils.isEqual(p1y, p3y)) || // p1 == p3 or
                     (MathUtils.isEqual(p2x, p3x) && MathUtils.isEqual(p2y, p3y))) { // p2 == p3
-                Gdx.app.error(getClass().getSimpleName(), "Duplicate point!: " + discard++);
+                discard++;
+                Gdx.app.error(getClass().getSimpleName(), "Duplicate point!: " + discard);
                 continue;
             }
 
@@ -338,10 +374,31 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             //todo: either pool the vecs, or store index of points and retrive from points
             //DelaunayCell d = new DelaunayCell(points, p1, p2, p3);
             dCells.add(d);
+            successfulTriangle++;
+
+            //calculate stats
+            float lenAB = a.dst(b);
+            shortestEdge = Math.min(shortestEdge, lenAB);
+            longestEdge = Math.max(longestEdge, lenAB);
+            float lenBC = b.dst(c);
+            shortestEdge = Math.min(shortestEdge, lenBC);
+            longestEdge = Math.max(longestEdge, lenBC);
+            float lenCA = c.dst(a);
+            shortestEdge = Math.min(shortestEdge, lenCA);
+            longestEdge = Math.max(longestEdge, lenCA);
+
+            smallestArea = Math.min(smallestArea, d.area);
+            largestArea = Math.max(largestArea, d.area);
+
+            //todo: calc all inner angles
+            //smallestAngle = ?;
+
+            lowestQuality = Math.min(lowestQuality, d.quality);
+            highestQuality = Math.max(highestQuality, d.quality);
         }
         
         //find surrounding cells for each cell
-        DelaunayCell.findNeighbors(dCells);
+        DelaunayCell.findNeighbors(dCells);//todo: optimize. profiler says this function is very heavy!!!
         
         //calculate the convex hull of all the points
         hull = convex.computePolygon(points, false).toArray();// <- system.arraycopy()
@@ -357,14 +414,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         for (int i = 0; i < hullVertices.length; i++) {
             floatHull[i] = (float) hullVertices[i];
         }
-/*
-        if (drawCentroidDelaunay) {
-            calculateCentroidDelaunay();
-        }*/
+
         end = System.currentTimeMillis() - start;
         if (end > 16) {
-            float ratio = (float)end / (triangles.size / 3f); //might not be the best measurement, includes other calculations like hull and secondary graph if enabled...
-            Gdx.app.log("", points.size/2 + " vertices - " + triangles.size / 3f + " triangles in " + end + "ms. ~" + ratio + "ms/tri. FPS:" + Gdx.graphics.getFramesPerSecond());
+            float ratio = (float)end / successfulTriangle; //might not be the best measurement, includes other calculations
+            Gdx.app.log("", points.size/2 + " vertices - " + successfulTriangle + " triangles in " + end + "ms. ~" + (int)ratio + "ms/tri. FPS:" + Gdx.graphics.getFramesPerSecond());
         }
     }
 
@@ -461,7 +515,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         return sum;
     }
-    
+
     private void drawStuff() {
         //enable blending
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -513,11 +567,26 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
 
         if (drawTriangleQuality) {
-            //moveable layer? this could be under or over...
+            int c = 1;
             shape.begin(ShapeType.Filled);
             for (DelaunayCell cell : dCells) {
-                shape.setColor(0.3f, 0.3f, 0.3f, 1 - cell.quality);
-                shape.triangle(cell.a.x, cell.a.y, cell.b.x, cell.b.y, cell.c.x, cell.c.y);
+                switch (colorStyle) {
+                    case qualityShade:
+                        shape.setColor(0, 0, 0, 1 - cell.quality);
+                        //if (cell.quality > 0.5f) shape.setColor(cell.quality, 0, cell.quality, 1-cell.quality);
+                        shape.triangle(cell.a.x, cell.a.y, cell.b.x, cell.b.y, cell.c.x, cell.c.y);
+                        break;
+                    case rgb:
+                        shape.triangle(cell.a.x, cell.a.y, cell.b.x, cell.b.y, cell.c.x, cell.c.y,
+                                Color.RED, Color.BLUE, Color.GREEN);
+                        break;
+                    case rng:
+                        shape.triangle(cell.a.x, cell.a.y, cell.b.x, cell.b.y, cell.c.x, cell.c.y,
+                                colors.get(c % colors.size), colors.get((c+1) % colors.size), colors.get((c+2) % colors.size));
+                        c++;
+                        break;
+                }
+
             }
             shape.end();
         }
@@ -575,6 +644,12 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.circle(cell.excircleB.x, cell.excircleB.y, 2);
                 shape.circle(cell.excircleC.x, cell.excircleC.y, 2);
             }
+            if (excircleLines) {
+                shape.setColor(Color.SKY);
+                shape.line(cell.excircleA.x, cell.excircleA.y, cell.a.x, cell.a.y);
+                shape.line(cell.excircleB.x, cell.excircleB.y, cell.b.x, cell.b.y);
+                shape.line(cell.excircleC.x, cell.excircleC.y, cell.c.x, cell.c.y);
+            }
             if (drawExRadius) {
                 shape.setColor(Color.SKY);
                 shape.circle(cell.excircleA.x, cell.excircleA.y, cell.excircleA.z);
@@ -605,7 +680,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.setColor(Color.PURPLE);
                 shape.circle(cell.ninePointCenter.x, cell.ninePointCenter.y, cell.ninePointCenter.z);
             }
-            
+
+            /*
+            boolean drawSteinerEllipse = true;
+            boolean drawSteinerInellipse = true;
+            if (drawSteinerInellipse) {
+                shape.setColor(Color.BLUE);
+                shape.ellipse(cell.centroid.x-cell.semiMajor/2, cell.centroid.y-cell.semiMinor/2, cell.semiMajor, cell.semiMinor, cell.centroid.angleDeg(cell.incircle));
+            }*/
+
             //draw delaunay triangles
             if (drawDelaunay) {
                 shape.setColor(Color.BLACK);
@@ -1000,6 +1083,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         super.render(deltaTime);
         //clear screen
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
+        //Gdx.gl.glClearColor(1f, 1f, 1f, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         //render voronoi stuff
@@ -1011,9 +1095,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         drawMenu();
     }
 
+    int prevWidth = 0, prevHeight = 0;
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
+
+        if (width == prevWidth && height == prevHeight) return;
+        prevWidth = width;
+        prevHeight = height;
+
         projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         shape.setProjectionMatrix(projectionMatrix);
         batch.setProjectionMatrix(projectionMatrix);
@@ -1047,6 +1137,13 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         int line = 0;
         layout.setText(text, "FPS: " + Gdx.graphics.getFramesPerSecond() + " - Vertices: " + (int) (points.size * 0.5f)  + ", D-Cells:" + dCells.size() + ", V-Cells: ? - " +  end + "ms", Color.WHITE, 0, Align.center, false);
         text.draw(batch, layout, Gdx.graphics.getWidth() * 0.5f, y);
+        if (points.size >= 6) {
+            layout.setText(text, "(Max,Min) - edge : " + MyMath.round(shortestEdge, 2) + "," + MyMath.round(longestEdge, 2) // + ", average:" + averageEdge
+                            + " - area: " + MyMath.round(smallestArea, 2) + "," + MyMath.round(largestArea, 2) // + ", average:" + averageArea
+                            + " - quality: " + MyMath.round(lowestQuality, 2) + "," + MyMath.round(highestQuality, 2),  //+ ", average:" + averageArea,
+                    Color.WHITE, 0, Align.center, false);
+            text.draw(batch, layout, Gdx.graphics.getWidth() * 0.5f, x + h);
+        }
 
         text.setColor(Color.BLACK);
         //controls
@@ -1056,6 +1153,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, "[SHIFT + Spacebar] Generate Regular + [ALT] add centroid", x, y - h * line++);
         text.draw(batch, "[L-Click] Drag vertex", x, y - h * line++);
         text.draw(batch, "[R-Click] Create new vertex", x, y - h  * line++);
+        text.draw(batch, "[SHIFT + R-Click] Delete vertex", x, y - h  * line++);
         text.draw(batch, "[ALT] Snap to center", 10, y - h * line++);
         text.draw(batch, "[SHIFT + L-Click] Drag vertices", x, y - h * line++);
         text.draw(batch, "[S] Shatter -> " + shatterStyle.toString().toUpperCase(), x, y - h * line++);
@@ -1130,6 +1228,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.draw(batch, "[H] ExCircle: ExCenter", x, y - h * line++);
         text.setColor(drawExRadius ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[J] ExCircle: ExRadius", x, y - h * line++);
+        text.setColor(excircleLines ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[K] Excircle: Lines", x, y - h * line++);
 
         text.setColor(drawNinePointCenter ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[F] NinePoint: Center", x, y - h * line++);
@@ -1141,6 +1241,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         text.setColor(drawAnticomplementaryTriangle ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[O] Anticomplementary Triangle", x, y - h * line++);
+
+        text.setColor(drawTriangleQuality ? Color.GREEN : Color.BLACK);
+        text.draw(batch, "[L] Triangle Fill -> " + colorStyle.toString(), x, y - h * line++);
 
         //we have officially run out of vertical space at 1280x800... need to rethink UI
         text.setColor(metaball ? Color.GREEN : Color.BLACK);
@@ -1213,12 +1316,24 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         //create new point
         if (Gdx.input.justTouched() && Gdx.input.isButtonPressed(Buttons.RIGHT)) {
-            if (snap != null) {
-                x = snap.x;
-                y = snap.y;
-            }
-            if (addNewVertex(x, y)) {
-                calculateDelaunay();
+            if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
+                for (int i = 0; i < points.size; i += 2) {
+                    float px = (float) points.get(i);
+                    float py = (float) points.get(i + 1);
+                    if (Vector2.dst(x, y, px, py) < dragRadius) {
+                        points.removeRange(i, i + 1);
+                        calculateDelaunay();
+                        return;
+                    }
+                }
+            } else {
+                if (snap != null) {
+                    x = snap.x;
+                    y = snap.y;
+                }
+                if (addNewVertex(x, y)) {
+                    calculateDelaunay();
+                }
             }
         }
 
@@ -1325,6 +1440,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         //Control + D -> Save to file
         if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Keys.D)) {
             renderToFile(!voronoiRender);
+            //renderToFile(false);
         }
 
         //copy paste!
@@ -1397,6 +1513,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         if (Gdx.input.isKeyJustPressed(Keys.NUM_9)) {
             drawTriangleQuality = !drawTriangleQuality;
         }
+        if (Gdx.input.isKeyJustPressed(Keys.L)) {
+            colorStyle = colorStyle.next();
+        }
         if (Gdx.input.isKeyJustPressed(Keys.NUM_0)) {
             drawTriangleInfo = !drawTriangleInfo;
         }
@@ -1437,6 +1556,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         if (Gdx.input.isKeyJustPressed(Keys.J)) {
             drawExRadius = !drawExRadius;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.K)) {
+            excircleLines = !excircleLines;
         }
         if (Gdx.input.isKeyJustPressed(Keys.I)) {
             drawOrtho = !drawOrtho;
