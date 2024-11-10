@@ -17,6 +17,7 @@ import com.spaceproject.screens.MyScreenAdapter;
 import com.spaceproject.screens.TitleScreen;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 //voronoi/polygon research:
 //END GOAL: https://www.youtube.com/watch?v=pe4_Dimk7v0
@@ -57,6 +58,7 @@ import java.util.ArrayList;
 //      [x] centroid
 //      [x] orthocenter
 //      [ ] are there more centers? yes!
+//      [ ] x13 fermat: https://en.wikipedia.org/wiki/Fermat_point
 //      [x] and their respective graphs connecting centers
 //           [ ] fix performance
 //           [x] add points at excircle or escribed circle: https://en.wikipedia.org/wiki/Incircle_and_excircles#Excircles_and_excenters
@@ -72,10 +74,10 @@ import java.util.ArrayList;
 //      or when points line up perfectly on y axis? - FIXED: by double math.
 // [x] draw Incircle
 // [x] draw Excircle
-// [ ] feuerbach's circle - touches all excircles - ninepoint
+// [x] feuerbach's circle - touches all excircles - ninepoint
 // [ ] draw Gergonne triangle: contact triangle or intouch triangle of △ A B C
-// [ ] draw tangent circles: https://en.wikipedia.org/wiki/Nine-point_circle
-// [ ] draw anticomplementary triangle: https://mathworld.wolfram.com/AnticomplementaryTriangle.html
+// [x] draw tangent circles: https://en.wikipedia.org/wiki/Nine-point_circle
+// [x] draw anticomplementary triangle: https://mathworld.wolfram.com/AnticomplementaryTriangle.html
 // [ ] color palate: render
 // [ ] color pallet: VisUI color picker dialog select render colors
 // [ ] color pallet: background color options or checkered tile?
@@ -90,7 +92,7 @@ import java.util.ArrayList;
 // [x] snap modifier: snap to nears center (any of the centers: highlight)
 // [ ] tileable voronoi! 2D voronoi wrapped on a 4D torus
 // [ ] mst!!! krustal?
-// [ ] and why not shortest path?
+// [ ] and why not longest path? (opposite of shortest)
 // [ ] complete graph: a simple undirected graph in which every pair of distinct vertices is connected by a unique edge.
 //      A complete digraph is a directed graph in which every pair of distinct vertices is connected by a pair of unique edges (one in each direction)
 //      https://en.wikipedia.org/wiki/Complete_graph
@@ -396,9 +398,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
             lowestQuality = Math.min(lowestQuality, d.quality);
             highestQuality = Math.max(highestQuality, d.quality);
         }
-        
-        //find surrounding cells for each cell
-        DelaunayCell.findNeighbors(dCells);//todo: optimize. profiler says this function is very heavy!!!
+
+        if (drawVoronoi) {
+            //find surrounding cells for each cell
+            DelaunayCell.findNeighbors(dCells);//todo: optimize. profiler says this function is very heavy!!!
+        }
         
         //calculate the convex hull of all the points
         hull = convex.computePolygon(points, false).toArray();// <- system.arraycopy()
@@ -515,7 +519,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
         return sum;
     }
-
+    Random rng = new Random();
     private void drawStuff() {
         //enable blending
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -567,12 +571,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         }
 
         if (drawTriangleQuality) {
-            int c = 1;
+            //rng.setSeed(0);
+            int c = 0;
+            int i = 0;
             shape.begin(ShapeType.Filled);
             for (DelaunayCell cell : dCells) {
                 switch (colorStyle) {
                     case qualityShade:
                         shape.setColor(0, 0, 0, 1 - cell.quality);
+                        //shape.setColor(1- cell.quality, 1- cell.quality, 1- cell.quality, 1 - cell.quality);
                         //if (cell.quality > 0.5f) shape.setColor(cell.quality, 0, cell.quality, 1-cell.quality);
                         shape.triangle(cell.a.x, cell.a.y, cell.b.x, cell.b.y, cell.c.x, cell.c.y);
                         break;
@@ -583,10 +590,11 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                     case rng:
                         shape.triangle(cell.a.x, cell.a.y, cell.b.x, cell.b.y, cell.c.x, cell.c.y,
                                 colors.get(c % colors.size), colors.get((c+1) % colors.size), colors.get((c+2) % colors.size));
-                        c++;
+                        i++;
+                        rng.setSeed(i);
+                        c += rng.nextInt(colors.size);
                         break;
                 }
-
             }
             shape.end();
         }
@@ -681,12 +689,15 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 shape.circle(cell.ninePointCenter.x, cell.ninePointCenter.y, cell.ninePointCenter.z);
             }
 
-            /*
+/*
             boolean drawSteinerEllipse = true;
             boolean drawSteinerInellipse = true;
             if (drawSteinerInellipse) {
                 shape.setColor(Color.BLUE);
-                shape.ellipse(cell.centroid.x-cell.semiMajor/2, cell.centroid.y-cell.semiMinor/2, cell.semiMajor, cell.semiMinor, cell.centroid.angleDeg(cell.incircle));
+                shape.ellipse(cell.centroid.x-cell.semiMinor/2, cell.centroid.y-cell.semiMajor/2, cell.semiMinor, cell.semiMajor,
+                        cell.orthocenter.angleDeg(cell.incircle)
+                        //MyMath.angleTo(cell.centroid, cell.orthocenter) * MathUtils.radDeg
+                );
             }*/
 
             //draw delaunay triangles
@@ -1084,6 +1095,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         //clear screen
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         //Gdx.gl.glClearColor(1f, 1f, 1f, 1);
+        //Gdx.gl.glClearColor(0f, 0f, 0f, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         //render voronoi stuff
@@ -1094,6 +1106,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         
         drawMenu();
     }
+
 
     int prevWidth = 0, prevHeight = 0;
     @Override
@@ -1229,7 +1242,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
         text.setColor(drawExRadius ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[J] ExCircle: ExRadius", x, y - h * line++);
         text.setColor(excircleLines ? Color.GREEN : Color.BLACK);
-        text.draw(batch, "[K] Excircle: Lines", x, y - h * line++);
+        text.draw(batch, "[K] ExCircle: Lines", x, y - h * line++);
 
         text.setColor(drawNinePointCenter ? Color.GREEN : Color.BLACK);
         text.draw(batch, "[F] NinePoint: Center", x, y - h * line++);
@@ -1439,8 +1452,8 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
         //Control + D -> Save to file
         if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Keys.D)) {
-            renderToFile(!voronoiRender);
-            //renderToFile(false);
+            //renderToFile(!voronoiRender);
+            renderToFile(false);
         }
 
         //copy paste!
