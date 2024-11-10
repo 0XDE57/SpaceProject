@@ -1,5 +1,6 @@
 package com.spaceproject.ui.menu;
 
+import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
@@ -23,6 +24,8 @@ import com.spaceproject.systems.DesktopInputSystem;
 import com.spaceproject.ui.ControllerMenuStage;
 import com.spaceproject.utility.Mappers;
 import com.spaceproject.utility.SimpleTimer;
+
+import java.util.HashMap;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 
@@ -52,9 +55,67 @@ public class SpaceStationMenu {
         String tractorBeamDescription = "[" + colorItem + "]" + tractorUpgrade + "[]\npush or pull objects.\n\nHold [" + colorControl + "][" + laserControl + "][] to activate.\nDouble Tap to toggle between PUSH & PULL";
         //todo: component levels may be better than per attribute?
         // examples: 3 or 5 levels?
-        // - Laser [1,2,3]
-        // - Cannon [1,2,3,4,5]
-        // - Health [1,2,3]
+        // - Hyperdrive [0] - no levels, only speed!
+        // - Active Shield [0,?] - no levels, unless we add the overheat system, maybe cooling rate could be upgrade
+        //     modifier for shield dash?
+        // - Passive Regen Shield [1,2,3,4] - rechargable shield - some forgiveness
+        //      25, 50, 75, 100
+        // - Laser [1,2,3,?], per level increase power and distance,
+        //      - determine max (sane) distance and power levels, and divide by desired number of levels
+        // - Cannon [1,2,3,4,5,6,7,8] 4 is round! (if starting at 80), or 8 for more sub divisions
+        //   -vel = 80 max = 240. 40-80 = 160
+        //   160 / 4 = 40
+        //   8 = 20;
+        //   -damage = 5 max = ?
+        //      8 * 5 = 40
+        // .
+        // also projectiles should be adding on velocity damage, not just base damage....
+        // will need to play around with asteroids hardness levels and find sensible balance...
+        // doesn't have to be round, it just looks nice...
+        //   5 - ?
+        //      - MODIFIER component: explode, follow, bounce, bifurcate, vampire(health steal)
+        // - Health [1,2,3,4,5,6,7,8]
+        // 200 - 1000 = 800
+        // +100 each time!
+        // .
+        // health could be hull with multiple properties?
+        //  Hull
+        //      - health
+        //      - heat resistance (stars / lasers)
+        //      - impact resistance (eg: -5% less damage from ramming asteroid)
+        // .
+        // . Do asteroids need these properties? no its overkill.
+        // . should they be individual components? eg: HeatResistanceComponent
+        // .
+        // .
+        // Health (1/9) or (0/8)?
+        // Cannon (1/8)
+        // Active Shield
+        // could have little stat bars for levels (ASCII for now UI later?)
+        //  ▱▱▱▱▱▰▰▰▰▰
+        // Progress Bar seems limited. best to make a custom component?
+        // shape drawer with rounded caps would probably be nice
+        // ship level: once levels are implemented we can give the ship a total level = all upgrades combined
+
+        // todo:
+        // Health (base) level 1 = 200
+        // 2 = 300
+        // 3 = 400
+        // 4 = 500
+        // 5 = 600
+        // 6 = 700
+        // 7 = 800
+        // 8 = 900
+        // 9 = 1000
+        // i dont want to store the levels in the componenet itselfs
+        // so how about an upgrade component?
+        class Upgrade implements Component {
+            HashMap<Class<?>, Integer> t = new HashMap<>();
+        }
+        Upgrade up = new Upgrade();
+        up.t.put(HealthComponent.class, 7);
+        int value = up.t.get(HealthComponent.class);
+
         int costHyper = 100000;
         int costShield = 25000;
         int costLaser = 30000;
@@ -473,6 +534,9 @@ public class SpaceStationMenu {
         VisTable descTable = new VisTable();
         text.setReadOnly(true);
         descTable.add(text.createCompatibleScrollPane()).growX().height(150).width(180).row();
+        //VisProgressBar statBarTest = new VisProgressBar(0, 10, 1, false);
+        //statBarTest.setValue(0);
+        //descTable.add(statBarTest).fillX().pad(10);
 
         VisWindow window = new VisWindow("[" + titleColor + "]STATION DELTA [E]");
         window.getTitleLabel().setAlignment(Align.center);
