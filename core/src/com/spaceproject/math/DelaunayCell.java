@@ -100,7 +100,22 @@ public class DelaunayCell {
 
         //calculate excircles
         PolygonUtil.excircle(a, b, c, area, excircleA, excircleB, excircleC);
+
+/*
+        //The Steiner inellipse of a triangle is the scaled Steiner Ellipse with scaling factor 1/2 and the centroid as center. Hence both ellipses have the same eccentricity, are similar.
+        //so we only need to calculate the outer ellipse and we can render the inellipse with scaling
+        //semiMajor = (float) (Math.sqrt(Math.pow(midBC.x - midCA.x, 2) + Math.pow(midBC.y - midCA.y, 2)) / Math.sqrt(3));
+        //semiMinor = (float) (Math.sqrt(Math.pow(midAB.x - midBC.x, 2) + Math.pow(midAB.y - midBC.y, 2)) / Math.sqrt(3));
+        //float semiTest = (float) (Math.sqrt(Math.pow(midCA.x - midAB.x, 2) + Math.pow(midCA.y - midAB.y, 2)) / Math.sqrt(3));
+        float da = centroid.dst(a);
+        float db = centroid.dst(b);
+        float dc = centroid.dst(c);
+        semiMajor = Math.max(da, Math.max(db, dc));
+        semiMinor = Math.min(da, Math.min(db, dc));
+ */
     }
+    public float semiMinor;
+    public float semiMajor;
 
     /**
      * Check if points are close enough together.
@@ -151,6 +166,8 @@ public class DelaunayCell {
      * @param dCells
      */
     public static void findNeighbors(ArrayList<DelaunayCell> dCells) {
+        //
+
         //check each cell against each other
         for (DelaunayCell cellA : dCells) {
             for (DelaunayCell cellB : dCells) {
