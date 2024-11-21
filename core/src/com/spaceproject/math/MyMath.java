@@ -137,7 +137,54 @@ public abstract class MyMath {
         //ignore Z component in this case
         return round(vec.x, decimal) + ", " + round(vec.y, decimal);
     }
-    
+
+    public static String formatFloat(float f) {
+        int bits = Float.floatToIntBits(f);
+        builder.setLength(0);
+        builder.append("float: ").append(f).append( "f | 0x")
+                .append(String.format("%8s", Integer.toHexString(bits)).replace(" ", "0")).append(" | ")
+                .append(String.format("%32s", Integer.toBinaryString(bits)).replace(" ", "0")).append("b");
+        //float: 2.0f | 0x40000000 | 01000000000000000000000000000000b
+        // 40 00 00 00
+        // 01000000 00000000 00000000 00000000
+        return builder.toString();
+    }
+
+    public static String formatDouble(double d) {
+        long bits = Double.doubleToLongBits(d);
+        builder.setLength(0);
+        builder.append("double: ").append(d).append( " | 0x")
+                .append(String.format("%16s", Long.toHexString(bits)).replace(" ", "0")).append(" | ")
+                .append(String.format("%64s", Long.toBinaryString(bits)).replace(" ", "0")).append("b");
+        //todo: add spacing
+        // double: 2.0003161430358887 | 0x400000a5c0000000 | 0100000000000000000000001010010111000000000000000000000000000000b
+        // 40 00 00 a5 c0 00 00 00
+        // 01000000 00000000 00000000 10100101 11000000 00000000 00000000 00000000
+        return builder.toString();
+    }
+
+    //quadratic float
+    public static void quadraticFloat(float a, float b, float c, Vector2 out) {
+        float d = b * b - 4.0f * a * c;
+        float sd = (float) Math.sqrt(d);
+        float r1 = (-b + sd) / (2.0f * a);
+        float r2 = (-b - sd) / (2.0f * a);
+        out.set(r1, r2);
+    }
+    //quadratic double
+    public static void quadraticDouble(double a, double b, double c, Vector2 out) {
+        double d = b * b - 4.0 * a * c;
+        double sd = Math.sqrt(d);
+        double r1 = (-b + sd) / (2.0 * a);
+        double r2 = (-b - sd) / (2.0 * a);
+        out.set((float) r1, (float) r2);
+        //todo: determine bits lost, store difference in double for compare?
+        //formatDouble(r1);
+        //formatFloat(out.x);
+        //formatDouble(r2);
+        //formatFloat(out.y);
+    }
+
     /**
      * Round value with specified precision.
      *
