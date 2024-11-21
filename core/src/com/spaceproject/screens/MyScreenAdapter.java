@@ -1,6 +1,7 @@
 package com.spaceproject.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -62,6 +63,7 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
         //init on
         setVsync(true);
     }
+
     
     @Override
     public void render(float delta) {
@@ -146,7 +148,8 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
         return false;//Gdx.gl.glIsEnabled(GL_VSYNC);
     }
 
-    final int GL_MAXSAMPLE = 0x809D;
+    //final int GL_MAXSAMPLE = 0x????;
+    final int SAMPLE_ALPHA_TO_ONE_EXT = 0x809F;
     final int GL_MULTISAMPLE = 0x809D;
     /**
      * Must first enable in config:
@@ -158,6 +161,13 @@ public abstract class MyScreenAdapter extends ScreenAdapter {
 
     public void disableMSAA() {
         Gdx.gl20.glDisable(GL_MULTISAMPLE);
+    }
+
+    public void alphaTestEnable() {
+        Gdx.gl20.glEnable(SAMPLE_ALPHA_TO_ONE_EXT);
+    }
+    public void alphaTestDisable() {
+        Gdx.gl20.glDisable(SAMPLE_ALPHA_TO_ONE_EXT);
     }
 
     /** NOTE! If application was not initially launched with MSAA enabled on startup config,
