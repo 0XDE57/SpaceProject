@@ -11,7 +11,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.RayCastCallback;
 import com.badlogic.gdx.utils.Disposable;
 import com.spaceproject.SpaceProject;
 import com.spaceproject.components.*;
@@ -89,7 +88,7 @@ public class LaserSystem extends IteratingSystem implements Disposable {
 
     private void castLaser(Entity entity, LaserComponent laser, Vector2 p1, Vector2 p2, Color color, float length, int reflections, float deltaTime) {
         if (reflections <= 0) return;
-        if (incidentVector.set(p2).sub(p1).len2() < 0.1f) return;
+        if (incidentVector.set(p2).sub(p1).isZero()) return;
 
         rayPoint.set(p2);
         rayFixture = null;
@@ -123,39 +122,56 @@ public class LaserSystem extends IteratingSystem implements Disposable {
             Entity hitEntity = (Entity) userData;
             AsteroidComponent asteroid = Mappers.asteroid.get(hitEntity);
             if (asteroid != null) {
-                //if fixture hit is a glassteroid, calculate refraction
-                if (asteroid.composition == ItemComponent.Resource.GLASS) {
-                    isGlass = true;
-                    //float waveLengthInN1 = laser.wavelength / refractiveIndexVacuum;
-                    refract(refract, incidentVector.nor(), rayNormal.nor(), refractiveIndexVacuum, asteroid.refractiveIndex);
-                    if (refract.len2() > 0) {
-                        if (drawNormal) {
-                            shape.setColor(Color.CYAN);
-                            shape.rectLine(p2, MyMath.vector((float) (rayNormal.angleRad()-Math.PI), 10).add(p2), 0.2f);
-                        }
+                //damage *= asteroid.albedo;// 0 = no damage, 1 = full damage
+                //remainingDistance *= asteroid.albedo;
 
-                        Vector2 refractedEndPoint = MyMath.vector(refract.angleRad(), remainingDistance).add(p2);
-                        Vector2 innerNormal = new Vector2();
-                        GameScreen.box2dWorld.rayCast((fixture, point, normal, fraction) -> {
-                            callbackCount++;
-                            //ignore sensors and other fixtures than the one we already hit
-                            if (fixture.isSensor() || fixture != rayFixture) return -1;
-                            refractedEndPoint.set(point);
-                            innerNormal.set(normal);
-                            return fraction;
-                        }, refractedEndPoint, p2);
-                        rayCount++;
-                        shape.setColor(color.r, color.g, color.b, asteroid.color.a);
-                        shape.rectLine(p2, refractedEndPoint, 0.1f);
-                        //todo: continue to cast internal reflections
-                        //calculate reflection: reflectedVector = incidentVector - 2 * (incidentVector dot normal) * normal
-                        //Vector2 internalReflection = new Vector2(refractedEndPoint).sub(innerNormal.scl(2 * refractedEndPoint.dot(innerNormal))).setLength(remainingDistance).add(refractedEndPoint);
-                        //shape.rectLine(refractedEndPoint,internalReflection, 0.2f);
-                    }
-                } else {
-                    if (debug.reflectAsteroidColor) {
-                        color.set(asteroid.color.cpy());
-                    }
+                //if fixture hit is a glassteroid, calculate refraction
+                switch (asteroid.composition) {
+                    case GLASS:
+                        isGlass = true;
+                        //float waveLengthInN1 = laser.wavelength / refractiveIndexVacuum;
+                        refract(refract, incidentVector.nor(), rayNormal.nor(), refractiveIndexVacuum, asteroid.refractiveIndex);
+                        if (refract.len2() > 0) {
+                            if (drawNormal) {
+                                shape.setColor(Color.CYAN);
+                                shape.rectLine(p2, MyMath.vector((float) (rayNormal.angleRad() - Math.PI), 10).add(p2), 0.2f);
+                            }
+
+                            Vector2 refractedEndPoint = MyMath.vector(refract.angleRad(), remainingDistance).add(p2);
+                            Vector2 innerNormal = new Vector2();
+                            GameScreen.box2dWorld.rayCast((fixture, point, normal, fraction) -> {
+                                callbackCount++;
+                                //ignore sensors and other fixtures than the one we already hit
+                                if (fixture.isSensor() || fixture != rayFixture) return -1;
+                                refractedEndPoint.set(point);
+                                innerNormal.set(normal);
+                                return fraction;
+                            }, refractedEndPoint, p2);
+                            rayCount++;
+                            shape.setColor(color.r, color.g, color.b, asteroid.color.a);
+                            shape.rectLine(p2, refractedEndPoint, 0.1f);
+                            //todo: continue to cast internal reflections
+                            //calculate reflection: reflectedVector = incidentVector - 2 * (incidentVector dot normal) * normal
+                            //Vector2 internalReflection = new Vector2(refractedEndPoint).sub(innerNormal.scl(2 * refractedEndPoint.dot(innerNormal))).setLength(remainingDistance).add(refractedEndPoint);
+                            //shape.rectLine(refractedEndPoint,internalReflection, 0.2f);
+                        }
+                        break;
+                        /*
+                    case BLACK:
+                        damage *= 2;//might need to rethink this entire model.
+                        //normalize all regular albedo / damage at 0.5f?
+                        //1 means full reflect, 0 means full absorb
+                        //we want all regular to reflect
+                        //black should fully absorb and do extra damage
+                        //gold/silver is shiny so should reflect lots?
+                        //blue is darker so takes more damage?
+
+                         */
+                    default:
+                        if (debug.reflectAsteroidColor) {
+                            color.set(asteroid.color.cpy());
+                        }
+                        break;
                 }
             }
 
