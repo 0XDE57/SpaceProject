@@ -26,6 +26,7 @@ import java.util.Random;
 //http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect/565282#565282
 //http://stackoverflow.com/questions/31021968/correct-use-of-polygon-triangulators-in-libgdx
 //https://github.com/mjholtzem/Unity-2D-Destruction
+//so pretty! https://www.youtube.com/watch?v=jxOAU7YfypA
 //todo:
 // [x] fix grabbing points, focus point, don't lose it
 // [x] highlight focused point
@@ -208,7 +209,7 @@ public class TestVoronoiScreen extends MyScreenAdapter {
 
     //distance based voronoi render style
     enum DistanceCheck {
-        euclidean, manhattan, //todo: minkowski,
+        euclidean, manhattan, curvy,//todo: minkowski,
         chess, antiChess, multiplyXY, divXY, divYX,
         divMinMax, divMaxMin, minMin, minMax, subXY, subYX;
 
@@ -1038,6 +1039,9 @@ public class TestVoronoiScreen extends MyScreenAdapter {
                 case manhattan: //add
                     //dist = Math.abs(x - xx) + Math.abs(y - yy);
                     dist = dX + dY;
+                    break;
+                case curvy:
+                    dist = (float) (Math.pow((dX*dX*dX) + (dY*dY*dY), 1f/3f) / Math.pow((x*x*x) + (y*y*y), 1f/3f));
                     break;
                 case chess: //Chebyshev (max)
                     // dist =  MyMath.chessDistance(x, y, xx, yy);
