@@ -674,6 +674,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     float animAngle = 0;
     private void drawCargoResources(Entity entity, int barX, int healthBarY, float deltaTime) {
         CargoComponent cargo = Mappers.cargo.get(entity);
+        if (cargo == null) return;
+
         int total = 0;
         for (int value : cargo.inventory.values()) {
             total += value;
@@ -690,14 +692,14 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;
         float angle = animAngle;//degrees
         final float radius = 30;
+        float r = radius;
+        if (timeSinceCollect < animTime) {
+            float ra = (float) timeSinceCollect / animTime;
+            r += (1-ra) * 7;
+        }
         for (Map.Entry<Integer, Integer> entry : cargo.inventory.entrySet()) {
             int key = entry.getKey();
             ItemComponent.Resource resource = ItemComponent.Resource.getById(key);
-            float r = radius;
-            if (timeSinceCollect < animTime) {
-                float ra = (float) timeSinceCollect / animTime;
-                r += (1-ra) * 7;
-            }
             int count = entry.getValue();
             float ratio = (float) count / total;
             float newAngle = ratio * 360;
