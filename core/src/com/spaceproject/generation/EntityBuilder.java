@@ -87,7 +87,6 @@ public class EntityBuilder {
         shipEntity.add(health);
 
         //weapon
-
         int index = 0;
         switch(index) {
             case 0:
@@ -104,6 +103,7 @@ public class EntityBuilder {
                 shipEntity.add(laser);
                 break;
         }
+        /*
         //vehicle.tools.put(VehicleComponent.Tool.laser.ordinal(), new LaserComponent(520, 250, 30, 1));
         TractorBeamComponent tractorBeam = new TractorBeamComponent();
         tractorBeam.maxDist = 150;
@@ -128,6 +128,7 @@ public class EntityBuilder {
         shield.heatResistance = 0f;
         shield.cooldownRate = 0.1f;
         //shipEntity.add(shield);
+         */
 
         //barrel roll
         BarrelRollComponent barrelRoll = new BarrelRollComponent();
@@ -537,9 +538,9 @@ public class EntityBuilder {
     static final ConvexHull convex = new ConvexHull();
     static final Vector2 center = new Vector2();
     public static Entity createAsteroid(long seed, float x, float y, float velX, float velY, float size) {
-        int maxPoints = 7;//Box2D poly vert limit is 8: Assertion `3 <= count && count <= 8' failed.
+        int maxPoints = 7;//Box2D poly vert limit is 7: Assertion `3 <= count && count <= 8' failed.
         FloatArray points = new FloatArray();
-        PolygonClass poly = PolygonClass.irregular;
+        PolygonClass poly;
 
         DebugConfig debugConfig = SpaceProject.configManager.getConfig(DebugConfig.class);
         //debugConfig.spawnRegularBodies = true;
@@ -585,8 +586,6 @@ public class EntityBuilder {
                     case 5: poly = PolygonClass.pentagon; break;
                     case 6: poly = PolygonClass.hexagon; break;
                     case 7: poly = PolygonClass.heptagon; break;
-                    //todo: octagons should be supported yet still fails with:
-                    // case 8: poly = PolygonClass.octogon; break;
                 }
                 //Gdx.app.debug("",seed + " : " + segments + " " + poly.name());
             }
