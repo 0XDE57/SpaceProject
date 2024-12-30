@@ -1,6 +1,6 @@
 # a space project
 Welcome to A Space Project. A project involving space...
-> Get a realistic sense of the cosmic scale; there's literally dozens of planets and traveling between them could take up to entire minutes! Enjoy Galactic Space Exploration in a sate-of-the-art, hyper-realistic physics simulation of the entire universe!
+> Get a realistic sense of the cosmic scale; there's literally dozens of planets and traveling between them could take up to entire minutes! Enjoy Galactic-Space-Exploration-in-a-sate-of-the-art-hyper-realistic-physics-simulation-of-the-entire-universe!
 
 ![screenshot](/Capture.PNG?raw=true)
 ![screenshot](/asteroid_shatter.gif?raw=true)
@@ -51,7 +51,7 @@ Welcome to A Space Project. A project involving space...
 | Toggle HUD                     | H             |                      |
 | Full screen                    | F11           |                      |
 | Menu (Pause)                   | Escape        | Start                |
-| MSAA (Multisample Anti Alias)  | F7            |                      |
+| MSAA (Multisample Anti-Alias)  | F7            |                      |
 | Vsync                          | F8            |                      |
 | ECS Debug Viewer               | F9            |                      |
 | Misc debug keys | too lazy to document, won't be permanent |
