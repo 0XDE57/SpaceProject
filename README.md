@@ -12,7 +12,7 @@ Welcome to A Space Project. A project involving space...
     * Unary star systems, Binary star systems, Trinary star systems, and even ~~Quadri... quatro? quadrino-ary?~~
     * lonely rogue planets who lost their sun :(
     * Destructible asteroids using cutting edge - ***t r i ▲ n g l e s*** -
-* Mine asteroids for resources. Upgrade ship.
+* Mine asteroids for resources. Dock at Space Station to sell resources. Upgrade ship.
 * Faster Than Light Travel! (yeah it's real, cuz like quantum anti-dark matter n' stuff yo)
 * ~~Fight against other ship~~ (disabled for now)
   * combat broken placeholder AI while I figure out the rest of the engine.
