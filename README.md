@@ -72,7 +72,14 @@ Apache 2.0: see [LICENSE.md](/LICENSE.md)
 
 Credit appreciated. Contributions welcome!
 
-Special thanks to the incredibly knowledgable and helpful libGDX community for guiding me along the way. This game would not exist with out you.
+## Thank!
+
+Thanks to the incredibly knowledgable and helpful libGDX community for guiding me along the way. This game would not exist with out you.
+
+Thanks to L1T for hosting Devember.
+
+Thanks to all the developers who built the open source technology that powers this game:
+
 
 ## Libraries
 - [libGDX](https://github.com/libgdx/libgdx)
