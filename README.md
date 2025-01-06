@@ -72,7 +72,7 @@ Apache 2.0: see [LICENSE.md](/LICENSE.md)
 
 Credit appreciated. Contributions welcome!
 
-Special thanks to the incredibly knowledgable and helpful libGDX community for guiding me along the way. This game would not be exist with out you.
+Special thanks to the incredibly knowledgable and helpful libGDX community for guiding me along the way. This game would not exist with out you.
 
 ## Libraries
 - [libGDX](https://github.com/libgdx/libgdx)
