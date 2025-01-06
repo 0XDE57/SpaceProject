@@ -41,6 +41,7 @@ import com.spaceproject.ui.debug.DebugVec;
 import com.spaceproject.ui.debug.ECSExplorerWindow;
 import com.spaceproject.utility.DebugUtil;
 import com.spaceproject.utility.ECSUtil;
+import com.spaceproject.utility.GPUUtil;
 import com.spaceproject.utility.Mappers;
 
 import java.lang.reflect.Field;
@@ -214,8 +215,11 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         String memory = DebugUtil.getMemory();
         String threads = "  Threads: " + threadSet.size();
         fontLarge.draw(batch, memory + threads, x, y - (lineHeight * linePos++));
-        
-        //OpenGL profiler
+
+        //gpu memory
+        fontLarge.draw(batch, "GPU: " + GPUUtil.getAvailableMemoryKB() + "KB / " + GPUUtil.getMaxMemoryKB() + "KB", x, y - (lineHeight * linePos++));
+
+        //OpenGL profiler + additional info
         fontSmall.draw(batch, GameScreen.getProfilerString(), x, y - (lineHeight * linePos++));
         
         //time
