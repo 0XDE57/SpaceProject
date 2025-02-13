@@ -278,13 +278,18 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             }
 
             drawHealthBars();
+        } else {
+            animRadius = 0;//hack to disable UI ring
         }
         shape.end();
 
-        //shape.begin(ShapeType.Line);
-        //todo: circle for empty cargo inventory?
-        //shape.end();
-
+        //draw cargo UI ring
+        if (animRadius > 0) {
+            shape.begin(ShapeType.Line);
+            int barX = Gdx.graphics.getWidth() / 2 - uiCFG.playerHPBarWidth / 2;
+            shape.circle(barX - 40, uiCFG.playerHPBarY, animRadius);
+            shape.end();
+        }
 
         batch.begin();
         //skip drawing some UI elements during land and take off
@@ -672,6 +677,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     }
 
     float animAngle = 0;
+    float animRadius = 0;
     private void drawCargoResources(Entity entity, int barX, int healthBarY, float deltaTime) {
         CargoComponent cargo = Mappers.cargo.get(entity);
         if (cargo == null) return;
@@ -680,7 +686,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         for (int value : cargo.inventory.values()) {
             total += value;
         }
-        if (total == 0) return;
+        if (total == 0) {
+            animRadius = 0;
+            return;
+        }
 
         float cargoAnimSpeed = 5;
         animAngle += cargoAnimSpeed * deltaTime;
@@ -692,10 +701,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;
         float angle = animAngle;//degrees
         final float radius = 30;
-        float r = radius;
+        animRadius = radius;
         if (timeSinceCollect < animTime) {
             float ra = (float) timeSinceCollect / animTime;
-            r += (1-ra) * 7;
+            animRadius += (1-ra) * 7;
         }
         for (Map.Entry<Integer, Integer> entry : cargo.inventory.entrySet()) {
             int key = entry.getKey();
@@ -704,7 +713,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             float ratio = (float) count / total;
             float newAngle = ratio * 360;
             shape.setColor(resource.getColor());
-            shape.arc(barX - radius - 10, healthBarY, r, angle, newAngle);
+            shape.arc(barX - radius - 10, healthBarY, animRadius, angle, newAngle);
             angle += newAngle;
         }
     }
