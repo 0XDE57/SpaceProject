@@ -49,19 +49,32 @@ public class SpaceStationMenu {
         String hyperdriveUpgrade = "Hyper-Drive".toUpperCase();
         String laserUpgrade = "Laser".toUpperCase();
         String tractorUpgrade = "Tractor Beam".toUpperCase();
-        String hyperdriveDescription = "[" + colorItem + "]" + hyperdriveUpgrade + "[]\nenable deep-space exploration.\n\nHold [" + colorControl + "][" + hyperControl + "][] to activate.";
-        String shieldDescription = "[" + colorItem + "]" + shieldUpgrade + "[]\nprotect your ship from damage.\n\nHold [" + colorControl + "][" + shieldControl + "][] to activate.";
-        String laserDescription = "[" + colorItem + "]" + laserUpgrade + "[]\nprecision tool.\n\nHold [" + colorControl + "][" + laserControl + "][] to activate.";
-        String tractorBeamDescription = "[" + colorItem + "]" + tractorUpgrade + "[]\npush or pull objects.\n\nHold [" + colorControl + "][" + laserControl + "][] to activate.\nDouble Tap to toggle between PUSH & PULL";
+        String hyperdriveDescription = String.format("[%s]%s[]\nenable deep-space exploration.\n\nHold [%s][%s][] to activate.",
+                colorItem, hyperdriveUpgrade, colorControl, hyperControl);
+        String shieldDescription = String.format("[%s]%s[]\nprotect your ship from damage.\n\nHold [%s][%s][] to activate.",
+                colorItem, shieldUpgrade, colorControl, shieldControl);
+        String laserDescription = String.format("[%s]%s[]\nprecision tool.\n\nHold [%s][%s][] to activate.",
+                colorItem, laserUpgrade, colorControl, laserControl);
+        String tractorBeamDescription = String.format("[%s]%s[]\npush or pull objects.\n\nHold [%s][%s][] to activate.\nDouble Tap to toggle between PUSH & PULL",
+                colorItem, tractorUpgrade, colorControl, laserControl);
+
         //todo: component levels may be better than per attribute?
         // examples: 3 or 5 levels?
         // - Hyperdrive [0] - no levels, only speed!
+        //      - cooldown?
         // - Active Shield [0,?] - no levels, unless we add the overheat system, maybe cooling rate could be upgrade
-        //     modifier for shield dash?
-        // - Passive Regen Shield [1,2,3,4] - rechargable shield - some forgiveness
+        //     modifier for shield dash? (speaking of sheild dash, (revamp boost to apply impulse? double tap + hold?)
+        //     - cooldownRate
+        //      -
+        //     heat += damage * multiplier;
+        //      if (heat > threshold); break shield
+        // - Passive Regen Shield [1,2,3,4] - rechargeable shield - some forgiveness
         //      25, 50, 75, 100
         // - Laser [1,2,3,?], per level increase power and distance,
         //      - determine max (sane) distance and power levels, and divide by desired number of levels
+        //      - damage
+        //      - range
+        //      - maxReflections? (handled per ray or leave global max?)
         // - Cannon [1,2,3,4,5,6,7,8] 4 is round! (if starting at 80), or 8 for more sub divisions
         //   -vel = 80 max = 240. 40-80 = 160
         //   160 / 4 = 40
@@ -81,8 +94,9 @@ public class SpaceStationMenu {
         // health could be hull with multiple properties?
         //  Hull
         //      - health
+        //      - Passive Regen (instead of component?)
         //      - heat resistance (stars / lasers)
-        //      - impact resistance (eg: -5% less damage from ramming asteroid)
+        //      - impact resistance (eg: -5% less damage from physical impulse)
         // .
         // . Do asteroids need these properties? no its overkill.
         // . should they be individual components? eg: HeatResistanceComponent
@@ -107,14 +121,22 @@ public class SpaceStationMenu {
         // 7 = 800
         // 8 = 900
         // 9 = 1000
-        // i dont want to store the levels in the componenet itselfs
+        // i dont want to store the levels in the component itself
         // so how about an upgrade component?
         class Upgrade implements Component {
-            HashMap<Class<?>, Integer> t = new HashMap<>();
+            HashMap<Class<?>, Integer> map = new HashMap<>();
         }
         Upgrade up = new Upgrade();
-        up.t.put(HealthComponent.class, 7);
-        int value = up.t.get(HealthComponent.class);
+        up.map.put(HealthComponent.class, 7);
+        int value = up.map.get(HealthComponent.class);
+
+        //maxLevel;
+        //buffPerLevelmerhep
+        //increaseByAmount()  eg: +100 //fixed
+        //increaseByPercent() eg: += 5% ( value += value * 0.005) //stackable or not?
+        //how about decrease
+        //decreaseByFixed()
+        //decreaseByPercent()
 
         int costHyper = 100000;
         int costShield = 25000;
@@ -326,7 +348,9 @@ public class SpaceStationMenu {
             @Override
             public boolean handle(Event event) {
                 LaserComponent laser = getLaserComponent(player, vehicle);
-                text.setText("Increase [" + colorItem + "]Range\nby: [" + colorCredits + "]" + laserRange +"\nCurrent: [" + colorCredits + "]"+ (laser == null ? "N/A" : laser.maxDist));
+                String str = String.format("Increase [%s]Range\nby: [%s]%s\nCurrent: [%s]%s",
+                        colorItem, colorCredits, laserRange, colorCredits, (laser == null ? "N/A" : laser.maxDist));
+                text.setText(str);
                 return super.handle(event);
             }
         });
@@ -392,7 +416,8 @@ public class SpaceStationMenu {
         buttonAddHealth.addListener(new FocusListener() {
             @Override
             public boolean handle(Event event) {
-                text.setText("Increase [" + colorItem + "]HP[]\nby: [" + colorCredits + "]" + health +"\nCurrent:  [" + colorCredits + "]"+ Mappers.health.get(player).maxHealth);
+                text.setText(String.format("Increase [%s]HP[]\nby: [%s]%s\nCurrent:  [%s]%s",
+                        colorItem, colorCredits, health, colorCredits, Mappers.health.get(player).maxHealth));
                 return super.handle(event);
             }
         });
@@ -422,7 +447,8 @@ public class SpaceStationMenu {
         buttonAddThrust.addListener(new FocusListener() {
             @Override
             public boolean handle(Event event) {
-                text.setText("Increase [" + colorItem + "]THRUST\nby: [" + colorCredits + "]" + thrust +"[]\nCurrent: [" + colorCredits + "]"+ Mappers.vehicle.get(player).thrust);
+                text.setText(String.format("Increase [%s]THRUST\nby: [%s]%s[]\nCurrent: [%s]%s",
+                        colorItem, colorCredits, thrust, colorCredits, Mappers.vehicle.get(player).thrust));
                 return super.handle(event);
             }
         });
@@ -454,7 +480,9 @@ public class SpaceStationMenu {
             @Override
             public boolean handle(Event event) {
                 CannonComponent cannon = getCannonComponent(player, vehicle);
-                text.setText("Increase [" + colorItem + "]Cannon Damage\nby: [" + colorCredits + "]" + cannonDamage +"\nCurrent: [" + colorCredits + "]" + cannon.damage);
+                text.setText(String.format("Increase [%s]Cannon Damage\nby: [%s]%s\nCurrent: [%s]%s",
+                        colorItem, colorCredits, cannonDamage, colorCredits, cannon.damage));
+
                 return super.handle(event);
             }
         });
@@ -493,7 +521,8 @@ public class SpaceStationMenu {
             @Override
             public boolean handle(Event event) {
                 CannonComponent cannon = getCannonComponent(player, vehicle);
-                text.setText("Increase [" + colorItem + "]Cannon Velocity\nby: [" + colorCredits + "]" + cannonVelocity +"\nCurrent: [" + colorCredits + "]" + cannon.velocity);
+                text.setText(String.format("Increase [%s]Cannon Velocity\nby: [%s]%s\nCurrent: [%s]%s",
+                        colorItem, colorCredits, cannonVelocity, colorCredits, cannon.velocity));
                 return super.handle(event);
             }
         });
