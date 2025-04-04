@@ -1,6 +1,5 @@
 package com.spaceproject;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.spaceproject.config.ConfigManager;
