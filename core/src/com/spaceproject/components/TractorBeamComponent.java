@@ -12,7 +12,7 @@ public class TractorBeamComponent implements Component {
 
     public State mode = State.push; //push/pull toggle
 
-    public float maxDist;
+    public float range;
 
     public float magnitude;
 

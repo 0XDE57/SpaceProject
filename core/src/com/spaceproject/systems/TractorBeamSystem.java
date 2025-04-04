@@ -67,7 +67,7 @@ public class TractorBeamSystem extends IteratingSystem implements Disposable {
         }
 
         Body body = Mappers.physics.get(entity).body;
-        incidentRay.set(MyMath.vector(body.getAngle(), tractorBeam.maxDist).add(body.getPosition()));
+        incidentRay.set(MyMath.vector(body.getAngle(), tractorBeam.range).add(body.getPosition()));
         castTractorBeam(entity, tractorBeam, body.getPosition(), incidentRay, deltaTime);
     }
 

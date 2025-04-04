@@ -73,7 +73,7 @@ public class LaserSystem extends IteratingSystem implements Disposable {
         }
 
         Body body = Mappers.physics.get(entity).body;
-        incidentRay.set(MyMath.vector(body.getAngle(), laser.maxDist).add(body.getPosition()));
+        incidentRay.set(MyMath.vector(body.getAngle(), laser.range).add(body.getPosition()));
         if (debug.discoLaser) {
             int referenceWavelength = 589;//"yellow doublet" sodium D line
             float wavelength = MathUtils.random(380, 780);
@@ -83,7 +83,7 @@ public class LaserSystem extends IteratingSystem implements Disposable {
             laser.color.set(rgb[0] / 255f, rgb[1] / 255f, rgb[2] / 255f, 1);
         }
 
-        castLaser(entity, laser, body.getPosition(), incidentRay, laser.color.cpy(), laser.maxDist, maxReflections, deltaTime);
+        castLaser(entity, laser, body.getPosition(), incidentRay, laser.color.cpy(), laser.range, maxReflections, deltaTime);
     }
 
     private void castLaser(Entity entity, LaserComponent laser, Vector2 p1, Vector2 p2, Color color, float length, int reflections, float deltaTime) {
