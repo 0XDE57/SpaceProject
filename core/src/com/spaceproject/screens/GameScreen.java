@@ -264,6 +264,8 @@ public class GameScreen extends MyScreenAdapter {
     private void pollGLProfiler() {
         profilerStringBuilder.setLength(0);
         profilerStringBuilder.append(Gdx.graphics.getGLVersion().getDebugVersionString());
+        String javaVersion = System.getProperty("java.version");
+        profilerStringBuilder.append("\nJava: v").append(javaVersion);
         profilerStringBuilder.append("\n[Frame ID]:         ").append(Gdx.graphics.getFrameId());
         profilerStringBuilder.append("\n[Engine Steps]:     ").append(engineTicks);
         Box2DPhysicsSystem box2DSystem = engine.getSystem(Box2DPhysicsSystem.class);
@@ -353,6 +355,13 @@ public class GameScreen extends MyScreenAdapter {
     
     @Override
     public void resume() {
+        /*
+        HUDSystem hud = engine.getSystem(HUDSystem.class);
+        if (hud != null) {
+            if (hud.getGameMenu().isVisible()) {
+                return;
+            }
+        }*/
         setSystemProcessing(true);
     }
     
