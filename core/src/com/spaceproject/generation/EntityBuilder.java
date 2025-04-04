@@ -203,7 +203,6 @@ public class EntityBuilder {
         cannon.timerFireRate = new SimpleTimer(entityCFG.cannonFireRate);
         cannon.size = entityCFG.cannonSize;
         cannon.velocity = entityCFG.cannonVelocity;
-        cannon.acceleration = entityCFG.cannonAcceleration;
         cannon.anchorVec = new Vector2(width, 0);
         cannon.aimAngle = 0;
         cannon.timerRechargeRate = new SimpleTimer(entityCFG.cannonRechargeRate);

@@ -20,8 +20,6 @@ public class CannonComponent implements Component {
     
     public float velocity;
     
-    public float acceleration;
-    
     public int size;
     
     public SimpleTimer timerFireRate;

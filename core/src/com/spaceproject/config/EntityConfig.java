@@ -26,7 +26,6 @@ public class EntityConfig extends Config {
     public long cannonFireRate;
     public long cannonRechargeRate;
     public float cannonVelocity;
-    public float cannonAcceleration;
     public long shrinkGrowAnimTime;
     
     
@@ -52,7 +51,6 @@ public class EntityConfig extends Config {
         cannonFireRate = 200;
         cannonRechargeRate = 1000;
         cannonVelocity = 80;
-        cannonAcceleration = 200;
         shrinkGrowAnimTime = 2500;
     }
     
