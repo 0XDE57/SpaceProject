@@ -246,12 +246,12 @@ public class DebugSystem extends IteratingSystem implements Disposable {
         fontSmall.draw(batch, noisePool, x, bottomY + lineHeight);
         if (GameScreen.noiseManager.getNoiseThreadPool().getActiveCount() > 0) {
             linePos = 3;
-            String threadSetInfo = "";
+            StringBuilder threadSetInfo = new StringBuilder();
             for (Thread t : threadSet) {
-                threadSetInfo += t.toString() + "\n";
+                threadSetInfo.append(t.toString()).append("\n");
                 linePos++;
             }
-            fontSmall.draw(batch, threadSetInfo, x, bottomY + ((lineHeight * 0.5f) * linePos));
+            fontSmall.draw(batch, threadSetInfo.toString(), x, bottomY + ((lineHeight * 0.5f) * linePos));
         }
     
         fontLarge.draw(batch, versionLayout, Gdx.graphics.getWidth() - versionLayout.width -10, lineHeight + 10);
