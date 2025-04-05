@@ -16,11 +16,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.*;
@@ -65,7 +61,8 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
 
         @Override
-        public void reset() {}
+        public void reset() {
+        }
 
     }
 
@@ -82,6 +79,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         Vector2 location;
         SimpleTimer animTimer;
         final Color color;
+
         CreditsMarker(int value, Vector2 pos, Color color) {
             this.value = value;
             Vector3 screenPos = cam.project(new Vector3(pos.cpy(), 0));//copy
@@ -90,11 +88,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             this.color = color;
         }
     }
+
     private final Array<CreditsMarker> markers;
 
     private final UIConfig uiCFG = SpaceProject.configManager.getConfig(UIConfig.class);
     private final KeyConfig keyCFG = SpaceProject.configManager.getConfig(KeyConfig.class);
-    
+
     private GameMenu gameMenu;
     private VisWindow stationMenu;
     private boolean interactHold;
@@ -120,20 +119,23 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private final Vector3 screenPos = new Vector3();
     private final Vector2 focusedPos = new Vector2();
     private float focusedDist;
-    
+
     private MiniMap miniMap;
-    
+
     private static boolean drawHud = true;
     private boolean drawEdgeMap = true;
 
     enum SpecialState {
         off, docked, landing, launching, destroyed;
     }
+
     private SpecialState messageState = SpecialState.off;
 
     private float statusAnim = 0;
     private float damageAnim = 0;
-    
+
+    private final int radius = 32;
+
     public HUDSystem() {
         cam = MyScreenAdapter.cam;
         shape = MyScreenAdapter.shape;
@@ -149,13 +151,13 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         parameter.borderColor = Color.BLACK;
         parameter.borderWidth = 3;
         font = FontLoader.createFont(FontLoader.fontPressStart, parameter);
-    
+
         FreeTypeFontGenerator.FreeTypeFontParameter parameter2 = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter2.size = 20;
         parameter2.borderColor = Color.BLACK;
         parameter2.borderWidth = 3;
         subFont = FontLoader.createFont(FontLoader.fontPressStart, parameter2);
-    
+
         FreeTypeFontGenerator.FreeTypeFontParameter inventoryParam = new FreeTypeFontGenerator.FreeTypeFontParameter();
         inventoryParam.size = 12;
         inventoryParam.borderColor = Color.BLACK;
@@ -200,12 +202,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             }
         });
     }
-    
+
     @Override
     public void initContext(GameScreen game) {
         gameMenu = new GameMenu(game, false);
     }
-    
+
     @Override
     public void addedToEngine(Engine engine) {
         mapableEntities = engine.getEntitiesFor(Family.all(MapComponent.class, TransformComponent.class).get());
@@ -214,21 +216,21 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 .exclude(ControlFocusComponent.class, AsteroidComponent.class).get());
         bodies = engine.getEntitiesFor(Family.one(PlanetComponent.class, StarComponent.class).get());
     }
-    
+
     @Override
     public void update(float deltaTime) {
         checkInput();
-    
+
         if (drawHud) {
             statusAnim += 4f * deltaTime;
             drawHUD(deltaTime);
-        
+
             if (miniMap.getState() != MapState.off) {
                 Entity p = players.size() > 0 ? players.first() : null;
                 miniMap.drawMiniMap(shape, batch, p, mapableEntities);
             }
         }
-    
+
         //TODO: temporary fix. engine system priority....
         //always draw even if hud off
         MobileInputSystem mobileUI = getEngine().getSystem(MobileInputSystem.class);
@@ -239,7 +241,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     public boolean isDraw() {
         return drawHud;
     }
-    
+
     private void drawHUD(float deltaTime) {
         //set projection matrix so things render using correct coordinates
         projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -278,16 +280,16 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             }
 
             drawHealthBars();
-        } else {
-            animRadius = 0;//hack to disable UI ring
         }
         shape.end();
 
         //draw cargo UI ring
-        if (animRadius > 0) {
+        if ((messageState != SpecialState.launching) && (messageState != SpecialState.landing) && (messageState != SpecialState.destroyed)) {
             shape.begin(ShapeType.Line);
             int barX = Gdx.graphics.getWidth() / 2 - uiCFG.playerHPBarWidth / 2;
-            shape.circle(barX - 40, uiCFG.playerHPBarY, animRadius);
+            shape.circle(barX - radius - 10, uiCFG.playerHPBarY, animRadius);
+            int barXRight = Gdx.graphics.getWidth() / 2 + uiCFG.playerHPBarWidth / 2;
+            shape.circle(barXRight + radius + 10, uiCFG.playerHPBarY, radius);
             shape.end();
         }
 
@@ -346,11 +348,11 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             inventoryFont.setColor(1, 1, 1, alpha);
             layout.setText(inventoryFont, "<planet name>");
             float offset = layout.height * 1.5f;
-            inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y + offset);
+            inventoryFont.draw(batch, layout, tempProj.x - layout.width * 0.5f, tempProj.y + offset);
             layout.setText(inventoryFont, "atmosphere: <unknown>");
-            inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y);
+            inventoryFont.draw(batch, layout, tempProj.x - layout.width * 0.5f, tempProj.y);
             layout.setText(inventoryFont, "size: " + planet.mapSize);
-            inventoryFont.draw(batch, layout, tempProj.x - layout.width*0.5f, tempProj.y - offset);//replace with mass?
+            inventoryFont.draw(batch, layout, tempProj.x - layout.width * 0.5f, tempProj.y - offset);//replace with mass?
             return;
         }
         StarComponent star = Mappers.star.get(entity);
@@ -401,16 +403,16 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
     private void drawMessageBacking(Entity player) {
         int offset = 50;
-        int messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3)) - offset;
-        float height =  40 + offset;
+        int messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight() / 3)) - offset;
+        float height = 40 + offset;
         shape.rect(0, messageHeight, Gdx.graphics.getWidth(), height, Color.CLEAR, Color.CLEAR, Color.DARK_GRAY, Color.DARK_GRAY);
         Color color = messageState == SpecialState.destroyed ? Color.RED : uiCFG.uiBaseColor;
         shape.setColor(color);
         shape.rectLine(0, messageHeight + height, Gdx.graphics.getWidth(), messageHeight + height, 3);
         shape.rectLine(0, messageHeight, Gdx.graphics.getWidth(), messageHeight, 1);
 
-        int timerHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3) - 6);
-        float halfWidth = Gdx.graphics.getWidth()*0.5f;
+        int timerHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight() / 3) - 6);
+        float halfWidth = Gdx.graphics.getWidth() * 0.5f;
 
         //draw respawn line
         if (messageState == SpecialState.destroyed) {
@@ -418,9 +420,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             if (respawnEntities.size() > 0) {
                 RespawnComponent respawn = Mappers.respawn.get(respawnEntities.first());
                 if (respawn.spawn == RespawnComponent.AnimState.pause || respawn.spawn == RespawnComponent.AnimState.pan) {
-                    float ratio = 1-respawn.timeout.ratio();
+                    float ratio = 1 - respawn.timeout.ratio();
                     shape.setColor(Color.WHITE);
-                    shape.rectLine(halfWidth - (halfWidth*ratio), timerHeight, halfWidth + (ratio * halfWidth), timerHeight, 2);
+                    shape.rectLine(halfWidth - (halfWidth * ratio), timerHeight, halfWidth + (ratio * halfWidth), timerHeight, 2);
                 }
             }
         }
@@ -484,13 +486,13 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             }
         }
     }
-    
+
     private void drawHealthBars() {
         //bar dimensions
         int barLength = uiCFG.entityHPbarLength;
         int barWidth = uiCFG.entityHPbarWidth;
         int yOffset = uiCFG.entityHPbarYOffset;
-        
+
         for (Entity entity : killableEntities) {
             HealthComponent health = Mappers.health.get(entity);
             //ignore full health
@@ -500,18 +502,18 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
             tempProj.set(Mappers.transform.get(entity).pos, 0);
             cam.project(tempProj);
-            
+
             //background
             shape.setColor(uiCFG.entityHPbarBackground);
             shape.rect(tempProj.x - barLength * 0.5f, tempProj.y + yOffset, barLength, barWidth);
-            
+
             //health
             float ratio = health.health / health.maxHealth;
             shape.setColor(1 - ratio, ratio, 0, uiCFG.entityHPbarOpacity); //creates color between red and green
             shape.rect(tempProj.x - barLength * 0.5f, tempProj.y + yOffset, barLength * ratio, barWidth);
         }
     }
-    
+
     //region player status
     private void drawSpecialStateMessage(Entity player) {
         messageState = SpecialState.off;
@@ -545,7 +547,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 }
                 String port = Mappers.docked.get(player).dockID;
                 layout.setText(font, "[ DOCKED: port " + port + " ]");
-            break;
+                break;
             case landing:
                 drawHint("<planet name goes here>");
                 layout.setText(font, "[ LANDING ]");
@@ -568,9 +570,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             cacheColor.set(Color.GOLD).lerp(Color.CYAN, ratio);
         }
         font.setColor(cacheColor);
-        
+
         float centerX = (Gdx.graphics.getWidth() - layout.width) * 0.5f;
-        float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3f) + layout.height);
+        float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight() / 3f) + layout.height);
         font.draw(batch, layout, centerX, messageHeight);
 
         if (player == null) {
@@ -601,9 +603,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         cacheColor.set(0, 1, 0, 1).lerp(Color.PURPLE, ratio);
         subFont.setColor(cacheColor);
         layout.setText(subFont, text);
-        
+
         float centerX = (Gdx.graphics.getWidth() - layout.width) * 0.5f;
-        float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3f) + layout.height);
+        float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight() / 3f) + layout.height);
         messageHeight -= layout.height * 2;
         subFont.draw(batch, layout, centerX, messageHeight);
     }
@@ -615,22 +617,23 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         //todo: add another column for current life vs total
         float centerX = 20;
         int offset = 50;
-        float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight()/3f)) - offset;
+        float messageHeight = (Gdx.graphics.getHeight() - (Gdx.graphics.getHeight() / 3f)) - offset;
         int h = 1;
         //layout.setText(subFont,  String.format("%-10s %s", MyMath.formatDuration(stats.timeAlive), "time alive"), Color.RED, 0, Align.left, false);
         //subFont.draw(batch, layout, centerX, messageHeight - height * h++);
 
-        layout.setText(subFont,  String.format("%-10s %s", stats.kills, "kills"), Color.RED, 0, Align.left, false);
+        layout.setText(subFont, String.format("%-10s %s", stats.kills, "kills"), Color.RED, 0, Align.left, false);
         float height = layout.height * 1.6f;
         subFont.draw(batch, layout, centerX, messageHeight - height * h++);
 
         layout.setText(subFont, String.format("%-10s %s", stats.deaths, "deaths"), Color.RED, 0, Align.left, false);
         subFont.draw(batch, layout, centerX, messageHeight - height * h++);
 
-        layout.setText(subFont, String.format("%-10s %s",stats.shotsFired, "shots fired"), Color.RED, 0, Align.left, false);
+        layout.setText(subFont, String.format("%-10s %s", stats.shotsFired, "shots fired"), Color.RED, 0, Align.left, false);
         subFont.draw(batch, layout, centerX, messageHeight - height * h++);
 
-        layout.setText(subFont, String.format("%-10s %s", stats.shotsHit, "shots hit") + " - " + MyMath.round((double) stats.shotsHit / stats.shotsFired * 100, 2) + "%", Color.RED, 0, Align.left, false);
+        layout.setText(subFont, String.format("%-10s %s", stats.shotsHit, "shots hit") + " - "
+                + MyMath.round((double) stats.shotsHit / stats.shotsFired * 100, 2) + "%", Color.RED, 0, Align.left, false);
         subFont.draw(batch, layout, centerX, messageHeight - height * h++);
 
         layout.setText(subFont, String.format("%-10s %s", stats.damageDealt, "damage dealt"), Color.RED, 0, Align.left, false);
@@ -647,19 +650,18 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
         layout.setText(subFont, String.format("%-10s %s", stats.profit, "profit"), Color.RED, 0, Align.left, false);
         subFont.draw(batch, layout, centerX, messageHeight - height * h++);
-
     }
-    
+
     private void drawPlayerStatus(Entity entity, CameraSystem cam, float deltaTime) {
         if (entity == null) return;
-        
+
         int barWidth = uiCFG.playerHPBarWidth;
         int barHeight = uiCFG.playerHPBarHeight;
         int barX = Gdx.graphics.getWidth() / 2 - barWidth / 2;
         int healthBarY = uiCFG.playerHPBarY;
         int ammoBarY = healthBarY - barHeight - 1;
         int hyperBarY = healthBarY + barHeight + 1;
-        
+
         drawPlayerVelocity(entity, barX, hyperBarY, barWidth, barHeight);
         drawHyperDriveBar(entity, barX, hyperBarY, barWidth, barHeight);
 
@@ -678,6 +680,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
     float animAngle = 0;
     float animRadius = 0;
+
     private void drawCargoResources(Entity entity, int barX, int healthBarY, float deltaTime) {
         CargoComponent cargo = Mappers.cargo.get(entity);
         if (cargo == null) return;
@@ -685,10 +688,6 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         int total = 0;
         for (int value : cargo.inventory.values()) {
             total += value;
-        }
-        if (total == 0) {
-            animRadius = 0;
-            return;
         }
 
         float cargoAnimSpeed = 5;
@@ -700,11 +699,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         long animTime = 500;
         long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;
         float angle = animAngle;//degrees
-        final float radius = 30;
         animRadius = radius;
         if (timeSinceCollect < animTime) {
             float ra = (float) timeSinceCollect / animTime;
-            animRadius += (1-ra) * 7;
+            animRadius += (1 - ra) * 7;
         }
         for (Map.Entry<Integer, Integer> entry : cargo.inventory.entrySet()) {
             int key = entry.getKey();
@@ -721,10 +719,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     private void drawPlayerHealth(Entity entity, float x, float y, float width, float height) {
         HealthComponent health = Mappers.health.get(entity);
         if (health == null) return;
-        
+
         shape.setColor(uiCFG.entityHPbarBackground);
         shape.rect(x, y, width, height);
-    
+
         float ratioHP = health.health / health.maxHealth;
         boolean warning = ratioHP < 0.25f;
         boolean hit = GameScreen.getGameTimeCurrent() - health.lastHitTime < 1000;
@@ -738,10 +736,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             }
             //border
             int thickness = 2;
-            shape.rectLine(x, y+height, x+width, y+height, thickness);//top
-            shape.rectLine(x, y, x+width, y, thickness);//bottom
-            shape.rectLine(x, y+height, x, y, thickness);//left
-            shape.rectLine(x+width, y+height, x+width, y, thickness);//right
+            shape.rectLine(x, y + height, x + width, y + height, thickness);//top
+            shape.rectLine(x, y, x + width, y, thickness);//bottom
+            shape.rectLine(x, y + height, x, y, thickness);//left
+            shape.rectLine(x + width, y + height, x + width, y, thickness);//right
         }
         if (!hit) {
             shape.setColor(1 - ratioHP, ratioHP, 0, uiCFG.entityHPbarOpacity);
@@ -755,21 +753,21 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (shield == null || shield.state == ShieldComponent.State.off) {
             return;
         }
-    
+
         //if shield not engaged, render bar half height
         float halfHeight = height * 0.5f;
         if (shield.state != ShieldComponent.State.on) {
             height = halfHeight;
             y += halfHeight * 0.5f;
         }
-    
+
         float ratioShield = shield.radius / shield.maxRadius;
         if (shield.state == ShieldComponent.State.on) {
             long hitTime = 500;
             long timeSinceHit = GameScreen.getGameTimeCurrent() - shield.lastHit;
             if (timeSinceHit < hitTime) {
                 float green = (float) timeSinceHit / hitTime;
-                shape.setColor(0, 1-green, green, green);
+                shape.setColor(0, 1 - green, green, green);
             } else {
                 shape.setColor(shield.heat, 0, 1, 1);
             }
@@ -793,16 +791,16 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             shape.rectLine(x + width, y + height, x + width, y, thickness);//right
         }
     }
-    
+
     private void drawPlayerAmmoBar(Entity entity, int x, int y, int width, int height) {
         drawCannonHeatBar(entity, x, y, width, height);
         drawGrowCannonAmmoBar(entity, x, y, width, height);
     }
-    
+
     private void drawGrowCannonAmmoBar(Entity entity, int x, int y, int width, int height) {
         ChargeCannonComponent chargeCannon = Mappers.chargeCannon.get(entity);
-        if (chargeCannon == null)  return;
-        
+        if (chargeCannon == null) return;
+
         float ratioAmmo = chargeCannon.size / chargeCannon.maxSize;
         shape.setColor(uiCFG.entityHPbarBackground);
         shape.rect(x, y, width, height);
@@ -825,25 +823,34 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         shape.setColor(uiCFG.playerAmmoBarColor);
         shape.rect(x, y, width * heatRatio, height);
     }
-    
+
     private void drawPlayerVelocity(Entity entity, int x, int y, int width, int height) {
         shape.setColor(Color.BLACK);
-        
+
         ControllableComponent control = Mappers.controllable.get(entity);
         if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight || control.boost) {
             shape.setColor(control.boost ? uiCFG.engineBoost : uiCFG.engineFire);
         }
-        shape.rect(x, y + (height*0.5f), width, 1);
-        
+        shape.rect(x, y + (height * 0.5f), width, 1);
+
         PhysicsComponent physics = Mappers.physics.get(entity);
         if (physics == null) {
             return;
         }
 
         float velocity = physics.body.getLinearVelocity().len() / Box2DPhysicsSystem.getVelocityLimit();
-        float barRatio = MathUtils.clamp(velocity * width, 0,  width);
+        float barRatio = MathUtils.clamp(velocity * width, 0, width);
         float center = (width * 0.5f) - (barRatio * 0.5f);
         shape.rect(x + center, y, barRatio, height);
+
+        int barXRight = Gdx.graphics.getWidth() / 2 + uiCFG.playerHPBarWidth / 2;
+        int x1 = barXRight + radius + 10;
+        int y1 = uiCFG.playerHPBarY;
+        Vector2 vel = MyMath.vector(physics.body.getLinearVelocity().angleRad(), radius).add(x1, y1);
+        shape.rectLine(x1, y1, vel.x,  vel.y, 2);
+        Vector2 facing = MyMath.vector(physics.body.getAngle(), radius).add(x1, y1);
+        shape.setColor(Color.BLACK);
+        shape.rectLine(x1, y1, facing.x,  facing.y, 2);
     }
 
     private void drawHyperDriveBar(Entity entity, int x, int y, int width, int height) {
@@ -856,7 +863,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             height = halfHeight;
             y += halfHeight / 2;
         }
-        
+
         shape.setColor(Color.WHITE);
         switch (hyperDrive.state) {
             case on:
@@ -875,6 +882,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
     }
 
+    Color tempColor;
     private void drawStatusInfo(Entity entity, int barWidth, int barHeight, int healthBarY) {
         if (entity == null) return;
 
@@ -884,7 +892,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (hyper != null && hyper.state == HyperDriveComponent.State.on) {
             cacheColor.set(Color.GOLD).lerp(Color.CYAN, 1 + (float) Math.sin(statusAnim));
             layout.setText(inventoryFont, "[ HYPER-DRIVE ]", cacheColor, 0, Align.center, false);
-            inventoryFont.draw(batch, layout, barX + layout.width - 37, healthBarY + barHeight + layout.height -1);
+            inventoryFont.draw(batch, layout, barX + layout.width - 37, healthBarY + barHeight + layout.height - 1);
             return;
         }
         CameraSystem camSystem = getEngine().getSystem(CameraSystem.class);
@@ -897,12 +905,12 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         if (physics != null) {
             ControllableComponent control = Mappers.controllable.get(entity);
             if (control.moveForward || control.moveBack || control.moveLeft || control.moveRight || control.boost) {
-                inventoryFont.setColor(control.boost ? uiCFG.engineBoost : uiCFG.engineFire);
+                tempColor = control.boost ? uiCFG.engineBoost : uiCFG.engineFire;
             } else {
-                inventoryFont.setColor(Color.WHITE);
+                tempColor = Color.WHITE;
             }
-            layout.setText(inventoryFont, " " + MyMath.round(physics.body.getLinearVelocity().len(), 1));
-            inventoryFont.draw(batch, layout, barX + barWidth, healthBarY + barHeight + layout.height);
+            layout.setText(inventoryFont, "" + MyMath.round(physics.body.getLinearVelocity().len(), 1), tempColor, 0, Align.center, false);
+            inventoryFont.draw(batch, layout, barX + barWidth + radius + 10, healthBarY - 2);
         }
         //draw HP
         HealthComponent health = Mappers.health.get(entity);
@@ -925,8 +933,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                     color = Color.BLUE;
                 }
             }
-            inventoryFont.setColor(color);
-            inventoryFont.draw(batch, " " + MyMath.round(health.health, 1), barX + barWidth, healthBarY + layout.height);
+            //inventoryFont.setColor(color);
+            layout.setText(inventoryFont, " " + MyMath.round(health.health, 1), color, 0, Align.center, false);
+            inventoryFont.draw(batch, layout, barX + barWidth * 0.5f, healthBarY + layout.height - 2);
         }
 
         VehicleComponent vehicleComponent = Mappers.vehicle.get(entity);
@@ -943,7 +952,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             inventoryFont.draw(batch, layout, controlsX, healthBarY - barHeight + layout.height - 3);
         }
     }
-    
+
     private void drawInventory(Entity entity, float inventoryX, float inventoryY) {
         if (entity == null) return;
         CargoComponent cargo = Mappers.cargo.get(entity);
@@ -953,9 +962,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         long timeSinceCollect = GameScreen.getGameTimeCurrent() - cargo.lastCollectTime;
         float ratio = (float) timeSinceCollect / (float) colorTime;
         if (GameScreen.isPaused() || messageState == SpecialState.docked) {
-            ratio = 0f;
+            ratio = 0f; //force render if pause or docked
         }
-        inventoryFont.setColor(1, 1, 1, 1-ratio);
+        inventoryFont.setColor(1, 1, 1, 1 - ratio);
         inventoryFont.draw(batch, cargo.credits + " credits", inventoryX, inventoryY);
         int offsetY = 1;
         int total = 0;
@@ -965,25 +974,24 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 int quantity = cargo.inventory.get(id);
                 total += quantity;
                 Color color = resource.getColor();
-                inventoryFont.setColor(color.r, color.g, color.b, 1-ratio);
+                inventoryFont.setColor(color.r, color.g, color.b, 1 - ratio);
                 layout.setText(inventoryFont, quantity + " " + resource.name().toLowerCase());
                 inventoryFont.draw(batch, layout, inventoryX, inventoryY + (layout.height * 1.5f * offsetY++));
             }
         }
-        if (total == 0) return;
+        //if (total == 0) return; hide if empty. maybe fade away instead?
 
         //draw total
         int barWidth = uiCFG.playerHPBarWidth;
         int barX = Gdx.graphics.getWidth() / 2 - barWidth / 2;
         int healthBarY = uiCFG.playerHPBarY;
-        int radius = 30;
         layout.setText(inventoryFont, total + "", Color.WHITE, 0, Align.center, false);
-        inventoryFont.draw(batch, layout, barX - radius - 10, healthBarY+3);
+        inventoryFont.draw(batch, layout, barX - radius - 10, healthBarY + 3);
     }
     //endregion
 
     private void drawDamageText() {
-        for (Iterator<DamageText> iterator = activeNumbers.iterator(); iterator.hasNext();) {
+        for (Iterator<DamageText> iterator = activeNumbers.iterator(); iterator.hasNext(); ) {
             DamageText text = iterator.next();
             float x = text.x;
             float y = text.y;
@@ -995,7 +1003,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             }
             cacheColor.set(1, 0, 0, 1).lerp(Color.CLEAR, (float) (GameScreen.getGameTimeCurrent() - text.timestamp) / damageTime);
             inventoryFont.setColor(cacheColor);
-            inventoryFont.draw(batch, "" + (int)text.damage, x, y);
+            inventoryFont.draw(batch, "" + (int) text.damage, x, y);
 
             if (text.timestamp < GameScreen.getGameTimeCurrent() - damageTime) {
                 iterator.remove();
@@ -1015,9 +1023,9 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 
     private void drawCreditMarkers(float deltaTime) {
         float velocityY = 35f;
-        for (Iterator<CreditsMarker> iterator = markers.iterator(); iterator.hasNext();) {
+        for (Iterator<CreditsMarker> iterator = markers.iterator(); iterator.hasNext(); ) {
             CreditsMarker marker = iterator.next();
-            inventoryFont.setColor(marker.color.r, marker.color.g, marker.color.b, 1-marker.animTimer.ratio());
+            inventoryFont.setColor(marker.color.r, marker.color.g, marker.color.b, 1 - marker.animTimer.ratio());
             inventoryFont.draw(batch, "+" + marker.value, marker.location.x, marker.location.y += velocityY * deltaTime);
             if (marker.animTimer.tryEvent()) {
                 iterator.remove();
@@ -1028,7 +1036,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
     public void addCredits(int totalCredits, Vector2 pos, Color color) {
         markers.add(new CreditsMarker(totalCredits, pos, color));//todo: replace with pool
     }
-    
+
     /**
      * Mark off-screen objects on edge of screen for navigation.
      * TODO: load star mapState markers based on point list instead of star entity for stars that aren't loaded yet
@@ -1041,7 +1049,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         float markerLarge = 8; //max marker size
         float distSmall = 600; //distance when marker is small
         float distLarge = 200; //distance when marker is large
-        
+
         int padding = (int) (markerLarge + 4); //how close to draw from edge of screen (in pixels)
         int width = Gdx.graphics.getWidth();
         int height = Gdx.graphics.getHeight();
@@ -1049,7 +1057,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         int centerY = height / 2;
         int verticalEdge = (height - padding * 2) / 2;
         int horizontalEdge = (width - padding * 2) / 2;
-        
+
         //todo: add navigation point for current direction facing
         //todo: add navigation point for current velocity vector
         focusedDist = -1;
@@ -1061,26 +1069,26 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             MapComponent map = Mappers.map.get(mapable);
             Vector2 pos = Mappers.transform.get(mapable).pos;
             screenPos.set(pos, 0);
-            
+
             if (screenPos.dst2(MyScreenAdapter.cam.position) > map.distance * map.distance) {
                 continue;
             }
-            
+
             if (pos.x > topLeft.x && pos.x < bottomRight.x
                     && pos.y < topLeft.y && pos.y > bottomRight.y) {
                 continue;
             }
-            
+
             //set entity co'ords relative to center of screen
             screenPos.x -= MyScreenAdapter.cam.position.x;
             screenPos.y -= MyScreenAdapter.cam.position.y;
-            
+
             //position to draw marker
             float markerX, markerY;
-            
+
             //calculate slope of line (y = mx+b)
             float slope = screenPos.y / screenPos.x;
-            
+
             //calculate where to position the marker
             if (screenPos.y < 0) {
                 //top
@@ -1091,7 +1099,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 markerX = verticalEdge / slope;
                 markerY = verticalEdge;
             }
-            
+
             if (markerX < -horizontalEdge) {
                 //left
                 markerX = -horizontalEdge;
@@ -1101,7 +1109,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
                 markerX = horizontalEdge;
                 markerY = slope * horizontalEdge;
             }
-            
+
             //set co'ords relative to center screen
             markerX += centerX;
             markerY += centerY;
@@ -1116,10 +1124,10 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
             if (tex != null) {
                 dist -= Math.max(tex.texture.getWidth(), tex.texture.getHeight()) * 0.5f * tex.scale;
             }
-            float distClamp = MathUtils.clamp((dist-distLarge)/(distSmall-distLarge), 0, 1);
-            float sizeInterp = Interpolation.pow3In.apply(1-distClamp);
-            float size = MathUtils.clamp((sizeInterp * (markerLarge-markerSmall)) + markerSmall, markerSmall, markerLarge);
-            
+            float distClamp = MathUtils.clamp((dist - distLarge) / (distSmall - distLarge), 0, 1);
+            float sizeInterp = Interpolation.pow3In.apply(1 - distClamp);
+            float size = MathUtils.clamp((sizeInterp * (markerLarge - markerSmall)) + markerSmall, markerSmall, markerLarge);
+
             //draw marker
             shape.setColor(map.color);
             shape.circle(markerX, markerY, size);
@@ -1132,17 +1140,17 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
 			}
 			 */
         }
-        
+
     }
-    
+
     public MiniMap getMiniMap() {
         return miniMap;
     }
-    
+
     public GameMenu getGameMenu() {
         return gameMenu;
     }
-    
+
     @Override
     public void resize(int width, int height) {
         gameMenu.resetPosition();
@@ -1151,7 +1159,7 @@ public class HUDSystem extends EntitySystem implements IRequireGameContext, IScr
         }
         miniMap.updateMapPosition();
     }
-    
+
     @Override
     public void dispose() {
         font.dispose();
