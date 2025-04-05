@@ -1,0 +1,238 @@
+{
+  "upgrades": [
+    {
+      "component": "VehicleComponent",
+      "name": "Engine",
+      "description": "Increase [%s]THRUST\nby: [%s]%s[]\nCurrent: [%s]%s",
+      "cost": 20000,
+      "levels": [
+        {
+          "level": 1,
+          "properties": {}
+        },
+        {
+          "level": 2,
+          "properties": {
+            "thrust": 1300
+          }
+        },
+        {
+          "level": 3,
+          "properties": {
+            "thrust": 1600
+          }
+        },
+        {
+          "level": 4,
+          "properties": {
+            "thrust": 1900
+          }
+        },
+        {
+          "level": 5,
+          "properties": {
+            "thrust": 2200
+          }
+        }
+      ]
+    },
+    {
+      "component": "HealthComponent",
+      "name": "Health",
+      "description": "Increase [%s]HP[]\nby: [%s]%s\nCurrent:  [%s]%s",
+      "cost": 40000,
+      "levels": [
+        {
+          "level": 1,
+          "properties": {
+            "maxHealth": 200
+          }
+        },
+        {
+          "level": 2,
+          "properties": {
+            "maxHealth": 300
+          }
+        },
+        {
+          "level": 3,
+          "properties": {
+            "maxHealth": 400
+          }
+        },
+        {
+          "level": 4,
+          "properties": {
+            "maxHealth": 500
+          }
+        },
+        {
+          "level": 5,
+          "properties": {
+            "maxHealth": 600
+          }
+        }
+      ]
+    },
+    {
+      "component": "CannonComponent",
+      "name": "Cannon",
+      "description": "",
+      "cost": 25000,
+      "levels": [
+        {
+          "level": 1,
+          "properties": {}
+        },
+        {
+          "level": 2,
+          "properties": {
+            "damage": 10,
+            "velocity": 100
+          }
+        },
+        {
+          "level": 3,
+          "properties": {
+            "damage": 15,
+            "velocity": 120
+          }
+        },
+        {
+          "level": 4,
+          "properties": {
+            "damage": 20,
+            "velocity": 140
+          }
+        },
+        {
+          "level": 5,
+          "properties": {
+            "damage": 25,
+            "velocity": 160
+          }
+        },
+        {
+          "level": 6,
+          "properties": {
+            "damage": 30,
+            "velocity": 180
+          }
+        },
+        {
+          "level": 7,
+          "properties": {
+            "damage": 35,
+            "velocity": 200
+          }
+        },
+        {
+          "level": 8,
+          "properties": {
+            "damage": 40,
+            "velocity": 220
+          }
+        }
+      ]
+    },
+    {
+      "component": "ShieldComponent",
+      "name": "Active Shield",
+      "description": "[%s]%s[]\nprotect your ship from damage.\n\nHold [%s][%s][] to activate.",
+      "cost": 25000,
+      "levels": [
+        {
+          "level": 1,
+          "properties": {
+            "animTimer": 50,
+            "defence": 100,
+            "cooldownRate": 0.1
+          }
+        }
+      ]
+    },
+    {
+      "component": "HyperDriveComponent",
+      "name": "Hyper-Drive",
+      "description": "[%s]%s[]\nenable deep-space exploration.\n\nHold [%s][%s][] to activate.",
+      "cost": 100000,
+      "levels": [
+        {
+          "level": 1,
+          "properties": {
+            "speed": 2000,
+            "coolDownTimer": 2000,
+            "chargeTimer": 2000,
+            "graceTimer": 1000
+          }
+        }
+      ]
+    },
+    {
+      "component": "LaserComponent",
+      "name": "Laser",
+      "description": "[%s]%s[]\nprecision tool.\n\nHold [%s][%s][] to activate.",
+      "cost": 30000,
+      "levels": [
+        {
+          "level": 1,
+          "properties": {
+            "wavelength": 520,
+            "damage": 30,
+            "range": 150
+          }
+        },
+        {
+          "level": 2,
+          "properties": {
+            "damage": 50,
+            "range": 200
+          }
+        },
+        {
+          "level": 3,
+          "properties": {
+            "damage": 80,
+            "range": 250
+          }
+        },
+        {
+          "level": 4,
+          "properties": {
+            "damage": 120,
+            "range": 300
+          }
+        },
+        {
+          "level": 5,
+          "properties": {
+            "damage": 150,
+            "range": 350
+          }
+        }
+      ]
+    },
+    {
+      "component": "TractorBeamComponent",
+      "name": "Tractor Beam",
+      "description": "[%s]%s[]\npush or pull objects.\n\nHold [%s][%s][] to activate.\nDouble Tap to toggle between PUSH & PULL",
+      "cost": 10000,
+      "levels": [
+        {
+          "level": 1,
+          "properties": {
+            "range": 200,
+            "magnitude": 70000
+          }
+        },
+        {
+          "level": 2,
+          "properties": {
+            "range": 250,
+            "magnitude": 80000
+          }
+        }
+      ]
+    }
+  ]
+}
