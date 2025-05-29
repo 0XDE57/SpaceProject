@@ -380,7 +380,8 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         shape.rectLine(pos.x, pos.y, cacheVec.x, cacheVec.y, width, cacheColor, cacheColor);
         
         float velocity = body.getLinearVelocity().len();
-        boolean isMaxVelocity = MathUtils.isEqual(velocity, Box2DPhysicsSystem.getVelocityLimit(), 0.5f);
+        //boolean isMaxVelocity = MathUtils.isEqual(velocity, Box2DPhysicsSystem.getVelocityLimit(), 0.5f);
+
         cacheColor.a = 1;
         shape.setColor(cacheColor);
 
@@ -392,6 +393,15 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
         shape.rectLine(cacheVec, arrowLeft, 1);
         Vector2 arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
         shape.rectLine(cacheVec, arrowRight, 1);
+
+        float percent = velocity / Box2DPhysicsSystem.getVelocityLimit();
+        float endPoint = MathUtils.map(0, 1, 80, 120, percent);
+        cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), endPoint)).add(pos.x, pos.y);
+        Vector2 arrowLeftVel = MyMath.vector(body.getLinearVelocity().angleRad() + angle, arrowSize).add(cacheVec);
+        shape.rectLine(cacheVec, arrowLeftVel, 1);
+        Vector2 arrowRightVel = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
+        shape.rectLine(cacheVec, arrowRightVel, 1);
+
         //more!
         if (velocity >= Box2DPhysicsSystem.getVelocityLimit() * 0.25f) {
             cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 90)).add(pos.x, pos.y);
@@ -416,6 +426,7 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
             arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
             shape.rectLine(cacheVec, arrowRight, 1);
         }
+        /*
         //max velocity!!!
         if (isMaxVelocity) {
             cacheVec.set(MyMath.vector(body.getLinearVelocity().angleRad(), 120)).add(pos.x, pos.y);
@@ -423,7 +434,8 @@ public class GridRenderSystem extends EntitySystem implements Disposable {
             shape.rectLine(cacheVec, arrowLeft, 1);
             arrowRight = MyMath.vector(body.getLinearVelocity().angleRad() - angle, arrowSize).add(cacheVec);
             shape.rectLine(cacheVec, arrowRight, 1);
-        }
+        }*/
+
         //draw force applied from engines?
     }
 
